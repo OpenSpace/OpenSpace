@@ -267,7 +267,7 @@ void KeplerTranslation::update(const UpdateData& data) {
         _orbitPlaneDirty = false;
     }
 
-    double t = data.time - _epoch;
+    double t = data.time.j2000Seconds() - _epoch;
     double meanMotion = 2.0 * glm::pi<double>() / _period;
     double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
     double e = eccentricAnomaly(meanAnomaly);

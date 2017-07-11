@@ -22,17 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include "sgct.h"
-
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
+
+#include "sgct.h"
 
 #undef near
 #undef far
 
 namespace {
     const char* GuiWindowTag = "GUI";
-}
+} // namespace
 
 namespace openspace {
 
@@ -158,6 +157,7 @@ int SGCTWindowWrapper::currentNumberOfAaSamples() const {
 bool SGCTWindowWrapper::isRegularRendering() const {
     sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
     std::size_t nViewports = w->getNumberOfViewports();
+    (void)nViewports; // Unused in Release mode
     ghoul_assert(nViewports > 0, "At least one viewport must exist at this time");
     sgct_core::Viewport* vp = w->getViewport(0);
     sgct_core::NonLinearProjection* nlp = vp->getNonLinearProjectionPtr();

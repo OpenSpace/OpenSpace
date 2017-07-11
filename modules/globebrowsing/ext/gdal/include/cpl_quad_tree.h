@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_quad_tree.h 33666 2016-03-07 05:21:07Z goatbar $
+ * $Id: cpl_quad_tree.h 34931 2016-08-05 17:13:05Z rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implementation of quadtree building and searching functions.
@@ -50,14 +50,22 @@ CPL_C_START
 
 /* Types */
 
+/** Describe a rectangle */
 typedef struct {
-  double minx, miny, maxx, maxy;
+  double minx; /**< Minimum x */
+  double miny; /**< Minimum y */
+  double maxx; /**< Maximum x */
+  double maxy; /**< Maximum y */
 } CPLRectObj;
 
+/** Opaque type for a quad tree */
 typedef struct _CPLQuadTree CPLQuadTree;
 
+/** CPLQuadTreeGetBoundsFunc */
 typedef void         (*CPLQuadTreeGetBoundsFunc)(const void* hFeature, CPLRectObj* pBounds);
+/** CPLQuadTreeForeachFunc */
 typedef int          (*CPLQuadTreeForeachFunc)(void* pElt, void* pUserData);
+/** CPLQuadTreeDumpFeatureFunc */
 typedef void         (*CPLQuadTreeDumpFeatureFunc)(const void* hFeature, int nIndentLevel, void* pUserData);
 
 /* Functions */

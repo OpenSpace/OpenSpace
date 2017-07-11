@@ -68,6 +68,8 @@ const string ConfigurationManager::PartLogs = "Logs";
 const string ConfigurationManager::PartAppend = "Append";
 const string ConfigurationManager::PartCapabilitiesVerbosity = "CapabilitiesVerbosity";
 
+const string ConfigurationManager::KeyLauncher = "Launcher";
+
 const string ConfigurationManager::KeyCapabilitiesVerbosity =
     KeyLogging + "." + PartCapabilitiesVerbosity;
 
@@ -113,7 +115,6 @@ string ConfigurationManager::findConfiguration(const string& filename) {
         }
         
         // Otherwise, we traverse the directory tree up
-    
         Directory nextDirectory = directory.parentDirectory(
             ghoul::filesystem::Directory::AbsolutePath::Yes
         );

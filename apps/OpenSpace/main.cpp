@@ -28,7 +28,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/opengl/ghoul_gl.h>
+//#include <ghoul/opengl/ghoul_gl.h>
 
 #include <sgct.h>
 
@@ -42,9 +42,15 @@
 #include <fmt/format.h>
 
 #include <Windows.h>
-#include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4091)
+#include <dbghelp.h>
+#pragma warning (pop)
+#endif // _MSC_VER
 
 #endif // WIN32
 

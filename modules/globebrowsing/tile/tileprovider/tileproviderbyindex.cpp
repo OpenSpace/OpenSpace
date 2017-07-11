@@ -43,8 +43,23 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(
         KeyDefaultProvider
         );
+
+    std::string typeString;
+    defaultProviderDict.getValue("Type", typeString);
+    layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
+    if (typeString.empty()) {
+        typeID = layergroupid::TypeID::DefaultTileLayer;
+    }
+    else {
+        typeID = layergroupid::getTypeIDFromTypeString(typeString);
+    }
+
+    if (typeID == layergroupid::TypeID::Unknown) {
+        throw ghoul::RuntimeError("Unknown layer type: " + typeString);
+    }
+    
     _defaultTileProvider = TileProvider::createFromDictionary(
-        defaultProviderDict
+        typeID, defaultProviderDict
     );
     
     ghoul::Dictionary indexProvidersDict = dictionary.value<ghoul::Dictionary>(
@@ -63,7 +78,23 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             );
             
         TileIndex tileIndex(tileIndexDict);
+      
+        std::string providerTypeString;
+        defaultProviderDict.getValue("Type", providerTypeString);
+        layergroupid::TypeID providerTypeID = layergroupid::TypeID::Unknown;
+        if (providerTypeString.empty()) {
+            providerTypeID = layergroupid::TypeID::DefaultTileLayer;
+        }
+        else {
+            providerTypeID = layergroupid::getTypeIDFromTypeString(providerTypeString);
+        }
+
+        if (providerTypeID == layergroupid::TypeID::Unknown) {
+            throw ghoul::RuntimeError("Unknown layer type: " + providerTypeString);
+        }
+    
         std::shared_ptr<TileProvider> stp = TileProvider::createFromDictionary(
+            providerTypeID,
             providerDict
         );
         TileIndex::TileHashKey key = tileIndex.hashKey();
@@ -75,10 +106,6 @@ Tile TileProviderByIndex::getTile(const TileIndex& tileIndex) {
     auto it = _tileProviderMap.find(tileIndex.hashKey());
     bool hasProvider = it != _tileProviderMap.end();
     return hasProvider ? it->second->getTile(tileIndex) : Tile::TileUnavailable;
-}
-
-Tile TileProviderByIndex::getDefaultTile() {
-    return _defaultTileProvider->getDefaultTile();
 }
 
 Tile::Status TileProviderByIndex::getTileStatus(const TileIndex& tileIndex) {

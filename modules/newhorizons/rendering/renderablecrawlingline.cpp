@@ -240,10 +240,10 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
         _source,
         //"ECLIPJ2000",
         "GALACTIC",
-        data.time
+        data.time.j2000Seconds()
     );
 
-    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(_instrumentName, "ECLIPJ2000", data.time);
+    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(_instrumentName, "ECLIPJ2000", data.time.j2000Seconds());
 
     //_positions[SourcePosition] = { 0.f, 0.f, 0.f, 0.f };
 

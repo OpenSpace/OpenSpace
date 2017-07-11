@@ -30,7 +30,6 @@
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 
@@ -41,7 +40,9 @@
 #include <ghoul/opengl/texture.h>
 
 #include <gdal.h>
+
 #include <string>
+#include <mutex>
 
 class GDALDataset;
 class GDALRasterBand;
@@ -62,14 +63,19 @@ public:
     * \param config, Configuration used for initialization
     * \param baseDirectory, the base directory to use in future loading operations
     */
-    GdalRawTileDataReader(const std::string& filePath, const Configuration& config,
-        const std::string& baseDirectory = "");
+    GdalRawTileDataReader(const std::string& filePath,
+        const TileTextureInitData& initData,
+        const std::string& baseDirectory = "",
+        RawTileDataReader::PerformPreprocessing preprocess =
+            RawTileDataReader::PerformPreprocessing::No
+        );
+
 
     virtual ~GdalRawTileDataReader() override;
 
     // Public virtual function overloading
     virtual void reset() override;
-    virtual int maxChunkLevel() override;
+    virtual int maxChunkLevel() const override;
     virtual float noDataValueAsFloat() const override;
     virtual int rasterXSize() const override;
     virtual int rasterYSize() const override;
@@ -90,31 +96,41 @@ protected:
 private:
     // Private virtual function overloading
     virtual void initialize() override;
-    virtual char* readImageData(
-        IODescription& io, RawTile::ReadError& worstError) const override;
+    virtual void readImageData(IODescription& io, RawTile::ReadError& worstError,
+        char* dataDestination) const override;
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const override;
 
     // GDAL Helper methods
     GDALDataset* openGdalDataset(const std::string& filePath);
-    int calculateTileLevelDifference(int minimumPixelSize);
-    bool gdalHasOverviews() const;
-    int gdalOverview(const PixelRegion::PixelRange& baseRegionSize) const;
-    int gdalOverview(const TileIndex& tileIndex) const;
-    int gdalVirtualOverview(const TileIndex& tileIndex) const;
-    PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
-    TileDataLayout getTileDataLayout(GLuint prefferedGLType);
+    
+    /**
+     * Use as a helper function when determining the maximum tile level. This function
+     * returns the negated number of overviews requred to downscale the highest overview
+     * dataset so that it fits within minimumPixelSize pixels in the x-dimension. 
+     */
+    int calculateTileLevelDifference(int minimumPixelSize) const;
 
     // Member variables
-    struct InitData {
-        std::string initDirectory;
-        std::string datasetFilePath;
-        int tilePixelSize;
-        GLuint dataType;
-    } _initData;
-
+    std::string _initDirectory;
+    std::string _datasetFilePath;
+  
     GDALDataset* _dataset;
-    GDALDataType _gdalType; // The type to reinterpret to when reading
+
+    struct GdalDatasetMetaDataCached {
+        int rasterCount;
+        float scale;
+        float offset;
+        int rasterXSize;
+        int rasterYSize;
+        float noDataValue;
+        std::array<double, 6> padfTransform;
+
+        GDALDataType dataType;
+
+    } _gdalDatasetMetaDataCached;
+
+    mutable std::mutex _datasetLock;
 };
 
 } // namespace globebrowsing

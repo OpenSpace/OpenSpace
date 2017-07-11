@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#if 0
+
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
 #include <modules/globebrowsing/tile/tileindex.h>
@@ -46,7 +48,7 @@ namespace globebrowsing {
 namespace tileprovider {
 
 PresentationSlideProvider::PresentationSlideProvider(const ghoul::Dictionary& dictionary)
-    : _slideIndex("slideIndex", "slideIndex", 0, 0, _slideProviders.size() - 1)
+    : _slideIndex("slideIndex", "slideIndex", 0, 0, 0)
 {
     setName("SlideProvider");
     ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(KeyDefaultProvider);
@@ -73,10 +75,6 @@ Tile PresentationSlideProvider::getTile(const TileIndex& tileIndex) {
     }
     return Tile::TileUnavailable;
         
-}
-
-Tile PresentationSlideProvider::getDefaultTile() {
-    return _defaultProvider->getDefaultTile();
 }
 
 Tile::Status PresentationSlideProvider::getTileStatus(const TileIndex& tileIndex) {
@@ -107,7 +105,7 @@ int PresentationSlideProvider::maxLevel() {
 }
 
 TileProvider* PresentationSlideProvider::slideProvider() {
-    int maxIndex = (int)_slideProviders.size() - 1;
+    int maxIndex = static_cast<int>(_slideProviders.size()) - 1;
     int clampedIndex = std::max(0, std::min(_slideIndex.value(), maxIndex));
     _slideIndex.setValue(clampedIndex);
     return _slideProviders[clampedIndex].get();
@@ -116,3 +114,5 @@ TileProvider* PresentationSlideProvider::slideProvider() {
 } // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif

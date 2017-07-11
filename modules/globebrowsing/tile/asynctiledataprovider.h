@@ -25,39 +25,107 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
+
+#include <modules/globebrowsing/globebrowsingmodule.h>
+
+#include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
+#include <modules/globebrowsing/other/pixelbuffercontainer.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 
+#include <ghoul/misc/boolean.h>
+#include <ghoul/opengl/ghoul_gl.h>
+
+#include <map>
+#include <set>
 #include <unordered_map>
 
 namespace openspace {
 namespace globebrowsing {
     
+//class GlobeBrowsingModule;
 struct RawTile;
 class RawTileDataReader;
 
+/**
+ * The responsibility of this class is to enqueue tile requests and fetching finished
+ * <code>RawTile</code>s that has been asynchronously loaded.
+ */
 class AsyncTileDataProvider {
 public:
-    AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> textureDataProvider,
-        std::shared_ptr<ThreadPool> pool);
+    /**
+     * \param textureDataProvider is the reader that will be used for the asynchronos
+     * tile loading.
+     */
+    AsyncTileDataProvider(const std::string& name,
+                          std::shared_ptr<RawTileDataReader> textureDataProvider);
 
-    bool enqueueTileIO(const TileIndex& tileIndex);        
+    /**
+     * Creates a job which asynchronously loads a raw tile. This job is enqueued.
+     */
+    bool enqueueTileIO(const TileIndex& tileIndex);
+
+    /**
+     * Get all finished jobs.
+     */
     std::vector<std::shared_ptr<RawTile>> getRawTiles();
+
+    /**
+     * Get one finished job.
+     */
     std::shared_ptr<RawTile> popFinishedRawTile();
 
+    void update();
     void reset();
-    void clearRequestQueue();
+    void prepairToBeDeleted();
+
+    bool shouldBeDeleted();
 
     std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
     float noDataValueAsFloat() const;
 
 protected:
-    virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
+    using ResetRawTileDataReader = ghoul::Boolean;
+
+    enum class ResetMode {
+        ShouldResetAll,
+        ShouldResetAllButRawTileDataReader,
+        ShouldBeDeleted,
+        ShouldNotReset
+    };
+
+    /**
+     * \returns true if tile of index <code>tileIndex</code> is not already enqueued.
+     */
+    bool satisfiesEnqueueCriteria(const TileIndex& tileIndex);
+
+    /**
+     * An unfinished job is a load tile job that has been popped from the thread pool due
+     * to its low priority. Once it has been popped, it is marked as unfinished and needs
+     * to be explicitly ended.
+     */
+    void endUnfinishedJobs();
+
+    void endEnqueuedJobs();
+
+    void updatePboUsage();
+
+    void performReset(ResetRawTileDataReader resetRawTileDataReader);
 
 private:
+    const std::string _name;
+    GlobeBrowsingModule* _globeBrowsingModule;
+    /// The reader used for asynchronous reading
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
-    ConcurrentJobManager<RawTile> _concurrentJobManager;
-    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
+    
+    PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey>
+        _concurrentJobManager;
+
+    /// nullptr if pbo is not used for texture uploading. Otherwise initialized.
+    std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
+    std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
+
+    ResetMode _resetMode;
+    bool _shouldBeDeleted;
 };
 
 } // namespace globebrowsing

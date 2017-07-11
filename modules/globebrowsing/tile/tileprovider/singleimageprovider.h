@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
+#include <openspace/properties/stringproperty.h>
+
 namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
@@ -37,17 +39,18 @@ public:
     SingleImageProvider(const std::string& imagePath);
     virtual ~SingleImageProvider() = default;
 
-    virtual Tile getTile(const TileIndex& tileIndex);
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& index);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
+    virtual Tile getTile(const TileIndex& tileIndex) override;
+    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+    virtual TileDepthTransform depthTransform() override;
+    virtual void update() override;
+    virtual void reset() override;
+    virtual int maxLevel() override;
 
 private:
+    std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
     Tile _tile;
-    std::string _imagePath;
+
+    properties::StringProperty _filePath;
 };
 
 } // namespace tileprovider

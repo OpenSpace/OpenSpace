@@ -17,4 +17,6 @@
         <BlockSizeY>256</BlockSizeY>
         <BandsCount>2</BandsCount>
         <MaxConnections>10</MaxConnections>
+        <ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>
+        <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
 </GDAL_WMS>

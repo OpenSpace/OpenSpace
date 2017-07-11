@@ -136,10 +136,9 @@ void Property::setVisibility(Visibility visibility) {
 }
 
 Property::Visibility Property::visibility() const {
-    return
-        static_cast<Visibility>(
-            _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility)
-        );
+    return static_cast<Visibility>(
+        _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility)
+    );
 }
 
 void Property::setReadOnly(bool state) {

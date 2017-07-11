@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geos.h 33631 2016-03-04 06:28:09Z goatbar $
+ * $Id: ogr_geos.h 34523 2016-07-02 21:50:47Z goatbar $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definitions related to support for use of GEOS in OGR.

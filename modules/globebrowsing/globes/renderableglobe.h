@@ -37,6 +37,7 @@ namespace openspace {
 namespace globebrowsing {
 
 class ChunkedLodGlobe;
+class PointGlobe;
 class LayerManager;
 
 /**
@@ -93,6 +94,7 @@ public:
     
     // Getters
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe() const;
+    LayerManager* layerManager() const;
     const Ellipsoid& ellipsoid() const;
     const glm::dmat4& modelTransform() const;
     const glm::dmat4& inverseModelTransform() const;
@@ -107,6 +109,7 @@ private:
     // Globes. These are renderables inserted in a distance switch so that the heavier
     // <code>ChunkedLodGlobe</code> does not have to be rendered at far distances.
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
+    //std::shared_ptr<PointGlobe> _pointGlobe;
 
     Ellipsoid _ellipsoid;
     std::shared_ptr<LayerManager> _layerManager;

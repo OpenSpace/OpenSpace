@@ -129,7 +129,7 @@ std::string to_string(openspace::Key key) {
             return p.first;
         }
     }
-    ghoul_assert(false, "Missing key in KeyMapping");
+    throw ghoul::MissingCaseException();
 }
 
 std::string to_string(openspace::KeyModifier mod) {

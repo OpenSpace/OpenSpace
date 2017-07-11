@@ -298,6 +298,7 @@ std::string DocumentationEngine::generateJson() const {
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
     for (const DocumentationEntry& e : doc.entries) {
+        (void)e; // Unused variable in Release mode
         ghoul_assert(
             e.documentation.find('"') == std::string::npos,
             "Documentation cannot contain \" character"

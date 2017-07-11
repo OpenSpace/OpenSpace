@@ -31,6 +31,7 @@
 #include <queue>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
@@ -50,6 +51,7 @@ private:
 class ThreadPool {
 public:
     ThreadPool(size_t numThreads);
+    ThreadPool(const ThreadPool& toCopy);
     ~ThreadPool();
 
     void enqueue(std::function<void()> f);

@@ -138,6 +138,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1000000)
     , _needsFullSweep(true)
     , _indexBufferDirty(true)
+    , _previousTime(0)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -195,7 +196,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
 
     // 2
     // Write the current location into the floating position
-    glm::vec3 p = _translation->position(data.time);
+    glm::vec3 p = _translation->position(data.time.j2000Seconds());
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
     glBindVertexArray(_primaryRenderInformation._vaoID);
@@ -284,7 +285,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                 // The current index
                 int i = _primaryRenderInformation.first;
                 // Number of values
-                int n = report.nUpdated + 1; // +1 for the floating position
+                int n = std::abs(report.nUpdated) + 1; // +1 for the floating position
                 // Total size of the array
                 int s = _primaryRenderInformation.count;
 
@@ -309,29 +310,27 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindVertexArray(0);
+    _previousTime = data.time.j2000Seconds();
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     const UpdateData& data)
 {
-    // If we are doing a time jump, it is in general faster to recalculate everything
-    // than to only update parts of the array
-    if (data.isTimeJump) {
-        _needsFullSweep = true;
-    }
     if (_needsFullSweep) {
-        fullSweep(data.time);
+        fullSweep(data.time.j2000Seconds());
         return { true, UpdateReport::All } ;
     }
 
+
+    const double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
-    if (data.delta == 0.0) {
+    if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
         return { false, 0 };
     }
 
     double secondsPerPoint = _period / (_resolution - 1);
     // How much time has passed since the last permanent point
-    double delta = data.time - _lastPointTime;
+    double delta = data.time.j2000Seconds() - _lastPointTime;
 
     // We'd like to test for equality with 0 here, but due to rounding issues, we won't
     // get there. If this check is not here, we will trigger the positive or negative
@@ -339,7 +338,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     //
     // This might become a bigger issue if we are starting to look at very short time
     // intervals
-    const double Epsilon = 1e-7;
+
     if (std::abs(delta) < Epsilon) {
         return { false, 0 };
     }
@@ -357,7 +356,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
         if (nNewPoints >= _resolution) {
-            fullSweep(data.time);
+            fullSweep(data.time.j2000Seconds());
             return { true, UpdateReport::All };
         }
 
@@ -392,7 +391,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
         if (nNewPoints >= _resolution) {
-            fullSweep(data.time);
+            fullSweep(data.time.j2000Seconds());
             return { true, UpdateReport::All };
         }
 

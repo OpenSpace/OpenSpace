@@ -119,7 +119,7 @@ void SpiceRotation::update(const UpdateData& data) {
         _matrix = SpiceManager::ref().positionTransformMatrix(
             _sourceFrame,
             _destinationFrame,
-            data.time
+            data.time.j2000Seconds()
         );
     }
     catch (const SpiceManager::SpiceException&) {

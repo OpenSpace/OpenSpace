@@ -155,6 +155,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/task.cpp
     ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/timeline.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
@@ -163,7 +164,6 @@ set(OPENSPACE_SOURCE
 )
 
 set(OPENSPACE_HEADER
-    ${OPENSPACE_BASE_DIR}/include/openspace/openspace.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
@@ -299,6 +299,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h

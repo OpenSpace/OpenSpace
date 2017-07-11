@@ -26,22 +26,41 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/triggerproperty.h>
-
 #include <memory>
 
 namespace openspace {
 
+namespace globebrowsing {
+namespace cache {
+    class MemoryAwareTileCache;
+}
+}
+
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
+    static const std::string name;
+
     GlobeBrowsingModule();
+
+    globebrowsing::cache::MemoryAwareTileCache* tileCache();
     
+
+    scripting::LuaLibrary luaLibrary() const override;
 protected:
     void internalInitialize() override;
+
 private:
-    properties::IntProperty _openSpaceMaximumTileCacheSize;
-    properties::TriggerProperty _clearTileCache;
+    /**
+     \return a comma separated list of layer group names.
+     */
+    static std::string layerGroupNamesList();
+
+    /**
+     \return a comma separated list of layer type names.
+     */
+    static std::string layerTypeNamesList();
+
+    std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 };
 
 } // namespace openspace

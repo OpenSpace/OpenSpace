@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_virtualmem.h 33666 2016-03-07 05:21:07Z goatbar $
+ * $Id: cpl_virtualmem.h 36485 2016-11-24 07:54:20Z goatbar $
  *
  * Name:     cpl_virtualmem.h
  * Project:  CPL - Common Portability Library
@@ -30,6 +30,8 @@
 
 #ifndef CPL_VIRTUAL_MEM_INCLUDED
 #define CPL_VIRTUAL_MEM_INCLUDED
+
+#include <stddef.h>
 
 #include "cpl_port.h"
 #include "cpl_vsi.h"
@@ -110,7 +112,6 @@ typedef enum
     VIRTUALMEM_READWRITE
 } CPLVirtualMemAccessMode;
 
-
 /** Return the size of a page of virtual memory.
  *
  * @return the page size.
@@ -172,7 +173,6 @@ CPLVirtualMem CPL_DLL *CPLVirtualMemNew(size_t nSize,
                                         CPLVirtualMemUnCachePageCbk pfnUnCachePage,
                                         CPLVirtualMemFreeUserData pfnFreeUserData,
                                         void *pCbkUserData);
-
 
 /** Return if virtual memory mapping of a file is available.
  *
@@ -383,7 +383,6 @@ void CPL_DLL CPLVirtualMemPin(CPLVirtualMem* ctxt,
  * @since GDAL 2.0
  */
 void CPL_DLL CPLVirtualMemManagerTerminate(void);
-
 
 CPL_C_END
 

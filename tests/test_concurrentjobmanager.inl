@@ -46,7 +46,7 @@ struct TestJob : public openspace::globebrowsing::Job<int> {
         std::cout << "Finished job" << std::endl;
     }
 
-    virtual std::shared_ptr<int> product() const {
+    virtual std::shared_ptr<int> product() {
         return std::make_shared<int>(prod);
     }
 
@@ -59,9 +59,8 @@ private:
 
 TEST_F(ConcurrentJobManagerTest, Basic) {
     using namespace openspace::globebrowsing;
-    std::shared_ptr<ThreadPool> pool = std::make_shared<ThreadPool>(1);
     
-    ConcurrentJobManager<int> jobManager(pool);
+    ConcurrentJobManager<int> jobManager(ThreadPool(1));
 
     auto testJob1 = std::shared_ptr<TestJob>(new TestJob(20));
     auto testJob2 = std::shared_ptr<TestJob>(new TestJob(20));
@@ -117,7 +116,7 @@ struct VerboseJob : public openspace::globebrowsing::Job<VerboseProduct>{
         std::cout << " ** Finished job" << std::endl;
     }
 
-    virtual std::shared_ptr<VerboseProduct> product() const {
+    virtual std::shared_ptr<VerboseProduct> product() {
         return _product;
     }
 
@@ -129,11 +128,9 @@ struct VerboseJob : public openspace::globebrowsing::Job<VerboseProduct>{
 TEST_F(ConcurrentJobManagerTest, JobCreation) {
     using namespace openspace::globebrowsing;
     
-    std::shared_ptr<ThreadPool> pool = std::make_shared<ThreadPool>(1);
-
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    ConcurrentJobManager<VerboseProduct> jobManager(pool);
+    ConcurrentJobManager<VerboseProduct> jobManager(ThreadPool(1));
 
     auto testJob1 = std::shared_ptr<VerboseJob>(new VerboseJob(20));
 

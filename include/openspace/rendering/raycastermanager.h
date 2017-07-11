@@ -34,8 +34,6 @@ class RaycasterListener;
 
 class RaycasterManager {
 public:
-    RaycasterManager();
-    ~RaycasterManager();
     void attachRaycaster(VolumeRaycaster& raycaster);
     void detachRaycaster(VolumeRaycaster& raycaster);
     bool isAttached(VolumeRaycaster& raycaster);

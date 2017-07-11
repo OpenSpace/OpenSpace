@@ -187,6 +187,25 @@ documentation::Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyLauncher,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartLogLevel,
+                    new StringInListVerifier(
+                    // List from logmanager.cpp::levelFromString
+                    { "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None" }
+                    ),
+                    "The severity of log messages that will be displayed. Only "
+                    "messages of the selected level or higher will be displayed. All "
+                    "levels below will be silently discarded. The order of "
+                    "severities is: Debug < Info < Warning < Error < Fatal < None.",
+                    Optional::Yes
+                },
+            }),
+            "Configurations for the Launcher & syncing application.",
+            Optional::Yes
+        },
+        {
             ConfigurationManager::KeyShutdownCountdown,
             new DoubleGreaterEqualVerifier(0.0),
             "The countdown that the application will wait between pressing ESC and "

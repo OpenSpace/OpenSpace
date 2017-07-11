@@ -65,7 +65,6 @@ public:
 
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-    void setInteractionMode(const std::string& interactionModeKey);
     InteractionMode* interactionMode();
     
     void goToChunk(int x, int y, int level);
@@ -73,9 +72,10 @@ public:
     
     void resetKeyBindings();
 
-    void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
+    void addKeyframe(double timestamp, KeyframeInteractionMode::CameraPose pose);
     void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
+    size_t nKeyframes() const;
     const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
     void bindKeyLocal(
@@ -134,7 +134,7 @@ private:
     
     std::string generateJson() const override;
 
-    void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
+    void setInteractionMode(InteractionMode* interactionMode);
 
     bool _cameraUpdatedFromScript = false;
 
@@ -143,14 +143,18 @@ private:
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
 
-    std::shared_ptr<InteractionMode> _currentInteractionMode;
+    InteractionMode* _currentInteractionMode;
 
-    std::map<std::string, std::shared_ptr<InteractionMode>> _interactionModes;
     std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
+
+    std::unique_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
+    std::unique_ptr<GlobeBrowsingInteractionMode> _globeBrowsingInteractionMode;
+    std::unique_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
 
     // Properties
     properties::StringProperty _origin;
-
+    properties::OptionProperty _interactionModeOption;
+    
     properties::BoolProperty _rotationalFriction;
     properties::BoolProperty _horizontalFriction;
     properties::BoolProperty _verticalFriction;

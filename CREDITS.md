@@ -22,6 +22,7 @@ Michael Sjöström
 Michael Novén
 Oskar Carlbaum
 Jonathan Bosson
+Klas Eskilson
 
 Anteige
 noahdasanaike

@@ -88,7 +88,7 @@ using namespace ghoul::cmdparser;
 
 namespace {
     const char* _loggerCat = "OpenSpaceEngine";
-    const char* SgctDefaultConfigFile = "${SGCT}/single.xml";
+    const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
     
     const char* SgctConfigArgumentCommand = "-config";
     
@@ -98,6 +98,9 @@ namespace {
     const int CacheVersion = 1;
     const int DownloadVersion = 1;
     
+    const glm::ivec3 FontAtlasSize{ 1536, 1536, 1 };
+
+
     struct {
         std::string configurationName;
         std::string sgctConfigurationName;
@@ -177,13 +180,16 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     );
 
     SpiceManager::initialize();
-    Time::initialize();
     TransformationManager::initialize();
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
     ghoul_assert(_engine, "OpenSpaceEngine not created");
     return *_engine;
+}
+
+bool OpenSpaceEngine::isCreated() {
+    return _engine != nullptr;
 }
 
 void OpenSpaceEngine::create(int argc, char** argv,
@@ -338,7 +344,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // After registering the modules, the documentations for the available classes
     // can be added as well
     for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
-        for (auto&& doc : m->documentations()) {
+        for (const documentation::Documentation& doc : m->documentations()) {
             DocEng.addDocumentation(doc);
         }
     }
@@ -384,7 +390,7 @@ void OpenSpaceEngine::destroy() {
         func();
     }
 
-    _engine->_syncEngine->removeSyncables(Time::ref().getSyncables());
+    _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
     _engine->_syncEngine->removeSyncable(_engine->_scriptEngine.get());
 
@@ -396,9 +402,7 @@ void OpenSpaceEngine::destroy() {
 
     delete _engine;
     FactoryManager::deinitialize();
-    Time::deinitialize();
     SpiceManager::deinitialize();
-
 
     ghoul::fontrendering::FontRenderer::deinitialize();
 
@@ -410,6 +414,10 @@ void OpenSpaceEngine::destroy() {
 
 void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
+
+    glbinding::Binding::useCurrentContext();
+    glbinding::Binding::initialize();
+
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
     LDEBUG("Clearing all Windows");
@@ -424,6 +432,7 @@ void OpenSpaceEngine::initialize() {
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
     
+    // @BUG:  This will call OpenGL functions, should it should be in the initializeGL
     LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
@@ -560,10 +569,18 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         LERRORC(e.component, e.message);
         return;
     }
+    catch (const std::exception& e) {
+        LERROR(e.what());
+        return;
+    }
+    catch (...) {
+        LERROR("Unknown error loading the scene");
+        return;
+    }
 
     Scene* previousScene = _renderEngine->scene();
     if (previousScene) {
-        _syncEngine->removeSyncables(Time::ref().getSyncables());
+        _syncEngine->removeSyncables(_timeManager->getSyncables());
         _syncEngine->removeSyncables(_renderEngine->getSyncables());
         _syncEngine->removeSyncable(_scriptEngine.get());
 
@@ -606,7 +623,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         );
     }
 
-    _syncEngine->addSyncables(Time::ref().getSyncables());
+    _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
 
@@ -746,8 +763,7 @@ void OpenSpaceEngine::loadFonts() {
     ghoul::Dictionary fonts;
     configurationManager().getValue(ConfigurationManager::KeyFonts, fonts);
 
-    glm::ivec3 fontAtlasSize{1024, 1024, 1};
-    _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(fontAtlasSize);
+    _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(FontAtlasSize);
     
     for (const std::string& key : fonts.keys()) {
         std::string font = fonts.value<std::string>(key);
@@ -761,14 +777,16 @@ void OpenSpaceEngine::loadFonts() {
         LINFO("Registering font '" << font << "' with key '" << key << "'");
         bool success = _fontManager->registerFontPath(key, font);
         
-        if (!success)
+        if (!success) {
             LERROR("Error registering font '" << font << "' with key '" << key << "'");
+        }
     }
     
     try {
         bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-        if (!initSuccess)
+        if (!initSuccess) {
             LERROR("Error initializing default font renderer");
+        }
 
         ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
             _renderEngine->fontResolution()
@@ -843,10 +861,19 @@ void OpenSpaceEngine::configureLogging() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
-    _engine->_console->initialize();
+    LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
+    try {
+        _engine->_console->initialize();
+    }
+    catch (ghoul::RuntimeError& e) {
+        LERROR("Error initializing Console with error:");
+        LERRORC(e.component, e.message);
+    }
+    LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(end)");
 
     const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
     if (_configurationManager->hasKey(key)) {
+        LTRACE("OpenSpaceEngine::initializeGL::DebugContext(begin)");
         ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
         bool debug = dict.value<bool>(ConfigurationManager::PartActivate);
 
@@ -942,16 +969,16 @@ void OpenSpaceEngine::initializeGL() {
                         LDEBUGC(category, std::string(message));
                         break;
                     default:
-                        ghoul_assert(false, "Missing case label");
+                        throw ghoul::MissingCaseException();
                 }
             };
             ghoul::opengl::debug::setDebugCallback(callback);
         }
+        LTRACE("OpenSpaceEngine::initializeGL::DebugContext(end)");
     }
 
 
     LINFO("Initializing Rendering Engine");
-    // @CLEANUP:  Remove the return statement and replace with exceptions ---abock
     _renderEngine->initializeGL();
     
     for (const auto& func : _moduleCallbacks.initializeGL) {
@@ -960,8 +987,6 @@ void OpenSpaceEngine::initializeGL() {
     
     LINFO("Finished initializing OpenGL");
 
-    // If using swapgroups,
-    
     LINFO("IsUsingSwapGroups: " << _windowWrapper->isUsingSwapGroups());
     LINFO("IsSwapGroupMaster: " << _windowWrapper->isSwapGroupMaster());
     
@@ -996,8 +1021,11 @@ void OpenSpaceEngine::preSynchronization() {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
 
-        auto scheduledScripts = _scriptScheduler->progressTo(Time::ref().j2000Seconds());
-        for (auto it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
+        using Iter = std::vector<std::string>::const_iterator;
+        std::pair<Iter, Iter> scheduledScripts = _scriptScheduler->progressTo(
+            timeManager().time().j2000Seconds()
+        );
+        for (Iter it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
             _scriptEngine->queueScript(
                 *it, ScriptEngine::RemoteScripting::Yes
             );
@@ -1007,18 +1035,14 @@ void OpenSpaceEngine::preSynchronization() {
         
         _renderEngine->updateScene();
         _interactionHandler->updateCamera(dt);
-        
+        _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
-
     }
     
     for (const auto& func : _moduleCallbacks.preSync) {
         func();
     }
-	if (master)
-		_renderEngine->camera()->invalidateCache();
-
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
@@ -1078,26 +1102,18 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
+    LTRACE("OpenSpaceEngine::render(begin)");
 
-    bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
-
-    if (showOverlay) {
+    const bool isGuiWindow =
+        _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    if (isGuiWindow) {
         _console->update();
     }
 
-    LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();
-    }
-
-    if (showOverlay) {
-        _renderEngine->renderScreenLog();
-        _console->render();
     }
 
     if (_shutdown.inShutdown) {
@@ -1111,6 +1127,14 @@ void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(begin)");
     
     _renderEngine->postDraw();
+
+    const bool isGuiWindow =
+        _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+
+    if (isGuiWindow) {
+        _renderEngine->renderScreenLog();
+        _console->render();
+    }
 
     for (const auto& func : _moduleCallbacks.postDraw) {
         func();
@@ -1234,6 +1258,12 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Writes out documentation files"
             },
             {
+                "downloadFile",
+                &luascriptfunctions::downloadFile,
+                "",
+                "Downloads a file from Lua scope"
+            },
+            {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
                 "type, name, identifier, [value, minimumValue, maximumValue]",
@@ -1293,7 +1323,7 @@ void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption opt
             _moduleCallbacks.postDraw.push_back(std::move(function));
             break;
         default:
-            ghoul_assert(false, "Missing case label");
+            throw ghoul::MissingCaseException();
     }
 }
     

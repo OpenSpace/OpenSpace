@@ -60,6 +60,15 @@ namespace {
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
     const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
     const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
+    
+    const int IdOrbitalInteractionMode = 0;
+    const char* KeyOrbitalInteractionMode = "Orbital";
+    
+    const int IdGlobeBrowsingInteractionMode = 1;
+    const char* KeyGlobeBrowsingInteractionMode = "GlobeBrowsing";
+    
+    const int IdKeyframeInteractionMode = 2;
+    const char* KeyKeyframeInteractionMode = "Keyframe";
 } // namespace
 
 #include "interactionhandler_lua.inl"
@@ -85,6 +94,11 @@ InteractionHandler::InteractionHandler()
     , _verticalFriction("verticalFriction", "Vertical Friction", true)
     , _sensitivity("sensitivity", "Sensitivity", 0.5f, 0.001f, 1.f)
     , _rapidness("rapidness", "Rapidness", 1.f, 0.1f, 60.f)
+    , _interactionModeOption(
+          "interactionMode",
+          "Interaction Mode",
+          properties::OptionProperty::DisplayType::Dropdown
+      )
 {
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
@@ -100,24 +114,17 @@ InteractionHandler::InteractionHandler()
     _inputState = std::make_unique<InputState>();
     // Inject the same mouse states to both orbital and global interaction mode
     _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(_sensitivity * pow(10.0,-4), 1);
-    _interactionModes.insert(
-        std::pair<std::string, std::shared_ptr<InteractionMode>>(
-            "Orbital",
-            std::make_shared<OrbitalInteractionMode>(_mouseStates)
-            ));
-    _interactionModes.insert(
-        std::pair<std::string, std::shared_ptr<InteractionMode>>(
-            "GlobeBrowsing",
-            std::make_shared<GlobeBrowsingInteractionMode>(_mouseStates)
-            ));
-    _interactionModes.insert(
-        std::pair<std::string, std::shared_ptr<InteractionMode>>(
-            "Keyframe",
-            std::make_shared<KeyframeInteractionMode>()
-            ));
+
+    _orbitalInteractionMode = std::make_unique<OrbitalInteractionMode>(_mouseStates);
+    _globeBrowsingInteractionMode = std::make_unique<GlobeBrowsingInteractionMode>(_mouseStates);
+    _keyframeInteractionMode = std::make_unique<KeyframeInteractionMode>();
+
+    _interactionModeOption.addOption(IdOrbitalInteractionMode, KeyOrbitalInteractionMode);
+    _interactionModeOption.addOption(IdGlobeBrowsingInteractionMode, KeyGlobeBrowsingInteractionMode);
+    _interactionModeOption.addOption(IdKeyframeInteractionMode, KeyKeyframeInteractionMode);
 
     // Set the interactionMode
-    _currentInteractionMode = _interactionModes["Orbital"];
+    _currentInteractionMode = _orbitalInteractionMode.get();
 
     // Define lambda functions for changed properties
     _rotationalFriction.onChange([&]() {
@@ -136,8 +143,25 @@ InteractionHandler::InteractionHandler()
         _mouseStates->setVelocityScaleFactor(_rapidness);
     });
 
+    _interactionModeOption.onChange([this]() {
+        switch(_interactionModeOption.value()) {
+        case IdGlobeBrowsingInteractionMode:
+             setInteractionMode(_globeBrowsingInteractionMode.get());
+            break;
+        case IdKeyframeInteractionMode:
+            setInteractionMode(_keyframeInteractionMode.get());
+            break;
+        case IdOrbitalInteractionMode:
+        default:
+           setInteractionMode(_orbitalInteractionMode.get());
+           break;
+        }
+    });
+
+    
     // Add the properties
     addProperty(_origin);
+    addProperty(_interactionModeOption);
 
     addProperty(_rotationalFriction);
     addProperty(_horizontalFriction);
@@ -153,14 +177,9 @@ InteractionHandler::~InteractionHandler() {
 void InteractionHandler::initialize() {
     OsEng.parallelConnection().connectionEvent()->subscribe("interactionHandler", "statusChanged", [this]() {
         if (OsEng.parallelConnection().status() == ParallelConnection::Status::ClientWithHost) {
-            setInteractionMode("Keyframe");
-        } else {
-            auto keyframeModeIter = _interactionModes.find("Keyframe");
-            if (keyframeModeIter != _interactionModes.end()) {
-                if (_currentInteractionMode == keyframeModeIter->second) {
-                    setInteractionMode("Orbital");
-                }
-            }
+            setInteractionMode(_keyframeInteractionMode.get());
+        } else if (_currentInteractionMode == _keyframeInteractionMode.get()) {
+            setInteractionMode(_orbitalInteractionMode.get());
         }
     });
 }
@@ -183,7 +202,7 @@ void InteractionHandler::resetCameraDirection() {
     _currentInteractionMode->rotateToFocusNodeInterpolator().start();
 }
 
-void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> interactionMode) {
+void InteractionHandler::setInteractionMode(InteractionMode* interactionMode) {
     // Focus node is passed over from the previous interaction mode
     SceneGraphNode* focusNode = _currentInteractionMode->focusNode();
 
@@ -195,31 +214,13 @@ void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> int
 }
 
 InteractionMode * InteractionHandler::interactionMode() {
-    return _currentInteractionMode.get();
+    return _currentInteractionMode;
 }
 
-void InteractionHandler::setInteractionMode(const std::string& interactionModeKey) {
-    if (_interactionModes.find(interactionModeKey) != _interactionModes.end()) {
-        setInteractionMode(_interactionModes[interactionModeKey]);
-        LINFO("Interaction mode set to '" << interactionModeKey << "'");
-    }
-    else {
-        std::string listInteractionModes("");
-        for (auto pair : _interactionModes) {
-            listInteractionModes += "'" + pair.first + "', ";
-        }
-        LWARNING("'" << interactionModeKey <<
-            "' is not a valid interaction mode. Candidates are " << listInteractionModes);
-    }
-}
-    
 void InteractionHandler::goToChunk(int x, int y, int level) {
-    std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
-        std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
-    
-    if (gbim) {
+    if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        gbim->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
+        _globeBrowsingInteractionMode->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
 #endif
     } else {
         LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
@@ -227,12 +228,9 @@ void InteractionHandler::goToChunk(int x, int y, int level) {
 }
 
 void InteractionHandler::goToGeo(double latitude, double longitude) {
-    std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
-    std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
-        
-    if (gbim) {
+    if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        gbim->goToGeodetic2(
+        _globeBrowsingInteractionMode->goToGeodetic2(
             *_camera,
             globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
         );
@@ -500,12 +498,6 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
                 "readable description of the command for documentation purposes."
             },
             {
-                "setInteractionMode",
-                &luascriptfunctions::setInteractionMode,
-                "string",
-                "Set the interaction mode for the camera"
-            },
-            {
                 "saveCameraStateToFile",
                 &luascriptfunctions::saveCameraStateToFile,
                 "string",
@@ -539,20 +531,32 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
     };
 }
 
-void InteractionHandler::addKeyframe(const datamessagestructures::CameraKeyframe &kf) {
-    _inputState->addKeyframe(kf);
+void InteractionHandler::addKeyframe(double timestamp, KeyframeInteractionMode::CameraPose pose) {
+    if (!_keyframeInteractionMode) {
+        return;
+    }
+    _keyframeInteractionMode->timeline().addKeyframe(timestamp, pose);
 }
 
 void InteractionHandler::removeKeyframesAfter(double timestamp) {
-    _inputState->removeKeyframesAfter(timestamp);
+    if (!_keyframeInteractionMode) {
+        return;
+    }
+    _keyframeInteractionMode->timeline().removeKeyframesAfter(timestamp);
 }
 
 void InteractionHandler::clearKeyframes() {
-    _inputState->clearKeyframes();
+    if (!_keyframeInteractionMode) {
+        return;
+    }
+    _keyframeInteractionMode->timeline().clearKeyframes();
 }
 
-const std::vector<datamessagestructures::CameraKeyframe>& InteractionHandler::keyframes() const {
-    return _inputState->keyframes();
+size_t InteractionHandler::nKeyframes() const {
+    if (!_keyframeInteractionMode) {
+        return 0;
+    }
+    return _keyframeInteractionMode->timeline().keyframes().size();
 }
 
 } // namespace interaction

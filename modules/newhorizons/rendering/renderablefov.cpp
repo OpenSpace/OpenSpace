@@ -409,7 +409,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
         if (!isInFov) {
             // If the target is not in the field of view, we don't need to perform any
             // surface intercepts
-            glm::vec3 o = orthogonalProjection(bound, data.time, target);
+            glm::vec3 o = orthogonalProjection(bound, data.time.j2000Seconds(), target);
 
             second = {
                 { o.x, o.y, o.z },
@@ -426,7 +426,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 _instrument.name,
                 ref.first,
                 _instrument.aberrationCorrection,
-                data.time,
+                data.time.j2000Seconds(),
                 bound
             );
 
@@ -443,7 +443,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     r.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
                         ref.first,
                         _instrument.referenceFrame,
-                        data.time
+                        data.time.j2000Seconds()
                     ) * r.surfaceVector;
                 }
 
@@ -460,7 +460,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             }
             else {
                 // This point did not intersect the target though others did
-                glm::vec3 o = orthogonalProjection(bound, data.time, target);
+                glm::vec3 o = orthogonalProjection(bound, data.time.j2000Seconds(), target);
                 second = {
                     { o.x, o.y, o.z },
                     RenderInformation::VertexColorTypeInFieldOfView
@@ -516,7 +516,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     _instrument.name,
                     makeBodyFixedReferenceFrame(_instrument.referenceFrame).first,
                     _instrument.aberrationCorrection,
-                    data.time,
+                    data.time.j2000Seconds(),
                     probe
                 ).interceptFound;
             };
@@ -531,7 +531,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     _instrument.name,
                     ref.first,
                     _instrument.aberrationCorrection,
-                    data.time,
+                    data.time.j2000Seconds(),
                     probe
                 );
 
@@ -539,7 +539,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     r.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
                         ref.first,
                         _instrument.referenceFrame,
-                        data.time
+                        data.time.j2000Seconds()
                     ) * r.surfaceVector;
                 }
 
@@ -561,7 +561,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     };
                 }
                 else {
-                    const glm::vec3 o = orthogonalProjection(tBound, data.time, target);
+                    const glm::vec3 o = orthogonalProjection(tBound, data.time.j2000Seconds(), target);
 
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
                         { o.x, o.y, o.z },
@@ -653,19 +653,11 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     break;
                 }
                 case ThisIntersect:
-                {
-                    break;
-                }
                 case NextIntersect:
-                {
-                    break;
-                }
                 case BothIntersect:
-                {
                     break;
-                }
                 default:
-                    ghoul_assert(false, "Missing case label");
+                    throw ghoul::MissingCaseException();
             }
         }
     }
@@ -1003,8 +995,8 @@ void RenderableFov::update(const UpdateData& data) {
         _drawFOV = ImageSequencer::ref().instrumentActive(_instrument.name);
     }
 
-    if (_drawFOV && !data.timePaused) {
-        auto t = determineTarget(data.time);
+    if (_drawFOV && !data.time.paused()) {
+        auto t = determineTarget(data.time.j2000Seconds());
         std::string target = t.first;
         bool inFOV = t.second;
 
@@ -1012,7 +1004,7 @@ void RenderableFov::update(const UpdateData& data) {
         updateGPU();
 
         double t2 = (ImageSequencer::ref().getNextCaptureTime());
-        double diff = (t2 - data.time);
+        double diff = (t2 - data.time.j2000Seconds());
         _interpolationTime = 0.0;
         float interpolationStart = 7.0; //seconds before
         if (diff <= interpolationStart) {

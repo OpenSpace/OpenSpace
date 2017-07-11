@@ -23,33 +23,35 @@
  ****************************************************************************************/
 
 #include <openspace/network/networkengine.h>
-#include <openspace/util/time.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 #include <array>
 #include <chrono>
 #include <thread>
 
-#include <ghoul/opengl/ghoul_gl.h>
-
 namespace {
-    const std::string _loggerCat = "NetworkEngine";
+    const char* _loggerCat = "NetworkEngine";
 
-    const std::string StatusMessageIdentifierName = "StatusMessage";
-    const std::string MappingIdentifierIdentifierName = "IdentifierMapping";
-    const std::string InitialMessageFinishedIdentifierName = "InitialMessageFinished";
+    const char* StatusMessageIdentifierName = "StatusMessage";
+    const char* MappingIdentifierIdentifierName = "IdentifierMapping";
+    const char* InitialMessageFinishedIdentifierName = "InitialMessageFinished";
 
     const char MessageTypeLuaScript = '0';
     const char MessageTypeExternalControlConnected = '1';
-}
+} // namespace
 
 namespace openspace {
 
 NetworkEngine::NetworkEngine() 
-    : _lastAssignedIdentifier(MessageIdentifier(-1)) // -1 is okay as we assign one identifier in this ctor
+    // -1 is okay as we assign one identifier in this ctor
+    : _lastAssignedIdentifier(MessageIdentifier(-1))
     , _shouldPublishStatusMessage(true)
 {
     static_assert(
@@ -65,41 +67,47 @@ bool NetworkEngine::handleMessage(const std::string& message) {
     // The first byte determines the type of message
     const char type = message[0];
     switch (type) {
-    case MessageTypeLuaScript:  // LuaScript
-    {
-        std::string script = message.substr(1);
-        //LINFO("Received Lua Script: '" << script << "'");
-        OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::No);
-        return true;
-    }
-    case MessageTypeExternalControlConnected:
-    {
-        publishIdentifierMappingMessage();
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        sendInitialInformation();
-        return true;
-    }
-    default:
-        LERROR("Unknown type '" << type << "'");
-        return false;
-    }
-
+        case MessageTypeLuaScript:  // LuaScript
+        {
+            std::string script = message.substr(1);
+            OsEng.scriptEngine().queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::No
+            );
+            return true;
+        }
+        case MessageTypeExternalControlConnected:
+        {
+            publishIdentifierMappingMessage();
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+            sendInitialInformation();
+            return true;
+        }
+        default:
+            LERROR("Unknown type '" << type << "'");
+            return false;
+        }
 }
 
 void NetworkEngine::publishStatusMessage() {
-    if (!_shouldPublishStatusMessage || !OsEng.windowWrapper().isExternalControlConnected())
+    if (!_shouldPublishStatusMessage ||
+        !OsEng.windowWrapper().isExternalControlConnected())
+    {
         return;
+    }
     // Protocol:
     // 8 bytes: time as a ET double
     // 24 bytes: time as a UTC string
     // 8 bytes: delta time as double
     // Total: 40
 
+    Time& currentTime = OsEng.timeManager().time();
+
     uint16_t messageSize = 0;
     
-    double time = Time::ref().j2000Seconds();
-    std::string timeString = Time::ref().UTC();
-    double delta = Time::ref().deltaTime();
+    double time = currentTime.j2000Seconds();
+    std::string timeString = currentTime.UTC();
+    double delta = currentTime.deltaTime();
 
     messageSize += sizeof(time);
     messageSize += static_cast<uint16_t>(timeString.length());
@@ -112,7 +120,10 @@ void NetworkEngine::publishStatusMessage() {
     
     std::memmove(buffer.data() + currentLocation, &time, sizeof(time));
     currentLocation += sizeof(time);
-    std::memmove(buffer.data() + currentLocation, timeString.c_str(), timeString.length());
+    std::memmove(
+        buffer.data() + currentLocation,
+        timeString.c_str(), timeString.length()
+    );
     currentLocation += static_cast<unsigned int>(timeString.length());
     std::memmove(buffer.data() + currentLocation, &delta, sizeof(delta));
 
@@ -132,7 +143,10 @@ void NetworkEngine::publishIdentifierMappingMessage() {
     std::memcpy(buffer.data(), &size, sizeof(uint16_t));
     currentWritingPosition += sizeof(uint16_t);
     for (const std::pair<std::string, MessageIdentifier>& i : _identifiers) {
-        std::memcpy(buffer.data() + currentWritingPosition, &(i.second), sizeof(MessageIdentifier));
+        std::memcpy(
+            buffer.data() + currentWritingPosition,
+            &(i.second), sizeof(MessageIdentifier)
+        );
         currentWritingPosition += sizeof(MessageIdentifier);
         uint8_t stringSize = static_cast<uint8_t>(i.first.size());
         std::memcpy(buffer.data() + currentWritingPosition, &stringSize, sizeof(uint8_t));
@@ -147,8 +161,9 @@ void NetworkEngine::publishIdentifierMappingMessage() {
 
 NetworkEngine::MessageIdentifier NetworkEngine::identifier(std::string name) {
     auto i = _identifiers.find(name);
-    if (i != _identifiers.end())
+    if (i != _identifiers.end()) {
         return i->second;
+    }
     else {
         _lastAssignedIdentifier++;
 
@@ -159,13 +174,16 @@ NetworkEngine::MessageIdentifier NetworkEngine::identifier(std::string name) {
     }
 }
 
-void NetworkEngine::publishMessage(MessageIdentifier identifier, std::vector<char> message) {
+void NetworkEngine::publishMessage(MessageIdentifier identifier,
+                                   std::vector<char> message)
+{
     _messagesToSend.push_back({ std::move(identifier), std::move(message) });
 }
 
 void NetworkEngine::sendMessages() {
-    if (!OsEng.windowWrapper().isExternalControlConnected())
+    if (!OsEng.windowWrapper().isExternalControlConnected()) {
         return;
+    }
 
     for (Message& m : _messagesToSend) {
         // Protocol:
@@ -199,7 +217,9 @@ void NetworkEngine::sendInitialInformation() {
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
         OsEng.windowWrapper().sendMessageToExternalControl(payload);
-        LINFO("Sent initial message: (s=" << m.body.size() << ") [i=" << identifier.value << "]");
+        LINFO("Sent initial message: (s=" << m.body.size() << ")" << 
+              "[i=" << identifier.value << "]"
+        );
 
         std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
     }
@@ -220,7 +240,9 @@ void NetworkEngine::sendInitialInformation() {
     _shouldPublishStatusMessage = true;
 }
 
-void NetworkEngine::setInitialConnectionMessage(MessageIdentifier identifier, std::vector<char> message) {
+void NetworkEngine::setInitialConnectionMessage(MessageIdentifier identifier,
+                                                std::vector<char> message)
+{
     // Add check if a MessageIdentifier already exists ---abock
     _initialConnectionMessages.push_back({std::move(identifier), std::move(message)});
 }

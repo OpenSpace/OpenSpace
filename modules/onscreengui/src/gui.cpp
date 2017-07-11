@@ -210,12 +210,9 @@ void addScreenSpaceRenderable(std::string texturePath) {
         return;
     }
 
-    texturePath = absPath(texturePath);
-    texturePath = FileSys.convertPathSeparator(texturePath, '/');
-
-    std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = '" + texturePath + "' }";
-    std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+    const std::string luaTable =
+        "{Type = 'ScreenSpaceImage', TexturePath = openspace.absPath('" + texturePath + "') }";
+    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
 } // namespace 
@@ -229,7 +226,7 @@ GUI::GUI()
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
-    , _currentVisibility(properties::Property::Visibility::All)
+    , _currentVisibility(properties::Property::Visibility::Developer)
 {
     addPropertySubOwner(_help);
     addPropertySubOwner(_origin);
@@ -238,6 +235,7 @@ GUI::GUI()
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
     addPropertySubOwner(_virtualProperty);
+    addPropertySubOwner(_filePath);
     addPropertySubOwner(_time);
     addPropertySubOwner(_iswa);
 }
@@ -321,6 +319,7 @@ void GUI::initialize() {
     _globalProperty.initialize();
     _globalProperty.setHasRegularProperties(true);
     _virtualProperty.initialize();
+    _filePath.initialize();
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
@@ -337,6 +336,7 @@ void GUI::deinitialize() {
     _globalProperty.deinitialize();
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
+    _filePath.deinitialize();
     _property.deinitialize();
 
     delete iniFileBuffer;
@@ -364,7 +364,8 @@ void GUI::initializeGL() {
     _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     _fontTexture->uploadTexture();
     GLuint id = *_fontTexture;
-    ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(id);
+    uint64_t tmp = id;
+    ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(tmp);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -488,6 +489,9 @@ void GUI::endFrame() {
         if (_iswa.isEnabled()) {
             _iswa.render();
         }
+        if (_filePath.isEnabled()) {
+            _filePath.render();
+        }
     }
 
     ImGui::Render();
@@ -583,6 +587,10 @@ void GUI::render() {
     ImGui::Checkbox("Virtual Properties", &virtualProperty);
     _virtualProperty.setEnabled(virtualProperty);
 
+    bool filePath = _filePath.isEnabled();
+    ImGui::Checkbox("File Paths", &filePath);
+    _filePath.setEnabled(filePath);
+
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     bool iswa = _iswa.isEnabled();
     ImGui::Checkbox("iSWA", &iswa);
@@ -634,7 +642,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
     int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
 
     // Array is sorted by importance
-    std::array<const char*, 4> items = { "None", "User", "Developer", "All"};
+    std::array<const char*, 4> items = { "User", "Developer", "Hidden", "All"};
     ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
 
     _currentVisibility = static_cast<V>(t);
