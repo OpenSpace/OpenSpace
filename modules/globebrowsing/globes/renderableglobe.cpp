@@ -70,7 +70,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty("orenNayarRoughness", "orenNayarRoughness", 0.0f, 0.0f, 1.0f)
     })
     , _debugPropertyOwner("Debug")
-    , _texturePropertyOwner("Textures")
 {
     setName("RenderableGlobe");
         

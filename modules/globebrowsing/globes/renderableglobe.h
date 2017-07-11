@@ -128,7 +128,6 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
-    properties::PropertyOwner _texturePropertyOwner;
 };
 
 } // namespace globebrowsing
