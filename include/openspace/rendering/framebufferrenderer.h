@@ -73,6 +73,10 @@ public:
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(const int nAaSamples) override;
     void setHDRExposure(const float hdrExposure) override;
+    void setHDRBackground(const float hdrBackground) override;
+    void setGamma(const float gamma) override;
+
+    float hdrBackground() const override;
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -122,6 +126,8 @@ private:
     glm::vec2 _resolution;
     int _nAaSamples;
     float _hdrExposure;
+    float _hdrBackground;
+    float _gamma;
 
     ghoul::Dictionary _rendererData;
 };

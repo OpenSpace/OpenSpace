@@ -65,6 +65,9 @@ ABufferRenderer::ABufferRenderer()
     , _dirtyRendererData(true)
     , _dirtyResolveDictionary(true)
     , _resolveProgram(nullptr)
+    , _hdrExposure(0.4)
+    , _hdrBackground(2.8)
+    , _gamma(2.2)
 {}
 
 ABufferRenderer::~ABufferRenderer() {}
@@ -404,6 +407,27 @@ void ABufferRenderer::setHDRExposure(const float hdrExposure) {
         LERROR("HDR Exposure constant must be greater than zero.");
         _hdrExposure = 1.0;
     }
+}
+
+void ABufferRenderer::setHDRBackground(const float hdrBackground) {
+    _hdrBackground = hdrBackground;
+    if (_hdrBackground < 0.0) {
+        LERROR("HDR Background constant must be greater than zero.");
+        _hdrBackground = 1.0;
+    }
+}
+
+
+void ABufferRenderer::setGamma(const float gamma) {
+    _gamma = gamma;
+    if (_gamma < 0.0) {
+        LERROR("Gamma value must be greater than zero.");
+        _gamma = 2.2;
+    }
+}
+
+float ABufferRenderer::hdrBackground() const {
+    return _hdrBackground;
 }
 
 void ABufferRenderer::clear() {

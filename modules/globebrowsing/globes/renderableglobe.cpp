@@ -34,7 +34,9 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderer.h>
 #endif
+
 
 namespace {
     const char* keyFrame = "Frame";
@@ -123,7 +125,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 0.85f, -1.0f, 1.0f),
         FloatProperty("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 1000.0f),
         FloatProperty("hdrExposition", "HDR Exposition", 0.4f, 0.01f, 5.0f),
-        FloatProperty("backgroundExposition", "Background Exposition", 1.8f, 0.01f, 10.0f),
         FloatProperty("gamma", "Gamma Correction", 1.8f, 0.1f, 3.0f ),
         BoolProperty("ozone", "Ozone Layer Enabled", true)
     })
@@ -141,7 +142,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _mieExtinctionCoeff(glm::vec3(0.f))
     , _sunRadianceIntensity(50.0f)
     , _exposureConstant(0.4f)
-    , _exposureBackgroundConstant(1.8f)
+    , _exposureBackgroundConstant(2.8f)
     , _gammaConstant(1.8f)
     , _atmosphereEnabled(false)
     , _saveCalculationsToTexture(false)
@@ -519,11 +520,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             _atmosphereProperties.hdrExpositionP.set(_exposureConstant);
             _atmosphereProperties.hdrExpositionP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.hdrExpositionP);
-
-            _atmosphereProperties.backgroundExpositionP.set(_exposureBackgroundConstant);
-            _atmosphereProperties.backgroundExpositionP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
-            _atmospherePropertyOwner.addProperty(_atmosphereProperties.backgroundExpositionP);
-
+            
             _atmosphereProperties.gammaConstantP.set(_gammaConstant);
             _atmosphereProperties.gammaConstantP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.gammaConstantP);
@@ -657,6 +654,9 @@ void RenderableGlobe::update(const UpdateData& data) {
     if (_deferredcaster) {
         _deferredcaster->setTime(data.time.j2000Seconds());
         _deferredcaster->setModelTransform(_cachedModelTransform);
+
+        if (_exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground())
+            updateAtmosphereParameters();
     }
 #endif
 }
@@ -717,9 +717,10 @@ void RenderableGlobe::updateAtmosphereParameters() {
     bool executeComputation = true;
     if (_sunRadianceIntensity != _atmosphereProperties.sunIntensityP.value() ||
         _exposureConstant != _atmosphereProperties.hdrExpositionP.value() ||
-        _exposureBackgroundConstant != _atmosphereProperties.backgroundExpositionP.value() ||
+        _exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground() ||
         _gammaConstant != _atmosphereProperties.gammaConstantP.value())
         executeComputation = false;
+
     _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereProperties.atmosphereHeightP.value();
     _planetAverageGroundReflectance = _atmosphereProperties.groundAverageReflectanceP.value();
     _rayleighHeightScale            = _atmosphereProperties.rayleighHeightScaleP.value();
@@ -739,7 +740,7 @@ void RenderableGlobe::updateAtmosphereParameters() {
     _miePhaseConstant     = _atmosphereProperties.mieAsymmetricFactorGP.value();
     _sunRadianceIntensity = _atmosphereProperties.sunIntensityP.value();
     _exposureConstant     = _atmosphereProperties.hdrExpositionP.value();
-    _exposureBackgroundConstant = _atmosphereProperties.backgroundExpositionP.value();
+    _exposureBackgroundConstant = OsEng.renderEngine().renderer()->hdrBackground();   
     _gammaConstant        = _atmosphereProperties.gammaConstantP.value();
 
     if (_deferredcaster) {

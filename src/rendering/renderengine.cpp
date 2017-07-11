@@ -130,7 +130,9 @@ RenderEngine::RenderEngine()
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
     , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
-    , _hdrExposure("backgroundExposure", "HDR Exposure", 1.8f, 0.01f, 10.0f)
+    , _hdrExposure("hdrExposure", "HDR Exposure", 0.4f, 0.01f, 10.0f)
+    , _hdrBackground("backgroundExposure", "HDR Background Exposure", 2.8f, 0.01f, 10.0f)
+    , _gamma("gamma", "Gamma Constant", 2.2f, 0.01f, 10.0f)
     , _frameNumber(0)
 {
     _performanceMeasurements.onChange([this]() {
@@ -170,9 +172,21 @@ RenderEngine::RenderEngine()
             _renderer->setHDRExposure(_hdrExposure);
         }
     });
+    _hdrBackground.onChange([this]() {
+        if (_renderer) {
+            _renderer->setHDRBackground(_hdrBackground);
+        }
+    });
+    _gamma.onChange([this]() {
+        if (_renderer) {
+            _renderer->setGamma(_gamma);
+        }
+    });
 
     addProperty(_nAaSamples);
     addProperty(_hdrExposure);
+    addProperty(_hdrBackground);
+    addProperty(_gamma);
     addProperty(_applyWarping);
     
     _takeScreenshot.onChange([this](){
@@ -1166,8 +1180,8 @@ void RenderEngine::renderInformation() {
                         "Active Instruments:"
                     );
 
-                    for (auto t : activeMap) {
-                        if (t.second == false) {
+                    for (auto ac : activeMap) {
+                        if (ac.second == false) {
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
@@ -1177,7 +1191,7 @@ void RenderEngine::renderInformation() {
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "    %5s",
-                                t.first.c_str()
+                                ac.first.c_str()
                             );
 
                         }
@@ -1187,7 +1201,7 @@ void RenderEngine::renderInformation() {
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "|"
                             );
-                            if (t.first == "NH_LORRI") {
+                            if (ac.first == "NH_LORRI") {
                                 RenderFont(*_fontInfo,
                                     penPosition,
                                     firing,
@@ -1203,7 +1217,7 @@ void RenderEngine::renderInformation() {
                                 penPosition,
                                 active,
                                 "    %5s",
-                                t.first.c_str()
+                                ac.first.c_str()
                             );
                         }
                     }

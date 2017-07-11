@@ -222,6 +222,9 @@ private:
     int _fadeDirection;
     properties::IntProperty _nAaSamples;
     properties::FloatProperty _hdrExposure;
+    properties::FloatProperty _hdrBackground;
+    properties::FloatProperty _gamma;
+
     uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;

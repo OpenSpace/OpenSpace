@@ -116,7 +116,6 @@ public:
         properties::FloatProperty mieAsymmetricFactorGP;
         properties::FloatProperty sunIntensityP;
         properties::FloatProperty hdrExpositionP;
-        properties::FloatProperty backgroundExpositionP;
         properties::FloatProperty gammaConstantP;
         properties::BoolProperty ozoneLayerEnabledP;
     };

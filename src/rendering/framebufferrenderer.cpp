@@ -68,6 +68,9 @@ FramebufferRenderer::FramebufferRenderer()
     : _camera(nullptr)
     , _scene(nullptr)
     , _resolution(glm::vec2(0))
+    , _hdrExposure(0.4)
+    , _hdrBackground(2.8)
+    , _gamma(2.2)
 {}
 
 FramebufferRenderer::~FramebufferRenderer() {}
@@ -550,6 +553,9 @@ void FramebufferRenderer::updateHDRData() {
             "${SHADERS}/framebuffer/hdrBackground.vert",
             "${SHADERS}/framebuffer/hdrBackground.frag"
         );
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _hdrBackGroundProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+        _hdrBackGroundProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -686,7 +692,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         glDrawBuffers(1, dBuffer);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // HDR Background Image Control
+        // HDR Image Control and Resolve
         _hdrBackGroundProgram->activate();
 
         ghoul::opengl::TextureUnit mainColorTextureUnit;
@@ -695,7 +701,9 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
         _hdrBackGroundProgram->setUniform("mainColorTexture", mainColorTextureUnit);
         _hdrBackGroundProgram->setUniform("nAaSamples", _nAaSamples);
-        _hdrBackGroundProgram->setUniform("backgroundExposure", _hdrExposure);
+        _hdrBackGroundProgram->setUniform("exposure", _hdrExposure);
+        _hdrBackGroundProgram->setUniform("backgroundExposure", _hdrBackground);
+        _hdrBackGroundProgram->setUniform("gamma", _gamma);
         glBindVertexArray(_screenQuad);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
@@ -753,6 +761,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
 
             deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
+            //deferredcastProgram->setUniform("hdrExposure", _nAaSamples);
 
             deferredcaster->preRaycast(deferredcasterTask.renderData, 
                                        _deferredcastData[deferredcaster], 
@@ -868,6 +877,26 @@ void FramebufferRenderer::setHDRExposure(const float hdrExposure) {
         LERROR("HDR Exposure constant must be greater than zero.");
         _hdrExposure = 1.0;
     }
+}
+
+void FramebufferRenderer::setHDRBackground(const float hdrBackground) {
+    _hdrBackground = hdrBackground;
+    if (_hdrBackground < 0.0) {
+        LERROR("HDR Background constant must be greater than zero.");
+        _hdrBackground = 1.0;    
+    }
+}
+
+void FramebufferRenderer::setGamma(const float gamma) {
+    _gamma = gamma;
+    if (_gamma < 0.0) {
+        LERROR("Gamma value must be greater than zero.");
+        _gamma = 2.2;
+    }
+}
+
+float FramebufferRenderer::hdrBackground() const {
+    return _hdrBackground;
 }
 
 void FramebufferRenderer::updateRendererData() {
