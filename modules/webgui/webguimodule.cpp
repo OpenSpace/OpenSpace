@@ -22,73 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <glm/gtc/matrix_transform.hpp>
-#include "include/gui_render_handler.h"
-
-namespace {
-    std::string _loggerCat = "WebGUI:RenderHandler";
-}
+#include "webguimodule.h"
 
 namespace openspace {
 
-GUIRenderHandler::GUIRenderHandler() {
+WebGuiModule::WebGuiModule()
+        : OpenSpaceModule("WebGui") {
+    guiInstance = std::make_unique<BrowserInstance>(new GUIRenderHandler());
+    guiLocation = OsEng.configurationManager().value<std::string>(
+            ConfigurationManager::KeyWebGuiUrl);
+}
+
+void WebGuiModule::internalInitialize() {
     OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::InitializeGL,
-            [this](){
-                LDEBUG("Initializing WebGUI RenderHandler OpenGL");
-                initializeGL();
+            OpenSpaceEngine::CallbackOption::Initialize,
+            [this]() {
+                LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", guiLocation));
+                guiInstance->load(guiLocation);
             }
     );
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Render,
+            [this](){
+                WindowWrapper& wrapper = OsEng.windowWrapper();
+
+                if (wrapper.isMaster()) {
+                    if (wrapper.windowHasResized()) {
+                        guiInstance->reshape(wrapper.currentWindowSize());
+                    }
+
+                    guiInstance->draw();
+                }
+            });
+
 }
 
-void GUIRenderHandler::initializeGL() {
-    LDEBUG("Initializing CEF GL environment...");
-    _programObject = ghoul::opengl::ProgramObject::Build(
-            "WebGUICEFProgram",
-            "${MODULE_WEBBROWSER}/shaders/gui_vs.glsl",
-            "${MODULE_WEBBROWSER}/shaders/gui_fs.glsl"
-    );
-    float data[] = {-1.0f, -1.0f, -1.0f,
-                     1.0f,  1.0f, -1.0f,
-                     1.0f, -1.0f, -1.0f,
-                     1.0f,  1.0f,  1.0f};
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glGenBuffers(1, &vbo);
-    glGenTextures(1, &texture);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-    glBindVertexArray(0);
-    LDEBUG("Initializing CEF GL environment... done!");
 }
 
-void GUIRenderHandler::draw(void) {
-	if (_programObject->isDirty()) {
-		_programObject->rebuildFromFile();
-	}
-
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-
-    _programObject->activate();
-
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    glBindTexture(GL_TEXTURE_2D, texture);
-    _programObject->setUniform("tex", unit);
-
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    _programObject->deactivate();
-
-    glEnable(GL_CULL_FACE);
-}
-
-} // namespace openspace

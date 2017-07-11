@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBGUIMODULE___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___WEBGUIMODULE___H__
+#ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
+#define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 #include "include/browser_instance.h"
@@ -40,10 +40,8 @@ public:
 
 private:
 	std::unique_ptr<CefHost> cefHost;
-	std::unique_ptr<BrowserInstance> guiInstance;
-	std::string guiLocation;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___WEBGUIMODULE___H__
+#endif // __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__

@@ -28,7 +28,7 @@
 #include <memory>
 #include <include/cef_client.h>
 
-#include "gui_render_handler.h"
+#include "modules/webgui/include/gui_render_handler.h"
 
 namespace openspace {
 

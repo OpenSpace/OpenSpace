@@ -24,7 +24,6 @@
 
 #include <include/openspace/util/factorymanager.h>
 #include <include/screen_space_browser.h>
-#include <include/openspace/engine/configurationmanager.h>
 #include "webbrowsermodule.h"
 
 namespace openspace {
@@ -32,33 +31,9 @@ namespace openspace {
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule("WebBrowser") {
     cefHost = std::make_unique<CefHost>();
-    guiInstance = std::make_unique<BrowserInstance>(new GUIRenderHandler());
-    guiLocation = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebGuiUrl);
 }
 
 void WebBrowserModule::internalInitialize() {
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Initialize,
-            [this]() {
-                LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", guiLocation));
-                guiInstance->load(guiLocation);
-            }
-    );
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
-            [this](){
-                WindowWrapper& wrapper = OsEng.windowWrapper();
-
-                if (wrapper.isMaster()) {
-                    if (wrapper.windowHasResized()) {
-                        guiInstance->reshape(wrapper.currentWindowSize());
-                    }
-
-                    guiInstance->draw();
-                }
-            });
-
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
 

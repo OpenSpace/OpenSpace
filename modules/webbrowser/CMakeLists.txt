@@ -73,7 +73,6 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
 set(WEBBROWSER_SOURCES
         webbrowsermodule.cpp
-        src/gui_render_handler.cpp
         src/browser_client.cpp
         src/event_handler.cpp
     )
@@ -169,12 +168,11 @@ endif (OS_WINDOWS)
 # Create OpenSpace module.
 set(OPENSPACE_HEADER_FILES
         webbrowsermodule.h
+        include/web_render_handler.h
         include/browser_client.h
         include/cef_host.h
-        include/web_render_handler.h
         include/screen_space_render_handler.h
         include/screen_space_browser.h
-        include/gui_render_handler.h
         include/event_handler.h
         include/browser_instance.h
     )
@@ -182,12 +180,11 @@ source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
         webbrowsermodule.cpp
+        src/web_render_handler.cpp
         src/browser_client.cpp
         src/cef_host.cpp
-        src/web_render_handler.cpp
         src/screen_space_render_handler.cpp
         src/screen_space_browser.cpp
-        src/gui_render_handler.cpp
         src/event_handler.cpp
         src/browser_instance.cpp
         )

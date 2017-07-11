@@ -27,9 +27,9 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <include/wrapper/cef_helpers.h>
-#include "include/gui_render_handler.h"
-#include "include/event_handler.h"
-#include "include/browser_client.h"
+#include "modules/webbrowser/include/web_render_handler.h"
+#include "modules/webbrowser/include/event_handler.h"
+#include "modules/webbrowser/include/browser_client.h"
 
 namespace openspace {
 

@@ -22,60 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <include/openspace/engine/configurationmanager.h>
-#include "include/cef_host.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include "modules/webgui/include/gui_render_handler.h"
 
 namespace {
-const char* _loggerCat = "CefHost";
+    std::string _loggerCat = "WebGUI:RenderHandler";
 }
 
 namespace openspace {
 
-CefHost::CefHost() {
-    LDEBUG("Initializing CEF...");
-    CefMainArgs args;
-    CefSettings settings;
-
-    std::string subprocessPath = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebHelperLocation);
-    subprocessPath += SUBPROCESS_ENDING;
-
-    CefString(&settings.browser_subprocess_path).FromASCII((char*) subprocessPath.c_str());
-    attachDebugSettings(settings);
-
-    CefInitialize(args, settings, nullptr, NULL);
-    initializeCallbacks();
-    LDEBUG("Initializing CEF... done!");
-}
-
-CefHost::~CefHost() {
-    CefShutdown();
-}
-
-void CefHost::attachDebugSettings(CefSettings &settings) {
-    settings.remote_debugging_port = 8088;
-    LDEBUG(fmt::format("Remote WebBrowser debugging available on http://localhost:{}", settings.remote_debugging_port));
-}
-
-void CefHost::deinitialize() {
-}
-
-void CefHost::initializeCallbacks() {
+GUIRenderHandler::GUIRenderHandler() {
     OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Deinitialize,
-            [this]() {
-                deinitialize();
-            }
-    );
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
+            OpenSpaceEngine::CallbackOption::InitializeGL,
             [this](){
-                CefDoMessageLoopWork();
-//                render();
+                LDEBUG("Initializing WebGUI RenderHandler OpenGL");
+                initializeGL();
             }
     );
-
 }
 
+void GUIRenderHandler::initializeGL() {
+    LDEBUG("Initializing CEF GL environment...");
+    _programObject = ghoul::opengl::ProgramObject::Build(
+            "WebGUICEFProgram",
+            "${MODULE_WEBBROWSER}/shaders/gui_vs.glsl",
+            "${MODULE_WEBBROWSER}/shaders/gui_fs.glsl"
+    );
+    float data[] = {-1.0f, -1.0f, -1.0f,
+                     1.0f,  1.0f, -1.0f,
+                     1.0f, -1.0f, -1.0f,
+                     1.0f,  1.0f,  1.0f};
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glGenBuffers(1, &vbo);
+    glGenTextures(1, &texture);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+    glBindVertexArray(0);
+    LDEBUG("Initializing CEF GL environment... done!");
 }
 
+void GUIRenderHandler::draw(void) {
+	if (_programObject->isDirty()) {
+		_programObject->rebuildFromFile();
+	}
+
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    _programObject->activate();
+
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    glBindTexture(GL_TEXTURE_2D, texture);
+    _programObject->setUniform("tex", unit);
+
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    _programObject->deactivate();
+
+    glEnable(GL_CULL_FACE);
+}
+
+} // namespace openspace

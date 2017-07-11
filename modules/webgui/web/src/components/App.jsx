@@ -15,6 +15,7 @@ class App extends Component {
       url: Connection.defaultUrl,
       isConnected: false,
       connectionLost: false,
+
     };
 
     this.connection = null;

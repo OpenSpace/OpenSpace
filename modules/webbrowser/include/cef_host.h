@@ -27,9 +27,9 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <include/wrapper/cef_helpers.h>
-#include "include/browser_client.h"
-#include "include/gui_render_handler.h"
-#include "include/event_handler.h"
+#include "modules/webbrowser/include/browser_client.h"
+#include "modules/webbrowser/include/web_render_handler.h"
+#include "modules/webbrowser/include/event_handler.h"
 
 namespace openspace {
 
@@ -49,9 +49,11 @@ private:
     void deinitialize();
     void attachDebugSettings(CefSettings&);
 
+    // TODO: remove?
     std::shared_ptr<EventHandler> eventHandler;
-
+    // TODO: remove?
     CefRefPtr<GUIRenderHandler> renderHandler;
+
     CefRefPtr<BrowserClient> client;
     CefRefPtr<CefBrowser> browser;
 };

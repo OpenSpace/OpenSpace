@@ -22,60 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <include/openspace/engine/configurationmanager.h>
-#include "include/cef_host.h"
+#ifndef OPENSPACE_WEBGUIMODULE_H
+#define OPENSPACE_WEBGUIMODULE_H
 
-namespace {
-const char* _loggerCat = "CefHost";
-}
+#include <openspace/util/openspacemodule.h>
+#include <include/openspace/engine/configurationmanager.h>
+#include "modules/webbrowser/include/browser_instance.h"
+#include "include/gui_render_handler.h"
 
 namespace openspace {
 
-CefHost::CefHost() {
-    LDEBUG("Initializing CEF...");
-    CefMainArgs args;
-    CefSettings settings;
+class WebGuiModule : public OpenSpaceModule {
+public:
+    WebGuiModule();
+    void internalInitialize();
 
-    std::string subprocessPath = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebHelperLocation);
-    subprocessPath += SUBPROCESS_ENDING;
-
-    CefString(&settings.browser_subprocess_path).FromASCII((char*) subprocessPath.c_str());
-    attachDebugSettings(settings);
-
-    CefInitialize(args, settings, nullptr, NULL);
-    initializeCallbacks();
-    LDEBUG("Initializing CEF... done!");
-}
-
-CefHost::~CefHost() {
-    CefShutdown();
-}
-
-void CefHost::attachDebugSettings(CefSettings &settings) {
-    settings.remote_debugging_port = 8088;
-    LDEBUG(fmt::format("Remote WebBrowser debugging available on http://localhost:{}", settings.remote_debugging_port));
-}
-
-void CefHost::deinitialize() {
-}
-
-void CefHost::initializeCallbacks() {
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Deinitialize,
-            [this]() {
-                deinitialize();
-            }
-    );
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
-            [this](){
-                CefDoMessageLoopWork();
-//                render();
-            }
-    );
+private:
+    std::unique_ptr<BrowserInstance> guiInstance;
+    std::string guiLocation;
+};
 
 }
 
-}
-
+#endif //OPENSPACE_WEBGUIMODULE_H
