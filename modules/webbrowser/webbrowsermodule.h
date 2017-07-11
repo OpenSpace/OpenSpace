@@ -26,20 +26,25 @@
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include "include/browser_instance.h"
-#include "include/cef_host.h"
+#include <include/openspace/engine/configurationmanager.h>
+#include <include/wrapper/cef_helpers.h>
 
 namespace openspace {
 
-static const std::string GUI_LOCATION = "http://localhost:8080";
+#ifdef WIN32
+static const std::string SUBPROCESS_ENDING = ".exe";
+#else
+static const std::string SUBPROCESS_ENDING = "";
+#endif
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
     WebBrowserModule();
+    ~WebBrowserModule();
     void internalInitialize();
 
 private:
-	std::unique_ptr<CefHost> cefHost;
+	void attachDebugSettings(CefSettings&);
 };
 
 } // namespace openspace

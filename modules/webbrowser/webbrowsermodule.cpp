@@ -26,19 +26,56 @@
 #include <include/screen_space_browser.h>
 #include "webbrowsermodule.h"
 
+namespace {
+const char* _loggerCat = "WebBrowser";
+}
+
 namespace openspace {
 
-WebBrowserModule::WebBrowserModule()
-    : OpenSpaceModule("WebBrowser") {
-    cefHost = std::make_unique<CefHost>();
+WebBrowserModule::WebBrowserModule() : OpenSpaceModule("WebBrowser") {
+    LDEBUG("Starting CEF...");
+    CefMainArgs args;
+    CefSettings settings;
 
+    std::string subprocessPath = OsEng.configurationManager().value<std::string>(
+            ConfigurationManager::KeyWebHelperLocation);
+    subprocessPath += SUBPROCESS_ENDING;
+
+    CefString(&settings.browser_subprocess_path).FromASCII((char*) subprocessPath.c_str());
+    attachDebugSettings(settings);
+
+    CefInitialize(args, settings, nullptr, NULL);
+    LDEBUG("Starting CEF... done!");
+}
+
+WebBrowserModule::~WebBrowserModule() {
+    CefShutdown();
+}
+
+void WebBrowserModule::attachDebugSettings(CefSettings &settings) {
+    settings.remote_debugging_port = 8088;
+    LDEBUG(fmt::format("Remote WebBrowser debugging available on http://localhost:{}", settings.remote_debugging_port));
 }
 
 void WebBrowserModule::internalInitialize() {
+    // register ScreenSpaceRenderable
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
-
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
+
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Deinitialize,
+            [this]() {
+                deinitialize();
+            }
+    );
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Render,
+            [this](){
+                CefDoMessageLoopWork();
+            }
+    );
+
 }
 
 }
