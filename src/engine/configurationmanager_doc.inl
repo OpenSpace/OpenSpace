@@ -87,6 +87,18 @@ documentation::Documentation ConfigurationManager::Documentation() {
             ConfigurationManager::KeyLogging,
             new TableVerifier({
                 {
+                    ConfigurationManager::PartLogDir,
+                    new StringVerifier,
+                    "The directory for logs",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartLogPerformancePrefix,
+                    new StringVerifier,
+                    "A string to prefix PerformanceMeasurement logfiles",
+                    Optional::Yes
+                },
+                {
                     ConfigurationManager::PartLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString

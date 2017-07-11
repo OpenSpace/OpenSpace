@@ -96,7 +96,7 @@ public:
     void charCallback(unsigned int codepoint, KeyModifier mod);
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double pos);
+    void mouseScrollWheelCallback(double posX, double posY);
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
@@ -162,7 +162,9 @@ public:
         std::function<void (double, double)> function);
     
     // Registers a callback that is called when a scroll wheel change is received
-    void registerModuleMouseScrollWheelCallback(std::function<bool (double)> function);
+    void registerModuleMouseScrollWheelCallback(
+        std::function<bool (double, double)> function
+    );
     
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -223,7 +225,7 @@ private:
         
         std::vector<std::function<bool (MouseButton, MouseAction)>> mouseButton;
         std::vector<std::function<void (double, double)>> mousePosition;
-        std::vector<std::function<bool (double)>> mouseScrollWheel;
+        std::vector<std::function<bool (double, double)>> mouseScrollWheel;
     } _moduleCallbacks;
     
     double _runTime;

@@ -195,9 +195,9 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
     
     OsEng.registerModuleMouseScrollWheelCallback(
-        [](double pos) -> bool {
+        [](double, double posY) -> bool {
             if (gui.isEnabled()) {
-                return gui.mouseWheelCallback(pos);
+                return gui.mouseWheelCallback(posY);
             }
             else {
                 return false;

@@ -78,12 +78,16 @@ public:
     static const std::string KeySettingsScript;
     /// The key that stores the settings for determining log-related settings
     static const std::string KeyLogging;
+    /// The key that stores the directory for Logging
+    static const std::string PartLogDir;
     /// The key that stores the desired LogLevel for the whole application
     /// \sa ghoul::logging::LogManager
     static const std::string PartLogLevel;
     /// The key that stores whether the log should be immediately flushed after a n
     /// \sa ghoul::logging::LogManager
     static const std::string PartImmediateFlush;
+    /// The key for prefixing PerformanceMeasurement logfiles
+    static const std::string PartLogPerformancePrefix;
     /// The key that stores a subdirectory with a description for additional
     /// ghoul::logging::Log%s to be created
     /// \sa LogFactory
