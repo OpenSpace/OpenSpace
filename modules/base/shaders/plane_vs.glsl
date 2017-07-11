@@ -25,6 +25,7 @@
 #version __CONTEXT__
 
 uniform mat4 modelViewProjectionTransform;
+uniform mat4 modelViewTransform;
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
@@ -32,6 +33,9 @@ layout(location = 1) in vec2 in_st;
 out vec2 vs_st;
 out vec4 vs_positionScreenSpace;
 out float s;
+// G-Buffer
+out vec4 vs_gPosition;
+out vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -42,6 +46,10 @@ void main()
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;
+
+    // G-Buffer
+    vs_gNormal = vec3(0.0);
+    vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
 
     vs_st = in_st;
 }

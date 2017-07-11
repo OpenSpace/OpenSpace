@@ -28,6 +28,8 @@ uniform bool additiveBlending;
 
 in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
+in vec4 vs_gPosition;
+in vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
@@ -55,6 +57,12 @@ Fragment getFragment() {
     if (additiveBlending) {
         frag.blend = BLEND_MODE_ADDITIVE;
     }
+
+    // G-Buffer 
+    frag.gOtherData = vec4(diffuse.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
+    frag.gNormal    = vec4(vs_gNormal, 1.0);
+    
     return frag;
 
 }

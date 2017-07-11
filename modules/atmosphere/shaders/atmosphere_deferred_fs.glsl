@@ -245,7 +245,7 @@ void dCalculateRayRenderableGlobe(out dRay ray, out dvec4 planetPositionObjectCo
   
   // OS Eye to World coords
   dvec4 tmpRInv = dInverseCamRotTransform * tOSEyeCoordsInv;
-  dvec4 worldCoords= dvec4(dvec3(tmpRInv) + dCampos, 1.0);
+  dvec4 worldCoords = dvec4(dvec3(tmpRInv) + dCampos, 1.0);
   
   // World to Object
   dvec4 objectCoords = dInverseTransformMatrix * worldCoords;

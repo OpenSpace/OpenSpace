@@ -226,7 +226,7 @@ void RenderableTrail::render(const RenderData & data) {
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
-
+    
     _programObject->setUniform("color", _lineColor);
     _programObject->setUniform("useLineFade", _useLineFade);
     if (_useLineFade) {
@@ -246,7 +246,7 @@ void RenderableTrail::render(const RenderData & data) {
     
     if (usingFramebufferRenderer) {
         glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
     bool renderLines =
