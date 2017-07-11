@@ -45,8 +45,8 @@ void GUIRenderHandler::initializeGL() {
     LDEBUG("Initializing CEF GL environment...");
     _programObject = ghoul::opengl::ProgramObject::Build(
             "WebGUICEFProgram",
-            "${MODULE_WEBBROWSER}/shaders/gui_vs.glsl",
-            "${MODULE_WEBBROWSER}/shaders/gui_fs.glsl"
+            "${MODULE_WEBGUI}/shaders/gui_vs.glsl",
+            "${MODULE_WEBGUI}/shaders/gui_fs.glsl"
     );
     float data[] = {-1.0f, -1.0f, -1.0f,
                      1.0f,  1.0f, -1.0f,
