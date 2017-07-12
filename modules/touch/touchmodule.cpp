@@ -144,10 +144,7 @@ TouchModule::TouchModule()
 	);
 
 	OsEng.registerModuleCallback(
-		// This is done in the PostDraw phase so that it will render it on top of
-		// everything else in the case of fisheyes. With this being in the Render callback
-		// the markers would be rendered on top of each of the cube faces
-		OpenSpaceEngine::CallbackOption::PostDraw,
+		OpenSpaceEngine::CallbackOption::Render,
 		[&]() {
 		markers.render(listOfContactPoints); // render markers, customizable through the GUI
 	}
