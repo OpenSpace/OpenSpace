@@ -25,6 +25,7 @@
 #include <modules/researchkit/timing/timing.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -42,26 +43,56 @@ void printFrame() {
     LINFO("Printing frame");
 }
 
-Timer::Timer() {
+Timer::Timer()
+    : _tick(0)
+    , _cycles(0) { }
 
-}
-
-void Timer::tick() {
+bool Timer::tick() {
+    LINFO("Tick" << _tick);
+    // Tick first, so (timeout && rollover == 0) means "No timeout"
     _tick++;
     if (_tick == std::numeric_limits<std::size_t>::max()) {
         _tick = 0;
-        _rollover++;
+        _cycles++;
     }
+    return false;
 }
 
 size_t Timer::getTick() {
     return _tick;
 }
 
-size_t Timer::getRollover() {
-    return _rollover;
+size_t Timer::getCycles() {
+    return _cycles;
 }
 
+TimeoutTimer::TimeoutTimer()
+    : Timer()
+    , _timeout(0)
+    , _timeoutCycles(0) { }
+
+bool TimeoutTimer::tick() {
+    // Tick first, so (timeout && rollover == 0) means "No timeout"
+    Timer::tick();
+    // Return whether past timeout
+    const bool timedOut = (_timeout <= _tick && _timeoutCycles <= _cycles);
+    if (timedOut) callback();
+
+    return timedOut;
+}
+
+void TimeoutTimer::setTimeout(size_t t) {
+    setTimeout(t, 0);
+}
+
+void TimeoutTimer::setTimeout(size_t t, size_t r) {
+    _timeout = t;
+    _timeoutCycles = r;
+}
+
+void ShutdownTimer::callback() {
+    OsEng.windowWrapper().terminate();
+}
 
 } // namespace timing
 } // namespace rk

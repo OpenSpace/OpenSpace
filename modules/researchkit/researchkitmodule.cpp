@@ -27,6 +27,7 @@
 #include <modules/researchkit/timing/timing.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configurationmanager.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -38,8 +39,7 @@ namespace openspace {
 
 ResearchKitModule::ResearchKitModule() 
     : OpenSpaceModule("ResearchKit")
-    , _applicationTimer(rk::timing::Timer()) {
-
+    , _applicationTimer(nullptr) { 
     internalInitialize();
 }
 
@@ -47,6 +47,36 @@ void ResearchKitModule::internalInitialize() {
     if (!OpenSpaceEngine::isCreated()) {
         return;
     }
+
+    rk::timing::ShutdownTimer * appTimer = dynamic_cast<rk::timing::ShutdownTimer*>(_applicationTimer);
+    const auto conf = OsEng.configurationManager();
+
+    // Configure the application timer
+    const std::string AppTimer = ConfigurationManager::KeyModuleResearchKit
+        + '.' + ConfigurationManager::PartModuleAppTimer;
+    const std::string Timeout = ConfigurationManager::KeyModuleResearchKit
+        + '.' + ConfigurationManager::PartModuleTimeoutTicks;
+    const std::string TimeoutCycles = ConfigurationManager::KeyModuleResearchKit
+        + '.' + ConfigurationManager::PartModuleTimeoutCycles;
+
+    if (conf.hasKeyAndValue<std::string>(AppTimer)) {
+        _applicationTimer = new rk::timing::ShutdownTimer;
+        size_t t = 0, c = 0;
+        if (conf.hasKeyAndValue<int>(Timeout)) {
+            conf.getValue(Timeout, t);
+        }
+        if (conf.hasKeyAndValue<int>(TimeoutCycles)) {
+            conf.getValue(Timeout, c);
+        }
+        appTimer->setTimeout(t, c);
+    }
+    registerCallbacks();
+
+}
+
+void ResearchKitModule::registerCallbacks() {
+
+    rk::timing::ShutdownTimer * appTimer = dynamic_cast<rk::timing::ShutdownTimer*>(_applicationTimer);
 
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Initialize,
@@ -60,11 +90,14 @@ void ResearchKitModule::internalInitialize() {
         LDEBUG("Initializing Research Kit OpenGL");
     });
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PostDraw,
-        [this]() {
-        _applicationTimer.tick();
-    });
+    if (_applicationTimer) {
+        LDEBUG("Adding application-wide timer callback to PostDraw");
+        OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::PostDraw,
+            [appTimer]() {
+            appTimer->tick();
+        });
+    }
 }
 
 } // namespace openspace

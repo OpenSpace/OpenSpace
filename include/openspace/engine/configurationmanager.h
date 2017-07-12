@@ -144,6 +144,14 @@ public:
     static const std::string PartFilterIdentifierIdentifier;
     /// The part of the key storing a list of severities that should be filtered out
     static const std::string PartFilterSeverity;
+    /// The key for Research Kit module values
+    static const std::string KeyModuleResearchKit;
+    /// The part of the key that sets the type of Research Kit Timer for the application
+    static const std::string PartModuleAppTimer;
+    /// The part of the key that sets the timeout for the applications Research Kit ShutdownTimer
+    static const std::string PartModuleTimeoutTicks;
+    /// The part of the key that sets the timeout cycles for the applications Research Kit ShutdownTimer
+    static const std::string PartModuleTimeoutCycles;
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the

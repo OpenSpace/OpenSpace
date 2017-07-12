@@ -41,7 +41,8 @@ public:
     
 protected:
     void internalInitialize() override;
-    rk::timing::Timer _applicationTimer;
+    void registerCallbacks();
+    rk::timing::Timer * _applicationTimer;
 };
 
 } // namespace openspace

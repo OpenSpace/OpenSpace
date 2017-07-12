@@ -38,16 +38,37 @@ class Timer : public properties::PropertyOwner {
 public:
     Timer();
 
-    void tick();
+    // Increments tick counter, returns whether timeout has occured
+    virtual bool tick();
+
     size_t getTick();
-    size_t getRollover();
+    size_t getCycles();
 
 protected:
     size_t _tick;
-    size_t _rollover;
-    size_t _timeout;
-    size_t _timeoutRollover;
+    size_t _cycles;
+};
 
+class TimeoutTimer : public Timer {
+public:
+    TimeoutTimer();
+    virtual bool tick() override;
+    // Sets the value for the timeout: will cancel after t ticks
+    void setTimeout(size_t t);
+    // Sets the value for the timeout: will cancel after r*size_t::max + t ticks
+    void setTimeout(size_t t, size_t r);
+protected:
+    size_t _timeout;
+    size_t _timeoutCycles;
+
+    virtual void callback() = 0;
+
+};
+
+class ShutdownTimer : public TimeoutTimer {
+
+protected:
+    virtual void callback();
 };
 
 } // namespace timing
