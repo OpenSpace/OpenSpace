@@ -77,7 +77,7 @@ public:
         properties::BoolProperty isEnabled;
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
-        bool useAccurateNormals;
+        properties::BoolProperty useAccurateNormals;
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;

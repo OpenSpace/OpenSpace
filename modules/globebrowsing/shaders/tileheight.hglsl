@@ -30,11 +30,19 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 
+
+#ifndef USE_HEIGHTMAP
+#define USE_HEIGHTMAP #{useAccurateNormals}
+#endif //USE_HEIGHTMAP
+
+#ifndef USE_ACCURATE_NORMALS
+#define USE_ACCURATE_NORMALS #{useAccurateNormals}
+#endif //USE_ACCURATE_NORMALS
+
 #if USE_HEIGHTMAP
 uniform Layer HeightLayers[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
-#define USE_ACCURATE_NORMALS 1
 #if USE_ACCURATE_NORMALS
 uniform float deltaTheta0;
 uniform float deltaTheta1;
