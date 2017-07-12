@@ -43,9 +43,7 @@
 
 namespace openspace {
 
-NewHorizonsModule::NewHorizonsModule()
-    : OpenSpaceModule("NewHorizons")
-{}
+NewHorizonsModule::NewHorizonsModule() : OpenSpaceModule(Name) {}
 
 void NewHorizonsModule::internalInitialize() {
     ImageSequencer::initialize();
