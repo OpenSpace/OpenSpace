@@ -55,7 +55,7 @@ std::string WebBrowserModule::findHelperExecutable() {
     std::string subprocessName = OsEng.configurationManager().value<std::string>(
             ConfigurationManager::KeyWebHelperLocation);
     subprocessName += SUBPROCESS_ENDING;
-	int subLength = subprocessName.length();
+	int subLength = (int) subprocessName.length();
 
     Directory binDir("${BASE_PATH}/bin/openspace", Directory::AbsolutePath::No);
     std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);

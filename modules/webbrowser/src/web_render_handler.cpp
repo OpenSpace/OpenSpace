@@ -38,8 +38,8 @@ bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
 }
 
 void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintElementType type,
-                               const CefRenderHandler::RectList &dirtyRects, const void *buffer, int width,
-                               int height) {
+                               const CefRenderHandler::RectList &dirtyRects, const void *buffer,
+                               int w, int h) {
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (unsigned char*) buffer);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
