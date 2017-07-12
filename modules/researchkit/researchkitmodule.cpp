@@ -24,6 +24,8 @@
 
 #include <modules/researchkit/researchkitmodule.h>
 
+#include <modules/researchkit/timing/timing.h>
+
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -35,8 +37,13 @@ namespace {
 namespace openspace {
 
 ResearchKitModule::ResearchKitModule() 
-    : OpenSpaceModule("ResearchKit") {
+    : OpenSpaceModule("ResearchKit")
+    , _applicationTimer(rk::timing::Timer()) {
 
+    internalInitialize();
+}
+
+void ResearchKitModule::internalInitialize() {
     if (!OpenSpaceEngine::isCreated()) {
         return;
     }
@@ -47,11 +54,17 @@ ResearchKitModule::ResearchKitModule()
         LDEBUG("Initializing Research Kit");
     });
 
-    internalInitialize();
-}
+    OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::InitializeGL,
+        []() {
+        LDEBUG("Initializing Research Kit OpenGL");
+    });
 
-void ResearchKitModule::internalInitialize() {
-
+    OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::PostDraw,
+        [this]() {
+        _applicationTimer.tick();
+    });
 }
 
 } // namespace openspace

@@ -25,11 +25,30 @@
 #ifndef __OPENSPACE_MODULE_RESEARCHKIT___TIMING___H__
 #define __OPENSPACE_MODULE_RESEARCHKIT___TIMING___H__
 
+#include <openspace/properties/propertyowner.h>
+
 namespace openspace {
 namespace rk {
 namespace timing {
 
 void printFrame();
+
+class Timer : public properties::PropertyOwner {
+
+public:
+    Timer();
+
+    void tick();
+    size_t getTick();
+    size_t getRollover();
+
+protected:
+    size_t _tick;
+    size_t _rollover;
+    size_t _timeout;
+    size_t _timeoutRollover;
+
+};
 
 } // namespace timing
 } // namespace rk

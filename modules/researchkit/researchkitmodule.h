@@ -27,7 +27,13 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <modules/researchkit/timing/timing.h>
+
 namespace openspace {
+
+    namespace rk {
+        namespace timing { class Timer; } // namespace timing
+} // namespace rk
 
 class ResearchKitModule : public OpenSpaceModule {
 public:
@@ -35,6 +41,7 @@ public:
     
 protected:
     void internalInitialize() override;
+    rk::timing::Timer _applicationTimer;
 };
 
 } // namespace openspace

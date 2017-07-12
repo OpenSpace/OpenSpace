@@ -24,9 +24,11 @@
 
 #include <modules/researchkit/timing/timing.h>
 
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
+
+#include <ghoul/logging/logmanager.h>
+
+#include <limits>
 
 namespace {
     const std::string _loggerCat = "Research Kit Timing";
@@ -39,6 +41,27 @@ namespace timing {
 void printFrame() {
     LINFO("Printing frame");
 }
+
+Timer::Timer() {
+
+}
+
+void Timer::tick() {
+    _tick++;
+    if (_tick == std::numeric_limits<std::size_t>::max()) {
+        _tick = 0;
+        _rollover++;
+    }
+}
+
+size_t Timer::getTick() {
+    return _tick;
+}
+
+size_t Timer::getRollover() {
+    return _rollover;
+}
+
 
 } // namespace timing
 } // namespace rk
