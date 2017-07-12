@@ -201,6 +201,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     
     requestClose = false;
 
+    LDEBUG("Initialize FileSystem");
     ghoul::initialize();
 
     // Initialize the LogManager and add the console log as this will be used every time
@@ -214,7 +215,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     );
     LogMgr.addLog(std::make_unique<ConsoleLog>());
 
-    LDEBUG("Initialize FileSystem");
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
@@ -282,8 +282,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         }
         throw;
     }
-    catch (const ghoul::RuntimeError&) {
+    catch (const ghoul::RuntimeError& e) {
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        LFATALC(e.component, e.message);
         throw;
     }
 
@@ -1194,15 +1195,15 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     _interactionHandler->mousePositionCallback(x, y);
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
+void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     for (const auto& func : _moduleCallbacks.mouseScrollWheel) {
-        bool consumed = func(pos);
+        bool consumed = func(posX, posY);
         if (consumed) {
             return;
         }
     }
     
-    _interactionHandler->mouseScrollWheelCallback(pos);
+    _interactionHandler->mouseScrollWheelCallback(posY);
 }
 
 void OpenSpaceEngine::encode() {
@@ -1352,7 +1353,7 @@ void OpenSpaceEngine::registerModuleMousePositionCallback(
 }
 
 void OpenSpaceEngine::registerModuleMouseScrollWheelCallback(
-                                                    std::function<bool (double)> function)
+                                            std::function<bool (double, double)> function)
 {
     _moduleCallbacks.mouseScrollWheel.push_back(std::move(function));
 }

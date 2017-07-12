@@ -33,7 +33,7 @@
 
 namespace openspace {
 
-MultiresVolumeModule::MultiresVolumeModule() : OpenSpaceModule("MultiresVolume") {}
+MultiresVolumeModule::MultiresVolumeModule() : OpenSpaceModule(Name) {}
 
 void MultiresVolumeModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
