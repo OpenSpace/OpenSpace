@@ -70,9 +70,9 @@ void EventHandler::initialize() {
             }
     );
     OsEng.registerModuleMouseScrollWheelCallback(
-            [this](double pos) -> bool {
+            [this](double posX, double posY) -> bool {
                 if (browser) {
-                    return mouseWheelCallback(pos);
+                    return mouseWheelCallback(posY);
                 } else {
                     return false;
                 }
