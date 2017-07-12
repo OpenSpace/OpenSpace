@@ -27,6 +27,7 @@
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 
@@ -68,43 +69,13 @@ uniform vec2 vertexResolution;
 in vec4 fs_position;
 in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
+in vec3 ellipsoidTangentThetaCameraSpace;
+in vec3 ellipsoidTangentPhiCameraSpace;
 in vec3 positionCameraSpace;
-
 
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
 in LevelWeights levelWeights;
-
-
-///////////////////////////////////////////////////////////////////// 
-
-// The heightmaps is only used in the fragment shader visually debugging 
-// the alignment and resolution of the heightmaps
-
-#if USE_HEIGHTMAP
-uniform Layer HeightLayers[NUMLAYERS_HEIGHTMAP];
-#endif // USE_HEIGHTMAP
-
-float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
-	float height = CHUNK_DEFAULT_HEIGHT;
-
-#if USE_HEIGHTMAP
-	// Calculate desired level based on distance to the vertex on the ellipsoid
-    // Before any heightmapping is done
-	height = calculateUntransformedHeight(
-		uv,
-		levelWeights, 							// Variable to determine which texture to sample from
-		HeightLayers);	// Three textures to sample from
-
-#endif // USE_HEIGHTMAP
-
-	return height;
-}
-
-/////////////////////////////////////////////////////////////////////
-
-
-
 
 /**
  * This method defines the fragment color pipeline which is used in both
@@ -115,8 +86,15 @@ vec4 getTileFragColor(){
 
 	vec4 color = vec4(0.3,0.3,0.3,1);
 
-#if USE_COLORTEXTURE
+	vec3 normal = normalize(ellipsoidNormalCameraSpace);
+#if USE_ACCURATE_NORMALS
+	normal = getTileNormal(fs_uv, levelWeights,
+						   normalize(ellipsoidNormalCameraSpace),
+						   normalize(ellipsoidTangentThetaCameraSpace),
+						   normalize(ellipsoidTangentPhiCameraSpace));
+#endif /// USE_ACCURATE_NORMALS
 
+#if USE_COLORTEXTURE
 	color = calculateColor(
 		color,
 		fs_uv,
@@ -130,7 +108,7 @@ vec4 getTileFragColor(){
 		fs_uv,
 		levelWeights,
 		WaterMasks,
-		normalize(ellipsoidNormalCameraSpace),
+		normal,
 		lightDirectionCameraSpace, // Should already be normalized
 		positionCameraSpace);
 
@@ -150,7 +128,7 @@ vec4 getTileFragColor(){
 #if PERFORM_SHADING
 	color = calculateShadedColor(
 		color,
-		normalize(ellipsoidNormalCameraSpace),
+		normal,
 		lightDirectionCameraSpace,
 		normalize(positionCameraSpace),
 		orenNayarRoughness);

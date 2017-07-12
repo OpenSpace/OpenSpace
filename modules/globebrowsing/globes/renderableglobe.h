@@ -32,6 +32,9 @@
 
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
@@ -74,6 +77,7 @@ public:
         properties::BoolProperty isEnabled;
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
+        bool useAccurateNormals;
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
@@ -119,7 +123,7 @@ private:
     
     double _interactionDepthBelowEllipsoid;
     std::string _frame;
-    double _time;
+    double _time; 
 
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;

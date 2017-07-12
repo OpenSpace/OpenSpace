@@ -22,26 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef TILE_VERTEX_HEIGHT_HGLSL
-#define TILE_VERTEX_HEIGHT_HGLSL
+#ifndef TILE_HEIGHT_HGLSL
+#define TILE_HEIGHT_HGLSL
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
-
+#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 
 #if USE_HEIGHTMAP
 uniform Layer HeightLayers[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
-uniform int xSegments;
-uniform float skirtLength;
+#define USE_ACCURATE_NORMALS 1
+#if USE_ACCURATE_NORMALS
+uniform float deltaTheta0;
+uniform float deltaTheta1;
+uniform float deltaPhi0;
+uniform float deltaPhi1;
+uniform float tileDelta;
+#endif //USE_ACCURATE_NORMALS
 
-uniform float distanceScaleFactor;
-uniform int chunkLevel;
-
-
-float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
+float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights){
 	float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -57,8 +59,7 @@ float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	return height;
 }
 
-
-float getTileVertexHeight(vec2 uv, LevelWeights levelWeights){
+float getTileHeight(vec2 uv, LevelWeights levelWeights){
 	float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -74,53 +75,33 @@ float getTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	return height;
 }
 
-// This function is currently not correct
-vec3 getTileVertexNormal(
+vec3 getTileNormal(
 	vec2 uv,
 	LevelWeights levelWeights,
-	vec3 ellipsoidNormal) {
-	vec3 normal = ellipsoidNormal;
+	vec3 ellipsoidNormalCameraSpace,
+	vec3 ellipsoidTangentThetaCameraSpace,
+	vec3 ellipsoidTangentPhiCameraSpace)
+{
+	vec3 normal = ellipsoidNormalCameraSpace;
 
-#if USE_HEIGHTMAP
-	float sampleDelta = 1.0 / xSegments;
+#if USE_ACCURATE_NORMALS
+	float deltaPhi = mix(deltaPhi0, deltaPhi1, uv.x);
+	float deltaTheta = mix(deltaTheta0, deltaTheta1, uv.y);
 
-	float heightCenter = calculateHeight(
-		uv,
-		levelWeights,
-		HeightLayers);
-	float heightOffsetX = calculateHeight(
-		uv + vec2(sampleDelta, 0.0),
-		levelWeights,
-		HeightLayers);
-	float heightOffsetY = calculateHeight(
-		uv + vec2(0.0, sampleDelta),
-		levelWeights,
-		HeightLayers);
+	vec3 deltaPhiVec = ellipsoidTangentPhiCameraSpace * deltaPhi;
+	vec3 deltaThetaVec = ellipsoidTangentThetaCameraSpace * deltaTheta;
 
-	vec3 e0 = normalize(cross(vec3(0,0,1), ellipsoidNormal));
-	vec3 e1 = cross(ellipsoidNormal, e0);
-	vec3 e2 = ellipsoidNormal;
+	float height00 = getTileHeight(uv, levelWeights);
+	float height10 = getTileHeight(uv + vec2(tileDelta, 0.0f), levelWeights);
+	float height01 = getTileHeight(uv + vec2(0.0f, tileDelta), levelWeights);
 
-	vec3 v0 = e0 * sampleDelta * 3000000 + e2 * heightOffsetX;
-	vec3 v1 = e1 * sampleDelta * 3000000 + e2 * heightOffsetY;
+	vec3 diffTheta = deltaThetaVec + ellipsoidNormalCameraSpace * (height10 - height00);
+	vec3 diffPhi = deltaPhiVec + ellipsoidNormalCameraSpace * (height01 - height00);
 
-	vec3 n = cross(v0, v1);
-
-	normal = normalize(n);
-
-#endif // USE_HEIGHTMAP
+	normal = normalize(cross(diffTheta, diffPhi));
+#endif // USE_ACCURATE_NORMALS
 	return normal;
 }
 
-bool tileVertexIsSkirtVertex(){
-	int vertexIDx = gl_VertexID % (xSegments + 3);
-	int vertexIDy = gl_VertexID / (xSegments + 3);
-	return vertexIDx == 0 || vertexIDy == 0 ||
-		vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
-}
 
-float getTileVertexSkirtLength(){
-	return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
-}
-
-#endif // TILE_VERTEX_HEIGHT_HGLSL
+#endif // TILE_HEIGHT_HGLSL

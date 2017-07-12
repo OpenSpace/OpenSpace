@@ -115,6 +115,10 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
                                       const Chunk& chunk, const RenderData& data)
 {
+    glm::dmat4 modelTransform = chunk.owner().modelTransform();
+    glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
+    glm::dmat4 modelViewTransform = viewTransform * modelTransform;
+
     if (_layerManager->layerGroup(
             layergroupid::NightLayers).activeLayers().size() > 0 ||
         _layerManager->layerGroup(
@@ -122,7 +126,6 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading)
     {
-        glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
         glm::vec3 directionToSunWorldSpace =
             glm::normalize(-data.modelTransform.translation);
         glm::vec3 directionToSunCameraSpace =
@@ -135,6 +138,37 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         programObject.setUniform(
             "orenNayarRoughness",
             chunk.owner().generalProperties().orenNayarRoughness);
+    }
+
+    if (chunk.owner().generalProperties().useAccurateNormals) {
+        glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(Quad::SOUTH_WEST));
+        glm::dvec3 corner10 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(Quad::SOUTH_EAST));
+        glm::dvec3 corner01 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(Quad::NORTH_WEST));
+        glm::dvec3 corner11 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(Quad::NORTH_EAST));
+        
+        float tileDelta = 1.0f / 512.0f;
+        glm::vec3 deltaTheta0 = glm::vec3(corner10 - corner00) * tileDelta;
+        glm::vec3 deltaTheta1 = glm::vec3(corner11 - corner01) * tileDelta;
+        glm::vec3 deltaPhi0 = glm::vec3(corner01 - corner00) * tileDelta;
+        glm::vec3 deltaPhi1 = glm::vec3(corner11 - corner10) * tileDelta;
+
+        // Transform to camera space
+        glm::mat3 modelViewTransformMat3 = glm::mat3(modelViewTransform);
+        deltaTheta0 = modelViewTransformMat3 * deltaTheta0;
+        deltaTheta1 = modelViewTransformMat3 * deltaTheta1;
+        deltaPhi0 = modelViewTransformMat3 * deltaPhi0;
+        deltaPhi1 = modelViewTransformMat3 * deltaPhi1;
+
+        // Upload uniforms
+        programObject.setUniform("deltaTheta0", glm::length(deltaTheta0));
+        programObject.setUniform("deltaTheta1", glm::length(deltaTheta1));
+        programObject.setUniform("deltaPhi0", glm::length(deltaPhi0));
+        programObject.setUniform("deltaPhi1", glm::length(deltaPhi1));
+        programObject.setUniform("tileDelta", tileDelta);
     }
 }
 
@@ -189,7 +223,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     {
         programObject->setUniform("modelViewTransform", modelViewTransform);
     }
-    
+
     setCommonUniforms(*programObject, chunk, data);
 
     // OpenGL rendering settings
