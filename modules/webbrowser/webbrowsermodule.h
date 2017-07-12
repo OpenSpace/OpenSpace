@@ -29,6 +29,7 @@
 #include <ghoul/filesystem/directory.h>
 #include <include/openspace/engine/configurationmanager.h>
 #include <include/wrapper/cef_helpers.h>
+#include <include/cef_browser.h>
 
 namespace openspace {
 
@@ -40,12 +41,17 @@ static const std::string SUBPROCESS_ENDING = "";
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
+    static constexpr const char* Name = "WebBrowser";
     WebBrowserModule();
     ~WebBrowserModule();
     void internalInitialize();
 
+    int addBrowser(CefBrowser*);
+    void removeBrowser(CefBrowser*);
+
 private:
 	void attachDebugSettings(CefSettings&);
+    std::vector<CefRefPtr<CefBrowser>> browsers;
     std::string findHelperExecutable();
 };
 

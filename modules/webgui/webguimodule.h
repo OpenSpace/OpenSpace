@@ -34,6 +34,7 @@ namespace openspace {
 
 class WebGuiModule : public OpenSpaceModule {
 public:
+    static constexpr const char* Name = "WebGui";
     WebGuiModule();
     void internalInitialize();
 

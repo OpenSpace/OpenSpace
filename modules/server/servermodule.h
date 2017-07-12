@@ -51,6 +51,7 @@ struct Message {
 
 class ServerModule : public OpenSpaceModule {
 public:
+    static constexpr const char* Name = "Server";
     ServerModule();
     virtual ~ServerModule();
 protected:

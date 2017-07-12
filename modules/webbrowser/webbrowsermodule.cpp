@@ -34,7 +34,7 @@ using ghoul::filesystem::Directory;
 
 namespace openspace {
 
-WebBrowserModule::WebBrowserModule() : OpenSpaceModule("WebBrowser") {
+WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
     LDEBUG("Starting CEF...");
     CefMainArgs args;
     CefSettings settings;
@@ -60,6 +60,7 @@ std::string WebBrowserModule::findHelperExecutable() {
     Directory binDir("${BASE_PATH}/bin/openspace", Directory::AbsolutePath::No);
     std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);
 
+    // find files matching the given file name
     std::vector<std::string> matchingFiles;
     std::copy_if(foundFiles.begin(), foundFiles.end(), std::back_inserter(matchingFiles),
                  [subprocessName, subLength](std::string s) {
@@ -71,7 +72,6 @@ std::string WebBrowserModule::findHelperExecutable() {
         LERROR(fmt::format("Could not find requested sub process executable file name: {}", subprocessName));
     }
 
-    // use the last one as the sorted array contains Release after Debug and we want that performance
     return matchingFiles.back();
 }
 
@@ -90,18 +90,29 @@ void WebBrowserModule::internalInitialize() {
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Deinitialize,
-            [this]() {
-                deinitialize();
-            }
-    );
+    // fire up callbacks used for rendering etc
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::Render,
             [this](){
                 CefDoMessageLoopWork();
             }
     );
+}
+
+int WebBrowserModule::addBrowser(CefBrowser *browser) {
+    static int browserId = 0;
+    browsers.push_back(browser);
+    int givenId = browserId++;
+    return givenId;
+}
+
+void WebBrowserModule::removeBrowser(CefBrowser *browser) {
+    auto p = std::find(browsers.begin(), browsers.end(), browser);
+    if (p != browsers.end()) {
+        browsers.erase(p);
+    } else {
+        LWARNING("Could not find browser in list of browsers.");
+    }
 }
 
 }

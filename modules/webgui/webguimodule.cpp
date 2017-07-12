@@ -26,8 +26,7 @@
 
 namespace openspace {
 
-WebGuiModule::WebGuiModule()
-        : OpenSpaceModule("WebGui") {
+WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {
     guiInstance = std::make_unique<BrowserInstance>(new GUIRenderHandler());
     guiLocation = OsEng.configurationManager().value<std::string>(
             ConfigurationManager::KeyWebGuiUrl);

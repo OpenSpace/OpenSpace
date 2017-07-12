@@ -35,7 +35,7 @@ namespace {
 namespace openspace {
 
 ServerModule::ServerModule()
-    : OpenSpaceModule("Server")
+    : OpenSpaceModule(ServerModule::Name)
 {}
 
 ServerModule::~ServerModule() {
