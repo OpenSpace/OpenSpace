@@ -62,7 +62,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 
     _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(windowDimensions, 1.0f));
     renderHandler = new ScreenSpaceRenderHandler();
-    browserInstance = std::make_shared<BrowserInstance>(renderHandler);
+    browserInstance = std::make_unique<BrowserInstance>(renderHandler);
 
     url.onChange([this]() { urlIsDirty = true; });
     dimensions.onChange([this]() { dimensionsAreDirty = true; });
@@ -85,7 +85,6 @@ bool ScreenSpaceBrowser::initialize() {
 }
 
 bool ScreenSpaceBrowser::deinitialize() {
-//    LDEBUG(fmt::format("Deinitializing CEF screen space browser {}", url));
     return true;
 }
 
