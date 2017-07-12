@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H
 
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/engine/moduleengine.h>
 #include <include/wrapper/cef_helpers.h>
 #include "modules/webbrowser/include/web_render_handler.h"
 #include "modules/webbrowser/include/event_handler.h"

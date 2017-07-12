@@ -76,6 +76,11 @@ std::string WebBrowserModule::findHelperExecutable() {
 }
 
 WebBrowserModule::~WebBrowserModule() {
+    // we're shutting down, force close all browsers
+    for (auto const& browser : browsers) {
+        browser->GetHost()->CloseBrowser(true);
+    }
+
     CefShutdown();
 }
 

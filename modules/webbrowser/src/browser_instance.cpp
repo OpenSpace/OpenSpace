@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <webbrowsermodule.h>
 #include "include/browser_instance.h"
 
 namespace {
@@ -40,10 +41,21 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : isInitialized(fal
     windowInfo.SetAsWindowless(nullptr, renderTransparent);
     std::string url = "";
     browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), url, browserSettings, NULL);
+
+    // send to WebBrowserModule
+    auto browserModule = OsEng.moduleEngine().module<WebBrowserModule>();
+    if (browserModule) {
+        browserModule->addBrowser(browser);
+    }
 }
 
 BrowserInstance::~BrowserInstance() {
-    browser->GetHost()->CloseBrowser(false);
+    browser->GetHost()->CloseBrowser(true);
+
+    auto pBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
+    if (pBrowserModule) {
+        pBrowserModule->removeBrowser(browser);
+    }
 }
 
 void BrowserInstance::initialize() {
