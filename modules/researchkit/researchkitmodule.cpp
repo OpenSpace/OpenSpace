@@ -39,8 +39,11 @@ namespace openspace {
 
 ResearchKitModule::ResearchKitModule() 
     : OpenSpaceModule("ResearchKit")
-    , _applicationTimer(nullptr) { 
+    , _applicationTimer(nullptr) {
+
     internalInitialize();
+
+    if (_applicationTimer) { addPropertySubOwner(_applicationTimer); };
 }
 
 void ResearchKitModule::internalInitialize() {
@@ -48,30 +51,8 @@ void ResearchKitModule::internalInitialize() {
         return;
     }
 
-    rk::timing::ShutdownTimer * appTimer = dynamic_cast<rk::timing::ShutdownTimer*>(_applicationTimer);
-    const auto conf = OsEng.configurationManager();
-
-    // Configure the application timer
-    const std::string AppTimer = ConfigurationManager::KeyModuleResearchKit
-        + '.' + ConfigurationManager::PartModuleAppTimer;
-    const std::string Timeout = ConfigurationManager::KeyModuleResearchKit
-        + '.' + ConfigurationManager::PartModuleTimeoutTicks;
-    const std::string TimeoutCycles = ConfigurationManager::KeyModuleResearchKit
-        + '.' + ConfigurationManager::PartModuleTimeoutCycles;
-
-    if (conf.hasKeyAndValue<std::string>(AppTimer)) {
-        _applicationTimer = new rk::timing::ShutdownTimer;
-        size_t t = 0, c = 0;
-        if (conf.hasKeyAndValue<int>(Timeout)) {
-            conf.getValue(Timeout, t);
-        }
-        if (conf.hasKeyAndValue<int>(TimeoutCycles)) {
-            conf.getValue(Timeout, c);
-        }
-        appTimer->setTimeout(t, c);
-    }
+    _applicationTimer = new rk::timing::ShutdownTimer;
     registerCallbacks();
-
 }
 
 void ResearchKitModule::registerCallbacks() {

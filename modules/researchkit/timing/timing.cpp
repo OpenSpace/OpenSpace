@@ -44,11 +44,11 @@ void printFrame() {
 }
 
 Timer::Timer()
-    : _tick(0)
+    : properties::PropertyOwner("Timer")
+    ,_tick(0)
     , _cycles(0) { }
 
 bool Timer::tick() {
-    LINFO("Tick" << _tick);
     // Tick first, so (timeout && rollover == 0) means "No timeout"
     _tick++;
     if (_tick == std::numeric_limits<std::size_t>::max()) {
@@ -68,26 +68,30 @@ size_t Timer::getCycles() {
 
 TimeoutTimer::TimeoutTimer()
     : Timer()
-    , _timeout(0)
-    , _timeoutCycles(0) { }
+    , _timeout("_timeout", "Timeout", 0, 0, std::numeric_limits<unsigned long long>::max())
+    , _timeoutCycles("_timeoutCycles", "Timeout Cycles", 0, 0, std::numeric_limits<unsigned long long>::max()) {
+
+    addProperty(_timeout);
+    addProperty(_timeoutCycles);
+}
 
 bool TimeoutTimer::tick() {
     // Tick first, so (timeout && rollover == 0) means "No timeout"
     Timer::tick();
     // Return whether past timeout
-    const bool timedOut = (_timeout <= _tick && _timeoutCycles <= _cycles);
+    const bool timedOut = (_timeout || _timeoutCycles ) && (_timeout <= _tick && _timeoutCycles <= _cycles);
     if (timedOut) callback();
 
     return timedOut;
 }
 
-void TimeoutTimer::setTimeout(size_t t) {
+void TimeoutTimer::setTimeout(unsigned long long t) {
     setTimeout(t, 0);
 }
 
-void TimeoutTimer::setTimeout(size_t t, size_t r) {
+void TimeoutTimer::setTimeout(unsigned long long t, unsigned long long c) {
     _timeout = t;
-    _timeoutCycles = r;
+    _timeoutCycles = c;
 }
 
 void ShutdownTimer::callback() {

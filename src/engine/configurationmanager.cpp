@@ -98,11 +98,6 @@ const string ConfigurationManager::PartFilterIdentifierType = "Type";
 const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier";
 const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
 
-const string ConfigurationManager::KeyModuleResearchKit     = "Module_ResearchKit";
-const string ConfigurationManager::PartModuleAppTimer       = "ApplicationTimer";
-const string ConfigurationManager::PartModuleTimeoutTicks   = "TimeoutTicks";
-const string ConfigurationManager::PartModuleTimeoutCycles  = "TimeoutCycles";
-
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;

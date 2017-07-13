@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_RESEARCHKIT___TIMING___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
+
 
 namespace openspace {
 namespace rk {
@@ -41,12 +43,12 @@ public:
     // Increments tick counter, returns whether timeout has occured
     virtual bool tick();
 
-    size_t getTick();
-    size_t getCycles();
+    unsigned long long getTick();
+    unsigned long long getCycles();
 
 protected:
-    size_t _tick;
-    size_t _cycles;
+    unsigned long long _tick;
+    unsigned long long _cycles;
 };
 
 class TimeoutTimer : public Timer {
@@ -54,12 +56,12 @@ public:
     TimeoutTimer();
     virtual bool tick() override;
     // Sets the value for the timeout: will cancel after t ticks
-    void setTimeout(size_t t);
-    // Sets the value for the timeout: will cancel after r*size_t::max + t ticks
-    void setTimeout(size_t t, size_t r);
+    void setTimeout(unsigned long long t);
+    // Sets the value for the timeout: will cancel after c*size_t::max + t ticks
+    void setTimeout(unsigned long long t, unsigned long long c);
 protected:
-    size_t _timeout;
-    size_t _timeoutCycles;
+    properties::ULongLongProperty _timeout;
+    properties::ULongLongProperty _timeoutCycles;
 
     virtual void callback() = 0;
 
