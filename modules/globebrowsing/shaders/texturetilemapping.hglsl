@@ -27,6 +27,7 @@
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/globeshading.hglsl>
 
 // First layer type from LayerShaderManager is height map
 #define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeightLayers} + 1
@@ -58,53 +59,54 @@
 
 // Other key value pairs used for settings
 #define USE_ATMOSPHERE #{useAtmosphere}
+#define USE_ACCURATE_NORMALS #{useAccurateNormals}
 #define PERFORM_SHADING #{performShading}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
 
 float performLayerSettingsRGB(float currentValue, const LayerSettings settings) {
-	float newValue = currentValue;
+    float newValue = currentValue;
 
-	newValue = sign(newValue) * pow(abs(newValue), settings.gamma);
-	newValue = newValue * settings.multiplier;
-	newValue = newValue + settings.offset;
+    newValue = sign(newValue) * pow(abs(newValue), settings.gamma);
+    newValue = newValue * settings.multiplier;
+    newValue = newValue + settings.offset;
 
-	return newValue;
+    return newValue;
 }
 
 vec4 performLayerSettingsRGB(vec4 currentValue, const LayerSettings settings) {
-	vec4 newValue = vec4(
-		performLayerSettingsRGB(currentValue.r, settings),
-		performLayerSettingsRGB(currentValue.g, settings),
-		performLayerSettingsRGB(currentValue.b, settings),
-		currentValue.a);
+    vec4 newValue = vec4(
+        performLayerSettingsRGB(currentValue.r, settings),
+        performLayerSettingsRGB(currentValue.g, settings),
+        performLayerSettingsRGB(currentValue.b, settings),
+        currentValue.a);
 
-	return newValue;
+    return newValue;
 }
 
 float performLayerSettingsAlpha(float currentValue, const LayerSettings settings) {
-	float newValue = currentValue;
-	newValue = newValue * settings.opacity;
-	return newValue;
+    float newValue = currentValue;
+    newValue = newValue * settings.opacity;
+    return newValue;
 }
 
 vec4 performLayerSettingsAlpha(vec4 currentValue, const LayerSettings settings) {
-	vec4 newValue = currentValue;
-	newValue.a = performLayerSettingsAlpha(currentValue.a, settings);
-	return newValue;
+    vec4 newValue = currentValue;
+    newValue.a = performLayerSettingsAlpha(currentValue.a, settings);
+    return newValue;
 }
 
 float performLayerSettings(float currentValue, const LayerSettings settings) {
-	float newValue = performLayerSettingsRGB(currentValue, settings);
-	newValue = performLayerSettingsAlpha(newValue, settings);
-	return newValue;
+    float newValue = performLayerSettingsRGB(currentValue, settings);
+    newValue = performLayerSettingsAlpha(newValue, settings);
+    return newValue;
 }
 
 vec4 performLayerSettings(vec4 currentValue, const LayerSettings settings) {
-	vec4 newValue = performLayerSettingsRGB(currentValue, settings);
-	newValue = performLayerSettingsAlpha(newValue, settings);
-	return newValue;
+    vec4 newValue = performLayerSettingsRGB(currentValue, settings);
+    newValue = performLayerSettingsAlpha(newValue, settings);
+    return newValue;
 }
 
 
@@ -112,32 +114,32 @@ vec4 performLayerSettings(vec4 currentValue, const LayerSettings settings) {
 #for i in 0..#{lastLayerIndex#{layerGroup}}
 
 vec4 getSample#{layerGroup}#{i}(
-	const vec2 uv,
-	const LevelWeights levelWeights,
-	const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
+    const vec2 uv,
+    const LevelWeights levelWeights,
+    const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
 {
-	vec4 color = vec4(0,0,0,1);
-	
-	// All tile layers are the same. Sample from texture
+    vec4 color = vec4(0,0,0,1);
+    
+    // All tile layers are the same. Sample from texture
 #if (#{#{layerGroup}#{i}LayerType} == 0) // DefaultTileLayer
-	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
 #elif (#{#{layerGroup}#{i}LayerType} == 1) // SingleImageTileLayer
-	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
 #elif (#{#{layerGroup}#{i}LayerType} == 2) // SizeReferenceTileLayer
-	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
 #elif (#{#{layerGroup}#{i}LayerType} == 3) // TemporalTileLayer
-	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
 #elif (#{#{layerGroup}#{i}LayerType} == 4) // TileIndexTileLayer
-	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
 #elif (#{#{layerGroup}#{i}LayerType} == 5) // ByIndexTileLayer
-	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
 #elif (#{#{layerGroup}#{i}LayerType} == 6) // ByLevelTileLayer
-	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
 #elif (#{#{layerGroup}#{i}LayerType} == 7) // SolidColor
-	color.rgb = #{layerGroup}[#{i}].color;
+    color.rgb = #{layerGroup}[#{i}].color;
 #endif
 
-	return color;
+    return color;
 }
 
 #endfor
@@ -148,24 +150,24 @@ vec4 getSample#{layerGroup}#{i}(
 
 vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor, float blendFactor) {
 #if (#{#{layerGroup}#{i}BlendMode} == 0) // Default, Normal
-	return blendNormal(currentColor, vec4(newColor.rgb, newColor.a * blendFactor));	
+    return blendNormal(currentColor, vec4(newColor.rgb, newColor.a * blendFactor)); 
 #elif (#{#{layerGroup}#{i}BlendMode} == 1) // Multiply
-	return blendMultiply(currentColor, newColor * blendFactor);
+    return blendMultiply(currentColor, newColor * blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == 2) // Add
-	return blendAdd(currentColor, newColor * blendFactor);
+    return blendAdd(currentColor, newColor * blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == 3) // Subtract
-	return blendSubtract(currentColor, newColor * blendFactor);
+    return blendSubtract(currentColor, newColor * blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == 4) // Color
-	// Convert color to grayscale
-	float gray = (newColor.r + newColor.g + newColor.b) / 3.0;
-	
-	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
-	// Use gray from new color as value in hsv
-	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, gray);
-	vec3 rgbNew = hsv2rgb(hsvNew);
+    // Convert color to grayscale
+    float gray = (newColor.r + newColor.g + newColor.b) / 3.0;
+    
+    vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
+    // Use gray from new color as value in hsv
+    vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, gray);
+    vec3 rgbNew = hsv2rgb(hsvNew);
 
-	vec4 color = blendNormal(currentColor, vec4(rgbNew, newColor.a * blendFactor));
-	return color;
+    vec4 color = blendNormal(currentColor, vec4(rgbNew, newColor.a * blendFactor));
+    return color;
 #endif
 }
 
@@ -178,18 +180,18 @@ vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor, float blendFactor)
 
 vec4 performAdjustment#{layerGroup}#{i}(vec4 currentColor, const LayerAdjustment adjustment) {
 #if (#{#{layerGroup}#{i}LayerAdjustmentType} == 0) // Default, None
-	return currentColor;	
+    return currentColor;    
 #elif (#{#{layerGroup}#{i}LayerAdjustmentType} == 1) // ChromaKey
-	if (distance(currentColor.rgb, adjustment.chromaKeyColor) <= adjustment.chromaKeyTolerance) {
-		return vec4(0,0,0,0);
-	}
-	else {
-		return currentColor;
-	}
+    if (distance(currentColor.rgb, adjustment.chromaKeyColor) <= adjustment.chromaKeyTolerance) {
+        return vec4(0,0,0,0);
+    }
+    else {
+        return currentColor;
+    }
 #elif (#{#{layerGroup}#{i}LayerAdjustmentType} == 2) // TransferFunction
-	return currentColor;
+    return currentColor;
 #else
-	return currentColor;
+    return currentColor;
 #endif
 }
 
@@ -197,234 +199,241 @@ vec4 performAdjustment#{layerGroup}#{i}(vec4 currentColor, const LayerAdjustment
 #endfor
 
 float calculateUntransformedHeight(
-	vec2 uv,
-	LevelWeights levelWeights,
-	const Layer HeightLayers[NUMLAYERS_HEIGHTMAP]) {
+    vec2 uv,
+    LevelWeights levelWeights,
+    const Layer HeightLayers[NUMLAYERS_HEIGHTMAP]) {
 
-	float height = 0;
+    float height = 0;
 
-	// The shader compiler will remove unused code when variables are multiplied by
-	// a constant 0
+    // The shader compiler will remove unused code when variables are multiplied by
+    // a constant 0
 #if !HEIGHTMAP_BLENDING_ENABLED
-	levelWeights = getDefaultLevelWeights();
+    levelWeights = getDefaultLevelWeights();
 #endif // HEIGHTMAP_BLENDING_ENABLED
-	
-	#for i in 0..#{lastLayerIndexHeightLayers}
-	{
-		vec4 colorSample = getSampleHeightLayers#{i}(uv, levelWeights, HeightLayers);
-		colorSample = performAdjustmentHeightLayers#{i}(colorSample, HeightLayers[#{i}].adjustment);
-		height = colorSample.r;
+    
+    #for i in 0..#{lastLayerIndexHeightLayers}
+    {
+        vec4 colorSample = getSampleHeightLayers#{i}(uv, levelWeights, HeightLayers);
+        colorSample = performAdjustmentHeightLayers#{i}(colorSample, HeightLayers[#{i}].adjustment);
+        height = colorSample.r;
 
-		height = performLayerSettings(height, HeightLayers[#{i}].settings);
-	}
-	#endfor
-	return height;
+        height = performLayerSettings(height, HeightLayers[#{i}].settings);
+    }
+    #endfor
+    return height;
 }
 
 float calculateHeight(
-	vec2 uv,
-	LevelWeights levelWeights,
-	const Layer HeightLayers[NUMLAYERS_HEIGHTMAP]) {
+    vec2 uv,
+    LevelWeights levelWeights,
+    const Layer HeightLayers[NUMLAYERS_HEIGHTMAP]) {
 
-	float height = 0;
+    float height = 0;
 
-	// The shader compiler will remove unused code when variables are multiplied by
-	// a constant 0
+    // The shader compiler will remove unused code when variables are multiplied by
+    // a constant 0
 #if !HEIGHTMAP_BLENDING_ENABLED
-	levelWeights = getDefaultLevelWeights();
+    levelWeights = getDefaultLevelWeights();
 #endif // HEIGHTMAP_BLENDING_ENABLED
 
-	
-	#for i in 0..#{lastLayerIndexHeightLayers}
-	{
-		vec4 colorSample = getSampleHeightLayers#{i}(uv, levelWeights, HeightLayers);
-		colorSample = performAdjustmentHeightLayers#{i}(colorSample, HeightLayers[#{i}].adjustment);
-		float untransformedHeight = colorSample.r;
+    
+    #for i in 0..#{lastLayerIndexHeightLayers}
+    {
+        vec4 colorSample = getSampleHeightLayers#{i}(uv, levelWeights, HeightLayers);
+        colorSample = performAdjustmentHeightLayers#{i}(colorSample, HeightLayers[#{i}].adjustment);
+        float untransformedHeight = colorSample.r;
 
-		float heightSample = getTransformedTexVal(HeightLayers[#{i}].depthTransform, untransformedHeight);
-		if (heightSample > -100000) {
-			heightSample = performLayerSettings(heightSample, HeightLayers[#{i}].settings);
-			height = heightSample;
-		}
-	}
-	#endfor
-	return height;
+        float heightSample = getTransformedTexVal(HeightLayers[#{i}].depthTransform, untransformedHeight);
+        if (heightSample > -100000) {
+            heightSample = performLayerSettings(heightSample, HeightLayers[#{i}].settings);
+            height = heightSample;
+        }
+    }
+    #endfor
+    return height;
 }
 
 vec4 calculateColor(
-	const vec4 currentColor,
-	const vec2 uv,
-	LevelWeights levelWeights,
-	const Layer ColorLayers[NUMLAYERS_COLORTEXTURE]) {
+    const vec4 currentColor,
+    const vec2 uv,
+    LevelWeights levelWeights,
+    const Layer ColorLayers[NUMLAYERS_COLORTEXTURE]) {
 
-	vec4 color = currentColor;
+    vec4 color = currentColor;
 
-	// The shader compiler will remove unused code when variables are multiplied by
-	// a constant 0
+    // The shader compiler will remove unused code when variables are multiplied by
+    // a constant 0
 #if !COLORTEXTURE_BLENDING_ENABLED
-	levelWeights = getDefaultLevelWeights();
+    levelWeights = getDefaultLevelWeights();
 #endif // COLORTEXTURE_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexColorLayers}
-	{
-		vec4 colorSample = getSampleColorLayers#{i}(uv, levelWeights, ColorLayers);
-		colorSample = performAdjustmentColorLayers#{i}(colorSample, ColorLayers[#{i}].adjustment);
-		colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
+    #for i in 0..#{lastLayerIndexColorLayers}
+    {
+        vec4 colorSample = getSampleColorLayers#{i}(uv, levelWeights, ColorLayers);
+        colorSample = performAdjustmentColorLayers#{i}(colorSample, ColorLayers[#{i}].adjustment);
+        colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
 
-		color = blendColorLayers#{i}(color, colorSample, 1.0);
-	}
-	#endfor
+        color = blendColorLayers#{i}(color, colorSample, 1.0);
+    }
+    #endfor
 
-	return color;	
+    return color;   
 }
 
 float gridDots(vec2 uv, vec2 gridResolution){
-	vec2 uvVertexSpace = fract((gridResolution) * uv) + 0.5;
+    vec2 uvVertexSpace = fract((gridResolution) * uv) + 0.5;
 
-	vec2 uvDotSpace = abs(2*(uvVertexSpace-0.5));
-	return 1-length(1-uvDotSpace);
+    vec2 uvDotSpace = abs(2*(uvVertexSpace-0.5));
+    return 1-length(1-uvDotSpace);
 }
 
 vec4 calculateDebugColor(vec2 uv, vec4 fragPos, vec2 vertexResolution){
-	vec2 uvVertexSpace = fract(vertexResolution * uv);
-	vec3 colorUv = vec3(0.3*uv.x, 0.3*uv.y, 0);
-	vec3 colorDistance = vec3(0, 0, min( 0.4*log(fragPos.w) - 3.9, 1));
-	vec3 colorVertex = (1.0-length(uvVertexSpace)) * vec3(0.5);
-	vec3 colorSum = colorUv + colorDistance + colorVertex;
-	return vec4(0.5 * colorSum, 1);
+    vec2 uvVertexSpace = fract(vertexResolution * uv);
+    vec3 colorUv = vec3(0.3*uv.x, 0.3*uv.y, 0);
+    vec3 colorDistance = vec3(0, 0, min( 0.4*log(fragPos.w) - 3.9, 1));
+    vec3 colorVertex = (1.0-length(uvVertexSpace)) * vec3(0.5);
+    vec3 colorSum = colorUv + colorDistance + colorVertex;
+    return vec4(0.5 * colorSum, 1);
 }
 
 float tileResolution(vec2 tileUV, const ChunkTile chunkTile){
-	vec2 heightResolution = textureSize(chunkTile.textureSampler, 0);
-	vec2 uv = TileUVToTextureSamplePosition(chunkTile, tileUV);
-	return gridDots(uv, heightResolution);
+    vec2 heightResolution = textureSize(chunkTile.textureSampler, 0);
+    vec2 uv = TileUVToTextureSamplePosition(chunkTile, tileUV);
+    return gridDots(uv, heightResolution);
 }
 
 vec4 calculateNight(
-	const vec4 currentColor,
-	const vec2 uv,
-	LevelWeights levelWeights,
-	const Layer NightLayers[NUMLAYERS_NIGHTTEXTURE],
-	const vec3 ellipsoidNormalCameraSpace,
-	const vec3 lightDirectionCameraSpace) {
+    const vec4 currentColor,
+    const vec2 uv,
+    LevelWeights levelWeights,
+    const Layer NightLayers[NUMLAYERS_NIGHTTEXTURE],
+    const vec3 ellipsoidNormalCameraSpace,
+    const vec3 lightDirectionCameraSpace) {
 
-	vec4 nightColor = vec4(0,0,0,0);
-	vec4 color = currentColor;
+    vec4 nightColor = vec4(0,0,0,0);
+    vec4 color = currentColor;
 
-	// The shader compiler will remove unused code when variables are multiplied by
-	// a constant 0
+    // The shader compiler will remove unused code when variables are multiplied by
+    // a constant 0
 #if !NIGHTTEXTURE_BLENDING_ENABLED
-	levelWeights = getDefaultLevelWeights();
+    levelWeights = getDefaultLevelWeights();
 #endif // NIGHTTEXTURE_BLENDING_ENABLED
 
-	vec3 n = normalize(ellipsoidNormalCameraSpace);
-	vec3 l = lightDirectionCameraSpace;
-	float cosineFactor = clamp(dot(l, normalize(n + 0.15 * l)) * 3 , 0, 1);
-	
-	#for i in 0..#{lastLayerIndexNightLayers}
-	{
-		vec4 colorSample = getSampleNightLayers#{i}(uv, levelWeights, NightLayers);
-		colorSample = performAdjustmentNightLayers#{i}(colorSample, NightLayers[#{i}].adjustment);
-		colorSample = performLayerSettings(colorSample, NightLayers[#{i}].settings);
+    vec3 n = normalize(ellipsoidNormalCameraSpace);
+    vec3 l = lightDirectionCameraSpace;
+    float cosineFactor = clamp(dot(l, normalize(n + 0.15 * l)) * 3 , 0, 1);
+    
+    #for i in 0..#{lastLayerIndexNightLayers}
+    {
+        vec4 colorSample = getSampleNightLayers#{i}(uv, levelWeights, NightLayers);
+        colorSample = performAdjustmentNightLayers#{i}(colorSample, NightLayers[#{i}].adjustment);
+        colorSample = performLayerSettings(colorSample, NightLayers[#{i}].settings);
 
-		float adjustedAlpha = cosineFactor * colorSample.a;
-		// Filter to night side
-		vec4 newColor = vec4(cosineFactor * colorSample.xyz, adjustedAlpha);
+        float adjustedAlpha = cosineFactor * colorSample.a;
+        // Filter to night side
+        vec4 newColor = vec4(cosineFactor * colorSample.xyz, adjustedAlpha);
 
-		color = blendNightLayers#{i}(currentColor, newColor, adjustedAlpha);
-	}
-	#endfor
+        color = blendNightLayers#{i}(currentColor, newColor, adjustedAlpha);
+    }
+    #endfor
 
-	return color;
+    return color;
 }
 
 vec4 calculateShadedColor(
-	const vec4 currentColor,
-	const vec3 ellipsoidNormalCameraSpace,
-	const vec3 lightDirectionCameraSpace) {
+    const vec4 currentColor,
+    const vec3 ellipsoidNormalCameraSpace,
+    const vec3 lightDirectionCameraSpace,
+    const vec3 viewDirectionCameraSpace,
+    float roughness)
+{
+    vec3 shadedColor = currentColor.rgb * 0.05;
 
-	vec3 shadedColor = currentColor.rgb * 0.05;
+    vec3 n = normalize(ellipsoidNormalCameraSpace);
+    vec3 l = lightDirectionCameraSpace;
+        
+    float power = orenNayarDiffuse(
+        -lightDirectionCameraSpace,
+        viewDirectionCameraSpace, 
+        ellipsoidNormalCameraSpace,
+        roughness);
 
-	vec3 n = normalize(ellipsoidNormalCameraSpace);
-	vec3 l = lightDirectionCameraSpace;
-	
-	float cosineFactor = pow(clamp(dot(-l, n), 0, 1), 0.8);
-	
-	// Blend shaded color with base color
-	vec4 color = vec4(cosineFactor * currentColor.xyz + (1 - cosineFactor) * shadedColor, currentColor.a);
-	return color;
+    power = max(smoothstep(0.0f, 0.1f, max(dot(-l, n), 0.0f)) * power, 0.0f);
+    
+    vec4 color = vec4(shadedColor + currentColor.rgb * power, currentColor.a);
+    return color;
 }
 
 vec4 calculateOverlay(
-	const vec4 currentColor,
-	const vec2 uv,
-	LevelWeights levelWeights,
-	const Layer Overlays[NUMLAYERS_OVERLAY]) {
+    const vec4 currentColor,
+    const vec2 uv,
+    LevelWeights levelWeights,
+    const Layer Overlays[NUMLAYERS_OVERLAY]) {
 
-	vec4 color = currentColor;
+    vec4 color = currentColor;
 
-	// The shader compiler will remove unused code when variables are multiplied by
-	// a constant 0
+    // The shader compiler will remove unused code when variables are multiplied by
+    // a constant 0
 #if !OVERLAY_BLENDING_ENABLED
-	levelWeights = getDefaultLevelWeights();
+    levelWeights = getDefaultLevelWeights();
 #endif // OVERLAY_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexOverlays}
-	{
-		vec4 colorSample = getSampleOverlays#{i}(uv, levelWeights, Overlays);
-		colorSample = performAdjustmentOverlays#{i}(colorSample, Overlays[#{i}].adjustment);
+    #for i in 0..#{lastLayerIndexOverlays}
+    {
+        vec4 colorSample = getSampleOverlays#{i}(uv, levelWeights, Overlays);
+        colorSample = performAdjustmentOverlays#{i}(colorSample, Overlays[#{i}].adjustment);
 
-		colorSample = performLayerSettings(colorSample, Overlays[#{i}].settings);
+        colorSample = performLayerSettings(colorSample, Overlays[#{i}].settings);
 
-		color = blendNormal(color, colorSample);
-		color = blendOverlays#{i}(color, colorSample, 1.0);
-	}
-	#endfor
+        color = blendNormal(color, colorSample);
+        color = blendOverlays#{i}(color, colorSample, 1.0);
+    }
+    #endfor
 
-	return color;
+    return color;
 }
 
 vec4 calculateWater(
-	const vec4 currentColor,
-	const vec2 uv,
-	LevelWeights levelWeights,
-	const Layer WaterMasks[NUMLAYERS_WATERMASK],
-	const vec3 ellipsoidNormalCameraSpace,
-	const vec3 lightDirectionCameraSpace,
-	const vec3 positionCameraSpace) {
+    const vec4 currentColor,
+    const vec2 uv,
+    LevelWeights levelWeights,
+    const Layer WaterMasks[NUMLAYERS_WATERMASK],
+    const vec3 ellipsoidNormalCameraSpace,
+    const vec3 lightDirectionCameraSpace,
+    const vec3 positionCameraSpace) {
 
-	vec4 waterColor = vec4(0,0,0,0);
+    vec4 waterColor = vec4(0,0,0,0);
 
-	// The shader compiler will remove unused code when variables are multiplied by
-	// a constant 0
+    // The shader compiler will remove unused code when variables are multiplied by
+    // a constant 0
 #if !WATERMASK_BLENDING_ENABLED
-	levelWeights = getDefaultLevelWeights();
+    levelWeights = getDefaultLevelWeights();
 #endif // WATERMASK_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexWaterMasks}
-	{
-		vec4 colorSample = getSampleWaterMasks#{i}(uv, levelWeights, WaterMasks);
-		colorSample = performAdjustmentWaterMasks#{i}(colorSample, WaterMasks[#{i}].adjustment);
+    #for i in 0..#{lastLayerIndexWaterMasks}
+    {
+        vec4 colorSample = getSampleWaterMasks#{i}(uv, levelWeights, WaterMasks);
+        colorSample = performAdjustmentWaterMasks#{i}(colorSample, WaterMasks[#{i}].adjustment);
 
-		colorSample = performLayerSettingsAlpha(colorSample, WaterMasks[#{i}].settings);
-		colorSample.a = performLayerSettingsRGB(colorSample.a, WaterMasks[#{i}].settings);
+        colorSample = performLayerSettingsAlpha(colorSample, WaterMasks[#{i}].settings);
+        colorSample.a = performLayerSettingsRGB(colorSample.a, WaterMasks[#{i}].settings);
 
-		waterColor = blendWaterMasks#{i}(waterColor, colorSample, 1.0);
-	}
-	#endfor
+        waterColor = blendWaterMasks#{i}(waterColor, colorSample, 1.0);
+    }
+    #endfor
 
-	vec3 directionToFragmentCameraSpace = normalize(positionCameraSpace - vec3(0, 0, 0));
-	vec3 reflectionDirectionCameraSpace = reflect(lightDirectionCameraSpace, ellipsoidNormalCameraSpace);
-	float cosineFactor = clamp(dot(-reflectionDirectionCameraSpace, directionToFragmentCameraSpace), 0, 1);
-	cosineFactor = pow(cosineFactor, 100);
+    vec3 directionToFragmentCameraSpace = normalize(positionCameraSpace - vec3(0, 0, 0));
+    vec3 reflectionDirectionCameraSpace = reflect(lightDirectionCameraSpace, ellipsoidNormalCameraSpace);
+    float cosineFactor = clamp(dot(-reflectionDirectionCameraSpace, directionToFragmentCameraSpace), 0, 1);
+    cosineFactor = pow(cosineFactor, 100);
 
-	vec3 specularColor = vec3(1, 1, 1);
-	float specularIntensity = 0.4;
+    vec3 specularColor = vec3(1, 1, 1);
+    float specularIntensity = 0.4;
 
-	vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
+    vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
 
-	//return blendNormal(currentColor, waterColor);
-	return currentColor + vec4(specularTotal, 1);
+    //return blendNormal(currentColor, waterColor);
+    return currentColor + vec4(specularTotal, 1);
 }
 
 #endif // TEXTURETILEMAPPING_HGLSL

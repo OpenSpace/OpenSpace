@@ -32,6 +32,9 @@
 
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
@@ -74,8 +77,10 @@ public:
         properties::BoolProperty isEnabled;
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
+        properties::BoolProperty useAccurateNormals;
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
+        properties::FloatProperty orenNayarRoughness;
     };
     
     RenderableGlobe(const ghoul::Dictionary& dictionary);
@@ -127,7 +132,6 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
-    properties::PropertyOwner _texturePropertyOwner;
 };
 
 } // namespace globebrowsing
