@@ -150,7 +150,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         glm::dvec3 corner11 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::NORTH_EAST));
         
-        float tileDelta = 1.0f / 512.0f;
+        float tileDelta = 1.0f / 64.0f;
         glm::vec3 deltaTheta0 = glm::vec3(corner10 - corner00) * tileDelta;
         glm::vec3 deltaTheta1 = glm::vec3(corner11 - corner01) * tileDelta;
         glm::vec3 deltaPhi0 = glm::vec3(corner01 - corner00) * tileDelta;
@@ -169,6 +169,12 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         programObject.setUniform("deltaPhi0", glm::length(deltaPhi0));
         programObject.setUniform("deltaPhi1", glm::length(deltaPhi1));
         programObject.setUniform("tileDelta", tileDelta);
+    }
+
+    if (chunk.owner().generalProperties().performShading) {
+        programObject.setUniform(
+            "orenNayarRoughness",
+            chunk.owner().generalProperties().orenNayarRoughness);
     }
 }
 
@@ -222,6 +228,14 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         chunk.owner().generalProperties().performShading)
     {
         programObject->setUniform("modelViewTransform", modelViewTransform);
+    }
+    
+    if (chunk.owner().generalProperties().useAccurateNormals &&
+        _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0)
+    {
+        // Apply an extra scaling to the height if the object is scaled
+        programObject->setUniform(
+            "heightScale", static_cast<float>(data.modelTransform.scale));
     }
 
     setCommonUniforms(*programObject, chunk, data);
@@ -291,7 +305,15 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
     programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
 
+    if (_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0) {
+        // Apply an extra scaling to the height if the object is scaled
+        programObject->setUniform(
+            "heightScale", static_cast<float>(data.modelTransform.scale));
+    }
+
     setCommonUniforms(*programObject, chunk, data);
+    
+    
 
     // OpenGL rendering settings
     glEnable(GL_DEPTH_TEST);

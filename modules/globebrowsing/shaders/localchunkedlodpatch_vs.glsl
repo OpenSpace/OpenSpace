@@ -84,7 +84,7 @@ void main() {
     levelWeights = getLevelWeights(levelInterpolationParameter);
 
     // Get the height value
-    float height = getTileHeight(in_uv, levelWeights);
+    float height = getTileHeightScaled(in_uv, levelWeights);
 
     // Apply skirts
     height -= getTileVertexSkirtLength();
