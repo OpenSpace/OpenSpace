@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -144,6 +144,11 @@ public:
     static const std::string PartFilterIdentifierIdentifier;
     /// The part of the key storing a list of severities that should be filtered out
     static const std::string PartFilterSeverity;
+    /// The part of the key storing whether the OpenGL state should be checked each call
+    static const std::string KeyCheckOpenGLState;
+    /// The part of the key storing whether each OpenGL call should be logged
+    static const std::string KeyLogEachOpenGLCall;
+
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the
