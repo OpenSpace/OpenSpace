@@ -379,7 +379,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
 void OpenSpaceEngine::destroy() {
     if (_engine->parallelConnection().status() != ParallelConnection::Status::Disconnected) {
-        _engine->parallelConnection().disconnect();
+        _engine->parallelConnection().signalDisconnect();
     }
 
     LTRACE("OpenSpaceEngine::destroy(begin)");
@@ -1001,7 +1001,7 @@ double OpenSpaceEngine::runTime() {
 void OpenSpaceEngine::setRunTime(double d) {
     _runTime = d;
 }
-
+    
 void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
     FileSys.triggerFilesystemEvents();
