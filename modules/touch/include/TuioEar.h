@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -40,68 +40,68 @@
 
 
 class TuioEar : public TUIO::TuioListener {
-	
-	public:
-		TuioEar();
-		~TuioEar() {
-			_tuioClient->disconnect();
-			delete _tuioClient;
-			delete _oscReceiver;
-		}
-		
-		/**
-		* Callback functions, listens to the TUIO server
-		*/
-		void addTuioObject(TUIO::TuioObject *tobj);
-		void updateTuioObject(TUIO::TuioObject *tobj);
-		void removeTuioObject(TUIO::TuioObject *tobj);
+    
+    public:
+        TuioEar();
+        ~TuioEar() {
+            _tuioClient->disconnect();
+            delete _tuioClient;
+            delete _oscReceiver;
+        }
+        
+        /**
+        * Callback functions, listens to the TUIO server
+        */
+        void addTuioObject(TUIO::TuioObject *tobj);
+        void updateTuioObject(TUIO::TuioObject *tobj);
+        void removeTuioObject(TUIO::TuioObject *tobj);
 
-		void addTuioCursor(TUIO::TuioCursor *tcur);
-		void updateTuioCursor(TUIO::TuioCursor *tcur);
-		void removeTuioCursor(TUIO::TuioCursor *tcur);
+        void addTuioCursor(TUIO::TuioCursor *tcur);
+        void updateTuioCursor(TUIO::TuioCursor *tcur);
+        void removeTuioCursor(TUIO::TuioCursor *tcur);
 
-		void addTuioBlob(TUIO::TuioBlob *tblb);
-		void updateTuioBlob(TUIO::TuioBlob *tblb);
-		void removeTuioBlob(TUIO::TuioBlob *tblb);
+        void addTuioBlob(TUIO::TuioBlob *tblb);
+        void updateTuioBlob(TUIO::TuioBlob *tblb);
+        void removeTuioBlob(TUIO::TuioBlob *tblb);
 
-		void refresh(TUIO::TuioTime frameTime);
+        void refresh(TUIO::TuioTime frameTime);
 
-		/**
-		* Returns a list of all touch history that happened since the last frame
-		*/
-		std::vector<TUIO::TuioCursor> getInput();
+        /**
+        * Returns a list of all touch history that happened since the last frame
+        */
+        std::vector<TUIO::TuioCursor> getInput();
 
-		/**
-		* Returns true if a tap occured since the last frame
-		*/
-		bool tap();
+        /**
+        * Returns true if a tap occured since the last frame
+        */
+        bool tap();
 
-		/**
-		* Returns tap's cursor coordinates and time information
-		*/
-		TUIO::TuioCursor getTap();
+        /**
+        * Returns tap's cursor coordinates and time information
+        */
+        TUIO::TuioCursor getTap();
 
-		/**
-		* Clears the input list, function called after getInput() each frame
-		*/
-		void clearInput();
-		
-	private:
-		bool _tap;
-		TUIO::TuioCursor _tapCo = TUIO::TuioCursor(-1, -1, -1.0f, -1.0f);
-		std::mutex _mx;
+        /**
+        * Clears the input list, function called after getInput() each frame
+        */
+        void clearInput();
+        
+    private:
+        bool _tap;
+        TUIO::TuioCursor _tapCo = TUIO::TuioCursor(-1, -1, -1.0f, -1.0f);
+        std::mutex _mx;
 
-		TUIO::TuioClient *_tuioClient;
-		TUIO::OscReceiver *_oscReceiver;
+        TUIO::TuioClient *_tuioClient;
+        TUIO::OscReceiver *_oscReceiver;
 
-		
-		std::vector<TUIO::TuioCursor> _list;
+        
+        std::vector<TUIO::TuioCursor> _list;
 
-		/**
-		* A list that tracks all of the cursor ID's that got removed since last frame
-		*/
-		std::vector<int> _removeList;
-		
+        /**
+        * A list that tracks all of the cursor ID's that got removed since last frame
+        */
+        std::vector<int> _removeList;
+        
 };
 
 #endif // __OPENSPACE_MODULE_TOUCH___TOUCHWRAPPER___H__

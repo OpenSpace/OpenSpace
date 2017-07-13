@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -146,10 +146,10 @@ OnScreenGUIModule::OnScreenGUIModule()
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
                 
                 double dt = std::max(wrapper.averageDeltaTime(), 0.0);
-				if (touchInput.active && mouseButtons == 0) {
-					mouseButtons = touchInput.action;
-					mousePosition = touchInput.pos;
-				}
+                if (touchInput.active && mouseButtons == 0) {
+                    mouseButtons = touchInput.action;
+                    mousePosition = touchInput.pos;
+                }
                 // We don't do any collection of immediate mode user interface, so it is
                 // fine to open and close a frame immediately
                 gui.startFrame(

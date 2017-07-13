@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,7 +35,7 @@
 
 using namespace TUIO;
 namespace {
-	const std::string _loggerCat = "TuioEar";
+    const std::string _loggerCat = "TuioEar";
 }
 
 void TuioEar::addTuioObject(TuioObject *tobj) { }
@@ -45,61 +45,61 @@ void TuioEar::updateTuioObject(TuioObject *tobj) { }
 void TuioEar::removeTuioObject(TuioObject *tobj) { }
 
 void TuioEar::addTuioCursor(TuioCursor *tcur) {
-	_mx.lock();
-	_tap = false;
-	// find same id in _list if it exists in _removeList (new input with same ID as a previously stored)
-	int i = tcur->getSessionID();
-	std::vector<int>::iterator foundID = std::find_if(
-		_removeList.begin(),
-		_removeList.end(),
-		[&i](int id) { return id == i; });
+    _mx.lock();
+    _tap = false;
+    // find same id in _list if it exists in _removeList (new input with same ID as a previously stored)
+    int i = tcur->getSessionID();
+    std::vector<int>::iterator foundID = std::find_if(
+        _removeList.begin(),
+        _removeList.end(),
+        [&i](int id) { return id == i; });
 
-	// if found, remove id from _removeList and update, otherwise add new id to list
-	if (foundID != _removeList.end()) {
-		std::find_if(
-			_list.begin(),
-			_list.end(),
-			[&i](const TuioCursor& cursor) {
-			return cursor.getSessionID() == i;
-		})->update(tcur);
-		_removeList.erase(foundID);
-	}
-	else {
-		_list.push_back(TuioCursor(*tcur));
-	}
-	_mx.unlock();
+    // if found, remove id from _removeList and update, otherwise add new id to list
+    if (foundID != _removeList.end()) {
+        std::find_if(
+            _list.begin(),
+            _list.end(),
+            [&i](const TuioCursor& cursor) {
+            return cursor.getSessionID() == i;
+        })->update(tcur);
+        _removeList.erase(foundID);
+    }
+    else {
+        _list.push_back(TuioCursor(*tcur));
+    }
+    _mx.unlock();
 }
 
 void TuioEar::updateTuioCursor(TuioCursor *tcur) {
-	_mx.lock();
-	_tap = false;
-	int i = tcur->getSessionID();
-	std::find_if(
-		_list.begin(),
-		_list.end(),
-		[&i](const TuioCursor& cursor) {
-			return cursor.getSessionID() == i;
-	})->update(tcur);
-	_mx.unlock();
+    _mx.lock();
+    _tap = false;
+    int i = tcur->getSessionID();
+    std::find_if(
+        _list.begin(),
+        _list.end(),
+        [&i](const TuioCursor& cursor) {
+            return cursor.getSessionID() == i;
+    })->update(tcur);
+    _mx.unlock();
 }
 
 // save id to be removed and remove it in clearInput
 void TuioEar::removeTuioCursor(TuioCursor *tcur) {
-	_mx.lock();
-	_removeList.push_back(tcur->getSessionID());
+    _mx.lock();
+    _removeList.push_back(tcur->getSessionID());
 
-	// Check if the cursor ID could be considered a tap
-	double dist = 0;
-	for (const TuioPoint& p : tcur->getPath()) {
-		dist += glm::length(glm::dvec2(p.getX(), p.getY()) - glm::dvec2(tcur->getX(), tcur->getY()));
-	}
-	dist /= tcur->getPath().size();
-	double heldTime = tcur->getPath().back().getTuioTime().getTotalMilliseconds() - tcur->getPath().front().getTuioTime().getTotalMilliseconds();
-	if (heldTime < 180 && dist < 0.0004 && _list.size() == 1 && _removeList.size() == 1) {
-		_tapCo = TuioCursor(*tcur);
-		_tap = true;
-	}
-	_mx.unlock();
+    // Check if the cursor ID could be considered a tap
+    double dist = 0;
+    for (const TuioPoint& p : tcur->getPath()) {
+        dist += glm::length(glm::dvec2(p.getX(), p.getY()) - glm::dvec2(tcur->getX(), tcur->getY()));
+    }
+    dist /= tcur->getPath().size();
+    double heldTime = tcur->getPath().back().getTuioTime().getTotalMilliseconds() - tcur->getPath().front().getTuioTime().getTotalMilliseconds();
+    if (heldTime < 180 && dist < 0.0004 && _list.size() == 1 && _removeList.size() == 1) {
+        _tapCo = TuioCursor(*tcur);
+        _tap = true;
+    }
+    _mx.unlock();
 }
 
 void TuioEar::addTuioBlob(TuioBlob *tblb) { }
@@ -111,52 +111,52 @@ void TuioEar::removeTuioBlob(TuioBlob *tblb) { }
 void TuioEar::refresh(TuioTime frameTime) { } // about every 15ms
 
 std::vector<TuioCursor> TuioEar::getInput() {
-	std::lock_guard<std::mutex> lock(_mx);
-	return _list;
+    std::lock_guard<std::mutex> lock(_mx);
+    return _list;
 }
 
 bool TuioEar::tap() {
-	std::lock_guard<std::mutex> lock(_mx);
-	if (_tap) {
-		_tap = false;
-		return !_tap;
-	}
-	else {
-		return _tap;
-	}
+    std::lock_guard<std::mutex> lock(_mx);
+    if (_tap) {
+        _tap = false;
+        return !_tap;
+    }
+    else {
+        return _tap;
+    }
 }
 
 TuioCursor TuioEar::getTap() {
-	std::lock_guard<std::mutex> lock(_mx);
-	return _tapCo;
+    std::lock_guard<std::mutex> lock(_mx);
+    return _tapCo;
 }
 
 // Removes all cursor ID from list that exists in _removeList
 void TuioEar::clearInput() {
-	_mx.lock();
-	_list.erase(
-		std::remove_if(
-			_list.begin(),
-			_list.end(),
-			[this](const TuioCursor& cursor) {
-		return std::find_if(
-			_removeList.begin(),
-			_removeList.end(),
-			[&cursor](int id) {
-			return cursor.getSessionID() == id;
-		}
-		) != _removeList.end();
-	}),
-	_list.end()
-	);
-	_removeList.clear();
-	_mx.unlock();
+    _mx.lock();
+    _list.erase(
+        std::remove_if(
+            _list.begin(),
+            _list.end(),
+            [this](const TuioCursor& cursor) {
+        return std::find_if(
+            _removeList.begin(),
+            _removeList.end(),
+            [&cursor](int id) {
+            return cursor.getSessionID() == id;
+        }
+        ) != _removeList.end();
+    }),
+    _list.end()
+    );
+    _removeList.clear();
+    _mx.unlock();
 }
 
 // Standard UDP IP connection to port 3333
 TuioEar::TuioEar() {
-	_oscReceiver = new UdpReceiver(3333);
-	_tuioClient = new TuioClient(_oscReceiver);
-	_tuioClient->addTuioListener(this);
-	_tuioClient->connect();
+    _oscReceiver = new UdpReceiver(3333);
+    _tuioClient = new TuioClient(_oscReceiver);
+    _tuioClient->addTuioListener(this);
+    _tuioClient->connect();
 }

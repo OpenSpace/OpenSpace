@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,23 +32,23 @@
 
 namespace openspace {
 
-	class TouchModule : public OpenSpaceModule {
-		using Point = std::pair<int, TUIO::TuioPoint>;
-	public:
-		TouchModule();
+    class TouchModule : public OpenSpaceModule {
+        using Point = std::pair<int, TUIO::TuioPoint>;
+    public:
+        TouchModule();
 
-	private:
-		/**
-		* Returns true if new touch input occured since the last frame
-		*/
-		bool hasNewInput();
+    private:
+        /**
+        * Returns true if new touch input occured since the last frame
+        */
+        bool hasNewInput();
 
-		TuioEar ear;
-		TouchInteraction touch;
-		TouchMarker markers;
-		std::vector<TUIO::TuioCursor> listOfContactPoints;
-		std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
-	};
+        TuioEar ear;
+        TouchInteraction touch;
+        TouchMarker markers;
+        std::vector<TUIO::TuioCursor> listOfContactPoints;
+        std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
+    };
 
 } // namespace openspace
 

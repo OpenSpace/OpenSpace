@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,111 +32,111 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-	const std::string _loggerCat = "TouchMarker";
-	const int MAX_FINGERS = 20;
+    const std::string _loggerCat = "TouchMarker";
+    const int MAX_FINGERS = 20;
 }
 namespace openspace {
 
 TouchMarker::TouchMarker()
-	: properties::PropertyOwner("TouchMarker")
-	, _visible("TouchMarkers visible", "Toggle visibility of markers", true)
-	, _radiusSize("Marker size", "Marker radius", 30, 0, 100)
-	, _transparency("Transparency of marker", "Marker transparency", 0.8, 0, 1.0)
-	, _thickness("Thickness of marker", "Marker thickness", 2.0, 0, 4.0)
-	, _color(
-		"MarkerColor",
-		"Marker color",
-		glm::vec3(204.f / 255.f, 51.f / 255.f, 51.f / 255.f),
-		glm::vec3(0.f),
-		glm::vec3(1.f)
-	)
-	, _shader(nullptr)
-	, _numFingers(0)
+    : properties::PropertyOwner("TouchMarker")
+    , _visible("TouchMarkers visible", "Toggle visibility of markers", true)
+    , _radiusSize("Marker size", "Marker radius", 30, 0, 100)
+    , _transparency("Transparency of marker", "Marker transparency", 0.8, 0, 1.0)
+    , _thickness("Thickness of marker", "Marker thickness", 2.0, 0, 4.0)
+    , _color(
+        "MarkerColor",
+        "Marker color",
+        glm::vec3(204.f / 255.f, 51.f / 255.f, 51.f / 255.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
+    )
+    , _shader(nullptr)
+    , _numFingers(0)
 {
-	addProperty(_visible);
-	addProperty(_radiusSize);
-	addProperty(_transparency);
-	addProperty(_thickness);
-	_color.setViewOption(properties::Property::ViewOptions::Color);
-	addProperty(_color);
-	
+    addProperty(_visible);
+    addProperty(_radiusSize);
+    addProperty(_transparency);
+    addProperty(_thickness);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
+    
 }
 
 bool TouchMarker::initialize() {
-	glGenVertexArrays(1, &_quad); // generate array
-	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glGenVertexArrays(1, &_quad); // generate array
+    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
-	try {
-		_shader = OsEng.renderEngine().buildRenderProgram("MarkerProgram",
-			"${MODULE_TOUCH}/shaders/marker_vs.glsl",
-			"${MODULE_TOUCH}/shaders/marker_fs.glsl"
-		);
-	}
-	catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
-		LERRORC(e.component, e.what());
-	}
-	return (_shader != nullptr);
+    try {
+        _shader = OsEng.renderEngine().buildRenderProgram("MarkerProgram",
+            "${MODULE_TOUCH}/shaders/marker_vs.glsl",
+            "${MODULE_TOUCH}/shaders/marker_fs.glsl"
+        );
+    }
+    catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+        LERRORC(e.component, e.what());
+    }
+    return (_shader != nullptr);
 }
 
 bool TouchMarker::deinitialize() {
-	glDeleteVertexArrays(1, &_quad);
-	_quad = 0;
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
 
-	glDeleteBuffers(1, &_vertexPositionBuffer);
-	_vertexPositionBuffer = 0;
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
 
-	RenderEngine& renderEngine = OsEng.renderEngine();
-	if (_shader) {
-		renderEngine.removeRenderProgram(_shader);
-		_shader = nullptr;
-	}
-	return true;
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+    return true;
 }
 
 void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
-	if (_visible && !list.empty()) {
-		createVertexList(list);
-		_shader->activate();
+    if (_visible && !list.empty()) {
+        createVertexList(list);
+        _shader->activate();
 
-		_shader->setUniform("radius", _radiusSize);
-		_shader->setUniform("transparency", _transparency);
-		_shader->setUniform("thickness", _thickness);
-		_shader->setUniform("color", _color.value());
+        _shader->setUniform("radius", _radiusSize);
+        _shader->setUniform("transparency", _transparency);
+        _shader->setUniform("thickness", _thickness);
+        _shader->setUniform("color", _color.value());
 
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-		glBindVertexArray(_quad);
-		glDrawArrays(GL_POINTS, 0, _numFingers);
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
+        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        glBindVertexArray(_quad);
+        glDrawArrays(GL_POINTS, 0, _numFingers);
 
-		_shader->deactivate();
-	}
+        _shader->deactivate();
+    }
 }
 
 void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor> list) {
-	_numFingers = list.size();
-	GLfloat vertexData[MAX_FINGERS];
-	int i = 0;
-	for (const TUIO::TuioCursor& c : list) {
-		vertexData[i] = 2 * (c.getX() - 0.5);
-		vertexData[i + 1] = -2 * (c.getY() - 0.5);
-		i += 2;
-	}
+    _numFingers = list.size();
+    GLfloat vertexData[MAX_FINGERS];
+    int i = 0;
+    for (const TUIO::TuioCursor& c : list) {
+        vertexData[i] = 2 * (c.getX() - 0.5);
+        vertexData[i + 1] = -2 * (c.getY() - 0.5);
+        i += 2;
+    }
 
-	glBindVertexArray(_quad);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(
-		0,
-		2,
-		GL_FLOAT,
-		GL_FALSE,
-		0,
-		0
-	);
+    glBindVertexArray(_quad);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        0
+    );
 }
 
 } // openspace namespace

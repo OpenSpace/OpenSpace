@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -211,7 +211,7 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, d
 
     const CameraPose& prevPose = prevKeyframe->data;
     const CameraPose& nextPose = nextKeyframe->data;
-	
+    
     Scene* scene = camera.parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
@@ -263,77 +263,77 @@ OrbitalInteractionMode::MouseStates::MouseStates(double sensitivity, double velo
 {}
 
 void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
-	ghoul::any t = property("Global Properties.Touch.TouchInteraction.TouchEvents")->get();
-	if (!*(ghoul::any_cast<bool>(&t))) {
-		glm::dvec2 mousePosition = inputState.getMousePosition();
+    ghoul::any t = property("Global Properties.Touch.TouchInteraction.TouchEvents")->get();
+    if (!*(ghoul::any_cast<bool>(&t))) {
+        glm::dvec2 mousePosition = inputState.getMousePosition();
 
-		bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
-		bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);
-		bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
-		bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl);
-		bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift);
+        bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
+        bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);
+        bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
+        bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl);
+        bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift);
 
-		// Update the mouse states
-		if (button1Pressed && !keyShiftPressed) {
-			if (keyCtrlPressed) {
-				glm::dvec2 mousePositionDelta =
-					_localRotationMouseState.previousPosition - mousePosition;
-				_localRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+        // Update the mouse states
+        if (button1Pressed && !keyShiftPressed) {
+            if (keyCtrlPressed) {
+                glm::dvec2 mousePositionDelta =
+                    _localRotationMouseState.previousPosition - mousePosition;
+                _localRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
 
-				_globalRotationMouseState.previousPosition = mousePosition;
-				_globalRotationMouseState.velocity.decelerate(deltaTime);
-			}
-			else {
-				glm::dvec2 mousePositionDelta =
-					_globalRotationMouseState.previousPosition - mousePosition;
-				_globalRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+                _globalRotationMouseState.previousPosition = mousePosition;
+                _globalRotationMouseState.velocity.decelerate(deltaTime);
+            }
+            else {
+                glm::dvec2 mousePositionDelta =
+                    _globalRotationMouseState.previousPosition - mousePosition;
+                _globalRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
 
-				_localRotationMouseState.previousPosition = mousePosition;
-				_localRotationMouseState.velocity.decelerate(deltaTime);
-			}
-		}
-		else { // !button1Pressed
-			_localRotationMouseState.previousPosition = mousePosition;
-			_localRotationMouseState.velocity.decelerate(deltaTime);
+                _localRotationMouseState.previousPosition = mousePosition;
+                _localRotationMouseState.velocity.decelerate(deltaTime);
+            }
+        }
+        else { // !button1Pressed
+            _localRotationMouseState.previousPosition = mousePosition;
+            _localRotationMouseState.velocity.decelerate(deltaTime);
 
-			_globalRotationMouseState.previousPosition = mousePosition;
-			_globalRotationMouseState.velocity.decelerate(deltaTime);
-		}
-		if (button2Pressed) {
-			glm::dvec2 mousePositionDelta =
-				_truckMovementMouseState.previousPosition - mousePosition;
-			_truckMovementMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
-		}
-		else { // !button2Pressed
-			_truckMovementMouseState.previousPosition = mousePosition;
-			_truckMovementMouseState.velocity.decelerate(deltaTime);
-		}
-		if (button3Pressed || (keyShiftPressed && button1Pressed)) {
-			if (keyCtrlPressed) {
-				glm::dvec2 mousePositionDelta =
-					_localRollMouseState.previousPosition - mousePosition;
-				_localRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+            _globalRotationMouseState.previousPosition = mousePosition;
+            _globalRotationMouseState.velocity.decelerate(deltaTime);
+        }
+        if (button2Pressed) {
+            glm::dvec2 mousePositionDelta =
+                _truckMovementMouseState.previousPosition - mousePosition;
+            _truckMovementMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+        }
+        else { // !button2Pressed
+            _truckMovementMouseState.previousPosition = mousePosition;
+            _truckMovementMouseState.velocity.decelerate(deltaTime);
+        }
+        if (button3Pressed || (keyShiftPressed && button1Pressed)) {
+            if (keyCtrlPressed) {
+                glm::dvec2 mousePositionDelta =
+                    _localRollMouseState.previousPosition - mousePosition;
+                _localRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
 
-				_globalRollMouseState.previousPosition = mousePosition;
-				_globalRollMouseState.velocity.decelerate(deltaTime);
-			}
-			else {
-				glm::dvec2 mousePositionDelta =
-					_globalRollMouseState.previousPosition - mousePosition;
-				_globalRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+                _globalRollMouseState.previousPosition = mousePosition;
+                _globalRollMouseState.velocity.decelerate(deltaTime);
+            }
+            else {
+                glm::dvec2 mousePositionDelta =
+                    _globalRollMouseState.previousPosition - mousePosition;
+                _globalRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
 
-				_localRollMouseState.previousPosition = mousePosition;
-				_localRollMouseState.velocity.decelerate(deltaTime);
-			}
-		}
-		else { // !button3Pressed
-			_globalRollMouseState.previousPosition = mousePosition;
-			_globalRollMouseState.velocity.decelerate(deltaTime);
+                _localRollMouseState.previousPosition = mousePosition;
+                _localRollMouseState.velocity.decelerate(deltaTime);
+            }
+        }
+        else { // !button3Pressed
+            _globalRollMouseState.previousPosition = mousePosition;
+            _globalRollMouseState.velocity.decelerate(deltaTime);
 
-			_localRollMouseState.previousPosition = mousePosition;
-			_localRollMouseState.velocity.decelerate(deltaTime);
-		}
-	}
+            _localRollMouseState.previousPosition = mousePosition;
+            _localRollMouseState.velocity.decelerate(deltaTime);
+        }
+    }
 }
 
 void OrbitalInteractionMode::MouseStates::setRotationalFriction(double friction) {
@@ -404,7 +404,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
         // Follow focus nodes movement
         dvec3 centerPos = _focusNode->worldPosition();
         dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
-		_previousFocusNodePosition = centerPos;
+        _previousFocusNodePosition = centerPos;
         camPos += focusNodeDiff;
 
         dquat totalRotation = camera.rotationQuaternion();

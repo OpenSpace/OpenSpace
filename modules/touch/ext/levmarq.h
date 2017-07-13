@@ -1,4 +1,4 @@
-/*
+﻿/*
 levmarq.c and levmarq.h are provided under the MIT license.
 Copyright(c) 2008 - 2016 Ron Babich
 
@@ -29,17 +29,17 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 
 typedef struct {
-	bool verbose;
-	std::string data;
-	std::vector<glm::dvec2> pos;
-	int max_it;
-	double init_lambda;
-	double up_factor;
-	double down_factor;
-	double target_derr;
-	int final_it;
-	double final_err;
-	double final_derr;
+    bool verbose;
+    std::string data;
+    std::vector<glm::dvec2> pos;
+    int max_it;
+    double init_lambda;
+    double up_factor;
+    double down_factor;
+    double target_derr;
+    int final_it;
+    double final_err;
+    double final_derr;
 } LMstat;
 
 /**
@@ -51,15 +51,15 @@ void levmarq_init(LMstat *lmstat);
 * Main function call, finds appropriate values for par[nDOF] that manipulates the camera correctly to direct-manipulation
 */
 bool levmarq(int npar, double *par, int ny, double *dysq,
-	double (*func)(double *, int, void *, LMstat*),
-	void (*grad)(double *, double *, int, void *, LMstat*),
-	void *fdata, LMstat *lmstat);
+    double (*func)(double *, int, void *, LMstat*),
+    void (*grad)(double *, double *, int, void *, LMstat*),
+    void *fdata, LMstat *lmstat);
 
 /**
 * Returns the total L2 error (to be minimized) with each contact point's distance from the projected coordinates depending on par[nDOF]. 
 */
 double error_func(double *par, int ny, double *dysq,
-	double (*func)(double *, int, void *, LMstat*), void *fdata, LMstat* lmstat);
+    double (*func)(double *, int, void *, LMstat*), void *fdata, LMstat* lmstat);
 
 void solve_axb_cholesky(int n, double** l, double* x, double* b);
 

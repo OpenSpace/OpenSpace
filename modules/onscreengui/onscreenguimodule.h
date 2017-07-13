@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,9 +32,9 @@
 namespace openspace {
 
 struct Touch {
-	bool active;
-	glm::vec2 pos;
-	uint32_t action;
+    bool active;
+    glm::vec2 pos;
+    uint32_t action;
 };
 
 class OnScreenGUIModule : public OpenSpaceModule {
@@ -44,7 +44,7 @@ public:
     OnScreenGUIModule();
     
     static gui::GUI gui;
-	static Touch touchInput;
+    static Touch touchInput;
 };
 
 } // namespace openspace

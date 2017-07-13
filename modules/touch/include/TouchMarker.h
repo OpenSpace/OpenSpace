@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -43,7 +43,7 @@
 
 namespace ghoul {
 namespace opengl {
-	class ProgramObject;
+    class ProgramObject;
 } // namespace opengl
 } // namespace ghoul
 
@@ -52,29 +52,29 @@ namespace openspace {
 
 class TouchMarker : public properties::PropertyOwner
 {
-	public:
-		TouchMarker();
+    public:
+        TouchMarker();
 
-		bool initialize();
-		bool deinitialize();
+        bool initialize();
+        bool deinitialize();
 
-		void render(const std::vector<TUIO::TuioCursor> list);
+        void render(const std::vector<TUIO::TuioCursor> list);
 
 
-	private:
-		void createVertexList(const std::vector<TUIO::TuioCursor> list);
+    private:
+        void createVertexList(const std::vector<TUIO::TuioCursor> list);
 
-		properties::BoolProperty _visible;
-		properties::FloatProperty _radiusSize;
-		properties::FloatProperty _transparency;
-		properties::FloatProperty _thickness;
-		properties::Vec3Property _color;
+        properties::BoolProperty _visible;
+        properties::FloatProperty _radiusSize;
+        properties::FloatProperty _transparency;
+        properties::FloatProperty _thickness;
+        properties::Vec3Property _color;
 
-		std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-		
-		GLuint _quad;
-		GLuint _vertexPositionBuffer;
-		int _numFingers;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+        
+        GLuint _quad;
+        GLuint _vertexPositionBuffer;
+        int _numFingers;
 };
 
 } // openspace namespace
