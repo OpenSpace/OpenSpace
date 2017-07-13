@@ -58,7 +58,7 @@ void SimpleRawTileDataReader::reset() {
 }
 
 int SimpleRawTileDataReader::maxChunkLevel() const {
-    return 2;
+    return 5;
 }
 
 float SimpleRawTileDataReader::noDataValueAsFloat() const {
@@ -85,20 +85,6 @@ float SimpleRawTileDataReader::depthScale() const {
     return 1.0f;
 }
 
-/*
-IODescription SimpleRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
-    IODescription io;
-    io.read.overview = 0;
-    io.read.region = highestResPixelRegion(tileIndex);
-    io.read.fullRegion = PixelRegion({0, 0}, {rasterXSize(), rasterYSize()});
-    io.write.region = PixelRegion({0, 0}, io.read.region.numPixels);
-    io.write.bytesPerLine = _dataTexture->bytesPerPixel() * io.write.region.numPixels.x;
-    io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
-    
-    return io;
-}
-*/
-
 void SimpleRawTileDataReader::initialize() {
     _dataTexture = ghoul::io::TextureReader::ref().loadTexture(_datasetFilePath);
     if (_dataTexture == nullptr) {
@@ -108,33 +94,8 @@ void SimpleRawTileDataReader::initialize() {
             "formats."
         );
     }
-    float exponentX = log2(_dataTexture->dimensions().x);
-    float exponentY = log2(_dataTexture->dimensions().y);
-    if ( (exponentX - static_cast<int>(exponentX)) > 0.0001 ||
-       (exponentY - static_cast<int>(exponentY)) > 0.0001 ) {
-        throw ghoul::RuntimeError(
-            "Unable to read dataset: " + _datasetFilePath +
-            ".\nCurrently only supporting power of 2 textures."
-        );
-    }
-
     _depthTransform = {depthScale(), depthOffset()};
 }
-
-/*
-void SimpleRawTileDataReader::readImageData(
-    IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const {
-    
-    // Modify to match OpenGL texture layout:
-    IODescription modifiedIO = io;
-    modifiedIO.read.region.start.y = modifiedIO.read.fullRegion.numPixels.y - modifiedIO.read.region.numPixels.y - modifiedIO.read.region.start.y;
-  
-    RawTile::ReadError err = repeatedRasterRead(0, modifiedIO, dataDestination);
-
-    // None = 0, Debug = 1, Warning = 2, Failure = 3, Fatal = 4
-    worstError = std::max(worstError, err);
-}
-*/
 
 RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     int rasterBand, const IODescription& io, char* dataDestination) const
@@ -143,31 +104,100 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
         "IODescription does not match data texture.");
     ghoul_assert(static_cast<unsigned int>(io.read.fullRegion.numPixels.y) == _dataTexture->dimensions().y,
         "IODescription does not match data texture.");
-    ghoul_assert(io.read.region.numPixels.x == io.write.region.numPixels.x,
-        "IODescription does not match data texture.");
-    ghoul_assert(io.read.region.numPixels.y == io.write.region.numPixels.y,
-        "IODescription does not match data texture.");
 
-    char* pixelWriteRow = dataDestination + io.write.bytesPerLine;
-    
-/*
-    try {
-        // For each row
-        for (int y = 0; y < io.read.region.numPixels.y; y++) {
-            int bytesPerLineDataTexture =
-                _dataTexture->bytesPerPixel() * _dataTexture->dimensions().x;
-            const char* textureRow = (static_cast<const char*>(_dataTexture->pixelData())
-                + io.read.region.start.x * _dataTexture->bytesPerPixel())
-                + io.read.region.start.y * bytesPerLineDataTexture
-                + y * bytesPerLineDataTexture;
-            memcpy(pixelWriteRow, textureRow, io.write.bytesPerLine);
-            pixelWriteRow += io.write.bytesPerLine;
+    // Modify to match OpenGL texture layout:
+    IODescription modifiedIO = io;
+    modifiedIO.read.region.start.y =
+        modifiedIO.read.fullRegion.numPixels.y -
+        modifiedIO.read.region.numPixels.y -
+        modifiedIO.read.region.start.y;
+  
+    char* writeDataStart =
+        dataDestination +
+        _initData.bytesPerLine() * modifiedIO.write.region.start.y +
+        _initData.bytesPerPixel() * modifiedIO.write.region.start.x;
+
+    for (int y = 0; y < modifiedIO.write.region.numPixels.y; ++y) {
+        for (int x = 0; x < modifiedIO.write.region.numPixels.x; ++x) {
+            char* pixelWriteDestination =
+                writeDataStart +
+                y * _initData.bytesPerLine() +
+                x * _initData.bytesPerPixel();
+
+            int xInSource =
+                modifiedIO.read.region.start.x +
+                static_cast<float>(x) / modifiedIO.write.region.numPixels.x *
+                modifiedIO.read.region.numPixels.x;
+            int yInSource =
+                modifiedIO.read.region.start.y +
+                static_cast<float>(y) / modifiedIO.write.region.numPixels.y *
+                modifiedIO.read.region.numPixels.y;
+
+            glm::vec4 sourceTexel = _dataTexture->texelAsFloat(xInSource, yInSource);
+
+            switch (_initData.glType()) {
+                case GL_UNSIGNED_BYTE: {
+                    unsigned char value = static_cast<unsigned char>(
+                        sourceTexel[rasterBand - 1] * 255
+                    );
+                    char* bytes = reinterpret_cast<char*>(&value);
+                    *pixelWriteDestination = *bytes;
+                    break;
+                }
+                case GL_BYTE: {
+                    char value = static_cast<char>(
+                        sourceTexel[rasterBand - 1]
+                    );
+                    char* bytes = reinterpret_cast<char*>(&value);
+                    *pixelWriteDestination = *bytes;
+                    break;
+                }
+                case GL_UNSIGNED_SHORT: {
+                    unsigned short value = static_cast<unsigned short>(
+                        sourceTexel[rasterBand - 1]
+                    );
+                    char* bytes = reinterpret_cast<char*>(&value);
+                    *pixelWriteDestination = *bytes;
+                    break;
+                }
+                case GL_SHORT: {
+                    short value = static_cast<short>(
+                        sourceTexel[rasterBand - 1]
+                    );
+                    char* bytes = reinterpret_cast<char*>(&value);
+                    *pixelWriteDestination = *bytes;
+                    break;
+                }
+                case GL_UNSIGNED_INT: {
+                    unsigned int value = static_cast<unsigned int>(
+                        sourceTexel[rasterBand - 1]
+                    );
+                    char* bytes = reinterpret_cast<char*>(&value);
+                    *pixelWriteDestination = *bytes;
+                    break;
+                }
+                case GL_INT: {
+                    int value = static_cast<int>(
+                        sourceTexel[rasterBand - 1]
+                    );
+                    char* bytes = reinterpret_cast<char*>(&value);
+                    *pixelWriteDestination = *bytes;
+                    break;
+                }
+                case GL_FLOAT: {
+                    float value = sourceTexel[rasterBand - 1];
+                    char* bytes = reinterpret_cast<char*>(&value);
+                    *pixelWriteDestination = *bytes;
+                    break;
+                }
+                default: {
+                    ghoul_assert(false, "Unknown texture type");
+                    return RawTile::ReadError::Failure;
+                }
+            }
         }
-    } catch (const std::exception&) {
-        return RawTile::ReadError::Failure;
     }
     return RawTile::ReadError::None;
-    */
 }
 
 
