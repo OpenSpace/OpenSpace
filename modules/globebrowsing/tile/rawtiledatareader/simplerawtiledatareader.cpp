@@ -143,54 +143,47 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                     unsigned char value = static_cast<unsigned char>(
                         sourceTexel[rasterBand - 1] * 255
                     );
-                    char* bytes = reinterpret_cast<char*>(&value);
-                    *pixelWriteDestination = *bytes;
+                    *reinterpret_cast<unsigned char*>(pixelWriteDestination) = value;
                     break;
                 }
                 case GL_BYTE: {
                     char value = static_cast<char>(
                         sourceTexel[rasterBand - 1] * 255
                     );
-                    char* bytes = reinterpret_cast<char*>(&value);
-                    *pixelWriteDestination = *bytes;
+                    *reinterpret_cast<char*>(pixelWriteDestination) = value;
                     break;
                 }
                 case GL_UNSIGNED_SHORT: {
                     unsigned short value = static_cast<unsigned short>(
                         sourceTexel[rasterBand - 1] * 65535
                     );
-                    char* bytes = reinterpret_cast<char*>(&value);
-                    *pixelWriteDestination = *bytes;
+                    *reinterpret_cast<unsigned short*>(pixelWriteDestination) = value;
                     break;
                 }
                 case GL_SHORT: {
                     short value = static_cast<short>(
                         sourceTexel[rasterBand - 1] * 65535
                     );
-                    char* bytes = reinterpret_cast<char*>(&value);
-                    *pixelWriteDestination = *bytes;
+                    *reinterpret_cast<short*>(pixelWriteDestination) = value;
                     break;
                 }
                 case GL_UNSIGNED_INT: {
                     unsigned int value = static_cast<unsigned int>(
                         sourceTexel[rasterBand - 1] * 4294967295
                     );
-                    char* bytes = reinterpret_cast<char*>(&value);
-                    *pixelWriteDestination = *bytes;
+                    *reinterpret_cast<unsigned int*>(pixelWriteDestination) = value;
                     break;
                 }
                 case GL_INT: {
                     int value = static_cast<int>(
                         sourceTexel[rasterBand - 1] * 4294967295
                     );
-                    char* bytes = reinterpret_cast<char*>(&value);
-                    *pixelWriteDestination = *bytes;
+                    *reinterpret_cast<int*>(pixelWriteDestination) = value;
                     break;
                 }
                 case GL_FLOAT: {
-                    GLfloat value = sourceTexel[rasterBand - 1];
-                    char* bytes = reinterpret_cast<char*>(&value);
-                    *pixelWriteDestination = *bytes;
+                    float value = sourceTexel[rasterBand - 1];
+                    *reinterpret_cast<float*>(pixelWriteDestination) = value;
                     break;
                 }
                 default: {
