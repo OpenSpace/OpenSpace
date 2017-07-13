@@ -22,17 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${MODULE_GLOBEBROWSING}/shaders/tilefragcolor.hglsl>
-#include "fragment.glsl"
+#ifndef TILE_VERTEX_SKIRT_HGLSL
+#define TILE_VERTEX_SKIRT_HGLSL
 
-Fragment getFragment() {
-    Fragment frag;
-    frag.color = getTileFragColor();
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#if SHOW_CHUNK_EDGES
-    frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
-#endif // SHOW_CHUNK_EDGES
+uniform int xSegments;
+uniform float skirtLength;
 
-    frag.depth = fs_position.w;
-    return frag;
+bool tileVertexIsSkirtVertex(){
+    int vertexIDx = gl_VertexID % (xSegments + 3);
+    int vertexIDy = gl_VertexID / (xSegments + 3);
+    return vertexIDx == 0 || vertexIDy == 0 ||
+        vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
 }
+
+float getTileVertexSkirtLength(){
+    return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
+}
+
+#endif // TILE_VERTEX_SKIRT_HGLSL
