@@ -25,7 +25,7 @@
 #ifndef BLENDING_HGLSL
 #define BLENDING_HGLSL
 
-vec4 blendOver(vec4 oldColor, vec4 newColor)
+vec4 blendNormal(vec4 oldColor, vec4 newColor)
 {
 	vec4 toReturn;
 	toReturn.rgb =

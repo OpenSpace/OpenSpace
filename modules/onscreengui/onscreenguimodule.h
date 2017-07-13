@@ -33,6 +33,8 @@ namespace openspace {
     
 class OnScreenGUIModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "OnScreenGUI";
+
     OnScreenGUIModule();
     
     static gui::GUI gui;

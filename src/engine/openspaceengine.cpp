@@ -89,7 +89,7 @@ using namespace ghoul::cmdparser;
 
 namespace {
     const char* _loggerCat = "OpenSpaceEngine";
-    const char* SgctDefaultConfigFile = "${SGCT}/single.xml";
+    const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
     
     const char* SgctConfigArgumentCommand = "-config";
     
@@ -203,6 +203,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
     
     requestClose = false;
 
+    LDEBUG("Initialize FileSystem");
+
     ghoul::initialize();
 
     // Initialize the LogManager and add the console log as this will be used every time
@@ -215,8 +217,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
     LogMgr.addLog(std::make_unique<ConsoleLog>());
-
-    LDEBUG("Initialize FileSystem");
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
@@ -284,8 +284,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         }
         throw;
     }
-    catch (const ghoul::RuntimeError&) {
+    catch (const ghoul::RuntimeError& e) {
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        LFATALC(e.component, e.message);
         throw;
     }
 
@@ -1196,18 +1197,18 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
         func(x, y);
     }
 
-	_navigationHandler->mousePositionCallback(x, y);
+    _navigationHandler->mousePositionCallback(x, y);
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
+void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     for (const auto& func : _moduleCallbacks.mouseScrollWheel) {
-        bool consumed = func(pos);
+        bool consumed = func(posX, posY);
         if (consumed) {
             return;
         }
     }
     
-	_navigationHandler->mouseScrollWheelCallback(pos);
+    _navigationHandler->mouseScrollWheelCallback(posY);
 }
 
 void OpenSpaceEngine::encode() {
@@ -1357,7 +1358,7 @@ void OpenSpaceEngine::registerModuleMousePositionCallback(
 }
 
 void OpenSpaceEngine::registerModuleMouseScrollWheelCallback(
-                                                    std::function<bool (double)> function)
+                                            std::function<bool (double, double)> function)
 {
     _moduleCallbacks.mouseScrollWheel.push_back(std::move(function));
 }

@@ -22,12 +22,6 @@ return {
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
-
-                },
-                GrayScaleColorOverlays = {
-
-                },
-                GrayScaleLayers = {
                     {
                         Name = "OnMoonColorGrayscale",
                         FilePath = "map_service_configs/OnMoonColor.xml",
@@ -46,28 +40,13 @@ return {
                         FilePath = "map_service_configs/Utah/Wac.wms"
                     }
                 },
-                NightLayers = {
-
-                },
-                WaterMasks = {
-                    
-                },
-                ColorOverlays = {
-                    
-                },
                 HeightLayers = {
-                    {
-                        Name = "OnMoonHeight",
-                        FilePath = "map_service_configs/OnMoonHeight.xml",
-                        Enabled = true,
-                        DoPreProcessing = true,
-                        TileSize = 64,
-                    },
                     {
                         Name = "LolaDem",
                         FilePath = "map_service_configs/Utah/LolaDem.wms",
-                        DoPreProcessing = true,
-                        TileSize = 64,
+                        Enabled = true,
+                        TilePixelSize = 64,
+                        Settings = { Multiplier = 0.5 },
                     }
                 },
             },

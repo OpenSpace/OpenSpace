@@ -26,6 +26,7 @@
  
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 namespace {
@@ -75,7 +76,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     glm::dvec3 radii;
     dictionary.getValue(keyRadii, radii);
     _ellipsoid = Ellipsoid(radii);
-    setBoundingSphere(_ellipsoid.averageRadius());
+    setBoundingSphere(_ellipsoid.maximumRadius());
 
     // Ghoul can't read ints from lua dictionaries...
     double patchSegmentsd;
@@ -93,13 +94,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
         *this, patchSegments, _layerManager);
+    //_pointGlobe = std::make_shared<PointGlobe>(*this);
         
-    // This distance will be enough to render the globe as one pixel if the field of
-    // view is 'fov' radians and the screen resolution is 'res' pixels.
-    double fov = 2 * glm::pi<double>() / 6; // 60 degrees
-    int res = 2880;
-    double distance = res * _ellipsoid.maximumRadius() / tan(fov / 2);
-    _distanceSwitch.addSwitchValue(_chunkedLodGlobe, distance);
+    _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
+    //_distanceSwitch.addSwitchValue(_pointGlobe);
         
     addProperty(_generalProperties.isEnabled);
     addProperty(_generalProperties.atmosphereEnabled);
@@ -136,6 +134,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
+    //addPropertySubOwner(_pointGlobe.get());
 }
 
 bool RenderableGlobe::initialize() {
@@ -214,6 +213,10 @@ float RenderableGlobe::getHeight(glm::dvec3 position) {
 
 std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() const{
     return _chunkedLodGlobe;
+}
+
+LayerManager* RenderableGlobe::layerManager() const {
+    return _layerManager.get();
 }
 
 const Ellipsoid& RenderableGlobe::ellipsoid() const{

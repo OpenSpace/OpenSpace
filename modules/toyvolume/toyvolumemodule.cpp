@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-ToyVolumeModule::ToyVolumeModule() : OpenSpaceModule("ToyVolume") {}
+ToyVolumeModule::ToyVolumeModule() : OpenSpaceModule(Name) {}
 
 void ToyVolumeModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

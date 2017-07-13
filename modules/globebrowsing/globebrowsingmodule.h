@@ -38,7 +38,7 @@ namespace cache {
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
-    static const std::string name;
+    constexpr static const char* Name = "GlobeBrowsing";
 
     GlobeBrowsingModule();
 
@@ -46,11 +46,20 @@ public:
     
 
     scripting::LuaLibrary luaLibrary() const override;
-
 protected:
     void internalInitialize() override;
 
 private:
+    /**
+     \return a comma separated list of layer group names.
+     */
+    static std::string layerGroupNamesList();
+
+    /**
+     \return a comma separated list of layer type names.
+     */
+    static std::string layerTypeNamesList();
+
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 };
 

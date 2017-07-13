@@ -31,6 +31,8 @@ namespace openspace {
 
 class BaseModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "Base";
+
     BaseModule();
     virtual ~BaseModule() = default;
     std::vector<documentation::Documentation> documentations() const override;
