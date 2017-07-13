@@ -31,6 +31,8 @@ namespace openspace {
 
 class KameleonModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "Kameleon";
+
     KameleonModule();
 };
 

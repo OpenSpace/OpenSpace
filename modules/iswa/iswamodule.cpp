@@ -39,7 +39,7 @@
 namespace openspace {
 
 IswaModule::IswaModule()
-    : OpenSpaceModule("ISWA")
+    : OpenSpaceModule(Name)
 {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Initialize,

@@ -53,11 +53,7 @@
 
 namespace openspace {
 
-const std::string GlobeBrowsingModule::name = "GlobeBrowsing";
-
-GlobeBrowsingModule::GlobeBrowsingModule()
-    : OpenSpaceModule(name)
-{ }
+GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
 
 void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;

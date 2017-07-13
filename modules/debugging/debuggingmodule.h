@@ -31,6 +31,8 @@ namespace openspace {
 
 class DebuggingModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "Debugging";
+
     DebuggingModule();
     
 protected:
