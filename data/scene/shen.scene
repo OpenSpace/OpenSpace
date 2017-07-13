@@ -23,6 +23,8 @@ function postInitialization()
     openspace.resetCameraDirection()
 
     openspace.printInfo("Done setting default values")
+
+    dofile(openspace.absPath('${SCRIPTS}/config_research_kit.lua'))
 end
 
 
