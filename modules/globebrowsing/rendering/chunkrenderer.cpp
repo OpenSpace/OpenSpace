@@ -150,6 +150,10 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         glm::dvec3 corner11 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::NORTH_EAST));
         
+        // This is an assumption that the height tile has a resolution of 64 * 64
+        // If it does not it will still produce "correct" normals. If the resolution is
+        // higher the shadows will be softer, if it is lower, pixels will be visible.
+        // Since default is 64 this will most likely work fine.
         float tileDelta = 1.0f / 64.0f;
         glm::vec3 deltaTheta0 = glm::vec3(corner10 - corner00) * tileDelta;
         glm::vec3 deltaTheta1 = glm::vec3(corner11 - corner01) * tileDelta;

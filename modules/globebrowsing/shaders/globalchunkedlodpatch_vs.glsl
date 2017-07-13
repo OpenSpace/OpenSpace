@@ -86,8 +86,11 @@ void main() {
 
 #if USE_ACCURATE_NORMALS
     // Calculate tangents
-    PositionNormalPair pair10 = globalInterpolation(in_uv + vec2(1.0, 0.0) / 512.0);
-    PositionNormalPair pair01 = globalInterpolation(in_uv + vec2(0.0, 1.0) / 512.0);
+    // tileDelta is a step length (epsilon). Should be small enough for accuracy but not
+    // Too small for precision. 1 / 512 is good.
+    float tileDelta = 1.0f / 512.0f;
+    PositionNormalPair pair10 = globalInterpolation(in_uv + vec2(1.0, 0.0) * tileDelta);
+    PositionNormalPair pair01 = globalInterpolation(in_uv + vec2(0.0, 1.0) * tileDelta);
     vec3 ellipsoidTangentTheta = normalize(pair10.position - pair.position);
     vec3 ellipsoidTangentPhi = normalize(pair01.position - pair.position);
     ellipsoidTangentThetaCameraSpace = mat3(modelViewTransform) * ellipsoidTangentTheta;

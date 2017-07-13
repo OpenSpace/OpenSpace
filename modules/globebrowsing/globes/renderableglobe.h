@@ -123,7 +123,7 @@ private:
     
     double _interactionDepthBelowEllipsoid;
     std::string _frame;
-    double _time; 
+    double _time;
 
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;
