@@ -58,7 +58,8 @@ void SimpleRawTileDataReader::reset() {
 }
 
 int SimpleRawTileDataReader::maxChunkLevel() const {
-    return 5;
+    float ratio = static_cast<float>(rasterYSize()) / _initData.dimensionsWithoutPadding().y;
+    return glm::max(2, 1 + static_cast<int>(glm::log2(ratio)));
 }
 
 float SimpleRawTileDataReader::noDataValueAsFloat() const {
@@ -100,9 +101,11 @@ void SimpleRawTileDataReader::initialize() {
 RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     int rasterBand, const IODescription& io, char* dataDestination) const
 {
-    ghoul_assert(static_cast<unsigned int>(io.read.fullRegion.numPixels.x) == _dataTexture->dimensions().x,
+    ghoul_assert(static_cast<unsigned int>(
+        io.read.fullRegion.numPixels.x) == _dataTexture->dimensions().x,
         "IODescription does not match data texture.");
-    ghoul_assert(static_cast<unsigned int>(io.read.fullRegion.numPixels.y) == _dataTexture->dimensions().y,
+    ghoul_assert(static_cast<unsigned int>(
+        io.read.fullRegion.numPixels.y) == _dataTexture->dimensions().y,
         "IODescription does not match data texture.");
 
     // Modify to match OpenGL texture layout:
