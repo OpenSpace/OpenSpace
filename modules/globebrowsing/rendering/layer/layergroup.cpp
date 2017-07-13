@@ -28,6 +28,8 @@
 
 namespace {
     const char* _loggerCat = "LayerGroup";
+
+    const char* KeyFallback = "Fallback";
 }
 
 namespace openspace {
@@ -53,6 +55,19 @@ LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
+
+            if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyFallback)) {
+                LWARNING("Unable to create layer. Initializing fallback layer.");
+                ghoul::Dictionary fallbackLayerDict =
+                layerDict.value<ghoul::Dictionary>(KeyFallback);
+                try {
+                    addLayer(fallbackLayerDict);
+                }
+                catch (const ghoul::RuntimeError& e) {
+                    LERRORC(e.component, e.message);
+                    continue;
+                }
+            }
             continue;
         }
     }

@@ -135,6 +135,9 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
 
             glm::vec4 sourceTexel = _dataTexture->texelAsFloat(xInSource, yInSource);
 
+            // Different type reinterpreting depending on the type of the target texture
+            // the _initData.glType() does not necessarily have to be the same type as
+            // the type of the source texture. Therefore the value is cast to float first.
             switch (_initData.glType()) {
                 case GL_UNSIGNED_BYTE: {
                     unsigned char value = static_cast<unsigned char>(
@@ -146,7 +149,7 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                 }
                 case GL_BYTE: {
                     char value = static_cast<char>(
-                        sourceTexel[rasterBand - 1]
+                        sourceTexel[rasterBand - 1] * 255
                     );
                     char* bytes = reinterpret_cast<char*>(&value);
                     *pixelWriteDestination = *bytes;
@@ -154,7 +157,7 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                 }
                 case GL_UNSIGNED_SHORT: {
                     unsigned short value = static_cast<unsigned short>(
-                        sourceTexel[rasterBand - 1]
+                        sourceTexel[rasterBand - 1] * 65535
                     );
                     char* bytes = reinterpret_cast<char*>(&value);
                     *pixelWriteDestination = *bytes;
@@ -162,7 +165,7 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                 }
                 case GL_SHORT: {
                     short value = static_cast<short>(
-                        sourceTexel[rasterBand - 1]
+                        sourceTexel[rasterBand - 1] * 65535
                     );
                     char* bytes = reinterpret_cast<char*>(&value);
                     *pixelWriteDestination = *bytes;
@@ -170,7 +173,7 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                 }
                 case GL_UNSIGNED_INT: {
                     unsigned int value = static_cast<unsigned int>(
-                        sourceTexel[rasterBand - 1]
+                        sourceTexel[rasterBand - 1] * 4294967295
                     );
                     char* bytes = reinterpret_cast<char*>(&value);
                     *pixelWriteDestination = *bytes;
@@ -178,14 +181,14 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                 }
                 case GL_INT: {
                     int value = static_cast<int>(
-                        sourceTexel[rasterBand - 1]
+                        sourceTexel[rasterBand - 1] * 4294967295
                     );
                     char* bytes = reinterpret_cast<char*>(&value);
                     *pixelWriteDestination = *bytes;
                     break;
                 }
                 case GL_FLOAT: {
-                    float value = sourceTexel[rasterBand - 1];
+                    GLfloat value = sourceTexel[rasterBand - 1];
                     char* bytes = reinterpret_cast<char*>(&value);
                     *pixelWriteDestination = *bytes;
                     break;

@@ -124,18 +124,12 @@ void RawTileDataReader::readImageData(
         static_cast<int>(_initData.nRasters()));
 
     switch (_initData.ghoulTextureFormat()) {
-        case ghoul::opengl::Texture::Format::Red:
-            if (nRastersToRead == 1) { // One channel
-                // The final destination pointer is offsetted by one datum byte size
-                // for every raster (or data channel, i.e. R in RGB)
-                char* dataDestination = imageDataDest + _initData.bytesPerDatum();
-
-                RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
-
-                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
-                worstError = std::max(worstError, err);
-            }
+        case ghoul::opengl::Texture::Format::Red: {
+            char* dataDestination = imageDataDest;
+            RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
+            worstError = std::max(worstError, err);
             break;
+        }
         case ghoul::opengl::Texture::Format::RG:
         case ghoul::opengl::Texture::Format::RGB:
         case ghoul::opengl::Texture::Format::RGBA: {

@@ -69,6 +69,11 @@ return {
             Layers = {
                 ColorLayers = {
                     {
+                            Name = "Earth Bluemarble Height",
+                            FilePath = "textures/earth_bluemarble_height.jpg",
+                            Enabled = true,
+                    },
+                    {
                         Name = "ESRI VIIRS Combo",
                         Type = "ByLevelTileLayer",
                         LevelTileProviders = {
@@ -88,6 +93,11 @@ return {
                             },
                         },
                         Enabled = true,
+                        Fallback = {
+                            Name = "Blue Marble",
+                            FilePath = "textures/earth_bluemarble.jpg",
+                            Enabled = true,
+                        }
                     },
                     {
                         Name = "BMNG",
@@ -131,6 +141,16 @@ return {
                             Gamma = 1.5,
                             Multiplier = 15.0,
                         },
+                        Fallback = {
+                            Name = "Earth Night",
+                            FilePath = "textures/earth_night.jpg",
+                            Enabled = true,
+                            Settings = {
+                                Opacity = 1.0,
+                                Gamma = 1.5,
+                                Multiplier = 15.0,
+                            },
+                        }
                     },
                     {
                         Type = "TemporalTileLayer",
@@ -143,6 +163,11 @@ return {
                         Name = "MODIS_Water_Mask",
                         FilePath = "map_service_configs/GIBS/MODIS_Water_Mask.xml",
                         Enabled = true,
+                        Fallback = {
+                            Name = "Earth Reflectance",
+                            FilePath = "textures/earth_reflectance.jpg",
+                            Enabled = true,
+                        }
                     },
                     {
                         Name = "GEBCO",
@@ -178,6 +203,11 @@ return {
                         FilePath = "map_service_configs/ESRI/TERRAIN.wms",
                         Enabled = true,
                         TilePixelSize = 64,
+                        Fallback = {
+                            Name = "Earth Bluemarble Height",
+                            FilePath = "textures/earth_bluemarble_height.jpg",
+                            Enabled = true,
+                        }
                     },
                 },
             },
