@@ -101,6 +101,7 @@ const string ConfigurationManager::PartFilterIdentifierType = "Type";
 const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier";
 const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
 
+
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
     
