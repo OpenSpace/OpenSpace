@@ -12,5 +12,4 @@
 	url = https://github.com/opensgct/sgct.git
 [submodule "modules/touch/ext/libTUIO11"]
 	path = modules/touch/ext/libTUIO11
-
 	url = https://github.com/mkalten/TUIO11_CPP
