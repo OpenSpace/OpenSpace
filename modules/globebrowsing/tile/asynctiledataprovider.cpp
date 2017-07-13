@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/other/lruthreadpool.h>
 
 #include <modules/globebrowsing/tile/tileloadjob.h>
