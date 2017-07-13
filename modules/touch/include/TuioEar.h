@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TOUCHEAR___H__
 #define __OPENSPACE_MODULE_TOUCH___TOUCHEAR___H__
 
-#include <modules/touch/ext/libTUIO/TUIO/TuioListener.h>
-#include <modules/touch/ext/libTUIO/TUIO/TuioClient.h>
-#include <modules/touch/ext/libTUIO/TUIO/UdpReceiver.h>
-#include <modules/touch/ext/libTUIO/TUIO/TcpReceiver.h>
+#include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
+#include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
+#include <modules/touch/ext/libTUIO11/TUIO/UdpReceiver.h>
+#include <modules/touch/ext/libTUIO11/TUIO/TcpReceiver.h>
 
 #include <glm/glm.hpp>
 
