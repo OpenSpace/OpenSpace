@@ -10,7 +10,6 @@ def modules = [
     "multiresvolume",
     "newhorizons",
     "onscreengui",
-    "researchkit",
     "space",
     "toyvolume",
     "volume"
@@ -35,7 +34,7 @@ stage('Build') {
                     cd build
                     cmake .. ''' +
                     flags + ''' ..
-                make
+                make -j2
                 '''
             }
         }
@@ -71,7 +70,7 @@ stage('Build') {
                       mkdir ${srcDir}/build
                     fi
                     cd ${srcDir}/build
-                    /Applications/CMake.app/Contents/bin/cmake -G Xcode -D NASM=/usr/local/bin/nasm ${srcDir} .. ''' +
+                    /Applications/CMake.app/Contents/bin/cmake -G Xcode ${srcDir} .. ''' +
                     flags + '''
                     xcodebuild -quiet
                     '''
