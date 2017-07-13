@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,6 +33,10 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
+#include <boost/iostreams/device/mapped_file.hpp>
+
+// Forward declare boost memory map
+
 namespace openspace {
 class TSP {
 public:
@@ -65,6 +69,14 @@ public:
 
     TSP(const std::string& filename);
     ~TSP();
+
+    bool openFile();
+
+    bool closeFile();
+
+    bool openMemoryMap();
+
+    bool closeMemoryMap();
 
     // load performs readHeader, readCache, writeCache and construct 
     // in the correct sequence
@@ -131,12 +143,15 @@ protected:
     std::ifstream _file;
     std::streampos _dataOffset;
 
+    boost::iostreams::mapped_file _memoryMap;
+
     // Holds the actual structure
     std::vector<int> data_;
     GLuint _dataSSBO;
 
     // Data from file
     Header _header;
+    size_t _filesize;
 
     // Additional metadata
     unsigned int paddedBrickDim_;

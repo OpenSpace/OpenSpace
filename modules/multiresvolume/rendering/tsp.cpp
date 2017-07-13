@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -63,15 +63,50 @@ TSP::TSP(const std::string& filename)
     , _spatialErrorReady(false)
     , _temporalErrorReady(false)
 {
-    _file.open(_filename, std::ios::in | std::ios::binary);
+    openFile();
+    openMemoryMap();
 }
 
 TSP::~TSP() {
+    closeFile();
+    closeMemoryMap();
+}
+
+bool TSP::openFile() {
+    if (!_file.is_open()) {
+        // Set filesize
+        _file.open(_filename, std::ios::ate | std::ios::binary);
+        _filesize = _file.tellg();
+        _file.close();
+
+        // Get file for reading
+        _file.open(_filename, std::ios::in | std::ios::binary);
+    }
+    return _file.is_open() && _file.good();
+}
+
+bool TSP::closeFile() {
     if (_file.is_open())
         _file.close();
+    return !_file.is_open();
+}
+
+bool TSP::openMemoryMap() {
+    if (!_memoryMap.is_open()) {
+        _memoryMap.open(_filename, boost::iostreams::mapped_file::mapmode::readonly, _filesize);
+    }
+    return _memoryMap.is_open();
+}
+
+bool TSP::closeMemoryMap() {
+    if (_memoryMap.is_open()) {
+        _memoryMap.close();
+    }
+    return !_memoryMap.is_open();
 }
 
 bool TSP::load() {
+    openFile();
     if (!readHeader()) {
         LERROR("Could not read header");
         return false;
@@ -276,14 +311,11 @@ GLuint TSP::ssbo() const {
 std::vector<float> TSP::calculateBrickAverages() {
     const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
-    boost::iostreams::mapped_file_source mfile;
-    mfile.open(_filename);
-
-    if (!mfile.is_open()) {
+    if (!openMemoryMap()) {
         return {};
     }
 
-    const float * voxelData = (float *)mfile.data();
+    const float * voxelData = (float *)_memoryMap.data();
     const long long headerOffset = dataPosition() / sizeof(float);
 
     std::vector<float> averages(numTotalNodes_);
@@ -301,22 +333,17 @@ std::vector<float> TSP::calculateBrickAverages() {
         averages[brick] = average / static_cast<double>(numBrickVals);
     }
 
-    mfile.close();
-
     return averages;
 }
 
 std::vector<float> TSP::calculateBrickStdDevs(std::vector<float> brickAverages) {
     const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
-    boost::iostreams::mapped_file_source mfile;
-    mfile.open(_filename);
-
-    if (!mfile.is_open()) {
+    if (!openMemoryMap()) {
         return {};
     }
 
-    const float * voxelData = (float *)mfile.data();
+    const float * voxelData = (float *)_memoryMap.data();
     const long long headerOffset = dataPosition() / sizeof(float);
 
     std::vector<float> stdDevs(numTotalNodes_);
@@ -364,8 +391,6 @@ std::vector<float> TSP::calculateBrickStdDevs(std::vector<float> brickAverages) 
 
         stdDevs[brick] = stdDev;
     }
-
-    mfile.close();
 
     return stdDevs;
 }
@@ -418,14 +443,11 @@ bool TSP::calculateSpatialError() {
 
 bool TSP::calculateTemporalError() {
 
-    boost::iostreams::mapped_file_source mfile;
-    mfile.open(_filename);
-
-    if (!mfile.is_open()) {
+    if (!openMemoryMap()) {
         return false;
     }
 
-    const float * voxelData = (float *)mfile.data();
+    const float * voxelData = (float *)_memoryMap.data();
     const long long headerOffset = dataPosition() / sizeof(float);
 
     LDEBUG("Calculating temporal error");
@@ -488,7 +510,6 @@ bool TSP::calculateTemporalError() {
         errors[brick] = avgStdDev;
 
     } // for all bricks
-    mfile.close();
 
     std::sort(meanArray.begin(), meanArray.end());
 
