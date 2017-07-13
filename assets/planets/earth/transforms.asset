@@ -1,0 +1,45 @@
+local assetHelper = asset.import('assethelper')
+local sunTransforms = asset.import('sun/transforms')
+
+asset.EarthBarycenter = {
+    Name = "EarthBarycenter",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Body = "EARTH",
+            Observer = "SUN"
+        }
+    }
+}
+
+asset.EarthInertial = {
+    -- The default reference frame for Earth-orbiting satellites
+    Name = "EarthInertial",
+    Parent = asset.EarthBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "J2000",
+            DestinationFrame = "GALACTIC",
+        }
+    },
+}
+
+asset.EarthIau = {
+    Name = "EarthIau",
+    Parent = asset.EarthBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_EARTH",
+            DestinationFrame = "GALACTIC",
+        }
+    }
+}
+
+assetHelper.registerSceneGraphNodes(asset, {
+    asset.EarthBarycenter,
+    asset.EarthInertial,
+    asset.EarthIau
+})

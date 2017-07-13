@@ -1,0 +1,5 @@
+asset.import("sun/sun")
+asset.import("planets/planets")
+-- asset.import("planets/moons")
+asset.import("planets/trails")
+-- asset.import("dwarfplanets/pluto")

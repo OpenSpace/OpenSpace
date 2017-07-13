@@ -1,0 +1,8 @@
+-- asset.import('./mercury/trail')
+-- asset.import('./venus/trail')
+asset.import('./earth/trail')
+-- asset.import('./mars/trail')
+-- asset.import('./jupiter/trail')
+-- asset.import('./saturn/trail')
+-- asset.import('./uranus/trail')
+-- asset.import('./neptune/trail')

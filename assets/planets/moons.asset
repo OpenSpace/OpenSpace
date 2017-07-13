@@ -1,0 +1,6 @@
+asset.import('./earth/moon/moon')
+asset.import('./mars/moons')
+asset.import('./jupiter/moons')
+asset.import('./saturn/moons')
+asset.import('./uranus/moons')
+asset.import('./neptune/moons')

@@ -1,0 +1,8 @@
+-- asset.import('./mercury/marker')
+-- asset.import('./venus/marker')
+asset.import('./earth/marker')
+-- asset.import('./mars/marker')
+-- asset.import('./jupiter/marker')
+-- asset.import('./saturn/marker')
+-- asset.import('./uranus/marker')
+-- asset.import('./neptune/marker')

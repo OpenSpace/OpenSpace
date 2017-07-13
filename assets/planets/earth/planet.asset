@@ -1,0 +1,40 @@
+local assetHelper = asset.import("assethelper")
+local transforms = asset.import("./transforms")
+
+asset.data = {
+    FileRequest = {
+        {
+            Destination = asset.syncedResource("textures"),
+            Identifier = "earth_textures",
+            Version = 2
+        }
+    }
+}
+
+asset.Earth = {
+    Name = "Earth",
+    Parent = transforms.EarthIau.Name,
+    Renderable = {
+        Type = "RenderablePlanet",
+        Frame = "IAU_EARTH",
+        Body = "EARTH",
+        Geometry = {
+            Type = "SimpleSphere",
+            Radius = 6.371E6,
+            Segments = 100
+        },
+        Textures = {
+            Type = "simple",
+            Color = asset.syncedResource("textures/earth_bluemarble.jpg"),
+            Night = asset.syncedResource("textures/earth_night.jpg"),
+            Height = asset.syncedResource("textures/earth_bluemarble_height.jpg")
+        }
+    },
+    Tag = {"planet_solarSystem", "planet_terrestrial"},
+    GuiName = "/Solar/Planets/Earth"
+}
+
+assetHelper.registerSceneGraphNodes(asset, {
+    asset.Earth,
+    asset.EarthMarker
+})

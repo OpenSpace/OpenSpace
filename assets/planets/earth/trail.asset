@@ -1,0 +1,24 @@
+local assetHelper = asset.import('assethelper')
+local sunTransforms = asset.import('sun/transforms')
+
+asset.EarthTrail = {
+    Name = "EarthTrail",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Body = "EARTH",
+            Observer = "SUN"
+        },
+        Color = { 0.5, 0.8, 1.0 },
+        Period = 365.242,
+        Resolution = 1000,
+        Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
+    },
+    GuiName = "/Solar/EarthTrail",
+}
+
+assetHelper.registerSceneGraphNodes(asset, {
+    asset.EarthTrail
+})

@@ -1,7 +1,0 @@
-local AssetHelper = asset.import("assethelper")
-local kernels = {
-	asset.syncedResource("naif0012.tls"),
-	asset.syncedResource("pck00010.tpc")
-}
-
-AssetHelper.registerSpiceKernels(asset, kernels)

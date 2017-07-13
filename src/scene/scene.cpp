@@ -271,6 +271,13 @@ const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
 SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
+
+    if (!dict.hasKey(KeyName)) {
+        // TODO: Throw exception
+        LERROR("Name missing for scene graph node");
+        return nullptr;
+    }
+
     const std::string nodeName = dict.value<std::string>(KeyName);
     const bool hasParent = dict.hasKey(KeyParentName);
 
@@ -279,6 +286,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
         std::string parentName = dict.value<std::string>(KeyParentName);
         parent = sceneGraphNode(parentName);
         if (!parent) {
+            // TODO: Throw exception
             LERROR("Could not find parent '" + parentName + "' for '" + nodeName + "'");
             return nullptr;
         }
@@ -286,11 +294,13 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
 
     std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dict);
     if (!node) {
+        // TODO: Throw exception
         LERROR("Could not create node from dictionary: " + nodeName);
     }
 
     if (dict.hasKey(SceneGraphNode::KeyDependencies)) {
         if (!dict.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
+            // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
         ghoul::Dictionary nodeDependencies;
@@ -309,6 +319,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     for (const auto& depName : dependencyNames) {
         SceneGraphNode* dep = sceneGraphNode(depName);
         if (!dep) {
+            // TODO: Throw exception
             LERROR("Could not find dependency '" + depName + "' for '" + nodeName + "'");
             foundAllDeps = false;
             continue;

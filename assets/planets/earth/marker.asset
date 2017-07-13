@@ -1,0 +1,14 @@
+local transforms = asset.import('./transforms')
+
+asset.EarthMarker = {
+    Name = "EarthMarker",
+    Parent = transforms.EarthIAU.Name,
+    Renderable = {
+        Type = "RenderablePlane",
+        Size = 3.0E11,
+        Origin = "Center",
+        Billboard = true,
+        Texture = asset.syncedResource("textures/marker.png"),
+        BlendMode = "Additive"
+    }
+}

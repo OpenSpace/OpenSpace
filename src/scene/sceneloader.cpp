@@ -91,7 +91,11 @@ void SceneLoader::loadScene(Scene* scene, const std::string& path) {
         std::string assetName = assetDictionary.value<std::string>(key);
         _assetLoader->loadAsset(assetName);
     }
-    _assetLoader->rootAsset()->initialize();
+    try {
+        _assetLoader->rootAsset()->initialize();
+    } catch (const ghoul::RuntimeError& e) {
+        LERROR("Could not initialize root asset: " << e.what());
+    }
     
     ghoul::Dictionary cameraDictionary;
     sceneDictionary.getValue(KeyCamera, cameraDictionary);

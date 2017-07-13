@@ -353,16 +353,20 @@ int addSceneGraphNode(lua_State* L) {
     }
     catch (const ghoul::lua::LuaFormatException& e) {
         LERRORC("addSceneGraphNode", e.what());
-        return 0;
+        return luaL_error(L, "Error loading dictionary from lua state");
     }
 
-    SceneGraphNode* node = OsEng.renderEngine().scene()->loadNode(d);
-    if (!node) {
-        LERRORC("addSceneGraphNode", "Could not load node");
-        return 0;
-    }
+    try {
+        SceneGraphNode* node = OsEng.renderEngine().scene()->loadNode(d);
+        if (!node) {
+            LERRORC("Could not load scene graph node", "scene");
+            return luaL_error(L, "Error loading scene graph node");
+        }
 
-    node->initialize();
+        node->initialize();
+    } catch (const ghoul::RuntimeError& e) {
+        return luaL_error(L, "Error loading scene graph node: %s", e.what());
+    }
     return 0;
 }
 

@@ -2,7 +2,7 @@ asset.registerSceneGraphNodes = function (sceneAsset, nodes)
     local oldInit = sceneAsset.onInitialize;
     sceneAsset.onInitialize = function ()
         for i, node in ipairs(nodes) do
-            openspace.addSceneGraphNode(node) 
+            openspace.addSceneGraphNode(node)
         end
         oldInit()
     end
@@ -22,12 +22,12 @@ asset.registerSpiceKernels = function (spiceAsset, kernels)
     spiceAsset.onInitialize = function ()
         print "loading spice kernels...."
         for i, kernel in ipairs(kernels) do
-            openspace.spice.loadKernel(kernel) 
+            openspace.spice.loadKernel(kernel)
         end
         oldInit()
     end
 
-    local oldDeinit =  spiceAsset.onDeinitialize;
+    local oldDeinit = spiceAsset.onDeinitialize;
     spiceAsset.onDeinitialize = function ()
         for i = #kernels, 1, -1 do
             kernel = kernels[i]

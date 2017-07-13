@@ -1,0 +1,8 @@
+-- asset.import('./mercury/globe')
+-- asset.import('./venus/globe')
+asset.import('./earth/globe')
+-- asset.import('./mars/globe')
+-- asset.import('./jupiter/globe')
+-- asset.import('./saturn/globe')
+-- asset.import('./uranus/globe')
+-- asset.import('./neptune/globe')

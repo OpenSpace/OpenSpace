@@ -68,11 +68,11 @@ public:
 
     class Asset : public properties::PropertyOwner {
     public:
-        Asset(AssetLoader* loader, std::string directory);
-        Asset(AssetLoader* loader, std::string directory, std::string name);
+        Asset(AssetLoader* loader, ghoul::filesystem::Directory directory);
+        Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, std::string assetPath);
         std::string id();
         std::string assetFilePath();
-        std::string dataFilePath();
+        std::string assetName();
         std::string assetDirectory();
         AssetLoader* loader();
         ghoul::Dictionary dataDictionary();
@@ -87,11 +87,8 @@ public:
         void setInitializationRequirement(Asset* dependency, InitializationRequirement initReq);
         void removeDependency(Asset* asset);
         void removeDependency(const std::string& assetId);
-
-        void dependencyInitialized(Asset* dependency);
-        void dependencyDeinitialized(Asset* dependency);
-        void dependantInitialized(Asset* dependant);
-        void dependantDeinitialized(Asset* dependant);
+        void dependantDidInitialize(Asset* dependant);
+        void dependantWillDeinitialize(Asset* dependant);
 
         bool hasInitializedDependants(InitializationRequirement initReq);
         bool hasDependant(InitializationRequirement initReq);
@@ -109,6 +106,11 @@ public:
         bool _hasLuaTable;
         bool _initialized;
         AssetLoader* _loader;
+
+        // Base name of .asset file
+        std::string _assetName;
+
+        // Asbolute path to directory with the .asset file
         std::string _assetDirectory;
 
         // Other assets that this asset depend on

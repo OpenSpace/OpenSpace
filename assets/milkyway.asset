@@ -1,0 +1,28 @@
+local sunTransforms = asset.import('sun/transforms')
+
+asset.data = {
+    FileRequest = {
+        {
+            Destination = asset.syncedResource("textures"),
+            Identifier = "milkyway_textures",
+            Version = 2
+        }
+    },
+}
+
+asset.MilkyWay =
+{
+    Name = "MilkyWay",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableSphere",
+        Size = 10E22,
+        Segments = 40,
+        Texture = asset.syncedResource("textures/DarkUniverse_mellinger_8k.jpg"),
+        Orientation = "Inside/Outside"
+    }
+}
+
+assetHelper.registerSceneGraphNodes(asset, {
+    asset.MilkyWay
+})
