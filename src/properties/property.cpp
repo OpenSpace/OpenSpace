@@ -40,6 +40,9 @@ namespace {
     const char* _metaDataKeyViewPrefix = "view.";
 }
 
+Property::OnChangeHandle Property::OnChangeHandleAll =
+                                               std::numeric_limits<OnChangeHandle>::max();
+
 const char* Property::ViewOptions::Color = "color";
 const char* Property::ViewOptions::LightPosition = "lightPosition";
 
@@ -51,6 +54,7 @@ const char* Property::MetaDataKey = "MetaData";
 Property::Property(std::string identifier, std::string guiName, Visibility visibility)
     : _owner(nullptr)
     , _identifier(std::move(identifier))
+    , _currentHandleValue(0)
 {
     ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
     ghoul_assert(!guiName.empty(), "guiName must not be empty");
@@ -58,8 +62,6 @@ Property::Property(std::string identifier, std::string guiName, Visibility visib
     setVisibility(visibility);
     _metaData.setValue(MetaDataKeyGuiName, std::move(guiName));
 }
-
-Property::~Property() {}
 
 const std::string& Property::identifier() const {
     return _identifier;
@@ -163,8 +165,33 @@ const ghoul::Dictionary& Property::metaData() const {
     return _metaData;
 }
 
-void Property::onChange(std::function<void()> callback) {
-    _onChangeCallback = std::move(callback);
+Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
+    ghoul_assert(callback, "The callback must not be empty");
+    OnChangeHandle handle = _currentHandleValue++;
+    _onChangeCallbacks.emplace_back(handle, std::move(callback));
+    return handle;
+}
+
+void Property::removeOnChange(OnChangeHandle handle) {
+    if (handle == OnChangeHandleAll) {
+        _onChangeCallbacks.clear();
+    }
+    else {
+        auto it = std::find_if(
+            _onChangeCallbacks.begin(),
+            _onChangeCallbacks.end(),
+            [handle](const std::pair<OnChangeHandle, std::function<void()>>& p) {
+                return p.first == handle;
+            }
+        );
+
+        ghoul_assert(
+            it != _onChangeCallbacks.end(),
+            "handle must be a valid callback handle"
+        );
+
+        _onChangeCallbacks.erase(it);
+    }
 }
 
 PropertyOwner* Property::owner() const {
@@ -176,8 +203,8 @@ void Property::setPropertyOwner(PropertyOwner* owner) {
 }
 
 void Property::notifyListener() {
-    if (_onChangeCallback) {
-        _onChangeCallback();
+    for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
+        p.second();
     }
 }
 

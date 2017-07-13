@@ -52,9 +52,7 @@
 
 namespace openspace {
 
-BaseModule::BaseModule() 
-    : OpenSpaceModule("Base")
-{}
+BaseModule::BaseModule()  : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize() {
     FactoryManager::ref().addFactory(
