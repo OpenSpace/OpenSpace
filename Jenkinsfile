@@ -10,6 +10,7 @@ def modules = [
     "multiresvolume",
     "newhorizons",
     "onscreengui",
+    "researchkit",
     "space",
     "toyvolume",
     "volume"
