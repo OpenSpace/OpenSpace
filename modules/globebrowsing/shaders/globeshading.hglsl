@@ -26,10 +26,10 @@
 #define GLOBESHADING_HGLSL
 
 float orenNayarDiffuse(
-	vec3 lightDirection,
-	vec3 viewDirection,
-	vec3 surfaceNormal,
-	float roughness)
+    vec3 lightDirection,
+    vec3 viewDirection,
+    vec3 surfaceNormal,
+    float roughness)
 {
     // calculate intermediary values
     float NdotL = dot(surfaceNormal, lightDirection);
@@ -41,8 +41,8 @@ float orenNayarDiffuse(
     float alpha = max(angleVN, angleLN);
     float beta = min(angleVN, angleLN);
     float gamma = dot(
-    	viewDirection - surfaceNormal * dot(viewDirection, surfaceNormal),
-    	lightDirection - surfaceNormal * dot(lightDirection, surfaceNormal)
+        viewDirection - surfaceNormal * dot(viewDirection, surfaceNormal),
+        lightDirection - surfaceNormal * dot(lightDirection, surfaceNormal)
     );
     
     float roughnessSquared = roughness * roughness;
