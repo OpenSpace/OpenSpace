@@ -43,6 +43,11 @@ return {
                         Name = "Viking",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
                         Enabled = true,
+                        Fallback =  {
+                            Name = "Mars Texture",
+                            FilePath = "textures/mars.jpg",
+                            Enabled = true,
+                        },
                     },
                     {
                         Name = "MOLA Pseudo Color",
