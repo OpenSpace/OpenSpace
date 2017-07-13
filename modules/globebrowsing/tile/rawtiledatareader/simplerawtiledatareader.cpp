@@ -85,6 +85,7 @@ float SimpleRawTileDataReader::depthScale() const {
     return 1.0f;
 }
 
+/*
 IODescription SimpleRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
     IODescription io;
     io.read.overview = 0;
@@ -96,6 +97,7 @@ IODescription SimpleRawTileDataReader::getIODescription(const TileIndex& tileInd
     
     return io;
 }
+*/
 
 void SimpleRawTileDataReader::initialize() {
     _dataTexture = ghoul::io::TextureReader::ref().loadTexture(_datasetFilePath);
@@ -146,7 +148,7 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     ghoul_assert(io.read.region.numPixels.y == io.write.region.numPixels.y,
         "IODescription does not match data texture.");
 
-    char* pixelWriteRow = dataDestination;
+    char* pixelWriteRow = dataDestination + io.write.bytesPerLine;
     
 /*
     try {

@@ -122,38 +122,6 @@ std::array<double, 6> GdalRawTileDataReader::getGeoTransform() const {
     return _gdalDatasetMetaDataCached.padfTransform;
 }
 
-IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
-    IODescription io;
-    io.read.region = highestResPixelRegion(tileIndex);
-    
-    // write region starts in origin
-    io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
-    io.write.region.numPixels = PixelRegion::PixelCoordinate(
-        _initData.dimensionsWithoutPadding().x, _initData.dimensionsWithoutPadding().y);
-    
-    io.read.overview = 0;
-    io.read.fullRegion = fullPixelRegion();
-    // For correct sampling in dataset, we need to pad the texture tile
-    
-    PixelRegion scaledPadding = padding;
-    double scale =
-        io.read.region.numPixels.x / static_cast<double>(io.write.region.numPixels.x);
-    scaledPadding.numPixels *= scale;
-    scaledPadding.start *= scale;
-
-    io.read.region.pad(scaledPadding);
-    io.write.region.pad(padding);
-    io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
-    
-    io.write.bytesPerLine = _initData.bytesPerLine();
-    io.write.totalNumBytes = _initData.totalNumBytes();
-
-    ghoul_assert(io.write.region.numPixels.x == io.write.region.numPixels.y, "");
-    ghoul_assert(io.write.region.numPixels.x == _initData.dimensionsWithPadding().x, "");
-
-    return io;
-}
-
 void GdalRawTileDataReader::initialize() {
     if (_datasetFilePath.empty()) {
         throw ghoul::RuntimeError("File path must not be empty");

@@ -115,7 +115,7 @@ protected:
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;
 
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const = 0;
+    IODescription getIODescription(const TileIndex& tileIndex) const;
 
     /**
      * Get the pixel corresponding to a specific position on the globe defined by the
