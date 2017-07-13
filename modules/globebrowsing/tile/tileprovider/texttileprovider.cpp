@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>

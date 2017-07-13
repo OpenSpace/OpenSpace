@@ -27,7 +27,6 @@ stage('Build') {
     parallel linux: {
         node('linux') {
             timeout(time: 30, unit: 'MINUTES') {
-                deleteDir()
                 checkout scm
                 sh 'git submodule update --init --recursive'
                 sh '''
@@ -35,7 +34,7 @@ stage('Build') {
                     cd build
                     cmake .. ''' +
                     flags + ''' ..
-                make
+                make -j2
                 '''
             }
         }
@@ -43,7 +42,6 @@ stage('Build') {
     windows: {
         node('windows') {
             timeout(time: 30, unit: 'MINUTES') {
-            	deleteDir()
                 checkout scm
                 bat '''
                     git submodule update --init --recursive
@@ -59,7 +57,6 @@ stage('Build') {
     osx: {
         node('osx') {
             timeout(time: 30, unit: 'MINUTES') {
-                deleteDir()
                 checkout scm
                 sh 'git submodule update --init --recursive'
                 sh '''
@@ -73,7 +70,7 @@ stage('Build') {
                       mkdir ${srcDir}/build
                     fi
                     cd ${srcDir}/build
-                    /Applications/CMake.app/Contents/bin/cmake -G Xcode -D NASM=/usr/local/bin/nasm ${srcDir} .. ''' +
+                    /Applications/CMake.app/Contents/bin/cmake -G Xcode ${srcDir} .. ''' +
                     flags + '''
                     xcodebuild -quiet
                     '''
