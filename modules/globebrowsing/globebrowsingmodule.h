@@ -38,7 +38,7 @@ namespace cache {
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
-    static const std::string name;
+    constexpr static const char* Name = "GlobeBrowsing";
 
     GlobeBrowsingModule();
 

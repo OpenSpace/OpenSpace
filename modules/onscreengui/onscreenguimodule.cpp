@@ -45,7 +45,7 @@ namespace openspace {
 gui::GUI OnScreenGUIModule::gui;
     
 OnScreenGUIModule::OnScreenGUIModule() 
-    : OpenSpaceModule("OnScreenGUI")
+    : OpenSpaceModule(Name)
 {
     addPropertySubOwner(gui);
 

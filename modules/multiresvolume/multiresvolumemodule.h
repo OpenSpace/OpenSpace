@@ -31,6 +31,8 @@ namespace openspace {
 
 class MultiresVolumeModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "MultiresVolume";
+
     MultiresVolumeModule();
     void internalInitialize() override;
 };
