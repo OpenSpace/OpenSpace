@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
