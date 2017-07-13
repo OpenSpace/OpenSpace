@@ -116,6 +116,134 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
     return rawTile;
 }
 
+void RawTileDataReader::readImageData(
+    IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const {
+  
+    // Only read the minimum number of rasters
+    int nRastersToRead = std::min(dataSourceNumRasters(),
+        static_cast<int>(_initData.nRasters()));
+
+    switch (_initData.ghoulTextureFormat()) {
+        case ghoul::opengl::Texture::Format::Red:
+            if (nRastersToRead == 1) { // One channel
+                // The final destination pointer is offsetted by one datum byte size
+                // for every raster (or data channel, i.e. R in RGB)
+                char* dataDestination = imageDataDest + _initData.bytesPerDatum();
+
+                RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
+
+                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                worstError = std::max(worstError, err);
+            }
+            break;
+        case ghoul::opengl::Texture::Format::RG:
+        case ghoul::opengl::Texture::Format::RGB:
+        case ghoul::opengl::Texture::Format::RGBA: {
+            if (nRastersToRead == 1) { // Grayscale
+                for (int i = 0; i < 3; i++) {
+                    // The final destination pointer is offsetted by one datum byte size
+                    // for every raster (or data channel, i.e. R in RGB)
+                    char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
+
+                    RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
+
+                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                    worstError = std::max(worstError, err);
+                }
+            }
+            else if (nRastersToRead == 2) { // Grayscale + alpha
+                for (int i = 0; i < 3; i++) {
+                    // The final destination pointer is offsetted by one datum byte size
+                    // for every raster (or data channel, i.e. R in RGB)
+                    char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
+
+                    RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
+
+                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                    worstError = std::max(worstError, err);
+                }
+                // Last read is the alpha channel
+                char* dataDestination = imageDataDest + (3 * _initData.bytesPerDatum());
+                RawTile::ReadError err = repeatedRasterRead(2, io, dataDestination);
+
+                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                worstError = std::max(worstError, err);
+            }
+            else { // Three or more rasters
+                for (int i = 0; i < nRastersToRead; i++) {
+                    // The final destination pointer is offsetted by one datum byte size
+                    // for every raster (or data channel, i.e. R in RGB)
+                    char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
+
+                    RawTile::ReadError err = repeatedRasterRead(i + 1, io, dataDestination);
+
+                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                    worstError = std::max(worstError, err);
+                }
+            }
+            break;
+        }
+        case ghoul::opengl::Texture::Format::BGR:
+        case ghoul::opengl::Texture::Format::BGRA: {
+            if (nRastersToRead == 1) { // Grayscale
+                for (int i = 0; i < 3; i++) {
+                    // The final destination pointer is offsetted by one datum byte size
+                    // for every raster (or data channel, i.e. R in RGB)
+                    char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
+
+                    RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
+
+                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                    worstError = std::max(worstError, err);
+                }
+            }
+            else if (nRastersToRead == 2) { // Grayscale + alpha
+                for (int i = 0; i < 3; i++) {
+                    // The final destination pointer is offsetted by one datum byte size
+                    // for every raster (or data channel, i.e. R in RGB)
+                    char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
+
+                    RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
+
+                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                    worstError = std::max(worstError, err);
+                }
+                // Last read is the alpha channel
+                char* dataDestination = imageDataDest + (3 * _initData.bytesPerDatum());
+                RawTile::ReadError err = repeatedRasterRead(2, io, dataDestination);
+
+                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                worstError = std::max(worstError, err);
+            }
+            else { // Three or more rasters
+                for (int i = 0; i < 3 && i < nRastersToRead; i++) {
+                    // The final destination pointer is offsetted by one datum byte size
+                    // for every raster (or data channel, i.e. R in RGB)
+                    char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
+
+                    RawTile::ReadError err = repeatedRasterRead(3 - i, io, dataDestination);
+
+                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                    worstError = std::max(worstError, err);
+                }
+            }
+            if (nRastersToRead > 3) { // Alpha channel exists
+                // Last read is the alpha channel
+                char* dataDestination = imageDataDest + (3 * _initData.bytesPerDatum());
+                RawTile::ReadError err = repeatedRasterRead(4, io, dataDestination);
+
+                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                worstError = std::max(worstError, err);
+            }
+            break;
+        }
+        default: {
+            ghoul_assert(false, "Texture format not supported for tiles");
+            break;
+        }
+    }
+}
+
 TileDepthTransform RawTileDataReader::getDepthTransform() const {
     return _depthTransform;
 }

@@ -76,6 +76,7 @@ public:
     virtual float noDataValueAsFloat() const = 0;
     virtual int rasterXSize() const = 0;
     virtual int rasterYSize() const = 0;
+    virtual int dataSourceNumRasters() const = 0;
     virtual float depthOffset() const;
     virtual float depthScale() const;
     PixelRegion fullPixelRegion() const;
@@ -97,11 +98,6 @@ protected:
     virtual void initialize() = 0;
 
     /**
-     * Call this in the constructor of the class extending <code>RawTileDataReader</code>
-     */
-    //void ensureInitialized();
-
-    /**
      * The function returns a transform to map
      * the pixel coordinates to cover the whole geodetic lat long space.
      */
@@ -113,8 +109,8 @@ protected:
      * \param <code>worstError</code> should be set to the error code returned when
      * reading the data.
      */
-    virtual void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const = 0;
+    void readImageData(
+        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const;
 
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;

@@ -73,6 +73,10 @@ int SimpleRawTileDataReader::rasterYSize() const {
     return _dataTexture->dimensions().y;
 }
 
+int SimpleRawTileDataReader::dataSourceNumRasters() const {
+    return _dataTexture->numberOfChannels();
+}
+
 float SimpleRawTileDataReader::depthOffset() const {
     return 0.0f;
 }
@@ -115,6 +119,7 @@ void SimpleRawTileDataReader::initialize() {
     _depthTransform = {depthScale(), depthOffset()};
 }
 
+/*
 void SimpleRawTileDataReader::readImageData(
     IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const {
     
@@ -127,6 +132,7 @@ void SimpleRawTileDataReader::readImageData(
     // None = 0, Debug = 1, Warning = 2, Failure = 3, Fatal = 4
     worstError = std::max(worstError, err);
 }
+*/
 
 RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     int rasterBand, const IODescription& io, char* dataDestination) const
@@ -141,6 +147,8 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
         "IODescription does not match data texture.");
 
     char* pixelWriteRow = dataDestination;
+    
+/*
     try {
         // For each row
         for (int y = 0; y < io.read.region.numPixels.y; y++) {
@@ -157,6 +165,7 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
         return RawTile::ReadError::Failure;
     }
     return RawTile::ReadError::None;
+    */
 }
 
 

@@ -214,7 +214,8 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(_name, tileDataset);
 
-    if (_preCacheLevel > -1) {
+    // Tiles are only available for levels 2 and higher.
+    if (_preCacheLevel >= 2) {
         LDEBUG("Precaching '" << _filePath << "' with level '" << _preCacheLevel << "'");
         for (int level = 0; level <= _preCacheLevel; ++level) {
             for (int x = 0; x <= level * 2; ++x) {

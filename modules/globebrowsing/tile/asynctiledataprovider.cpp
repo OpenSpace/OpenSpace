@@ -62,6 +62,10 @@ std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader()
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
+    if (tileIndex.level < 2) {
+        int hej = 0;
+    }
+    
     if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
         if (_pboContainer) {
             char* dataPtr = static_cast<char*>(_pboContainer->mapBuffer(
