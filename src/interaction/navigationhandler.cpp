@@ -89,7 +89,7 @@ NavigationHandler::~NavigationHandler()
 
 void NavigationHandler::initialize() {
     OsEng.parallelConnection().connectionEvent()->subscribe("NavigationHandler", "statusChanged", [this]() {
-        if (OsEng.parallelConnection().status() == ParallelConnection::Status::ClientWithHost) {
+    if (OsEng.parallelConnection().status() == ParallelConnection::Status::ClientWithHost) {
             _useKeyFrameInteraction = true;
         }
     });
