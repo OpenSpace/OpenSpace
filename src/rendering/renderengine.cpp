@@ -134,6 +134,14 @@ RenderEngine::RenderEngine()
         if (_performanceMeasurements) {
             if (!_performanceManager) {
                 _performanceManager = std::make_unique<performance::PerformanceManager>();
+                const std::string KeyLogDir = ConfigurationManager::KeyLogging + "." + ConfigurationManager::PartLogDir;
+                const std::string KeyPrefix = ConfigurationManager::KeyLogging + "." + ConfigurationManager::PartLogPerformancePrefix;
+                if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyLogDir)) {
+                    _performanceManager->logDir(OsEng.configurationManager().value<std::string>(KeyLogDir));
+                }
+                if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyPrefix)) {
+                    _performanceManager->prefix(OsEng.configurationManager().value<std::string>(KeyPrefix));
+                }
             }
         }
         else {
