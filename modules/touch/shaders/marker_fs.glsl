@@ -22,80 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
-#define __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
+in vec2 out_position;
 
-#include <openspace/performance/performancelayout.h>
+uniform float radius;
+uniform float transparency;
+uniform float thickness;
+uniform vec3 color;
 
-#include <ghoul/misc/sharedmemory.h>
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-#include <map>
-#include <memory>
-#include <vector>
+Fragment getFragment() {
+    
+    // calculate normal from texture coordinates
+    vec3 n;
+    n.xy = gl_PointCoord.st*vec2(2.0, -2.0) + vec2(-1.0, 1.0);
+    float mag = dot(n.xy, n.xy);
+    if (mag > 1.0) discard;   // kill pixels outside circle
+    n.z = sqrt(1.0-mag);
+    
+    // calculate lighting
+    const vec3 light_dir = vec3(0.0, 0.0, 1.0);
+    float diffuse = max(0.0, dot(light_dir, n));
+    float alpha = min(pow(sqrt(mag), thickness), transparency);
 
-namespace ghoul {
-    class SharedMemory;
+    Fragment frag;
+    frag.color = vec4(color * diffuse, alpha);
+    frag.depth = 1.0;
+    return frag;
 }
-
-namespace openspace {
-
-class SceneGraphNode;
-
-namespace performance {
-
-class PerformanceManager {
-public:
-    static void createGlobalSharedMemory();
-    static void destroyGlobalSharedMemory();
-    
-    PerformanceManager();
-    ~PerformanceManager();
-
-    void resetPerformanceMeasurements();
-    
-    bool isMeasuringPerformance() const;
-
-    void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
-    void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
-    
-    void outputLogs();
-
-    void writeData(std::ofstream& out, const std::vector<float>& data);
-
-    std::string formatLogName(std::string nodeName);
-
-    void logDir(std::string dir);
-    std::string logDir() const;
-    void prefix(std::string prefix);
-    std::string prefix() const;
-
-    void enableLogging();
-    void disableLogging();
-    void toggleLogging();
-    void setLogging(bool enabled);
-    bool loggingEnabled() const;
-
-    PerformanceLayout* performanceData();
-private:
-    bool _doPerformanceMeasurements;
-    bool _loggingEnabled;
-
-    std::string _logDir;
-    std::string _prefix;
-    std::string _suffix;
-    std::string _ext;
-    
-    std::map<std::string, size_t> individualPerformanceLocations;
-    
-    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
-
-    size_t _tick;
-    
-    void tick();
-    bool createLogDir();
-};
-
-} // namespace performance
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
