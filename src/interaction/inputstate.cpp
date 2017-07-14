@@ -26,6 +26,8 @@
 
 #include <ghoul/logging/logmanager.h>
 
+#include <algorithm>
+
 namespace openspace {
 namespace interaction {
 
