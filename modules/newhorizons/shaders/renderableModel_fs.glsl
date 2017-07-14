@@ -90,6 +90,7 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color = vec4(color, 1.0);
-    frag.depth = vs_positionScreenSpace.w;
+    // frag.depth = vs_positionScreenSpace.w;
+    frag.depth = 0.0;
     return frag;
 }

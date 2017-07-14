@@ -1,7 +1,9 @@
+local pluto_radius = 1.173E6
+
 if UseAccurateNewHorizonsKernels then
     NewHorizonsKernels = {
-        "${SPICE}/nh_kernels/spk/NavPE_de433_od122.bsp",
-        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
+        "${SPICE}/nh_20170126/spk/NavPE_de433_od122.bsp",
+        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp"
     }
 else
     NewHorizonsKernels = {
@@ -9,12 +11,12 @@ else
     }
 end
 
-Files = {
+local Files = {
     low = "textures/pluto_large.jpg",
     med = "textures/Shenk_180.jpg",
     high = "textures/pmap_cyl_HR_LOR_lowres.jpg"
 }
-ColorTexture = Files[TextureResolution]
+local ColorTexture = Files[TextureResolution]
 
 return {
     -- Pluto barycenter module
@@ -36,9 +38,10 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
+            Radius = pluto_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 1.173E6,
+                Radius = pluto_radius,
                 Segments = 100
             },
             Textures = {
@@ -205,7 +208,7 @@ return {
         Parent = "Pluto",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 6.4},
+            Size = 10.0^6.4,
             Origin = "Center",
             Billboard = true,
             ProjectionListener = false,

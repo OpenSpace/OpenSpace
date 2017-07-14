@@ -280,7 +280,7 @@ void RenderablePlanetProjection::imageProjectGPU(
 
     if (_geometry->hasProperty("radius")){ 
         ghoul::any r = _geometry->property("radius")->get();
-        if (glm::vec4* radius = ghoul::any_cast<glm::vec4>(&r)){
+        if (glm::vec3* radius = ghoul::any_cast<glm::vec3>(&r)){
             _fboProgramObject->setUniform("_radius", radius);
         }
     }else{

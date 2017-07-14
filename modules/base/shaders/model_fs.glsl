@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// Uniforms
-uniform float transparency;
 uniform float fading;
 uniform bool performShading = true;
 
@@ -76,10 +74,8 @@ Fragment getFragment() {
         color = diffuseAlbedo;
     }
 
-    float alpha = fading * transparency;
-
     Fragment frag;
-    frag.color = vec4(color, alpha);
+    frag.color = vec4(color, fading);
     frag.depth = vs_positionScreenSpace.w;
 
     return frag;

@@ -1,3 +1,5 @@
+local europa_radius = 1.8213E6
+
 return {
     -- Europa module
     {   
@@ -7,9 +9,10 @@ return {
             Type = "RenderablePlanetProjection",
             Frame = "IAU_EUROPA", 
             Body = "EUROPA",
+            Radius = europa_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 1.8213E6,
+                Radius = europa_radius,
                 Segments = 100
             },
             Textures = {
