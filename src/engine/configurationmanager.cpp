@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -62,8 +62,11 @@ const string ConfigurationManager::KeyConfigScene = "Scene";
 const string ConfigurationManager::KeyConfigTask = "Task";
 
 const string ConfigurationManager::KeyLogging = "Logging";
+const string ConfigurationManager::PartLogDir = "LogDir";
 const string ConfigurationManager::PartLogLevel = "LogLevel";
 const string ConfigurationManager::PartImmediateFlush = "ImmediateFlush";
+const string ConfigurationManager::PartLogPerformancePrefix = "PerformancePrefix";
+
 const string ConfigurationManager::PartLogs = "Logs";
 const string ConfigurationManager::PartAppend = "Append";
 const string ConfigurationManager::PartCapabilitiesVerbosity = "CapabilitiesVerbosity";
@@ -97,6 +100,8 @@ const string ConfigurationManager::PartFilterIdentifierSource = "Source";
 const string ConfigurationManager::PartFilterIdentifierType = "Type";
 const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier";
 const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
+const string ConfigurationManager::KeyCheckOpenGLState = "CheckOpenGLState";
+const string ConfigurationManager::KeyLogEachOpenGLCall = "LogEachOpenGLCall";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;

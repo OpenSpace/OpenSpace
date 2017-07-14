@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -59,6 +59,7 @@
 #include <openspace/util/transformationmanager.h>
 
 #include <ghoul/ghoul.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/misc/onscopeexit.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
@@ -70,6 +71,7 @@
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
+#include <glbinding/callbacks.h>
 
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
@@ -78,6 +80,8 @@
 #ifdef WIN32
 #include <Windows.h>
 #endif
+
+#include <numeric>
 
 #include "openspaceengine_lua.inl"
 
@@ -978,6 +982,90 @@ void OpenSpaceEngine::initializeGL() {
         LTRACE("OpenSpaceEngine::initializeGL::DebugContext(end)");
     }
 
+    // The ordering of the KeyCheckOpenGLState and KeyLogEachOpenGLCall are important as
+    // the callback mask in glbinding is stateful for each context, and since
+    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the 
+    // state from KeyCheckOpenGLState
+    if (_configurationManager->hasKey(ConfigurationManager::KeyCheckOpenGLState)) {
+        const bool val = _configurationManager->value<bool>(
+            ConfigurationManager::KeyCheckOpenGLState
+        );
+
+        if (val) {
+            using namespace glbinding;
+            setCallbackMaskExcept(CallbackMask::After, { "glGetError" });
+            setAfterCallback([](const FunctionCall& f) {
+                const GLenum error = glGetError();
+                switch (error) {
+                    case GL_NO_ERROR:
+                        break;
+                    case GL_INVALID_ENUM:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() << ": GL_INVALID_ENUM"
+                        );
+                        break;
+                    case GL_INVALID_VALUE:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() << ": GL_INVALID_VALUE"
+                        );
+                        break;
+                    case GL_INVALID_OPERATION:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() << ": GL_INVALID_OPERATION"
+                        );
+                        break;
+                    case GL_INVALID_FRAMEBUFFER_OPERATION:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() <<
+                                ": GL_INVALID_FRAMEBUFFER_OPERATION"
+                        );
+                        break;
+                    case GL_OUT_OF_MEMORY:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() << ": GL_OUT_OF_MEMORY"
+                        );
+                        break;
+                    default:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Unknown error code: " << std::hex << error
+                        );
+                }
+            });
+        }
+    }
+
+    if (_configurationManager->hasKey(ConfigurationManager::KeyLogEachOpenGLCall)) {
+        const bool val = _configurationManager->value<bool>(
+            ConfigurationManager::KeyLogEachOpenGLCall
+        );
+
+        if (val) {
+            using namespace glbinding;
+            setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
+            glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
+                std::string arguments = std::accumulate(
+                        call.parameters.begin(),
+                        call.parameters.end(),
+                        std::string("("),
+                        [](std::string a, AbstractValue* v) {
+                            return a + ", " + v->asString();
+                        }
+                );
+
+                std::string returnValue = call.returnValue ?
+                    " -> " + call.returnValue->asString() :
+                    "";
+
+                LTRACEC("OpenGL", call.function->name() << arguments << returnValue);
+            });
+        }
+    }
 
     LINFO("Initializing Rendering Engine");
     _renderEngine->initializeGL();
