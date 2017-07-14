@@ -63,7 +63,7 @@ void Interpolator<T>::setInterpolationTime(float interpolationTime) {
 template <typename T>
 void Interpolator<T>::step() {
     _t += _scaledDeltaTime;
-    _t = glm::clamp(_t, 0.0, 1.0);
+    _t = glm::clamp(_t, 0.0f, 1.0f);
 }
 
 template <typename T>

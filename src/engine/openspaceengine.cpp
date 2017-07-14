@@ -519,8 +519,7 @@ void OpenSpaceEngine::initialize() {
 
     // Initialize the NavigationHandler
     _navigationHandler->initialize();
-    _keyBindingManager->initialize();
-
+    
     // Load a light and a monospaced font
     loadFonts();
 
@@ -646,7 +645,6 @@ void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
     _navigationHandler->deinitialize();
-    _keyBindingManager->deinitialize();
     _renderEngine->deinitialize();
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
