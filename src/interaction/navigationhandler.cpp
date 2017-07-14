@@ -35,12 +35,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
-#endif
-
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 
@@ -120,46 +114,6 @@ const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
 
 KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
     return *_keyframeNavigator;
-}
-
-void NavigationHandler::goToChunk(int x, int y, int level) {
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    _orbitalNavigator->goToChunk(
-        *_camera,
-        globebrowsing::TileIndex(x,y,level),
-        glm::vec2(0.5,0.5),
-        true);
-#else
-    LWARNING("GlobeBrowsing module must be enabled");
-#endif
-}
-
-void NavigationHandler::goToGeo(double latitude, double longitude) {
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    _orbitalNavigator->goToGeodetic2(
-        *_camera,
-        globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
-    );
-#else
-    LWARNING("GlobeBrowsing module must be enabled");
-#endif
-}
-
-void NavigationHandler::goToGeo(double latitude, double longitude,
-                                double altitude)
-{
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    _orbitalNavigator->goToGeodetic3(
-        *_camera,
-        {
-            globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(),
-            altitude
-        },
-        true
-    );
-#else
-    LWARNING("GlobeBrowsing module must be enabled");
-#endif
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
@@ -336,19 +290,7 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 &luascriptfunctions::resetCameraDirection,
                 "void",
                 "Reset the camera direction to point at the focus node"
-            },
-            {
-                "goToChunk",
-                &luascriptfunctions::goToChunk,
-                "void",
-                "Go to chunk with given index x, y, level"
-            },
-            {
-                "goToGeo",
-                &luascriptfunctions::goToGeo,
-                "void",
-                "Go to geographic coordinates latitude and longitude"
-            },
+            }
         }
     };
 }

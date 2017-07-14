@@ -59,45 +59,6 @@ int setOrigin(lua_State* L) {
     return 0;
 }
 
-int goToChunk(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-    
-    int nArguments = lua_gettop(L);
-    if (nArguments != 3) {
-        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
-    }
-    
-    int x = static_cast<int>(lua_tonumber(L, 1));
-    int y = static_cast<int>(lua_tonumber(L, 2));
-    int level = static_cast<int>(lua_tonumber(L, 3));
-
-    OsEng.navigationHandler().goToChunk(x, y, level);
-
-    return 0;
-}
-
-int goToGeo(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-    
-    int nArguments = lua_gettop(L);
-    if (nArguments != 2 && nArguments != 3) {
-        return luaL_error(L, "Expected 2 or 3 arguments.");
-    }
-    
-    double latitude = static_cast<int>(lua_tonumber(L, 1));
-    double longitude = static_cast<int>(lua_tonumber(L, 2));
-
-    if (nArguments == 2) {
-        OsEng.navigationHandler().goToGeo(latitude, longitude);
-    }
-    else if (nArguments == 3) {
-        double altitude = static_cast<int>(lua_tonumber(L, 3));
-        OsEng.navigationHandler().goToGeo(latitude, longitude, altitude);
-    }
-    
-    return 0;
-}
-
 int restoreCameraStateFromFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 

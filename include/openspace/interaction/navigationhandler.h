@@ -58,10 +58,7 @@ public:
     void resetCameraDirection();
 
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);    
-    void goToChunk(int x, int y, int level);
-    void goToGeo(double latitude, double longitude);
-    void goToGeo(double latitude, double longitude, double altitude);
-
+    
     void updateCamera(double deltaTime);
 
     // Accessors

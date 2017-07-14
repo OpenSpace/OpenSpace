@@ -43,13 +43,6 @@ class SceneGraphNode;
 class Camera;
 class SurfacePositionHandle;
 
-namespace globebrowsing {
-    class RenderableGlobe;
-    class TileIndex;
-    class Geodetic2;
-    class Geodetic3;
-}
-
 namespace interaction {
 
 class OrbitalNavigator : public properties::PropertyOwner  {
@@ -64,16 +57,6 @@ public:
 
     bool followingNodeRotation() const;    
     SceneGraphNode* focusNode() const;
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
-                   bool resetCameraDirection);
-    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
-                       bool resetCameraDirection);
-    
-    void goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3,
-                       bool resetCameraDirection);
-#endif
 
 private:
     struct CameraRotationDecomposition {
@@ -206,11 +189,6 @@ private:
      */
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3 cameraPositionWorldSpace);
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    globebrowsing::RenderableGlobe* castRenderableToGlobe();
-    void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
-#endif
 };
 
 } // namespace interaction

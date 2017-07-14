@@ -78,7 +78,7 @@ function postInitialization()
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.levelByProjectedAreaElseDistance", false)
     openspace.setPropertyValue("Earth.RenderableGlobe.Layers.ColorLayers.blendTileLevels", true)
 
-    openspace.navigation.goToGeo(0, 0, 20000000)
+    openspace.globebrowsing.goToGeo(0, 0, 20000000)
 
     openspace.printInfo("Done setting default values")
 end
