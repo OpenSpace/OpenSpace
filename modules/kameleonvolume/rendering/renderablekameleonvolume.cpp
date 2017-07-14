@@ -72,8 +72,8 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _upperDomainBound("upperDomainBound", "Upper Domain Bound")
     , _domainScale("domainScale", "Domain scale")
     , _autoDomainBounds(false)
-    , _lowerValueBound("lowerValueBound", "Lower Value Bound", 0.0, 0.0, 1)
-    , _upperValueBound("upperValueBound", "Upper Value Bound", 1, 0.01, 1)
+    , _lowerValueBound("lowerValueBound", "Lower Value Bound", 0.f, 0.f, 1.f)
+    , _upperValueBound("upperValueBound", "Upper Value Bound", 1.f, 0.01f, 1.f)
     , _autoValueBounds(false)
     , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
     , _autoGridType(false)
@@ -83,7 +83,8 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
-    , _cache("cache", "Cache") {
+    , _cache("cache", "Cache")
+{
 
     glm::vec3 dimensions;
     if (dictionary.getValue(KeyDimensions, dimensions)) {

@@ -91,10 +91,10 @@ unsigned int AtlasManager::atlasMapBuffer() {
 }
 
 void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices) {
-    int nBrickIndices = brickIndices.size();
+    size_t nBrickIndices = brickIndices.size();
 
     _requiredBricks.clear();
-    for (int i = 0; i < nBrickIndices; i++) {
+    for (size_t i = 0; i < nBrickIndices; i++) {
         _requiredBricks.insert(brickIndices[i]);
     }
 
@@ -105,7 +105,7 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
     }
 
     // Stats
-    _nUsedBricks = _requiredBricks.size();
+    _nUsedBricks = static_cast<unsigned int>(_requiredBricks.size());
     _nStreamedBricks = 0;
     _nDiskReads = 0;
 

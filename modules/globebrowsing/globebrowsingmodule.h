@@ -30,12 +30,13 @@
 #include <memory>
 
 namespace openspace {
-    class Camera;
+class Camera;
+
 namespace globebrowsing {
-    class RenderableGlobe;
-    class TileIndex;
-    class Geodetic2;
-    class Geodetic3;
+class RenderableGlobe;
+class TileIndex;
+struct Geodetic2;
+struct Geodetic3;
 
 namespace cache {
     class MemoryAwareTileCache;

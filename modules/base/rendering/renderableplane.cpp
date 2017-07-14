@@ -104,7 +104,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         "RenderablePlane"
     );
 
-    _size = dictionary.value<double>(KeySize);
+    _size = static_cast<float>(dictionary.value<double>(KeySize));
 
     if (dictionary.hasKey(KeyBillboard)) {
         _billboard = dictionary.value<bool>(KeyBillboard);

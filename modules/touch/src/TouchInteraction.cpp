@@ -65,24 +65,28 @@ TouchInteraction::TouchInteraction()
     , _maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000)
     , _deceleratesPerSecond("Decelerates per second", "Number of times velocity is decelerated per second", 240, 60, 300)
     , _touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f)
-    , _tapZoomFactor("Tap zoom factor","Scaling distance travelled on tap", 0.2, 0.0, 0.5)
+    , _tapZoomFactor("Tap zoom factor","Scaling distance travelled on tap", 0.2f, 0.f, 0.5f)
     , _nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.2f, 0.0f, 1.0f)
     , _rollAngleThreshold("Interpret roll", "Threshold for min angle for roll interpret", 0.025f, 0.0f, 0.05f)
     , _orbitSpeedThreshold("Activate orbit spinning", "Threshold to activate orbit spinning in direct-manipulation", 0.005f, 0.0f, 0.01f)
-    , _spinSensitivity("Sensitivity of spinning", "Sensitivity of spinning in direct-manipulation", 1.0f, 0, 2)
-    , _inputStillThreshold("Input still", "Threshold for interpreting input as still", 0.0005f, 0, 0.001)
-    , _centroidStillThreshold("Centroid stationary", "Threshold for stationary centroid", 0.0018f, 0, 0.01) // used to void wrongly interpreted roll interactions
-    , _interpretPan("Pan delta distance", "Delta distance between fingers allowed for interpreting pan interaction", 0.015f, 0, 0.1)
-    , _slerpTime("Time to slerp", "Time to slerp in seconds to new orientation with new node picking", 3, 0, 5)
+    , _spinSensitivity("Sensitivity of spinning", "Sensitivity of spinning in direct-manipulation", 1.f, 0.f, 2.f)
+    , _inputStillThreshold("Input still", "Threshold for interpreting input as still", 0.0005f, 0.f, 0.001f)
+    , _centroidStillThreshold("Centroid stationary", "Threshold for stationary centroid", 0.0018f, 0.f, 0.01f) // used to void wrongly interpreted roll interactions
+    , _interpretPan("Pan delta distance", "Delta distance between fingers allowed for interpreting pan interaction", 0.015f, 0.f, 0.1f)
+    , _slerpTime("Time to slerp", "Time to slerp in seconds to new orientation with new node picking", 3.f, 0.f, 5.f)
     , _guiButton("GUI Button", "GUI button size in pixels.", glm::ivec2(32, 64), glm::ivec2(8, 16), glm::ivec2(128, 256))
-    , _friction("Friction", "Friction for different interactions (orbit, zoom, roll, pan)", glm::vec4(0.01, 0.025, 0.02, 0.02), glm::vec4(0.0), glm::vec4(0.2))
+    , _friction("Friction", "Friction for different interactions (orbit, zoom, roll, pan)", glm::vec4(0.01f, 0.025f, 0.02f, 0.02f), glm::vec4(0.f), glm::vec4(0.2f))
     
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
     , _centroid{ glm::dvec3(0.0) }
     , _projectionScaleFactor{ 1.000004 } // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
     , _currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 }, _timeSlack{ 0.0 }
-    , _directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
+    , _directTouchMode{ false }
+    , _tap{ false }
+    , _doubleTap{ false }
+    , _lmSuccess{ true }
+    , _guiON{ false }
 {
     addProperty(_touchActive);
     addProperty(_unitTest);
@@ -240,7 +244,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     // Gradient of distToMinimize w.r.t par (using forward difference)
     auto gradient = [](double* g, double* par, int x, void* fdata, LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-        double h, hZoom, lastG, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
+        double h, lastG, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
         double scale = log10(ptr->node->boundingSphere()); // scale value to find minimum step size h, dependant on planet size
         std::vector<double> dPar(ptr->nDOF, 0.0);
         dPar.assign(par, par + ptr->nDOF);
@@ -447,8 +451,8 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
     double rollOn = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
         TuioPoint point = std::find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
         double res = 0.0;
-        double lastAngle = point.getAngle(_centroid.x, _centroid.y);
-        double currentAngle = c.getAngle(_centroid.x, _centroid.y);
+        float lastAngle = point.getAngle(_centroid.x, _centroid.y);
+        float currentAngle = c.getAngle(_centroid.x, _centroid.y);
         if (lastAngle > currentAngle + 1.5 * M_PI)
             res = currentAngle + (2 * M_PI - lastAngle);
         else if (currentAngle > lastAngle + 1.5 * M_PI)

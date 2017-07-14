@@ -41,7 +41,7 @@ namespace openspace {
 
 class SceneGraphNode;
 class Camera;
-class SurfacePositionHandle;
+struct SurfacePositionHandle;
 
 namespace interaction {
 

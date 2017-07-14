@@ -113,9 +113,9 @@ std::vector<std::string> KameleonVolumeReader::gridVariableNames() const {
     std::string y = tokens.at(1);
     std::string z = tokens.at(2);
 
-    std::transform(x.begin(), x.end(), x.begin(), ::tolower);
-    std::transform(y.begin(), y.end(), y.begin(), ::tolower);
-    std::transform(z.begin(), z.end(), z.begin(), ::tolower);
+    std::transform(x.begin(), x.end(), x.begin(), tolower);
+    std::transform(y.begin(), y.end(), y.begin(), tolower);
+    std::transform(z.begin(), z.end(), z.begin(), tolower);
 
     return std::vector<std::string>{x, y, z};
 }

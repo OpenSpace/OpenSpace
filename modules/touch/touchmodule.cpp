@@ -32,7 +32,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <glm/ext.hpp>
+//#include <glm/ext.hpp>
 
 #include <sstream>
 #include <string>

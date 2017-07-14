@@ -108,7 +108,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         "RenderableSphere"
     );
 
-    _size = dictionary.value<double>(KeySize);
+    _size = static_cast<float>(dictionary.value<double>(KeySize));
     _segments = static_cast<int>(dictionary.value<double>(KeySegments));
     _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
 

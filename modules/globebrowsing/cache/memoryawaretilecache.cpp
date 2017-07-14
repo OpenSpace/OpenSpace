@@ -80,11 +80,14 @@ MemoryAwareTileCache::MemoryAwareTileCache()
         setSizeEstimated(_tileCacheSize * 1024 * 1024);
     });
     _cpuAllocatedTileData.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
     _gpuAllocatedTileData.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
     _tileCacheSize.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
   
     setSizeEstimated(_tileCacheSize * 1024 * 1024);
   

@@ -415,7 +415,9 @@ size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
         case ghoul::opengl::Texture::Format::BGR: return 3;
         case ghoul::opengl::Texture::Format::RGBA:; // Intentional fallthrough
         case ghoul::opengl::Texture::Format::BGRA: return 4;
-        default: ghoul_assert(false, "Unknown format");
+        default: 
+            ghoul_assert(false, "Unknown format");
+            return size_t(-1);
     }
 }
 
@@ -432,6 +434,7 @@ size_t numberOfBytes(GLenum glType) {
         case GL_DOUBLE: return sizeof(GLdouble);
         default:
             ghoul_assert(false, "Unknown data type");
+            return size_t(-1);
     }
 }
 
@@ -449,6 +452,7 @@ size_t getMaximumValue(GLenum glType) {
             return 1 << 31;
         default:
             ghoul_assert(false, "Unknown data type");
+            return size_t(-1);
     }
 }
 
@@ -472,6 +476,7 @@ float interpretFloat(GLenum glType, const char* src) {
             return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
         default:
             ghoul_assert(false, "Unknown data type");
+            return 0.f;
     }
 }
 

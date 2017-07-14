@@ -106,9 +106,9 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _statsToFile("printStats", "Print Stats", false)
     , _statsToFileName("printStatsFileName", "Stats Filename")
     , _scalingExponent("scalingExponent", "Scaling Exponent", 1, -10, 20)
-    , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
+    , _scaling("scaling", "Scaling", glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _translation("translation", "Translation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _rotation("rotation", "Euler rotation", glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
 {
     std::string name;
     //bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);

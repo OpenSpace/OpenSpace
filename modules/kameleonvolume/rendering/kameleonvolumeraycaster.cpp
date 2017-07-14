@@ -121,7 +121,7 @@ void KameleonVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
 
     std::vector<glm::vec3> clipNormals = _clipPlanes->normals();
     std::vector<glm::vec2> clipOffsets = _clipPlanes->offsets();
-    int nClips = clipNormals.size();
+    int nClips = static_cast<int>(clipNormals.size());
 
     program.setUniform("nClips_" + id, nClips);
     program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);

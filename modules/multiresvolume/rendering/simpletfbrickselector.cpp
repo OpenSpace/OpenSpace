@@ -99,7 +99,7 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             // On average on the whole time period, splitting this spatial brick in two time steps
             // would generate twice as much streaming. Current number of streams of this spatial brick
             // is 2^nTemporalSplits over the whole time period.
-            int newStreams = std::pow(2, bs.nTemporalSplits);
+            int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
 
             // Refining this one more step would require the double amount of streams
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
@@ -132,7 +132,7 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             // On average on the whole time period, splitting this spatial brick into eight spatial bricks
             // would generate eight times as much streaming. Current number of streams of this spatial brick
             // is 2^nTemporalStreams over the whole time period.
-            int newStreams = 7*std::pow(2, bs.nTemporalSplits);
+            int newStreams = 7 * static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // Reached dead end (streaming budget would be exceeded)
                 // However, temporal split might be possible
@@ -189,7 +189,7 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             temporalSplitQueue.pop_back();
 
             unsigned int brickIndex = bs.brickIndex;
-            int newStreams = std::pow(2, bs.nTemporalSplits);
+            int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // The current best choice would make us exceed the streaming budget, try next instead.
                 deadEnds.push_back(bs);
@@ -244,14 +244,14 @@ float SimpleTfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
     if (_tsp->isBstLeaf(brickIndex)) {
         return -1;
     }
-    return _brickImportances[brickIndex] * 0.5;
+    return _brickImportances[brickIndex] * 0.5f;
 }
 
 float SimpleTfBrickSelector::spatialSplitPoints(unsigned int brickIndex) {
     if (_tsp->isOctreeLeaf(brickIndex)) {
         return -1;
     }
-    return _brickImportances[brickIndex] * 0.125;
+    return _brickImportances[brickIndex] * 0.125f;
 }
 
 float SimpleTfBrickSelector::splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType) {
@@ -278,8 +278,11 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
     TransferFunction *tf = _transferFunction;
     if (!tf) return false;
 
-    float tfWidth = tf->width();
-    if (tfWidth <= 0) return false;
+    size_t tfWidth = tf->width();
+    
+    // By changing tfWidth to the correct type size_t, this check is no longer valid since
+    // size_t is unsigned ---abock
+    //if (tfWidth <= 0) return false;
 
     /*    std::vector<float> gradients(tfWidth - 1);
     for (size_t offset = 0; offset < tfWidth - 1; offset++) {
@@ -303,7 +306,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
 
         float dotProduct = 0;
         for (int i = 0; i < tf->width(); i++) {
-            float x = float(i) / tfWidth;
+            float x = static_cast<float>(i) / static_cast<float>(tfWidth);
             float sample = histogram->interpolate(x);
 
             assert(sample >= 0);

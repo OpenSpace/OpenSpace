@@ -50,7 +50,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
     : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers))
     , _backgroundTile(Tile::TileUnavailable)
 {
-	
+    
     _fontSize = 50;
     _font = OsEng.fontManager().font("Mono", _fontSize);
 

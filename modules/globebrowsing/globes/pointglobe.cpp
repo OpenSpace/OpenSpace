@@ -69,14 +69,14 @@ bool PointGlobe::initialize() {
 
     glBindVertexArray(_vaoID);
 
-	std::array<glm::vec2, 6> quadVertexData = {
-		glm::vec2(-1.0f, -1.0f),
-		glm::vec2(1.0f, -1.0f),
-		glm::vec2(-1.0f, 1.0f),
-		glm::vec2(-1.0f, 1.0f),
-		glm::vec2(1.0f, -1.0f),
-		glm::vec2(1.0f, 1.0f)
-	};
+    std::array<glm::vec2, 6> quadVertexData = {
+        glm::vec2(-1.0f, -1.0f),
+        glm::vec2(1.0f, -1.0f),
+        glm::vec2(-1.0f, 1.0f),
+        glm::vec2(-1.0f, 1.0f),
+        glm::vec2(1.0f, -1.0f),
+        glm::vec2(1.0f, 1.0f)
+    };
     
     // Vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);

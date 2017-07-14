@@ -307,7 +307,7 @@ bool TSP::calculateSpatialError() {
             average += *it;
         }
 
-        averages[brick] = average / static_cast<double>(numBrickVals);
+        averages[brick] = static_cast<float>(average / static_cast<double>(numBrickVals));
     }
 
     // Spatial SNR stats
