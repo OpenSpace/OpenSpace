@@ -64,9 +64,15 @@ KeyBindingManager::KeyBindingManager()
 void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
         // iterate over key bindings
-        auto ret = _keyLua.equal_range({ key, modifier });
-        for (auto it = ret.first; it != ret.second; ++it) {
-            auto remote = it->second.synchronization ?
+        std::pair<std::multimap<KeyWithModifier, KeyInformation>::iterator,
+            std::multimap<KeyWithModifier, KeyInformation>::iterator> ret =
+            _keyLua.equal_range({ key, modifier });
+        for (std::multimap<KeyWithModifier, KeyInformation>::iterator it = ret.first;
+            it != ret.second;
+            ++it)
+        {
+            scripting::ScriptEngine::RemoteScripting remote =
+                it->second.synchronization ?
                 scripting::ScriptEngine::RemoteScripting::Yes :
                 scripting::ScriptEngine::RemoteScripting::No;
 
@@ -84,7 +90,11 @@ void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
 {
     _keyLua.insert({
         { key, modifier },
-        { std::move(luaCommand), Synchronized::No, std::move(documentation) }
+        {
+            std::move(luaCommand),
+            Synchronized::No,
+            std::move(documentation)
+        }
     });
 }
 
@@ -93,7 +103,11 @@ void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
 {
     _keyLua.insert({
         { key, modifier },
-        { std::move(luaCommand), Synchronized::Yes, std::move(documentation) }
+        {
+            std::move(luaCommand),
+            Synchronized::Yes,
+            std::move(documentation)
+        }
     });
 }
     
@@ -101,7 +115,7 @@ std::string KeyBindingManager::generateJson() const {
     std::stringstream json;
     json << "[";
     bool first = true;
-    for (const auto& p : _keyLua) {
+    for (const std::pair<KeyWithModifier, KeyInformation>& p : _keyLua) {
         if (!first) {
             json << ",";
         }
