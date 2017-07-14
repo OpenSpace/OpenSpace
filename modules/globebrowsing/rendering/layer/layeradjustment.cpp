@@ -35,11 +35,6 @@ namespace {
 
 LayerAdjustment::LayerAdjustment()
     : properties::PropertyOwner("adjustment")
-    , _typeOption(
-        "type",
-        "Type",
-        properties::OptionProperty::DisplayType::Dropdown
-      )
     , chromaKeyColor(
         "chromaKeyColor",
         "Chroma key color",
@@ -53,6 +48,11 @@ LayerAdjustment::LayerAdjustment()
         0,
         0,
         1
+      )
+    , _typeOption(
+        "type",
+        "Type",
+        properties::OptionProperty::DisplayType::Dropdown
       )
     , _onChangeCallback([](){})
 {

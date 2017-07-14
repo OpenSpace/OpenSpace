@@ -68,8 +68,9 @@ public:
 
 private:
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
-    size_t _freeTexture;
+
     const TileTextureInitData _initData;
+    size_t _freeTexture;
     size_t _numTextures;
 };
 
