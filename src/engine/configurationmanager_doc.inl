@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -394,6 +394,23 @@ documentation::Documentation ConfigurationManager::Documentation() {
                 }
             }),
             "Determines the settings for the creation of an OpenGL debug context.",
+            Optional::Yes
+        },
+        {
+            ConfigurationManager::KeyCheckOpenGLState,
+            new BoolVerifier,
+            "Determines whether the OpenGL state is checked after each OpenGL function "
+            "call. This will dramatically slow down the rendering, but will make finding "
+            "OpenGL errors easier. This defaults to 'false'.",
+            Optional::Yes
+        },
+        {
+            ConfigurationManager::KeyLogEachOpenGLCall,
+            new BoolVerifier,
+            "Determines whether each OpenGL call that happens should be logged using the "
+            "'TRACE' loglevel. This will bring the rendering to a crawl but provides "
+            "useful debugging features for the order in which OpenGL calls occur. This "
+            "defaults to 'false'.",
             Optional::Yes
         }
         }

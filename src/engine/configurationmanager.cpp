@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -100,6 +100,8 @@ const string ConfigurationManager::PartFilterIdentifierSource = "Source";
 const string ConfigurationManager::PartFilterIdentifierType = "Type";
 const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier";
 const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
+const string ConfigurationManager::KeyCheckOpenGLState = "CheckOpenGLState";
+const string ConfigurationManager::KeyLogEachOpenGLCall = "LogEachOpenGLCall";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
