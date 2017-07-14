@@ -65,11 +65,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("enabled", "Enabled", true),
         BoolProperty("performShading", "perform shading", true),
         BoolProperty("atmosphere", "atmosphere", false),
+        BoolProperty("useAccurateNormals", "useAccurateNormals", false),
         FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
-        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
+        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f),
+        FloatProperty("orenNayarRoughness", "orenNayarRoughness", 0.0f, 0.0f, 1.0f)
     })
     , _debugPropertyOwner("Debug")
-    , _texturePropertyOwner("Textures")
 {
     setName("RenderableGlobe");
         
@@ -114,8 +115,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.isEnabled);
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
+    addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
+    addProperty(_generalProperties.orenNayarRoughness);
         
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
@@ -138,6 +141,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _chunkedLodGlobe->notifyShaderRecompilation();
     };
     _generalProperties.atmosphereEnabled.onChange(notifyShaderRecompilation);
+    _generalProperties.useAccurateNormals.onChange(notifyShaderRecompilation);
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
