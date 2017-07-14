@@ -20,7 +20,7 @@ function postInitialization()
     created and initialized, but before the first render call. This is the place to set
     graphical settings for the renderables.
     ]]--
-    openspace.resetCameraDirection()
+    openspace.navigation.resetCameraDirection()
 
     openspace.printInfo("Done setting default values")
 

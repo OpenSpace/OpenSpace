@@ -11,6 +11,7 @@ function preInitialization()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+
 end
 
 function postInitialization()
@@ -19,21 +20,11 @@ function postInitialization()
     created and initialized, but before the first render call. This is the place to set
     graphical settings for the renderables.
     ]]--
-    openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
-    openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
-
-    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
-    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
-
-    openspace.addVirtualProperty("BoolProperty", "Show Trails", "*Trail.renderable.enabled", true, nil, nil)
-
     openspace.navigation.resetCameraDirection()
 
     openspace.printInfo("Done setting default values")
 
-    dofile(openspace.absPath('${SCRIPTS}/config_research_kit.lua'))
+    -- dofile(openspace.absPath('${SCRIPTS}/config_research_kit.lua'))
 end
 
 
@@ -41,24 +32,11 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Earth",
+        Focus = "Enlil New Horizons",
         Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
         Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
     Modules = {
-        "sun",
-        "mercury",
-        "venus",
-        "earth",
-        "mars",
---        "jupiter",
---        "saturn",
-        "uranus",
-        "neptune",
-        "stars",
-        -- "stars-denver",
-        "milkyway",
-        --"milkyway-eso",
-        "constellationbounds",
+        "multires/sand",
     }
 }

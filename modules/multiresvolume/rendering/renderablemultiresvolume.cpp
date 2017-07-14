@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -112,7 +112,7 @@ namespace openspace {
         { RenderableMultiresVolume::TSP_SHEN    , RenderableMultiresVolume::TspType::SHEN }
     };
 
-RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dictionary)
+RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dictionary)
     :  Renderable(dictionary)
     , _transferFunction(nullptr)
     , _timestep(0)
@@ -121,6 +121,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _simpleTfBrickSelector(nullptr)
     , _localTfBrickSelector(nullptr)
     , _timeBrickSelector(nullptr)
+    , _shenBrickSelector(nullptr)
     , _errorHistogramManager(nullptr)
     , _histogramManager(nullptr)
     , _localErrorHistogramManager(nullptr)
@@ -216,7 +217,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     case TspType::SHEN:    _tsp = std::make_shared<ShenTSP>(_filename);    break;
     case TspType::SAND:    _tsp = std::make_shared<SandTSP>(_filename);    break;
     case TspType::DEFAULT: _tsp = std::make_shared<TSP>(_filename);        break;
-    default:                _tsp = std::make_shared<TSP>(_filename);        break;
+    default:               _tsp = std::make_shared<TSP>(_filename);        break;
     }
 
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
@@ -432,6 +433,7 @@ bool RenderableMultiresVolume::initializeSelector() {
     case Selector::LOCAL:   selector = _localTfBrickSelector;   manager = _localErrorHistogramManager;                                      break;
     case Selector::SIMPLE:  selector = _simpleTfBrickSelector;  manager = _histogramManager;                                                break;
     case Selector::SHEN:    selector = _shenBrickSelector;      return initializeShenSelector();
+    default:                LERROR("No selector " << _selector);        return false;
     }
 
     if (manager) {
@@ -541,13 +543,12 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         case Selector::LOCAL:   s = _localTfBrickSelector; break;
         case Selector::SHEN:    s = _shenBrickSelector; break;
         case Selector::TIME:    s = _timeBrickSelector; break;
+        default:                LERROR("No selector" << _selector); return;
         }
 
         if (s) {
-            if (_selector != Selector::SHEN) {
-                s->setMemoryBudget(_memoryBudget);
-                s->setStreamingBudget(_streamingBudget);
-            }
+            s->setMemoryBudget(_memoryBudget);
+            s->setStreamingBudget(_streamingBudget);
             s->selectBricks(currentTimestep, _brickIndices);
         }
 

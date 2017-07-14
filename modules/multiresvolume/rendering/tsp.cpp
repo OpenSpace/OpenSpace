@@ -93,7 +93,8 @@ bool TSP::closeFile() {
 
 bool TSP::openMemoryMap() {
     if (!_memoryMap.is_open()) {
-        _memoryMap.open(_filename, boost::iostreams::mapped_file::mapmode::readonly, _filesize);
+        //_memoryMap.open(_filename, boost::iostreams::mapped_file::mapmode::readonly, _filesize);
+        _memoryMap.open(_filename);
     }
     return _memoryMap.is_open();
 }
@@ -259,7 +260,7 @@ const TSP::Header& TSP::header() const {
     return _header;
 }
 
-long long TSP::dataPosition() {
+size_t TSP::dataPosition() {
     return sizeof(Header);
 }
 
@@ -309,14 +310,16 @@ GLuint TSP::ssbo() const {
 
 
 std::vector<float> TSP::calculateBrickAverages() {
-    const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
     if (!openMemoryMap()) {
         return {};
     }
 
+    const uint64_t dim = paddedBrickDim_;
+    const uint64_t numBrickVals = dim * dim * dim;
+
     const float * voxelData = (float *)_memoryMap.data();
-    const long long headerOffset = dataPosition() / sizeof(float);
+    const uint64_t headerOffset = dataPosition() / sizeof(float);
 
     std::vector<float> averages(numTotalNodes_);
 
@@ -324,7 +327,7 @@ std::vector<float> TSP::calculateBrickAverages() {
     LDEBUG("Calculating spatial error, first pass");
     for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
         // Offset in file
-        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
+        const uint64_t brickStart = headerOffset + (brick * numBrickVals);
         double average = 0.0;
 
         for (size_t i = 0; i < numBrickVals; i++) {
@@ -337,14 +340,15 @@ std::vector<float> TSP::calculateBrickAverages() {
 }
 
 std::vector<float> TSP::calculateBrickStdDevs(std::vector<float> brickAverages) {
-    const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
-
     if (!openMemoryMap()) {
         return {};
     }
 
+    const uint64_t dim = paddedBrickDim_;
+    const uint64_t numBrickVals = dim * dim * dim;
+
     const float * voxelData = (float *)_memoryMap.data();
-    const long long headerOffset = dataPosition() / sizeof(float);
+    const uint64_t headerOffset = dataPosition() / sizeof(float);
 
     std::vector<float> stdDevs(numTotalNodes_);
 
@@ -446,9 +450,13 @@ bool TSP::calculateTemporalError() {
     if (!openMemoryMap()) {
         return false;
     }
+    const uint64_t dim = paddedBrickDim_;
+    const uint64_t numBrickVals = dim * dim * dim;
 
     const float * voxelData = (float *)_memoryMap.data();
-    const long long headerOffset = dataPosition() / sizeof(float);
+    const uint64_t headerOffset = dataPosition() / sizeof(float);
+
+    std::vector<float> averages(numTotalNodes_);
 
     LDEBUG("Calculating temporal error");
 
@@ -458,9 +466,6 @@ bool TSP::calculateTemporalError() {
 
     // Save errors
     std::vector<float> errors(numTotalNodes_);
-
-    const unsigned int numBrickVals =
-        paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
     // Calculate temporal error for one brick at a time
     for (unsigned int brick = 0; brick<numTotalNodes_; ++brick) {
@@ -549,7 +554,7 @@ bool TSP::readCache() {
     if (!FileSys.cacheManager())
         return false;
 
-    ghoul::filesystem::File f = _filename;
+    ghoul::filesystem::File f = absPath(_filename);
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
         f.baseName(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
 

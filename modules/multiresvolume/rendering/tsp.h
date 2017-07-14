@@ -89,7 +89,7 @@ public:
     bool initalizeSSO();
 
     const Header& header() const;
-    static long long dataPosition();
+    static size_t dataPosition();
     std::ifstream& file();
     unsigned int numTotalNodes() const;
     unsigned int numValuesPerNode() const;
@@ -143,7 +143,7 @@ protected:
     std::ifstream _file;
     std::streampos _dataOffset;
 
-    boost::iostreams::mapped_file _memoryMap;
+    boost::iostreams::mapped_file_source _memoryMap;
 
     // Holds the actual structure
     std::vector<int> data_;
