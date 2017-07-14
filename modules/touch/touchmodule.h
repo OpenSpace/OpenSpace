@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,80 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
-#define __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
+#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 
-#include <openspace/performance/performancelayout.h>
+#include <openspace/util/openspacemodule.h>
+#include <modules/touch/include/TouchMarker.h>
+#include <modules/touch/include/TouchInteraction.h>
 
-#include <ghoul/misc/sharedmemory.h>
-
-#include <map>
-#include <memory>
-#include <vector>
-
-namespace ghoul {
-    class SharedMemory;
-}
 
 namespace openspace {
 
-class SceneGraphNode;
+    class TouchModule : public OpenSpaceModule {
+        using Point = std::pair<int, TUIO::TuioPoint>;
+    public:
+        TouchModule();
 
-namespace performance {
+    private:
+        /**
+        * Returns true if new touch input occured since the last frame
+        */
+        bool hasNewInput();
 
-class PerformanceManager {
-public:
-    static void createGlobalSharedMemory();
-    static void destroyGlobalSharedMemory();
-    
-    PerformanceManager();
-    ~PerformanceManager();
+        TuioEar ear;
+        TouchInteraction touch;
+        TouchMarker markers;
+        std::vector<TUIO::TuioCursor> listOfContactPoints;
+        std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
+    };
 
-    void resetPerformanceMeasurements();
-    
-    bool isMeasuringPerformance() const;
-
-    void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
-    void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
-    
-    void outputLogs();
-
-    void writeData(std::ofstream& out, const std::vector<float>& data);
-
-    std::string formatLogName(std::string nodeName);
-
-    void logDir(std::string dir);
-    std::string logDir() const;
-    void prefix(std::string prefix);
-    std::string prefix() const;
-
-    void enableLogging();
-    void disableLogging();
-    void toggleLogging();
-    void setLogging(bool enabled);
-    bool loggingEnabled() const;
-
-    PerformanceLayout* performanceData();
-private:
-    bool _doPerformanceMeasurements;
-    bool _loggingEnabled;
-
-    std::string _logDir;
-    std::string _prefix;
-    std::string _suffix;
-    std::string _ext;
-    
-    std::map<std::string, size_t> individualPerformanceLocations;
-    
-    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
-
-    size_t _tick;
-    
-    void tick();
-    bool createLogDir();
-};
-
-} // namespace performance
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
+#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
