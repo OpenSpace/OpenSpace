@@ -22,17 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${MODULE_GLOBEBROWSING}/shaders/tilefragcolor.hglsl>
-#include "fragment.glsl"
+#ifndef GLOBESHADING_HGLSL
+#define GLOBESHADING_HGLSL
 
-Fragment getFragment() {
-    Fragment frag;
-    frag.color = getTileFragColor();
+float orenNayarDiffuse(
+    vec3 lightDirection,
+    vec3 viewDirection,
+    vec3 surfaceNormal,
+    float roughness)
+{
+    // calculate intermediary values
+    float NdotL = dot(surfaceNormal, lightDirection);
+    float NdotV = dot(surfaceNormal, viewDirection); 
 
-#if SHOW_CHUNK_EDGES
-    frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
-#endif // SHOW_CHUNK_EDGES
+    float angleVN = acos(NdotV);
+    float angleLN = acos(NdotL);
+    
+    float alpha = max(angleVN, angleLN);
+    float beta = min(angleVN, angleLN);
+    float gamma = dot(
+        viewDirection - surfaceNormal * dot(viewDirection, surfaceNormal),
+        lightDirection - surfaceNormal * dot(lightDirection, surfaceNormal)
+    );
+    
+    float roughnessSquared = roughness * roughness;
+    
+    // calculate A and B
+    float A = 1.0 - 0.5 * (roughnessSquared / (roughnessSquared + 0.57));
+    float B = 0.45 * (roughnessSquared / (roughnessSquared + 0.09));
+    float C = sin(alpha) * tan(beta);
+    
+    // put it all together
+    float L1 = max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
 
-    frag.depth = fs_position.w;
-    return frag;
+    return L1;
 }
+
+#endif // GLOBESHADING_HGLSL
