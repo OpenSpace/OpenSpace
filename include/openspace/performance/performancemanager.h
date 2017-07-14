@@ -58,14 +58,41 @@ public:
     void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
     void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
     
-    PerformanceLayout* performanceData();
+    void outputLogs();
 
+    void writeData(std::ofstream& out, const std::vector<float>& data);
+
+    std::string formatLogName(std::string nodeName);
+
+    void logDir(std::string dir);
+    std::string logDir() const;
+    void prefix(std::string prefix);
+    std::string prefix() const;
+
+    void enableLogging();
+    void disableLogging();
+    void toggleLogging();
+    void setLogging(bool enabled);
+    bool loggingEnabled() const;
+
+    PerformanceLayout* performanceData();
 private:
     bool _doPerformanceMeasurements;
+    bool _loggingEnabled;
+
+    std::string _logDir;
+    std::string _prefix;
+    std::string _suffix;
+    std::string _ext;
     
     std::map<std::string, size_t> individualPerformanceLocations;
     
     std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
+
+    size_t _tick;
+    
+    void tick();
+    bool createLogDir();
 };
 
 } // namespace performance

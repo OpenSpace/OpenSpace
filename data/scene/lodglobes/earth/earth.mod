@@ -63,8 +63,6 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = earthEllipsoid,
-            CameraMinHeight = 300,
-            InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
@@ -99,6 +97,10 @@ return {
                             Enabled = true,
                         }
                     },
+					{
+						FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
+						Name = "ESRI",
+					},
                     {
                         Name = "BMNG",
                         FilePath = "map_service_configs/Utah/Bmng.wms"

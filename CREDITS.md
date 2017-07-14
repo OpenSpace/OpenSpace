@@ -21,7 +21,7 @@ Rickard Lindtstedt
 Michael Sjöström
 Michael Novén
 Oskar Carlbaum
-Jonathas Bosson
+Jonathan Bosson
 Klas Eskilson
 
 Anteige
