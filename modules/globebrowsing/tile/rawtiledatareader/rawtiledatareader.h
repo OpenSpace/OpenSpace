@@ -112,6 +112,12 @@ protected:
     void readImageData(
         IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const;
 
+    /**
+     * The default does not affect the IODescription but this function can be used for
+     * example to flip the y axis.
+     */
+    virtual IODescription adjustIODescription(const IODescription& io) const;
+
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;
 

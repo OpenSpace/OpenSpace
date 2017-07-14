@@ -108,33 +108,26 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
         io.read.fullRegion.numPixels.y) == _dataTexture->dimensions().y,
         "IODescription does not match data texture.");
 
-    // Modify to match OpenGL texture layout:
-    IODescription modifiedIO = io;
-    modifiedIO.read.region.start.y =
-        modifiedIO.read.fullRegion.numPixels.y -
-        modifiedIO.read.region.numPixels.y -
-        modifiedIO.read.region.start.y;
-  
     char* writeDataStart =
         dataDestination +
-        _initData.bytesPerLine() * modifiedIO.write.region.start.y +
-        _initData.bytesPerPixel() * modifiedIO.write.region.start.x;
+        _initData.bytesPerLine() * io.write.region.start.y +
+        _initData.bytesPerPixel() * io.write.region.start.x;
 
-    for (int y = 0; y < modifiedIO.write.region.numPixels.y; ++y) {
-        for (int x = 0; x < modifiedIO.write.region.numPixels.x; ++x) {
+    for (int y = 0; y < io.write.region.numPixels.y; ++y) {
+        for (int x = 0; x < io.write.region.numPixels.x; ++x) {
             char* pixelWriteDestination =
                 writeDataStart +
                 y * _initData.bytesPerLine() +
                 x * _initData.bytesPerPixel();
 
             int xInSource =
-                modifiedIO.read.region.start.x +
-                static_cast<float>(x) / modifiedIO.write.region.numPixels.x *
-                modifiedIO.read.region.numPixels.x;
+                io.read.region.start.x +
+                static_cast<float>(x) / io.write.region.numPixels.x *
+                io.read.region.numPixels.x;
             int yInSource =
-                modifiedIO.read.region.start.y +
-                static_cast<float>(y) / modifiedIO.write.region.numPixels.y *
-                modifiedIO.read.region.numPixels.y;
+                io.read.region.start.y +
+                static_cast<float>(y) / io.write.region.numPixels.y *
+                io.read.region.numPixels.y;
 
             glm::vec4 sourceTexel = _dataTexture->texelAsFloat(xInSource, yInSource);
 
@@ -199,6 +192,16 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     return RawTile::ReadError::None;
 }
 
+IODescription SimpleRawTileDataReader::adjustIODescription(const IODescription& io) const {
+    // Modify to match OpenGL texture layout
+    IODescription modifiedIO = io;
+    modifiedIO.read.region.start.y =
+        modifiedIO.read.fullRegion.numPixels.y -
+        modifiedIO.read.region.numPixels.y -
+        modifiedIO.read.region.start.y;
+  
+    return modifiedIO;
+}
 
 } // namespace globebrowsing
 } // namespace openspace

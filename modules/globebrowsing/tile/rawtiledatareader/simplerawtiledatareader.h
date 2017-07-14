@@ -62,6 +62,9 @@ public:
     virtual float depthOffset() const override;
     virtual float depthScale() const override;
 
+protected:
+    virtual IODescription adjustIODescription(const IODescription& io) const;
+
 private:
     // Private virtual function overloading
     virtual void initialize() override;

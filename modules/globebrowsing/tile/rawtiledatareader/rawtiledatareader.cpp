@@ -119,6 +119,8 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 void RawTileDataReader::readImageData(
     IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const {
   
+    io = adjustIODescription(io);
+
     // Only read the minimum number of rasters
     int nRastersToRead = std::min(dataSourceNumRasters(),
         static_cast<int>(_initData.nRasters()));
@@ -236,6 +238,10 @@ void RawTileDataReader::readImageData(
             break;
         }
     }
+}
+
+IODescription RawTileDataReader::adjustIODescription(const IODescription& io) const {
+    return io;
 }
 
 IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
