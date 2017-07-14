@@ -297,12 +297,24 @@ std::string DocumentationEngine::generateJson() const {
 }
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
+    std::function<void(const DocumentationEntry&)> testDocumentation =
+        [&testDocumentation](const DocumentationEntry& e) {
+            (void)e; // Unused variable in Release mode
+            ghoul_assert(
+                e.documentation.find('"') == std::string::npos,
+                fmt::format("Documentation cannot contain \" character. {} does", e.key)
+            );
+
+            TableVerifier* v = dynamic_cast<TableVerifier*>(e.verifier.get());
+            if (v) {
+                for (const DocumentationEntry& e : v->documentations) {
+                    testDocumentation(e);
+                }
+            }
+        };
+
     for (const DocumentationEntry& e : doc.entries) {
-        (void)e; // Unused variable in Release mode
-        ghoul_assert(
-            e.documentation.find('"') == std::string::npos,
-            "Documentation cannot contain \" character"
-        );
+        testDocumentation(e);
     }
 
     if (doc.id.empty()) {
