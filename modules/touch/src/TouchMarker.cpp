@@ -93,7 +93,7 @@ bool TouchMarker::deinitialize() {
     return true;
 }
 
-void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
+void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
     if (_visible && !list.empty()) {
         createVertexList(list);
         _shader->activate();
@@ -115,7 +115,7 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
     }
 }
 
-void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor> list) {
+void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor>& list) {
     _numFingers = list.size();
     GLfloat vertexData[MAX_FINGERS];
     int i = 0;

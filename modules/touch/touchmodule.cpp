@@ -40,10 +40,6 @@
 
 using namespace TUIO;
 
-namespace {
-    const std::string _loggerCat = "TouchModule";
-}
-
 namespace openspace {
 
 bool TouchModule::hasNewInput() {

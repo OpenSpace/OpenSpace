@@ -78,7 +78,7 @@ TouchInteraction::TouchInteraction()
     , _friction("Friction", "Friction for different interactions (orbit, zoom, roll, pan)", glm::vec4(0.01, 0.025, 0.02, 0.02), glm::vec4(0.0), glm::vec4(0.2))
     
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
-    , _sensitivity{glm::dvec2(0.0808181818181818, 0.0454545454545455), 4.0, 2.75, glm::dvec2(0.0808181818181818, 0.0454545454545455) }
+    , _sensitivity{glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
     , _centroid{ glm::dvec3(0.0) }
     , _projectionScaleFactor{ 1.000004 } // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
     , _currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 }, _timeSlack{ 0.0 }
@@ -412,8 +412,8 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 // Interprets the input gesture to a specific interaction
 int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
     glm::dvec3 lastCentroid = _centroid;
-    _centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
-    _centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
+    _centroid.x = std::accumulate(list.begin(), list.end(), 0.0, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
+    _centroid.y = std::accumulate(list.begin(), list.end(), 0.0, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
 
     // see if the distance between fingers changed - used in pan interpretation
     double dist = 0;

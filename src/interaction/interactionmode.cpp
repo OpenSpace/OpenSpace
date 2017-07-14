@@ -263,8 +263,10 @@ OrbitalInteractionMode::MouseStates::MouseStates(double sensitivity, double velo
 {}
 
 void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
+#ifdef OPENSPACE_MODULE_TOUCH_ENABLED
     ghoul::any t = property("Global Properties.Touch.TouchInteraction.TouchEvents")->get();
     if (!*(ghoul::any_cast<bool>(&t))) {
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         glm::dvec2 mousePosition = inputState.getMousePosition();
 
         bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
@@ -333,7 +335,10 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
             _localRollMouseState.previousPosition = mousePosition;
             _localRollMouseState.velocity.decelerate(deltaTime);
         }
+#ifdef OPENSPACE_MODULE_TOUCH_ENABLED
     }
+#endif // OPENSPACE_MODULE_TOUCH_ENABLED
+    
 }
 
 void OrbitalInteractionMode::MouseStates::setRotationalFriction(double friction) {

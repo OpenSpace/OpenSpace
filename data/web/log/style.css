@@ -27,6 +27,15 @@ label {
   margin-right: 0.5em;
 }
 
+.log-level-trace {
+  color: #eeeeee;
+  background-color: #aaaaaa;
+  border-bottom: 1px solid #eaeaea;
+}
+.log-level-trace td:first-child {
+  border-left: 10px solid #eaeaea;
+}
+
 .log-level-debug {
   background-color: #bbdda9;
   border-bottom: 1px solid #7bc142;

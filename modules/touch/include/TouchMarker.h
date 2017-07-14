@@ -58,11 +58,11 @@ class TouchMarker : public properties::PropertyOwner
         bool initialize();
         bool deinitialize();
 
-        void render(const std::vector<TUIO::TuioCursor> list);
+        void render(const std::vector<TUIO::TuioCursor>& list);
 
 
     private:
-        void createVertexList(const std::vector<TUIO::TuioCursor> list);
+        void createVertexList(const std::vector<TUIO::TuioCursor>& list);
 
         properties::BoolProperty _visible;
         properties::FloatProperty _radiusSize;
