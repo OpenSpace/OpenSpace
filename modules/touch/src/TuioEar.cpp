@@ -86,7 +86,6 @@ void TuioEar::removeTuioCursor(TuioCursor *tcur) {
     _removeList.push_back(tcur->getSessionID());
 
     // Check if the cursor ID could be considered a tap
-    std::list<TuioPoint>& path = tcur->getPath();
     glm::dvec2 currPos = glm::dvec2(tcur->getX(), tcur->getY());
     double dist = 0;
     for (const TuioPoint& p : tcur->getPath()) {
@@ -94,7 +93,7 @@ void TuioEar::removeTuioCursor(TuioCursor *tcur) {
     }
     dist /= tcur->getPath().size();
     
-    double heldTime = path.back().getTuioTime().getTotalMilliseconds() - path.front().getTuioTime().getTotalMilliseconds();
+    double heldTime = tcur->getPath().back().getTuioTime().getTotalMilliseconds() - tcur->getPath().front().getTuioTime().getTotalMilliseconds();
     if (heldTime < 180 && dist < 0.0004 && _list.size() == 1 && _removeList.size() == 1) {
         _tapCo = TuioCursor(*tcur);
         _tap = true;
