@@ -1,0 +1,75 @@
+@import "../../styles/all";
+
+$label-size: 0.7rem;
+$label-margin: 0.1rem;
+
+// calculate good padding for input field
+$input-padding-horizontal: $base-padding * 2/3;
+$input-padding-vertical: $base-padding;
+$input-padding-top: $label-size + $label-margin;
+$input-padding-bottom: $input-padding-vertical - $input-padding-top;
+
+$input-padding: $input-padding-top
+                $input-padding-horizontal
+                $input-padding-bottom;
+$input-padding-empty: ($input-padding-vertical/2) $input-padding-horizontal;
+
+@keyframes label-animation {
+  0% {
+    opacity: 0;
+    transform: translateY($label-size);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.group {
+  position: relative;
+}
+
+.input {
+  border: 0;
+  color: $input-text-color-blur;
+  padding: $input-padding-empty;
+  transition: padding $animation-duration $animation-easing;
+
+  &.hasinput {
+    padding: $input-padding;
+  }
+
+  &:disabled {
+    color: lighten(black, 40%);
+    cursor: not-allowed;
+  }
+}
+
+.input:focus {
+  background: $ui-background-hover;
+  color: $input-text-color-focus;
+  outline: 0;
+
+  + .label {
+    color: $green;
+  }
+}
+
+.input.wide {
+  width: 100%;
+}
+
+.label {
+  display: none;
+  font-size: $label-size;
+  left: $input-padding-horizontal;
+  line-height:1;
+  position: absolute;
+  top: ($label-margin/2);
+  transition: color $animation-duration $animation-easing;
+}
+
+.label.hasinput {
+  animation: label-animation $animation-duration $animation-easing;
+  display: inline-block;
+  user-select: none;
+}

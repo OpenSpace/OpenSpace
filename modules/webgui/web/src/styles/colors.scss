@@ -16,3 +16,6 @@ $ui-highlight-secondary: $blue;
 
 $text-color-focus: white;
 $text-color-blur: darken($text-color-focus, 40%);
+
+$input-text-color-focus: $text-color-focus;
+$input-text-color-blur: $text-color-blur;
