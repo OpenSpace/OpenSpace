@@ -22,31 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <modules/touch/include/TouchMarker.h>
+#include <modules/touch/include/TouchInteraction.h>
 
-#include <modules/onscreengui/include/gui.h>
 
 namespace openspace {
 
-struct Touch {
-    bool active;
-    glm::vec2 pos;
-    uint32_t action;
-};
+    class TouchModule : public OpenSpaceModule {
+        using Point = std::pair<int, TUIO::TuioPoint>;
+    public:
+        TouchModule();
 
-class OnScreenGUIModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "OnScreenGUI";
+    private:
+        /**
+        * Returns true if new touch input occured since the last frame
+        */
+        bool hasNewInput();
 
-    OnScreenGUIModule();
-    
-    static gui::GUI gui;
-    static Touch touchInput;
-};
+        TuioEar ear;
+        TouchInteraction touch;
+        TouchMarker markers;
+        std::vector<TUIO::TuioCursor> listOfContactPoints;
+        std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
+    };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__

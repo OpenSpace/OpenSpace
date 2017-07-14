@@ -22,31 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+#ifndef __OPENSPACE_TOUCH___MARKER___H__
+#define __OPENSPACE_TOUCH___MARKER___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/touch/include/TuioEar.h>
 
-#include <modules/onscreengui/include/gui.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+
+
+#include <glm/glm.hpp>
+#include <memory>
+#include <vector>
+
+namespace ghoul {
+namespace opengl {
+    class ProgramObject;
+} // namespace opengl
+} // namespace ghoul
 
 namespace openspace {
 
-struct Touch {
-    bool active;
-    glm::vec2 pos;
-    uint32_t action;
+
+class TouchMarker : public properties::PropertyOwner
+{
+    public:
+        TouchMarker();
+
+        bool initialize();
+        bool deinitialize();
+
+        void render(const std::vector<TUIO::TuioCursor>& list);
+
+
+    private:
+        void createVertexList(const std::vector<TUIO::TuioCursor>& list);
+
+        properties::BoolProperty _visible;
+        properties::FloatProperty _radiusSize;
+        properties::FloatProperty _transparency;
+        properties::FloatProperty _thickness;
+        properties::Vec3Property _color;
+
+        std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+        
+        GLuint _quad;
+        GLuint _vertexPositionBuffer;
+        int _numFingers;
 };
 
-class OnScreenGUIModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "OnScreenGUI";
+} // openspace namespace
 
-    OnScreenGUIModule();
-    
-    static gui::GUI gui;
-    static Touch touchInput;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+#endif // __OPENSPACE_TOUCH___MARKER___H__

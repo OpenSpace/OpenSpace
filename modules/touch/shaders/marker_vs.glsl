@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,31 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+#version __CONTEXT__
 
-#include <openspace/util/openspacemodule.h>
+// Vertex attributes
+layout(location = 0) in vec2 in_position;
 
-#include <modules/onscreengui/include/gui.h>
+// Uniforms
+uniform float radius;
 
-namespace openspace {
+// Outputs
+out vec2 out_position;
+//out float pointRadius;
 
-struct Touch {
-    bool active;
-    glm::vec2 pos;
-    uint32_t action;
-};
+void main() {
+    out_position = in_position;
 
-class OnScreenGUIModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "OnScreenGUI";
-
-    OnScreenGUIModule();
-    
-    static gui::GUI gui;
-    static Touch touchInput;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+    gl_PointSize = radius;
+    gl_Position = vec4(in_position, -1.0, 1.0);
+}
