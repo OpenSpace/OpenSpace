@@ -89,13 +89,15 @@ documentation::Documentation ConfigurationManager::Documentation() {
                 {
                     ConfigurationManager::PartLogDir,
                     new StringVerifier,
-                    "The directory for logs",
+                    "The directory for logs."
+                    "Default value is \"${BASE_PATH}\"",
                     Optional::Yes
                 },
                 {
                     ConfigurationManager::PartLogPerformancePrefix,
                     new StringVerifier,
-                    "A string to prefix PerformanceMeasurement logfiles",
+                    "A string to prefix PerformanceMeasurement logfiles."
+                    "Default value is \"PM-\"",
                     Optional::Yes
                 },
                 {

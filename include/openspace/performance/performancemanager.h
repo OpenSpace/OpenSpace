@@ -60,20 +60,20 @@ public:
     
     void outputLogs();
 
-    void writeData(std::ofstream& out, const std::vector<float> data);
+    void writeData(std::ofstream& out, const std::vector<float>& data);
 
-    const std::string formatLogName(std::string nodeName);
+    std::string formatLogName(std::string nodeName);
 
     void logDir(std::string dir);
-    std::string logDir();
+    std::string logDir() const;
     void prefix(std::string prefix);
-    std::string prefix();
+    std::string prefix() const;
 
     void enableLogging();
     void disableLogging();
     void toggleLogging();
     void setLogging(bool enabled);
-    bool loggingEnabled();
+    bool loggingEnabled() const;
 
     PerformanceLayout* performanceData();
 private:
@@ -92,6 +92,7 @@ private:
     size_t _tick;
     
     void tick();
+    bool createLogDir();
 };
 
 } // namespace performance

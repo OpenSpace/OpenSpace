@@ -86,6 +86,8 @@ void GuiPerformanceComponent::render() {
     v = _outputLogs;
     ImGui::Checkbox("Output Logs", &v);
     OsEng.renderEngine().performanceManager()->setLogging(v);
+    // Need to catch if it's unsuccessful
+    v = OsEng.renderEngine().performanceManager()->loggingEnabled();
     _outputLogs = v;
 
     ImGui::Spacing();
