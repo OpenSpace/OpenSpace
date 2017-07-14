@@ -22,60 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
+#ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+#define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/gpu/gpuheightlayer.h>
+#include <openspace/util/timeline.h>
+#include <openspace/network/parallelconnection.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace openspace {
-namespace globebrowsing {
 
-void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
-                             const LayerGroup& layerGroup, const TileIndex& tileIndex)
+class Camera;
+
+namespace interaction {
+
+class KeyframeNavigator
 {
-    auto& activeLayers = layerGroup.activeLayers();
-    ghoul_assert(
-        activeLayers.size() == _gpuActiveLayers.size(),
-        "GPU and CPU active layers must have same size!"
-    );
-    for (unsigned int i = 0; i < activeLayers.size(); ++i) {
-        _gpuActiveLayers[i]->setValue(
-            programObject,
-            *activeLayers[i],
-            tileIndex,
-            layerGroup.pileSize()
-        );
-    }
-}
+public:
+    struct CameraPose {
+        glm::dvec3 position;
+        glm::quat rotation;
+        std::string focusNode;
+        bool followFocusNodeRotation;
+    };
 
-void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
-                         const LayerGroup& layerGroup, const std::string& nameBase,
-                         int category)
-{
-    auto activeLayers = layerGroup.activeLayers();
-    _gpuActiveLayers.resize(activeLayers.size());
-    int pileSize = layerGroup.pileSize();
-    for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
-        // should maybe a proper GPULayer factory
-        _gpuActiveLayers[i] = (category == layergroupid::GroupID::HeightLayers) ?
-            std::make_unique<GPUHeightLayer>() : 
-            std::make_unique<GPULayer>();
-        std::string nameExtension = "[" + std::to_string(i) + "].";
-        _gpuActiveLayers[i]->bind(
-            programObject,
-            *activeLayers[i],
-            nameBase + nameExtension,
-            pileSize
-        );
-    }
-}
+    KeyframeNavigator() = default;
+    ~KeyframeNavigator() = default;
 
-void GPULayerGroup::deactivate() {
-    for (std::unique_ptr<GPULayer>& l : _gpuActiveLayers) {
-        l->deactivate();
-    }
-}
-    
-}  // namespace globebrowsing
-}  // namespace openspace
+    void updateCamera(Camera& camera);
+    Timeline<CameraPose>& timeline();
+
+    void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
+    void removeKeyframesAfter(double timestamp);
+    void clearKeyframes();
+    size_t nKeyframes() const;
+    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
+
+private:
+    Timeline<CameraPose> _cameraPoseTimeline;
+};
+
+} // namespace interaction
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__

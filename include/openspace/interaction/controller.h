@@ -33,7 +33,7 @@
 namespace openspace {
 namespace interaction {
 
-class InteractionHandler;
+class NavigationHandler;
 
 class Controller {
 public:
@@ -41,10 +41,10 @@ public:
         _handler(nullptr)
     {}
     
-    void setHandler(InteractionHandler* handler);
+    void setHandler(NavigationHandler* handler);
 
 protected:
-    InteractionHandler* _handler;
+    NavigationHandler* _handler;
 };
 
 } // namespace interaction

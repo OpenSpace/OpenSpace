@@ -19,10 +19,7 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = {1738140, 1738140, 1735970}, -- Moons's radius
-            CameraMinHeight = 300,
             SegmentsPerPatch = 64,
-            -- Allows camera to go down 10000 meters below the reference ellipsoid
-            InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             Layers = {
                 ColorLayers = {
                     {

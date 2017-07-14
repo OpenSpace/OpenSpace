@@ -78,7 +78,7 @@ function postInitialization()
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.levelByProjectedAreaElseDistance", false)
     openspace.setPropertyValue("Earth.RenderableGlobe.Layers.ColorLayers.blendTileLevels", true)
 
-    openspace.resetCameraDirection()
+    openspace.globebrowsing.goToGeo(0, 0, 20000000)
 
     openspace.printInfo("Done setting default values")
 end
@@ -89,7 +89,7 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {30000000, 0, 0},
+        Position = {0, 0, 0},
         Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
     },
 

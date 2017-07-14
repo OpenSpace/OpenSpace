@@ -42,6 +42,7 @@ namespace openspace {
 struct RenderData;
 struct UpdateData;
 struct RendererTasks;
+struct SurfacePositionHandle;
 
 namespace documentation { struct Documentation; } 
 
@@ -78,6 +79,8 @@ public:
     virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
+    virtual SurfacePositionHandle calculateSurfacePositionHandle(
+                                                      const glm::dvec3& targetModelSpace);
 
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);

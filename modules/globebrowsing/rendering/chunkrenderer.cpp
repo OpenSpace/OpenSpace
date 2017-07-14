@@ -228,9 +228,9 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     programObject->setUniform("radiiSquared", glm::vec3(ellipsoid.radiiSquared()));
 
     if (_layerManager->layerGroup(
-            layergroupid::NightLayers).activeLayers().size() > 0 ||
+            layergroupid::GroupID::NightLayers).activeLayers().size() > 0 ||
         _layerManager->layerGroup(
-            layergroupid::WaterMasks).activeLayers().size() > 0 ||
+            layergroupid::GroupID::WaterMasks).activeLayers().size() > 0 ||
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading)
     {
