@@ -42,7 +42,7 @@
 #endif
 
 namespace {
-    const std::string _loggerCat = "OrbitalNavigator";
+    const char* _loggerCat = "OrbitalNavigator";
 }
 
 namespace openspace {
@@ -147,7 +147,8 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera,
             camPos,
             camera.rotationQuaternion(),
             camera.lookUpVectorWorldSpace(),
-            camera.viewDirectionWorldSpace());
+            camera.viewDirectionWorldSpace()
+        );
 
         // Rotate with the globe by finding a differential rotation from the previous
         // to the current rotation
@@ -165,7 +166,8 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera,
             focusNodeRotationDiff,
             centerPos,
             camPos,
-            posHandle);
+            posHandle
+        );
 
         // Update local rotation
         camRot.localRotation = roll(deltaTime, camRot.localRotation);
@@ -186,7 +188,8 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera,
         camPos = followFocusNodeRotation(
             camPos,
             centerPos,
-            focusNodeRotationDiff);
+            focusNodeRotationDiff
+        );
 
         // Recalculate posHandle since horizontal position changed
         posHandle = calculateSurfacePositionHandle(camPos);
@@ -196,14 +199,16 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera,
             centerPos,
             focusNodeRotationDiff,
             camPos,
-			posHandle);
+            posHandle
+        );
 
         // Rotate around the surface out direction
         camRot.globalRotation = rotateHorizontally(
             deltaTime,
             camRot.globalRotation,
             camPos,
-            posHandle);
+            posHandle
+        );
 
         // Perform the vertical movements
         camPos = translateVertically(deltaTime, camPos, centerPos, posHandle);
@@ -211,12 +216,12 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera,
             _minimumAllowedDistance,
             camPos,
             centerPos,
-            posHandle);
+            posHandle
+        );
 
         // Update the camera state
         camera.setPositionVec3(camPos); 
         camera.setRotation(camRot.globalRotation * camRot.localRotation);
-        return;
     }
 }
 
@@ -253,11 +258,11 @@ SceneGraphNode* OrbitalNavigator::focusNode() const {
 }
 
 OrbitalNavigator::CameraRotationDecomposition
-	OrbitalNavigator::decomposeCameraRotation(
-		const glm::dvec3& cameraPosition,
-		const glm::dquat& cameraRotation,
-		const glm::dvec3& cameraLookUp,
-		const glm::dvec3& cameraViewDirection)
+    OrbitalNavigator::decomposeCameraRotation(
+        const glm::dvec3& cameraPosition,
+        const glm::dquat& cameraRotation,
+        const glm::dvec3& cameraLookUp,
+        const glm::dvec3& cameraViewDirection)
 {
     glm::dmat4 inverseModelTransform = _focusNode->inverseModelTransform();
     glm::dmat4 modelTransform = _focusNode->modelTransform();
@@ -267,19 +272,19 @@ OrbitalNavigator::CameraRotationDecomposition
     SurfacePositionHandle posHandle =
         _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
-	glm::dvec3 directionFromSurfaceToCameraModelSpace =
+    glm::dvec3 directionFromSurfaceToCameraModelSpace =
         posHandle.referenceSurfaceOutDirection;
-	glm::dvec3 directionFromSurfaceToCamera =
-		glm::normalize(glm::dmat3(modelTransform) *
+    glm::dvec3 directionFromSurfaceToCamera =
+        glm::normalize(glm::dmat3(modelTransform) *
         directionFromSurfaceToCameraModelSpace);
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
-	glm::dmat4 lookAtMat = glm::lookAt(
-		glm::dvec3(0.0, 0.0, 0.0),
+    glm::dmat4 lookAtMat = glm::lookAt(
+        glm::dvec3(0.0, 0.0, 0.0),
         -directionFromSurfaceToCamera,
         normalize(cameraViewDirection + cameraLookUp));
-	glm::dquat globalCameraRotation = glm::normalize(glm::quat_cast(inverse(lookAtMat)));
-	glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) * cameraRotation;
+    glm::dquat globalCameraRotation = glm::normalize(glm::quat_cast(inverse(lookAtMat)));
+    glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) * cameraRotation;
 
     return { localCameraRotation, globalCameraRotation };
 }
@@ -303,7 +308,7 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
         0.0
     );
     glm::dquat rotationDiff = glm::dquat(eulerAngles * deltaTime);
-	return localCameraRotation * rotationDiff;
+    return localCameraRotation * rotationDiff;
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(
@@ -354,8 +359,8 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(
     double distFromSurfaceToCamera = glm::length(actualSurfaceToCamera);
 
     // Final values to be used
-	double distFromCenterToSurface = length(centerToActualSurface);
-	double distFromCenterToCamera = length(posDiff);
+    double distFromCenterToSurface = length(centerToActualSurface);
+    double distFromCenterToCamera = length(posDiff);
 
     double speedScale =
         distFromCenterToSurface > 0.0 ?
@@ -473,7 +478,7 @@ glm::dvec3 OrbitalNavigator::pushToSurface(
     glm::dmat4 modelTransform = _focusNode->modelTransform();
 
     glm::dvec3 posDiff = cameraPosition - objectPosition;
-	glm::dvec3 referenceSurfaceOutDirection =
+    glm::dvec3 referenceSurfaceOutDirection =
         glm::dmat3(modelTransform) * positionHandle.referenceSurfaceOutDirection;
     glm::dvec3 centerToReferenceSurface =
         glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
@@ -594,9 +599,9 @@ void OrbitalNavigator::goToGeodetic2(Camera& camera,
 void OrbitalNavigator::goToGeodetic3(Camera& camera,
                                      globebrowsing::Geodetic3 geo3, 
                                      bool resetCameraDirection) {
-	using namespace globebrowsing;
-	
-	RenderableGlobe* globe = castRenderableToGlobe();
+    using namespace globebrowsing;
+    
+    RenderableGlobe* globe = castRenderableToGlobe();
     if (!globe) {
         LERROR("Focus node must have a RenderableGlobe renderable.");
         return;
@@ -652,9 +657,9 @@ globebrowsing::RenderableGlobe* OrbitalNavigator::castRenderableToGlobe() {
     using namespace globebrowsing;
 
     Renderable* baseRenderable = _focusNode->renderable();
-	if (!baseRenderable) {
-		return nullptr;
-	}
+    if (!baseRenderable) {
+        return nullptr;
+    }
     if (globebrowsing::RenderableGlobe* globe =
             dynamic_cast<globebrowsing::RenderableGlobe*>(baseRenderable))
     {

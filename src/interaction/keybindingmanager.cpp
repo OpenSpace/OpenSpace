@@ -39,8 +39,6 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "KeyBindingManager";
-
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
     const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
     const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
@@ -61,15 +59,6 @@ KeyBindingManager::KeyBindingManager()
         },
         JsFilename
     )
-{ }
-
-KeyBindingManager::~KeyBindingManager()
-{ }
-
-void KeyBindingManager::initialize()
-{ }
-
-void KeyBindingManager::deinitialize()
 { }
 
 void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -139,7 +128,7 @@ std::string KeyBindingManager::generateJson() const {
 }    
 
 scripting::LuaLibrary KeyBindingManager::luaLibrary() {
-    return{
+    return {
         "",
         {
             {

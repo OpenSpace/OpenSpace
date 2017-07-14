@@ -81,7 +81,7 @@ NavigationHandler::NavigationHandler()
     // Add the properties
     addProperty(_origin);
     addProperty(_useKeyFrameInteraction);
-	addPropertySubOwner(*_orbitalNavigator);
+    addPropertySubOwner(*_orbitalNavigator);
 }
 
 NavigationHandler::~NavigationHandler()
@@ -111,7 +111,7 @@ void NavigationHandler::setCamera(Camera* camera) {
 
 void NavigationHandler::resetCameraDirection() {
     LINFO("Setting camera direction to point at focus node.");
-	_orbitalNavigator->startInterpolateCameraDirection(*_camera);
+    _orbitalNavigator->startInterpolateCameraDirection(*_camera);
 }
 
 const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
@@ -178,7 +178,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
                 _orbitalNavigator->updateMouseStatesFromInput(*_inputState, deltaTime);
                 _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);    
             }
-			_camera->setFocusPositionVec3(focusNode()->worldPosition());
+            _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }
 }
@@ -268,7 +268,7 @@ ghoul::Dictionary NavigationHandler::getCameraStateDictionary() {
 
 void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
-        auto fullpath = absPath(filepath);
+        std::string fullpath = absPath(filepath);
         LINFO("Saving camera position: " << filepath);
 
         ghoul::Dictionary cameraDict = getCameraStateDictionary();
@@ -316,7 +316,7 @@ void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) 
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
-    return{
+    return {
         "navigation",
         {
             {

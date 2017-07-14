@@ -47,8 +47,8 @@ public:
         bool followFocusNodeRotation;
     };
 
-    KeyframeNavigator();
-    ~KeyframeNavigator();
+    KeyframeNavigator() = default;
+    ~KeyframeNavigator() = default;
 
     void updateCamera(Camera& camera);
     Timeline<CameraPose>& timeline();

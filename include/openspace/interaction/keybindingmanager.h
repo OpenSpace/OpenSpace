@@ -42,10 +42,7 @@ class KeyBindingManager : public DocumentationGenerator
 {
 public:
     KeyBindingManager();
-    ~KeyBindingManager();
-
-    void initialize();
-    void deinitialize();
+    ~KeyBindingManager() = default;
     
     void resetKeyBindings();
 

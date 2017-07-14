@@ -187,8 +187,10 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h

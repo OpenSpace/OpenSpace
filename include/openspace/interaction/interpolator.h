@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___INTERPOLATOR___H__
 #define __OPENSPACE_CORE___INTERPOLATOR___H__
 
-#include <ghoul/misc/assert.h>
-
 #include <functional>
 
 namespace openspace {
@@ -36,44 +34,32 @@ namespace interaction {
  * Interpolates a typename T using a transfer function.
  */
 template <typename T>
-class Interpolator
-{
+class Interpolator {
 public:
-    Interpolator()
-    : _transferFunction([](double t){ return t; })
-    , _t(0.0)
-    , _interpolationTime(1.0) {};
-    ~Interpolator() {};
+    Interpolator();
+    ~Interpolator() = default;
 
-    void start() {
-        _t = 0.0;
-    };
-
-    void end() { _t = 1.0; };
+    void start();
+    void end();
+    void setDeltaTime(float deltaTime);
+    void setTransferFunction(std::function<T(float)> transferFunction);
+    void setInterpolationTime(float interpolationTime);
+	void step();
     
-    void setDeltaTime(double deltaTime) {
-        _scaledDeltaTime = deltaTime / _interpolationTime;
-    };
-    void setTransferFunction(std::function<T(double)> transferFunction) {
-        _transferFunction = transferFunction;
-    }
-    void setInterpolationTime(double interpolationTime) {
-        _interpolationTime = interpolationTime;
-    }
-	void step() { _t += _scaledDeltaTime; _t = glm::clamp(_t, 0.0, 1.0); };
-    double deltaTimeScaled() const { return _scaledDeltaTime; };
-
-    T value() const { return _transferFunction(_t); };
-    bool isInterpolating() const { return _t < 1.0 && _t >= 0.0; };
+    float deltaTimeScaled() const;
+    T value() const;
+    bool isInterpolating() const;
 
 private:
-    std::function<T(double)> _transferFunction;
-    double _t;
-    double _interpolationTime;
-    double _scaledDeltaTime;
+    std::function<T(float)> _transferFunction;
+    float _t;
+    float _interpolationTime;
+    float _scaledDeltaTime;
 };
 
 } // namespace interaction
 } // namespace openspace
+
+#include "interpolator.inl"
 
 #endif // __OPENSPACE_CORE___INTERPOLATOR___H__

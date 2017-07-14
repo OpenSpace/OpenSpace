@@ -25,52 +25,25 @@
 #ifndef __OPENSPACE_CORE___DELAYEDVARIABLE___H__
 #define __OPENSPACE_CORE___DELAYEDVARIABLE___H__
 
-#include <ghoul/glm.h>
-
 namespace openspace {
 namespace interaction {
 
 /**
  * Class that acts as a smoothing filter to a variable. The filter has a step
  * response on a form that resembles the function y = 1-e^(-t/scale). The variable
- * will be updates as soon as it is set to a value (calling the set() function).
+ * will be updated as soon as it is set to a value (calling the set() function).
 */
 template <typename T, typename ScaleType>
 class DelayedVariable {
 public:
-    DelayedVariable(ScaleType scaleFactor, ScaleType friction) {
-        _scaleFactor = scaleFactor;
-        _friction = glm::max(friction, ScaleType(0.0));
-    }
+    DelayedVariable(ScaleType scaleFactor, ScaleType friction);
+    void set(T value, double dt);
+    void decelerate(double dt);
+    void setHard(T value);
+    void setFriction(ScaleType friction);
+    void setScaleFactor(ScaleType scaleFactor);
+    T get() const;
 
-    void set(T value, double dt) {
-        _targetValue = value;
-        _currentValue = _currentValue + (_targetValue - _currentValue) *
-			glm::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
-    }
-    
-    void decelerate(double dt) {
-        _currentValue = _currentValue + (- _currentValue) *
-            glm::min(_scaleFactor * _friction * dt, 1.0);
-            // less or equal to 1.0 keeps it stable
-    }
-    
-    void setHard(T value) {
-        _targetValue = value;
-        _currentValue = value;
-    }
-    
-    void setFriction(ScaleType friction) {
-        _friction = glm::max(friction, ScaleType(0.0));
-    }
-    
-    void setScaleFactor(ScaleType scaleFactor) {
-        _scaleFactor = scaleFactor;
-    }
-    
-    T get() const {
-        return _currentValue;
-    }
 private:
     ScaleType _scaleFactor;
     ScaleType _friction;
@@ -80,5 +53,7 @@ private:
 
 } // namespace interaction
 } // namespace openspace
+
+#include "delayedvariable.inl"
 
 #endif // __OPENSPACE_CORE___DELAYEDVARIABLE___H__

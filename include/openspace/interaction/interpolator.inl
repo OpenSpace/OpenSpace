@@ -22,49 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
-#define __OPENSPACE_CORE___INPUTSTATE___H__
+#include <ghoul/misc/assert.h>
 
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
-
-#include <glm/glm.hpp>
-
-#include <list>
+#include <functional>
 
 namespace openspace {
 namespace interaction {
 
-class InputState {
-public:
-    InputState() = default;
-    ~InputState() = default;
+template <typename T>
+Interpolator<T>::Interpolator()
+: _transferFunction([](float t){ return t; })
+, _t(0.0)
+, _interpolationTime(1.0) {};
 
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
-
-    // Accessors
-    const std::list<std::pair<Key, KeyModifier>>& getPressedKeys() const;
-    const std::list<MouseButton>& getPressedMouseButtons() const;
-    glm::dvec2 getMousePosition() const;
-    double getMouseScrollDelta() const;
-
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
-    bool isKeyPressed(Key key) const;
-    bool isMouseButtonPressed(MouseButton mouseButton) const;
-
-private:
-    // Input from keyboard and mouse
-    std::list<std::pair<Key, KeyModifier>> _keysDown;
-    std::list<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
-    double _mouseScrollDelta;
+template <typename T>
+void Interpolator<T>::start() {
+    _t = 0.0;
 };
+
+template <typename T>
+void Interpolator<T>::end() {
+    _t = 1.0;
+}
+
+template <typename T>
+void Interpolator<T>::setDeltaTime(float deltaTime) {
+    _scaledDeltaTime = deltaTime / _interpolationTime;
+}
+
+template <typename T>
+void Interpolator<T>::setTransferFunction(std::function<T(float)> transferFunction) {
+    _transferFunction = transferFunction;
+}
+
+template <typename T>
+void Interpolator<T>::setInterpolationTime(float interpolationTime) {
+    _interpolationTime = interpolationTime;
+}
+
+template <typename T>
+void Interpolator<T>::step() {
+    _t += _scaledDeltaTime;
+    _t = glm::clamp(_t, 0.0, 1.0);
+}
+
+template <typename T>
+float Interpolator<T>::deltaTimeScaled() const {
+    return _scaledDeltaTime;
+}
+
+template <typename T>
+T Interpolator<T>::value() const {
+    return _transferFunction(_t);
+}
+
+template <typename T>
+bool Interpolator<T>::isInterpolating() const {
+    return _t < 1.0 && _t >= 0.0;
+}
 
 } // namespace interaction
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___INPUTSTATE___H__

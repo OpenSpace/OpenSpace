@@ -34,8 +34,9 @@ int setOrigin(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     const int type = lua_type(L, -1);
     if (type != LUA_TSTRING) {

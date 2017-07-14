@@ -246,31 +246,32 @@ const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
 }
 
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
-    glm::dvec3 targetModelSpace) 
+                                                       const glm::dvec3& targetModelSpace) 
 {
-    glm::dvec3 centerToEllipsoidSurface = _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
+    glm::dvec3 centerToEllipsoidSurface =
+        _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
     glm::dvec3 ellipsoidSurfaceToTarget = targetModelSpace - centerToEllipsoidSurface;
     // ellipsoidSurfaceOutDirection will point towards the target, we want the outward
     // direction. Therefore it must be flipped in case the target is under the reference
     // ellipsoid so that it always points outwards
     glm::dvec3 ellipsoidSurfaceOutDirection = glm::normalize(ellipsoidSurfaceToTarget);
     if (glm::dot(ellipsoidSurfaceOutDirection, centerToEllipsoidSurface) < 0) {
-		ellipsoidSurfaceOutDirection *= -1.0;
+        ellipsoidSurfaceOutDirection *= -1.0;
     }
 
-	double heightToSurface = getHeight(targetModelSpace);
+    double heightToSurface = getHeight(targetModelSpace);
     heightToSurface = glm::isnan(heightToSurface) ? 0.0 : heightToSurface;
     centerToEllipsoidSurface = glm::isnan(glm::length(centerToEllipsoidSurface)) ?
         (glm::dvec3(0.0, 1.0, 0.0) * static_cast<double>(boundingSphere())) :
-		centerToEllipsoidSurface;
+        centerToEllipsoidSurface;
     ellipsoidSurfaceOutDirection = glm::isnan(glm::length(ellipsoidSurfaceOutDirection)) ?
         glm::dvec3(0.0, 1.0, 0.0) : ellipsoidSurfaceOutDirection;
 
     return {
-		centerToEllipsoidSurface,
-		ellipsoidSurfaceOutDirection,
-		heightToSurface
-	};
+        centerToEllipsoidSurface,
+        ellipsoidSurfaceOutDirection,
+        heightToSurface
+    };
 }
 
 void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 

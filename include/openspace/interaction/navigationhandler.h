@@ -44,8 +44,7 @@ class SceneGraphNode;
 
 namespace interaction {
 
-class NavigationHandler : public properties::PropertyOwner
-{
+class NavigationHandler : public properties::PropertyOwner {
 public:
     NavigationHandler();
     ~NavigationHandler();

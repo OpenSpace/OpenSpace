@@ -24,12 +24,21 @@
 
 #include <openspace/interaction/mousestate.h>
 
-namespace {
-    const std::string _loggerCat = "MouseState";
-}
-
 namespace openspace {
 namespace interaction {
+
+MouseState::MouseState(double scaleFactor)
+    : velocity(scaleFactor, 1)
+    , previousPosition(0.0, 0.0)
+{ }
+
+void MouseState::setFriction(double friction) {
+    velocity.setFriction(friction);
+}
+
+void MouseState::setVelocityScaleFactor(double scaleFactor) {
+    velocity.setScaleFactor(scaleFactor);
+}
 
 MouseStates::MouseStates(double sensitivity, double velocityScaleFactor)
     : _sensitivity(sensitivity)
@@ -38,10 +47,11 @@ MouseStates::MouseStates(double sensitivity, double velocityScaleFactor)
     , _truckMovementMouseState(velocityScaleFactor)
     , _localRollMouseState(velocityScaleFactor)
     , _globalRollMouseState(velocityScaleFactor)
-{
-}
+{ }
 
-void MouseStates::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
+void MouseStates::updateMouseStatesFromInput(const InputState& inputState,
+                                             double deltaTime)
+{
     glm::dvec2 mousePosition = inputState.getMousePosition();
 
     bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
@@ -55,7 +65,8 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState, doubl
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
                 _localRotationMouseState.previousPosition - mousePosition;
-            _localRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+            _localRotationMouseState.velocity.set(
+                mousePositionDelta * _sensitivity, deltaTime);
 
             _globalRotationMouseState.previousPosition = mousePosition;
             _globalRotationMouseState.velocity.decelerate(deltaTime);
@@ -63,7 +74,8 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState, doubl
         else {
             glm::dvec2 mousePositionDelta =
                 _globalRotationMouseState.previousPosition - mousePosition;
-            _globalRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+            _globalRotationMouseState.velocity.set(
+                mousePositionDelta * _sensitivity, deltaTime);
 
             _localRotationMouseState.previousPosition = mousePosition;
             _localRotationMouseState.velocity.decelerate(deltaTime);
@@ -79,7 +91,8 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState, doubl
     if (button2Pressed) {
         glm::dvec2 mousePositionDelta =
             _truckMovementMouseState.previousPosition - mousePosition;
-        _truckMovementMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+        _truckMovementMouseState.velocity.set(
+            mousePositionDelta * _sensitivity, deltaTime);
     }
     else { // !button2Pressed
         _truckMovementMouseState.previousPosition = mousePosition;
@@ -89,7 +102,8 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState, doubl
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
                 _localRollMouseState.previousPosition - mousePosition;
-            _localRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+            _localRollMouseState.velocity.set(
+                mousePositionDelta * _sensitivity, deltaTime);
 
             _globalRollMouseState.previousPosition = mousePosition;
             _globalRollMouseState.velocity.decelerate(deltaTime);
@@ -97,7 +111,8 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState, doubl
         else {
             glm::dvec2 mousePositionDelta =
                 _globalRollMouseState.previousPosition - mousePosition;
-            _globalRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
+            _globalRollMouseState.velocity.set(
+                mousePositionDelta * _sensitivity, deltaTime);
 
             _localRollMouseState.previousPosition = mousePosition;
             _localRollMouseState.velocity.decelerate(deltaTime);

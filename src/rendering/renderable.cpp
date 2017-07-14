@@ -159,7 +159,7 @@ void Renderable::render(const RenderData& data, RendererTasks&) {
 void Renderable::render(const RenderData&) {}
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
-    glm::dvec3 targetModelSpace)
+                                                       const glm::dvec3& targetModelSpace)
 {
     glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
 	return {

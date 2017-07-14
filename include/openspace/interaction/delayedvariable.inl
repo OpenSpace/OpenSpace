@@ -22,49 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
-#define __OPENSPACE_CORE___INPUTSTATE___H__
-
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
-
-#include <glm/glm.hpp>
-
-#include <list>
+#include <ghoul/misc/assert.h>
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace interaction {
 
-class InputState {
-public:
-    InputState() = default;
-    ~InputState() = default;
+template <typename T, typename ScaleType>
+DelayedVariable<T, ScaleType>::DelayedVariable(ScaleType scaleFactor, ScaleType friction)
+    : _scaleFactor(std::move(scaleFactor))
+    , _friction(friction)
+{
+    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
+}
 
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::set(T value, double dt) {
+    _targetValue = value;
+    _currentValue = _currentValue + (_targetValue - _currentValue) *
+        glm::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
+}
 
-    // Accessors
-    const std::list<std::pair<Key, KeyModifier>>& getPressedKeys() const;
-    const std::list<MouseButton>& getPressedMouseButtons() const;
-    glm::dvec2 getMousePosition() const;
-    double getMouseScrollDelta() const;
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::decelerate(double dt) {
+    _currentValue = _currentValue + (- _currentValue) *
+        glm::min(_scaleFactor * _friction * dt, 1.0);
+        // less or equal to 1.0 keeps it stable
+}
 
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
-    bool isKeyPressed(Key key) const;
-    bool isMouseButtonPressed(MouseButton mouseButton) const;
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setHard(T value) {
+    _targetValue = value;
+    _currentValue = value;
+}
 
-private:
-    // Input from keyboard and mouse
-    std::list<std::pair<Key, KeyModifier>> _keysDown;
-    std::list<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
-    double _mouseScrollDelta;
-};
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setFriction(ScaleType friction) {
+    _friction = friction;
+    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
+}
+
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setScaleFactor(ScaleType scaleFactor) {
+    _scaleFactor = scaleFactor;
+}
+
+template <typename T, typename ScaleType>
+T DelayedVariable<T, ScaleType>::get() const {
+    return _currentValue;
+}
 
 } // namespace interaction
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___INPUTSTATE___H__

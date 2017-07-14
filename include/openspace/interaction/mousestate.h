@@ -34,15 +34,10 @@ namespace openspace {
 namespace interaction {
 
 struct MouseState {
-    MouseState(double scaleFactor)
-        : velocity(scaleFactor, 1)
-        , previousPosition(0.0, 0.0) {}
-    void setFriction(double friction) {
-        velocity.setFriction(friction);
-    }
-    void setVelocityScaleFactor(double scaleFactor) {
-        velocity.setScaleFactor(scaleFactor);
-    }
+    MouseState(double scaleFactor);
+    void setFriction(double friction);
+    void setVelocityScaleFactor(double scaleFactor);
+    
     glm::dvec2 previousPosition;
     DelayedVariable<glm::dvec2, double> velocity;
 };

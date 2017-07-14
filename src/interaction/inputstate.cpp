@@ -26,22 +26,12 @@
 
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    const std::string _loggerCat = "InputState";
-}
-
 namespace openspace {
 namespace interaction {
 
-InputState::InputState()
-{ }
-
-InputState::~InputState()
-{ }
-
 void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
     if (action == KeyAction::Press) {
-        _keysDown.push_back(std::pair<Key, KeyModifier>(key, modifier));
+        _keysDown.emplace_back(key, modifier);
     }
     else if (action == KeyAction::Release) {
         // Remove all key pressings for 'key'
@@ -86,30 +76,19 @@ double InputState::getMouseScrollDelta() const {
 }
 
 bool InputState::isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const {
-    for (auto it = _keysDown.begin(); it != _keysDown.end(); it++) {
-        if (*it == keyModPair) {
-            return true;
-        }
-    }
-    return false;
+    return std::find(_keysDown.begin(), _keysDown.end(), keyModPair) != _keysDown.end();
 }
 
 bool InputState::isKeyPressed(Key key) const {
-    for (auto it = _keysDown.begin(); it != _keysDown.end(); it++) {
-        if ((*it).first == key) {
-            return true;
-        }
-    }
-    return false;
+    return std::find_if(_keysDown.begin(), _keysDown.end(),
+        [key](const std::pair<Key, KeyModifier>& keyModPair) {
+            return key == keyModPair.first;
+        }) != _keysDown.end();
 }
 
 bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
-    for (auto it = _mouseButtonsDown.begin(); it != _mouseButtonsDown.end(); it++) {
-        if (*it == mouseButton) {
-            return true;
-        }
-    }
-    return false;
+    return std::find(_mouseButtonsDown.begin(), _mouseButtonsDown.end(),
+        mouseButton) != _mouseButtonsDown.end();
 }
 
 } // namespace interaction

@@ -34,18 +34,8 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-namespace {
-    const std::string _loggerCat = "KeyframeNavigator";
-}
-
 namespace openspace {
 namespace interaction {
-
-KeyframeNavigator::KeyframeNavigator()
-{ }
-
-KeyframeNavigator::~KeyframeNavigator()
-{ }
 
 void KeyframeNavigator::updateCamera(Camera& camera) {
     double now = OsEng.runTime();
@@ -80,7 +70,7 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
 
     const CameraPose& prevPose = prevKeyframe->data;
     const CameraPose& nextPose = nextKeyframe->data;
-	
+    
     Scene* scene = camera.parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
@@ -130,7 +120,7 @@ void KeyframeNavigator::clearKeyframes() {
 }
 
 size_t KeyframeNavigator::nKeyframes() const {
-	return _cameraPoseTimeline.nKeyframes();
+    return _cameraPoseTimeline.nKeyframes();
 }
 
 } // namespace interaction

@@ -34,7 +34,6 @@ namespace globebrowsing {
 
 class GeodeticPatch {
 public:
-    GeodeticPatch(int hej);
     GeodeticPatch(
         double centerLat,
         double centerLon,
