@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,80 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
-#define __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
+#ifndef __OPENSPACE_TOUCH___MARKER___H__
+#define __OPENSPACE_TOUCH___MARKER___H__
 
-#include <openspace/performance/performancelayout.h>
+#include <modules/touch/include/TuioEar.h>
 
-#include <ghoul/misc/sharedmemory.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
-#include <map>
+
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
 namespace ghoul {
-    class SharedMemory;
-}
+namespace opengl {
+    class ProgramObject;
+} // namespace opengl
+} // namespace ghoul
 
 namespace openspace {
 
-class SceneGraphNode;
 
-namespace performance {
+class TouchMarker : public properties::PropertyOwner
+{
+    public:
+        TouchMarker();
 
-class PerformanceManager {
-public:
-    static void createGlobalSharedMemory();
-    static void destroyGlobalSharedMemory();
-    
-    PerformanceManager();
-    ~PerformanceManager();
+        bool initialize();
+        bool deinitialize();
 
-    void resetPerformanceMeasurements();
-    
-    bool isMeasuringPerformance() const;
+        void render(const std::vector<TUIO::TuioCursor>& list);
 
-    void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
-    void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
-    
-    void outputLogs();
 
-    void writeData(std::ofstream& out, const std::vector<float>& data);
+    private:
+        void createVertexList(const std::vector<TUIO::TuioCursor>& list);
 
-    std::string formatLogName(std::string nodeName);
+        properties::BoolProperty _visible;
+        properties::FloatProperty _radiusSize;
+        properties::FloatProperty _transparency;
+        properties::FloatProperty _thickness;
+        properties::Vec3Property _color;
 
-    void logDir(std::string dir);
-    std::string logDir() const;
-    void prefix(std::string prefix);
-    std::string prefix() const;
-
-    void enableLogging();
-    void disableLogging();
-    void toggleLogging();
-    void setLogging(bool enabled);
-    bool loggingEnabled() const;
-
-    PerformanceLayout* performanceData();
-private:
-    bool _doPerformanceMeasurements;
-    bool _loggingEnabled;
-
-    std::string _logDir;
-    std::string _prefix;
-    std::string _suffix;
-    std::string _ext;
-    
-    std::map<std::string, size_t> individualPerformanceLocations;
-    
-    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
-
-    size_t _tick;
-    
-    void tick();
-    bool createLogDir();
+        std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+        
+        GLuint _quad;
+        GLuint _vertexPositionBuffer;
+        int _numFingers;
 };
 
-} // namespace performance
-} // namespace openspace
+} // openspace namespace
 
-#endif // __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
+#endif // __OPENSPACE_TOUCH___MARKER___H__

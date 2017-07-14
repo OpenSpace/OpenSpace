@@ -137,14 +137,12 @@ PerformanceManager::PerformanceManager()
     , _loggingEnabled(false)
     , _logDir(absPath("${BASE_PATH}"))
     , _prefix("PM-")
-    , _suffix("")
     , _ext("log")
 {
-    using ghoul::SharedMemory;
     PerformanceManager::createGlobalSharedMemory();
     
     
-    SharedMemory sharedMemory(GlobalSharedMemoryName);
+    ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
     sharedMemory.acquireLock();
     OnExit([&](){sharedMemory.releaseLock();});
     
@@ -160,7 +158,7 @@ PerformanceManager::PerformanceManager()
     const int totalSize = sizeof(PerformanceLayout);
     LINFO("Create shared memory '" + localName + "' of " << totalSize << " bytes");
 
-    if (SharedMemory::exists(localName)) {
+    if (ghoul::SharedMemory::exists(localName)) {
         throw ghoul::RuntimeError(
             "Shared Memory '" + localName + "' block already existed"
         );
@@ -247,14 +245,14 @@ void PerformanceManager::outputLogs() {
     }
 }
 
-void PerformanceManager::writeData(std::ofstream& out, const std::vector<float> data) {
+void PerformanceManager::writeData(std::ofstream& out, const std::vector<float>& data) {
     for (size_t i = 0; i < data.size() - 1; i++) {
         out << data[i] << ",";
     }
     out << data[data.size() - 1] << "\n";
 }
 
-const std::string PerformanceManager::formatLogName(std::string nodeName) {
+ std::string PerformanceManager::formatLogName(std::string nodeName) {
     // Replace any colons with dashes
     std::replace(nodeName.begin(), nodeName.end(), ':', '-');
     return  _logDir + "/" + _prefix + nodeName + _suffix + "." + _ext;
@@ -264,7 +262,7 @@ void PerformanceManager::logDir(std::string dir) {
     _logDir = absPath(dir);
 }
 
-std::string PerformanceManager::logDir() {
+std::string PerformanceManager::logDir() const {
     return _logDir;
 }
 
@@ -272,7 +270,7 @@ void PerformanceManager::prefix(std::string prefix) {
     _prefix = prefix;
 }
 
-std::string PerformanceManager::prefix() {
+std::string PerformanceManager::prefix() const {
     return _prefix;
 }
 
@@ -285,13 +283,39 @@ void PerformanceManager::disableLogging() {
 }
 
 void PerformanceManager::toggleLogging() {
-    _loggingEnabled = !_loggingEnabled;
+    setLogging(!_loggingEnabled);
 }
+
 void PerformanceManager::setLogging(bool enabled) {
+    // Create the log directory if it doesn't exist. Do it here, so that it
+    // only tests once each time output is enabled
+    if (enabled) {
+        // If it can't create the directory, it's not logging so set false
+        enabled = createLogDir();
+    }
+
     _loggingEnabled = enabled;
 }
 
-bool PerformanceManager::loggingEnabled() {
+bool PerformanceManager::createLogDir() {
+    // Done if it exists
+    ghoul::filesystem::Directory dir(_logDir);
+    if (FileSys.directoryExists(dir)) {
+        return true;
+    }
+
+    // Error and set false if can't create
+    try {
+        FileSys.createDirectory(dir, ghoul::filesystem::FileSystem::Recursive::Yes);
+    }
+    catch (const ghoul::filesystem::FileSystem::FileSystemException& e) {
+        LERROR("Could not create log directory: " << e.message);
+        return false;
+    }
+    return true;
+}
+
+bool PerformanceManager::loggingEnabled() const {
     return _loggingEnabled;
 }
 
@@ -404,7 +428,9 @@ void PerformanceManager::storeScenePerformanceMeasurements(
     }
     _performanceMemory->releaseLock();
     
-    if (_loggingEnabled && _tick == PerformanceLayout::NumberValues - 1) outputLogs();
+    if (_loggingEnabled && _tick == PerformanceLayout::NumberValues - 1) {
+        outputLogs();
+    }
 
     tick();
 }
