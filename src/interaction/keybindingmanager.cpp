@@ -124,7 +124,7 @@ std::string KeyBindingManager::generateJson() const {
         json << "\"key\": \"" << std::to_string(p.first) << "\",";
         json << "\"script\": \"" << p.second.command << "\",";
         json << "\"remoteScripting\": " << (p.second.synchronization ? "true," : "false,");
-        json << "\"documentation\": \"" << p.second.documentation << "\"";
+        json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\"";
         json << "}";
     }
     json << "]";

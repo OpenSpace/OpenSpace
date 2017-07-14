@@ -603,8 +603,8 @@ std::string ScriptEngine::generateJson() const {
         for (const LuaLibrary::Function& f : l.functions) {
             json << "{";
             json << "\"name\": \"" << f.name << "\", ";
-            json << "\"arguments\": \"" << f.argumentText << "\", ";
-            json << "\"help\": \"" << f.helpText << "\"";
+            json << "\"arguments\": \"" << escapedJson(f.argumentText) << "\", ";
+            json << "\"help\": \"" << escapedJson(f.helpText) << "\"";
             json << "}";
             if (&f != &l.functions.back() || !l.documentations.empty()) {
                 json << ",";
@@ -614,8 +614,8 @@ std::string ScriptEngine::generateJson() const {
         for (const LuaLibrary::Documentation& doc : l.documentations) {
             json << "{";
             json << "\"name\": \"" << doc.name << "\", ";
-            json << "\"arguments\": \"" << doc.parameter<< "\", ";
-            json << "\"help\": \"" << doc.description<< "\"";
+            json << "\"arguments\": \"" << escapedJson(doc.parameter) << "\", ";
+            json << "\"help\": \"" << escapedJson(doc.description) << "\"";
             json << "}";
             if (&doc != &l.documentations.back()) {
                 json << ",";

@@ -156,7 +156,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
         result << "\"key\": \"" << p.key << "\",";
         result << "\"optional\": " << (p.optional ? "true" : "false") << ",";
         result << "\"type\": \"" << p.verifier->type() << "\",";
-        result << "\"documentation\": \"" << p.documentation << "\",";
+        result << "\"documentation\": \"" << escapedJson(p.documentation) << "\",";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
@@ -210,7 +210,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
              << "\t\t<td></td>\n"
              << "\t\t<td>" << p.key << "</td>\n"
              << "\t\t<td>" << (p.optional ? "Optional" : "Required") << "</td>\n"
-             << "\t\t<td>" << p.documentation << "</td>\n"
+             << "\t\t<td>" << escapedJson(p.documentation) << "</td>\n"
              << "\t\t<td>" << p.verifier->type() << "</td>\n";
 
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
@@ -285,11 +285,12 @@ std::string DocumentationEngine::generateJson() const {
 
     std::string jsonString = "";
     for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        }
-        else {
-            jsonString += c;
+        switch (c) {
+            case '\'':
+                jsonString += "\\'";
+                break;
+            default:
+                jsonString += c;
         }
     }
 
@@ -297,26 +298,6 @@ std::string DocumentationEngine::generateJson() const {
 }
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
-    std::function<void(const DocumentationEntry&)> testDocumentation =
-        [&testDocumentation](const DocumentationEntry& e) {
-            (void)e; // Unused variable in Release mode
-            ghoul_assert(
-                e.documentation.find('"') == std::string::npos,
-                fmt::format("Documentation cannot contain \" character. {} does", e.key)
-            );
-
-            TableVerifier* v = dynamic_cast<TableVerifier*>(e.verifier.get());
-            if (v) {
-                for (const DocumentationEntry& e : v->documentations) {
-                    testDocumentation(e);
-                }
-            }
-        };
-
-    for (const DocumentationEntry& e : doc.entries) {
-        testDocumentation(e);
-    }
-
     if (doc.id.empty()) {
         _documentations.push_back(std::move(doc));
     }
