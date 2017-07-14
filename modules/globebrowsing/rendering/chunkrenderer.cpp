@@ -119,10 +119,13 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
     glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
     glm::dmat4 modelViewTransform = viewTransform * modelTransform;
 
-    if (_layerManager->layerGroup(
-            layergroupid::NightLayers).activeLayers().size() > 0 ||
-        _layerManager->layerGroup(
-            layergroupid::WaterMasks).activeLayers().size() > 0 ||
+    const bool nightLayersActive =
+        !_layerManager->layerGroup(layergroupid::NightLayers).activeLayers().empty();
+    const bool waterLayersActive =
+        !_layerManager->layerGroup(layergroupid::WaterMasks).activeLayers().empty();
+    
+    if (nightLayersActive ||
+        waterLayersActive ||
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading)
     {

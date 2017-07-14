@@ -34,8 +34,6 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
-#include <string>
-
 namespace openspace {
 namespace globebrowsing {
 
