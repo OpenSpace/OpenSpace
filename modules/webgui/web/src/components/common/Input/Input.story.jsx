@@ -11,5 +11,6 @@ storiesOf('Input.Input', module)
   .add('no input', () => (<Input placeholder="Input" />))
   .add('wide', () => (<Input placeholder="Input" wide />))
   .add('disabled', () => (<Input placeholder="Input" value="value" disabled />))
+  .add('loading', () => (<Input placeholder="Input" value="value" loading />))
   .add('with callback', () =>
     (<Input placeholder="Input" value="change me" onChange={action('input')} />));

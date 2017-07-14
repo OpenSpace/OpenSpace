@@ -14,7 +14,7 @@ class Input extends Component {
 
     this.state = {
       value: props.value,
-      id: `input-${Input.nextId}`,
+      id: props.id,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -38,22 +38,37 @@ class Input extends Component {
     return this.state.value !== '';
   }
 
+  /**
+   * filter out props that shouldn't be inherited by the input element
+   * @returns {*}
+   */
+  get inheritProps() {
+    const doNotInclude = 'wide onChange loading value'.split(' ');
+    return Object.keys(this.props)
+      // actually filter out the keywords
+      .filter(key => !doNotInclude.includes(key))
+      // create new props object to return
+      .reduce((newProps, key) => {
+        const prop = {};
+        prop[key] = this.props[key];
+        return Object.assign(newProps, prop);
+      }, {});
+  }
+
   render() {
-    const { type, placeholder, className, wide, disabled, autocomplete } = this.props;
+    const { placeholder, className, wide, loading } = this.props;
     const { value, id } = this.state;
     return (
       <div className={styles.group}>
         <input
-          autoComplete={autocomplete}
+          {...this.inheritProps}
           className={`${className} ${styles.input}
                       ${this.hasInput && styles.hasinput}
+                      ${loading && styles.loading}
                       ${wide && styles.wide}`}
-          disabled={disabled}
           id={id}
-          placeholder={placeholder}
           onChange={this.onChange}
           value={value}
-          type={type}
         />
         <label htmlFor={id} className={`${styles.label} ${this.hasInput && styles.hasinput}`}>
           {placeholder}
@@ -66,22 +81,20 @@ class Input extends Component {
 Input.idCounter = 0;
 
 Input.propTypes = {
-  autocomplete: PropTypes.bool,
   onChange: PropTypes.func,
   className: PropTypes.string,
-  disabled: PropTypes.bool,
+  id: PropTypes.string,
+  loading: PropTypes.bool,
   placeholder: PropTypes.string.isRequired,
-  type: PropTypes.string,
   value: PropTypes.string,
   wide: PropTypes.bool,
 };
 
 Input.defaultProps = {
-  autocomplete: false,
   onChange: () => {},
   className: '',
-  disabled: false,
-  type: 'text',
+  id: `input-${Input.nextId}`,
+  loading: false,
   value: '',
   wide: false,
 };

@@ -1,0 +1,94 @@
+@import "../../../styles/all";
+
+$label-size: 0.7rem;
+$label-margin: 0.1rem;
+$loading-border-width: 0.1rem;
+
+// calculate good padding for input field
+$padding-horizontal: $base-padding * 2/3;
+$padding-vertical: $base-padding;
+$padding-top: $label-size + $label-margin;
+$padding-bottom: $padding-vertical - $padding-top;
+$padding-bottom-loading: $padding-vertical - $padding-top - $loading-border-width;
+
+$padding: $padding-top $padding-horizontal $padding-bottom;
+$padding-empty: ($padding-vertical/2) $padding-horizontal;
+$padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
+
+.group {
+  position: relative;
+}
+
+.input {
+  border: 0;
+  color: $text-color-blur;
+  padding: $padding-empty;
+  transition: padding $animation-duration $animation-easing;
+
+  &:disabled {
+    color: lighten(black, 40%);
+    cursor: not-allowed;
+  }
+}
+
+.input:focus {
+  background: $ui-background-hover;
+  color: $text-color-focus;
+  outline: 0;
+
+  + .label {
+    color: $green;
+  }
+}
+
+.input.hasinput {
+  padding: $padding;
+}
+
+.input.loading {
+  animation: loading-input-animation $loading-animation-duration $loading-easing infinite;
+  padding: $padding-loading;
+}
+
+.input.wide {
+  width: 100%;
+}
+
+.label {
+  display: none;
+  font-size: $label-size;
+  left: $padding-horizontal;
+  line-height:1;
+  position: absolute;
+  top: ($label-margin/2);
+  transition: color $animation-duration $animation-easing;
+}
+
+.label.hasinput {
+  animation: label-animation $animation-duration $animation-easing;
+  display: inline-block;
+  user-select: none;
+}
+
+
+@keyframes label-animation {
+  0% {
+    opacity: 0;
+    transform: translateY($label-size);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes loading-input-animation {
+  0% {
+    border-bottom: $loading-border-width solid $blue;
+  }
+  50% {
+    border-bottom: $loading-border-width solid $green;
+  }
+  100% {
+    border-bottom: $loading-border-width solid $blue;
+  }
+}
