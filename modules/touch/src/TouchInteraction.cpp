@@ -25,7 +25,7 @@
 #include <modules/touch/include/TouchInteraction.h>
 #include <modules/onscreengui/onscreenguimodule.h>
 
-#include <openspace/interaction/interactionmode.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -530,7 +530,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, co
         case PICK: { // pick something in the scene as focus node
             if (_selected.size() == 1 && _selected.at(0).node) {
                 setFocusNode(_selected.at(0).node);
-                OsEng.interactionHandler().setFocusNode(_focusNode); // cant do setFocusNode() since TouchInteraction is not subclass of InteractionMode
+                OsEng.navigationHandler().setFocusNode(_focusNode); // cant do setFocusNode() since TouchInteraction is not subclass of InteractionMode
 
                 // rotate camera to look at new focus, using slerp quat
                 glm::dvec3 camToFocus = _focusNode->worldPosition() - _camera->positionVec3();
@@ -556,7 +556,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, co
 void TouchInteraction::step(double dt) {
     using namespace glm;
 
-    setFocusNode(OsEng.interactionHandler().focusNode()); // since functions cant be called directly (TouchInteraction not a subclass of InteractionMode)
+    setFocusNode(OsEng.navigationHandler().focusNode()); // since functions cant be called directly (TouchInteraction not a subclass of InteractionMode)
     if (_focusNode && _camera) {
         // Create variables from current state
         dvec3 camPos = _camera->positionVec3();

@@ -27,7 +27,6 @@
 #include <openspace/util/syncbuffer.h>
 #include <openspace/query/query.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/interactionhandler.h>
 
 
 #include <glm/gtc/matrix_transform.hpp>

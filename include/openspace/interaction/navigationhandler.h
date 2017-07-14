@@ -22,14 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
-#define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
+#ifndef __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
+#define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
-#include <openspace/documentation/documentationgenerator.h>
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -38,10 +37,6 @@
 
 #include <ghoul/misc/boolean.h>
 
-#include <list>
-
-#include <mutex>
-
 namespace openspace {
 
 class Camera;
@@ -49,11 +44,10 @@ class SceneGraphNode;
 
 namespace interaction {
 
-class InteractionHandler : public properties::PropertyOwner, public DocumentationGenerator
-{
+class NavigationHandler : public properties::PropertyOwner {
 public:
-    InteractionHandler();
-    ~InteractionHandler();
+    NavigationHandler();
+    ~NavigationHandler();
 
     void initialize();
     void deinitialize();
@@ -63,39 +57,9 @@ public:
     void setCamera(Camera* camera);
     void resetCameraDirection();
 
-    // Interaction mode setters
-    void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-    InteractionMode* interactionMode();
+    void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);    
     
-    void goToChunk(int x, int y, int level);
-    void goToGeo(double latitude, double longitude);
-    
-    void resetKeyBindings();
-
-    void addKeyframe(double timestamp, KeyframeInteractionMode::CameraPose pose);
-    void removeKeyframesAfter(double timestamp);
-    void clearKeyframes();
-    size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
-
-    void bindKeyLocal(
-        Key key,
-        KeyModifier modifier,
-        std::string luaCommand,
-        std::string documentation = ""
-    );
-    void bindKey(
-        Key key,
-        KeyModifier modifier,
-        std::string luaCommand,
-        std::string documentation = ""
-    );
-    void lockControls();
-    void unlockControls();
-
-    //void update(double deltaTime);
     void updateCamera(double deltaTime);
-    void updateInputStates(double timeSinceLastUpdate);    
 
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
@@ -104,15 +68,8 @@ public:
     glm::quat focusNodeToCameraRotation() const;
     Camera* camera() const;
     const InputState& inputState() const;
-
-    /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * interaction. The functions contained are
-    * - openspace::luascriptfunctions::setOrigin
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
-    */
-    static scripting::LuaLibrary luaLibrary();
+    const OrbitalNavigator& orbitalNavigator() const;
+    KeyframeNavigator& keyframeNavigator() const; 
 
     // Callback functions 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
@@ -123,47 +80,26 @@ public:
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);
 
+    /**
+    * \return The Lua library that contains all Lua functions available to affect the
+    * interaction
+    */
+    static scripting::LuaLibrary luaLibrary();
 private:
-    using Synchronized = ghoul::Boolean;
-
-    struct KeyInformation {
-        std::string command;
-        Synchronized synchronization;
-        std::string documentation;
-    };
-    
-    std::string generateJson() const override;
-
-    void setInteractionMode(InteractionMode* interactionMode);
-
     bool _cameraUpdatedFromScript = false;
-
-    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
 
-    InteractionMode* _currentInteractionMode;
-
-    std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
-
-    std::unique_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
-    std::unique_ptr<GlobeBrowsingInteractionMode> _globeBrowsingInteractionMode;
-    std::unique_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
+    std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
+    std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
 
     // Properties
     properties::StringProperty _origin;
-    properties::OptionProperty _interactionModeOption;
-    
-    properties::BoolProperty _rotationalFriction;
-    properties::BoolProperty _horizontalFriction;
-    properties::BoolProperty _verticalFriction;
-
-    properties::FloatProperty _sensitivity;
-    properties::FloatProperty _rapidness;
+    properties::BoolProperty _useKeyFrameInteraction;
 };
 
 } // namespace interaction
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___INTERACTIONHANDLER___H__
+#endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__

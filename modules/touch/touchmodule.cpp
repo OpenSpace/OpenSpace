@@ -27,7 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
@@ -119,8 +119,8 @@ TouchModule::TouchModule()
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::PreSync,
         [&]() {
-        touch.setCamera(OsEng.interactionHandler().camera());
-        touch.setFocusNode(OsEng.interactionHandler().focusNode());
+        touch.setCamera(OsEng.navigationHandler().camera());
+        touch.setFocusNode(OsEng.navigationHandler().focusNode());
 
         if (hasNewInput() && OsEng.windowWrapper().isMaster()) {
             touch.updateStateFromInput(listOfContactPoints, lastProcessed);

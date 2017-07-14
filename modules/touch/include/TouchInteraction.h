@@ -31,8 +31,8 @@
 #include <openspace/util/camera.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>

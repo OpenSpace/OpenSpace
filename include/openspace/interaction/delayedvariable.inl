@@ -22,60 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
-
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/gpu/gpuheightlayer.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/glm.h>
 
 namespace openspace {
-namespace globebrowsing {
+namespace interaction {
 
-void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
-                             const LayerGroup& layerGroup, const TileIndex& tileIndex)
+template <typename T, typename ScaleType>
+DelayedVariable<T, ScaleType>::DelayedVariable(ScaleType scaleFactor, ScaleType friction)
+    : _scaleFactor(std::move(scaleFactor))
+    , _friction(friction)
 {
-    auto& activeLayers = layerGroup.activeLayers();
-    ghoul_assert(
-        activeLayers.size() == _gpuActiveLayers.size(),
-        "GPU and CPU active layers must have same size!"
-    );
-    for (unsigned int i = 0; i < activeLayers.size(); ++i) {
-        _gpuActiveLayers[i]->setValue(
-            programObject,
-            *activeLayers[i],
-            tileIndex,
-            layerGroup.pileSize()
-        );
-    }
+    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
 }
 
-void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
-                         const LayerGroup& layerGroup, const std::string& nameBase,
-                         int category)
-{
-    auto activeLayers = layerGroup.activeLayers();
-    _gpuActiveLayers.resize(activeLayers.size());
-    int pileSize = layerGroup.pileSize();
-    for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
-        // should maybe a proper GPULayer factory
-        _gpuActiveLayers[i] = (category == layergroupid::GroupID::HeightLayers) ?
-            std::make_unique<GPUHeightLayer>() : 
-            std::make_unique<GPULayer>();
-        std::string nameExtension = "[" + std::to_string(i) + "].";
-        _gpuActiveLayers[i]->bind(
-            programObject,
-            *activeLayers[i],
-            nameBase + nameExtension,
-            pileSize
-        );
-    }
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::set(T value, double dt) {
+    _targetValue = value;
+    _currentValue = _currentValue + (_targetValue - _currentValue) *
+        glm::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
 }
 
-void GPULayerGroup::deactivate() {
-    for (std::unique_ptr<GPULayer>& l : _gpuActiveLayers) {
-        l->deactivate();
-    }
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::decelerate(double dt) {
+    _currentValue = _currentValue + (- _currentValue) *
+        glm::min(_scaleFactor * _friction * dt, 1.0);
+        // less or equal to 1.0 keeps it stable
 }
-    
-}  // namespace globebrowsing
-}  // namespace openspace
+
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setHard(T value) {
+    _targetValue = value;
+    _currentValue = value;
+}
+
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setFriction(ScaleType friction) {
+    _friction = friction;
+    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
+}
+
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setScaleFactor(ScaleType scaleFactor) {
+    _scaleFactor = scaleFactor;
+}
+
+template <typename T, typename ScaleType>
+T DelayedVariable<T, ScaleType>::get() const {
+    return _currentValue;
+}
+
+} // namespace interaction
+} // namespace openspace

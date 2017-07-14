@@ -22,60 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
+#ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/gpu/gpuheightlayer.h>
+#include <openspace/documentation/documentationgenerator.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/keys.h>
+
+#include <ghoul/misc/boolean.h>
 
 namespace openspace {
-namespace globebrowsing {
 
-void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
-                             const LayerGroup& layerGroup, const TileIndex& tileIndex)
+class Camera;
+class SceneGraphNode;
+
+namespace interaction {
+
+class KeyBindingManager : public DocumentationGenerator
 {
-    auto& activeLayers = layerGroup.activeLayers();
-    ghoul_assert(
-        activeLayers.size() == _gpuActiveLayers.size(),
-        "GPU and CPU active layers must have same size!"
-    );
-    for (unsigned int i = 0; i < activeLayers.size(); ++i) {
-        _gpuActiveLayers[i]->setValue(
-            programObject,
-            *activeLayers[i],
-            tileIndex,
-            layerGroup.pileSize()
-        );
-    }
-}
-
-void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
-                         const LayerGroup& layerGroup, const std::string& nameBase,
-                         int category)
-{
-    auto activeLayers = layerGroup.activeLayers();
-    _gpuActiveLayers.resize(activeLayers.size());
-    int pileSize = layerGroup.pileSize();
-    for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
-        // should maybe a proper GPULayer factory
-        _gpuActiveLayers[i] = (category == layergroupid::GroupID::HeightLayers) ?
-            std::make_unique<GPUHeightLayer>() : 
-            std::make_unique<GPULayer>();
-        std::string nameExtension = "[" + std::to_string(i) + "].";
-        _gpuActiveLayers[i]->bind(
-            programObject,
-            *activeLayers[i],
-            nameBase + nameExtension,
-            pileSize
-        );
-    }
-}
-
-void GPULayerGroup::deactivate() {
-    for (std::unique_ptr<GPULayer>& l : _gpuActiveLayers) {
-        l->deactivate();
-    }
-}
+public:
+    KeyBindingManager();
+    ~KeyBindingManager() = default;
     
-}  // namespace globebrowsing
-}  // namespace openspace
+    void resetKeyBindings();
+
+    void bindKeyLocal(
+        Key key,
+        KeyModifier modifier,
+        std::string luaCommand,
+        std::string documentation = ""
+    );
+
+    void bindKey(
+        Key key,
+        KeyModifier modifier,
+        std::string luaCommand,
+        std::string documentation = ""
+    );
+
+    static scripting::LuaLibrary luaLibrary();
+
+    // Callback functions 
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+
+private:
+    using Synchronized = ghoul::Boolean;
+
+    struct KeyInformation {
+        std::string command;
+        Synchronized synchronization;
+        std::string documentation;
+    };
+    
+    std::string generateJson() const override;
+
+    bool _cameraUpdatedFromScript = false;
+
+    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
+};
+
+} // namespace interaction
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
