@@ -110,13 +110,16 @@ function (set_compile_settings project)
         "/w44946"   # reinterpret_cast used between related classes: 'class1' and 'class2'
         "/w44986"   # 'symbol': exception specification does not match previous declaration
         "/w44988"   # 'symbol': variable declared outside class/function scope
-        # "/std:c++latest"      # Boost as of 1.64 still uses unary_function
+        "/std:c++latest"
         "/permissive-"
         "/Zc:strictStrings-"    # Windows header don't adhere to this
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "/WX")
         endif ()
+
+        # Boost as of 1.64 still uses unary_function unless we define this
+        target_compile_definitions(${project} PRIVATE "_HAS_AUTO_PTR_ETC")
     elseif (APPLE)
         target_compile_definitions(${project} PRIVATE "__APPLE__")
 
