@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -85,21 +85,21 @@ public:
     virtual std::string className() const override;
 
     /**
-     * Returns the stored value packed into a ghoul::any object.
-     * \return The stored value packed into a ghoul::any object
+     * Returns the stored value packed into a std::any object.
+     * \return The stored value packed into a std::any object
      */
-    virtual ghoul::any get() const override;
+    virtual std::any get() const override;
 
     /**
-     * Sets the value fro the provided ghoul::any object. If the types between
+     * Sets the value from the provided std::any object. If the types between
      * <code>T</code> and <code>value</code> disagree, an error is logged and the stored
      * value remains unchanged.
      */
-    virtual void set(ghoul::any value) override;
+    virtual void set(std::any value) override;
 
     /**
      * Returns the <code>std::type_info</code> describing the template parameter
-     * <code>T</code>. It can be used to test against a ghoul::any value before trying to
+     * <code>T</code>. It can be used to test against a std::any value before trying to
      * assign it.
      * \return The type info object describing the template parameter <code>T</code>
      */

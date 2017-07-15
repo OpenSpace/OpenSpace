@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,6 +28,8 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
+#include <algorithm>
+
 namespace openspace {
 namespace properties {
 
@@ -38,7 +40,7 @@ namespace {
     const char* MetaDataKeyReadOnly = "isReadOnly";
 
     const char* _metaDataKeyViewPrefix = "view.";
-}
+} // namespace
 
 Property::OnChangeHandle Property::OnChangeHandleAll =
                                                std::numeric_limits<OnChangeHandle>::max();
@@ -80,15 +82,15 @@ std::string Property::fullyQualifiedIdentifier() const {
     return identifier;
 }
 
-ghoul::any Property::get() const {
-    return ghoul::any();
+std::any Property::get() const {
+    return std::any();
 }
 
 bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(ghoul::any) {}
+void Property::set(std::any) {}
 
 bool Property::setLuaValue(lua_State*) {
     return false;

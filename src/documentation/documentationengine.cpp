@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,6 +31,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <streambuf>

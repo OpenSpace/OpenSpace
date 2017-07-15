@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -25,6 +25,8 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
+
+#include <algorithm>
 
 namespace openspace {
 namespace documentation {

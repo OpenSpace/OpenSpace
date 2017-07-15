@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -64,7 +64,7 @@ public:
      * listeners regardless of the value
      * \param value The ignored value
      */
-    void set(ghoul::any value);
+    void set(std::any value);
 };
 
 } // namespace properties

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -214,20 +214,20 @@ std::ostream& operator<<(std::ostream& os, const TemplateProperty<T>& obj) {
 }
 
 template <typename T>
-ghoul::any TemplateProperty<T>::get() const {
-    return ghoul::any(_value);
+std::any TemplateProperty<T>::get() const {
+    return std::any(_value);
 }
 
 template <typename T>
-void TemplateProperty<T>::set(ghoul::any value) {
+void TemplateProperty<T>::set(std::any value) {
     try {
-        T v = ghoul::any_cast<T>(std::move(value));
+        T v = std::any_cast<T>(std::move(value));
         if (v != _value) {
             _value = std::move(v);
             notifyListener();
         }
     }
-    catch (ghoul::bad_any_cast&) {
+    catch (std::bad_any_cast&) {
         LERRORC("TemplateProperty", "Illegal cast from '" << value.type().name()
             << "' to '" << typeid(T).name() << "'");
     }
@@ -240,16 +240,23 @@ const std::type_info& TemplateProperty<T>::type() const {
 
 template <typename T>
 bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
-    bool success = PropertyDelegate<TemplateProperty<T>>::template toLuaValue<T>(state, _value);
+    bool success = PropertyDelegate<TemplateProperty<T>>::template toLuaValue<T>(
+        state,
+        _value
+    );
     return success;
 }
 
 template <typename T>
 bool TemplateProperty<T>::setLuaValue(lua_State* state) {
     bool success = false;
-    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
-    if (success)
-        set(ghoul::any(thisValue));
+    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(
+        state,
+        success
+    );
+    if (success) {
+        set(std::any(thisValue));
+    }
     return success;
 }
 
@@ -260,16 +267,23 @@ int TemplateProperty<T>::typeLua() const {
 
 template <typename T>
 bool TemplateProperty<T>::getStringValue(std::string& value) const {
-    bool success = PropertyDelegate<TemplateProperty<T>>::template toString<T>(value, _value);
+    bool success = PropertyDelegate<TemplateProperty<T>>::template toString<T>(
+        value,
+        _value
+    );
     return success;
 }
 
 template <typename T>
 bool TemplateProperty<T>::setStringValue(std::string value) {
     bool success = false;
-    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromString<T>(value, success);
-    if (success)
-        set(ghoul::any(thisValue));
+    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromString<T>(
+        value,
+        success
+    );
+    if (success) {
+        set(std::any(thisValue));
+    }
     return success;
 }
 
