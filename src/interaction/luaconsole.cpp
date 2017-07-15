@@ -52,9 +52,7 @@ namespace {
     // A high number is chosen since we didn't have a version number before
     // any small number might also be equal to the console history length
 
-    // @CPP17
-    //const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
-    const uint64_t CurrentVersion = 0xFEEEFEEE00000001;
+    const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
     const openspace::Key CommandInputButton = openspace::Key::GraveAccent;
 
@@ -750,7 +748,7 @@ void LuaConsole::render() {
         res.y - HistoryFontSize * 1.5f + _fullHeight - _currentHeight
     );
 
-    // @CPP17: Replace with array_view
+    // @CPP: Replace with array_view
     std::vector<std::string> commandSubset;
     if (_commandsHistory.size() < static_cast<size_t>(_historyLength)) {
         commandSubset = _commandsHistory;
