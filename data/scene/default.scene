@@ -29,6 +29,8 @@ function postInitialization()
 
     openspace.addVirtualProperty("BoolProperty", "Show Trails", "*Trail.renderable.enabled", true, nil, nil)
 
+    openspace.navigation.resetCameraDirection()
+
     openspace.printInfo("Done setting default values")
 end
 
