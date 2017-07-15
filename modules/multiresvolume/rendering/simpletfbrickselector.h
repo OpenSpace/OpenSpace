@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,7 +36,7 @@ class HistogramManager;
 
 class SimpleTfBrickSelector : public TSPBrickSelector {
 public:
-    SimpleTfBrickSelector(TSP* tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    SimpleTfBrickSelector(std::shared_ptr<TSP> tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
     ~SimpleTfBrickSelector();
 
     virtual bool initialize();

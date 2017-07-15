@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -31,7 +31,7 @@ namespace openspace {
 
 class TimeBrickSelector : public TfBrickSelector {
 public:
-    TimeBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    TimeBrickSelector(std::shared_ptr<TSP> tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
 
     ~TimeBrickSelector();
 

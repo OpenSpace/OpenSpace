@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,7 +32,7 @@ namespace {
 
 namespace openspace {
 
-ShenBrickSelector::ShenBrickSelector(TSP* tsp, float spatialTolerance, float temporalTolerance)
+ShenBrickSelector::ShenBrickSelector(std::shared_ptr<TSP> tsp, float spatialTolerance, float temporalTolerance)
     : TSPBrickSelector(tsp)
     , _spatialTolerance(spatialTolerance)
     , _temporalTolerance(temporalTolerance) { }
@@ -44,7 +44,7 @@ ShenBrickSelector::~ShenBrickSelector() {
 
 bool ShenBrickSelector::initialize() {
     if(!_tsp->_spatialErrorReady)
-        _tsp->_spatialErrorReady   = _tsp->calculateSpatialError();
+        _tsp->_spatialErrorReady = _tsp->calculateSpatialError();
     if(!_tsp->_temporalErrorReady)
         _tsp->_temporalErrorReady = _tsp->calculateTemporalError();
     return (_tsp->_spatialErrorReady && _tsp->_temporalErrorReady);

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,15 +36,15 @@ namespace openspace {
     TSPBrickSelector::TSPBrickSelector()
     : BrickSelector(0, 0) {}
 
-    TSPBrickSelector::TSPBrickSelector(TSP* tsp)
+    TSPBrickSelector::TSPBrickSelector(std::shared_ptr<TSP> tsp)
     : BrickSelector(0, 0)
     , _tsp(tsp) {}
 
-    TSPBrickSelector::TSPBrickSelector(TSP* tsp, int memoryBudget, int streamingBudget)
+    TSPBrickSelector::TSPBrickSelector(std::shared_ptr<TSP> tsp, int memoryBudget, int streamingBudget)
     : BrickSelector(memoryBudget, streamingBudget)
     , _tsp(tsp) {}
 
-    TSPBrickSelector::TSPBrickSelector(TSP* tsp, TransferFunction* tf, int memoryBudget, int streamingBudget)
+    TSPBrickSelector::TSPBrickSelector(std::shared_ptr<TSP> tsp, TransferFunction* tf, int memoryBudget, int streamingBudget)
     : BrickSelector(memoryBudget, streamingBudget)
         , _tsp(tsp)
         ,_transferFunction(tf) {}

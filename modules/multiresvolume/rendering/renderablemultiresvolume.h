@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -155,11 +155,11 @@ private:
 
     std::unique_ptr<MultiresVolumeRaycaster> _raycaster;
 
-    TfBrickSelector* _tfBrickSelector;
-    SimpleTfBrickSelector* _simpleTfBrickSelector;
-    LocalTfBrickSelector* _localTfBrickSelector;
-    ShenBrickSelector* _shenBrickSelector;
-    TimeBrickSelector* _timeBrickSelector;
+    std::shared_ptr<TfBrickSelector>        _tfBrickSelector;
+    std::shared_ptr<SimpleTfBrickSelector>  _simpleTfBrickSelector;
+    std::shared_ptr<LocalTfBrickSelector>   _localTfBrickSelector;
+    std::shared_ptr<ShenBrickSelector>      _shenBrickSelector;
+    std::shared_ptr<TimeBrickSelector>      _timeBrickSelector;
 
     Selector _selector;
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,7 +33,7 @@ class ErrorHistogramManager;
 
 class TfBrickSelector : public TSPBrickSelector {
 public:
-    TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    TfBrickSelector(std::shared_ptr<TSP> tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
 
     ~TfBrickSelector();
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,7 +32,7 @@ namespace openspace {
 
 class ShenBrickSelector : public TSPBrickSelector {
 public:
-    ShenBrickSelector(TSP* tsp, float spatialTolerance, float temporalTolerance);
+    ShenBrickSelector(std::shared_ptr<TSP> tsp, float spatialTolerance, float temporalTolerance);
     ~ShenBrickSelector();
     bool initialize();
     void setSpatialTolerance(float spatialTolerance);

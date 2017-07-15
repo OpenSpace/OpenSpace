@@ -261,17 +261,6 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
 
 RenderableMultiresVolume::~RenderableMultiresVolume() {
 
-    if (_tfBrickSelector)
-        delete _tfBrickSelector;
-    if (_simpleTfBrickSelector)
-        delete _simpleTfBrickSelector;
-    if (_localTfBrickSelector)
-        delete _localTfBrickSelector;
-    if (_shenBrickSelector)
-        delete _shenBrickSelector;
-    if (_timeBrickSelector)
-        delete _timeBrickSelector;
-
     if (_errorHistogramManager)
         delete _errorHistogramManager;
     if (_histogramManager)
@@ -285,9 +274,9 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
     switch (_selector) {
         case Selector::TF:
             if (!_tfBrickSelector) {
-                TfBrickSelector* tbs;
+                std::shared_ptr<TfBrickSelector> tbs;
                 _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
-                _tfBrickSelector = tbs = new TfBrickSelector(_tsp.get(), _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
+                _tfBrickSelector = tbs = std::make_shared<TfBrickSelector>(_tsp, _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _transferFunction->setCallback([tbs](const TransferFunction &tf) {
                     tbs->initialize();
                 });
@@ -296,9 +285,9 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
             break;
         case Selector::TIME:
             if (!_timeBrickSelector) {
-                TimeBrickSelector* tbs;
+                std::shared_ptr<TimeBrickSelector> tbs;
                 _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
-                tbs = new TimeBrickSelector(_tsp.get(), _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
+                tbs = std::make_shared< TimeBrickSelector>(_tsp, _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _timeBrickSelector = tbs;
                 _transferFunction->setCallback([tbs](const TransferFunction &tf) {
                     tbs->initialize();
@@ -308,9 +297,9 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
             break;
         case Selector::SIMPLE:
             if (!_simpleTfBrickSelector) {
-                SimpleTfBrickSelector *stbs;
+                std::shared_ptr<SimpleTfBrickSelector> stbs;
                 _histogramManager = new HistogramManager(_tsp.get());
-                _simpleTfBrickSelector = stbs = new SimpleTfBrickSelector(_tsp.get(), _histogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
+                _simpleTfBrickSelector = stbs = std::make_shared<SimpleTfBrickSelector>(_tsp, _histogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _transferFunction->setCallback([stbs](const TransferFunction &tf) {
                     stbs->initialize();
                 });
@@ -320,9 +309,9 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
 
         case Selector::LOCAL:
             if (!_localTfBrickSelector) {
-                LocalTfBrickSelector* ltbs;
+                std::shared_ptr< LocalTfBrickSelector> ltbs;
                 _localErrorHistogramManager = new LocalErrorHistogramManager(_tsp.get());
-                _localTfBrickSelector = ltbs = new LocalTfBrickSelector(_tsp.get(), _localErrorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
+                _localTfBrickSelector = ltbs = std::make_shared<LocalTfBrickSelector>(_tsp, _localErrorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _transferFunction->setCallback([ltbs](const TransferFunction &tf) {
                     ltbs->initialize();
                 });
@@ -331,8 +320,8 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
             break;
         case Selector::SHEN:
             if (!_shenBrickSelector) {
-                ShenBrickSelector* sbs;
-                _shenBrickSelector = sbs = new ShenBrickSelector(_tsp.get(), _tsp->getMaxError(TSP::NodeType::SPATIAL), _tsp->getMaxError(TSP::NodeType::TEMPORAL));
+                std::shared_ptr<ShenBrickSelector> sbs;
+                _shenBrickSelector = sbs = std::make_shared<ShenBrickSelector>(_tsp, _tsp->getMaxError(TSP::NodeType::SPATIAL), _tsp->getMaxError(TSP::NodeType::TEMPORAL));
                 _transferFunction->setCallback([sbs](const TransferFunction &tf) {
                     sbs->initialize();
                 });
@@ -410,7 +399,7 @@ bool RenderableMultiresVolume::isReady() const {
 
 bool RenderableMultiresVolume::initializeShenSelector() {
     bool success = true;
-    BrickSelector * selector = _shenBrickSelector;
+    BrickSelector* selector = _shenBrickSelector.get();
     success &= selector && selector->initialize();
     _toleranceSpatial.setMaxValue(_tsp->getMaxError(TSP::NodeType::SPATIAL));
     _toleranceSpatial.setMinValue(_tsp->getMinError(TSP::NodeType::SPATIAL));
@@ -423,16 +412,16 @@ bool RenderableMultiresVolume::initializeSelector() {
     int nHistograms = _histogramBins;
     bool success = true;
 
-    BrickSelector * selector;
+    BrickSelector* selector;
     HistogramManager * manager;
     std::string scenePath = "";
 
     switch (_selector) {
-    case Selector::TF:      selector = _tfBrickSelector;        manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
-    case Selector::TIME:    selector = _timeBrickSelector;      manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
-    case Selector::LOCAL:   selector = _localTfBrickSelector;   manager = _localErrorHistogramManager;                                      break;
-    case Selector::SIMPLE:  selector = _simpleTfBrickSelector;  manager = _histogramManager;                                                break;
-    case Selector::SHEN:    selector = _shenBrickSelector;      return initializeShenSelector();
+    case Selector::TF:      selector = _tfBrickSelector.get();          manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
+    case Selector::TIME:    selector = _timeBrickSelector.get();        manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
+    case Selector::LOCAL:   selector = _localTfBrickSelector.get();     manager = _localErrorHistogramManager;                                      break;
+    case Selector::SIMPLE:  selector = _simpleTfBrickSelector.get();    manager = _histogramManager;                                                break;
+    case Selector::SHEN:    selector = _shenBrickSelector.get();        return initializeShenSelector();
     default:                LERROR("No selector " << _selector);        return false;
     }
 
@@ -536,13 +525,13 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
             selectionStart = std::chrono::system_clock::now();
         }
 
-        BrickSelector * s;
+        BrickSelector* s;
         switch (_selector) {
-        case Selector::TF:      s = _tfBrickSelector; break;
-        case Selector::SIMPLE:  s = _simpleTfBrickSelector; break;
-        case Selector::LOCAL:   s = _localTfBrickSelector; break;
-        case Selector::SHEN:    s = _shenBrickSelector; break;
-        case Selector::TIME:    s = _timeBrickSelector; break;
+        case Selector::TF:      s = _tfBrickSelector.get();         break;
+        case Selector::SIMPLE:  s = _simpleTfBrickSelector.get();   break;
+        case Selector::LOCAL:   s = _localTfBrickSelector.get();    break;
+        case Selector::SHEN:    s = _shenBrickSelector.get();       break;
+        case Selector::TIME:    s = _timeBrickSelector.get();       break;
         default:                LERROR("No selector" << _selector); return;
         }
 

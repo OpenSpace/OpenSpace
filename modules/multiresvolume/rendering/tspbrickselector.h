@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -38,16 +38,16 @@ class TransferFunction;
 class TSPBrickSelector : public BrickSelector {
 public:
     TSPBrickSelector();
-    TSPBrickSelector(TSP* tsp);
-    TSPBrickSelector(TSP* tsp, int memoryBudget, int streamingBudget);
-    TSPBrickSelector(TSP* tsp, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    TSPBrickSelector(std::shared_ptr<TSP> tsp);
+    TSPBrickSelector(std::shared_ptr<TSP> tsp, int memoryBudget, int streamingBudget);
+    TSPBrickSelector(std::shared_ptr<TSP> tsp, TransferFunction* tf, int memoryBudget, int streamingBudget);
     virtual ~TSPBrickSelector();
 
     virtual int getTimeStepCount();
     virtual int getBrickCount();
 
 protected:
-    TSP* _tsp;
+    std::shared_ptr<TSP> _tsp;
     TransferFunction* _transferFunction;
 
     int linearCoords(int x, int y, int z);

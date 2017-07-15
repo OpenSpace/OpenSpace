@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -62,7 +62,7 @@ public:
         }
     };
 
-    LocalTfBrickSelector(TSP* tsp, LocalErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    LocalTfBrickSelector(std::shared_ptr<TSP> tsp, LocalErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
     ~LocalTfBrickSelector();
 
     virtual bool initialize();

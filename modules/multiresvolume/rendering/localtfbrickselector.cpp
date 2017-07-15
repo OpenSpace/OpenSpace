@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,7 +35,7 @@ namespace {
 
 namespace openspace {
 
-LocalTfBrickSelector::LocalTfBrickSelector(TSP* tsp, LocalErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
+LocalTfBrickSelector::LocalTfBrickSelector(std::shared_ptr<TSP> tsp, LocalErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
     : TSPBrickSelector(tsp, tf, memoryBudget, streamingBudget)
     , _histogramManager(hm) {}
 

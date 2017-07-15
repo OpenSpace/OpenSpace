@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,7 +36,7 @@ namespace {
 
 namespace openspace {
 
-    SimpleTfBrickSelector::SimpleTfBrickSelector(TSP* tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
+    SimpleTfBrickSelector::SimpleTfBrickSelector(std::shared_ptr<TSP> tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
     : TSPBrickSelector(tsp, tf, memoryBudget, streamingBudget)
     , _histogramManager(hm) {}
 
