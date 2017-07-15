@@ -34,10 +34,6 @@
 
 #include <climits>
 
-namespace {
-    const char* KeyType = "Type";
-}
-
 namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {

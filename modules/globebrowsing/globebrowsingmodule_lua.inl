@@ -48,7 +48,6 @@ int addLayer(lua_State* L) {
     // Argument locations
     const int GlobeLocation = -3;
     const int LayerGroupLocation = -2;
-    const int DictionaryLocation = -1;
 
     int nArguments = lua_gettop(L);
     if (nArguments != 3) {
