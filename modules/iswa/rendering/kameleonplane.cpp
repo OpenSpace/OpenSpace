@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -269,7 +269,11 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile){
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
                 _fieldlines.addOption({i, it.key()});
-                _fieldlineState[i] = std::make_tuple(partName+"/"+it.key(), it.value(), false);
+                _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
+                    partName + "/" + it.key(),
+                    it.value(),
+                    false
+                );
                 i++;
             }
         } catch(const std::exception& e) {

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -46,10 +46,10 @@ protected:
     // Allowing SyncEngine synchronization methods and at the same time hiding them
     // from the used of implementations of the interface
     friend class SyncEngine;
-    virtual void presync(bool isMaster) {};
-    virtual void encode(SyncBuffer* syncBuffer) = 0;
-    virtual void decode(SyncBuffer* syncBuffer) = 0;
-    virtual void postsync(bool isMaster) {};
+    virtual void presync(bool /*isMaster*/) {};
+    virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
+    virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
+    virtual void postsync(bool /*isMaster*/) {};
 };
 
 /**

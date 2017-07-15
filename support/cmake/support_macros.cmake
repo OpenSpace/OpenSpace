@@ -94,6 +94,7 @@ function (set_compile_settings project)
         "/w44350"   # behavior change: 'member1' called instead of 'member2'
         "/w44431"   # missing type specifier - int assumed. Note: C no longer supports default-int
         "/w44471"   # a forward declaration of an unscoped enumeration must have an underlying type (int assumed)
+        "/wd4505"   # unreferenced local function has been removed
         "/w44545"   # expression before comma evaluates to a function which is missing an argument list
         "/w44546"   # function call before comma missing argument list
         "/w44547"   # 'operator': operator before comma has no effect; expected operator with side-effect

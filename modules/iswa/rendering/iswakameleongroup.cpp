@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -113,7 +113,11 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){
 
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
                 _fieldlines.addOption({i, it.key()});
-                _fieldlineState[i] = std::make_tuple(name()+"/"+it.key(), it.value(), false);
+                _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
+                    name() + "/" + it.key(),
+                    it.value(),
+                    false
+                );
                 i++;
             }
 
