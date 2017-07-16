@@ -135,7 +135,7 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromStrin
     while ((pos = value.find(Delimiter)) != std::string::npos) {
         std::string token = value.substr(0, pos);
         result.push_back(std::stoi(token));
-        value.erase(0, pos + Delimiter.length());
+        value.erase(0, pos + 1); // 1: Delimiter.length()
     }
     success = true;
     return result;

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -25,9 +25,13 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
 #define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
 
+namespace openspace {
+
 enum class VolumeGridType : int {
     Cartesian = 0,
     Spherical = 1
 };
+
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__

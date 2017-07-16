@@ -57,5 +57,4 @@ void GuiFilePathComponent::render() {
     ImGui::End();
 }
 
-} // 
 } // namespace openspace::gui

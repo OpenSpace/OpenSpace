@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,10 +31,11 @@
 
 namespace openspace {
 
-template <typename Voxel>
+template <typename Type>
 class RawVolume {
+    using VoxelType = Type;
+
 public:
-    typedef Voxel VoxelType;
     RawVolume(const glm::uvec3& dimensions);
     glm::uvec3 dimensions() const;
     void setDimensions(const glm::uvec3& dimensions);

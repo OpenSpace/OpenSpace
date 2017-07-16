@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,12 +31,11 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace {
+namespace openspace { class Renderable; }
 
-class Renderable;
-namespace documentation {  struct Documentation; }
+namespace openspace::documentation { struct Documentation; }
 
-namespace planetgeometry {
+namespace openspace::planetgeometry {
 
 class PlanetGeometry : public properties::PropertyOwner {
 public:
@@ -56,7 +55,6 @@ protected:
     Renderable* _parent;
 };
 
-}  // namespace planetgeometry
-}  // namespace openspace
+}  // namespace openspace::planetgeometry
 
 #endif // __OPENSPACE_MODULE_SPACE___PLANETGEOMETRY___H__

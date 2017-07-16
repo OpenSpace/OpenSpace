@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,13 +36,14 @@ namespace {
     const char* GlslRaycastPath = "${MODULES}/toyvolume/shaders/raycast.glsl";
     const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsvs.glsl";
     const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsfs.glsl";
-}
+} // namespace
 
 namespace openspace {
 
 ToyVolumeRaycaster::ToyVolumeRaycaster(glm::vec4 color)
     : _boundingBox(glm::vec3(1.0))
-    , _color(color) {}
+    , _color(color)
+{}
     
 ToyVolumeRaycaster::~ToyVolumeRaycaster() {}
 

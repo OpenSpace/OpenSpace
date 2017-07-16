@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,19 +28,13 @@
 #include <openspace/rendering/renderable.h>
 
 namespace {
-    const std::string _loggerCat = "SimpleSphereGeometry";
-}
+    const char* _loggerCat = "SimpleSphereGeometry";
 
-namespace openspace {
-
-namespace constants {
-namespace simplespheregeometry {
     const char* keyRadius = "Radius";
     const char* keySegments = "Segments";
-}  // namespace simplespheregeometry
-}
+} // namespace
 
-namespace planetgeometry {
+namespace openspace::planetgeometry {
 
 SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     : PlanetGeometry()
@@ -53,9 +47,6 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     , _segments("segments", "Segments", 20, 1, 5000)
     , _sphere(nullptr)
 {
-    using constants::simplespheregeometry::keyRadius;
-    using constants::simplespheregeometry::keySegments;
-
     float sphereRadius = 0.f;
     glm::vec3 ellipsoidRadius;
     if (dictionary.getValue(keyRadius, sphereRadius)) {
@@ -115,5 +106,4 @@ void SimpleSphereGeometry::createSphere(){
     _sphere->initialize();
 }
 
-}  // namespace planetgeometry
-}  // namespace openspace
+}  // namespace openspace::planetgeometry

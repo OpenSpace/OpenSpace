@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -42,7 +42,7 @@
 #include <stdint.h>
 
 namespace {
-    static const std::string _loggerCat = "RenderableStars";
+    const char* _loggerCat = "RenderableStars";
 
     const char* KeyFile = "File";
     const char* KeyTexture = "Texture";
@@ -79,7 +79,7 @@ namespace {
 
         float speed;
     };
-}
+}  // namespace
 
 namespace openspace {
 

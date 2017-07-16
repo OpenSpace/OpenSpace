@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,17 +33,15 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul {
-namespace filesystem { class File; }
-namespace opengl {
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} // namespace opengl
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 
-    namespace documentation { struct Documentation; }
+namespace documentation { struct Documentation; }
 
 class RenderableStars : public Renderable {
 public:

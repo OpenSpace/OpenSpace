@@ -139,6 +139,7 @@ private:
 
     ghoul::Event<> _iswaEvent;
 
+    std::string _baseUrl;
 };
 
 } //namespace openspace

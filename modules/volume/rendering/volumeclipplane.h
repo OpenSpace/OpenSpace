@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,10 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
 
-// Forward declare to minimize dependencies
-namespace ghoul {
-    class Dictionary;
-}
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

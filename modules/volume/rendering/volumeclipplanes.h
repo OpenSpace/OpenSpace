@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,9 +33,7 @@
 #include <vector>
 #include <memory>
 
-namespace ghoul {
-    class Dictionary;
-}
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
@@ -47,6 +45,7 @@ public:
     void deinitialize();
     std::vector<glm::vec3> normals();
     std::vector<glm::vec2> offsets();
+
 private:
     properties::IntProperty _nClipPlanes;
     std::vector<std::shared_ptr<VolumeClipPlane>> _clipPlanes;

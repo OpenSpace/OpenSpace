@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,12 +30,11 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string _loggerCat = "PlanetGeometry";
+    const char* _loggerCat = "PlanetGeometry";
     const char* KeyType = "Type";
-}
+} // namespace
 
-namespace openspace {
-namespace planetgeometry {
+namespace openspace::planetgeometry {
 
 documentation::Documentation PlanetGeometry::Documentation() {
     using namespace documentation;
@@ -53,7 +52,8 @@ documentation::Documentation PlanetGeometry::Documentation() {
     };
 }
 
-std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
+std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -87,5 +87,4 @@ bool PlanetGeometry::initialize(Renderable* parent) {
 
 void PlanetGeometry::deinitialize() {}
 
-}  // namespace planetgeometry
-}  // namespace openspace
+}  // namespace openspace::planetgeometry

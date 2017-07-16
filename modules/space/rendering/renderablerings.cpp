@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -41,7 +41,7 @@ namespace {
     const char* KeyTexture = "Texture";
     const char* KeySize = "Size";
     const char* KeyOffset = "Offset";
-}
+} // namespace
 
 namespace openspace {
 

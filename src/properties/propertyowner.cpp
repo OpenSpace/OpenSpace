@@ -30,6 +30,8 @@
 
 #include <algorithm>
 
+namespace openspace::properties {
+
 namespace {
     const char* _loggerCat = "PropertyOwner";
 
@@ -42,7 +44,6 @@ namespace {
     }
 } // namespace
 
-namespace openspace::properties {
 
 PropertyOwner::PropertyOwner(std::string name)
     : _name(std::move(name))

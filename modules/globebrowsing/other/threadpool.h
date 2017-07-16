@@ -36,7 +36,6 @@
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace::globebrowsing {
-namespace  {    
 
 class ThreadPool;
 

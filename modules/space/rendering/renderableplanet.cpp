@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -58,9 +58,7 @@ namespace {
     const char* KeyHeightTexture = "Textures.Height";
     const char* KeyShading = "PerformShading";
 
-    
-    
-    static const std::string _loggerCat = "RenderablePlanet";
+    static const char* _loggerCat = "RenderablePlanet";
 
     const char* keyFrame                         = "Frame";
     const char* keyShadowGroup                   = "Shadow_Group";

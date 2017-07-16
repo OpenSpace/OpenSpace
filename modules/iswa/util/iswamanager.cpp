@@ -52,8 +52,6 @@
 namespace {
     using json = nlohmann::json;
     const char* _loggerCat = "IswaManager";
-    const char* baseUrl = "https://iswa-demo-server.herokuapp.com/";
-    //const std::string baseUrl = "http://128.183.168.116:3000/";
 } // namespace
 
 namespace openspace {
@@ -61,6 +59,7 @@ namespace openspace {
 IswaManager::IswaManager()
     : properties::PropertyOwner("IswaManager")
     , _iswaEvent()
+    , _baseUrl("https://iswa-demo-server.herokuapp.com/")
 {
     // @CLEANUP: Make this staticly allocated ---abock
     _month["JAN"] = "01";
@@ -144,7 +143,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
 
         // Download metadata
         OsEng.downloadManager().fetchFile(
-            baseUrl + std::to_string(-id),
+            _baseUrl + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err){
                 LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
@@ -185,7 +184,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, do
                 LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));
             },
             [id](const std::string& err){
-                LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
+                LDEBUG("Download to memory was aborted for data cygnet with id " + std::to_string(id)+": " + err);
             }
         ) );   
 }
@@ -193,7 +192,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, do
 std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::string url;
     if(id < 0){
-        url = baseUrl+type+"/" + std::to_string(-id) + "/";
+        url = _baseUrl + type+"/" + std::to_string(-id) + "/";
     } else{
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
@@ -259,7 +258,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
 
     metaFuture->id = id;
     OsEng.downloadManager().fetchFile(
-        baseUrl + std::to_string(-id),
+        _baseUrl + std::to_string(-id),
         [&metaFuture](const DownloadManager::MemoryFile& file){
             metaFuture->json = std::string(file.buffer, file.size);
             metaFuture->isFinished = true;
@@ -661,7 +660,7 @@ void IswaManager::addCdfFiles(std::string path){
 
 void IswaManager::setBaseUrl(std::string bUrl){
     LDEBUG("Swapped baseurl to: " + bUrl);
-    baseUrl = bUrl;
+    _baseUrl = bUrl;
 }
 
 scripting::LuaLibrary IswaManager::luaLibrary() {

@@ -100,7 +100,6 @@ private:
     bool _updatedOnLastCall;
 };
 
-} // namespace 
 } // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__

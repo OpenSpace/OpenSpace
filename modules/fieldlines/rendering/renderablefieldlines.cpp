@@ -38,7 +38,7 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "RenderableFieldlines";
+    std::string _loggerCat = "RenderableFieldlines";
 
     const float defaultFieldlineStepSize = 0.5f;;
     const glm::vec4 defaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);

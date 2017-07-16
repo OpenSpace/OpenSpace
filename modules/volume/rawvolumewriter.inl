@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,7 +30,8 @@ namespace openspace {
 template <typename VoxelType>
     RawVolumeWriter<VoxelType>::RawVolumeWriter(std::string path, size_t bufferSize)
     : _path(path)
-    , _bufferSize(bufferSize) {}
+    , _bufferSize(bufferSize)
+    {}
 
 template <typename VoxelType>
 size_t RawVolumeWriter<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {

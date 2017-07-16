@@ -68,7 +68,7 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
     float rootSplitPoints = splitPoints(rootNode, splitType);
     BrickSelection brickSelection = BrickSelection(
         numBricksPerDim,
-        umTimeSteps,
+        numTimeSteps,
         splitType,
         rootSplitPoints
     );
