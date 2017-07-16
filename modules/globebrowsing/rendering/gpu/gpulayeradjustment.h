@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,12 +27,9 @@
 
 #include <openspace/util/gpudata.h>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-}}
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct LayerAdjustment;
 
@@ -50,7 +47,6 @@ private:
     GPUData<float> gpuChromaKeyTolerance;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__

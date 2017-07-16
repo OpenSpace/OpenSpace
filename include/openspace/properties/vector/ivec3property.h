@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,12 +29,10 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 REGISTER_NUMERICALPROPERTY_HEADER(IVec3Property, glm::ivec3);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___IVEC3PROPERTY___H__

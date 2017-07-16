@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,13 +35,9 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-
-namespace tileprovider {
-    class TileProvider;
-}
+namespace tileprovider { class TileProvider; }
 
 /**
  * Convenience class for dealing with multiple <code>Layer</code>s.
@@ -78,7 +74,6 @@ private:
     std::function<void(void)> _onChangeCallback;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__

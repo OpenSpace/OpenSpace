@@ -1,4 +1,4 @@
- /*****************************************************************************************
+﻿ /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -37,11 +37,11 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <modules/iswa/rendering/iswacygnet.h>
 
-namespace openspace {
-
 namespace {
     const char* _loggerCat = "Query";
-}
+} // namespace
+
+namespace openspace {
 
 Scene* sceneGraph() {
     return OsEng.renderEngine().scene();

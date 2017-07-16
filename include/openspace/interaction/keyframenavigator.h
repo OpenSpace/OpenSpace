@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,14 +31,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-namespace openspace {
+namespace openspace { class Camera; }
 
-class Camera;
+namespace openspace::interaction {
 
-namespace interaction {
-
-class KeyframeNavigator
-{
+class KeyframeNavigator {
 public:
     struct CameraPose {
         glm::dvec3 position;
@@ -63,7 +60,6 @@ private:
     Timeline<CameraPose> _cameraPoseTimeline;
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__

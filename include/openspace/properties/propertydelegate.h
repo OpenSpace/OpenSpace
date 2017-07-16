@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,8 +29,7 @@
 
 struct lua_State;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 /**
  * The PropertyDelegate class is used by (among others) the TemplateProperty and the
@@ -158,8 +157,7 @@ public:
     static bool toString(std::string& outValue, U inValue);
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #include <openspace/properties/propertydelegate.inl>
 

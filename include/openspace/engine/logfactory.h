@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,12 +27,8 @@
 
 #include <memory>
 
-namespace ghoul {
-
-class Dictionary;
-namespace logging { class Log; }
-
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
+namespace ghoul::logging { class Log; }
 
 namespace openspace {
 

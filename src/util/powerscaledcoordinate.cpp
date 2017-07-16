@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,20 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
 
-// std includes
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
 
+namespace {
+    const double k = 10.0;
+} // namespace
+
 namespace openspace {
 
-namespace {
-const double k = 10.0;
-}
 
 PowerScaledCoordinate::PowerScaledCoordinate()
     : _vec(0.f)

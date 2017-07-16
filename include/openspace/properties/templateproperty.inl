@@ -24,8 +24,7 @@
 
 #include <ghoul/logging/logmanager.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 // The following macros can be used to quickly generate the necessary PropertyDelegate
 // specializations required by the TemplateProperty class. Use the
@@ -287,5 +286,4 @@ bool TemplateProperty<T>::setStringValue(std::string value) {
     return success;
 }
 
-}  // namespace properties
-}  // namespace openspace
+}  // namespace openspace::properties

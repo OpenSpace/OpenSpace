@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -44,9 +44,7 @@
 
 struct CPLXMLNode;
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
     
 /**
  * Interface for stringifying OpenSpace Time instances.
@@ -334,9 +332,7 @@ private:
     bool _successfulInitialization;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // GLOBEBROWSING_USE_GDAL
 

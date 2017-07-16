@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,8 +24,7 @@
 
 #include <typeinfo>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 template <typename T>
 std::string PropertyDelegate<T>::className() {
@@ -95,5 +94,4 @@ U PropertyDelegate<T>::fromString(std::string value, bool& success) {
         "Unimplemented PropertyDelegate::fromString specialization");
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

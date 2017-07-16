@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -46,8 +46,7 @@ namespace {
 
 #include "keybindingmanager_lua.inl"
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 KeyBindingManager::KeyBindingManager()
     : DocumentationGenerator(
@@ -174,5 +173,4 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
     };
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

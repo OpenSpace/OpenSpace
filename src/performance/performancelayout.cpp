@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,8 +26,7 @@
 
 #include <cstring>
 
-namespace openspace {
-namespace performance {
+namespace openspace::performance {
 
 PerformanceLayout::PerformanceLayout()
     : nScaleGraphEntries(0)
@@ -46,5 +45,4 @@ PerformanceLayout::PerformanceLayout()
     );
 }
 
-} // namespace performance
-} // namespace openspace
+} // namespace openspace::performance

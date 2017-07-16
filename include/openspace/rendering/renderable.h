@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,13 +29,11 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-    class Dictionary;
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+}
 
 namespace openspace {
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,12 +32,10 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul {
-namespace opengl {
+namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} 
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,8 +27,8 @@
 #include <string>
 
 namespace {
-const std::string _loggerCat = "BoxGeometry";
-}
+    const char* _loggerCat = "BoxGeometry";
+} // namespace
 
 namespace openspace {
 

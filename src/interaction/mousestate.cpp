@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,8 +24,7 @@
 
 #include <openspace/interaction/mousestate.h>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 MouseState::MouseState(double scaleFactor)
     : velocity(scaleFactor, 1)
@@ -173,5 +172,4 @@ glm::dvec2 MouseStates::globalRollMouseVelocity() const{
     return _globalRollMouseState.velocity.get();
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

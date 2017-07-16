@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,8 +27,7 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct Geodetic2 {
     Geodetic2(double latitude = 0.0, double longitude = 0.0);
@@ -51,7 +50,6 @@ struct Geodetic2 {
     double lon;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__

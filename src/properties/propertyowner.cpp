@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,21 +30,19 @@
 
 #include <algorithm>
 
-namespace openspace {
-namespace properties {
-
 namespace {
     const char* _loggerCat = "PropertyOwner";
 
     bool propertyLess(Property* lhs, Property* rhs) {
         return lhs->identifier() < rhs->identifier();
     }
-    
+
     bool subOwnerLess(PropertyOwner* lhs, PropertyOwner* rhs) {
         return lhs->name() < rhs->name();
     }
-    
 } // namespace
+
+namespace openspace::properties {
 
 PropertyOwner::PropertyOwner(std::string name)
     : _name(std::move(name))
@@ -282,5 +280,4 @@ void PropertyOwner::addTag(std::string tag) {
     _tags.push_back(std::move(tag));
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

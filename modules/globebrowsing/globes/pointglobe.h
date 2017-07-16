@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,12 +30,9 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-} }
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class RenderableGlobe;
 
@@ -61,7 +58,6 @@ private:
     properties::FloatProperty _lightIntensity;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__

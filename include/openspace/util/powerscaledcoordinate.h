@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -25,17 +25,13 @@
 #ifndef __OPENSPACE_CORE___POWERSCALEDCOORDINATE___H__
 #define __OPENSPACE_CORE___POWERSCALEDCOORDINATE___H__
 
-// open space includes
-// glm includes
 #include <ghoul/glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-namespace openspace
-{
+namespace openspace {
 
-// forward declare the power scaled scalars
 class PowerScaledScalar;
 
 class PowerScaledCoordinate {

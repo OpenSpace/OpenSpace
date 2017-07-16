@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -25,15 +25,11 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
 
-namespace openspace {
+namespace openspace { struct RenderData; }
 
-struct RenderData;
-
-namespace globebrowsing {
-
-class Chunk;
+namespace openspace::globebrowsing { class Chunk; }
     
-namespace chunklevelevaluator {
+namespace openspace::globebrowsing::chunklevelevaluator {
 
 /**
  * Abstract class defining an interface for accessing a desired level of a Chunk.
@@ -48,8 +44,6 @@ public:
     virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
 };
 
-} // namespace chunklevelevaluator
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::chunklevelevaluator
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__

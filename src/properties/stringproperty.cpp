@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,8 +26,7 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
 [](lua_State* state, bool& success) -> std::string {
@@ -62,5 +61,4 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
 LUA_TSTRING
 );
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

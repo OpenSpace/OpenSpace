@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,11 +32,9 @@
 
 #include <vector>
 
-namespace openspace {
+namespace openspace { struct RenderData; }
 
-struct RenderData;
-
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class RenderableGlobe;
 struct TileIndex;
@@ -101,7 +99,6 @@ private:
     const GeodeticPatch _surfacePatch;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK___H__

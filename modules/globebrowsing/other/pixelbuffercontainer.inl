@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 template <class KeyType>
 PixelBufferContainer<KeyType>::PixelBufferContainer(size_t numBytesPerBuffer,
@@ -126,5 +125,4 @@ GLuint PixelBufferContainer<KeyType>::idOfMappedBuffer(KeyType key) {
     return 0;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,16 +33,11 @@
 
 #include <memory>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-namespace chunklevelevaluator {
-    class Evaluator;
-} // namespace chunklevelevaluator
+namespace chunklevelevaluator { class Evaluator; }
     
-namespace culling {
-    class ChunkCuller;
-} // namespace culling
+namespace culling { class ChunkCuller; }
 
 class Chunk;
 class ChunkNode;
@@ -145,7 +140,6 @@ private:
     bool _shadersNeedRecompilation;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKED_LOD_GLOBE___H__

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,12 +27,10 @@
 
 #include <openspace/properties/templateproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___STRINGPROPERTY___H__

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,8 +26,7 @@
 
 #include <limits>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 AABB1::AABB1()
     : AABB1(std::numeric_limits<float>::max(), -std::numeric_limits<float>::max())
@@ -185,5 +184,4 @@ AABB3::AABBSpatialRelation AABB3::relationTo(const AABB3& o) const {
     return AABB3::AABBSpatialRelation::None;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

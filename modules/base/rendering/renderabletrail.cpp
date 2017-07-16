@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -56,7 +56,7 @@ namespace {
         { "Lines+Points", RenderingModeLinesPoints },
         { "Points+Lines", RenderingModeLinesPoints }
     };
-}
+} // namespace
 
 namespace openspace {
 

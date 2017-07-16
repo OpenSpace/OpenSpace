@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,14 +32,12 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul { namespace fontrendering {
-class Font;
-class FontRenderer;
-}}
+namespace ghoul::fontrendering {
+    class Font;
+    class FontRenderer;
+} // namespace ghoul::fontrendering
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 /**
  * Enables a simple way of providing tiles with any type of rendered text. 
@@ -91,14 +89,12 @@ private:
     Tile
         createChunkIndexTile(const TileIndex& tileIndex);
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-	
+    
     GLuint _fbo;
   
     cache::MemoryAwareTileCache* _tileCache;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXT_TILE_PROVIDER___H__

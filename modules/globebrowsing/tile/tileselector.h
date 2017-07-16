@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,14 +29,13 @@
 
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
-    
-struct LayerGroup;
-struct TileIndex;
-struct LayerRenderSettings;
+namespace openspace::globebrowsing {
+    struct LayerGroup;
+    struct TileIndex;
+    struct LayerRenderSettings;
+} // namespace openspace::globebrowsing
 
-namespace tileselector {
+namespace openspace::globebrowsing::tileselector {
 
 ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, const TileIndex& tileIndex);
 
@@ -47,12 +46,10 @@ std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
     const TileIndex& tileIndex);
 std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
     getTilesAndSettingsUnsorted(const LayerGroup& layerGroup,
-	const TileIndex& tileIndex);
+    const TileIndex& tileIndex);
 
 void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv);
     
-} // namespace tileselector
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileselector
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_SELECTOR___H__

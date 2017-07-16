@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,8 +32,7 @@
 
 #include <list>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 class InputState {
 public:
@@ -64,7 +63,6 @@ private:
     double _mouseScrollDelta;
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___INPUTSTATE___H__

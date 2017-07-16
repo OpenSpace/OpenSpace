@@ -30,9 +30,6 @@
 
 #include <algorithm>
 
-namespace openspace {
-namespace properties {
-
 namespace {
     const char* MetaDataKeyGuiName = "guiName";
     const char* MetaDataKeyGroup = "Group";
@@ -41,6 +38,8 @@ namespace {
 
     const char* _metaDataKeyViewPrefix = "view.";
 } // namespace
+
+namespace openspace::properties {
 
 Property::OnChangeHandle Property::OnChangeHandleAll =
                                                std::numeric_limits<OnChangeHandle>::max();
@@ -242,5 +241,4 @@ std::string Property::generateAdditionalDescription() const {
     return "";
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

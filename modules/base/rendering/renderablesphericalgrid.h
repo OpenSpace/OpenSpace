@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,7 +33,7 @@
 
 namespace openspace {
 
-class RenderableSphericalGrid : public Renderable{
+class RenderableSphericalGrid : public Renderable {
 public:
     RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
     ~RenderableSphericalGrid();

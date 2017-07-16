@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,11 +35,7 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
-} // namespace opengl
-} // namespace ghoul
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 

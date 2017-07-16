@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -49,7 +49,7 @@ namespace {
     const char* KeySampleInterval = "SampleInterval";
     const char* KeyTimeStampSubsample = "TimeStampSubsampleFactor";
     const char* KeyShowFullTrail = "ShowFullTrail";
-}
+} // namespace
 
 namespace openspace {
 

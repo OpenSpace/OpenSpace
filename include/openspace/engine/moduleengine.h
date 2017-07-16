@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,13 +33,7 @@
 #include <ghoul/misc/assert.h>
 #include <algorithm>
 
-namespace ghoul {
-namespace systemcapabilities {
-
-struct Version;
-
-} // namespace systemcapabilities
-} // namespace ghoul
+namespace ghoul::systemcapabilities { struct Version; }
 
 namespace openspace {
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,7 +32,6 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 struct TimeRange {
-
     /**
     * Default constructor initializes an empty time range.
     */

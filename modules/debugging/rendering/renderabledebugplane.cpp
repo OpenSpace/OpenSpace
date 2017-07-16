@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -40,8 +40,8 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string _loggerCat = "RenderablePlaneTexture";
-}
+    const char* _loggerCat = "RenderablePlaneTexture";
+} // namespace
 
 namespace openspace {
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <openspace/util/powerscaledsphere.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -30,8 +29,8 @@
 #include <math.h>
 
 namespace {
-const std::string _loggerCat = "PowerScaledSphere";
-}
+    const char* _loggerCat = "PowerScaledSphere";
+} // namespace
 
 namespace openspace {
 

@@ -112,13 +112,11 @@ namespace {
         std::string sceneName;
         std::string cacheFolder;
     } commandlineArgumentPlaceholders;
-}
+} // namespace
 
 namespace openspace {
 
-namespace properties {
-    class Property;
-}
+namespace properties { class Property; }
 
 class Scene;
 

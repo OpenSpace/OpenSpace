@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,14 +32,13 @@
 #include <ghoul/misc/boolean.h>
 
 namespace openspace {
+    class Camera;
+    class SceneGraphNode;
+} // namespace
 
-class Camera;
-class SceneGraphNode;
+namespace openspace::interaction {
 
-namespace interaction {
-
-class KeyBindingManager : public DocumentationGenerator
-{
+class KeyBindingManager : public DocumentationGenerator {
 public:
     KeyBindingManager();
     ~KeyBindingManager() = default;
@@ -81,7 +80,6 @@ private:
     std::multimap<KeyWithModifier, KeyInformation> _keyLua;
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___KEYBINDINGMANAGER___H__

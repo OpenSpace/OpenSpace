@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,18 +28,15 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-        class ProgramObject;
-    }
+namespace ghoul::opengl {
+    class Texture;
+    class ProgramObject;
 }
 
 namespace openspace {
 
 class Volume {
 public:
-
     /**
      * Constructor
      */

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,9 +34,7 @@
 #include <gdal.h>
 #endif // GLOBEBROWSING_USE_GDAL
 
-namespace openspace {
-namespace globebrowsing {
-namespace tiledatatype {
+namespace openspace::globebrowsing::tiledatatype {
 
 #ifdef GLOBEBROWSING_USE_GDAL
     GLenum getOpenGLDataType(GDALDataType gdalType);
@@ -54,8 +52,6 @@ size_t numberOfBytes(GLenum glType);
 size_t getMaximumValue(GLenum glType);
 float interpretFloat(GLenum glType, const char* src);
 
-} // namespace tiledatatype
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tiledatatype
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__

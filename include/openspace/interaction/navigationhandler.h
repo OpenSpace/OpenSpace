@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -38,11 +38,11 @@
 #include <ghoul/misc/boolean.h>
 
 namespace openspace {
+    class Camera;
+    class SceneGraphNode;
+} // namespace openspace
 
-class Camera;
-class SceneGraphNode;
-
-namespace interaction {
+namespace openspace::interaction {
 
 class NavigationHandler : public properties::PropertyOwner {
 public:
@@ -85,6 +85,7 @@ public:
     * interaction
     */
     static scripting::LuaLibrary luaLibrary();
+
 private:
     bool _cameraUpdatedFromScript = false;
 
@@ -99,7 +100,6 @@ private:
     properties::BoolProperty _useKeyFrameInteraction;
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__

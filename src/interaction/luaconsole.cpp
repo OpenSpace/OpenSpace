@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -69,7 +69,6 @@ namespace {
      // The number of characters to display after the cursor
      // when horizontal scrolling is required.
      const int NVisibleCharsAfterCursor = 5;
-
 } // namespace
 
 namespace openspace {

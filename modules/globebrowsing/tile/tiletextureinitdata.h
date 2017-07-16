@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,14 +31,12 @@
 
 #include <string>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * All information needed to create a texture used for a Tile.
  */
-class TileTextureInitData
-{
+class TileTextureInitData {
 public:
     using HashKey = unsigned long long;
     using ShouldAllocateDataOnCPU = ghoul::Boolean;
@@ -85,7 +83,6 @@ private:
     bool _shouldAllocateDataOnCPU;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__

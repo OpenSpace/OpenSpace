@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,8 +28,7 @@
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/tile/tile.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class RawTileDataReader;
 struct RawTile;
@@ -65,11 +64,11 @@ struct TileLoadJob : public Job<RawTile> {
      */
     void execute() override;
 
-	/**
-	* Marks the job as finised and releases ownership of the data.
-	* Unless the job is marked as finished, the pixel data will be deallocated
-	* when the job is deleted.
-	*/
+    /**
+    * Marks the job as finised and releases ownership of the data.
+    * Unless the job is marked as finished, the pixel data will be deallocated
+    * when the job is deleted.
+    */
     std::shared_ptr<RawTile> product() override;
 
     /**
@@ -85,10 +84,9 @@ protected:
     std::shared_ptr<RawTile> _rawTile;
     TileIndex _chunkIndex;
     char* _pboMappedDataDestination;
-	bool _hasOwnershipOfData;
+    bool _hasOwnershipOfData;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__

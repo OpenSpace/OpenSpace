@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,8 +27,7 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Handles an OpenGL pixel buffer which contains data allocated on the GPU. A simple
@@ -37,8 +36,7 @@ namespace globebrowsing {
  * address pointer, the user needs to ensure the data is unmapped before the data can
  * be used on the GPU / CPU depending on Usage.
  */
-class PixelBuffer
-{
+class PixelBuffer {
 public:
     /**
      * All kinds of usage for pixel buffer objects as defined by the OpenGL standard.
@@ -134,7 +132,6 @@ private:
     bool _isMapped;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___PIXEL_BUFFER___H__

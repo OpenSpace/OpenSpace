@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,8 +36,7 @@
 #include <mutex>
 #include <memory>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Function for passing GDAL error messages to the GHOUL logging system.
@@ -88,8 +87,7 @@ private:
     static std::mutex _mutexLock;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // GLOBEBROWSING_USE_GDAL
 

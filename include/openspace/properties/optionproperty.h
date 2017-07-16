@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,8 +29,7 @@
 
 #include <vector>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 /**
  * The OptionProperty is a property that provides a number of predefined (using the 
@@ -131,7 +130,6 @@ private:
     DisplayType _displayType;
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___OPTIONPROPERTY___H__

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,8 +29,7 @@
 #include <memory>
 #include <math.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 template <typename T>
 class Angle {
@@ -129,8 +128,7 @@ private:
 using dAngle = Angle<double>;
 using fAngle = Angle<float>;
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include <modules/globebrowsing/geometry/angle.inl>
 

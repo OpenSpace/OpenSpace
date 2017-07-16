@@ -28,8 +28,7 @@
 
 #include <algorithm>
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 // The explicit template instantiations for many of the commonly used template values
 // This cuts down on the compilation time by only compiling these once
@@ -348,5 +347,4 @@ std::string OrVerifier::documentation() const {
 }
 
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation

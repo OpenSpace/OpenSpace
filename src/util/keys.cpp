@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,8 +31,8 @@
 #include <vector>
 
 namespace {
-    const std::string _loggerCat = "Keys";
-}
+    const char* _loggerCat = "Keys";
+} // namespace
 
 namespace openspace {
 

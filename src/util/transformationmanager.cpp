@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,8 +30,8 @@
 #include <math.h>
 
  namespace {
-    const std::string _loggerCat = "TransformationManager";
- }
+    const char* _loggerCat = "TransformationManager";
+ } // namespace
 
  namespace openspace{
     TransformationManager::TransformationManager(){

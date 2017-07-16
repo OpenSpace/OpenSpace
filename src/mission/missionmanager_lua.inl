@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,11 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
+namespace openspace::luascriptfunctions {
 
-namespace luascriptfunctions { 
-
-    int loadMission(lua_State* L) {
+int loadMission(lua_State* L) {
     using ghoul::lua::luaTypeToString;
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
@@ -54,5 +52,4 @@ int setCurrentMission(lua_State* L) {
     return 0;
 }
 
-} // namespace luascriptfunction
-} // namespace openspace
+} // namespace openspace::luascriptfunction

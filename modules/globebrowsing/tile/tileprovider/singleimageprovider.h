@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,9 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 class SingleImageProvider : public TileProvider {
 public:
@@ -53,8 +51,6 @@ private:
     properties::StringProperty _filePath;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___SINGLE_IMAGE_PROVIDER___H__

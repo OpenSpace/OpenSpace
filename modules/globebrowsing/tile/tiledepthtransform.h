@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -25,15 +25,13 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEDEPTHTRANSFORM___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILEDEPTHTRANSFORM___H__
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct TileDepthTransform {
     float depthScale;
     float depthOffset;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEDEPTHTRANSFORM___H__

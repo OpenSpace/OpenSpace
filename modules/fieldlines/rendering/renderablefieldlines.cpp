@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -38,7 +38,7 @@
 #include <fstream>
 
 namespace {
-    std::string _loggerCat = "RenderableFieldlines";
+    const char* _loggerCat = "RenderableFieldlines";
 
     const float defaultFieldlineStepSize = 0.5f;;
     const glm::vec4 defaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
@@ -70,7 +70,7 @@ namespace {
 
     const int SeedPointSourceFile = 0;
     const int SeedPointSourceTable = 1;
-}
+} // namespace
 
 namespace openspace {
 

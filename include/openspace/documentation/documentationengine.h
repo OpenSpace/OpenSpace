@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,8 +31,7 @@
 
 #include <ghoul/misc/exception.h>
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 /**
  * The DocumentationEngine has the ability to collect all Documentation%s that are
@@ -92,8 +91,7 @@ private:
     static DocumentationEngine* _instance;
 };
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation
 
 #define DocEng (openspace::documentation::DocumentationEngine::ref())
 

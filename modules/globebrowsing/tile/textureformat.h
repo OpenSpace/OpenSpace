@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,16 +28,13 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct TextureFormat {
     ghoul::opengl::Texture::Format ghoulFormat;
     GLenum glFormat;
 };
 
-    
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXTUREFORMAT___H__

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,12 +24,10 @@
 
 #include <openspace/scripting/lualibrary.h>
 
-namespace openspace {
-namespace scripting {
+namespace openspace::scripting {
 
 bool LuaLibrary::operator<(const LuaLibrary& rhs) const {
     return name < rhs.name;
 }
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting

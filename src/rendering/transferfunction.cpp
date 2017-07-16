@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -38,7 +38,7 @@
 #include <iostream>
 
 namespace {
-    const std::string _loggerCat = "TransferFunction";
+    const char* _loggerCat = "TransferFunction";
 
     ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
     ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
@@ -52,11 +52,11 @@ namespace {
             return false;
         }
     }
-
-}
+} // namespace
 
 
 namespace openspace {
+
 TransferFunction::TransferFunction(const std::string& filepath, TfChangedCallback tfChangedCallback) : _filepath(filepath) {
     setPath(filepath);
     setCallback(tfChangedCallback);

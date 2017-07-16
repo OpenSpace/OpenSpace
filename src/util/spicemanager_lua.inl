@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,8 +24,7 @@
 
 #include <openspace/scripting/script_helper.h>
 
-namespace openspace {
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 /**
  * \ingroup LuaScripts
@@ -88,5 +87,4 @@ int unloadKernel(lua_State* L) {
     return 0;
 }
 
-} // luascriptfunctions
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

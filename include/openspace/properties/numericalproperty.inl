@@ -24,8 +24,7 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define REGISTER_NUMERICALPROPERTY_HEADER(CLASS_NAME, TYPE)                              \
     typedef NumericalProperty<TYPE> CLASS_NAME;                                          \
@@ -361,5 +360,4 @@ std::string NumericalProperty<T>::generateAdditionalDescription() const {
     return result;
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

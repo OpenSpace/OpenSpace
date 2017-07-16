@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,8 +35,8 @@
 
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
-namespace openspace {
-namespace globebrowsing {    
+namespace openspace::globebrowsing {
+namespace  {    
 
 class ThreadPool;
 
@@ -70,7 +70,6 @@ private:
     bool stop;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -52,7 +52,7 @@
 
 namespace openspace {
 
-BaseModule::BaseModule()  : OpenSpaceModule(BaseModule::Name) {}
+BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize() {
     FactoryManager::ref().addFactory(

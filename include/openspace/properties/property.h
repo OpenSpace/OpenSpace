@@ -35,8 +35,7 @@
 
 struct lua_State;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 class PropertyOwner;
 
@@ -419,7 +418,6 @@ private:
     OnChangeHandle _currentHandleValue;
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___PROPERTY___H__

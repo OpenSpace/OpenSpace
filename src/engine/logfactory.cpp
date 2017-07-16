@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -50,7 +50,7 @@ namespace {
     const char* BootstrapPath = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
     const char* CssPath = "${OPENSPACE_DATA}/web/log/style.css";
     const char* JsPath = "${OPENSPACE_DATA}/web/log/script.js";
-}
+} // namespace
 
 namespace openspace {
 

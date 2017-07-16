@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,9 +24,7 @@
 
 #include <ghoul/filesystem/directory.h>
 
-namespace openspace {
-
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 namespace {
 
@@ -291,6 +289,4 @@ int walkDirectoryFolder(lua_State* L) {
 
 }
 
-} // namespace luascriptfunctions
-
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

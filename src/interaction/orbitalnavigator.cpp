@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,10 +35,9 @@
 
 namespace {
     const char* _loggerCat = "OrbitalNavigator";
-}
+} // namespace
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner("OrbitalNavigator")
@@ -528,5 +527,4 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
     return posHandle;
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

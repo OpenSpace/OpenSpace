@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,7 +34,7 @@
 namespace {
     const char* _loggerCat = "OpenSpaceModule";
     const char* ModuleBaseToken = "MODULE_";
-}
+} // namespace
 
 namespace openspace {
 

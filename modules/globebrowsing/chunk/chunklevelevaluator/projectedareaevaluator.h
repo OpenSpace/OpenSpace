@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,9 +27,7 @@
 
 #include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace chunklevelevaluator {
+namespace openspace::globebrowsing::chunklevelevaluator {
     
 /**
  * Evaluate the chunk level using the area of the non-heightmapped Chunk projected
@@ -43,9 +41,6 @@ public:
     virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
 };
 
-
-} // namespace chunklevelevaluator
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::chunklevelevaluator
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTEDAREAEVALUATOR___H__

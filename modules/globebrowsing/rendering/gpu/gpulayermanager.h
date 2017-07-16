@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,12 +30,9 @@
 
 #include <string>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-}}
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class LayerManager;
 
@@ -72,7 +69,6 @@ private:
     std::vector<std::unique_ptr<GPULayerGroup>> _gpuLayerGroups;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERMANAGER___H__

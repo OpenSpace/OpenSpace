@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -37,12 +37,9 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vectorproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-namespace tileprovider {
-    class TileProvider;
-}
+namespace tileprovider { class TileProvider; }
 
 class Layer : public properties::PropertyOwner {
 public:
@@ -94,7 +91,6 @@ private:
     std::function<void(void)> _onChangeCallback;
   };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__

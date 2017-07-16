@@ -121,7 +121,6 @@ protected:
     T data;
     T doubleBufferedData;
     std::mutex _mutex;
-
 };
 
 } // namespace openspace

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,8 +29,7 @@
 #include <string>
 #include <vector>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 class Property;
 
@@ -236,7 +235,6 @@ private:
     std::vector<std::string> _tags;
 };
 
-}  // namespace properties
-}  // namespace openspace
+}  // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___PROPERTYOWNER___H__

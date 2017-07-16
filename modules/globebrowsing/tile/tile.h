@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,12 +30,9 @@
 
 #include <memory>
 
-namespace ghoul { namespace opengl {
-    class Texture;
-}}
+namespace ghoul::opengl { class Texture; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct TileMetaData;
 struct TileUvTransform;
@@ -104,8 +101,7 @@ private:
     Status _status;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,12 +34,10 @@
 
 #include <memory>
 
-namespace ghoul {
-namespace opengl {
+namespace ghoul::opengl {
     class ProgramObject; 
     class Texture;
-} // namespace opengl
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -47,10 +45,7 @@ struct RenderData;
 struct UpdateData;
 
 namespace documentation { struct Documentation; }
-
-namespace modelgeometry {
-class ModelGeometry;
-}
+namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModel : public Renderable {
 public:

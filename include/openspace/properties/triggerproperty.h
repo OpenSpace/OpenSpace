@@ -27,8 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 /**
  * TriggerProperty that can be used to fire events into your code using the callback
@@ -67,7 +66,6 @@ public:
     void set(std::any value);
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__

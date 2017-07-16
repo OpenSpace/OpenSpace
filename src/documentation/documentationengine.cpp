@@ -45,8 +45,7 @@ namespace {
     const char* JsFilename = "${OPENSPACE_DATA}/web/documentation/script.js";
 } // namespace
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
@@ -322,5 +321,4 @@ std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation

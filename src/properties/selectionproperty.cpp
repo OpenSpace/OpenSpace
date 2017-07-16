@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,13 +27,12 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace {
-    const std::string _loggerCat = "SelectionProperty";
+    const char* _loggerCat = "SelectionProperty";
 
-    const std::string Delimiter = ",";
-}
+    const char Delimiter = ',';
+} // namespace
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 const std::string SelectionProperty::OptionsKey = "Options";
 
@@ -170,5 +169,4 @@ std::string SelectionProperty::generateAdditionalDescription() const {
     return result;
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

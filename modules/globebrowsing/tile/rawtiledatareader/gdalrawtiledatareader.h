@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -47,8 +47,7 @@
 class GDALDataset;
 class GDALRasterBand;
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class GeodeticPatch;
 
@@ -133,8 +132,7 @@ private:
     mutable std::mutex _datasetLock;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // GLOBEBROWSING_USE_GDAL
 

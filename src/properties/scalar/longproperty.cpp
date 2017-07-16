@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,8 +31,7 @@
 
 using std::numeric_limits;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
     [](lua_State* state, bool& success) -> TYPE {                                        \
@@ -80,5 +79,4 @@ REGISTER_NUMERICALPROPERTY_SOURCE(LongProperty, long, long(0),
                                   DEFAULT_TO_STRING_LAMBDA(long),
                                   LUA_TNUMBER);
 
-}  // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

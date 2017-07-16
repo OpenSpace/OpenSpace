@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,8 +29,7 @@
 
 #include <map>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Templated class which owns one or many <code>PixelBuffer</code>s. The
@@ -38,8 +37,7 @@ namespace globebrowsing {
  * mapped.
  */
 template <class KeyType>
-class PixelBufferContainer
-{
+class PixelBufferContainer {
 public:
     /**
      * Creates numPixelBuffers pixel buffer objects, each with numBytesPerBuffer bytes
@@ -107,8 +105,7 @@ private:
     std::map<KeyType, int> _indexMap;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "pixelbuffercontainer.inl"
 

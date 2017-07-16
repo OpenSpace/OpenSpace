@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -50,8 +50,7 @@ namespace {
 
 #include "navigationhandler_lua.inl"
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner("NavigationHandler")
@@ -295,5 +294,4 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
     };
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

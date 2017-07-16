@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,8 +27,7 @@
 
 #include <functional>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 /*
  * Interpolates a typename T using a transfer function.
@@ -44,7 +43,7 @@ public:
     void setDeltaTime(float deltaTime);
     void setTransferFunction(std::function<T(float)> transferFunction);
     void setInterpolationTime(float interpolationTime);
-	void step();
+    void step();
     
     float deltaTimeScaled() const;
     T value() const;
@@ -57,8 +56,7 @@ private:
     float _scaledDeltaTime;
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #include "interpolator.inl"
 

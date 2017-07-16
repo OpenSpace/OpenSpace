@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,12 +29,10 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 REGISTER_NUMERICALPROPERTY_HEADER(DMat3x2Property, glm::dmat3x2);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___DMAT3X2PROPERTY___H__

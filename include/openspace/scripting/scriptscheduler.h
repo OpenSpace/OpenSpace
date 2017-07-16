@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,13 +30,11 @@
 #include <queue>
 #include <vector>
 
-namespace ghoul {
-class Dictionary;
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
 
-namespace openspace {
-namespace documentation { struct Documentation; }
-namespace scripting {
+namespace openspace::documentation { struct Documentation; }
+
+namespace openspace::scripting {
 
 /**
  * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple 
@@ -123,7 +121,6 @@ private:
 
 };
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting
 
 #endif // __OPENSPACE_CORE___SCRIPTSCHEDULER___H__

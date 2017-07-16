@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,8 +31,7 @@
 #include <chrono>
 #include <string>
 
-namespace openspace {
-namespace performance {
+namespace openspace::performance {
 
 class PerformanceManager;
 
@@ -59,7 +58,6 @@ private:
             OsEng.renderEngine().performanceManager() \
         )
     
-} // namespace performance
-} // namespace openspace
+} // namespace openspace::performance
 
 #endif // __OPENSPACE_CORE___PERFORMANCEMEASUREMENT___H__

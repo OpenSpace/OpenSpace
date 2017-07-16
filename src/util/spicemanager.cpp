@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -99,7 +99,6 @@ using std::string;
 #include "spicemanager_lua.inl"
 
 namespace openspace {
-    
     
 SpiceManager::SpiceException::SpiceException(const string& msg)
     : ghoul::RuntimeError(msg, "Spice")

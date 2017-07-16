@@ -29,11 +29,9 @@
 #include <vector>
 #include <openspace/util/updatestructures.h>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-        class ProgramObject;
-    }
+namespace ghoul::opengl {
+    class Texture;
+    class ProgramObject;
 }
 
 namespace openspace {

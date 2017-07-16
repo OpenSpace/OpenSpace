@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -39,13 +39,11 @@ namespace {
     const char* KeyForwardScript = "ForwardScript";
     const char* KeyBackwardScript = "BackwardScript";
     const char* KeyUniversalScript = "Script";
-}
-
-namespace openspace {
+} // namespace
 
 #include "scriptscheduler_lua.inl"
 
-namespace scripting {
+namespace openspace::scripting {
 
 documentation::Documentation ScriptScheduler::Documentation() {
     using namespace openspace::documentation;
@@ -294,6 +292,4 @@ LuaLibrary ScriptScheduler::luaLibrary() {
     };
 }
 
-} // namespace scripting
-
-} // namespace openspace
+} // namespace openspace::scripting

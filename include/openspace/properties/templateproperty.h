@@ -27,8 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 /**
  * This concrete subclass of Property handles a single parameter value that is of type
@@ -186,8 +185,7 @@ protected:
     T _value;
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #include "openspace/properties/templateproperty.inl"
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -41,7 +41,7 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const std::string _loggerCat = "ScriptEngine";
+    const char* _loggerCat = "ScriptEngine";
 
     const char* LuaGlobalNamespace = "_G";
     const char* PrintFunctionName = "print";
@@ -54,8 +54,7 @@ namespace {
     const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
 } // namespace
 
-namespace openspace {
-namespace scripting {
+namespace openspace::scripting {
 
 std::string ScriptEngine::OpenSpaceLibraryName = "openspace";
 
@@ -753,5 +752,4 @@ void ScriptEngine::queueScript(const std::string &script, ScriptEngine::RemoteSc
     _mutex.unlock();
 }
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting

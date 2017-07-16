@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,8 +32,7 @@
 
 using std::numeric_limits;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(__TYPE__, __CONVFUNC__, __TESTFUNC__)                    \
     [](lua_State * state, bool& success) -> __TYPE__ {                                   \
@@ -122,5 +121,4 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BVec3Property, glm::bvec3, glm::bvec3(false),
 #pragma warning(default : 4800)
 #endif
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

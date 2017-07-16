@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,8 +27,7 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct PixelRegion {
     using PixelCoordinate = glm::ivec2;
@@ -100,7 +99,6 @@ struct PixelRegion {
     PixelRange numPixels;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__

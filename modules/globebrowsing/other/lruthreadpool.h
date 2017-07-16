@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -37,11 +37,9 @@
 
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
-namespace openspace {
-namespace globebrowsing {    
+namespace openspace::globebrowsing {
 
-template<typename KeyType>
-class LRUThreadPool;
+template<typename KeyType> class LRUThreadPool;
 
 template<typename KeyType>
 class LRUThreadPoolWorker {
@@ -93,8 +91,7 @@ private:
     bool _stop;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "lruthreadpool.inl"
 

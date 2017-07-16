@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -44,8 +44,7 @@ namespace {
     const int8_t CurrentCacheVersion = 3;
 } // namespace
 
-namespace openspace {
-namespace modelgeometry {
+namespace openspace::modelgeometry {
 
 documentation:: Documentation ModelGeometry::Documentation() {
     using namespace documentation;
@@ -295,5 +294,4 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
 
 void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject&) {}
 
-}  // namespace modelgeometry
-}  // namespace openspace
+}  // namespace openspace::modelgeometry

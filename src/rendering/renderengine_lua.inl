@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,9 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
-
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 /**
 * \ingroup LuaScripts
@@ -143,6 +141,4 @@ int unregisterScreenSpaceRenderable(lua_State* L) {
     return 1;
 }
 
-} // namespace luascriptfunctions
-
-}// namespace openspace
+}// namespace openspace::luascriptfunctions

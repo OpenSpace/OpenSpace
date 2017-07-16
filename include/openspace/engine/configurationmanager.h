@@ -28,6 +28,7 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+
 namespace documentation {  struct Documentation; }
 
 /**

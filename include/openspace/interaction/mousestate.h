@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,8 +30,7 @@
 
 #include <glm/glm.hpp>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 struct MouseState {
     MouseState(double scaleFactor);
@@ -42,14 +41,13 @@ struct MouseState {
     DelayedVariable<glm::dvec2, double> velocity;
 };
 
-class MouseStates
-{
+class MouseStates {
 public:
     /**
-    \param sensitivity
-    \param velocityScaleFactor can be set to 60 to remove the inertia of the
-    interaction. Lower value will make it harder to move the camera. 
-    */
+     * \param sensitivity
+     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
+     * interaction. Lower value will make it harder to move the camera. 
+     */
     MouseStates(double sensitivity, double velocityScaleFactor);
     void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     void setRotationalFriction(double friction);
@@ -74,7 +72,6 @@ private:
     MouseState _globalRollMouseState;
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___MOUSESTATE___H__

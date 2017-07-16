@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 
-
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
 #include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
@@ -39,8 +38,7 @@
 #include <set>
 #include <unordered_map>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
     
 //class GlobeBrowsingModule;
 struct RawTile;
@@ -128,7 +126,6 @@ private:
     bool _shouldBeDeleted;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__

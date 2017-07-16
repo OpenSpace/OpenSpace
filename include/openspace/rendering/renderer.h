@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,16 +32,11 @@
 #include <vector>
 #include <map>
 
-namespace ghoul {
-    class Dictionary;
-    
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace ghoul { class Dictionary; }
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
 }
 
 namespace openspace {

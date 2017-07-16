@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,8 +29,7 @@
 #include <limits>
 #include <sstream>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
     [](lua_State* state, bool& success) -> bool {
@@ -65,6 +64,4 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
     LUA_TBOOLEAN
 );
 
-
-}  // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

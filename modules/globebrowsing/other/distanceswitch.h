@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,12 +29,12 @@
 #include <vector>
 
 namespace openspace {
+    class Renderable;
+    struct RenderData;
+    struct UpdateData;
+} // namespace openspace
 
-class Renderable;
-struct RenderData;
-struct UpdateData;
-
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Selects a specific Renderable to be used for rendering, based on distance to the 
@@ -63,7 +63,6 @@ private:
     std::vector<std::shared_ptr<Renderable>> _renderables;
 };
 
-} // namespace globebrowsing
-} // openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__

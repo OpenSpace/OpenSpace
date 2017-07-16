@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -54,13 +54,13 @@
 #include "scenegraphnode_doc.inl"
 
 namespace {
-    const std::string _loggerCat = "SceneGraphNode";
-    const std::string KeyRenderable = "Renderable";
+    const char* _loggerCat = "SceneGraphNode";
+    const char* KeyRenderable = "Renderable";
 
-    const std::string keyTransformTranslation = "Transform.Translation";
-    const std::string keyTransformRotation = "Transform.Rotation";
-    const std::string keyTransformScale = "Transform.Scale";
-}
+    const char* keyTransformTranslation = "Transform.Translation";
+    const char* keyTransformRotation = "Transform.Rotation";
+    const char* keyTransformScale = "Transform.Scale";
+} // namespace
 
 namespace openspace {
 
@@ -484,11 +484,11 @@ SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
     }
     else {
-		return {
-			glm::dvec3(0.0, 0.0, 0.0),
-			glm::normalize(targetModelSpace),
-			0.0
-		};
+        return {
+            glm::dvec3(0.0, 0.0, 0.0),
+            glm::normalize(targetModelSpace),
+            0.0
+        };
     }
 }
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -37,8 +37,7 @@
 using namespace ghoul::lua;
 using namespace ghoul::systemcapabilities;
 
-namespace luascripting {
-namespace general {
+namespace luascripting::general {
 
 int operatingSystem(lua_State* L) {
     lua_pushstring(L, CpuCap.operatingSystemString().c_str());
@@ -81,9 +80,9 @@ int extensions(lua_State* L) {
 
 }
     
-} // namespace general
+} // namespace luascripting::general
 
-namespace opengl {
+namespace luascripting::opengl {
     
 int hasOpenGLVersion(lua_State* L) {
     int nArguments = lua_gettop(L);
@@ -188,11 +187,9 @@ int maxUniformBufferBindings(lua_State* L) {
 }
     
 
-} // namespace opengl
-} // namespace luascripting
+} // namespace luascripting::opengl
 
-namespace openspace {
-namespace scripting {
+namespace openspace::scripting {
 
 LuaLibrary generalSystemCapabilities() {
     return {
@@ -343,5 +340,4 @@ LuaLibrary openglSystemCapabilities() {
     };
 }
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting

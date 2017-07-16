@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -51,7 +51,6 @@ namespace {
     const char* keyBody        = "Body";
     const char* keyStart       = "StartTime";
     const char* keyEnd         = "EndTime";
-    
 } // namespace
 
 namespace openspace {
