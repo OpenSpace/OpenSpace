@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,8 +34,7 @@
 
 #include "imgui.h"
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GuiOriginComponent::GuiOriginComponent()
     : GuiComponent("Origin")
@@ -77,5 +76,4 @@ void GuiOriginComponent::render() {
     }
 }
 
-} // gui
-} // openspace
+} // namespace openspace::gui

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,17 +27,15 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string _loggerCat = "TileProviderByIndex";
+    const char* _loggerCat = "TileProviderByIndex";
     
     const char* KeyDefaultProvider = "DefaultProvider";
     const char* KeyProviders = "IndexTileProviders";
     const char* KeyTileIndex = "TileIndex";
     const char* KeyTileProvider = "TileProvider";
-}
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(
@@ -141,6 +139,4 @@ TileProvider* TileProviderByIndex::indexProvider(const TileIndex& tileIndex) con
     return (it != _tileProviderMap.end()) ? it->second.get() : nullptr;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

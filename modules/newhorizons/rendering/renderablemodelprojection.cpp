@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -53,7 +53,7 @@ namespace {
     const char* keyTextureColor = "Textures.Color";
 
     const char* _destination = "GALACTIC";
-}
+} // namespace
 
 namespace openspace {
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,9 +32,7 @@
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <openspace/util/updatestructures.h>
 
-
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
@@ -222,5 +220,4 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
     return corners;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

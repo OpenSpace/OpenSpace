@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,13 +34,12 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 
-
 namespace {
     const char* GlslRaycastPath = "${MODULES}/kameleonvolume/shaders/raycast.glsl";
     const char* GlslHelperPath = "${MODULES}/kameleonvolume/shaders/helper.glsl";
     const char* GlslBoundsVsPath = "${MODULES}/kameleonvolume/shaders/boundsvs.glsl";
     const char* GlslBoundsFsPath = "${MODULES}/kameleonvolume/shaders/boundsfs.glsl";
-}
+} // namespace
 
 namespace openspace {
 

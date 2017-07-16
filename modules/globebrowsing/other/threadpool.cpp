@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,12 +24,9 @@
 
 #include <modules/globebrowsing/other/threadpool.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-Worker::Worker(ThreadPool& pool)
-    : pool(pool)
-{}
+Worker::Worker(ThreadPool& pool) : pool(pool) {}
 
 void Worker::operator()() {
     std::function<void()> task;
@@ -106,5 +103,4 @@ void ThreadPool::clearTasks() {
     } // release lock
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,8 +31,8 @@
 #include <openspace/util/histogram.h>
 
 namespace {
-    const std::string _loggerCat = "HistogramManager";
-}
+    const char* _loggerCat = "HistogramManager";
+} // namespace
 
 namespace openspace {
 

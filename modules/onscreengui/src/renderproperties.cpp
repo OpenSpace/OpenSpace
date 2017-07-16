@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -49,13 +49,19 @@ void renderTooltip(Property* prop) {
 void executeScriptSingle(const std::string& id, const std::string& value) {
     std::string script =
         "openspace.setPropertyValueSingle('" + id + "', " + value + ");";
-    OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
+    OsEng.scriptEngine().queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void executeScriptGroup(const std::string& id, const std::string& value) {
     std::string script =
         "openspace.setPropertyValue('" + id + "', " + value + ");";
-    OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
+    OsEng.scriptEngine().queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void executeScript(const std::string& id, const std::string& value,

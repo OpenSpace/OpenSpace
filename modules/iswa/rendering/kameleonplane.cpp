@@ -32,8 +32,8 @@
 
 namespace {
     using json = nlohmann::json;
-    const std::string _loggerCat = "KameleonPlane";
-}
+    const char* _loggerCat = "KameleonPlane";
+} // namespace
 
 namespace openspace {
 

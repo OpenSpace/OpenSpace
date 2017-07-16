@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,9 +29,9 @@
 #include <modules/iswa/ext/json/json.hpp>
 
 namespace {
-    const std::string _loggerCat = "DataProcessorJson";
+    const char* _loggerCat = "DataProcessorJson";
     using json = nlohmann::json;
-}
+} // namespace
 
 namespace openspace {
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -38,7 +38,7 @@
 #include <numeric>
 
 namespace {
-    const std::string _loggerCat = "GuiPerformanceComponent";
+    const char* _loggerCat = "GuiPerformanceComponent";
 
     enum class Sorting {
         NoSorting = -1,
@@ -49,10 +49,9 @@ namespace {
         Render = 4,
         Total = 5
     };
-}
+} // namespace
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GuiPerformanceComponent::GuiPerformanceComponent()
     : GuiComponent("PerformanceComponent")
@@ -450,5 +449,4 @@ void GuiPerformanceComponent::render() {
     ImGui::End();
 }
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui

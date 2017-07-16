@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,9 +29,7 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-class Dictionary;
-}
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

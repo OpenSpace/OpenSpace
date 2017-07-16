@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,8 +28,7 @@
 #include <iomanip>
 #include <string>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 StatsCollector::StatsCollector(const std::string& filename, int dumpEveryXRecord,
                                Enabled enabled, const std::string & delimiter)
@@ -118,5 +117,4 @@ void StatsCollector::writeData() {
     ofs.close();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

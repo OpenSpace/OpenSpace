@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,11 +35,7 @@
 #include <map>
 #include <set>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-    }
-}
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
@@ -64,6 +60,7 @@ public:
     unsigned int getNumDiskReads();
     unsigned int getNumUsedBricks();
     unsigned int getNumStreamedBricks();
+
 private:
     const unsigned int NOT_USED = UINT_MAX;
     TSP* _tsp;

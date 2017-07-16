@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
@@ -35,12 +34,10 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 
-namespace openspace {
-namespace globebrowsing { 
-namespace luascriptfunctions {
+namespace openspace::globebrowsing::luascriptfunctions {
 
 /**
- Adds a layer to the specified globe.
+ *Adds a layer to the specified globe.
  */
 int addLayer(lua_State* L) {
     using ghoul::lua::errorLocation;
@@ -176,7 +173,4 @@ int goToGeo(lua_State* L) {
     return 0;
 }
 
-
-} // namespace luascriptfunctions
-} // nameapace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::luascriptfunctions

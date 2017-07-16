@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPULayerManager::setValue(ghoul::opengl::ProgramObject* programObject,
                                const LayerManager& layerManager, 
@@ -62,5 +61,4 @@ void GPULayerManager::deactivate() {
     }
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

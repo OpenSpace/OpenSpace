@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -47,12 +47,12 @@
 #include <vector>
 
 namespace {
-    const std::string _loggerCat = "LabelParser";
+    const char* _loggerCat = "LabelParser";
     const char* keySpecs   = "Read";
     const char* keyConvert = "Convert";
 
     const char* PlaybookIdentifierName = "LabelParser";
-}
+} // namespace
 
 namespace openspace {
 

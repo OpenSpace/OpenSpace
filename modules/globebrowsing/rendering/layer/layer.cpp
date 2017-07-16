@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 namespace {
     const char* _loggerCat = "Layer";
@@ -38,7 +37,7 @@ namespace {
     const char* keySettings = "Settings";
     const char* keyAdjustment = "Adjustment";
     const char* KeyBlendMode = "BlendMode";
-}
+} // namespace
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>(keyName))
@@ -322,5 +321,4 @@ void Layer::removeVisibleProperties() {
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

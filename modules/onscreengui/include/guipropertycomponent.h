@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,14 +33,12 @@
 #include <string>
 #include <vector>
 
-namespace openspace {
-
-namespace properties {
+namespace openspace::properties {
     class Property;
     class PropertyOwner;
-}
+} // namespace openspace::properties
 
-namespace gui {
+namespace openspace::gui {
 
 class GuiPropertyComponent : public GuiComponent {
 public:
@@ -70,7 +68,6 @@ protected:
     bool _hasOnlyRegularProperties = false;
 };
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui
 
 #endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,9 +36,9 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
-    const std::string _loggerCat = "IswaBaseGroup";
+    const char* _loggerCat = "IswaBaseGroup";
     using json = nlohmann::json;
-}
+} // namespace
 
 namespace openspace {
 

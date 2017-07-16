@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,11 +28,10 @@
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
 namespace {
-    const std::string _loggerCat = "Tile";
-}
+    const char* _loggerCat = "Tile";
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);
 
@@ -65,5 +64,4 @@ glm::vec2 Tile::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform
     return uv;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

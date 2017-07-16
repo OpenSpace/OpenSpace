@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,8 +24,7 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void TileMetaData::serialize(std::ostream& os) {
     os << maxValues.size() << std::endl;
@@ -54,5 +53,4 @@ TileMetaData TileMetaData::deserialize(std::istream& is) {
     return res;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

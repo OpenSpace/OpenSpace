@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,8 +34,8 @@
 #endif
 
 namespace {
-    const std::string _loggerCat = "DataSphere";
-}
+    const char* _loggerCat = "DataSphere";
+} // namespace
 
 namespace openspace {
 

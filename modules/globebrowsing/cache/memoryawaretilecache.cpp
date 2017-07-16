@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,13 +35,11 @@
 #include <numeric>
 #include <algorithm>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
-
 namespace {
     const char* _loggerCat = "MemoryAwareTileCache";
-}
+} // namespace
+
+namespace openspace::globebrowsing::cache {
 
 MemoryAwareTileCache::MemoryAwareTileCache()
     : PropertyOwner("TileCache")
@@ -309,7 +307,4 @@ bool MemoryAwareTileCache::shouldUsePbo() const {
     return _usePbo;
 }
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
-
+} // namespace openspace::globebrowsing::cache

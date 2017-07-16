@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,8 +24,7 @@
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 Geodetic2::Geodetic2(double latitude, double longitude)
     : lat(latitude)
@@ -60,5 +59,4 @@ Geodetic2 Geodetic2::operator/(double scalar) const {
     return Geodetic2(lat / scalar, lon / scalar);
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

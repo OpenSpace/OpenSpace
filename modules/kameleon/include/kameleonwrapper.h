@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,7 +35,7 @@ namespace ccmc {
     class Kameleon;
     class Model;
     class Interpolator;
-}
+} // namespace ccmc
 
 namespace openspace {
 
@@ -51,7 +51,6 @@ struct LinePoint {
 
 class KameleonWrapper {
 public:
-
     enum class Model {
         OpenGGCM,
         BATSRUS,        // Magnetosphere

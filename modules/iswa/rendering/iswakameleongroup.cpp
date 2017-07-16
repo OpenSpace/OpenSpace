@@ -36,9 +36,9 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
-    const std::string _loggerCat = "IswaDataGroup";
+    const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
-}
+} // namespace
 
 namespace openspace{
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,6 +28,7 @@
 #include <modules/iswa/rendering/iswadatagroup.h>
 
 namespace openspace {
+
 class IswaKameleonGroup : public IswaDataGroup{
 public:
     IswaKameleonGroup(std::string name, std::string type);

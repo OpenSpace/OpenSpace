@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -66,21 +66,21 @@
 
 
 namespace {
-    const std::string _loggerCat = "RenderableMultiresVolume";
-    const std::string KeyDataSource = "Source";
-    const std::string KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    const std::string KeyHints = "Hints";
-    const std::string KeyTransferFunction = "TransferFunction";
+    const char* _loggerCat = "RenderableMultiresVolume";
+    const char* KeyDataSource = "Source";
+    const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
+    const char* KeyHints = "Hints";
+    const char* KeyTransferFunction = "TransferFunction";
 
-    const std::string KeyVolumeName = "VolumeName";
-    const std::string KeyBrickSelector = "BrickSelector";
-    const std::string KeyStartTime = "StartTime";
-    const std::string KeyEndTime = "EndTime";
-    const std::string GlslHelpersPath = "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
-    const std::string GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
-    const std::string GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
+    const char* KeyVolumeName = "VolumeName";
+    const char* KeyBrickSelector = "BrickSelector";
+    const char* KeyStartTime = "StartTime";
+    const char* KeyEndTime = "EndTime";
+    const char* GlslHelpersPath = "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
+    const char* GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
+    const char* GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
-}
+} // namespace
 
 namespace openspace {
 

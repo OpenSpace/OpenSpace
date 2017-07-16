@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,12 +30,9 @@
 
 #include "imgui.h"
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
-GuiTimeComponent::GuiTimeComponent()
-    : GuiComponent("Time")
-{}
+GuiTimeComponent::GuiTimeComponent() : GuiComponent("Time") {}
 
 void GuiTimeComponent::render() {
     float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
@@ -49,5 +46,4 @@ void GuiTimeComponent::render() {
     }
 }
 
-} // gui
-} // openspace
+} // namespace openspace gui

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -51,12 +51,12 @@
 
 namespace {
     using json = nlohmann::json;
-    const std::string _loggerCat = "IswaManager";
-    std::string baseUrl = "https://iswa-demo-server.herokuapp.com/";
+    const char* _loggerCat = "IswaManager";
+    const char* baseUrl = "https://iswa-demo-server.herokuapp.com/";
     //const std::string baseUrl = "http://128.183.168.116:3000/";
-}
+} // namespace
 
-namespace openspace{
+namespace openspace {
 
 IswaManager::IswaManager()
     : properties::PropertyOwner("IswaManager")

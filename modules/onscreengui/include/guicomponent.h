@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,8 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 class GUI;
 
@@ -75,7 +74,6 @@ protected:
     properties::BoolProperty _isEnabled;
 };
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui
 
 #endif // __OPENSPACE_MODULE_ONSCREENGUI___GUICOMPONENT___H__

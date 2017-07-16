@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,10 +28,9 @@
 
 namespace {
     const ImVec2 size = ImVec2(350, 500);
-}
+} // namespace
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GuiHelpComponent::GuiHelpComponent()
     : GuiComponent("Help")
@@ -45,5 +44,4 @@ void GuiHelpComponent::render() {
     ImGui::End();
 }
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui

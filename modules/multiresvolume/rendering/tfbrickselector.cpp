@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,17 +31,20 @@
 #include <cassert>
 
 namespace {
-    const std::string _loggerCat = "TfBrickSelector";
-}
+    const char* _loggerCat = "TfBrickSelector";
+} // namespace
 
 namespace openspace {
 
-TfBrickSelector::TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
+TfBrickSelector::TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm,
+                                 TransferFunction* tf, int memoryBudget,
+                                 int streamingBudget)
     : _tsp(tsp)
     , _histogramManager(hm)
     , _transferFunction(tf)
     , _memoryBudget(memoryBudget)
-    , _streamingBudget(streamingBudget) {}
+    , _streamingBudget(streamingBudget)
+{}
 
 TfBrickSelector::~TfBrickSelector() {}
 

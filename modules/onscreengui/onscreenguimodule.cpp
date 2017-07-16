@@ -45,9 +45,7 @@ namespace openspace {
 gui::GUI OnScreenGUIModule::gui;
 Touch OnScreenGUIModule::touchInput;
     
-OnScreenGUIModule::OnScreenGUIModule() 
-    : OpenSpaceModule(Name)
-{
+OnScreenGUIModule::OnScreenGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
     // TODO: Remove dependency on OsEng.

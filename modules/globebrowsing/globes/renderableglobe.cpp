@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,14 +34,12 @@ namespace {
     const char* keyRadii = "Radii";
     const char* keySegmentsPerPatch = "SegmentsPerPatch";
     const char* keyLayers = "Layers";
-}
+} // namespace
 
-namespace openspace {
+using namespace openspace::properties;
 
-using namespace properties;
+namespace openspace::globebrowsing {
 
-namespace globebrowsing {
-    
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : _debugProperties({
         BoolProperty("saveOrThrowCamera", "save or throw camera", false),
@@ -284,5 +282,4 @@ void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) {
     _savedCamera = camera;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -41,8 +41,7 @@ namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
 } // namespace
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GuiIswaComponent::GuiIswaComponent()
     : GuiPropertyComponent("iSWA")
@@ -223,5 +222,4 @@ void GuiIswaComponent::render() {
 #endif
 }
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui

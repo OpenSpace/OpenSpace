@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,13 +32,12 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
+
 namespace documentation { struct Documentation; }
 
 struct Image;
 
-namespace planetgeometry {
-    class PlanetGeometry;
-}
+namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanetProjection : public Renderable {
 public:

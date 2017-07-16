@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,11 +27,10 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const std::string _loggerCat = "TriangleSoup";
+    const char* _loggerCat = "TriangleSoup";
 }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 TriangleSoup::TriangleSoup(std::vector<unsigned int> elements, Positions usePositions,
                            TextureCoordinates useTextures, Normals useNormals)
@@ -170,5 +169,4 @@ void TriangleSoup::drawUsingActiveProgram() {
     glBindVertexArray(0);
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

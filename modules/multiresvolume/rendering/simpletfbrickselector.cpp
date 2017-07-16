@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,12 +32,14 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const std::string _loggerCat = "SimpleTfBrickSelector";
-}
+    const char* _loggerCat = "SimpleTfBrickSelector";
+} // namespace
 
 namespace openspace {
 
-    SimpleTfBrickSelector::SimpleTfBrickSelector(TSP* tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
+SimpleTfBrickSelector::SimpleTfBrickSelector(TSP* tsp, HistogramManager* hm,
+                                             TransferFunction* tf, int memoryBudget,
+                                             int streamingBudget)
     : _tsp(tsp)
     , _histogramManager(hm)
     , _transferFunction(tf)

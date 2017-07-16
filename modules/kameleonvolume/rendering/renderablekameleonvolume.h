@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -39,7 +39,6 @@
 #include <modules/kameleonvolume/rendering/kameleonvolumeraycaster.h>
 
 #include <modules/volume/rendering/volumeclipplanes.h>
-
 
 namespace openspace {
 

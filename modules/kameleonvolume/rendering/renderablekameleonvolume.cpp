@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -43,9 +43,7 @@
 
 namespace {
     const char* _loggerCat = "RenderableKameleonVolume";
-}
 
-namespace {
     const char* KeyDimensions = "Dimensions";
     const char* KeyStepSize = "StepSize";
     const char* KeyTransferFunction = "TransferFunction";
@@ -60,7 +58,7 @@ namespace {
     const char* KeyCache = "Cache";
     const char* KeyGridType = "GridType";
     const char* ValueSphericalGridType = "Spherical";
-}
+} // namespace
 
 namespace openspace {
 

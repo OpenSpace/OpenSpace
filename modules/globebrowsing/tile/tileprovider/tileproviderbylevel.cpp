@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -35,14 +35,11 @@ namespace {
     const char* KeyMaxLevel = "MaxLevel";
     const char* KeyTileProvider = "TileProvider";
     const char* KeyLayerGroupID = "LayerGroupID";
-}
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
-TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
-{
+TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     std::string name = "Name unspecified";
     dictionary.getValue("Name", name);
   
@@ -181,6 +178,4 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
     }
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

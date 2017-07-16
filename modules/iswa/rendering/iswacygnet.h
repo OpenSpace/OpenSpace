@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -44,6 +44,7 @@
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
 namespace openspace {
+
 class IswaBaseGroup;
 
 struct Metadata {

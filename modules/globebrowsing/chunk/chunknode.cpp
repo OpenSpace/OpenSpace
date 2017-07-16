@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,8 +29,7 @@
 #include <stack>
 #include <queue>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
     : _parent(parent)
@@ -186,5 +185,4 @@ const Chunk& ChunkNode::getChunk() const {
     return _chunk;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,8 +29,7 @@
 
 #include <map>
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 class GuiIswaComponent : public GuiPropertyComponent {
 public:
@@ -46,7 +45,6 @@ private:
     std::map<std::string, int> _cdfOptionsMap;
 };
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui
 
 #endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIISWACOMPONENT___H__

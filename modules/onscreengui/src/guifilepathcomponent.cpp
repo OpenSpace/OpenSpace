@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,8 +28,7 @@
 
 #include "imgui.h"
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GuiFilePathComponent::GuiFilePathComponent()
     : GuiComponent("File Path")
@@ -58,5 +57,5 @@ void GuiFilePathComponent::render() {
     ImGui::End();
 }
 
-} // gui
-} // openspace
+} // 
+} // namespace openspace::gui

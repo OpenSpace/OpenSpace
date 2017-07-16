@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObject,
                                       const LayerRenderSettings& layerSettings)
@@ -42,7 +41,8 @@ void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObjec
     }
 }
 
-void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings, ghoul::opengl::ProgramObject* programObject,
+void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings,
+                                  ghoul::opengl::ProgramObject* programObject,
                                   const std::string& nameBase)
 {
     gpuOpacity.bind(programObject, nameBase + "opacity");
@@ -55,5 +55,4 @@ void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings, ghou
     }
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

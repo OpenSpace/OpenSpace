@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,10 +27,10 @@
 #include <ghoul/io/texture/texturereader.h>
 
 namespace {
-    const std::string _loggerCat = "TextureCygnet";
-}
+    const char* _loggerCat = "TextureCygnet";
+} // namespace
 
-namespace openspace{
+namespace openspace {
 
 TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
     :IswaCygnet(dictionary)
@@ -38,7 +38,7 @@ TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
     registerProperties();
 }
 
-TextureCygnet::~TextureCygnet(){}
+TextureCygnet::~TextureCygnet() {}
 
 bool TextureCygnet::updateTexture() {
 

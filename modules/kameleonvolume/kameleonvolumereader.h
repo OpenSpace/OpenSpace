@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,9 +33,7 @@
 #include <ccmc/Kameleon.h>
 #include <ccmc/Interpolator.h>
 
-namespace ccmc {
-    class Model;
-}
+namespace ccmc { class Model; }
 
 namespace openspace {
 

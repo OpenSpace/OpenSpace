@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -37,11 +37,10 @@
 #include <numeric>
 
 namespace {
-    const std::string _loggerCat = "GuiParallelComponent";
-}
+    const char* _loggerCat = "GuiParallelComponent";
+} // namespace
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GuiParallelComponent::GuiParallelComponent()
     : GuiPropertyComponent("GuiParallelComponent")
@@ -187,5 +186,4 @@ void GuiParallelComponent::render() {
     ImGui::End();
 }
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui

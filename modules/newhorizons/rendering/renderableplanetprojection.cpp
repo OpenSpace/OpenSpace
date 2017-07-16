@@ -52,7 +52,7 @@
 #endif
 
 namespace {
-    const std::string _loggerCat = "RenderablePlanetProjection";
+    const char* _loggerCat = "RenderablePlanetProjection";
 
     const char* keyGeometry = "Geometry";
     const char* keyProjection = "Projection";
@@ -63,7 +63,7 @@ namespace {
     const char* keyRadius = "Geometry.Radius";
 //    const char* keyShading = "PerformShading";
     const char* _mainFrame = "GALACTIC";
-}
+} // namespace
 
 namespace openspace {
 

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,11 +32,11 @@
 #include <cstring>
 
 namespace {
-    const std::string _loggerCat = "SequenceParser";
+    const char* _loggerCat = "SequenceParser";
     const char* keyTranslation = "DataInputTranslation";
 
     const char* PlaybookIdentifierName = "Playbook";
-}
+} // namespace
 
 namespace openspace {
 

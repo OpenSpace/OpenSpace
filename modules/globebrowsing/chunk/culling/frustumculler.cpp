@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,9 +28,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/util/updatestructures.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace culling {
+namespace openspace::globebrowsing::culling {
 
 FrustumCuller::FrustumCuller(AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
@@ -59,6 +57,4 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     return !(_viewFrustum.intersects(bounds));
 }
 
-} // namespace culling
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::culling

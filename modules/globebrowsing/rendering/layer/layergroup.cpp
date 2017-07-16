@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,8 +30,7 @@ namespace {
     const char* _loggerCat = "LayerGroup";
 }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 LayerGroup::LayerGroup(layergroupid::GroupID id)
     : properties::PropertyOwner(std::move(layergroupid::LAYER_GROUP_NAMES[id]))
@@ -125,5 +124,4 @@ void LayerGroup::onChange(std::function<void(void)> callback) {
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

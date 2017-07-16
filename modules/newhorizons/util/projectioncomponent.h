@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,16 +36,9 @@
 
 #include <ghoul/opengl/texture.h>
 
-namespace ghoul {
+namespace ghoul { class Dictionary; }
 
-class Dictionary;
-
-namespace opengl {
-
-class ProgramObject;
-
-} // namespace opengl
-} // namespace ghoul
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 

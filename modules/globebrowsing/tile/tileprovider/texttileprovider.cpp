@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -40,9 +40,7 @@
 
 using namespace ghoul::fontrendering;
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
     
 TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t fontSize)
     : _initData(initData)
@@ -136,6 +134,4 @@ TileIndex::TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) cons
     return tileIndex.hashKey();
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

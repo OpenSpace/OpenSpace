@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,8 +33,7 @@
 
 #include <ghoul/opengl/programobject.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 PointGlobe::PointGlobe(const RenderableGlobe& owner)
     : _owner(owner)
@@ -69,7 +68,7 @@ bool PointGlobe::initialize() {
 
     glBindVertexArray(_vaoID);
 
-	std::array<glm::vec2, 6> quadVertexData = {{
+    std::array<glm::vec2, 6> quadVertexData = {{
       glm::vec2(-1.0f, -1.0f),
       glm::vec2(1.0f, -1.0f),
       glm::vec2(-1.0f, 1.0f),
@@ -162,5 +161,4 @@ void PointGlobe::render(const RenderData& data) {
     _programObject->deactivate();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -49,8 +49,7 @@
 
 #include <math.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 const TileIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX = TileIndex(0, 0, 1);
 const TileIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = TileIndex(1, 0, 1);
@@ -190,8 +189,8 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             return 0;
         }
 
-		ghoul::opengl::Texture* tileTexture = tile.texture();
-		if (!tileTexture) {
+        ghoul::opengl::Texture* tileTexture = tile.texture();
+        if (!tileTexture) {
             return 0;
         }
 
@@ -361,5 +360,4 @@ void ChunkedLodGlobe::update(const UpdateData& data) {
     _renderer->update();
 }
     
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

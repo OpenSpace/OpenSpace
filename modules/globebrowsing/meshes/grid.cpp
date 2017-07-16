@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,8 +24,7 @@
 
 #include <modules/globebrowsing/meshes/grid.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 Grid::Grid(int xSegments, int ySegments)
     : _xSegments(xSegments)
@@ -36,5 +35,4 @@ TriangleSoup& Grid::geometry() {
     return *_geometry;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

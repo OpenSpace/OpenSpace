@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,8 +28,8 @@
 #include <fstream>
 
 namespace {
-    const std::string _loggerCat = "DataProcessor";
-}
+    const char* _loggerCat = "DataProcessor";
+} // namespace
 
 namespace openspace {
 

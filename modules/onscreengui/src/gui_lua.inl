@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,12 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
+namespace openspace::gui::luascriptfunctions {
    
-namespace luascriptfunctions {
-
-namespace gui {
-
 /**
  * \ingroup LuaScripts
  * show():
@@ -73,6 +69,4 @@ int toggle(lua_State* L) {
     return 0;
 }
 
-} // namespace gui
-} // namespace luascriptfunctions
-} // namespace openspace
+} // namespace openspace::gui::luascriptfunctions

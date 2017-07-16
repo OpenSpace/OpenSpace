@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -39,7 +39,7 @@ namespace {
     const char* keyTranslation = "DataInputTranslation";
 
     const char* PlaybookIdentifierName = "HongKang";
-}
+} // namespace
 
 namespace openspace {
 

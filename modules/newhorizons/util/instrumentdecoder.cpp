@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,16 +29,15 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string _loggerCat  = "InstrumentDecoder";
+    const char* _loggerCat  = "InstrumentDecoder";
     const char* keyDetector = "DetectorType";
     const char* keySpice    = "Spice";
     const char* keyStopCommand = "StopCommand";
-}
+} // namespace
 
 namespace openspace {
    
-InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
-{
+InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
     bool success = dictionary.getValue(keyDetector, _type);
     ghoul_assert(success, "Instrument has not provided detector type");
     std::for_each(
@@ -66,15 +65,15 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
     }
 }
 
-std::string InstrumentDecoder::getStopCommand(){
+std::string InstrumentDecoder::getStopCommand() {
     return _stopCommand;
 }
 
-std::string InstrumentDecoder::getDecoderType(){
+std::string InstrumentDecoder::getDecoderType() {
     return _type;
 }
 
-std::vector<std::string> InstrumentDecoder::getTranslation(){
+std::vector<std::string> InstrumentDecoder::getTranslation() {
     return _spiceIDs;
 }
 

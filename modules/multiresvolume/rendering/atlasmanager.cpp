@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,8 +34,8 @@
 #include <cstring>
 
 namespace {
-    const std::string _loggerCat = "AtlasManager";
-}
+    const char* _loggerCat = "AtlasManager";
+} // namespace
 
 namespace openspace {
 

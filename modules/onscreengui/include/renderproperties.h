@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,11 +29,11 @@
 
 #include <string>
 
-namespace openspace {
-
-namespace properties {
+namespace openspace::properties {
     class Property;
-} // namespace properties
+} // namespace openspace::properties
+
+namespace openspace {
 
 using IsRegularProperty = ghoul::Boolean;
 

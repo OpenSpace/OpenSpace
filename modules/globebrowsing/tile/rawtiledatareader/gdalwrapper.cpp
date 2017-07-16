@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -37,10 +37,9 @@
 
 namespace {
     const char* _loggerCat = "GdalWrapper";
-}
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void gdalErrorHandler(CPLErr eErrClass, int errNo, const char *msg) {
     if (GdalWrapper::ref().logGdalErrors()) {
@@ -183,8 +182,6 @@ void GdalWrapper::setGdalProxyConfiguration() {
     }
 }
 
-
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // GLOBEBROWSING_USE_GDAL
