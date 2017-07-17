@@ -1,8 +1,8 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ATMOSPHEREMODULE_H__
-#define __ATMOSPHEREMODULE_H__
+#ifndef __OPENSAPCE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
+#define __OPENSAPCE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -38,4 +38,4 @@ public:
 
 } // namespace openspace
 
-#endif // __ATMOSPHEREMODULE_H__
+#endif // __OPENSAPCE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
