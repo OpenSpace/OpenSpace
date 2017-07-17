@@ -4,10 +4,44 @@ $background: $ui-background-solid;
 $arrow-size: 0.5rem;
 $corner-radius: $arrow-size / 2;
 
+$padding-horizontal: 0.3rem;
+$padding-vertical: 0.5rem;
+$padding: $padding-horizontal $padding-vertical;
+
 .popover {
   background: $background;
   border-radius: $corner-radius;
+  color: $text-color-focus;
   max-width: 300px;
+
+  &.small {
+    max-width: 150px;
+  }
+}
+
+.popover header {
+  display: flex;
+  justify-content: space-between;
+
+  .title {
+    font-weight: bold;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    padding: $padding;
+    text-transform: uppercase;
+  }
+}
+
+.close {
+  background: none;
+  border: 0;
+  color: $text-color-blur;
+  line-height: 1;
+
+  &:hover, &:focus {
+    background: $ui-background-hover;
+    color: $text-color-focus;
+  }
 }
 
 .popover.arrow {
