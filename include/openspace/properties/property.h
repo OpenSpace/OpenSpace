@@ -29,7 +29,6 @@
 
 #include <ghoul/misc/dictionary.h>
 
-#include <any>
 #include <functional>
 #include <string>
 
