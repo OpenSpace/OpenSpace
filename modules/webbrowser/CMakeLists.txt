@@ -160,7 +160,7 @@ if (OS_WINDOWS)
     add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
     target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     # Add the custom manifest files to the executable.
-    ADD_WINDOWS_CEF_MANIFEST("${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
+    ADD_WINDOWS_CEF_MANIFEST("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
 endif (OS_WINDOWS)
 
 

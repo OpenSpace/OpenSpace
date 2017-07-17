@@ -139,114 +139,21 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
     # Add the CEF binary distribution's cmake/ directory to the module path and
     # find CEF to initialize it properly.
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
-    find_package(CEF REQUIRED)
+    include(webbrowser_helpers)
 
-    # include CEF support functions and macros
-    include(cef_support)
-
-    # ensure out target dir is set
-    SET_OPENSPACE_CEF_TARGET_OUT_DIR()
-
-    # main CEF executable target
-    set(CEF_TARGET ${APPLICATION_NAME})
-    #SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_TARGET})
-
-    # Logical target used to link the libcef library.
-    ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
-
-    # platform specific config
-    if(OS_MACOSX)
-        set(CEF_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CEF_TARGET}.app")
-        set(CEF_FINAL_APP "${CEF_TARGET_OUT_DIR}/${CEF_TARGET}.app")
-
-        add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
-
-        target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-        set_target_properties(${CEF_TARGET} PROPERTIES
-            RESOURCE "${WEBBROWSER_RESOURCES_SRCS}"
-            MACOSX_BUNDLE_INFO_PLIST ${WEBBROWSER_MODULE_PATH}/mac/Info.plist
-        )
-
-        # Copy files into the main app bundle.
-        add_custom_command(
-            TARGET ${CEF_TARGET}
-            POST_BUILD
-            # Copy the built app bundle into the proper cmake build type directory.
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    "${CEF_APP}"
-                    "${CEF_FINAL_APP}"
-            # Copy the helper app bundle into the Frameworks directory.
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    "${CEF_HELPER_APP}"
-                    "${CEF_FINAL_APP}/Contents/Frameworks/${CEF_HELPER_TARGET}.app"
-            # Copy the CEF framework into the Frameworks directory.
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework"
-                    "${CEF_FINAL_APP}/Contents/Frameworks/Chromium Embedded Framework.framework"
-            VERBATIM
-            )
-
-        # copy dynamic libraries to bundle
-        file(GLOB LIBRARIES_TO_COPY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dylib")
-        foreach (lib_file ${LIBRARIES_TO_COPY})
-            get_filename_component(file_name "${lib_file}" NAME)
-            add_custom_command(
-                TARGET ${CEF_TARGET} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${lib_file}"
-                "${CEF_FINAL_APP}/Contents/${file_name}"
-                )
-        endforeach ()
-
-        # Fix the framework rpath in the main executable.
-        FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_TARGET})
-
-        if(NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
-            # Manually process and copy over resource files.
-            # The Xcode generator handles this via the set_target_properties RESOURCE directive.
-            set(PREFIXES "mac/")  # Remove these prefixes from input file paths.
-            COPY_MACOSX_RESOURCES("${WEBBROWSER_RESOURCES_SOURCES}" "${PREFIXES}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}" "${CEF_FINAL_APP}")
-        endif()
-    endif (OS_MACOSX)
-
-	if (OS_WINDOWS)
-		# Executable target.
-		add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
-		target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-        include_directories(${CEF_ROOT})
-
-        add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
-
-		if(USE_SANDBOX)
-			# Logical target used to link the cef_sandbox library.
-            message(STATUS "Using CEF in Sandboxed mode.")
-			ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
-			target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
-		endif()
-
-		# Add the custom manifest files to the executable.
-        ADD_WINDOWS_CEF_MANIFEST("${WEBBROWSER_MODULE_PATH}" "${CEF_TARGET}" "exe")
-
-		# Copy binary and resource files to the target output directory.
-		copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
-		copy_files("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
-	endif (OS_WINDOWS)
-
-    set(NPM_COMMAND "npm" CACHE STRING "Location of NPM executable unless in PATH.")
-    # copy webgui source
-    add_custom_command(
-            TARGET OpenSpace POST_BUILD
-            COMMAND ${NPM_COMMAND} install
-            COMMAND ${NPM_COMMAND} run build
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBBROWSER_MODULE_PATH}/web/dist "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBBROWSER_MODULE_PATH}/web/dist/static "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui/static"
-            WORKING_DIRECTORY ${WEBBROWSER_MODULE_PATH}/web
-            VERBATIM
-    )
+    set_cef_targets("${CEF_ROOT}" "${APPLICATION_NAME}")
+    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
 elseif (OPENSPACE_MODULE_WEBBROWSER)
     message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
+
+if (OPENSPACE_MODULE_WEBGUI AND WEBGUI_MODULE_PATH)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
+    include(webgui_helpers)
+    build_webgui_source("${APPLICATION_NAME}")
+elseif(OPENSPACE_MODULE_WEBGUI)
+    message(WARNING "WebGui is configured to be included, but the web source could not be found. Try configuring CMake again.")
+endif()
 
 
 
