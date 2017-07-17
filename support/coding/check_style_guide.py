@@ -40,6 +40,7 @@ guards for correctness. At the moment this includes:
    * The correct submodule is used
  * Checking for duplicates between all files
  * Checking that no file includes glm header directly
+ * Checking whether any files starts with the UTF-8 Byte-order mark
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
 be passed, otherwise the first and only argument has to point to the base directory.
@@ -175,6 +176,15 @@ def check_copyright(lines):
 
 
 
+def check_byte_order_mark_character(lines):
+    c = lines[0][0]
+    if c == 'ï':
+        return 'File contains UTF-8 byte mark order character'
+
+    return ''
+
+
+
 def check_naming_convention_component(lines, component):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
 
@@ -233,6 +243,8 @@ def check_glm_header(lines, file):
     else:
         return ''
 
+
+
 def check_core_dependency(lines, component):
     if component != "openspace_core":
         return ''
@@ -244,6 +256,8 @@ def check_core_dependency(lines, component):
     else:
         return ''
 
+
+
 def check_using_namespace(lines):
     index = [i for i,s in enumerate(lines) if "using namespace" in s.strip()]
 
@@ -251,6 +265,7 @@ def check_using_namespace(lines):
         return lines[index[0]]
     else:
         return ''
+
 
 
 previousSymbols  = {}
@@ -318,6 +333,12 @@ def check_header_file(file, component):
         if using_namespaces:
             print(file, '\t', 'Using namespace found in header file')
 
+        bom = check_byte_order_mark_character(lines)
+        if bom:
+            print(file, '\t', 'Byte order mark failed:', bom)
+
+
+
 def check_inline_file(file, component):
     with open(file, 'r+') as f:
         lines = f.readlines()
@@ -334,12 +355,17 @@ def check_inline_file(file, component):
         if core_dependency:
             print(file, '\t', 'Wrong dependency (core depends on module)', core_dependency)
 
+        bom = check_byte_order_mark_character(lines)
+        if bom:
+            print(file, '\t', 'Byte order mark failed:', bom)
+
         if (not '_doc.inl' in file):
             # The _doc.inl files are allowed to use using namespace as they are inclued
             # from the cpp files and thus don't leak it
             using_namespaces = check_using_namespace(lines)
             if using_namespaces:
                 print(file, '\t', 'Using namespace found in inline file')
+
 
 
 def check_source_file(file, component):
@@ -358,6 +384,9 @@ def check_source_file(file, component):
         if copyright:
             print(file, '\t', 'Copyright check failed', '\t', copyright)
 
+        bom = check_byte_order_mark_character(lines)
+        if bom:
+            print(file, '\t', 'Byte order mark failed:', bom)
 
 
 
@@ -369,6 +398,7 @@ def check_files(positiveList, negativeList, component, check_function):
 
     for file in files:
         check_function(file, component)
+
 
 
 
