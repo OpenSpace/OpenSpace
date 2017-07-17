@@ -49,7 +49,6 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_gs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/hdr.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_gs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_fs.glsl
