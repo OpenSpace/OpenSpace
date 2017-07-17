@@ -27,7 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
