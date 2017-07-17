@@ -114,11 +114,11 @@ public:
     /**
      * This method returns the encapsulated value of the Property to the caller. The type
      * that is returned is determined by the type function and is up to the developer of
-     * the derived class. The default implementation returns an empty std::any object.
-     * \return The value that is encapsulated by this Property, or an empty std::any
+     * the derived class. The default implementation returns an empty ghoul::any object.
+     * \return The value that is encapsulated by this Property, or an empty ghoul::any
      * object if the method was not overritten.
      */
-    virtual std::any get() const;
+    virtual ghoul::any get() const;
 
     /**
      * Sets the value encapsulated by this Property to the <code>value</code> passed to
@@ -128,7 +128,7 @@ public:
      * implementation of this method ignores the input.
      * \param value The new value that should be stored in this Property
      */
-    virtual void set(std::any value);
+    virtual void set(ghoul::any value);
 
     /**
      * This method returns the type that is requested by this Property for the set method.

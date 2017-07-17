@@ -279,16 +279,16 @@ void RenderablePlanetProjection::imageProjectGPU(
     _fboProgramObject->setUniform("boresight"      , _boresight);
 
     if (_geometry->hasProperty("radius")){ 
-        std::any r = _geometry->property("radius")->get();
-        if (glm::vec3* radius = std::any_cast<glm::vec3>(&r)){
+        ghoul::any r = _geometry->property("radius")->get();
+        if (glm::vec3* radius = ghoul::any_cast<glm::vec3>(&r)){
             _fboProgramObject->setUniform("_radius", radius);
         }
     }else{
         LERROR("Geometry object needs to provide radius");
     }
     if (_geometry->hasProperty("segments")){
-        std::any s = _geometry->property("segments")->get();
-        if (int* segments = std::any_cast<int>(&s)){
+        ghoul::any s = _geometry->property("segments")->get();
+        if (int* segments = ghoul::any_cast<int>(&s)){
             _fboProgramObject->setUniform("_segments", segments[0]);
         }
     }else{

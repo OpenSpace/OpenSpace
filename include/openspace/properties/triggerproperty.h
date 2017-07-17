@@ -63,7 +63,7 @@ public:
      * listeners regardless of the value
      * \param value The ignored value
      */
-    void set(std::any value);
+    void set(ghoul::any value);
 };
 
 } // namespace openspace::properties

@@ -327,7 +327,7 @@ bool NumericalProperty<T>::setStringValue(std::string value) {
         value, success
     );
     if (success)
-        TemplateProperty<T>::set(std::any(std::move(thisValue)));
+        TemplateProperty<T>::set(ghoul::any(std::move(thisValue)));
     return success;
 }
 
