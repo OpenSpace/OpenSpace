@@ -226,7 +226,7 @@ void TemplateProperty<T>::set(ghoul::any value) {
             notifyListener();
         }
     }
-    catch (std::bad_any_cast&) {
+    catch (ghoul::bad_any_cast&) {
         LERRORC("TemplateProperty", "Illegal cast from '" << value.type().name()
             << "' to '" << typeid(T).name() << "'");
     }
