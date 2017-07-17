@@ -27,6 +27,7 @@
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 
@@ -58,7 +59,11 @@ uniform vec2 vertexResolution;
 #endif // USE_ATMOSPHERE
 
 #if USE_NIGHTTEXTURE || USE_WATERMASK || USE_ATMOSPHERE || PERFORM_SHADING
-	uniform vec3 lightDirectionCameraSpace;
+    uniform vec3 lightDirectionCameraSpace;
+#endif
+
+#if PERFORM_SHADING
+    uniform float orenNayarRoughness;
 #endif
 
 in vec4 fs_position;
@@ -66,144 +71,123 @@ in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
 in vec3 positionCameraSpace;
 
+#if USE_ACCURATE_NORMALS
+in vec3 ellipsoidTangentThetaCameraSpace;
+in vec3 ellipsoidTangentPhiCameraSpace;
+#endif // USE_ACCURATE_NORMALS
 
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
 in LevelWeights levelWeights;
-
-
-///////////////////////////////////////////////////////////////////// 
-
-// The heightmaps is only used in the fragment shader visually debugging 
-// the alignment and resolution of the heightmaps
-
-#if USE_HEIGHTMAP
-uniform Layer HeightLayers[NUMLAYERS_HEIGHTMAP];
-#endif // USE_HEIGHTMAP
-
-float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
-	float height = CHUNK_DEFAULT_HEIGHT;
-
-#if USE_HEIGHTMAP
-	// Calculate desired level based on distance to the vertex on the ellipsoid
-    // Before any heightmapping is done
-	height = calculateUntransformedHeight(
-		uv,
-		levelWeights, 							// Variable to determine which texture to sample from
-		HeightLayers);	// Three textures to sample from
-
-#endif // USE_HEIGHTMAP
-
-	return height;
-}
-
-/////////////////////////////////////////////////////////////////////
-
-
-
 
 /**
  * This method defines the fragment color pipeline which is used in both
  * the local and global chunk rendering. 
  *
  */
-vec4 getTileFragColor(){
+vec4 getTileFragColor() {
 
-	vec4 color = vec4(0.3,0.3,0.3,1);
+    vec4 color = vec4(0.3,0.3,0.3,1);
+
+    vec3 normal = normalize(ellipsoidNormalCameraSpace);
+#if USE_ACCURATE_NORMALS
+    normal = getTileNormal(fs_uv, levelWeights,
+                           normalize(ellipsoidNormalCameraSpace),
+                           normalize(ellipsoidTangentThetaCameraSpace),
+                           normalize(ellipsoidTangentPhiCameraSpace));
+#endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
-
-	color = calculateColor(
-		color,
-		fs_uv,
-		levelWeights,
-		ColorLayers);
+    color = calculateColor(
+        color,
+        fs_uv,
+        levelWeights,
+        ColorLayers);
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
-	color = calculateWater(
-		color,
-		fs_uv,
-		levelWeights,
-		WaterMasks,
-		normalize(ellipsoidNormalCameraSpace),
-		lightDirectionCameraSpace, // Should already be normalized
-		positionCameraSpace);
+    color = calculateWater(
+        color,
+        fs_uv,
+        levelWeights,
+        WaterMasks,
+        normal,
+        lightDirectionCameraSpace, // Should already be normalized
+        positionCameraSpace);
 
 #endif // USE_WATERMASK
 
 #if USE_NIGHTTEXTURE
-	color = calculateNight(
-		color,
-		fs_uv,
-		levelWeights,
-		NightLayers,
-		normalize(ellipsoidNormalCameraSpace),
-		lightDirectionCameraSpace); // Should already be normalized
+    color = calculateNight(
+        color,
+        fs_uv,
+        levelWeights,
+        NightLayers,
+        normalize(ellipsoidNormalCameraSpace),
+        lightDirectionCameraSpace); // Should already be normalized
 
 #endif // USE_NIGHTTEXTURE
 
 #if PERFORM_SHADING
-	color = calculateShadedColor(
-		color,
-		normalize(ellipsoidNormalCameraSpace),
-		lightDirectionCameraSpace);
+    color = calculateShadedColor(
+        color,
+        normal,
+        lightDirectionCameraSpace,
+        normalize(positionCameraSpace),
+        orenNayarRoughness);
 #endif // PERFORM_SHADING
 
 #if USE_ATMOSPHERE
-	// Temporary until the real atmosphere code is here
-	//color = color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
-	vec3 n = normalize(ellipsoidNormalCameraSpace);
-	vec3 l = lightDirectionCameraSpace;
-	vec3 c = normalize(positionCameraSpace);
-	float cosFactor = 1 - clamp(dot(-n * 0.9, c), 0, 1);
-	cosFactor *= 1.1;
-	cosFactor -= 0.1;
-	cosFactor = clamp(cosFactor, 0, 1);
-	cosFactor = cosFactor + pow(cosFactor, 5);
-	
-	float shadowLight = 0.15;
-	float cosFactorLight = pow(max(dot(-l, n), -shadowLight) + shadowLight, 0.8);
-	//float cosFactorScatter = pow(max(dot(l, n) + shadowLight, 0), 5);
-	//float cosFactorLight = max(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)), 0);
-	//vec3 r = reflect(l, n);
-	//float scatteredLight = pow(clamp(dot(-r,c), 0, 1), 20);
-	vec3 atmosphereColor = vec3(0.5,0.5,1) * 2;
-	color = color + vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
+    // Temporary until the real atmosphere code is here
+    //color = color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
+    vec3 n = normalize(ellipsoidNormalCameraSpace);
+    vec3 l = lightDirectionCameraSpace;
+    vec3 c = normalize(positionCameraSpace);
+    float cosFactor = 1 - clamp(dot(-n * 0.9, c), 0, 1);
+    cosFactor *= 1.1;
+    cosFactor -= 0.1;
+    cosFactor = clamp(cosFactor, 0, 1);
+    cosFactor = cosFactor + pow(cosFactor, 5);
+    
+    float shadowLight = 0.15;
+    float cosFactorLight = pow(max(dot(-l, n), -shadowLight) + shadowLight, 0.8);
+    //float cosFactorScatter = pow(max(dot(l, n) + shadowLight, 0), 5);
+    //float cosFactorLight = max(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)), 0);
+    //vec3 r = reflect(l, n);
+    //float scatteredLight = pow(clamp(dot(-r,c), 0, 1), 20);
+    vec3 atmosphereColor = vec3(0.5,0.5,1) * 2;
+    color = color + vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
 #endif // USE_ATMOSPHERE
 
 #if USE_OVERLAY
-	color = calculateOverlay(
-		color,
-		fs_uv,
-		levelWeights,
-		Overlays);
+    color = calculateOverlay(
+        color,
+        fs_uv,
+        levelWeights,
+        Overlays);
 #endif // USE_OVERLAY
 
-
-
 #if SHOW_HEIGHT_INTENSITIES
-	color.r *= 0.1;
-	color.g *= 0.1;
-	color.b *= 0.1;
+    color.r *= 0.1;
+    color.g *= 0.1;
+    color.b *= 0.1;
 
-	float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
-	float contourLine = fract(10*untransformedHeight) > 0.98 ? 1 : 0;
-	color.r += untransformedHeight;
-	color.b = contourLine;
+    float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
+    float contourLine = fract(10*untransformedHeight) > 0.98 ? 1 : 0;
+    color.r += untransformedHeight;
+    color.b = contourLine;
 #endif
-
 
 #if SHOW_HEIGHT_RESOLUTION
-	color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
-	#if USE_HEIGHTMAP
-		color.r = min(color.r, 0.8);
-		color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
-	#endif
+    color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
+    #if USE_HEIGHTMAP
+        color.r = min(color.r, 0.8);
+        color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
+    #endif
 #endif
 
 
-	return color;
+    return color;
 }
 
 

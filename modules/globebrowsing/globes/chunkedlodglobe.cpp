@@ -174,7 +174,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
 
     // Get the tile providers for the height maps
     const std::vector<std::shared_ptr<Layer>>& heightMapLayers =
-        _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers();
+        _layerManager->layerGroup(layergroupid::GroupID::HeightLayers).activeLayers();
         
     for (const std::shared_ptr<Layer>& layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();

@@ -69,14 +69,14 @@ bool PointGlobe::initialize() {
 
     glBindVertexArray(_vaoID);
 
-	std::array<glm::vec2, 6> quadVertexData = {
-		glm::vec2(-1.0f, -1.0f),
-		glm::vec2(1.0f, -1.0f),
-		glm::vec2(-1.0f, 1.0f),
-		glm::vec2(-1.0f, 1.0f),
-		glm::vec2(1.0f, -1.0f),
-		glm::vec2(1.0f, 1.0f)
-	};
+	std::array<glm::vec2, 6> quadVertexData = {{
+      glm::vec2(-1.0f, -1.0f),
+      glm::vec2(1.0f, -1.0f),
+      glm::vec2(-1.0f, 1.0f),
+      glm::vec2(-1.0f, 1.0f),
+      glm::vec2(1.0f, -1.0f),
+      glm::vec2(1.0f, 1.0f)
+    }};
     
     // Vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
@@ -121,7 +121,7 @@ void PointGlobe::render(const RenderData& data) {
     float avgRadius = _owner.ellipsoid().averageRadius();
     float lightIntensity = _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody;
     float lightIntensityClamped = glm::min(lightIntensity, _intensityClamp.value());
-    float lightOverflow = glm::max(lightIntensity - lightIntensityClamped, 0.0f);
+    //float lightOverflow = glm::max(lightIntensity - lightIntensityClamped, 0.0f);
 
     float billboardRadius = lightIntensityClamped * distanceToBody;
     glm::dmat4 scaleTransform = glm::scale(glm::dmat4(1.0), glm::dvec3(billboardRadius));
@@ -134,8 +134,8 @@ void PointGlobe::render(const RenderData& data) {
         glm::inverse(rotationTransform) * 
         scaleTransform; // Scale
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    glm::vec3 directionToSun = glm::normalize(glm::vec3(0) - glm::vec3(bodyPosition));
-    glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+    //glm::vec3 directionToSun = glm::normalize(glm::vec3(0) - glm::vec3(bodyPosition));
+    //glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
         
   
     _programObject->setUniform("lightIntensityClamped", lightIntensityClamped);

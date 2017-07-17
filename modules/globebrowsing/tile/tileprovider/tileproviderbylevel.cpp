@@ -29,6 +29,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    const char* _loggerCat = "TileProviderByLevel";
+
     const char* KeyProviders = "LevelTileProviders";
     const char* KeyMaxLevel = "MaxLevel";
     const char* KeyTileProvider = "TileProvider";
@@ -46,7 +48,6 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
   
     layergroupid::GroupID layerGroupID;
     dictionary.getValue(KeyLayerGroupID, layerGroupID);
-    const char* _loggerCat = ("TileProviderByLevel" + name).c_str();
   
     ghoul::Dictionary providers;
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyProviders)) {

@@ -6,9 +6,12 @@ function preInitialization()
     critical objects.
     ]]--
 
-    --openspace.time.setTime(openspace.time.currentWallTime())
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    -- For unit test
+    --openspace.time.setTime("2016 SEP 8 23:00:00.500")
+    --openspace.time.togglePause()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
@@ -75,7 +78,7 @@ function postInitialization()
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.levelByProjectedAreaElseDistance", false)
     openspace.setPropertyValue("Earth.RenderableGlobe.Layers.ColorLayers.blendTileLevels", true)
 
-    openspace.resetCameraDirection()
+    openspace.globebrowsing.goToGeo(0, 0, 20000000)
 
     openspace.printInfo("Done setting default values")
 end
@@ -86,7 +89,7 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {30000000, 0, 0},
+        Position = {0, 0, 0},
         Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
     },
 
