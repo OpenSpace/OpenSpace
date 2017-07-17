@@ -76,7 +76,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
     , _autoGridType(false)
     , _clipPlanes(nullptr)
-    , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
+    , _stepSize("stepSize", "Step Size", 0.02f, 0.01f, 1.f)
     , _sourcePath("sourcePath", "Source Path")
     , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
     , _raycaster(nullptr)
@@ -383,7 +383,7 @@ bool RenderableKameleonVolume::isReady() const {
     return true;
 }
     
-void RenderableKameleonVolume::update(const UpdateData& data) {
+void RenderableKameleonVolume::update(const UpdateData&) {
     if (_raycaster) {
         _raycaster->setStepSize(_stepSize);
     }

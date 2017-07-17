@@ -165,7 +165,12 @@ void TriangleSoup::drawUsingActiveProgram() {
     }
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
-    glDrawElements(GL_TRIANGLES, _elementData.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(
+        GL_TRIANGLES,
+        static_cast<GLsizei>(_elementData.size()),
+        GL_UNSIGNED_INT,
+        nullptr
+    );
     glBindVertexArray(0);
 }
 

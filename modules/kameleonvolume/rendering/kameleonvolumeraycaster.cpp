@@ -127,7 +127,9 @@ void KameleonVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
     program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
 }
     
-void KameleonVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+void KameleonVolumeRaycaster::postRaycast(const RaycastData&,
+                                          ghoul::opengl::ProgramObject&)
+{
     // For example: release texture units
     _textureUnit = nullptr;
     _tfUnit = nullptr;

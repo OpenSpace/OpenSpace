@@ -170,8 +170,8 @@ bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data,
         localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
 }
 
-void MultiresVolumeRaycaster::postRaycast(const RaycastData& data,
-                                          ghoul::opengl::ProgramObject& program)
+void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
+                                          ghoul::opengl::ProgramObject&)
 {
     _atlasUnit = nullptr;
     _tfUnit = nullptr;

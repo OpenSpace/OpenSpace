@@ -33,14 +33,17 @@ int iswa_addCygnet(lua_State* L) {
     std::string type = "Texture";
     std::string group = "";
 
-    if(nArguments > 0)
-        id = lua_tonumber(L, 1);
+    if (nArguments > 0) {
+        id = static_cast<int>(lua_tonumber(L, 1));
+    }
 
-    if(nArguments > 1)
+    if (nArguments > 1) {
         type = luaL_checkstring(L, 2);
+    }
 
-    if(nArguments > 2)
+    if (nArguments > 2) {
         group = luaL_checkstring(L, 3);
+    }
     
     IswaManager::ref().addIswaCygnet(id, type, group);
 
@@ -125,7 +128,7 @@ int iswa_removeCygnet(lua_State* L){
 int iswa_removeScrenSpaceCygnet(lua_State* L){
     static const std::string _loggerCat = "removeScreenSpaceCygnet";
 
-    int id = lua_tonumber(L, 1);
+    int id = static_cast<int>(lua_tonumber(L, 1));
 
     auto cygnetInformation = IswaManager::ref().cygnetInformation(); 
     if(cygnetInformation.find(id) == cygnetInformation.end()){

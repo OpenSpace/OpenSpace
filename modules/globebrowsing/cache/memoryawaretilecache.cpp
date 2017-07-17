@@ -263,10 +263,13 @@ void MemoryAwareTileCache::put(const ProviderTileKey& key,
 }
 
 void MemoryAwareTileCache::update() {
-    size_t dataSizeCPU = getCPUAllocatedDataSize();
-    size_t dataSizeGPU = getGPUAllocatedDataSize();
-    _cpuAllocatedTileData.setValue(dataSizeCPU / 1024 / 1024);
-    _gpuAllocatedTileData.setValue(dataSizeGPU / 1024 / 1024);
+    const size_t dataSizeCPU = getCPUAllocatedDataSize();
+    const size_t dataSizeGPU = getGPUAllocatedDataSize();
+
+    const size_t ByteToMegaByte = 1024 * 1024;
+
+    _cpuAllocatedTileData.setValue(dataSizeCPU / ByteToMegaByte);
+    _gpuAllocatedTileData.setValue(dataSizeGPU / ByteToMegaByte);
 }
 
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {

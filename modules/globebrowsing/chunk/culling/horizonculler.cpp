@@ -69,7 +69,7 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     );
 
     for (int i = 0; i < 4; ++i) {
-        float distance = glm::length(cameraPosition - corners[i]);
+        double distance = glm::length(cameraPosition - corners[i]);
         if (distance < glm::length(cameraPosition - objectPosition)) {
             objectPosition = corners[i];
         }

@@ -33,7 +33,7 @@
 
 namespace openspace::globebrowsing::chunklevelevaluator {
     
-int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
+int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData&) const {
     auto layerManager = chunk.owner().chunkedLodGlobe()->layerManager();
     // auto layers = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
     int currLevel = chunk.tileIndex().level;

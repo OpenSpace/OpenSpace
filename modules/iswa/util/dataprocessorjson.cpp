@@ -26,7 +26,7 @@
 
 #include <algorithm>
 #include <iterator>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 
 namespace {
     const char* _loggerCat = "DataProcessorJson";

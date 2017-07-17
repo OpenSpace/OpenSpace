@@ -32,7 +32,7 @@
 
 #include <ghoul/filesystem/filesystem>
 
-#include <ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 
 #include "imgui.h"
 

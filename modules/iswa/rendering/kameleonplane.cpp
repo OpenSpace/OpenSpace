@@ -26,7 +26,7 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <ghoul/filesystem/filesystem>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 

@@ -93,7 +93,7 @@ void ToyVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::Prog
     program.setUniform(timeUniformName, static_cast<float>(std::fmod(_time, 3600.0)));
 }
     
-void ToyVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+void ToyVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
     // For example: release texture units
 }
     

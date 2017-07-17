@@ -202,8 +202,9 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
         glm::dvec3 cameraPosition = glm::dvec3(
             inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
-        float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
-            ellipsoid.minimumRadius();
+        float distanceScaleFactor = static_cast<float>(
+            chunk.owner().generalProperties().lodScaleFactor * ellipsoid.minimumRadius()
+        );
         programObject->setUniform("cameraPosition", glm::vec3(cameraPosition));
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
         programObject->setUniform("chunkLevel", chunk.tileIndex().level);
@@ -277,8 +278,11 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
 
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
-        float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
-            chunk.owner().ellipsoid().minimumRadius();
+        float distanceScaleFactor = static_cast<float>(
+            chunk.owner().generalProperties().lodScaleFactor *
+            chunk.owner().ellipsoid().minimumRadius()
+        );
+
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
         programObject->setUniform("chunkLevel", chunk.tileIndex().level);
     }

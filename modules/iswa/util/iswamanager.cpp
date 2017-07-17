@@ -47,7 +47,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
-#include "iswamanager_lua.inl";
+#include "iswamanager_lua.inl"
 
 namespace {
     using json = nlohmann::json;
@@ -168,11 +168,17 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos){
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp){
     return std::move(OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "image"),
-            [id](const DownloadManager::MemoryFile& file){
-                LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
+            [id](const DownloadManager::MemoryFile&) {
+                LDEBUG(
+                    "Download to memory finished for image cygnet with id: " +
+                    std::to_string(id)
+                );
             },
-            [id](const std::string& err){
-                LDEBUG("Download to memory was aborted for image cygnet with id "+ std::to_string(id)+": " + err);
+            [id](const std::string& err) {
+                LDEBUG(
+                    "Download to memory was aborted for image cygnet with id " +
+                    std::to_string(id) + ": " + err
+                );
             }
         ) );   
 }
@@ -180,20 +186,26 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
 std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
     return std::move(OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "data"),
-            [id](const DownloadManager::MemoryFile& file){
-                LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));
+            [id](const DownloadManager::MemoryFile& ) {
+                LDEBUG(
+                    "Download to memory finished for data cygnet with id: " +
+                    std::to_string(id)
+                );
             },
             [id](const std::string& err){
-                LDEBUG("Download to memory was aborted for data cygnet with id " + std::to_string(id)+": " + err);
+                LDEBUG(
+                    "Download to memory was aborted for data cygnet with id " +
+                    std::to_string(id) + ": " + err
+                );
             }
         ) );   
 }
 
 std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::string url;
-    if(id < 0){
+    if (id < 0) {
         url = _baseUrl + type+"/" + std::to_string(-id) + "/";
-    } else{
+    } else {
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
 
@@ -215,7 +227,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
 }
 
 void IswaManager::registerGroup(std::string groupName, std::string type){
-    if(_groups.find(groupName) == _groups.end()){
+    if (_groups.find(groupName) == _groups.end()) {
         bool dataGroup =    (type == typeid(DataPlane).name()) ||
                             (type == typeid(DataSphere).name());
                             

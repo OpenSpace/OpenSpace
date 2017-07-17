@@ -162,11 +162,11 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                        const glm::dvec3& targetModelSpace)
 {
     glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
-	return {
-		directionFromCenterToTarget * static_cast<double>(boundingSphere()),
+    return {
+        directionFromCenterToTarget * static_cast<double>(boundingSphere()),
         directionFromCenterToTarget,
-		0.0
-	};
+        0.0
+    };
 }
 
 void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,

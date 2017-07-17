@@ -86,9 +86,9 @@ bool DataPlane::createGeometry() {
     // ============================
     // GLfloat x,y, z;
     float s = _data->spatialScale.x;
-    const GLfloat x = s*_data->scale.x/2.0;
-    const GLfloat y = s*_data->scale.y/2.0;
-    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat x = s*_data->scale.x/2.f;
+    const GLfloat y = s*_data->scale.y/2.f;
+    const GLfloat z = s*_data->scale.z/2.f;
     const GLfloat w = _data->spatialScale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)

@@ -63,7 +63,7 @@ int BasicGrid::ySegments() const {
     return _ySegments;
 }
 
-void BasicGrid::validate(int xSegments, int ySegments) {
+void BasicGrid::validate(int, int) {
     ghoul_assert(
         xSegments > 0 && ySegments > 0,
         std::string("Resolution must be at least 1x1. (") +

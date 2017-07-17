@@ -31,7 +31,7 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace::globebrowsing {
 
-struct LayerAdjustment;
+class LayerAdjustment;
 
 class GPULayerAdjustment{
 public:

@@ -136,7 +136,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     glm::vec3 scaling, translation, rotation;
 
     if (dictionary.getValue("ScalingExponent", scalingExponent)) {
-        _scalingExponent = scalingExponent;
+        _scalingExponent = static_cast<int>(scalingExponent);
     }
     if (dictionary.getValue("Scaling", scaling)) {
         _scaling = scaling;
@@ -278,8 +278,14 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
             if (!_tfBrickSelector) {
                 TfBrickSelector* tbs;
                 _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
-                _tfBrickSelector = tbs = new TfBrickSelector(_tsp.get(), _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
-                _transferFunction->setCallback([tbs](const TransferFunction &tf) {
+                _tfBrickSelector = tbs = new TfBrickSelector(
+                    _tsp.get(),
+                    _errorHistogramManager,
+                    _transferFunction.get(),
+                    _memoryBudget,
+                    _streamingBudget
+                );
+                _transferFunction->setCallback([tbs](const TransferFunction& /*tf*/) {
                     tbs->calculateBrickErrors();
                 });
                 if (initializeSelector()) {
@@ -293,8 +299,14 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
             if (!_simpleTfBrickSelector) {
                 SimpleTfBrickSelector *stbs;
                 _histogramManager = new HistogramManager();
-                _simpleTfBrickSelector = stbs = new SimpleTfBrickSelector(_tsp.get(), _histogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
-                _transferFunction->setCallback([stbs](const TransferFunction &tf) {
+                _simpleTfBrickSelector = stbs = new SimpleTfBrickSelector(
+                    _tsp.get(),
+                    _histogramManager,
+                    _transferFunction.get(),
+                    _memoryBudget,
+                    _streamingBudget
+                );
+                _transferFunction->setCallback([stbs](const TransferFunction& /*tf*/) {
                     stbs->calculateBrickImportances();
                 });
                 if (initializeSelector()) {
@@ -308,8 +320,14 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
             if (!_localTfBrickSelector) {
                 LocalTfBrickSelector* ltbs;
                 _localErrorHistogramManager = new LocalErrorHistogramManager(_tsp.get());
-                _localTfBrickSelector = ltbs = new LocalTfBrickSelector(_tsp.get(), _localErrorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
-                _transferFunction->setCallback([ltbs](const TransferFunction &tf) {
+                _localTfBrickSelector = ltbs = new LocalTfBrickSelector(
+                    _tsp.get(),
+                    _localErrorHistogramManager,
+                    _transferFunction.get(),
+                    _memoryBudget,
+                    _streamingBudget
+                );
+                _transferFunction->setCallback([ltbs](const TransferFunction& /*tf*/) {
                     ltbs->calculateBrickErrors();
                 });
                 if (initializeSelector()) {

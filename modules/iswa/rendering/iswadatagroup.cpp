@@ -25,7 +25,7 @@
 #include <modules/iswa/rendering/iswadatagroup.h>
 
 #include <fstream>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>

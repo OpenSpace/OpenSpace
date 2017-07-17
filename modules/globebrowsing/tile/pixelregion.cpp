@@ -257,13 +257,15 @@ PixelRegion::PixelCoordinate PixelRegion::end() const {
 
 bool PixelRegion::lineIntersect(Side side, int p) {
     switch (side) {
-    case Side::LEFT:
-    case Side::RIGHT:
-        return start.x <= p && p <= (start.x + numPixels.x);
+        case Side::LEFT:
+        case Side::RIGHT:
+            return start.x <= p && p <= (start.x + numPixels.x);
 
-    case Side::TOP:
-    case Side::BOTTOM:
-        return start.y <= p && p <= (start.y + numPixels.y);
+        case Side::TOP:
+        case Side::BOTTOM:
+            return start.y <= p && p <= (start.y + numPixels.y);
+        default:
+            throw ghoul::MissingCaseException();
     }
 }
 

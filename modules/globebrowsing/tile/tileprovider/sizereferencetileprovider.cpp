@@ -47,7 +47,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
     , _backgroundTile(Tile::TileUnavailable)
 {
     _fontSize = 50;
-    _font = OsEng.fontManager().font("Mono", _fontSize);
+    _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
 
     glm::dvec3 radii(1,1,1);
     dictionary.getValue(KeyRadii, radii);

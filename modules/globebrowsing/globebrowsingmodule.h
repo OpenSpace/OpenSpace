@@ -29,19 +29,18 @@
 #include <ghoul/glm.h>
 #include <memory>
 
+namespace openspace::globebrowsing {
+    class RenderableGlobe;
+    struct TileIndex;
+    struct Geodetic2;
+    struct Geodetic3;
+
+    namespace cache { class MemoryAwareTileCache; }
+} // namespace openspace::globebrowsing
+
 namespace openspace {
+
 class Camera;
-
-namespace globebrowsing {
-class RenderableGlobe;
-class TileIndex;
-struct Geodetic2;
-struct Geodetic3;
-
-namespace cache {
-    class MemoryAwareTileCache;
-}
-}
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:

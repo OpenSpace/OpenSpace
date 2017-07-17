@@ -44,7 +44,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/properties/selectionproperty.h>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 

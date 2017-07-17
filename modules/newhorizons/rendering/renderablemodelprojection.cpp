@@ -119,7 +119,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     );
 
     std::string name;
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+    dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModelProjection");
 
     using ghoul::Dictionary;

@@ -55,11 +55,11 @@ SingleImageProvider::SingleImageProvider(const std::string& imagePath)
     reset();
 }
 
-Tile SingleImageProvider::getTile(const TileIndex& tileIndex) {
+Tile SingleImageProvider::getTile(const TileIndex&) {
     return _tile;
 }
 
-Tile::Status SingleImageProvider::getTileStatus(const TileIndex& index) {
+Tile::Status SingleImageProvider::getTileStatus(const TileIndex&) {
     return _tile.status();
 }
 

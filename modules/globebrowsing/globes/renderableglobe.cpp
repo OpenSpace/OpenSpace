@@ -76,12 +76,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     glm::dvec3 radii;
     dictionary.getValue(keyRadii, radii);
     _ellipsoid = Ellipsoid(radii);
-    setBoundingSphere(_ellipsoid.maximumRadius());
+    setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
 
     // Ghoul can't read ints from lua dictionaries...
     double patchSegmentsd;
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
-    int patchSegments = patchSegmentsd;
+    int patchSegments = static_cast<int>(patchSegmentsd);
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
@@ -93,7 +93,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _layerManager = std::make_shared<LayerManager>(layersDictionary);
 
     _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
-        *this, patchSegments, _layerManager);
+        *this,
+        patchSegments,
+        _layerManager
+        );
     //_pointGlobe = std::make_shared<PointGlobe>(*this);
         
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe);

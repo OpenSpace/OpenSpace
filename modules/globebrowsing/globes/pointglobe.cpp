@@ -115,10 +115,12 @@ void PointGlobe::render(const RenderData& data) {
         glm::normalize(glm::dvec3(1000000.0f) - bodyPosition));
   
     glm::dvec3 camToBody = bodyPosition - data.camera.positionVec3();
-    float distanceToBody = glm::length(camToBody);
+    float distanceToBody = static_cast<float>(glm::length(camToBody));
 
-    float avgRadius = _owner.ellipsoid().averageRadius();
-    float lightIntensity = _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody;
+    float avgRadius = static_cast<float>(_owner.ellipsoid().averageRadius());
+    float lightIntensity = static_cast<float>(
+        _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody
+    );
     float lightIntensityClamped = glm::min(lightIntensity, _intensityClamp.value());
     //float lightOverflow = glm::max(lightIntensity - lightIntensityClamped, 0.0f);
 

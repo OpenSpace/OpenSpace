@@ -120,7 +120,7 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
 
     double scaledArea =
         globe.generalProperties().lodScaleFactor * projectedChunkAreaApprox;
-    return chunk.tileIndex().level + round(scaledArea - 1);
+    return chunk.tileIndex().level + static_cast<int>(round(scaledArea - 1));
 }
 
 } // namespace openspace::globebrowsing::chunklevelevaluator
