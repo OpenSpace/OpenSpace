@@ -1,0 +1,43 @@
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    openspace.time.setTime(openspace.time.currentWallTime())
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+
+end
+
+function postInitialization()
+    --[[
+    The scripts in this function are executed after all objects in the scene have been
+    created and initialized, but before the first render call. This is the place to set
+    graphical settings for the renderables.
+    ]]--
+    openspace.navigation.resetCameraDirection()
+
+    openspace.printInfo("Done setting default values")
+
+    dofile(openspace.absPath('${SCRIPTS}/config_mrv.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/config_mrv-front.lua'))    
+end
+
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "Enlil New Horizons",
+        Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
+        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
+    },
+    Modules = {
+        "leaf",
+    }
+}
