@@ -68,11 +68,18 @@ LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
     }
 }
 
+template<typename KeyType>
+LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
+    : LRUThreadPool(toCopy._workers.size(), toCopy._queuedTasks.maximumCacheSize())
+{ }
+
 // the destructor joins all threads
 template<typename KeyType>
 LRUThreadPool<KeyType>::~LRUThreadPool() {
-    // Stop all threads
-    _stop = true;
+    {
+        std::unique_lock<std::mutex> lock(_queueMutex);
+        _stop = true;
+    }
     _condition.notify_all();
 
     // join them

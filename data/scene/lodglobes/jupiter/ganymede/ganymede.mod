@@ -23,8 +23,6 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = {2631000, 2631000, 2631000},
-            CameraMinHeight = 300,
-            InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
@@ -32,15 +30,8 @@ return {
                         Name = "Ganymede Texture",
                         FilePath = "textures/ganymede.jpg",
                         Enabled = true,
-                        TilePixelSize = 112,
                     },
                 },
-                GrayScaleLayers = { },
-                GrayScaleColorOverlays = { },
-                NightLayers = { },
-                WaterMasks = { },
-                ColorOverlays = { },
-                HeightLayers = { },
             },
         }
     },

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -78,12 +78,16 @@ public:
     static const std::string KeySettingsScript;
     /// The key that stores the settings for determining log-related settings
     static const std::string KeyLogging;
+    /// The key that stores the directory for Logging
+    static const std::string PartLogDir;
     /// The key that stores the desired LogLevel for the whole application
     /// \sa ghoul::logging::LogManager
     static const std::string PartLogLevel;
     /// The key that stores whether the log should be immediately flushed after a n
     /// \sa ghoul::logging::LogManager
     static const std::string PartImmediateFlush;
+    /// The key for prefixing PerformanceMeasurement logfiles
+    static const std::string PartLogPerformancePrefix;
     /// The key that stores a subdirectory with a description for additional
     /// ghoul::logging::Log%s to be created
     /// \sa LogFactory
@@ -144,6 +148,11 @@ public:
     static const std::string PartFilterIdentifierIdentifier;
     /// The part of the key storing a list of severities that should be filtered out
     static const std::string PartFilterSeverity;
+    /// The part of the key storing whether the OpenGL state should be checked each call
+    static const std::string KeyCheckOpenGLState;
+    /// The part of the key storing whether each OpenGL call should be logged
+    static const std::string KeyLogEachOpenGLCall;
+
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the

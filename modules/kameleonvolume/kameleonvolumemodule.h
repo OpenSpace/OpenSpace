@@ -32,6 +32,8 @@ namespace openspace {
 
 class KameleonVolumeModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "KameleonVolume";
+
     KameleonVolumeModule();
     virtual ~KameleonVolumeModule() = default;
     void internalInitialize() override;

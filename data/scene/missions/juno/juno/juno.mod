@@ -127,7 +127,7 @@ return {
         Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderableTrailTrajectory",
-            Translation = {
+             Translation = {
                 Type = "SpiceTranslation",
                 Body = "JUNO",
                 Observer = "JUPITER BARYCENTER"
@@ -135,7 +135,7 @@ return {
             Color = { 0.70, 0.50, 0.20 },
             StartTime = "2016 JUN 28",
             EndTime = "2016 APR 01",
-            SampleInterval = 3600
+            SampleInterval = 3600  
         },
     },
     }

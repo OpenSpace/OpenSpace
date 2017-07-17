@@ -28,7 +28,8 @@
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/cache/lrucache.h>
- 
+#include <modules/globebrowsing/rendering/layer/layer.h>
+
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/opengl/texture.h>
@@ -52,6 +53,7 @@ public:
      * to be instantiated.
      */
     static std::unique_ptr<TileProvider> createFromDictionary(
+        layergroupid::TypeID layerTypeID,
         const ghoul::Dictionary& dictionary);
 
     /** 

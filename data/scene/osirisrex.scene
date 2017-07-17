@@ -46,7 +46,7 @@ function postInitialization()
     openspace.printInfo("Done setting default values")
     openspace.loadMission("${OPENSPACE_DATA}/scene/missions/osirisrex/osirisrex/osirisrex.mission")
 
-    openspace.resetCameraDirection()
+    openspace.navigation.resetCameraDirection()
 end
 
 return {

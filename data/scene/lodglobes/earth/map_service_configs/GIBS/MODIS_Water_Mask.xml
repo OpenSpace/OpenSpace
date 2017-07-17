@@ -17,13 +17,7 @@
     <BlockSizeY>512</BlockSizeY>
     <BandsCount>4</BandsCount>
     <MaxConnections>5</MaxConnections>
-    <Cache>
-        <Path>./GDAL_Cache/MODIS_Water_Mask</Path>
-        <Depth>4</Depth>
-        <Extension>.png</Extension>
-    </Cache>
-    <OfflineMode>false</OfflineMode>      
     <UnsafeSSL>true</UnsafeSSL>
-    <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
+    <ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>
     <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
 </GDAL_WMS>

@@ -123,7 +123,6 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = marsEllipsoid,
-            CameraMinHeight = 10,
             SegmentsPerPatch = 90,
             -- Allows camera to go down 10000 meters below the reference ellipsoid InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
              Atmosphere = {
@@ -176,16 +175,6 @@ return {
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
                         Enabled = true,
                     },
-                    -- {
-                    --     Type = "SingleImage",
-                    --     Name = "Debug Tiles",
-                    --     FilePath = "../../debugglobe/textures/test_tile.png",
-                    -- },
-                    --{
-                    --    Name = "MARS_Viking",
-                    --    FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
-                    --    Enabled = true,
-                    --},
                     {
                         Name = "MOLA Pseudo Color",
                         FilePath = "map_service_configs/Utah/MolaPseudoColor.xml",
@@ -207,11 +196,12 @@ return {
                     {
                         Name = "CTX Mosaic [Europe]",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
-                        --Enabled = true,
+                        BlendMode = "Color"
                     },
                     {
                         Name = "CTX Mosaic [Utah]",
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
+                        BlendMode = "Color"
                     },
                     table.unpack(createTextureLayers(patches))
                     --[[{
@@ -233,18 +223,15 @@ return {
                     },
                     ]]
                 },
-                NightLayers = { },
-                WaterMasks = { },
-                ColorOverlays = {
+                Overlays = {
                     {
-                        Type = "TileIndex",
+                        Type = "TileIndexTileLayer",
                         Name = "Indices",
                     },
                     {
-                        Type = "SizeReference",
+                        Type = "SizeReferenceTileLayer",
                         Name = "Size Reference",
                         Radii = marsEllipsoid,
-                        BackgroundImagePath = "../arrows.png",
                     },
                 },
                 HeightLayers = {
@@ -298,8 +285,7 @@ return {
                     {
                         Name = "Part of Area Traversed by the Mars Exploration Rover",
                         FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",
-                    },
-                    ]]
+                    },]]--
                 },
             },
         }

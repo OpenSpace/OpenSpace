@@ -36,8 +36,6 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = {6051900, 6051900, 6051800},
-            CameraMinHeight = 300,
-            InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
@@ -45,15 +43,8 @@ return {
                         Name = "Venus Texture",
                         FilePath = "textures/venus.jpg",
                         Enabled = true,
-                        TilePixelSize = 256,
                     },
                 },
-                GrayScaleLayers = { },
-                GrayScaleColorOverlays = { },
-                NightLayers = { },
-                WaterMasks = { },
-                ColorOverlays = { },
-                HeightLayers = { },
             },
         },
     },

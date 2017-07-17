@@ -32,7 +32,7 @@ function postInitialization()
     openspace.setPropertyValue("EarthTrail.renderable.enabled", false)
     openspace.setPropertyValue("Earth.renderable.performShading", false)
 
-    openspace.resetCameraDirection()
+    openspace.navigation.resetCameraDirection()
 
     openspace.printInfo("Done setting default values")
 

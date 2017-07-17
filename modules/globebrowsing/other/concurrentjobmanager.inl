@@ -34,13 +34,13 @@ template<typename P>
 Job<P>::~Job() {}
 
 template<typename P>
-ConcurrentJobManager<P>::ConcurrentJobManager(std::shared_ptr<ThreadPool> pool)
+ConcurrentJobManager<P>::ConcurrentJobManager(ThreadPool pool)
     : threadPool(pool)
 { }
 
 template<typename P>
 void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
-    threadPool->enqueue([this, job]() {
+    threadPool.enqueue([this, job]() {
         job->execute();
         std::lock_guard<std::mutex> lock(_finishedJobsMutex);
         _finishedJobs.push(job);
@@ -49,7 +49,7 @@ void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
 
 template<typename P>
 void ConcurrentJobManager<P>::clearEnqueuedJobs() {
-    threadPool->clearTasks();
+    threadPool.clearTasks();
 }
 
 template<typename P>

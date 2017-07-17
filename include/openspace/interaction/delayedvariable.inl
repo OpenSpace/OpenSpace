@@ -22,48 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__
-
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
-
-#include <openspace/properties/scalarproperty.h>
-
-#include <memory>
-#include <unordered_map>
+#include <ghoul/misc/assert.h>
+#include <ghoul/glm.h>
 
 namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace interaction {
 
-class PresentationSlideProvider : public TileProvider {
-public:
-    PresentationSlideProvider(const ghoul::Dictionary& dictionary);
-    PresentationSlideProvider(const std::string& imagePath);
-    virtual ~PresentationSlideProvider() = default;
+template <typename T, typename ScaleType>
+DelayedVariable<T, ScaleType>::DelayedVariable(ScaleType scaleFactor, ScaleType friction)
+    : _scaleFactor(std::move(scaleFactor))
+    , _friction(friction)
+{
+    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
+}
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
-    virtual TileDepthTransform depthTransform() override;
-    virtual void update() override;
-    virtual void reset() override;
-    virtual int maxLevel() override;
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::set(T value, double dt) {
+    _targetValue = value;
+    _currentValue = _currentValue + (_targetValue - _currentValue) *
+        glm::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
+}
 
-private:
-    TileProvider* slideProvider();
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::decelerate(double dt) {
+    _currentValue = _currentValue + (- _currentValue) *
+        glm::min(_scaleFactor * _friction * dt, 1.0);
+        // less or equal to 1.0 keeps it stable
+}
 
-    TileIndex _tileIndex;
-    properties::IntProperty _slideIndex;
-    std::vector<std::unique_ptr<TileProvider>> _slideProviders;
-    std::unique_ptr<TileProvider> _defaultProvider;
-};
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setHard(T value) {
+    _targetValue = value;
+    _currentValue = value;
+}
 
-} // namespace tileprovider
-} // namespace globebrowsing
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setFriction(ScaleType friction) {
+    _friction = friction;
+    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
+}
+
+template <typename T, typename ScaleType>
+void DelayedVariable<T, ScaleType>::setScaleFactor(ScaleType scaleFactor) {
+    _scaleFactor = scaleFactor;
+}
+
+template <typename T, typename ScaleType>
+T DelayedVariable<T, ScaleType>::get() const {
+    return _currentValue;
+}
+
+} // namespace interaction
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__

@@ -32,7 +32,7 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
@@ -139,6 +139,14 @@ RenderEngine::RenderEngine()
         if (_performanceMeasurements) {
             if (!_performanceManager) {
                 _performanceManager = std::make_unique<performance::PerformanceManager>();
+                const std::string KeyLogDir = ConfigurationManager::KeyLogging + "." + ConfigurationManager::PartLogDir;
+                const std::string KeyPrefix = ConfigurationManager::KeyLogging + "." + ConfigurationManager::PartLogPerformancePrefix;
+                if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyLogDir)) {
+                    _performanceManager->logDir(OsEng.configurationManager().value<std::string>(KeyLogDir));
+                }
+                if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyPrefix)) {
+                    _performanceManager->prefix(OsEng.configurationManager().value<std::string>(KeyPrefix));
+                }
             }
         }
     });      

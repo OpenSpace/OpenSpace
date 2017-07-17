@@ -31,6 +31,8 @@ namespace openspace {
 
 class ToyVolumeModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "ToyVolume";
+
     ToyVolumeModule();
     void internalInitialize() override;
 };
