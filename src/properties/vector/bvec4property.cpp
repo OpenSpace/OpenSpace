@@ -104,11 +104,6 @@ namespace openspace::properties {
     }
 
 
-// Forcing value from int to bool is acceptable here (line 48)
-#ifdef WIN32
-#pragma warning(disable : 4800)
-#endif
-
 REGISTER_TEMPLATEPROPERTY_SOURCE(BVec4Property, glm::bvec4, glm::bvec4(false),
                                  DEFAULT_FROM_LUA_LAMBDA(glm::bvec4, lua_toboolean,
                                                          lua_isboolean),
@@ -116,9 +111,5 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BVec4Property, glm::bvec4, glm::bvec4(false),
                                  DEFAULT_FROM_STRING_LAMBDA(glm::bvec4),
                                  DEFAULT_TO_STRING_LAMBDA(glm::bvec4),
                                  LUA_TTABLE);
-
-#ifdef WIN32
-#pragma warning(default : 4800)
-#endif
 
 } // namespace openspace::properties

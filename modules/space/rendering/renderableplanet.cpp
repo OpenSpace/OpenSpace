@@ -153,7 +153,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(KeyRadius)) {
         // If the user specified a radius, we want to use this
-        _planetRadius = dictionary.value<double>(KeyRadius);
+        _planetRadius = static_cast<float>(dictionary.value<double>(KeyRadius));
     }
     else if (SpiceManager::ref().hasValue(name, "RADII") ) {
         // If the user didn't specfify a radius, but Spice has a radius, we can use this
@@ -163,7 +163,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
         geomDict.setValue(KeyRadius, radius);
 
-        _planetRadius = (radius.x + radius.y + radius.z) / 3.0;
+        _planetRadius = static_cast<float>((radius.x + radius.y + radius.z) / 3.0);
     }
     else {
         LERRORC("RenderablePlanet", "Missing radius specification");

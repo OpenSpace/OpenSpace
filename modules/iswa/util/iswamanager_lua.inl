@@ -167,7 +167,7 @@ int iswa_addCdfFiles(lua_State* L){
 
 int iswa_addKameleonPlanes(lua_State* L){
     std::string group = luaL_checkstring(L, 1);
-    int pos = lua_tonumber(L, 2);
+    int pos = static_cast<int>(lua_tonumber(L, 2));
     IswaManager::ref().addKameleonCdf(group, pos);
     // auto cdfInfo = 
     return 0;

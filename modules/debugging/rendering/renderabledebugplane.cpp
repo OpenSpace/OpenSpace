@@ -175,7 +175,7 @@ void RenderableDebugPlane::render(const RenderData& data) {
     _shader->deactivate();
 }
 
-void RenderableDebugPlane::update(const UpdateData& data) {
+void RenderableDebugPlane::update(const UpdateData&) {
     if (_shader->isDirty())
         _shader->rebuildFromFile();
 

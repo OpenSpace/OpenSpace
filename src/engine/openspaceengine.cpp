@@ -1306,7 +1306,7 @@ void OpenSpaceEngine::decode() {
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,
-                                              int clientId)
+                                              int /*clientId*/)
 {
     if (size == 0) {
         return;

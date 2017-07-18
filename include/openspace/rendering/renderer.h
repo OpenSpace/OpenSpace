@@ -58,12 +58,12 @@ public:
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.
     */
-    virtual void preRaycast(ghoul::opengl::ProgramObject& programObject) {};
+    virtual void preRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
 
     /**
     * Tear down raycasting for the specified program object.
     */
-    virtual void postRaycast(ghoul::opengl::ProgramObject& programObject) {};
+    virtual void postRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
 
 
     virtual void update() = 0;
