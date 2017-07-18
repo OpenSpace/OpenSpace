@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/webbrowser/webbrowsermodule.h>
 #include "webguimodule.h"
 
 namespace openspace {
@@ -38,6 +39,10 @@ void WebGuiModule::internalInitialize() {
             [this]() {
                 LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", guiLocation));
                 guiInstance->load(guiLocation);
+                auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
+                if (webBrowserModule) {
+                    webBrowserModule->attachEventHandler(guiInstance->getBrowser());
+                }
             }
     );
     OsEng.registerModuleCallback(
