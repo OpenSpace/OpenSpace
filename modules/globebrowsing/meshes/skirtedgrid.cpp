@@ -60,7 +60,8 @@ int SkirtedGrid::ySegments() const {
     return _ySegments;
 }
 
-void SkirtedGrid::validate(int, int) {
+void SkirtedGrid::validate([[maybe_unused]] int xSegments, [[maybe_unused]] int ySegments)
+{
     ghoul_assert(
         xSegments > 0 && ySegments > 0,
         "Resolution must be at least 1x1. (" + std::to_string(xSegments) + ", " +
