@@ -30,6 +30,7 @@
 #include <include/openspace/engine/configurationmanager.h>
 #include <include/wrapper/cef_helpers.h>
 #include <include/cef_browser.h>
+#include <modules/webbrowser/include/event_handler.h>
 
 namespace openspace {
 
@@ -49,10 +50,13 @@ public:
     int addBrowser(CefBrowser*);
     void removeBrowser(CefBrowser*);
 
+    void attachEventHandler(CefRefPtr<CefBrowser>);
+
 private:
 	void attachDebugSettings(CefSettings&);
     std::vector<CefRefPtr<CefBrowser>> browsers;
     std::string findHelperExecutable();
+    EventHandler eventHandler;
 };
 
 } // namespace openspace

@@ -35,9 +35,11 @@ namespace openspace {
 
 class EventHandler {
 public:
-    EventHandler(CefRefPtr<CefBrowser> browser) : browser(browser), mousePosition(0,0) {};
+    EventHandler() : mousePosition(0, 0) {};
 
     void initialize();
+    void setBrowser(const CefRefPtr<CefBrowser> &browser);
+    void detachBrowser();
 
     const int SINGLE_CLICK = 1;
 

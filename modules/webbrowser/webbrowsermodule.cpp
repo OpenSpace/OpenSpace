@@ -90,6 +90,8 @@ void WebBrowserModule::attachDebugSettings(CefSettings &settings) {
 }
 
 void WebBrowserModule::internalInitialize() {
+    eventHandler.initialize();
+
     // register ScreenSpaceRenderable
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
@@ -118,6 +120,10 @@ void WebBrowserModule::removeBrowser(CefBrowser *browser) {
     } else {
         LWARNING("Could not find browser in list of browsers.");
     }
+}
+
+void WebBrowserModule::attachEventHandler(CefRefPtr<CefBrowser> browser) {
+    eventHandler.setBrowser(browser);
 }
 
 }

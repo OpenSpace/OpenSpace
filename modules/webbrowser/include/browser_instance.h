@@ -45,6 +45,8 @@ public:
     void reshape(const glm::ivec2&);
     void draw();
 
+    const CefRefPtr<CefBrowser> &getBrowser() const;
+
 private:
     CefRefPtr<WebRenderHandler> renderHandler;
     CefRefPtr<BrowserClient> client;

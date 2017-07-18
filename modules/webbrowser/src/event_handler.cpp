@@ -28,7 +28,7 @@
 #include "include/event_handler.h"
 
 namespace {
-    std::string _loggerCat = "WebGUI:EventHandler";
+    std::string _loggerCat = "WebBrowser:EventHandler";
 }
 
 namespace openspace {
@@ -134,6 +134,7 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
 
     CefKeyEvent keyEvent;
 //        keyEvent.native_key_code  = mapFromGlfwToNative(key);
+    // TODO(klas): Use something less platform specific
     keyEvent.windows_key_code = mapFromGlfwToNative(key);
     keyEvent.modifiers        = static_cast<uint32>(modifier);
     keyEvent.type             = keyEventType(action);
@@ -204,6 +205,14 @@ CefMouseEvent EventHandler::mouseEvent() {
     event.x = (int) mousePosition.x;
     event.y = (int) mousePosition.y;
     return event;
+}
+
+void EventHandler::setBrowser(const CefRefPtr<CefBrowser> &browser) {
+    EventHandler::browser = browser;
+}
+
+void EventHandler::detachBrowser() {
+    browser = nullptr;
 }
 
 } // namespace openspace

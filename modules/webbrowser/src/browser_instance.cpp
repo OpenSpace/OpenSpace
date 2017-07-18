@@ -105,4 +105,8 @@ void BrowserInstance::draw() {
     renderHandler->draw();
 }
 
+const CefRefPtr<CefBrowser> &BrowserInstance::getBrowser() const {
+    return browser;
+}
+
 }
