@@ -35,7 +35,7 @@ class OriginPicker extends Component {
               { this.origin }
             </LoadingString>
           </span>
-          <SmallLabel>Origin</SmallLabel>
+          <SmallLabel>Focus</SmallLabel>
         </div>
       </Picker>
     );
