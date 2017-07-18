@@ -181,7 +181,7 @@ bool RenderableSphere::deinitialize() {
     return true;
 }
 
-void RenderableSphere::render(const RenderData& data) {
+void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glm::mat4 transform = glm::mat4(1.0);
 
     transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));

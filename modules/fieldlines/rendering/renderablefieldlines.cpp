@@ -239,7 +239,7 @@ bool RenderableFieldlines::deinitialize() {
     return true;
 }
 
-void RenderableFieldlines::render(const RenderData& data) {
+void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
     _program->activate();
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));

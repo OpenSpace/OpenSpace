@@ -214,7 +214,7 @@ ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
     return _projectionComponent.projectionTexture();
 }
 
-void RenderableModelProjection::render(const RenderData& data) {
+void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     if (_projectionComponent.needsClearProjection())
         _projectionComponent.clearAllProjections();
 

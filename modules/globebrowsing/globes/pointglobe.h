@@ -45,7 +45,7 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     
 private:
     const RenderableGlobe& _owner;

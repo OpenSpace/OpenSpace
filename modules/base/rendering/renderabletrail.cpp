@@ -217,7 +217,7 @@ bool RenderableTrail::isReady() const {
     return _programObject != nullptr;
 }
 
-void RenderableTrail::render(const RenderData & data) {
+void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
     glm::dmat4 modelTransform =

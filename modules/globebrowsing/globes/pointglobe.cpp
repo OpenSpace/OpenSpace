@@ -103,7 +103,7 @@ bool PointGlobe::isReady() const {
     return (_vaoID != 0) && (_vertexBufferID != 0);
 }
     
-void PointGlobe::render(const RenderData& data) {
+void PointGlobe::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
     // Calculate variables to be used as uniform variables in shader

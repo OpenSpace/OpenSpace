@@ -156,7 +156,7 @@ bool RenderableGlobe::isReady() const {
     return true;
 }
 
-void RenderableGlobe::render(const RenderData& data) {
+void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
     bool statsEnabled = _debugProperties.collectStats.value();
     _chunkedLodGlobe->stats.setEnabled(statsEnabled);
 
@@ -176,7 +176,7 @@ void RenderableGlobe::render(const RenderData& data) {
                 setSaveCamera(nullptr);
             }
         }
-        _distanceSwitch.render(data);
+        _distanceSwitch.render(data, tasks);
     }
     if (_savedCamera != nullptr) {
         DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);

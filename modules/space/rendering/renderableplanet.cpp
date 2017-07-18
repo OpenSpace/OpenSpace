@@ -351,7 +351,7 @@ bool RenderablePlanet::isReady() const {
     return ready;
 }
 
-void RenderablePlanet::render(const RenderData& data) {
+void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     // activate shader
     _programObject->activate();
 

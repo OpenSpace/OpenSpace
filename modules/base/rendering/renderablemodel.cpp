@@ -176,7 +176,7 @@ bool RenderableModel::deinitialize() {
     return true;
 }
 
-void RenderableModel::render(const RenderData& data) {
+void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
     
     // Fading

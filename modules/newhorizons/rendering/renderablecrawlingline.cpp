@@ -186,7 +186,7 @@ bool RenderableCrawlingLine::deinitialize(){
     return true;
 }
 
-void RenderableCrawlingLine::render(const RenderData& data) {
+void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
     if (!_drawLine) {
         return;
     }

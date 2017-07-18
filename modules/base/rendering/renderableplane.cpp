@@ -173,7 +173,7 @@ bool RenderablePlane::deinitialize() {
     return true;
 }
 
-void RenderablePlane::render(const RenderData& data) {
+void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
     //if (_projectionListener){
     //    //get parent node-texture and set with correct dimensions  

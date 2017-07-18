@@ -197,7 +197,7 @@ bool RenderableSphericalGrid::initialize(){
     return completeSuccess;
 }
 
-void RenderableSphericalGrid::render(const RenderData& data){
+void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
     glm::mat4 transform;

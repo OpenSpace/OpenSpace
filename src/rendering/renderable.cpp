@@ -152,11 +152,7 @@ float Renderable::boundingSphere() const {
 
 void Renderable::update(const UpdateData&) {}
 
-void Renderable::render(const RenderData& data, RendererTasks&) {
-    render(data);
-}
-
-void Renderable::render(const RenderData&) {}
+void Renderable::render(const RenderData& data, RendererTasks&) {}
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                        const glm::dvec3& targetModelSpace)

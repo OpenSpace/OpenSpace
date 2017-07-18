@@ -31,6 +31,7 @@
 namespace openspace {
     class Renderable;
     struct RenderData;
+    struct RendererTasks;
     struct UpdateData;
 } // namespace openspace
 
@@ -51,7 +52,7 @@ public:
      * Picks the first Renderable with the associated maxDistance greater than the 
      * current distance to the camera
      */
-    void render(const RenderData& data);
+    void render(const RenderData& data, RendererTasks& rendererTask);
     void update(const UpdateData& data);
 
     /**

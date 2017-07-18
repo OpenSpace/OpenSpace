@@ -47,7 +47,18 @@
 #include <cmath>
 #include <functional>
 #include <fstream>
-//#include <glm/ext.hpp>
+
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4310) // cast truncates constant value
+#endif // WIN32
+
+#include <glm/ext.hpp>
+
+#pragma warning (pop)
+#ifdef WIN32
+
+#endif // WIN32
 
 
 #include <openspace/engine/wrapper/windowwrapper.h>

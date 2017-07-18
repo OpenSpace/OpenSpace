@@ -104,6 +104,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 }
 
 IswaCygnet::~IswaCygnet(){}
+
 bool IswaCygnet::initialize(){
     _textures.push_back(nullptr);
     
@@ -145,7 +146,7 @@ bool IswaCygnet::isReady() const{
     return ready;
 }
 
-void IswaCygnet::render(const RenderData& data){
+void IswaCygnet::render(const RenderData& data, RendererTasks&){
     if(!readyToRender()) return;
     
     psc position = data.position;

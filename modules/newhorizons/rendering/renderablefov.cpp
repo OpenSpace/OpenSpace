@@ -947,7 +947,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 }
 #endif
 
-void RenderableFov::render(const RenderData& data) {
+void RenderableFov::render(const RenderData& data, RendererTasks&) {
     if (_drawFOV) {
         _programObject->activate();
 

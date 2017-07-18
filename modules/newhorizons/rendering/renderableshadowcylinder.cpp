@@ -105,7 +105,7 @@ bool RenderableShadowCylinder::isReady() const {
     return true;
 }
     
-void RenderableShadowCylinder::render(const RenderData& data){
+void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _shader->activate();
 

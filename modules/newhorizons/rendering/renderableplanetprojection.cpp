@@ -374,7 +374,7 @@ ghoul::opengl::Texture& RenderablePlanetProjection::baseTexture() const {
     return _projectionComponent.projectionTexture();
 }
 
-void RenderablePlanetProjection::render(const RenderData& data) {
+void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) {
     if (_projectionComponent.needsClearProjection())
         _projectionComponent.clearAllProjections();
 

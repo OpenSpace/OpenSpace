@@ -44,7 +44,7 @@ bool DistanceSwitch::deinitialize() {
     return true;
 }
 
-void DistanceSwitch::render(const RenderData& data) {
+void DistanceSwitch::render(const RenderData& data, RendererTasks& tasks) {
     const double distanceToCamera =
         distance(data.camera.positionVec3(), data.modelTransform.translation);
 
@@ -57,7 +57,7 @@ void DistanceSwitch::render(const RenderData& data) {
     for (std::shared_ptr<Renderable> renderable : _renderables) {
         const double distance = res * renderable->boundingSphere() / tan(fov / 2);
         if (distanceToCamera < distance) {
-            renderable->render(data);
+            renderable->render(data, tasks);
         }
     }
 }

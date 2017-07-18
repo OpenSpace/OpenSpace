@@ -234,7 +234,7 @@ bool RenderableStars::deinitialize() {
     return true;
 }
 
-void RenderableStars::render(const RenderData& data) {
+void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _program->activate();
 
