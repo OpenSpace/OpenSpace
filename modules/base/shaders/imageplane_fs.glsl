@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,7 @@ in vec4 vs_positionScreenSpace;
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-Fragment getFragment()
-{
+Fragment getFragment() {
     vec4 diffuse;
     if (gl_FrontFacing)
         diffuse = texture(texture1, vs_st);
