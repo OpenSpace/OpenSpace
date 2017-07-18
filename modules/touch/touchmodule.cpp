@@ -88,7 +88,7 @@ bool TouchModule::hasNewInput() {
             }
         });
         return newInput;
-    }		
+    }
     else {
         return false;
     }
