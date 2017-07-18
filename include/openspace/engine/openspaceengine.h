@@ -64,7 +64,10 @@ class SyncEngine;
 class TimeManager;
 class WindowWrapper;
 
-namespace interaction { class InteractionHandler; }
+namespace interaction {
+    class NavigationHandler;
+    class KeyBindingManager;
+}
 namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -98,7 +101,7 @@ public:
     void charCallback(unsigned int codepoint, KeyModifier mod);
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double pos);
+    void mouseScrollWheelCallback(double posX, double posY);
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
@@ -124,7 +127,8 @@ public:
     WindowWrapper& windowWrapper();
     AssetLoader& assetLoader();
     ghoul::fontrendering::FontManager& fontManager();
-    interaction::InteractionHandler& interactionHandler();
+    interaction::NavigationHandler& navigationHandler();
+    interaction::KeyBindingManager& keyBindingManager();
     properties::PropertyOwner& globalPropertyOwner();
     scripting::ScriptEngine& scriptEngine();
     scripting::ScriptScheduler& scriptScheduler();
@@ -163,7 +167,9 @@ public:
         std::function<void (double, double)> function);
     
     // Registers a callback that is called when a scroll wheel change is received
-    void registerModuleMouseScrollWheelCallback(std::function<bool (double)> function);
+    void registerModuleMouseScrollWheelCallback(
+        std::function<bool (double, double)> function
+    );
     
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -197,7 +203,8 @@ private:
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
-    std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
+    std::unique_ptr<interaction::NavigationHandler> _navigationHandler;
+    std::unique_ptr<interaction::KeyBindingManager> _keyBindingManager;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
@@ -225,7 +232,7 @@ private:
         
         std::vector<std::function<bool (MouseButton, MouseAction)>> mouseButton;
         std::vector<std::function<void (double, double)>> mousePosition;
-        std::vector<std::function<bool (double)>> mouseScrollWheel;
+        std::vector<std::function<bool (double, double)>> mouseScrollWheel;
     } _moduleCallbacks;
     
     double _runTime;

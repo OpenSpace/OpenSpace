@@ -48,6 +48,7 @@ class Translation;
 class Scale;
 class Scene;
 struct UpdateData;
+struct SurfacePositionHandle;
 
 namespace documentation { struct Documentation; }
 
@@ -92,6 +93,9 @@ public:
     void removeDependency(SceneGraphNode& dependency);
     void clearDependencies();
     void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
+
+    SurfacePositionHandle calculateSurfacePositionHandle(
+                                                      const glm::dvec3& targetModelSpace);
 
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;

@@ -73,6 +73,14 @@ public:
         User = 0 ///< Visible in User mode
     };
 
+    /// An OnChangeHandle is returned by the onChange method to uniquely identify an 
+    /// onChange callback
+    using OnChangeHandle = uint32_t;
+
+    /// This OnChangeHandle can be used to remove all onChange callbacks from this
+    /// Property
+    static OnChangeHandle OnChangeHandleAll;
+
     /**
      * The constructor for the property. The <code>identifier</code> needs to be unique
      * for each PropertyOwner. The <code>guiName</code> will be stored in the metaData
@@ -92,7 +100,7 @@ public:
      * The destructor taking care of deallocating all unused memory. This method will not
      * remove the Property from the PropertyOwner.
      */
-    virtual ~Property();
+    virtual ~Property() = default;
 
     /**
      * This method returns the class name of the Property. The method is used by the
@@ -191,12 +199,25 @@ public:
      * This method registers a <code>callback</code> function that will be called every
      * time if either Property:set or Property::setLuaValue was called with a value that
      * is different from the previously stored value. The callback can be removed by
-     * passing an empty <code>std::function<void()></code> object.
+     * calling the removeOnChange method with the OnChangeHandle that was returned here.
      * \param callback The callback function that is called when the encapsulated type has
      * been successfully changed by either the Property::set or Property::setLuaValue
      * methods.
+     * \pre The callback must not be empty
+     * \return An OnChangeHandle that can be used in subsequent calls to remove a callback
      */
-    virtual void onChange(std::function<void()> callback);
+    OnChangeHandle onChange(std::function<void()> callback);
+
+    /**
+     * This method deregisters a callback that was previously registered with the onChange
+     * method. If OnChangeHandleAll is passed to this function, all registered callbacks
+     * are removed.
+     * \param handle An OnChangeHandle that was returned from a previous call to onChange
+     * by this property or OnChangeHandleAll if all callbacks should be removed.
+     * \pre handle must refer to a callback that has been previously registred
+     * \pre handle must refer to a callback that has not been removed previously
+     */
+    void removeOnChange(OnChangeHandle handle);
 
     /**
      * This method returns the unique identifier of this Property.
@@ -389,8 +410,11 @@ protected:
     /// The Dictionary containing all meta data necessary for external applications
     ghoul::Dictionary _metaData;
 
-    /// The callback function that will be invoked whenever the encapsulated value changes
-    std::function<void()> _onChangeCallback;
+    /// The callback function sthat will be invoked whenever the value changes
+    std::vector<std::pair<OnChangeHandle, std::function<void()>>> _onChangeCallbacks;
+
+private:
+    OnChangeHandle _currentHandleValue;
 };
 
 } // namespace properties

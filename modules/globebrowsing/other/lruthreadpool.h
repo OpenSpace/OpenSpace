@@ -33,6 +33,7 @@
 #include <queue>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
@@ -65,6 +66,7 @@ template<typename KeyType>
 class LRUThreadPool {
 public:
     LRUThreadPool(size_t numThreads, size_t queueSize);
+    LRUThreadPool(const LRUThreadPool& toCopy);
     ~LRUThreadPool();
 
     void enqueue(std::function<void()> f, KeyType key);

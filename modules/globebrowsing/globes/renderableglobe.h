@@ -32,11 +32,13 @@
 
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
 
 class ChunkedLodGlobe;
+class PointGlobe;
 class LayerManager;
 
 /**
@@ -73,8 +75,10 @@ public:
         properties::BoolProperty isEnabled;
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
+        properties::BoolProperty useAccurateNormals;
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
+        properties::FloatProperty orenNayarRoughness;
     };
     
     RenderableGlobe(const ghoul::Dictionary& dictionary);
@@ -93,6 +97,7 @@ public:
     
     // Getters
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe() const;
+    LayerManager* layerManager() const;
     const Ellipsoid& ellipsoid() const;
     const glm::dmat4& modelTransform() const;
     const glm::dmat4& inverseModelTransform() const;
@@ -102,18 +107,22 @@ public:
     double interactionDepthBelowEllipsoid();
 
     // Setters
-    void setSaveCamera(std::shared_ptr<Camera> camera);    
+    void setSaveCamera(std::shared_ptr<Camera> camera);
+
+    virtual SurfacePositionHandle calculateSurfacePositionHandle(
+                                             const glm::dvec3& targetModelSpace) override; 
+
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier
     // <code>ChunkedLodGlobe</code> does not have to be rendered at far distances.
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
+    //std::shared_ptr<PointGlobe> _pointGlobe;
 
     Ellipsoid _ellipsoid;
     std::shared_ptr<LayerManager> _layerManager;
     DistanceSwitch _distanceSwitch;
     std::shared_ptr<Camera> _savedCamera;
     
-    double _interactionDepthBelowEllipsoid;
     std::string _frame;
     double _time;
 
@@ -124,7 +133,6 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
-    properties::PropertyOwner _texturePropertyOwner;
 };
 
 } // namespace globebrowsing

@@ -285,7 +285,7 @@ void MainWindow::initialize() {
     _syncWidget->setSceneFiles(_sceneFiles);
 
     // Load all available configuration files
-    QString configurationDirectory = QString::fromStdString(absPath("${SGCT}"));
+    QString configurationDirectory = QString::fromStdString(absPath("${CONFIG}"));
     d = QDir(configurationDirectory);
     d.setFilter(QDir::Files);
     list = d.entryInfoList();

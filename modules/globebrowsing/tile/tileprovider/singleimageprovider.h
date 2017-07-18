@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
+#include <openspace/properties/stringproperty.h>
+
 namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
@@ -46,8 +48,9 @@ public:
 
 private:
     std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
-    std::string _imagePath;
     Tile _tile;
+
+    properties::StringProperty _filePath;
 };
 
 } // namespace tileprovider

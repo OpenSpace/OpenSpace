@@ -47,7 +47,7 @@ namespace {
 }
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::ID::ColorLayers))
+    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers))
     , _backgroundTile(Tile::TileUnavailable)
 {
 	
@@ -55,9 +55,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
     _font = OsEng.fontManager().font("Mono", _fontSize);
 
     glm::dvec3 radii(1,1,1);
-    if (!dictionary.getValue(KeyRadii, radii)) {
-        throw std::runtime_error("Must define key '" + std::string(KeyRadii) + "'");
-    }
+    dictionary.getValue(KeyRadii, radii);
     _ellipsoid = Ellipsoid(radii);
 }
 

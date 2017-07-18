@@ -310,7 +310,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
 glm::mat4 ScreenSpaceRenderable::rotationMatrix() {
     // Get the scene transform
-    glm::mat4 rotation = OsEng.windowWrapper().modelMatrix();
+    glm::mat4 rotation = glm::inverse(OsEng.windowWrapper().modelMatrix());
     if (!_useEuclideanCoordinates) {
         glm::vec2 position = _sphericalPosition.value();
 

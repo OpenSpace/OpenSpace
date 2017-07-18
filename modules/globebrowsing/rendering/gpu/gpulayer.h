@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
 
 #include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayerrendersettings.h>
 #include <openspace/util/gpudata.h>
 #include <string>
@@ -73,6 +74,10 @@ public:
 private:
     GPUChunkTilePile gpuChunkTilePile;
     GPULayerRenderSettings gpuRenderSettings;
+    GPULayerAdjustment gpuLayerAdjustment;
+    
+    // Adjustment layer stuff
+    GPUData<glm::vec3> gpuColor;
 };
 
 } // namespace globebrowsing

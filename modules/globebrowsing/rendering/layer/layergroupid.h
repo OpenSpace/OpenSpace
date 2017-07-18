@@ -25,31 +25,132 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
 namespace layergroupid  {
 
-static const int NUM_LAYER_GROUPS = 7;
-static const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+static const int NUM_LAYER_GROUPS = 5;
+static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
-    "ColorOverlays",
-    "GrayScaleLayers",
-    "GrayScaleColorOverlays",
+    "Overlays",
     "NightLayers",
     "WaterMasks"
 };
 
-enum ID {
+enum GroupID {
     HeightLayers,
     ColorLayers,
-    ColorOverlays,
-    GrayScaleLayers,
-    GrayScaleColorOverlays,
+    Overlays,
     NightLayers,
-    WaterMasks
+    WaterMasks,
+    Unknown,
 };
+
+static const int NUM_LAYER_TYPES = 8;
+static const std::string LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
+    "DefaultTileLayer",
+    "SingleImageTileLayer",
+    "SizeReferenceTileLayer",
+    "TemporalTileLayer",
+    "TileIndexTileLayer",
+    "ByIndexTileLayer",
+    "ByLevelTileLayer",
+    "SolidColor",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class TypeID {
+    Unknown = -1,
+    DefaultTileLayer = 0,
+    SingleImageTileLayer = 1,
+    SizeReferenceTileLayer = 2,
+    TemporalTileLayer = 3,
+    TileIndexTileLayer = 4,
+    ByIndexTileLayer = 5,
+    ByLevelTileLayer = 6,
+    SolidColor = 7,
+};
+
+static const int NUM_ADJUSTMENT_TYPES = 3;
+static const std::string ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
+    "None",
+    "ChromaKey",
+    "TransferFunction",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class AdjustmentTypeID {
+    None = 0,
+    ChromaKey = 1,
+    TransferFunction = 2,
+};
+
+static const int NUM_BLEND_MODES = 5;
+static const std::string BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
+    "Normal",
+    "Multiply",
+    "Add",
+    "Subtract",
+    "Color",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class BlendModeID {
+    Normal = 0,
+    Multiply = 1,
+    Add = 2,
+    Subtract = 3,
+    Color = 4,
+};
+
+static TypeID getTypeIDFromTypeString(std::string typeString) {
+    for (int i = 0; i < NUM_LAYER_TYPES; ++i) {
+        if (typeString == LAYER_TYPE_NAMES[i]) {
+            return static_cast<TypeID>(i);
+        }
+    }
+    return TypeID::Unknown;
+}
+
+static layergroupid::GroupID getGroupIDFromName(std::string layerGroupName) {
+    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
+        if (layerGroupName == layergroupid::LAYER_GROUP_NAMES[i]) {
+            return static_cast<layergroupid::GroupID>(i);
+        }
+    }
+    return GroupID::Unknown;
+}
+
+static layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
+    std::string adjustmentTypeName)
+{
+    for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
+        if (adjustmentTypeName == layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
+            return static_cast<layergroupid::AdjustmentTypeID>(i);
+        }
+    }
+    return AdjustmentTypeID::None;
+}
+
+static layergroupid::BlendModeID getBlendModeIDFromName(
+    std::string blendModeName)
+{
+    for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
+        if (blendModeName == layergroupid::BLEND_MODE_NAMES[i]) {
+            return static_cast<layergroupid::BlendModeID>(i);
+        }
+    }
+    return BlendModeID::Normal;
+}
 
 } // namespace layergroupid
 } // namespace globebrowsing

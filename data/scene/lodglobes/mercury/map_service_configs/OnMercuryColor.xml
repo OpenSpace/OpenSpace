@@ -25,6 +25,7 @@
         <TileCountY>1</TileCountY>
         <YOrigin>top</YOrigin>
     </DataWindow>
+    <Timeout>5</Timeout>
     <BlockSizeX>512</BlockSizeX>
     <BlockSizeY>512</BlockSizeY>
 </GDAL_WMS>

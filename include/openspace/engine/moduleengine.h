@@ -97,7 +97,7 @@ public:
     ModuleSubClass* module() const {
         auto it = std::find_if(_modules.begin(), _modules.end(),
             [](const std::unique_ptr<OpenSpaceModule>& module) {
-                return module->name() == ModuleSubClass::name;
+                return module->name() == ModuleSubClass::Name;
             });
         if (it != _modules.end()) {
             return dynamic_cast<ModuleSubClass*>(it->get());
