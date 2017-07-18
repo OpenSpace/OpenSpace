@@ -255,6 +255,8 @@ void PerformanceManager::writeData(std::ofstream& out, const std::vector<float>&
  std::string PerformanceManager::formatLogName(std::string nodeName) {
     // Replace any colons with dashes
     std::replace(nodeName.begin(), nodeName.end(), ':', '-');
+    // Replace spaces with underscore
+    std::replace(nodeName.begin(), nodeName.end(), ' ', '_');
     return  _logDir + "/" + _prefix + nodeName + _suffix + "." + _ext;
 }
 
