@@ -276,18 +276,21 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "saveCameraStateToFile",
                 &luascriptfunctions::saveCameraStateToFile,
+                {},
                 "string",
                 "Save the current camera state to file"
             },
             {
                 "restoreCameraStateFromFile",
                 &luascriptfunctions::restoreCameraStateFromFile,
+                {},
                 "string",
                 "Restore the camera state from file"
             },
             {
                 "resetCameraDirection",
                 &luascriptfunctions::resetCameraDirection,
+                {},
                 "void",
                 "Reset the camera direction to point at the focus node"
             }

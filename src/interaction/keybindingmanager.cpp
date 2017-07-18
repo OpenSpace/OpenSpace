@@ -148,12 +148,14 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
             {
                 "clearKeys",
                 &luascriptfunctions::clearKeys,
+                {},
                 "",
                 "Clear all key bindings"
             },
             {
                 "bindKey",
                 &luascriptfunctions::bindKey,
+                {},
                 "string, string [,string]",
                 "Binds a key by name to a lua string command to execute both locally "
                 "and to broadcast to clients if this is the host of a parallel session. "
@@ -164,6 +166,7 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
             {
                 "bindKeyLocal",
                 &luascriptfunctions::bindKeyLocal,
+                {},
                 "string, string [,string]",
                 "Binds a key by name to a lua string command to execute only locally. "
                 "The first argument is the key, the second argument is the Lua command "

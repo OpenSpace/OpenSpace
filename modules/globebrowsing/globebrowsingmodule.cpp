@@ -134,6 +134,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "addLayer",
                 &globebrowsing::luascriptfunctions::addLayer,
+                {},
                 "string, string, table",
                 "Adds a layer to the specified globe. The first argument specifies the "
                 "name of the scene graph node of which to add the layer. The renderable "
@@ -145,6 +146,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "deleteLayer",
                 &globebrowsing::luascriptfunctions::deleteLayer,
+                {},
                 "string, string",
                 "Removes a layer from the specified globe. The first argument specifies "
                 "the name of the scene graph node of which to remove the layer. "
@@ -156,12 +158,14 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "goToChunk",
                 &globebrowsing::luascriptfunctions::goToChunk,
+                {},
                 "void",
                 "Go to chunk with given index x, y, level"
             },
             {
                 "goToGeo",
                 &globebrowsing::luascriptfunctions::goToGeo,
+                {},
                 "void",
                 "Go to geographic coordinates latitude and longitude"
             }

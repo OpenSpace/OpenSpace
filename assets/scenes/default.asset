@@ -9,7 +9,6 @@ solarSystemDep.onInitialize = function ()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
-    openspace.resetCameraDirection()
     openspace.addVirtualProperty("BoolProperty", "Show Trails", "*Trail.renderable.enabled", true, nil, nil)
 
 end

@@ -570,7 +570,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
                 _syncEngine->removeSyncables(_renderEngine->getSyncables());
                 _renderEngine->setScene(nullptr);
                 _renderEngine->setCamera(nullptr);
-                _interactionHandler->setCamera(nullptr);
+                _navigationHandler->setCamera(nullptr);
                 _scene->clear();
             }
 
@@ -610,11 +610,11 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     if (_scene) {
         _renderEngine->setCamera(_scene->camera());
         _navigationHandler->setCamera(_scene->camera());
-        _navigationHandler->setFocusNode(scene->camera()->parent());
+        _navigationHandler->setFocusNode(_scene->camera()->parent());
     
         // Write keyboard documentation.
         if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
-            interactionHandler().writeDocumentation(
+            keyBindingManager().writeDocumentation(
                 absPath(configurationManager().value<std::string>(
                     ConfigurationManager::KeyKeyboardShortcuts
                 ))
@@ -1059,15 +1059,12 @@ void OpenSpaceEngine::preSynchronization() {
             );
         }
 
-        _interactionHandler->updateInputStates(dt);
-        _renderEngine->updateScene();
-
         _renderEngine->updateScene();
         _navigationHandler->updateCamera(dt);
 
         Camera* camera = _renderEngine->camera();
         if (camera) {
-            _interactionHandler->updateCamera(dt);
+            _navigationHandler->updateCamera(dt);
             _renderEngine->camera()->invalidateCache();
         }
         _parallelConnection->preSynchronization();
