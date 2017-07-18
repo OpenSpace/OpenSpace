@@ -197,8 +197,6 @@ void DefaultTileProvider::initTexturesFromLoadedData() {
 void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
     std::string _loggerCat = "DefaultTileProvider : " + _name;
 
-    RawTileDataReader* tileDataReader = nullptr;
-
     RawTileDataReader::PerformPreprocessing preprocess =
         _performPreProcessing ? RawTileDataReader::PerformPreprocessing::Yes :
         RawTileDataReader::PerformPreprocessing::No;
