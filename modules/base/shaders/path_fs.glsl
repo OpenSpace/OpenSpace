@@ -28,10 +28,11 @@
 in vec4 vs_positionScreenSpace;
 in vec4 vs_pointColor;
 
-Fragment getFragment() {
 
-    if (vs_pointColor.a < 0.01)
+Fragment getFragment() {
+    if (vs_pointColor.a < 0.01) {
         discard;
+    }
     Fragment frag;
     frag.color = vs_pointColor;
     frag.depth = vs_positionScreenSpace.w;

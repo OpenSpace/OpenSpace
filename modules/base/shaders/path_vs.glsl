@@ -24,32 +24,33 @@
 
 #version __CONTEXT__
 
+#include "PowerScaling/powerScaling_vs.hglsl"
+
 in vec4 in_point_position;
+
+out vec4 vs_positionScreenSpace;
+out vec4 vs_pointColor;
 
 uniform vec3 color;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform int pointSteps;
 
-out vec4 vs_positionScreenSpace;
-out vec4 vs_pointColor;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-void main() {    
-    vec4 positionCameraSpace = modelViewTransform * in_point_position;
-    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+void main() {
+    const vec4 positionCameraSpace = modelViewTransform * in_point_position;
+    const vec4 positionClipSpace = projectionTransform * positionCameraSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
-    
+
     gl_Position = vs_positionScreenSpace;
-            
-    if(mod(gl_VertexID, pointSteps) == 0) {
+
+    if (mod(gl_VertexID, pointSteps) == 0) {
         vs_pointColor.rgb = color;
-        gl_PointSize = 5.0f;  
+        gl_PointSize = 5.0f;
     }
     else {
-        vs_pointColor.rgb = (color + vec3(0.6f, 0.6f, 0.6f)) / 2;
-        gl_PointSize = 2.f;  
+        vs_pointColor.rgb = (color + vec3(0.6, 0.6, 0.6)) / 2.0;
+        gl_PointSize = 2.f;
     }
 
     // I don't like this random variable k defined in powerScalingMath.hglsl.
@@ -57,6 +58,6 @@ void main() {
     // float maximumDistance = pow(k, 10);
     float maximumDistance = pow(10, 10);
     float distanceToCamera = length(positionCameraSpace.xyz);
-    
-    vs_pointColor.a = maximumDistance / (distanceToCamera/100);
+
+    vs_pointColor.a = maximumDistance / (distanceToCamera / 100.0);
 }

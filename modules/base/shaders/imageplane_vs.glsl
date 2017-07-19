@@ -24,25 +24,23 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjectionTransform;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
-out vec4 vs_positionScreenSpace;
-out float s;
+out float vs_screenSpaceDepth;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 modelViewProjectionTransform;
 
-void main()
-{
-    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
 
-    // Write output
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    gl_Position = vs_positionScreenSpace;
+void main() {
+    const vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+    const vec4 positionClipSpace = modelViewProjectionTransform * position;
+    const vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-    vs_st = in_st;    
+    gl_Position = positionScreenSpace;
+    vs_st = in_st;
+    vs_screenSpaceDepth = positionScreenSpace.w;
 }

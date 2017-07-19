@@ -22,26 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float emittanceFactor;
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
 in vec3 vsPosition;
 in vec3 vsColor;
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+uniform float emittanceFactor;
+
 
 Fragment getFragment() {
-    vec4 color = vec4(vsColor, 1.0);
-    
     Fragment frag;
-    float depth = pscDepth(vec4(vsPosition, 0.0));
 
-    float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
-
+    const float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
     frag.color = vec4(vsColor.rgb * coefficient, 1.0);
 
-    
-    frag.depth = depth;
+    frag.depth = pscDepth(vec4(vsPosition, 0.0));
 
     return frag;
 }

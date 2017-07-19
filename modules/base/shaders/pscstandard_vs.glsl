@@ -24,26 +24,22 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
-//in vec3 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
 out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
-out float s;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-void main()
-{
-    // set variables
+
+void main() {
     vs_st = in_st;
-    //vs_stp = in_position.xyz;
     vs_position = in_position;
     vec4 tmp = in_position;
 

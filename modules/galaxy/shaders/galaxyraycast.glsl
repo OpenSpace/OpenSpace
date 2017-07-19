@@ -32,17 +32,17 @@ void sample#{id}(vec3 samplePos,
                  vec3 dir,
                  inout vec3 accumulatedColor,
                  inout vec3 accumulatedAlpha,
-                 inout float maxStepSize) {
-    
+                 inout float maxStepSize)
+{
+
     vec3 aspect = aspect#{id};
-    maxStepSize = maxStepSize#{id} / length(dir/aspect);
+    maxStepSize = maxStepSize#{id} / length(dir / aspect);
     
     vec4 sampledColor = texture(galaxyTexture#{id}, samplePos.xyz);
 
     float STEP_SIZE = maxStepSize#{id};
 
     vec3 alphaTint = vec3(0.3, 0.54, 0.85);
-    //alphaTint = vec3(0.0, 0.5, 1.0);
 
     sampledColor = sampledColor*sampledColor;
     sampledColor.a = pow(sampledColor.a, 0.7);
@@ -86,12 +86,8 @@ void sample#{id}(vec3 samplePos,
     vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
     accumulatedColor += oneMinusFrontAlpha * backColor;
     accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
-
-    // acc+= 1.0;
-
-    //accumulatedColor = vec3(opacityCoefficient#{id});
 }
 
 float stepSize#{id}(vec3 samplePos, vec3 dir) {
-    return maxStepSize#{id} * length(dir * 1.0/aspect#{id});
+    return maxStepSize#{id} * length(dir * 1.0 / aspect#{id});
 }

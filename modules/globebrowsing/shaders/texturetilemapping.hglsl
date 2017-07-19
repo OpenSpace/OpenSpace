@@ -80,43 +80,40 @@ vec4 performLayerSettingsRGB(vec4 currentValue, const LayerSettings settings) {
         performLayerSettingsRGB(currentValue.r, settings),
         performLayerSettingsRGB(currentValue.g, settings),
         performLayerSettingsRGB(currentValue.b, settings),
-        currentValue.a);
+        currentValue.a
+    );
 
     return newValue;
 }
 
 float performLayerSettingsAlpha(float currentValue, const LayerSettings settings) {
-    float newValue = currentValue;
-    newValue = newValue * settings.opacity;
-    return newValue;
+    return currentValue * settings.opacity;
 }
 
 vec4 performLayerSettingsAlpha(vec4 currentValue, const LayerSettings settings) {
-    vec4 newValue = currentValue;
-    newValue.a = performLayerSettingsAlpha(currentValue.a, settings);
-    return newValue;
+    return vec4(currentValue.rgb, performLayerSettingsAlpha(currentValue.a, settings));
 }
 
 float performLayerSettings(float currentValue, const LayerSettings settings) {
-    float newValue = performLayerSettingsRGB(currentValue, settings);
-    newValue = performLayerSettingsAlpha(newValue, settings);
-    return newValue;
+    return performLayerSettingsAlpha(
+        performLayerSettingsRGB(currentValue, settings),
+        settings
+    );
 }
 
 vec4 performLayerSettings(vec4 currentValue, const LayerSettings settings) {
-    vec4 newValue = performLayerSettingsRGB(currentValue, settings);
-    newValue = performLayerSettingsAlpha(newValue, settings);
-    return newValue;
+    return performLayerSettingsAlpha(
+        performLayerSettingsRGB(currentValue, settings),
+        settings
+    );
 }
 
 
 #for id, layerGroup in layerGroups
 #for i in 0..#{lastLayerIndex#{layerGroup}}
 
-vec4 getSample#{layerGroup}#{i}(
-    const vec2 uv,
-    const LevelWeights levelWeights,
-    const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
+vec4 getSample#{layerGroup}#{i}(const vec2 uv, const LevelWeights levelWeights,
+                            const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
 {
     vec4 color = vec4(0,0,0,1);
     
@@ -178,12 +175,18 @@ vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor, float blendFactor)
 #for id, layerGroup in layerGroups
 #for i in 0..#{lastLayerIndex#{layerGroup}}
 
-vec4 performAdjustment#{layerGroup}#{i}(vec4 currentColor, const LayerAdjustment adjustment) {
+vec4 performAdjustment#{layerGroup}#{i}(vec4 currentColor,
+                                        const LayerAdjustment adjustment)
+{
 #if (#{#{layerGroup}#{i}LayerAdjustmentType} == 0) // Default, None
-    return currentColor;    
+    return currentColor;
 #elif (#{#{layerGroup}#{i}LayerAdjustmentType} == 1) // ChromaKey
-    if (distance(currentColor.rgb, adjustment.chromaKeyColor) <= adjustment.chromaKeyTolerance) {
-        return vec4(0,0,0,0);
+    if (distance(
+        currentColor.rgb,
+        adjustment.chromaKeyColor
+        ) <= adjustment.chromaKeyTolerance)
+    {
+        return vec4(0.0);
     }
     else {
         return currentColor;

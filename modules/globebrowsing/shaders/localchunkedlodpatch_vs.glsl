@@ -31,20 +31,6 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tilevertexskirt.hglsl>
 
-
-uniform mat4 projectionTransform;
-
-// Input points in camera space
-uniform vec3 p00;
-uniform vec3 p10;
-uniform vec3 p01;
-uniform vec3 p11;
-uniform vec3 patchNormalCameraSpace;
-uniform float chunkMinHeight;
-
-uniform float distanceScaleFactor;
-uniform int chunkLevel;
-
 layout(location = 1) in vec2 in_uv;
 
 out vec2 fs_uv;
@@ -58,6 +44,19 @@ out vec3 ellipsoidTangentThetaCameraSpace;
 out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
+uniform mat4 projectionTransform;
+// Input points in camera space
+uniform vec3 p00;
+uniform vec3 p10;
+uniform vec3 p01;
+uniform vec3 p11;
+uniform vec3 patchNormalCameraSpace;
+uniform float chunkMinHeight;
+
+uniform float distanceScaleFactor;
+uniform int chunkLevel;
+
+
 vec3 bilinearInterpolation(vec2 uv) {
     vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
     vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
@@ -66,15 +65,14 @@ vec3 bilinearInterpolation(vec2 uv) {
 }
 
 void main() {
-
     // Position in cameraspace
     vec3 p = bilinearInterpolation(in_uv);
     
     // Calculate desired level based on distance to the vertex on the ellipsoid
     // Before any heightmapping is done
-    float distToVertexOnEllipsoid =
+    const float distToVertexOnEllipsoid =
         length(p + patchNormalCameraSpace * chunkMinHeight);
-    float levelInterpolationParameter =
+    const float levelInterpolationParameter =
         getLevelInterpolationParameter(
             chunkLevel,
             distanceScaleFactor,
@@ -83,16 +81,14 @@ void main() {
     // use level weight for height sampling, and output to fragment shader
     levelWeights = getLevelWeights(levelInterpolationParameter);
 
-    // Get the height value
-    float height = getTileHeightScaled(in_uv, levelWeights);
-
-    // Apply skirts
-    height -= getTileVertexSkirtLength();
+    // Get the height value and apply skirts
+    const float height =
+        getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength();
     
     // Translate the point along normal
     p += patchNormalCameraSpace * height;
 
-    vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
+    const vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
     
     #if USE_ACCURATE_NORMALS
     // Calculate tangents

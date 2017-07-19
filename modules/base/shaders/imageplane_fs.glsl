@@ -22,26 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float time;
-uniform sampler2D texture1;
-
-in vec2 vs_st;
-in vec4 vs_positionScreenSpace;
-
-#include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
+in vec2 vs_st;
+in float vs_screenSpaceDepth;
+
+uniform sampler2D texture1;
+
+
 Fragment getFragment() {
-    vec4 diffuse;
-    if (gl_FrontFacing)
-        diffuse = texture(texture1, vs_st);
+    Fragment frag;
+
+    if (gl_FrontFacing) {
+        frag.color = texture(texture1, vs_st);
+    }
     else {
-        diffuse = vec4(0.8);
+        frag.color = vec4(0.8);
     }
 
-    Fragment frag;
-    frag.color = diffuse;
-    frag.depth = vs_positionScreenSpace.w;
+    frag.depth = vs_screenSpaceDepth;
 
     return frag;
 }

@@ -22,27 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
-
-uniform vec3 sun_pos;
-
-uniform bool _performShading = true;
-uniform float transparency;
-uniform int shadows;
-
-uniform float time;
-uniform sampler2D texture1;
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
 in vec2 vs_st;
 in vec4 vs_normal;
 in vec4 vs_position;
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+uniform vec4 campos;
+uniform vec4 objpos;
+uniform vec3 sun_pos;
+uniform bool _performShading = true;
+uniform float transparency;
+uniform int shadows;
+uniform float time;
+uniform sampler2D texture1;
 
-//#include "PowerScaling/powerScaling_vs.hglsl"
+
 Fragment getFragment() {
     vec4 position = vs_position;
     float depth = pscDepth(position);
@@ -50,20 +46,15 @@ Fragment getFragment() {
 
     Fragment frag;
     if (_performShading) {
-        // directional lighting
-        vec3 origin = vec3(0.0);
-        vec4 spec = vec4(0.0);
+        const vec3 n = normalize(vs_normal.xyz);
+        const vec3 l_pos = vec3(sun_pos); // sun.
+        const vec3 l_dir = normalize(l_pos - objpos.xyz);
+        const float intensity = min(max(5 * dot(n,l_dir), 0.0), 1);
         
-        vec3 n = normalize(vs_normal.xyz);
-        //vec3 e = normalize(camdir);
-        vec3 l_pos = vec3(sun_pos); // sun.
-        vec3 l_dir = normalize(l_pos-objpos.xyz);
-        float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
-        
-        float shine = 0.0001;
+        // float shine = 0.0001;
 
-        vec4 specular = vec4(0.5);
-        vec4 ambient = vec4(0.0,0.0,0.0,transparency);
+        const vec4 specular = vec4(0.5);
+        const vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
         /*
         if(intensity > 0.f){
             // halfway vector
@@ -76,8 +67,8 @@ Fragment getFragment() {
         diffuse = max(intensity * diffuse, ambient);
     }
 
-    diffuse[3] = transparency;
-    frag.color = diffuse;
+    frag.color.rgb = diffuse.rgb;
+    frag.color.a = transparency;
     frag.depth = depth;
 
     return frag;

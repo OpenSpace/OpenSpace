@@ -24,22 +24,21 @@
 
 #include "fragment.glsl"
 
+in vec4 vs_positionClipSpace;
+in vec2 vs_positionModelSpace;
+
 //uniform vec3 directionToSunViewSpace;
 uniform vec3 positionCameraSpace;
 //uniform float lightOverflow;
 
-in vec4 vs_positionClipSpace;
-in vec2 vs_positionModelSpace;
 
 Fragment getFragment() {
-
-    float alpha = 1 - sqrt(pow(vs_positionModelSpace.x, 2) + pow(vs_positionModelSpace.y, 2));
+    float alpha =
+        1.0 - sqrt(pow(vs_positionModelSpace.x, 2) + pow(vs_positionModelSpace.y, 2));
     alpha = pow(alpha, 3);
     Fragment frag;
-    frag.color = vec4(1,1,1, alpha);// + vec4(1,1,1,1) * 0.0000000001 * directionToSunViewSpace.x;
-    //frag.color *= 1 + (lightOverflow * lightOverflow) * 0.0001;
+    frag.color = vec4(1.0, 1.0, 1.0, alpha);
     frag.depth = vs_positionClipSpace.w;
     frag.blend = BLEND_MODE_ADDITIVE;
     return frag;
 }
-

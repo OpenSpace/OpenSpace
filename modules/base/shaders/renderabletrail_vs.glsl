@@ -24,10 +24,7 @@
 
 #version __CONTEXT__
 
-// Fragile! Keep in sync with RenderableTrail::render
-#define VERTEX_SORTING_NEWESTFIRST 0
-#define VERTEX_SORTING_OLDESTFIRST 1
-#define VERTEX_SORTING_NOSORTING 2
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec3 in_point_position;
 
@@ -36,7 +33,6 @@ out float fade;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
-
 uniform int idOffset;
 uniform int nVertices;
 uniform bool useLineFade;
@@ -45,7 +41,11 @@ uniform int vertexSortingMethod;
 uniform int pointSize;
 uniform int stride;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+// Fragile! Keep in sync with RenderableTrail::render
+#define VERTEX_SORTING_NEWESTFIRST 0
+#define VERTEX_SORTING_OLDESTFIRST 1
+#define VERTEX_SORTING_NOSORTING 2
+
 
 void main() {
     int modId = gl_VertexID;
