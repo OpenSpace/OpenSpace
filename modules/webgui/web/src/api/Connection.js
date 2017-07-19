@@ -7,15 +7,26 @@ class Connection {
    * Start a connection to the web socket server
    * @param url - the server url
    */
-  constructor(url = Connection.defaultUrl) {
-    this.socket = new WebSocket(url);
+  constructor(url = Connection.DEFAULT_URL) {
+    this.commandQueue = [];
+    this.reconnectionCommandQueue = [];
+    this.statusCallbacks = [];
+    this.topics = {};
+    this.url = url;
+    this.connect();
+  }
+
+  connect() {
+    this.socket = new WebSocket(this.url);
     this.socket.onopen = this.onOpen.bind(this);
     this.socket.onclose = this.onClose.bind(this);
     this.socket.onerror = this.onError.bind(this);
     this.socket.onmessage = this.onMessage.bind(this);
-    this.commandQueue = [];
-    this.statusCallbacks = [];
-    this.topics = {};
+  }
+
+  reconnect() {
+    // TODO: restart topics/subscriptions
+    this.connect();
   }
 
   onOpen(event) {
@@ -26,7 +37,9 @@ class Connection {
   }
 
   onClose(event) {
-    // TODO: Tell datamanager connection was lost, take care of callbacks somehow
+    this.reconnectionCommandQueue
+      .filter(m => !this.commandQueue.includes(m))
+      .forEach(m => this.commandQueue.push(m));
     this.statusCallbacks.forEach(cb => cb(this, event, 'onClose'));
   }
 
@@ -58,14 +71,19 @@ class Connection {
    * Send a message to the server
    * @param payload [object] - the payload to send to the server
    * @param callback [[function]] - This replaces any existing callback. Expects response.
+   * @param resendOnReconnect - if this message should be resent after a disconnection
    */
-  send(payload, callback) {
+  send(payload, callback, resendOnReconnect = false) {
     const message = JSON.stringify(payload);
     const { topic } = payload;
 
     // store callback
     if (callback && topic) {
       this.topics[topic] = callback;
+    }
+
+    if (resendOnReconnect) {
+      this.reconnectionCommandQueue.push(message);
     }
 
     // send it!
@@ -116,8 +134,12 @@ class Connection {
     this.socket.close();
   }
 
-  static get defaultUrl() {
+  static get DEFAULT_URL() {
     return 'ws://localhost:8001';
+  }
+
+  addStatusCallback(cb) {
+    this.statusCallbacks.push(cb);
   }
 }
 

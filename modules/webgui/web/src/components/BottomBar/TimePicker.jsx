@@ -20,7 +20,6 @@ class TimePicker extends Component {
 
   componentDidMount() {
     // subscribe to data
-    // console.log(DataManager.nextTopicId);
     DataManager.subscribe(TIME_KEY, this.subscriptionCallback);
   }
 

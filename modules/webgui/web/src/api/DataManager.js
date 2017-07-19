@@ -27,20 +27,6 @@ class DataManager {
     subscription.addCallback(callback);
   }
 
-  createSubscription(key) {
-    const topic = this.nextTopicId;
-    const payload = {
-      topic,
-      type: TOPIC_TYPES.subscribe,
-      payload: {
-        subscriptionProperty: key,
-      },
-    };
-    const subscription = new Subscription(key, topic);
-    this.connection.send(payload, subscription.onMessage);
-    return subscription;
-  }
-
   unsubscribe(key, callback) {
     const subscription = this.subscriptions[key];
     if (subscription) {
@@ -80,6 +66,21 @@ class DataManager {
       },
     };
     this.connection.send(payload);
+  }
+
+  createSubscription(key) {
+    const topic = this.nextTopicId;
+    const payload = {
+      topic,
+      type: TOPIC_TYPES.subscribe,
+      payload: {
+        subscriptionProperty: key,
+      },
+    };
+    const subscription = new Subscription(key, topic);
+    const resubscribeOnReconnect = true;
+    this.connection.send(payload, subscription.onMessage, resubscribeOnReconnect);
+    return subscription;
   }
 
   get nextTopicId() {

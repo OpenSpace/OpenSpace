@@ -12,14 +12,16 @@ class App extends Component {
     super(props);
 
     this.state = {
-      url: Connection.defaultUrl,
+      url: Connection.DEFAULT_URL,
       isConnected: false,
       connectionLost: false,
-
+      connectionWait: 1000,
     };
 
-    this.connection = null;
+    this.connection = DataManager.connection;
     this.initializeConnection = this.initializeConnection.bind(this);
+    this.resetConnection = this.resetConnection.bind(this);
+    this.connectionStatusCallback = this.connectionStatusCallback.bind(this);
   }
 
   componentDidMount() {
@@ -27,8 +29,44 @@ class App extends Component {
   }
 
   initializeConnection() {
+    this.connection.addStatusCallback(this.connectionStatusCallback);
+  }
+
+  resetConnection() {
     this.connection = new Connection(this.state.url);
     DataManager.connection = this.connection;
+    this.initializeConnection();
+  }
+
+  connectionStatusCallback(connection, event, origin) {
+    switch (origin) {
+      case 'onOpen':
+        // everything is all right!
+        this.setState({ isConnected: true, connectionLost: false, connectionWait: 1000 });
+        break;
+      case 'onClose':
+        this.setState({ isConnected: false, connectionLost: true });
+        this.tryToReconnect();
+        break;
+      case 'onError':
+        break;
+      default:
+        // unknown
+    }
+  }
+
+  /**
+   * start reconnection attempts, at intervals ever increasing
+   */
+  tryToReconnect() {
+    let { connectionWait } = this.state;
+
+    console.log('Attempting to connect in', connectionWait, 'ms.'); // eslint-disable-line
+    setTimeout(() => {
+      DataManager.connection.reconnect();
+      connectionWait *= 2;
+      this.setState({ connectionWait });
+    }, connectionWait);
   }
 
   render() {
