@@ -67,11 +67,6 @@ return {
             Layers = {
                 ColorLayers = {
                     {
-                            Name = "Earth Bluemarble Height",
-                            FilePath = "textures/earth_bluemarble_height.jpg",
-                            Enabled = true,
-                    },
-                    {
                         Name = "ESRI VIIRS Combo",
                         Type = "ByLevelTileLayer",
                         LevelTileProviders = {
@@ -98,8 +93,8 @@ return {
                         }
                     },
 					{
+                        Name = "ESRI_Imagery_World_2D",
 						FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
-						Name = "ESRI",
 					},
                     {
                         Name = "BMNG",
@@ -165,11 +160,6 @@ return {
                         Name = "MODIS_Water_Mask",
                         FilePath = "map_service_configs/GIBS/MODIS_Water_Mask.xml",
                         Enabled = true,
-                        Fallback = {
-                            Name = "Earth Reflectance",
-                            FilePath = "textures/earth_reflectance.jpg",
-                            Enabled = true,
-                        }
                     },
                     {
                         Name = "GEBCO",

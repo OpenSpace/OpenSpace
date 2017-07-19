@@ -107,7 +107,17 @@ public:
      */
     float getHeight(glm::dvec3 position) const;
 
+    /**
+     * Notifies the renderer to recompile its shaders the next time the render function is
+     * called. The actual shader recompilation takes place in the render function because
+     * properties that the shader depends on need to be properly synced.
+     */
     void notifyShaderRecompilation();
+
+    /**
+     * Directly recompile the shaders of the renderer.
+     */
+    void recompileShaders();
 
     const int minSplitDepth;
     const int maxSplitDepth;

@@ -279,6 +279,11 @@ void ChunkedLodGlobe::notifyShaderRecompilation() {
     _shadersNeedRecompilation = true;
 }
 
+void ChunkedLodGlobe::recompileShaders() {
+    _renderer->recompileShaders(_owner);
+    _shadersNeedRecompilation = false;
+}
+
 void ChunkedLodGlobe::render(const RenderData& data) {
     stats.startNewRecord();
     if (_shadersNeedRecompilation) {
