@@ -45,17 +45,17 @@ uniform vec3 boresight;
 #define M_PI 3.14159265358979323846
 
 vec4 uvToModel(vec2 uv, vec3 radius, float segments){
-    float fj = uv.x * segments;
-    float fi = (1.0 - uv.y) * segments;
+    const float fj = uv.x * segments;
+    const float fi = (1.0 - uv.y) * segments;
 
-    float theta = fi * float(M_PI) / segments;  // 0 -> PI
-    float phi   = fj * float(M_PI) * 2.0f / segments;
+    const float theta = fi * float(M_PI) / segments;  // 0 -> PI
+    const float phi   = fj * float(M_PI) * 2.0f / segments;
 
-    float x = radius[0] * sin(phi) * sin(theta);  //
-    float y = radius[1] * cos(theta);             // up 
-    float z = radius[2] * cos(phi) * sin(theta);  //
+    const float x = radius[0] * sin(phi) * sin(theta);  //
+    const float y = radius[1] * cos(theta);             // up 
+    const float z = radius[2] * cos(phi) * sin(theta);  //
     
-    return vec4(x, y, z, 0);
+    return vec4(x, y, z, 0.0);
 }
 
 bool inRange(float x, float a, float b){
@@ -75,13 +75,12 @@ void main() {
 
     projected = projected * 0.5 + vec4(0.5);
 
-    vec3 normal = normalize((ModelTransform*vec4(vertex.xyz,0)).xyz);
+    vec3 normal = normalize((ModelTransform * vec4(vertex.xyz, 0.0)).xyz);
 
     vec3 v_b = normalize(boresight);
 
-    if((inRange(projected.x, 0, 1) &&
-      inRange(projected.y, 0, 1)) &&
-      dot(v_b, normal) < 0 )
+    if((inRange(projected.x, 0.0, 1.0) && inRange(projected.y, 0.0, 1.0)) &&
+       dot(v_b, normal) < 0.0)
     {
         color = texture(projectionTexture, vec2(projected.x, projected.y));
         stencil = vec4(1.0); 

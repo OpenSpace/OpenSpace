@@ -30,13 +30,12 @@ vec3 kameleon_cartesianToSpherical(vec3 zeroToOneCoords) {
     const vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
 
     const float r = length(cartesian);
-    float theta, phi;
+    float theta = 0.0;
+    float phi = 0.0;
 
-    if (r == 0.0) {
-        theta = phi = 0.0;
-    } else {
-        theta = acos(cartesian.z/r) / KAMELEON_PI;
-        phi = (KAMELEON_PI + atan(cartesian.y, cartesian.x)) / (2.0*KAMELEON_PI );
+    if (r != 0.0) {
+        theta = acos(cartesian.z / r) / KAMELEON_PI;
+        phi = (KAMELEON_PI + atan(cartesian.y, cartesian.x)) / (2.0 * KAMELEON_PI );
     }
     return vec3(r * KAMELEON_SQRT1_3, theta, phi);
 }

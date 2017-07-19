@@ -323,6 +323,15 @@ void OpenSpaceEngine::create(int argc, char** argv,
         );
     }
 
+    // Create directories that doesn't exist
+    auto tokens = FileSys.tokens();
+    for (const std::string& token : tokens) {
+        if (!FileSys.directoryExists(token)) {
+            std::string p = absPath(token);
+            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
+        }
+    }
+
     // Initialize the requested logs from the configuration file
     _engine->configureLogging();
 
@@ -332,16 +341,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
         OPENSPACE_VERSION_PATCH <<
         " (" << OPENSPACE_VERSION_STRING << ")"
     );
-
-    // Create directories that doesn't exist
-    auto tokens = FileSys.tokens();
-    for (const std::string& token : tokens) {
-        if (!FileSys.directoryExists(token)) {
-            std::string p = absPath(token);
-            LDEBUG("Directory '" << p << "' does not exist, creating.");
-            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
-        }
-    }
 
     // Register modules
     _engine->_moduleEngine->initialize();

@@ -80,10 +80,10 @@ LayerShaderManager::LayerShaderPreprocessingData
         
         // This check was implicit before;  not sure if it will fire or will be handled
         // elsewhere
-        ghoul_assert(
-            !layerGroup.activeLayers().empty(),
-            "If activeLayers is empty the following line will lead to an overflow"
-        );
+        //ghoul_assert(
+        //    !layerGroup.activeLayers().empty(),
+        //    "If activeLayers is empty the following line will lead to an overflow"
+        //);
         layeredTextureInfo.lastLayerIdx = static_cast<int>(
             layerGroup.activeLayers().size() - 1
         );

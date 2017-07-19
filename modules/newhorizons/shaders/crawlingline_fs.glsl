@@ -22,16 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-uniform vec3 color;
-uniform float _alpha;
+#include "fragment.glsl"
 
 in vec4 vs_positionScreenSpace;
 in vec4 vs_color;
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+uniform float _alpha;
+
 
 Fragment getFragment() {
     Fragment frag;

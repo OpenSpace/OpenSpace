@@ -22,19 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//in vec4 vs_point_position;
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
+
 in vec4 vs_positionScreenSpace;
 in vec4 vs_point_velocity;
-
-//in float fade;
-//uniform float forceFade;
+in vec4 vs_color;
 
 uniform vec3 color;
 
-in vec4 vs_color;
-
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
 
 Fragment getFragment() {
     Fragment frag;

@@ -24,15 +24,12 @@
 
 #version __CONTEXT__
 
-// Vertex attributes
 layout(location = 0) in vec2 in_position;
 
-// Uniforms
+out vec2 out_position;
+
 uniform float radius;
 
-// Outputs
-out vec2 out_position;
-//out float pointRadius;
 
 void main() {
     out_position = in_position;

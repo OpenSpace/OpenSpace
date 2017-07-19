@@ -26,11 +26,9 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
-//layout(location = 3) in vec2 in_nightTex;
 
 out vec2 vs_st;
 out vec4 vs_normal;
@@ -55,9 +53,9 @@ void main() {
     vec4 position = vec4(tmp.xyz * pow(10, tmp. w), 1.0);
 
     if (_hasHeightMap) {
-        float height = texture(heightTex, in_st).r;
-        vec3 displacementDirection = abs(normalize(in_normal.xyz));
-        float displacementFactor = height * _heightExaggeration;
+        const float height = texture(heightTex, in_st).r;
+        const vec3 displacementDirection = abs(normalize(in_normal.xyz));
+        const float displacementFactor = height * _heightExaggeration;
         position.xyz = position.xyz + displacementDirection * displacementFactor;
     }
     

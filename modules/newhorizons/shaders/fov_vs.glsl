@@ -26,15 +26,6 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-// This needs to be synced with the RenderableFov header
-const int VertexColorTypeDefaultStart = 0;
-const int VertexColorTypeDefaultEnd = 1;
-const int VertexColorTypeInFieldOfView = 2;
-const int VertexColorTypeActive = 3;
-const int VertexColorTypeIntersectionStart = 4;
-const int VertexColorTypeIntersectionEnd = 5;
-const int VertexColorTypeSquare = 6;
-
 layout(location = 0) in vec3 in_point_position;
 layout (location = 1) in int colorInformation;
 
@@ -51,7 +42,17 @@ uniform vec4 intersectionStartColor;
 uniform vec4 intersectionEndColor;
 uniform vec4 squareColor;
 uniform float interpolation;
- 
+
+// This needs to be synced with the RenderableFov header
+const int VertexColorTypeDefaultStart = 0;
+const int VertexColorTypeDefaultEnd = 1;
+const int VertexColorTypeInFieldOfView = 2;
+const int VertexColorTypeActive = 3;
+const int VertexColorTypeIntersectionStart = 4;
+const int VertexColorTypeIntersectionEnd = 5;
+const int VertexColorTypeSquare = 6;
+
+
 void main() {
     vec4 position = vec4(in_point_position, 1);
     vec4 positionClipSpace = modelViewProjectionTransform * position;

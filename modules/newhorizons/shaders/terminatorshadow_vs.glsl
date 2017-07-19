@@ -24,37 +24,29 @@
 
 #version __CONTEXT__
 
-//uniform mat4 ViewProjection;
-//uniform mat4 ModelTransform;
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+layout(location = 0) in vec4 in_point_position;
+
+out vec4 vs_color;
+out vec4 vs_positionScreenSpace;
 
 uniform mat4 modelViewProjectionTransform;
 uniform vec4 objectVelocity;
 
-layout(location = 0) in vec4 in_point_position;
-
-//out vec4 vs_point_position;
-out vec4 vs_color;
-out vec4 vs_positionScreenSpace;
-//out float fade;
-
 uniform uint nVertices;
 uniform vec4 shadowColor;
-//uniform float lineFade;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-    //float id = float(gl_VertexID) / float(nVertices * lineFade);
-    //fade = 1.0 - id;
-
-    if(mod(gl_VertexID,2) == 0.f){
+    if (mod(gl_VertexID,2) == 0.0) {
         vs_color = shadowColor;
-    }else{
-        vs_color = vec4(0);
+    } else {
+        vs_color = vec4(0.0);
     }
     
     // Transform the damn psc to homogenous coordinate
-    vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1);
+    vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1.0);
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;

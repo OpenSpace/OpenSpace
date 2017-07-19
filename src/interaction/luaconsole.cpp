@@ -545,6 +545,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     default:
         return true;
     }
+
 }
 
 void LuaConsole::charCallback(unsigned int codepoint,

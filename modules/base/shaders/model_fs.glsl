@@ -34,7 +34,7 @@ uniform bool performShading = true;
 uniform vec3 directionToSunViewSpace;
 uniform sampler2D texture1;
 
-const specularAlbedo = vec3(1.0);
+const vec3 SpecularAlbedo = vec3(1.0);
 
 Fragment getFragment() {
     const vec3 diffuseAlbedo = texture(texture1, vs_st).rgb;
@@ -61,7 +61,7 @@ Fragment getFragment() {
 
         const vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
         const vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
-        const vec3 specularColor = specularIntensity * lightColor * specularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
+        const vec3 specularColor = specularIntensity * lightColor * SpecularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
 
         frag.color.rgb = ambientColor + diffuseColor + specularColor;
     }

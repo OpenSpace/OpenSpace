@@ -22,19 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-in vec3 vPosition;
-in vec4 worldPosition;
-
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
+in vec3 vPosition;
+in vec4 worldPosition;
+
+
 Fragment getFragment() {
-    vec4 fragColor = vec4(vPosition+0.5, 1.0);
-    vec4 position = worldPosition;
-    float depth = pscDepth(position);
+    const vec4 position = worldPosition;
+    const float depth = pscDepth(position);
 
     Fragment frag;
-    frag.color = fragColor;
+    frag.color = vec4(vPosition + 0.5, 1.0);
     frag.depth = depth;
     return frag;
 }

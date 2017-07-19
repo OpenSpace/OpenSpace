@@ -32,32 +32,29 @@ uniform vec3 clipNormals_#{id}[8];
 uniform vec2 clipOffsets_#{id}[8];
 
 
-void sample#{id}(vec3 samplePos,
-             vec3 dir,
-             inout vec3 accumulatedColor,
-             inout vec3 accumulatedAlpha,
-             inout float stepSize) {
+void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
+                 inout vec3 accumulatedAlpha, inout float stepSize)
+{
 
     vec3 transformedPos = samplePos;
     if (gridType_#{id} == 1) {
         transformedPos = kameleon_cartesianToSpherical(samplePos);
     }
 
-
     float clipAlpha = 1.0;
-    vec3 centerToPos = transformedPos - vec3(0.5);
+    const vec3 centerToPos = transformedPos - vec3(0.5);
 
 
     for (int i = 0; i < nClips_#{id} && i < 8; i++) {
-        vec3 clipNormal = clipNormals_#{id}[i];
-        float clipBegin = clipOffsets_#{id}[i].x;
-        float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
+        const vec3 clipNormal = clipNormals_#{id}[i];
+        const float clipBegin = clipOffsets_#{id}[i].x;
+        const float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
         clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
     }
 
     if (clipAlpha > 0) {
-        float val = texture(volumeTexture_#{id}, transformedPos).r;
-        vec4 color = texture(transferFunction_#{id}, val);
+        const float val = texture(volumeTexture_#{id}, transformedPos).r;
+        const vec4 color = texture(transferFunction_#{id}, val);
         vec3 backColor = color.rgb;
         vec3 backAlpha = color.aaa;
 
@@ -67,7 +64,7 @@ void sample#{id}(vec3 samplePos,
         backColor = clamp(backColor, 0.0, 1.0);
         backAlpha = clamp(backAlpha, 0.0, 1.0);
 
-        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+        const vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
         accumulatedColor += oneMinusFrontAlpha * backColor;
         accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
     }

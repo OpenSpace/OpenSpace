@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
+
 in vec2 out_position;
 
 uniform float radius;
@@ -29,22 +32,22 @@ uniform float transparency;
 uniform float thickness;
 uniform vec3 color;
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
 
 Fragment getFragment() {
-    
     // calculate normal from texture coordinates
     vec3 n;
-    n.xy = gl_PointCoord.st*vec2(2.0, -2.0) + vec2(-1.0, 1.0);
+    n.xy = gl_PointCoord.st * vec2(2.0, -2.0) + vec2(-1.0, 1.0);
     float mag = dot(n.xy, n.xy);
-    if (mag > 1.0) discard;   // kill pixels outside circle
-    n.z = sqrt(1.0-mag);
+    if (mag > 1.0) {
+        // kill pixels outside circle
+        discard;
+    }
+    n.z = sqrt(1.0 - mag);
     
     // calculate lighting
     const vec3 light_dir = vec3(0.0, 0.0, 1.0);
-    float diffuse = max(0.0, dot(light_dir, n));
-    float alpha = min(pow(sqrt(mag), thickness), transparency);
+    const float diffuse = max(0.0, dot(light_dir, n));
+    const float alpha = min(pow(sqrt(mag), thickness), transparency);
 
     Fragment frag;
     frag.color = vec4(color * diffuse, alpha);

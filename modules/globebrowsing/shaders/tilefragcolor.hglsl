@@ -30,9 +30,7 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-
-// Below are all the tiles that are used for contributing 
-// the actual fragment color
+// Below are all the tiles that are used for contributing the actual fragment color
 
 #if USE_COLORTEXTURE
 uniform Layer ColorLayers[NUMLAYERS_COLORTEXTURE];
@@ -59,11 +57,11 @@ uniform vec2 vertexResolution;
 #endif // USE_ATMOSPHERE
 
 #if USE_NIGHTTEXTURE || USE_WATERMASK || USE_ATMOSPHERE || PERFORM_SHADING
-    uniform vec3 lightDirectionCameraSpace;
+uniform vec3 lightDirectionCameraSpace;
 #endif
 
 #if PERFORM_SHADING
-    uniform float orenNayarRoughness;
+uniform float orenNayarRoughness;
 #endif
 
 in vec4 fs_position;
@@ -86,15 +84,17 @@ in LevelWeights levelWeights;
  *
  */
 vec4 getTileFragColor() {
-
-    vec4 color = vec4(0.3,0.3,0.3,1);
+    vec4 color = vec4(0.3, 0.3, 0.3, 1.0);
 
     vec3 normal = normalize(ellipsoidNormalCameraSpace);
 #if USE_ACCURATE_NORMALS
-    normal = getTileNormal(fs_uv, levelWeights,
-                           normalize(ellipsoidNormalCameraSpace),
-                           normalize(ellipsoidTangentThetaCameraSpace),
-                           normalize(ellipsoidTangentPhiCameraSpace));
+    normal = getTileNormal(
+        fs_uv,
+        levelWeights,
+        normalize(ellipsoidNormalCameraSpace),
+        normalize(ellipsoidTangentThetaCameraSpace),
+        normalize(ellipsoidTangentPhiCameraSpace)
+    );
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
@@ -102,7 +102,8 @@ vec4 getTileFragColor() {
         color,
         fs_uv,
         levelWeights,
-        ColorLayers);
+        ColorLayers
+    );
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
@@ -113,7 +114,8 @@ vec4 getTileFragColor() {
         WaterMasks,
         normal,
         lightDirectionCameraSpace, // Should already be normalized
-        positionCameraSpace);
+        positionCameraSpace
+    );
 
 #endif // USE_WATERMASK
 
@@ -124,7 +126,8 @@ vec4 getTileFragColor() {
         levelWeights,
         NightLayers,
         normalize(ellipsoidNormalCameraSpace),
-        lightDirectionCameraSpace); // Should already be normalized
+        lightDirectionCameraSpace // Should already be normalized
+    );
 
 #endif // USE_NIGHTTEXTURE
 
@@ -134,29 +137,30 @@ vec4 getTileFragColor() {
         normal,
         lightDirectionCameraSpace,
         normalize(positionCameraSpace),
-        orenNayarRoughness);
+        orenNayarRoughness
+    );
 #endif // PERFORM_SHADING
 
 #if USE_ATMOSPHERE
     // Temporary until the real atmosphere code is here
     //color = color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
-    vec3 n = normalize(ellipsoidNormalCameraSpace);
-    vec3 l = lightDirectionCameraSpace;
-    vec3 c = normalize(positionCameraSpace);
+    const vec3 n = normalize(ellipsoidNormalCameraSpace);
+    const vec3 l = lightDirectionCameraSpace;
+    const vec3 c = normalize(positionCameraSpace);
     float cosFactor = 1 - clamp(dot(-n * 0.9, c), 0, 1);
     cosFactor *= 1.1;
     cosFactor -= 0.1;
-    cosFactor = clamp(cosFactor, 0, 1);
+    cosFactor = clamp(cosFactor, 0.0, 1.0);
     cosFactor = cosFactor + pow(cosFactor, 5);
     
-    float shadowLight = 0.15;
-    float cosFactorLight = pow(max(dot(-l, n), -shadowLight) + shadowLight, 0.8);
+    const float shadowLight = 0.15;
+    const float cosFactorLight = pow(max(dot(-l, n), -shadowLight) + shadowLight, 0.8);
     //float cosFactorScatter = pow(max(dot(l, n) + shadowLight, 0), 5);
     //float cosFactorLight = max(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)), 0);
     //vec3 r = reflect(l, n);
     //float scatteredLight = pow(clamp(dot(-r,c), 0, 1), 20);
-    vec3 atmosphereColor = vec3(0.5,0.5,1) * 2;
-    color = color + vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
+    const vec3 atmosphereColor = vec3(0.5, 0.5, 1.0) * 2.0;
+    color += vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
 #endif // USE_ATMOSPHERE
 
 #if USE_OVERLAY
@@ -164,7 +168,8 @@ vec4 getTileFragColor() {
         color,
         fs_uv,
         levelWeights,
-        Overlays);
+        Overlays
+    );
 #endif // USE_OVERLAY
 
 #if SHOW_HEIGHT_INTENSITIES
@@ -173,7 +178,7 @@ vec4 getTileFragColor() {
     color.b *= 0.1;
 
     float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
-    float contourLine = fract(10*untransformedHeight) > 0.98 ? 1 : 0;
+    float contourLine = fract(10.0 * untransformedHeight) > 0.98 ? 1.0 : 0.0;
     color.r += untransformedHeight;
     color.b = contourLine;
 #endif
@@ -186,9 +191,7 @@ vec4 getTileFragColor() {
     #endif
 #endif
 
-
     return color;
 }
-
 
 #endif ///TILE_FRAG_COLOR_HGLSL

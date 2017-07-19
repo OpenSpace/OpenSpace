@@ -24,13 +24,13 @@
 
 #version __CONTEXT__
 
+layout(location = 0) in vec3 in_position;
+out vec4 vs_position;
+
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
 uniform float exponent;
-
-layout(location = 0) in vec3 in_position;
-out vec4 vs_position;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 

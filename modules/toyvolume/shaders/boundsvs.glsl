@@ -24,15 +24,16 @@
  
 #version __CONTEXT__
 
-layout(location = 0) in vec4 vertPosition;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform mat4 viewProjection;
-uniform mat4 modelTransform;
+layout(location = 0) in vec4 vertPosition;
 
 out vec3 vPosition;
 out vec4 worldPosition;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 viewProjection;
+uniform mat4 modelTransform;
+
 
 void main() {
     vPosition = vertPosition.xyz;
@@ -42,6 +43,5 @@ void main() {
     
     // project the position to view space
     gl_Position = viewProjection * position;
-
     gl_Position.z = 1.0;
 }

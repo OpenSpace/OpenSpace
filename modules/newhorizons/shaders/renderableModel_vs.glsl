@@ -30,18 +30,15 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-
-uniform vec3 cameraDirectionWorldSpace;
-
-uniform float _magnification;
-
-// Outputs
 out vec2 vs_st;
 out vec3 vs_normalViewSpace;
 out vec4 vs_positionScreenSpace;
 out vec4 vs_positionCameraSpace;
+
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
+uniform vec3 cameraDirectionWorldSpace;
+uniform float _magnification;
 
 
 void main() {
@@ -50,7 +47,6 @@ void main() {
     vs_positionCameraSpace = modelViewTransform * position;
     vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
 
-    // Write output
     vs_st = in_st;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;
