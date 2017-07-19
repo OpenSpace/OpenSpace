@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -152,12 +152,12 @@ void GuiPerformanceComponent::render() {
         // updateScaling
         // UpdateRender
         // RenderTime
-        std::vector<std::array<float, 5>> averages(
+        std::vector<std::array<float, 6>> averages(
             layout->nScaleGraphEntries,
-            { 0.f, 0.f, 0.f, 0.f, 0.f }
+            { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f }
         );
             
-        std::vector<std::array<std::pair<float, float>, 5>> minMax(
+        std::vector<std::array<std::pair<float, float>, 6>> minMax(
             layout->nScaleGraphEntries
         );
             
@@ -165,7 +165,7 @@ void GuiPerformanceComponent::render() {
             const PerformanceLayout::SceneGraphPerformanceLayout& entry =
                 layout->sceneGraphEntries[i];
 
-            int nValues[5] = { 0, 0, 0, 0, 0 };
+            int nValues[6] = { 0, 0, 0, 0, 0, 0 };
                 
             // Compute the averages and count the number of values so we don't divide
             // by 0 later
@@ -185,6 +185,9 @@ void GuiPerformanceComponent::render() {
                 averages[i][4] += entry.renderTime[j];
                 if (entry.renderTime[j] != 0.f)
                     ++(nValues[4]);
+                averages[i][5] += entry.totalTime[j];
+                if (entry.totalTime[j] != 0.f)
+                    ++(nValues[5]);
             }
 
             if (nValues[0] != 0) {
@@ -201,6 +204,9 @@ void GuiPerformanceComponent::render() {
             }
             if (nValues[4] != 0) {
                 averages[i][4] /= static_cast<float>(nValues[4]);
+            }
+            if (nValues[5] != 0) {
+                averages[i][5] /= static_cast<float>(nValues[5]);
             }
 
             // Get the minimum/maximum values for each of the components so that we
@@ -249,7 +255,15 @@ void GuiPerformanceComponent::render() {
                 *(minmaxRendering.first),
                 *(minmaxRendering.second)
             );
-                
+
+            auto minmaxTotal = std::minmax_element(
+                std::begin(entry.totalTime),
+                std::end(entry.totalTime)
+            );
+            minMax[i][5] = std::make_pair(
+                *(minmaxTotal.first),
+                *(minmaxTotal.second)
+            );
 
         }
             
@@ -399,6 +413,24 @@ void GuiPerformanceComponent::render() {
                     renderTime.c_str(),
                     minMax[indices[i]][4].first,
                     minMax[indices[i]][4].second,
+                    ImVec2(0, 40)
+                );
+
+                std::string totalTime = std::to_string(
+                    entry.totalTime[PerformanceLayout::NumberValues - 1]
+                ) + "us";
+
+                ImGui::PlotLines(
+                    fmt::format(
+                        "TotalTime\nAverage: {}us",
+                        averages[indices[i]][5]
+                    ).c_str(),
+                    &entry.totalTime[0],
+                    PerformanceLayout::NumberValues,
+                    0,
+                    totalTime.c_str(),
+                    minMax[indices[i]][5].first,
+                    minMax[indices[i]][5].second,
                     ImVec2(0, 40)
                 );
             }

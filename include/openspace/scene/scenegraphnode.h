@@ -84,6 +84,7 @@ public:
     void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
+    void clearPerformanceTotalTime();
     void updateCamera(Camera* camera) const;
 
     void attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene = UpdateScene::Yes);

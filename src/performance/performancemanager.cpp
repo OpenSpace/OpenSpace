@@ -242,7 +242,8 @@ void PerformanceManager::outputLogs() {
                 node.updateRenderable[i],
                 node.updateRotation[i],
                 node.updateScaling[i],
-                node.updateTranslation[i]
+                node.updateTranslation[i],
+                node.totalTime[i]
             };
             writeData(out, data);
         }
@@ -395,9 +396,6 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();
         PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 
-        // Covert nano to microseconds
-        const float micro = 1000.f;
-
         std::rotate(
             std::begin(entry.renderTime),
             std::next(std::begin(entry.renderTime)),
@@ -432,6 +430,15 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::end(entry.updateRenderable)
         );
         entry.updateRenderable[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeRenderable).count();
+
+        std::rotate(
+            std::begin(entry.totalTime),
+            std::next(std::begin(entry.totalTime)),
+            std::end(entry.totalTime)
+        );
+        entry.totalTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.totalTime).count();
+        // Reset the total after we log it
+        node->clearPerformanceTotalTime();
     }
     _performanceMemory->releaseLock();
     

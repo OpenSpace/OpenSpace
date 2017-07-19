@@ -374,6 +374,10 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     //    child->render(newData);
 }
 
+void SceneGraphNode::clearPerformanceTotalTime() {
+    _performanceRecord.totalTime = std::chrono::nanoseconds(0);
+}
+
 void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
     ghoul_assert(
