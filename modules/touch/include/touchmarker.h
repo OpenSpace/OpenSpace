@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_TOUCH___MARKER___H__
 #define __OPENSPACE_TOUCH___MARKER___H__
 
-#include <modules/touch/include/TuioEar.h>
+#include <modules/touch/include/tuioear.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/rendering/renderable.h>

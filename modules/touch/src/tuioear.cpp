@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/touch/include/TuioEar.h>
+#include <modules/touch/include/tuioear.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>

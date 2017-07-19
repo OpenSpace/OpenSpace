@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/touch/include/TouchInteraction.h>
+#include <modules/touch/include/touchinteraction.h>
 #include <modules/onscreengui/onscreenguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
