@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/touch/ext/levmarq.h>
-#include <modules/touch/include/TuioEar.h>
+#include <modules/touch/include/tuioear.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
