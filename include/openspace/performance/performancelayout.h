@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -45,6 +45,7 @@ struct PerformanceLayout {
         float updateTranslation[NumberValues];
         float updateRotation[NumberValues];
         float updateScaling[NumberValues];
+        float totalTime[NumberValues];
     };
     SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
     int16_t nScaleGraphEntries;

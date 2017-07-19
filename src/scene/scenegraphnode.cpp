@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -169,7 +169,14 @@ SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner("")
     , _parent(nullptr)
     , _scene(nullptr)
-    , _performanceRecord({0, 0, 0, 0, 0})
+    , _performanceRecord({
+            std::chrono::nanoseconds(0),
+            std::chrono::nanoseconds(0),
+            std::chrono::nanoseconds(0),
+            std::chrono::nanoseconds(0),
+            std::chrono::nanoseconds(0),
+            std::chrono::nanoseconds(0)
+            })
     , _renderable(nullptr)
     , _transform {
         std::make_unique<StaticTranslation>(),
@@ -231,6 +238,11 @@ void SceneGraphNode::traversePostOrder(std::function<void(SceneGraphNode*)> fn) 
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
+    auto startUpdate = std::chrono::high_resolution_clock::now();
+    auto endUpdate = startUpdate;
+    if (data.doPerformanceMeasurement) {
+        startUpdate = std::chrono::high_resolution_clock::now();
+    }
     if (_transform.translation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
@@ -240,7 +252,7 @@ void SceneGraphNode::update(const UpdateData& data) {
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeTranslation = (end - start).count();
+            _performanceRecord.updateTimeTranslation = (end - start);
         }
         else {
             _transform.translation->update(data);
@@ -256,7 +268,7 @@ void SceneGraphNode::update(const UpdateData& data) {
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeRotation = (end - start).count();
+            _performanceRecord.updateTimeRotation = (end - start);
         }
         else {
             _transform.rotation->update(data);
@@ -272,7 +284,7 @@ void SceneGraphNode::update(const UpdateData& data) {
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeScaling = (end - start).count();
+            _performanceRecord.updateTimeScaling = (end - start);
         }
         else {
             _transform.scale->update(data);
@@ -308,10 +320,15 @@ void SceneGraphNode::update(const UpdateData& data) {
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeRenderable = (end - start).count();
+            _performanceRecord.updateTimeRenderable = (end - start);
         }
         else
             _renderable->update(newUpdateData);
+    }
+
+    if (data.doPerformanceMeasurement) {
+        endUpdate = std::chrono::high_resolution_clock::now();
+        _performanceRecord.totalTime += (endUpdate - startUpdate);
     }
 }
 
@@ -344,7 +361,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.renderTime = (end - start).count();
+            _performanceRecord.renderTime = (end - start);
+            _performanceRecord.totalTime += (end - start);
         }
         else
             _renderable->render(newData, tasks);
@@ -354,6 +372,10 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
     //for (SceneGraphNode* child : _children)
     //    child->render(newData);
+}
+
+void SceneGraphNode::clearPerformanceTotalTime() {
+    _performanceRecord.totalTime = std::chrono::nanoseconds(0);
 }
 
 void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) {

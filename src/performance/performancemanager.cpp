@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -242,7 +242,8 @@ void PerformanceManager::outputLogs() {
                 node.updateRenderable[i],
                 node.updateRotation[i],
                 node.updateScaling[i],
-                node.updateTranslation[i]
+                node.updateTranslation[i],
+                node.totalTime[i]
             };
             writeData(out, data);
         }
@@ -395,43 +396,49 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();
         PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 
-        // Covert nano to microseconds
-        const float micro = 1000.f;
-
         std::rotate(
             std::begin(entry.renderTime),
             std::next(std::begin(entry.renderTime)),
             std::end(entry.renderTime)
         );
-        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / micro;
+        entry.renderTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.renderTime).count();
         
         std::rotate(
             std::begin(entry.updateTranslation),
             std::next(std::begin(entry.updateTranslation)),
             std::end(entry.updateTranslation)
         );
-        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / micro;
+        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeTranslation).count();
 
         std::rotate(
             std::begin(entry.updateRotation),
             std::next(std::begin(entry.updateRotation)),
             std::end(entry.updateRotation)
         );
-        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / micro;
+        entry.updateRotation[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeRotation).count();
 
         std::rotate(
             std::begin(entry.updateScaling),
             std::next(std::begin(entry.updateScaling)),
             std::end(entry.updateScaling)
         );
-        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / micro;
+        entry.updateScaling[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeScaling).count();
 
         std::rotate(
             std::begin(entry.updateRenderable),
             std::next(std::begin(entry.updateRenderable)),
             std::end(entry.updateRenderable)
         );
-        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / micro;
+        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeRenderable).count();
+
+        std::rotate(
+            std::begin(entry.totalTime),
+            std::next(std::begin(entry.totalTime)),
+            std::end(entry.totalTime)
+        );
+        entry.totalTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.totalTime).count();
+        // Reset the total after we log it
+        node->clearPerformanceTotalTime();
     }
     _performanceMemory->releaseLock();
     
