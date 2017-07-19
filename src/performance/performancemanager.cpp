@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -403,35 +403,35 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::next(std::begin(entry.renderTime)),
             std::end(entry.renderTime)
         );
-        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / micro;
+        entry.renderTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.renderTime).count();
         
         std::rotate(
             std::begin(entry.updateTranslation),
             std::next(std::begin(entry.updateTranslation)),
             std::end(entry.updateTranslation)
         );
-        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / micro;
+        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeTranslation).count();
 
         std::rotate(
             std::begin(entry.updateRotation),
             std::next(std::begin(entry.updateRotation)),
             std::end(entry.updateRotation)
         );
-        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / micro;
+        entry.updateRotation[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeRotation).count();
 
         std::rotate(
             std::begin(entry.updateScaling),
             std::next(std::begin(entry.updateScaling)),
             std::end(entry.updateScaling)
         );
-        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / micro;
+        entry.updateScaling[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeScaling).count();
 
         std::rotate(
             std::begin(entry.updateRenderable),
             std::next(std::begin(entry.updateRenderable)),
             std::end(entry.updateRenderable)
         );
-        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / micro;
+        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeRenderable).count();
     }
     _performanceMemory->releaseLock();
     

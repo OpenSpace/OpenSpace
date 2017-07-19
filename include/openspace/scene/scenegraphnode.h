@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,6 +34,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <chrono>
 
 namespace ghoul { class Dictionary; }
 
@@ -57,11 +58,12 @@ public:
     using UpdateScene = ghoul::Boolean;
 
     struct PerformanceRecord {
-        long long renderTime;  // time in ns
-        long long updateTimeRenderable;  // time in ns
-        long long updateTimeTranslation; // time in ns
-        long long updateTimeRotation;  // time in ns
-        long long updateTimeScaling;  // time in ns
+        std::chrono::nanoseconds renderTime;
+        std::chrono::nanoseconds updateTimeRenderable;
+        std::chrono::nanoseconds updateTimeTranslation;
+        std::chrono::nanoseconds updateTimeRotation;
+        std::chrono::nanoseconds updateTimeScaling;
+        std::chrono::nanoseconds totalTime;
     };
 
     static const std::string RootNodeName;
