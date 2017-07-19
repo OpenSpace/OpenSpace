@@ -547,7 +547,9 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
 }
 
-void LuaConsole::charCallback(unsigned int codepoint, KeyModifier /*modifier*/) {
+void LuaConsole::charCallback(unsigned int codepoint,
+                              [[maybe_unused]] KeyModifier modifier)
+{
     if (!_isVisible) {
         return;
     }
