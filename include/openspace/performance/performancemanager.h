@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -76,9 +76,13 @@ public:
     bool loggingEnabled() const;
 
     PerformanceLayout* performanceData();
+    void clearLogs();
+    void initLogs();
+
 private:
     bool _doPerformanceMeasurements;
     bool _loggingEnabled;
+    bool _clearLogs;
 
     std::string _logDir;
     std::string _prefix;
