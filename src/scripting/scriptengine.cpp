@@ -75,8 +75,6 @@ void ScriptEngine::initialize() {
     addBaseLibrary();
     LDEBUG("Initializing Lua state");
     initializeLuaState(_state);
-    //LDEBUG("Remapping Print functions");
-    //remapPrintFunction();
 }
 
 void ScriptEngine::deinitialize() {}
