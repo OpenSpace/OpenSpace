@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/web_render_handler.h"
+#include "include/webrenderhandler.h"
 
 namespace openspace {
 

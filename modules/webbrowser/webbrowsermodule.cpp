@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <include/openspace/util/factorymanager.h>
-#include <include/screen_space_browser.h>
+#include <include/screenspacebrowser.h>
 #include "webbrowsermodule.h"
 
 namespace {

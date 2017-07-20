@@ -30,7 +30,7 @@
 #include <include/openspace/engine/configurationmanager.h>
 #include <include/wrapper/cef_helpers.h>
 #include <include/cef_browser.h>
-#include <modules/webbrowser/include/event_handler.h>
+#include <modules/webbrowser/include/eventhandler.h>
 
 namespace openspace {
 

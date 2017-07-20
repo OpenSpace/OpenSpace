@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <webbrowsermodule.h>
-#include "include/browser_instance.h"
+#include "include/browserinstance.h"
 
 namespace {
     const char* _loggerCat = "CEF BrowserInstance";

@@ -73,8 +73,8 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
 set(WEBBROWSER_SOURCES
         webbrowsermodule.cpp
-        src/browser_client.cpp
-        src/event_handler.cpp
+    src/browserclient.cpp
+    src/eventhandler.cpp
     )
 set(WEBBROWSER_SOURCES_LINUX
     )
@@ -101,10 +101,10 @@ set(WEBBROWSER_SOURCES
 
 # CEF helper sources
 set(WEBBROWSER_HELPER_SOURCES_MACOSX
-        src/process_helper_mac.cpp
+    src/processhelpermac.cpp
 	)
 set(WEBBROWSER_HELPER_SOURCES_WINDOWS
-        src/process_helper_windows.cpp
+    src/processhelperwindows.cpp
 	)
 APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
 source_group(WebBrowser\\\\helper FILES ${WEBBROWSER_HELPER_SOURCES})
@@ -168,23 +168,23 @@ endif (OS_WINDOWS)
 # Create OpenSpace module.
 set(OPENSPACE_HEADER_FILES
         webbrowsermodule.h
-        include/web_render_handler.h
-        include/browser_client.h
-        include/screen_space_render_handler.h
-        include/screen_space_browser.h
-        include/event_handler.h
-        include/browser_instance.h
+    include/webrenderhandler.h
+    include/browserclient.h
+    include/screenspacerenderhandler.h
+    include/screenspacebrowser.h
+    include/eventhandler.h
+    include/browserinstance.h
     )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
         webbrowsermodule.cpp
-        src/web_render_handler.cpp
-        src/browser_client.cpp
-        src/screen_space_render_handler.cpp
-        src/screen_space_browser.cpp
-        src/event_handler.cpp
-        src/browser_instance.cpp
+    src/webrenderhandler.cpp
+    src/browserclient.cpp
+    src/screenspacerenderhandler.cpp
+    src/screenspacebrowser.cpp
+    src/eventhandler.cpp
+    src/browserinstance.cpp
         )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 

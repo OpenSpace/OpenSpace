@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_RENDER_HANDLER_H
 #define __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_RENDER_HANDLER_H
 
-#include "include/web_render_handler.h"
+#include "include/webrenderhandler.h"
 
 namespace openspace {
 

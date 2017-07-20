@@ -25,7 +25,7 @@
 
 #include <ext/ghoul/include/ghoul/logging/logmanager.h>
 #include <ext/ghoul/ext/cppformat/fmt/format.h>
-#include "include/event_handler.h"
+#include "include/eventhandler.h"
 
 namespace {
     std::string _loggerCat = "WebBrowser:EventHandler";

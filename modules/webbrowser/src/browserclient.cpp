@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 
-#include "include/browser_client.h"
+#include "include/browserclient.h"
 
 namespace openspace {
 

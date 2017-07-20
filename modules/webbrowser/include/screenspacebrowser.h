@@ -33,8 +33,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/opengl/texture.h>
 #include <fmt/format.h>
-#include "include/screen_space_render_handler.h"
-#include "include/browser_instance.h"
+#include "include/screenspacerenderhandler.h"
+#include "include/browserinstance.h"
 
 namespace openspace {
 

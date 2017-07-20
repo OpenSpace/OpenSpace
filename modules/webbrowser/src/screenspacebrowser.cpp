@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/screen_space_browser.h"
+#include "include/screenspacebrowser.h"
 
 
 namespace {
