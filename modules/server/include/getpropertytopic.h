@@ -22,44 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__TOPIC_H
-#define OPENSPACE_MODULES_SERVER__TOPIC_H
+#ifndef OPENSPACE_MODULES_SERVER__GETPROPERTY_TOPIC_H
+#define OPENSPACE_MODULES_SERVER__GETPROPERTY_TOPIC_H
 
-#include <ext/json/json.hpp>
+#include "topic.h"
+#include "connection.h"
 
 namespace openspace {
 
-class Connection;
-
-class Topic {
+class GetPropertyTopic : public Topic {
 public:
-    Topic() {};
-    virtual ~Topic() {};
-    void initialize(Connection* c, size_t t);
-    virtual void handleJson(nlohmann::json json) = 0;
-    virtual bool isDone() = 0;
-
-protected:
-    size_t _topicId;
-    Connection* _connection;
-};
-
-class SetPropertyTopic : public Topic {
-public:
-    SetPropertyTopic() : Topic() {};
-    ~SetPropertyTopic() {};
-    void handleJson(nlohmann::json json) {};
-    bool isDone() { return false; }
-};
-
-class BounceTopic : public Topic {
-public:
-    BounceTopic() : Topic() {};
-    ~BounceTopic() {};
+    GetPropertyTopic();
+    ~GetPropertyTopic() {};
     void handleJson(nlohmann::json json);
-    bool isDone() { return false; }
+    bool isDone();
 };
 
 }
 
-#endif //OPENSPACE_MODULES_SERVER__TOPIC_H
+#endif //OPENSPACE_MODULES_SERVER__GETPROPERTY_TOPIC_H

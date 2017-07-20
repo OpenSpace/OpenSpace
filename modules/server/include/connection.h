@@ -39,6 +39,7 @@
 #include "topic.h"
 #include "authenticationtopic.h"
 #include "subscriptiontopic.h"
+#include "getpropertytopic.h"
 
 namespace openspace {
 

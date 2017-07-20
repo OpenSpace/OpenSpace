@@ -22,44 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__TOPIC_H
-#define OPENSPACE_MODULES_SERVER__TOPIC_H
+#include "include/getpropertytopic.h"
 
-#include <ext/json/json.hpp>
+namespace {
+std::string _loggerCat = "GetPropertyTopic";
+}
 
 namespace openspace {
 
-class Connection;
+GetPropertyTopic::GetPropertyTopic()
+        : Topic() {
+    LDEBUG("Getting property...");
+}
 
-class Topic {
-public:
-    Topic() {};
-    virtual ~Topic() {};
-    void initialize(Connection* c, size_t t);
-    virtual void handleJson(nlohmann::json json) = 0;
-    virtual bool isDone() = 0;
 
-protected:
-    size_t _topicId;
-    Connection* _connection;
-};
+bool GetPropertyTopic::isDone() {
+    return true;
+}
 
-class SetPropertyTopic : public Topic {
-public:
-    SetPropertyTopic() : Topic() {};
-    ~SetPropertyTopic() {};
-    void handleJson(nlohmann::json json) {};
-    bool isDone() { return false; }
-};
-
-class BounceTopic : public Topic {
-public:
-    BounceTopic() : Topic() {};
-    ~BounceTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return false; }
-};
+void GetPropertyTopic::handleJson(nlohmann::json json) {
+    std::string requestedKey = json.at("getProperty").get<std::string>();
 
 }
 
-#endif //OPENSPACE_MODULES_SERVER__TOPIC_H
+} // namespace openspace

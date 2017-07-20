@@ -31,6 +31,7 @@ set(HEADER_FILES
     include/topic.h
     include/authenticationtopic.h
     include/subscriptiontopic.h
+    include/getpropertytopic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -41,6 +42,7 @@ set(SOURCE_FILES
     src/topics/topic.cpp
     src/topics/authenticationtopic.cpp
     src/topics/subscriptiontopic.cpp
+    src/topics/getpropertytopic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
