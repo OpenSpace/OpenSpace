@@ -68,9 +68,9 @@ FramebufferRenderer::FramebufferRenderer()
     : _camera(nullptr)
     , _scene(nullptr)
     , _resolution(glm::vec2(0))
-    , _hdrExposure(0.4)
-    , _hdrBackground(2.8)
-    , _gamma(2.2)
+    , _hdrExposure(0.4f)
+    , _hdrBackground(2.8f)
+    , _gamma(2.2f)
 {}
 
 FramebufferRenderer::~FramebufferRenderer() {}
@@ -338,7 +338,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGBA,
+        GL_RGBA32F,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
         0,
@@ -685,7 +685,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         }
     }
 
-    // g-buffer1
+    // g-buffer
     if (!tasks.deferredcasterTasks.empty()) {
         glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
         GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
@@ -717,7 +717,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     //    //GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
     //    //glDrawBuffers(1, dBuffer);
     //}
-
+    
     for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
 
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
@@ -789,7 +789,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     }
     
 #ifdef _NEW_RENDERING_    
-    if (tasks.deferredcasterTasks.size()) {
+    if (!tasks.deferredcasterTasks.empty()) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
         glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _deferredColorTexture, 0);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -800,7 +800,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
             GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
+        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
         
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     } else {
@@ -873,25 +873,25 @@ void FramebufferRenderer::setNAaSamples(const int nAaSamples) {
 
 void FramebufferRenderer::setHDRExposure(const float hdrExposure) {
     _hdrExposure = hdrExposure;
-    if (_hdrExposure < 0.0) {
+    if (_hdrExposure < 0.0f) {
         LERROR("HDR Exposure constant must be greater than zero.");
-        _hdrExposure = 1.0;
+        _hdrExposure = 1.0f;
     }
 }
 
 void FramebufferRenderer::setHDRBackground(const float hdrBackground) {
     _hdrBackground = hdrBackground;
-    if (_hdrBackground < 0.0) {
+    if (_hdrBackground < 0.0f) {
         LERROR("HDR Background constant must be greater than zero.");
-        _hdrBackground = 1.0;    
+        _hdrBackground = 1.0f;    
     }
 }
 
 void FramebufferRenderer::setGamma(const float gamma) {
     _gamma = gamma;
-    if (_gamma < 0.0) {
+    if (_gamma < 0.0f) {
         LERROR("Gamma value must be greater than zero.");
-        _gamma = 2.2;
+        _gamma = 2.2f;
     }
 }
 
