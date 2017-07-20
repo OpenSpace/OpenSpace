@@ -31,15 +31,18 @@ namespace {
     const char* keyOpacity = "Opacity";
     const char* keyGamma = "Gamma";
     const char* keyMultiplier = "Multiplier";
+    const char* keyOffset = "Offset";
     const char* keyValueBlending = "ValueBlending";
 }
 
 LayerRenderSettings::LayerRenderSettings()
     : properties::PropertyOwner("Settings")
-    , opacity(properties::FloatProperty("Opacity", "opacity", 1.f, 0.f, 1.f))    
-    , gamma(properties::FloatProperty("Gamma", "gamma", 1, 0, 5))
-    , multiplier(properties::FloatProperty("Multiplier", "multiplier", 1.f, 0.f, 20.f))
-    , valueBlending(properties::FloatProperty("Value blending", "valueBlending",
+    , setDefault("setDefault", "Set Default")
+    , opacity(properties::FloatProperty("opacity", "Opacity", 1.f, 0.f, 1.f))    
+    , gamma(properties::FloatProperty("gamma", "Gamma", 1, 0, 5))
+    , multiplier(properties::FloatProperty("multiplier", "Multiplier", 1.f, 0.f, 20.f))
+    , offset(properties::FloatProperty("offset", "Offset", 0.f, -10000.f, 10000.f))
+    , valueBlending(properties::FloatProperty("valueBlending", "Value Blending",
                                                1.f, 0.f, 1.f))
     , useValueBlending(false)
 {
@@ -47,6 +50,10 @@ LayerRenderSettings::LayerRenderSettings()
     addProperty(opacity);
     addProperty(gamma);
     addProperty(multiplier);
+    addProperty(offset);
+    addProperty(setDefault);
+
+    setDefault.onChange([this](){ setDefaultValues(); });
 }
 
 void LayerRenderSettings::setValuesFromDictionary(
@@ -55,19 +62,23 @@ void LayerRenderSettings::setValuesFromDictionary(
     float dictOpacity;
     float dictGamma;
     float dictMultiplier;
+    float dictOffset;
     float dictValueBlending;
     
     if(renderSettingsDict.getValue(keyOpacity, dictOpacity)) {
-        opacity.setValue(dictOpacity);
+        opacity = dictOpacity;
     }
     if(renderSettingsDict.getValue(keyGamma, dictGamma)) {
-        gamma.setValue(dictGamma);
+        gamma = dictGamma;
     }
     if(renderSettingsDict.getValue(keyMultiplier, dictMultiplier)) {
-        multiplier.setValue(dictMultiplier);
+        multiplier = dictMultiplier;
+    }
+    if(renderSettingsDict.getValue(keyOffset, dictOffset)) {
+        multiplier = dictOffset;
     }
     if(renderSettingsDict.getValue(keyValueBlending, dictValueBlending)) {
-        valueBlending.setValue(dictValueBlending);
+        valueBlending = dictValueBlending;
         useValueBlending = true;
     }
 }
@@ -77,6 +88,7 @@ float LayerRenderSettings::performLayerSettings(float currentValue) const {
 
     newValue = glm::sign(newValue) * glm::pow(glm::abs(newValue), gamma);
     newValue = newValue * multiplier;
+    newValue = newValue + offset;
     newValue = newValue * opacity;
 
     return newValue;
@@ -90,6 +102,14 @@ glm::vec4 LayerRenderSettings::performLayerSettings(glm::vec4 currentValue) cons
         performLayerSettings(currentValue.a));
 
     return newValue;
+}
+
+void LayerRenderSettings::setDefaultValues() {
+    opacity = 1.f;
+    gamma = 1.f;
+    multiplier = 1.f;
+    offset = 0.f;
+    valueBlending = 1.f;
 }
 
 } // namespace globebrowsing

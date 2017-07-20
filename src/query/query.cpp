@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
@@ -40,7 +40,7 @@
 namespace openspace {
 
 namespace {
-    const std::string _loggerCat = "Query";
+    const char* _loggerCat = "Query";
 }
 
 Scene* sceneGraph() {
@@ -80,8 +80,9 @@ properties::Property* property(const std::string& uri) {
             return property;
         }
 
-        std::shared_ptr<ScreenSpaceRenderable> ssr = OsEng.renderEngine().screenSpaceRenderable(nameUri);
-        if(ssr){
+        std::shared_ptr<ScreenSpaceRenderable> ssr =
+            OsEng.renderEngine().screenSpaceRenderable(nameUri);
+        if (ssr) {
             properties::Property* property = ssr->property(remainingUri);
             return property;
         }

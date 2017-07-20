@@ -34,6 +34,8 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/timerange.h>
 
+#include <openspace/properties/stringproperty.h>
+
 #include <ghoul/misc/dictionary.h>
 
 #include <memory>
@@ -77,6 +79,15 @@ struct YYYY_MM_DD : public TimeFormat {
 */
 struct YYYYMMDD_hhmmss : public TimeFormat {
     virtual ~YYYYMMDD_hhmmss() override = default;
+    virtual std::string stringify(const Time& t) const override;
+};
+
+/**
+ * Stringifies OpenSpace to the format "YYYYMMDD_hhmm"
+ * Example: 20160908_2305
+ */
+struct YYYYMMDD_hhmm : public TimeFormat {
+    virtual ~YYYYMMDD_hhmm() override = default;
     virtual std::string stringify(const Time& t) const override;
 };
 
@@ -203,8 +214,10 @@ public:
 
     typedef std::string TimeKey;
 
-    std::shared_ptr<TileProvider> getTileProvider(Time t = OsEng.timeManager().time());
-    std::shared_ptr<TileProvider> getTileProvider(TimeKey timekey);
+    std::shared_ptr<TileProvider> getTileProvider(
+        const Time& t = OsEng.timeManager().time());
+    std::shared_ptr<TileProvider> getTileProvider(
+        const TimeKey& timekey);
 
 private:
     /**
@@ -303,8 +316,10 @@ private:
      * Ensures that the TemporalTileProvider is up to date.
      */
     void ensureUpdated();
+  
+    bool readFilePath();
 
-    std::string _datasetFile;
+    properties::StringProperty _filePath;
     std::string _gdalXmlTemplate;
 
     std::unordered_map<TimeKey, std::shared_ptr<TileProvider>> _tileProviderMap;
@@ -316,6 +331,7 @@ private:
         
     TimeFormat* _timeFormat;
     TimeQuantizer _timeQuantizer;
+    bool _successfulInitialization;
 };
 
 } // namespace tileprovider

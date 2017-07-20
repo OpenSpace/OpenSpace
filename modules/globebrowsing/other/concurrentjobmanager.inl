@@ -34,26 +34,28 @@ template<typename P>
 Job<P>::~Job() {}
 
 template<typename P>
-ConcurrentJobManager<P>::ConcurrentJobManager(std::shared_ptr<ThreadPool> pool)
+ConcurrentJobManager<P>::ConcurrentJobManager(ThreadPool pool)
     : threadPool(pool)
 { }
 
 template<typename P>
 void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
-    threadPool->enqueue([this, job]() {
+    threadPool.enqueue([this, job]() {
         job->execute();
+        std::lock_guard<std::mutex> lock(_finishedJobsMutex);
         _finishedJobs.push(job);
     });
 }
 
 template<typename P>
 void ConcurrentJobManager<P>::clearEnqueuedJobs() {
-    threadPool->clearTasks();
+    threadPool.clearTasks();
 }
 
 template<typename P>
 std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
     ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
+    std::lock_guard<std::mutex> lock(_finishedJobsMutex);
     return _finishedJobs.pop();
 }
 

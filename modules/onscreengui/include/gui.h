@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
+#include <modules/onscreengui/include/guifilepathcomponent.h>
 #include <modules/onscreengui/include/guihelpcomponent.h>
 #include <modules/onscreengui/include/guiperformancecomponent.h>
 #include <modules/onscreengui/include/guipropertycomponent.h>
@@ -65,6 +66,7 @@ public:
 
 //protected:
     GuiHelpComponent _help;
+    GuiFilePathComponent _filePath;
     GuiOriginComponent _origin;
     GuiPerformanceComponent _performance;
     GuiPropertyComponent _globalProperty;

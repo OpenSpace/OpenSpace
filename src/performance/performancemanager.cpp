@@ -30,21 +30,22 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/sharedmemory.h>
 #include <ghoul/misc/onscopeexit.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <algorithm>
 #include <cstring>
+#include <iostream>
+#include <fstream>
 
 namespace {
-    const std::string _loggerCat = "PerformanceManager";
+    const char* _loggerCat = "PerformanceManager";
     
-    const std::string GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
+    const char* GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
     // Probably 255 performance blocks per node are enough, so we can get away with
     // 4 bytes (one uint8_t for the number, one uint8_t for the reference count to keep
     // the global memory alive, and 2 bytes to enforce alignment)
     const size_t GlobalSharedMemorySize = 4;
     
-    const int MaximumNumber = 256;
-
     struct GlobalMemory {
         uint8_t number;
         uint8_t referenceCount;
@@ -52,7 +53,7 @@ namespace {
         std::array<uint8_t, 2> alignment;
     };
     
-    const std::string LocalSharedMemoryNameBase = "PerformanceMeasurement_";
+    const char* LocalSharedMemoryNameBase = "PerformanceMeasurement_";
 }
 
 namespace openspace {
@@ -132,12 +133,16 @@ void PerformanceManager::destroyGlobalSharedMemory() {
     
 PerformanceManager::PerformanceManager()
     : _performanceMemory(nullptr)
+    , _tick(0)
+    , _loggingEnabled(false)
+    , _logDir(absPath("${BASE_PATH}"))
+    , _prefix("PM-")
+    , _ext("log")
 {
-    using ghoul::SharedMemory;
     PerformanceManager::createGlobalSharedMemory();
     
     
-    SharedMemory sharedMemory(GlobalSharedMemoryName);
+    ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
     sharedMemory.acquireLock();
     OnExit([&](){sharedMemory.releaseLock();});
     
@@ -153,7 +158,7 @@ PerformanceManager::PerformanceManager()
     const int totalSize = sizeof(PerformanceLayout);
     LINFO("Create shared memory '" + localName + "' of " << totalSize << " bytes");
 
-    if (SharedMemory::exists(localName)) {
+    if (ghoul::SharedMemory::exists(localName)) {
         throw ghoul::RuntimeError(
             "Shared Memory '" + localName + "' block already existed"
         );
@@ -167,6 +172,10 @@ PerformanceManager::PerformanceManager()
 }
 
 PerformanceManager::~PerformanceManager() {
+    if (loggingEnabled()) {
+        outputLogs();
+    }
+
     if (_performanceMemory) {
         ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
         sharedMemory.acquireLock();
@@ -198,13 +207,136 @@ bool PerformanceManager::isMeasuringPerformance() const {
     return _doPerformanceMeasurements;
 }
     
+void PerformanceManager::outputLogs() {
+
+    // Log Layout values
+    PerformanceLayout* layout = performanceData();
+    const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _tick;
+
+    // Log function performance
+    for (size_t n = 0; n < layout->nFunctionEntries; n++) {
+        const auto function = layout->functionEntries[n];
+        const std::string filename = formatLogName(function.name);
+        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
+
+        // Comma separate data
+        for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
+            const std::vector<float> data = { function.time[i] };
+            writeData(out, data);
+        }
+        out.close();
+    }
+
+    // Log scene object performance
+    for (size_t n = 0; n < layout->nScaleGraphEntries; n++) {
+        const auto node = layout->sceneGraphEntries[n];
+
+        // Open file
+        const std::string filename = formatLogName(node.name);
+        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
+        
+        // Comma separate data
+        for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
+            const std::vector<float> data = {
+                node.renderTime[i],
+                node.updateRenderable[i],
+                node.updateRotation[i],
+                node.updateScaling[i],
+                node.updateTranslation[i]
+            };
+            writeData(out, data);
+        }
+        out.close();
+    }
+}
+
+void PerformanceManager::writeData(std::ofstream& out, const std::vector<float>& data) {
+    for (size_t i = 0; i < data.size() - 1; i++) {
+        out << data[i] << ",";
+    }
+    out << data[data.size() - 1] << "\n";
+}
+
+ std::string PerformanceManager::formatLogName(std::string nodeName) {
+    // Replace any colons with dashes
+    std::replace(nodeName.begin(), nodeName.end(), ':', '-');
+    // Replace spaces with underscore
+    std::replace(nodeName.begin(), nodeName.end(), ' ', '_');
+    return  _logDir + "/" + _prefix + nodeName + _suffix + "." + _ext;
+}
+
+void PerformanceManager::logDir(std::string dir) {
+    _logDir = absPath(dir);
+}
+
+std::string PerformanceManager::logDir() const {
+    return _logDir;
+}
+
+void PerformanceManager::prefix(std::string prefix) {
+    _prefix = prefix;
+}
+
+std::string PerformanceManager::prefix() const {
+    return _prefix;
+}
+
+void PerformanceManager::enableLogging() {
+    setLogging(true);
+}
+
+void PerformanceManager::disableLogging() {
+    setLogging(false);
+}
+
+void PerformanceManager::toggleLogging() {
+    setLogging(!_loggingEnabled);
+}
+
+void PerformanceManager::setLogging(bool enabled) {
+    // Create the log directory if it doesn't exist. Do it here, so that it
+    // only tests once each time output is enabled
+    if (enabled) {
+        // If it can't create the directory, it's not logging so set false
+        enabled = createLogDir();
+    }
+
+    _loggingEnabled = enabled;
+}
+
+bool PerformanceManager::createLogDir() {
+    // Done if it exists
+    ghoul::filesystem::Directory dir(_logDir);
+    if (FileSys.directoryExists(dir)) {
+        return true;
+    }
+
+    // Error and set false if can't create
+    try {
+        FileSys.createDirectory(dir, ghoul::filesystem::FileSystem::Recursive::Yes);
+    }
+    catch (const ghoul::filesystem::FileSystem::FileSystemException& e) {
+        LERROR("Could not create log directory: " << e.message);
+        return false;
+    }
+    return true;
+}
+
+bool PerformanceManager::loggingEnabled() const {
+    return _loggingEnabled;
+}
+
 PerformanceLayout* PerformanceManager::performanceData() {
     void* ptr = _performanceMemory->memory();
     return reinterpret_cast<PerformanceLayout*>(ptr);
 }
 
+void PerformanceManager::tick() {
+    _tick = (_tick + 1) % PerformanceLayout::NumberValues;
+}
+
 void PerformanceManager::storeIndividualPerformanceMeasurement
-                                         (std::string identifier, long long microseconds)
+                                          (std::string identifier, long long microseconds)
 {
     PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();
@@ -251,7 +383,11 @@ void PerformanceManager::storeScenePerformanceMeasurements(
 
         memset(layout->sceneGraphEntries[i].name, 0, PerformanceLayout::LengthName);
 #ifdef _MSC_VER
-        strcpy_s(layout->sceneGraphEntries[i].name, node->name().length() + 1, node->name().c_str());
+        strcpy_s(
+            layout->sceneGraphEntries[i].name,
+            node->name().length() + 1,
+            node->name().c_str()
+        );
 #else
         strcpy(layout->sceneGraphEntries[i].name, node->name().c_str());
 #endif
@@ -259,42 +395,51 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();
         PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 
+        // Covert nano to microseconds
+        const float micro = 1000.f;
+
         std::rotate(
             std::begin(entry.renderTime),
             std::next(std::begin(entry.renderTime)),
             std::end(entry.renderTime)
         );
-        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / 1000.f;
+        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / micro;
         
         std::rotate(
             std::begin(entry.updateTranslation),
             std::next(std::begin(entry.updateTranslation)),
             std::end(entry.updateTranslation)
         );
-        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / 1000.f;
+        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / micro;
 
         std::rotate(
             std::begin(entry.updateRotation),
             std::next(std::begin(entry.updateRotation)),
             std::end(entry.updateRotation)
         );
-        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / 1000.f;
+        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / micro;
 
         std::rotate(
             std::begin(entry.updateScaling),
             std::next(std::begin(entry.updateScaling)),
             std::end(entry.updateScaling)
         );
-        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / 1000.f;
+        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / micro;
 
         std::rotate(
             std::begin(entry.updateRenderable),
             std::next(std::begin(entry.updateRenderable)),
             std::end(entry.updateRenderable)
         );
-        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / 1000.f;
+        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / micro;
     }
     _performanceMemory->releaseLock();
+    
+    if (_loggingEnabled && _tick == PerformanceLayout::NumberValues - 1) {
+        outputLogs();
+    }
+
+    tick();
 }
 
 } // namespace performance

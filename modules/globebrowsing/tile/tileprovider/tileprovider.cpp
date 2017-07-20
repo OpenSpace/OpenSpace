@@ -34,10 +34,6 @@
 
 #include <climits>
 
-namespace {
-    const char* KeyType = "Type";
-}
-
 namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
@@ -45,12 +41,15 @@ namespace tileprovider {
 unsigned int TileProvider::_numTileProviders = 0;
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
+    layergroupid::TypeID layerTypeID,
     const ghoul::Dictionary& dictionary)
 {
-    std::string type = "LRUCaching";
-    dictionary.getValue(KeyType, type);
+    std::string type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();
     std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
+    if (!result) {
+        throw ghoul::RuntimeError("Unable to create tile provider");
+    }
     return result;
 }
 

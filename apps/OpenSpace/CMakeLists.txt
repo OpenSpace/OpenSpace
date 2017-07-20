@@ -84,10 +84,13 @@ if (OPENSPACE_SPOUT_SUPPORT)
     set(SPOUT_INCLUDE_DIRS ${OPENSPACE_APPS_DIR}/OpenSpace/ext/spout)
     set(SPOUT_LIBRARY ${OPENSPACE_APPS_DIR}/OpenSpace/ext/spout/SpoutLibrary.lib)
     set(SPOUT_DEFINITIONS "OPENSPACE_HAS_SPOUT")
+
+    set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
+
 endif ()
 
 ########################
-#  Spout section  end  #
+#  Spout section end   #
 ########################
 
 add_executable(${APPLICATION_NAME}
@@ -96,7 +99,7 @@ add_executable(${APPLICATION_NAME}
     ${RESOURCE_FILE}
 )
 if (OPENSPACE_SPOUT_SUPPORT)
-    copy_files(
+    ghl_copy_files(
         ${APPLICATION_NAME}
         ${OPENSPACE_APPS_DIR}/OpenSpace/ext/spout/SpoutLibrary.dll
     )

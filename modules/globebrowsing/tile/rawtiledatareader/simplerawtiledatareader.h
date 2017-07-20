@@ -54,7 +54,7 @@ public:
 
     // Public virtual function overloading
     virtual void reset() override;
-    virtual int maxChunkLevel() override;
+    virtual int maxChunkLevel() const override;
     virtual float noDataValueAsFloat() const override;
     virtual int rasterXSize() const override;
     virtual int rasterYSize() const override;

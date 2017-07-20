@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * GHOUL                                                                                 *
 * General Helpful Open Utility Library                                                  *
@@ -36,7 +36,7 @@ namespace globebrowsing {
 class TextureArray {
 public:
 	TextureArray(glm::uvec3 dimensions, int size, 
-		GLint format = GL_RGBA, GLint internalFormat = GL_RGBA8, GLenum dataType = GL_UNSIGNED_BYTE, 
+		GLint format = (GLint)GL_RGBA, GLint internalFormat = (GLint)GL_RGBA8, GLenum dataType = GL_UNSIGNED_BYTE, 
 		bool allocateData = true);
 
 	//~TextureArray();

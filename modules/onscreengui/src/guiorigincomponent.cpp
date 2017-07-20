@@ -25,7 +25,7 @@
 #include <modules/onscreengui/include/guiorigincomponent.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -42,7 +42,7 @@ GuiOriginComponent::GuiOriginComponent()
 {}
 
 void GuiOriginComponent::render() {
-    SceneGraphNode* currentFocus = OsEng.interactionHandler().focusNode();
+    SceneGraphNode* currentFocus = OsEng.navigationHandler().focusNode();
 
     std::vector<SceneGraphNode*> nodes =
         OsEng.renderEngine().scene()->allSceneGraphNodes();
@@ -70,7 +70,7 @@ void GuiOriginComponent::render() {
     bool hasChanged = ImGui::Combo("Origin", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.origin', '" +
+            "openspace.setPropertyValue('NavigationHandler.origin', '" +
             nodes[currentPosition]->name() + "');",
             scripting::ScriptEngine::RemoteScripting::Yes
         );

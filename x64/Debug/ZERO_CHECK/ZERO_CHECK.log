@@ -1,0 +1,227 @@
+﻿  Checking Build System
+  CMake does not need to re-run because F:/develop/OpenSpace/build/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/glbinding/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/glbinding/source/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/glbinding/source/codegeneration/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/glbinding/source/glbinding/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/glbinding/source/examples/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/glbinding/source/tools/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/glbinding/docs/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/glbinding/deploy/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/lz4/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/lua/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/assimp/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/assimp/contrib/zlib/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/assimp/code/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/cppformat/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/cppformat/fmt/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/stackwalker/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/freetype2/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/googletest/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/ghoul/ext/googletest/googletest/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/glew/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/glfw/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/glfw/src/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/lpng/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/lpng/zlib/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/libjpeg-turbo/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/tinyxml2/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/vrpn/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/vrpn/quat/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/sgct/src/deps/vrpn/client_src/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/ext/spice/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/apps/Launcher/ext/libtorrent/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/modules/base/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/modules/debugging/CMakeFiles/generate.stamp is up-to-date.
+  CMake does not need to re-run because F:/develop/OpenSpace/build/modules/space/CMakeFiles/generate.stamp is up-to-date.
+  CMake is re-running because F:/develop/OpenSpace/build/modules/globebrowsing/CMakeFiles/generate.stamp is out-of-date.
+    the file 'F:/develop/OpenSpace/modules/globebrowsing/CMakeLists.txt'
+    is newer than 'F:/develop/OpenSpace/build/modules/globebrowsing/CMakeFiles/generate.stamp.depend'
+    result='-1'
+  -- Generating OpenSpace project
+  -- Generating Ghoul project
+  -- Could NOT find cppcheck (missing: cppcheck_EXECUTABLE) 
+  -- Check cppcheck skipped: cppcheck not found
+  -- Could NOT find clang_tidy (missing: clang_tidy_EXECUTABLE) 
+  -- Check clang-tidy skipped: clang-tidy not found
+  Command update skipped: python not found
+  Command generate skipped: python not found
+  -- Lib glbinding
+  -- Looking for DirectX...
+  -- DirectX_PREFIX_PATH changed.
+  -- Found DirectX: C:/Program Files (x86)/Windows Kits/10/Lib/10.0.15063.0/um/x64/d3d9.lib
+  -- DX lib dir: C:/Program Files (x86)/Windows Kits/10/Lib/10.0.15063.0/um/x64
+  -- Looking for ZLIB...
+  -- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE) 
+  -- Could not locate ZLIB
+  -- compiling zlib from souces
+  -- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE) 
+  -- Could NOT find rt (missing: RT_LIBRARY) 
+  -- Enabled formats: AMF 3DS AC ASE ASSBIN ASSXML B3D BVH COLLADA DXF CSM HMP IRRMESH IRR LWO LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OBJ OGRE OPENGEX PLY MS3D COB BLEND IFC XGL FBX Q3D Q3BSP RAW SIB SMD STL TERRAGEN 3D X X3D GLTF 3MF
+  -- Disabled formats:
+  -- CMake version: 3.9.0
+  -- Version: 4.0.0
+  -- Build type: Release
+  -- Could NOT find SOIL (missing: SOIL_LIBRARIES SOIL_INCLUDE_DIRS) 
+  -- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE) 
+  -- Creating directory F:/develop/OpenSpace/build/ext/ghoul/ext/freetype2/include/freetype/config
+  -- Creating file F:/develop/OpenSpace/build/ext/ghoul/ext/freetype2/include/freetype/config/ftconfig.h
+  -- Creating file F:/develop/OpenSpace/build/ext/ghoul/ext/freetype2/include/freetype/config/ftoption.h
+  -- Could NOT find PythonInterp (missing: PYTHON_EXECUTABLE) 
+  -- SGCT target path: F:/develop/OpenSpace/build/ext/sgct
+  -- SGCT lib path: F:/develop/OpenSpace/build/ext/sgct/lib/msvc15_x64
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/BaseViewport.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/ClusterManager.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/CorrectionMesh.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/Engine.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/FisheyeProjection.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/Font.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/FontManager.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/Image.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/MessageHandler.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/NetworkManager.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/NonLinearProjection.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/OffScreenBuffer.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/PostFX.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/ReadConfig.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTMutexManager.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTNetwork.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTNode.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTProjection.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTProjectionPlane.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTSettings.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTTracker.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTTrackingDevice.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTTrackingManager.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTUser.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTVersion.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SGCTWindow.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/ScreenCapture.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/Shader.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/ShaderManager.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/ShaderProgram.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SharedData.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SharedDataTypes.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SphericalMirrorProjection.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/SpoutOuputProjection.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/Statistics.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/TextureManager.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/Touch.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/Viewport.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/freetype.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/utils/SGCTBox.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/utils/SGCTDome.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/utils/SGCTDomeGrid.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/utils/SGCTPlane.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/src/sgct/utils/SGCTSphere.cpp
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/BaseViewport.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/ClusterManager.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/CorrectionMesh.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/Engine.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/FisheyeProjection.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/Font.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/FontManager.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/Frustum.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/Image.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/MessageHandler.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/NetworkManager.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/NonLinearProjection.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/OffScreenBuffer.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/PostFX.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/ReadConfig.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTConfig.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTMutexManager.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTNetwork.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTNode.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTProjection.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTProjectionPlane.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTSettings.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTTracker.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTTrackingDevice.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTTrackingManager.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTUser.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTVersion.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SGCTWindow.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/ScreenCapture.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/Shader.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/ShaderData.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/ShaderManager.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/ShaderProgram.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SharedData.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SharedDataTypes.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SphericalMirrorProjection.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/SpoutOutputProjection.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/Statistics.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/TextureManager.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/Touch.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/Viewport.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/freetype.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/helpers/SGCTCPPEleven.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/helpers/SGCTPortedFunctions.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/helpers/SGCTStringFunctions.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/helpers/SGCTVertexData.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/ogl_headers.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/shaders/SGCTInternalFisheyeShaders.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/shaders/SGCTInternalFisheyeShaders_cubic.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/shaders/SGCTInternalFisheyeShaders_modern.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/shaders/SGCTInternalFisheyeShaders_modern_cubic.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/shaders/SGCTInternalShaders.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/shaders/SGCTInternalShaders_modern.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/shaders/SGCTInternalSphericalProjectionShaders.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/shaders/SGCTInternalSphericalProjectionShaders_modern.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/utils/SGCTBox.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/utils/SGCTDome.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/utils/SGCTDomeGrid.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/utils/SGCTPlane.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct/utils/SGCTSphere.h
+  -- Adding file: F:/develop/OpenSpace/ext/sgct/include/sgct.h
+  -- Could NOT find Vulkan (missing: VULKAN_LIBRARY VULKAN_INCLUDE_DIR) 
+  -- Using Win32 for window creation
+  CMake Warning (dev) at ext/sgct/src/deps/zlib/CMakeLists.txt:176 (add_library):
+    Policy CMP0002 is not set: Logical target names must be globally unique.
+    Run "cmake --help-policy CMP0002" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  -- Arithmetic encoding support enabled
+  -- Arithmetic decoding support enabled
+  -- TurboJPEG C wrapper enabled
+  -- In-memory source/destination managers enabled
+  -- 64-bit build
+  -- Not using SIMD acceleration
+  -- Boost version: 1.64.0
+  -- Found the following Boost libraries:
+  --   system
+  --   chrono
+  --   date_time
+  --   thread
+  --   atomic
+  -- Applications:
+  -- 	Launcher (Link: ON)
+  -- 	OpenSpace (Link: ON)
+  -- Included modules:
+  -- 	base
+  -- 	debugging
+  -- 	space
+  -- 	globebrowsing
+  -- 	newhorizons
+  -- 	onscreengui
+  -- 	touch
+  -- Configuring module Base: openspace-module-base
+  -- Configuring module Debugging: openspace-module-debugging
+  -- Configuring module Space: openspace-module-space
+  -- Configuring module GlobeBrowsing: openspace-module-globebrowsing
+  -- Link: openspace-module-globebrowsing <- openspace-module-debugging
+  -- Link: openspace-module-globebrowsing <- openspace-module-space
+  -- Configuring module NewHorizons: openspace-module-newhorizons
+  -- Link: openspace-module-newhorizons <- openspace-module-space
+  -- Configuring module OnScreenGUI: openspace-module-onscreengui
+  -- Generating Imgui project
+  -- Configuring module Touch: openspace-module-touch
+  -- Generating libTUIO11 project
+  -- Configuring done
+  -- Generating done
+  -- Build files have been written to: F:/develop/OpenSpace/build

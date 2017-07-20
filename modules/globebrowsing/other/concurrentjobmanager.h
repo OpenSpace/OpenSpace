@@ -28,6 +28,8 @@
 #include <modules/globebrowsing/other/concurrentqueue.h>
 #include <modules/globebrowsing/other/threadpool.h>
 
+#include <mutex>
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -49,7 +51,7 @@ struct Job {
 template<typename P>
 class ConcurrentJobManager {
 public:
-    ConcurrentJobManager(std::shared_ptr<ThreadPool> pool);
+    ConcurrentJobManager(ThreadPool pool);
 
     void enqueueJob(std::shared_ptr<Job<P>> job);
 
@@ -61,7 +63,8 @@ public:
 
 private:
     ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-    std::shared_ptr<ThreadPool> threadPool;
+    std::mutex _finishedJobsMutex;
+    ThreadPool threadPool;
 };
 
 } // namespace globebrowsing

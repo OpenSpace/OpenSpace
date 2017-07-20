@@ -32,25 +32,22 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <openspace/scene/scene.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderer.h>
-
-#include <openspace/interaction/luaconsole.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/rendering/raycastermanager.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/font/font.h>
@@ -137,6 +134,14 @@ RenderEngine::RenderEngine()
         if (_performanceMeasurements) {
             if (!_performanceManager) {
                 _performanceManager = std::make_unique<performance::PerformanceManager>();
+                const std::string KeyLogDir = ConfigurationManager::KeyLogging + "." + ConfigurationManager::PartLogDir;
+                const std::string KeyPrefix = ConfigurationManager::KeyLogging + "." + ConfigurationManager::PartLogPerformancePrefix;
+                if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyLogDir)) {
+                    _performanceManager->logDir(OsEng.configurationManager().value<std::string>(KeyLogDir));
+                }
+                if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyPrefix)) {
+                    _performanceManager->prefix(OsEng.configurationManager().value<std::string>(KeyPrefix));
+                }
             }
         }
         else {
@@ -311,7 +316,7 @@ void RenderEngine::deinitialize() {
 }
 
 void RenderEngine::updateScene() {
-	const Time& currentTime = OsEng.timeManager().time();
+    const Time& currentTime = OsEng.timeManager().time();
     _scene->update({
         { glm::dvec3(0), glm::dmat3(1), 1.0 },
         currentTime,
@@ -485,9 +490,9 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::postDraw() {
-	Time& currentTime = OsEng.timeManager().time();
+    Time& currentTime = OsEng.timeManager().time();
     if (currentTime.timeJumped()) {
-		currentTime.setTimeJumped(false);
+        currentTime.setTimeJumped(false);
     }
 
     if (_shouldTakeScreenshot) {

@@ -179,7 +179,9 @@ int property_setValueSingle(lua_State* L) {
         for (properties::Property* prop : allProperties()) {
             std::string propFullId = prop->fullyQualifiedIdentifier();
             //Look for a match in the uri with the group name (first term) removed
-            int propMatchLength = propFullId.length() - pathRemainderToMatch.length();
+            int propMatchLength = 
+                static_cast<int>(propFullId.length()) -
+                static_cast<int>(pathRemainderToMatch.length());
 
             if (propMatchLength >= 0) {
                 std::string thisPropMatchId = propFullId.substr(propMatchLength);
@@ -289,7 +291,7 @@ int property_setValueRegex(lua_State* L) {
     }
     catch (const std::regex_error& e) {
         LERRORC("property_setValueRegex", "Malformed regular expression: '"
-            << regex << "'");
+            << regex << "':" << e.what());
     }
 
     return 0;

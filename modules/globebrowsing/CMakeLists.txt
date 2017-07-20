@@ -1,4 +1,4 @@
-##########################################################################################
+﻿##########################################################################################
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
@@ -25,6 +25,8 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.h
+    
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
@@ -101,28 +103,30 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuheightlayer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayeradjustment.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayerrendersettings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroupid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgenerationtask.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudinfo.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/collapsedmeshgeneration.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudfilter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/medianpointcloudfilter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/fastbilateralpointcloudfilter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/randompointcloudfilter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/levelofdetail.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgenerationtask.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudinfo.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/collapsedmeshgeneration.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudfilter.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/medianpointcloudfilter.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/fastbilateralpointcloudfilter.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/randompointcloudfilter.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/levelofdetail.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
 
@@ -139,8 +143,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/defaulttileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
@@ -160,6 +163,9 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule_lua.inl
+
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.cpp
 
@@ -218,25 +224,27 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuheightlayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayeradjustment.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayerrendersettings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputiledepthtransform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgenerationtask.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/collapsedmeshgeneration.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudfilter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/medianpointcloudfilter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/fastbilateralpointcloudfilter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/randompointcloudfilter.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgenerationtask.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/collapsedmeshgeneration.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudfilter.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/medianpointcloudfilter.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/fastbilateralpointcloudfilter.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/tasks/randompointcloudfilter.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
 
@@ -249,8 +257,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/defaulttileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
@@ -286,9 +293,12 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilefragcolor.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexheight.hglsl
 	${CMAKE_CURRENT_SOURCE_DIR}/shaders/fullsubsite_vs.glsl
 	${CMAKE_CURRENT_SOURCE_DIR}/shaders/fullsubsite_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tileheight.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexskirt.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globeshading.hglsl
+
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
@@ -300,6 +310,8 @@ create_new_module(
 )
 
 option(OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL "Use GDAL" ON)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
     if (WIN32)
@@ -313,7 +325,7 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
             openspace-module-globebrowsing
             ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
         )
-        set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal201.dll" PARENT_SCOPE)
+        set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal202.dll" PARENT_SCOPE)
     else (WIN32)
         find_package(GDAL REQUIRED)
 

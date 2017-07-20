@@ -33,7 +33,7 @@ namespace globebrowsing {
 namespace tileprovider {
 
 TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dict)
-    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::ID::ColorLayers))
+    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers))
 { }
 
 void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&

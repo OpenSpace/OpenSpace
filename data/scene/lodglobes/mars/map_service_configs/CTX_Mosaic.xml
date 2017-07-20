@@ -12,10 +12,6 @@
     <BlockSizeX>256</BlockSizeX>
     <BlockSizeY>256</BlockSizeY>
   </DataWindow>
-  <Cache>
-    <Path>./GDAL_CTX_cache</Path>
-    <Depth>3</Depth>
-    <Extension>.png</Extension>
-  </Cache>
-  <OfflineMode>false</OfflineMode>
+  <ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>
+  <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
 </GDAL_WMS>

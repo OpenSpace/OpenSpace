@@ -325,7 +325,7 @@ void RenderableFieldlines::loadSeedPoints() {
             loadSeedPointsFromTable();
             break;
         default:
-            ghoul_assert(false, "Missing case label");
+            throw ghoul::MissingCaseException();
     }
 }
 

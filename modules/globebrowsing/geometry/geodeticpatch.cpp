@@ -92,7 +92,7 @@ Geodetic2 GeodeticPatch::getCorner(Quad q) const {
         case NORTH_EAST: return Geodetic2(maxLat(), maxLon());// northEastCorner();
         case SOUTH_WEST: return Geodetic2(minLat(), minLon());// southWestCorner();
         case SOUTH_EAST: return Geodetic2(minLat(), maxLon());// southEastCorner();
-        default:         ghoul_assert(false, "Missing case label");
+        default:         throw ghoul::MissingCaseException();
     }
 }
 

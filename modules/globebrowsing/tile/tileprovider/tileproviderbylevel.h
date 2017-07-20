@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
+#include <openspace/properties/stringproperty.h>
+
 namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {

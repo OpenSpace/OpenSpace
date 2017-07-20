@@ -27,6 +27,7 @@
 
 #include <list>
 #include <unordered_map>
+#include <vector>
 
 namespace openspace {
 namespace globebrowsing {
@@ -69,6 +70,7 @@ public:
      */
     Item popLRU();
     size_t size() const;
+    size_t maximumCacheSize() const;
 
 	/**
 	 * Return the whole list of.

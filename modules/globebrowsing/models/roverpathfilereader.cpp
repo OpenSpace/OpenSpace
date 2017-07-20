@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -28,7 +28,8 @@
 
 #include <fstream>
 #include <gdal_priv.h>
-#include "ogrsf_frmts.h"
+//#include "ogrsf_frmts.h"
+#include "ogr_feature.h"
 
 template<typename Out>
 static void split(const std::string &s, char delim, Out result) {
@@ -73,9 +74,10 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractAllSubsites(co
 	}
 
 	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
-
+    
 	OGRFeature *poFeature;
 	poLayer->ResetReading();
+    
 
 	double siteLat;
 	double siteLon;

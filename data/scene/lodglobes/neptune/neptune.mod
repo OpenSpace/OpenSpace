@@ -31,8 +31,6 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = {24764000, 24764000, 24314000},
-            CameraMinHeight = 300,
-            InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
@@ -40,15 +38,8 @@ return {
                         Name = "Texture",
                         FilePath = "textures/neptune.jpg",
                         Enabled = true,
-                        TilePixelSize = 256,
                     },
                 },
-                GrayScaleLayers = { },
-                GrayScaleColorOverlays = { },
-                NightLayers = { },
-                WaterMasks = { },
-                ColorOverlays = { },
-                HeightLayers = { },
             },
         },
     },

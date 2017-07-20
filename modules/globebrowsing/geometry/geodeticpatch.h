@@ -27,11 +27,10 @@
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/quad.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 namespace openspace {
 namespace globebrowsing {
-    
-struct TileIndex;
 
 class GeodeticPatch {
 public:

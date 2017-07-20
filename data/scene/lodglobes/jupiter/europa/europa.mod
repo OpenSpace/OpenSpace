@@ -23,8 +23,6 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = {1561000, 1561000, 1561000},
-            CameraMinHeight = 300,
-            InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
@@ -32,15 +30,8 @@ return {
                         Name = "Europa Texture",
                         FilePath = "textures/europa.jpg",
                         Enabled = true,
-                        TilePixelSize = 256,
                     },
                 },
-                GrayScaleLayers = { },
-                GrayScaleColorOverlays = { },
-                NightLayers = { },
-                WaterMasks = { },
-                ColorOverlays = { },
-                HeightLayers = { },
             },
         }
     },

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -37,8 +37,8 @@ namespace openspace {
 namespace globebrowsing {
 
 AsyncSurfaceModelProvider::AsyncSurfaceModelProvider(Renderable* parent)
-	: _diskToRamJobManager(std::make_shared<LRUThreadPool<uint64_t>>(1, 20))
-	, _ramToGpuJobManager(std::make_shared<LRUThreadPool<uint64_t>>(1, 20))
+	: _diskToRamJobManager(LRUThreadPool<uint64_t>(1, 20))
+	, _ramToGpuJobManager(LRUThreadPool<uint64_t>(1, 20))
 	, _parent(parent)
 {}
 

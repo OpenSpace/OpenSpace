@@ -1,0 +1,3 @@
+﻿  keybindingmanager.cpp
+wcharproperty.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+  libOpenSpace.vcxproj -> F:\develop\OpenSpace\bin\lib\Debug\libOpenSpace.lib

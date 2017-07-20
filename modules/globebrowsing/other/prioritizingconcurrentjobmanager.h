@@ -29,6 +29,8 @@
 #include <modules/globebrowsing/other/lruthreadpool.h>
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 
+#include <mutex>
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -41,7 +43,7 @@ namespace globebrowsing {
 template<typename P, typename KeyType>
 class PrioritizingConcurrentJobManager {
 public:
-    PrioritizingConcurrentJobManager(std::shared_ptr<LRUThreadPool<KeyType>> pool);
+    PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);
 
     /**
      * Enqueues a job which is identified using a given key
@@ -83,8 +85,10 @@ public:
 
 private:
     ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
+    std::mutex _finishedJobsMutex;
     /// An LRU thread pool is used since the jobs can be bumped and hence prioritized.
-    std::shared_ptr<LRUThreadPool<KeyType>> _threadPool;
+    LRUThreadPool<KeyType> _threadPool;
+    
 };
 
 } // namespace globebrowsing

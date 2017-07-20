@@ -62,6 +62,7 @@ private:
     GPUData<float> gpuOpacity;
     GPUData<float> gpuGamma;
     GPUData<float> gpuMultiplier;
+    GPUData<float> gpuOffset;
 
     // Optional
     GPUData<float> gpuValueBlending;

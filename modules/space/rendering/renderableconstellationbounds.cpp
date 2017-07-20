@@ -79,13 +79,6 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
                 "abbreviations and full name of the constellation. If the file is "
                 "omitted, the abbreviations are used as the full names.",
                 Optional::Yes
-            },
-            {
-                KeyReferenceFrame,
-                new StringVerifier,
-                "The reference frame in which the constellation points are stored in. "
-                "Defaults to <code>J2000< / code>",
-                Optional::Yes
             }
         }
     };
@@ -99,7 +92,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     , _constellationFilename("")
     , _distance("distance", "Distance to the celestial Sphere", 15.f, 0.f, 30.f)
     , _constellationSelection("constellationSelection", "Constellation Selection")
-    , _originReferenceFrame("")
     , _vao(0)
     , _vbo(0)
 {
@@ -113,13 +105,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 
     if (dictionary.hasKey(KeyConstellationFile)) {
         _constellationFilename = dictionary.value<std::string>(KeyConstellationFile);
-    }
-
-    if (dictionary.hasKey(KeyReferenceFrame)) {
-        _originReferenceFrame = dictionary.value<std::string>(KeyReferenceFrame);
-    }
-    else {
-        _originReferenceFrame = DefaultReferenceFrame;
     }
 
     addProperty(_distance);
@@ -189,9 +174,15 @@ void RenderableConstellationBounds::render(const RenderData& data) {
 
     setPscUniforms(*_program.get(), data.camera, data.position);
 
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+
     _program->setUniform("exponent", _distance);
     _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _program->setUniform("ModelTransform", glm::mat4(glm::dmat4(_stateMatrix)));
+    _program->setUniform("ModelTransform", glm::mat4(modelTransform));
 
     glBindVertexArray(_vao);
     for (const ConstellationBound& bound : _constellationBounds) {
@@ -205,14 +196,6 @@ void RenderableConstellationBounds::render(const RenderData& data) {
     }
     glBindVertexArray(0);
     _program->deactivate();
-}
-
-void RenderableConstellationBounds::update(const UpdateData& data) {
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix(
-        _originReferenceFrame,
-        "GALACTIC",
-        data.time.j2000Seconds()
-    );
 }
 
 bool RenderableConstellationBounds::loadVertexFile() {

@@ -104,9 +104,11 @@ getTilesAndSettingsUnsorted(const LayerGroup& layerGroup,
 {
     std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
     for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
-        tilesAndSettings.push_back({
-            layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings()
-        });
+        if (layer->tileProvider()) {
+            tilesAndSettings.push_back({
+                layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings()
+            });
+        }
     }
     std::reverse(tilesAndSettings.begin(), tilesAndSettings.end());
     return tilesAndSettings;
