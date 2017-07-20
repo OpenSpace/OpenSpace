@@ -249,6 +249,7 @@ void PerformanceManager::outputLogs() {
                 node.updateRotation[i],
                 node.updateScaling[i],
                 node.updateTranslation[i],
+                node.updateSceneGraphNode[i],
                 node.totalTime[i]
             };
             writeData(out, data);
@@ -443,6 +444,13 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         entry.updateRenderable[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeRenderable).count();
 
         std::rotate(
+            std::begin(entry.updateSceneGraphNode),
+            std::next(std::begin(entry.updateSceneGraphNode)),
+            std::end(entry.updateSceneGraphNode)
+        );
+        entry.updateSceneGraphNode[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateSceneGraphNode).count();
+
+        std::rotate(
             std::begin(entry.totalTime),
             std::next(std::begin(entry.totalTime)),
             std::end(entry.totalTime)
@@ -484,7 +492,7 @@ void PerformanceManager::initLogs() {
     for (size_t n = 0; n < layout->nScaleGraphEntries; n++) {
         const std::string filename = formatLogName(layout->sceneGraphEntries[n].name);
         std::ofstream out(absPath(filename), std::ofstream::out | std::ofstream::trunc);
-        out << "render,updateRenderable,updateRotation,updateScaling,updateTranslation,totalTime\n";
+        out << "render,updateRenderable,updateRotation,updateScaling,updateTranslation,updateSceneGraphNode,totalTime\n";
     }
 }
 

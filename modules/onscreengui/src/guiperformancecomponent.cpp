@@ -47,7 +47,9 @@ namespace {
         UpdateScaling = 2,
         UpdateRender = 3,
         Render = 4,
-        Total = 5
+        Total = 5,
+        UpdateSceneGraphNode = 6,
+        TotalTime = 7
     };
 }
 
@@ -56,7 +58,7 @@ namespace gui {
 
 GuiPerformanceComponent::GuiPerformanceComponent()
     : GuiComponent("PerformanceComponent")
-    , _sortingSelection("sortingSelection", "Sorting", -1, -1, 6)
+    , _sortingSelection("sortingSelection", "Sorting", -1, -1, 7)
     , _sceneGraphIsEnabled("showSceneGraph", "Show Scene Graph Measurements", false)
     , _functionsIsEnabled("showFunctions", "Show Function Measurements", false)
     , _outputLogs("outputLogs", "Output Logs", false)
@@ -135,9 +137,19 @@ void GuiPerformanceComponent::render() {
             static_cast<int>(Sorting::Render)
         );
         ImGui::RadioButton(
-            "TotalTime",
+            "Total",
             &sorting,
             static_cast<int>(Sorting::Total)
+        );
+        ImGui::RadioButton(
+            "UpdateSceneGraphNode",
+            &sorting,
+            static_cast<int>(Sorting::UpdateSceneGraphNode)
+        );
+        ImGui::RadioButton(
+            "TotalTime",
+            &sorting,
+            static_cast<int>(Sorting::TotalTime)
         );
         _sortingSelection = sorting;
 
@@ -152,12 +164,14 @@ void GuiPerformanceComponent::render() {
         // updateScaling
         // UpdateRender
         // RenderTime
-        std::vector<std::array<float, 6>> averages(
+        // UpdateSceneGraphNode
+        // TotalTime
+        std::vector<std::array<float, 7>> averages(
             layout->nScaleGraphEntries,
-            { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f }
+            { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f }
         );
             
-        std::vector<std::array<std::pair<float, float>, 6>> minMax(
+        std::vector<std::array<std::pair<float, float>, 7>> minMax(
             layout->nScaleGraphEntries
         );
             
@@ -165,7 +179,7 @@ void GuiPerformanceComponent::render() {
             const PerformanceLayout::SceneGraphPerformanceLayout& entry =
                 layout->sceneGraphEntries[i];
 
-            int nValues[6] = { 0, 0, 0, 0, 0, 0 };
+            int nValues[7] = { 0, 0, 0, 0, 0, 0, 0};
                 
             // Compute the averages and count the number of values so we don't divide
             // by 0 later
@@ -185,9 +199,12 @@ void GuiPerformanceComponent::render() {
                 averages[i][4] += entry.renderTime[j];
                 if (entry.renderTime[j] != 0.f)
                     ++(nValues[4]);
-                averages[i][5] += entry.totalTime[j];
-                if (entry.totalTime[j] != 0.f)
+                averages[i][5] += entry.updateSceneGraphNode[j];
+                if (entry.updateSceneGraphNode[j] != 0.f)
                     ++(nValues[5]);
+                averages[i][6] += entry.totalTime[j];
+                if (entry.totalTime[j] != 0.f)
+                    ++(nValues[6]);
             }
 
             if (nValues[0] != 0) {
@@ -207,6 +224,9 @@ void GuiPerformanceComponent::render() {
             }
             if (nValues[5] != 0) {
                 averages[i][5] /= static_cast<float>(nValues[5]);
+            }
+            if (nValues[6] != 0) {
+                averages[i][6] /= static_cast<float>(nValues[6]);
             }
 
             // Get the minimum/maximum values for each of the components so that we
@@ -256,11 +276,20 @@ void GuiPerformanceComponent::render() {
                 *(minmaxRendering.second)
             );
 
+            auto minmaxUpdateSceneGraphNode = std::minmax_element(
+                std::begin(entry.updateSceneGraphNode),
+                std::end(entry.updateSceneGraphNode)
+            );
+            minMax[i][5] = std::make_pair(
+                *(minmaxUpdateSceneGraphNode.first),
+                *(minmaxUpdateSceneGraphNode.second)
+            );
+
             auto minmaxTotal = std::minmax_element(
                 std::begin(entry.totalTime),
                 std::end(entry.totalTime)
             );
-            minMax[i][5] = std::make_pair(
+            minMax[i][6] = std::make_pair(
                 *(minmaxTotal.first),
                 *(minmaxTotal.second)
             );
@@ -416,6 +445,24 @@ void GuiPerformanceComponent::render() {
                     ImVec2(0, 40)
                 );
 
+                std::string updateSceneGraphNode = std::to_string(
+                    entry.updateSceneGraphNode[PerformanceLayout::NumberValues - 1]
+                ) + "us";
+
+                ImGui::PlotLines(
+                    fmt::format(
+                        "UpdateSceneGraphNode\nAverage: {}us",
+                        averages[indices[i]][5]
+                    ).c_str(),
+                    &entry.updateSceneGraphNode[0],
+                    PerformanceLayout::NumberValues,
+                    0,
+                    updateSceneGraphNode.c_str(),
+                    minMax[indices[i]][5].first,
+                    minMax[indices[i]][5].second,
+                    ImVec2(0, 40)
+                );
+
                 std::string totalTime = std::to_string(
                     entry.totalTime[PerformanceLayout::NumberValues - 1]
                 ) + "us";
@@ -423,14 +470,14 @@ void GuiPerformanceComponent::render() {
                 ImGui::PlotLines(
                     fmt::format(
                         "TotalTime\nAverage: {}us",
-                        averages[indices[i]][5]
+                        averages[indices[i]][6]
                     ).c_str(),
                     &entry.totalTime[0],
                     PerformanceLayout::NumberValues,
                     0,
                     totalTime.c_str(),
-                    minMax[indices[i]][5].first,
-                    minMax[indices[i]][5].second,
+                    minMax[indices[i]][6].first,
+                    minMax[indices[i]][6].second,
                     ImVec2(0, 40)
                 );
             }
