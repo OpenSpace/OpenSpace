@@ -39,7 +39,7 @@ public:
     virtual CefRefPtr<CefRenderHandler> GetRenderHandler();
 
 private:
-    CefRefPtr<CefRenderHandler> renderHandler;
+    CefRefPtr<CefRenderHandler> _renderHandler;
 
     IMPLEMENT_REFCOUNTING(BrowserClient);
 };

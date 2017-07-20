@@ -49,13 +49,13 @@ public:
     bool isReady() const override;
 
 private:
-    properties::StringProperty url;
-    properties::Vec2Property dimensions;
-    CefRefPtr<ScreenSpaceRenderHandler> renderHandler;
-    std::unique_ptr<BrowserInstance> browserInstance;
+    properties::StringProperty _url;
+    properties::Vec2Property _dimensions;
+    CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
+    std::unique_ptr<BrowserInstance> _browserInstance;
 
-    bool urlIsDirty;
-    bool dimensionsAreDirty;
+    bool _urlIsDirty;
+    bool _dimensionsAreDirty;
 };
 
 };

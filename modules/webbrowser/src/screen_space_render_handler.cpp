@@ -35,7 +35,7 @@ void ScreenSpaceRenderHandler::render() {
 }
 
 void ScreenSpaceRenderHandler::setTexture(const GLuint &t) {
-    texture = t;
+    _texture = t;
 }
 
 }

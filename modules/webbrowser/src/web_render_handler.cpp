@@ -28,20 +28,20 @@ namespace openspace {
 
 void WebRenderHandler::reshape(int w, int h) {
 //    LDEBUGC("WebRenderHandler", fmt::format("Reshaping browser window. Width: {}, height: {}", w, h));
-    width = w;
-    height = h;
+    _width = w;
+    _height = h;
 }
 
 bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) {
-    rect = CefRect(0, 0, width, height);
+    rect = CefRect(0, 0, _width, _height);
     return true;
 }
 
 void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintElementType type,
                                const CefRenderHandler::RectList &dirtyRects, const void *buffer,
                                int w, int h) {
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (unsigned char*) buffer);
+    glBindTexture(GL_TEXTURE_2D, _texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (unsigned char*) buffer);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

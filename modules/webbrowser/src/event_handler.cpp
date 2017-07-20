@@ -35,7 +35,7 @@ namespace openspace {
 void EventHandler::initialize() {
     OsEng.registerModuleCharCallback(
             [this](unsigned int charCode, KeyModifier mod) -> bool {
-                if (browser) {
+                if (_browser) {
                     return charCallback(charCode, mod);
                 } else {
                     return false;
@@ -44,7 +44,7 @@ void EventHandler::initialize() {
     );
     OsEng.registerModuleKeyboardCallback(
             [this](Key key, KeyModifier mod, KeyAction action) -> bool {
-                if (browser) {
+                if (_browser) {
                     return keyboardCallback(key, mod, action);
                 } else {
                     return false;
@@ -53,7 +53,7 @@ void EventHandler::initialize() {
     );
     OsEng.registerModuleMousePositionCallback(
             [this](double x, double y) -> bool {
-                if (browser) {
+                if (_browser) {
                     return mousePositionCallback(x, y);
                 } else {
                     return false;
@@ -62,7 +62,7 @@ void EventHandler::initialize() {
     );
     OsEng.registerModuleMouseButtonCallback(
             [this](MouseButton button, MouseAction action) -> bool {
-                if (browser) {
+                if (_browser) {
                     return mouseButtonCallback(button, action);
                 } else {
                     return false;
@@ -71,7 +71,7 @@ void EventHandler::initialize() {
     );
     OsEng.registerModuleMouseScrollWheelCallback(
             [this](double posX, double posY) -> bool {
-                if (browser) {
+                if (_browser) {
                     return mouseWheelCallback(posY);
                 } else {
                     return false;
@@ -85,25 +85,25 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (button != MouseButton::Left) return false;
 
     if (action == MouseAction::Release) {
-        leftMouseDown = false;
+        _leftMouseDown = false;
     } else {
-        leftMouseDown = true;
+        _leftMouseDown = true;
     }
-    browser->GetHost()->SendMouseClickEvent(mouseEvent(), MBT_LEFT, leftMouseDown, SINGLE_CLICK);
+    _browser->GetHost()->SendMouseClickEvent(mouseEvent(), MBT_LEFT, _leftMouseDown, SINGLE_CLICK);
 
     // TODO(klas): Figure out when to block and when to not block
     return false;
 }
 
 bool EventHandler::mousePositionCallback(double x, double y) {
-    mousePosition.x = (int) x;
-    mousePosition.y = (int) y;
+    _mousePosition.x = (int) x;
+    _mousePosition.y = (int) y;
     CefMouseEvent localMouseEvent(mouseEvent());
-    if (leftMouseDown) {
+    if (_leftMouseDown) {
         localMouseEvent.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
         LDEBUGC("event", fmt::format("dragging: {}, {}", x, y));
     }
-    browser->GetHost()->SendMouseMoveEvent(localMouseEvent, false);
+    _browser->GetHost()->SendMouseMoveEvent(localMouseEvent, false);
 
     // Let the mouse event trickle on
     return false;
@@ -112,7 +112,7 @@ bool EventHandler::mousePositionCallback(double x, double y) {
 bool EventHandler::mouseWheelCallback(double position) {
     // TODO(klas): Support horizontal scrolling, use shift?
     // TODO(klas): Figure out how this should be used
-    browser->GetHost()->SendMouseWheelEvent(mouseEvent(), (int) position, 0);
+    _browser->GetHost()->SendMouseWheelEvent(mouseEvent(), (int) position, 0);
     return false;
 }
 
@@ -121,7 +121,7 @@ bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     keyEvent.windows_key_code = charCode;
     keyEvent.modifiers        = static_cast<uint32>(modifier);
     keyEvent.type             = KEYEVENT_CHAR;
-    browser->GetHost()->SendKeyEvent(keyEvent);
+    _browser->GetHost()->SendKeyEvent(keyEvent);
 
     // TODO(klas): figure out when to block
     return false;
@@ -138,7 +138,7 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     keyEvent.windows_key_code = mapFromGlfwToNative(key);
     keyEvent.modifiers        = static_cast<uint32>(modifier);
     keyEvent.type             = keyEventType(action);
-    browser->GetHost()->SendKeyEvent(keyEvent);
+    _browser->GetHost()->SendKeyEvent(keyEvent);
 
     // TODO(klas): figure out when to block
     return false;
@@ -179,7 +179,7 @@ int EventHandler::mapFromGlfwToNative(Key key) {
 }
 
 void EventHandler::reloadBrowser() {
-    browser->Reload();
+    _browser->Reload();
 }
 
 /**
@@ -202,17 +202,17 @@ cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
  */
 CefMouseEvent EventHandler::mouseEvent() {
     CefMouseEvent event;
-    event.x = (int) mousePosition.x;
-    event.y = (int) mousePosition.y;
+    event.x = (int) _mousePosition.x;
+    event.y = (int) _mousePosition.y;
     return event;
 }
 
 void EventHandler::setBrowser(const CefRefPtr<CefBrowser> &browser) {
-    EventHandler::browser = browser;
+    _browser = browser;
 }
 
 void EventHandler::detachBrowser() {
-    browser = nullptr;
+    _browser = nullptr;
 }
 
 } // namespace openspace

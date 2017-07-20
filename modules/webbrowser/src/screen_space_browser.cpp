@@ -35,10 +35,10 @@ namespace openspace {
 
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         : ScreenSpaceRenderable(dictionary)
-        , urlIsDirty(false)
-        , dimensionsAreDirty(false)
-        , url("url", "URL", "")
-        , dimensions("dimensions",
+        , _urlIsDirty(false)
+        , _dimensionsAreDirty(false)
+        , _url("url", "URL", "")
+        , _dimensions("dimensions",
                      "Browser Dimensions",
                      glm::vec2(0.0f),
                      glm::vec2(0.0f),
@@ -54,32 +54,32 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 
     std::string urlToLoad;
     if (dictionary.getValue(KeyUrl, urlToLoad)) {
-        url = dictionary.value<std::string>(KeyUrl);
+        _url = dictionary.value<std::string>(KeyUrl);
     }
 
     glm::vec2 windowDimensions = OsEng.windowWrapper().currentWindowSize();
-    dimensions = windowDimensions;
+    _dimensions = windowDimensions;
 
     _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(windowDimensions, 1.0f));
-    renderHandler = new ScreenSpaceRenderHandler();
-    browserInstance = std::make_unique<BrowserInstance>(renderHandler);
+    _renderHandler = new ScreenSpaceRenderHandler();
+    _browserInstance = std::make_unique<BrowserInstance>(_renderHandler);
 
-    url.onChange([this]() { urlIsDirty = true; });
-    dimensions.onChange([this]() { dimensionsAreDirty = true; });
+    _url.onChange([this]() { _urlIsDirty = true; });
+    _dimensions.onChange([this]() { _dimensionsAreDirty = true; });
 
-    addProperty(url);
-    addProperty(dimensions);
+    addProperty(_url);
+    addProperty(_dimensions);
 }
 
 bool ScreenSpaceBrowser::initialize() {
     _originalViewportSize = OsEng.windowWrapper().currentWindowSize();
-    renderHandler->setTexture((GLuint) *_texture);
+    _renderHandler->setTexture((GLuint) *_texture);
 
     createPlane();
     // Load a special version of the regular ScreenRenderable shaders. This mirrors the
     // image along the Y axis since the image produced by CEF was flipped.
     createShaders("${MODULE_WEBBROWSER}/shaders/");
-    browserInstance->load(url);
+    _browserInstance->load(_url);
 
     return isReady();
 }
@@ -93,15 +93,15 @@ void ScreenSpaceBrowser::render() {
 }
 
 void ScreenSpaceBrowser::update() {
-    if (urlIsDirty) {
-        browserInstance->load(url);
-        urlIsDirty = false;
+    if (_urlIsDirty) {
+        _browserInstance->load(_url);
+        _urlIsDirty = false;
     }
 
-    if (dimensionsAreDirty) {
-        browserInstance->reshape(dimensions.value());
-        _originalViewportSize = dimensions.value();
-        dimensionsAreDirty = false;
+    if (_dimensionsAreDirty) {
+        _browserInstance->reshape(_dimensions.value());
+        _originalViewportSize = _dimensions.value();
+        _dimensionsAreDirty = false;
     }
 }
 

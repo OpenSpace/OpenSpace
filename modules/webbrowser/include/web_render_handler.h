@@ -45,8 +45,8 @@ public:
                  int width, int height) override;
 
 protected:
-    int width = 0, height = 0;
-    GLuint texture;
+    int _width = 0, _height = 0;
+    GLuint _texture;
 
     IMPLEMENT_REFCOUNTING(WebRenderHandler);
 };

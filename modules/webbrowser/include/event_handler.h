@@ -55,12 +55,12 @@ private:
     CefMouseEvent mouseEvent();
     cef_key_event_type_t keyEventType(KeyAction);
 
-    bool leftMouseDown = false;
+    bool _leftMouseDown = false;
 
     void reloadBrowser();
 
-    CefRefPtr<CefBrowser> browser;
-    glm::vec2 mousePosition;
+    CefRefPtr<CefBrowser> _browser;
+    glm::vec2 _mousePosition;
 };
 
 

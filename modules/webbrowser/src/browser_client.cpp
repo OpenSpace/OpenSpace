@@ -28,11 +28,11 @@
 namespace openspace {
 
 BrowserClient::BrowserClient(WebRenderHandler* handler) {
-    renderHandler = handler;
+    _renderHandler = handler;
 };
 
 CefRefPtr<CefRenderHandler> BrowserClient::GetRenderHandler() {
-    return renderHandler;
+    return _renderHandler;
 }
 
 } // namespace openspace
