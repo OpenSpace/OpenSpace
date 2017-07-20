@@ -138,6 +138,7 @@ PerformanceManager::PerformanceManager()
     , _logDir(absPath("${BASE_PATH}"))
     , _prefix("PM-")
     , _ext("log")
+    , _clearLogs(true)
 {
     PerformanceManager::createGlobalSharedMemory();
     
@@ -169,9 +170,6 @@ PerformanceManager::PerformanceManager()
     _performanceMemory = std::make_unique<ghoul::SharedMemory>(localName);
     // Using the placement-new to create a PerformanceLayout in the shared memory
     new (_performanceMemory->memory()) PerformanceLayout;
-
-    // Create or clear the logs
-    clearLogs();
 }
 
 PerformanceManager::~PerformanceManager() {
@@ -212,6 +210,11 @@ bool PerformanceManager::isMeasuringPerformance() const {
     
 void PerformanceManager::outputLogs() {
 
+    if (_clearLogs) {
+        // Clear the logs, and then make sure we don't the next time
+        initLogs();
+        _clearLogs = false;
+    }
     // Log Layout values
     PerformanceLayout* layout = performanceData();
     const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _tick;
@@ -220,7 +223,7 @@ void PerformanceManager::outputLogs() {
     for (size_t n = 0; n < layout->nFunctionEntries; n++) {
         const auto function = layout->functionEntries[n];
         const std::string filename = formatLogName(function.name);
-        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
+        std::ofstream out(absPath(filename), std::ofstream::out | std::ofstream::app);
 
         // Comma separate data
         for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
@@ -236,7 +239,7 @@ void PerformanceManager::outputLogs() {
 
         // Open file
         const std::string filename = formatLogName(node.name);
-        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
+        std::ofstream out(absPath(filename), std::ofstream::out | std::ofstream::app);
         
         // Comma separate data
         for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
@@ -303,6 +306,11 @@ void PerformanceManager::setLogging(bool enabled) {
     if (enabled) {
         // If it can't create the directory, it's not logging so set false
         enabled = createLogDir();
+    }
+
+    if (!enabled) {
+        // Clear logs the next time we enable logging
+        _clearLogs = true;
     }
 
     _loggingEnabled = enabled;
@@ -456,12 +464,27 @@ void PerformanceManager::clearLogs() {
     const PerformanceLayout* layout = performanceData();
     for (size_t n = 0; n < layout->nFunctionEntries; n++) {
         const std::string filename = formatLogName(layout->functionEntries[n].name);
-        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::trunc);
+        std::ofstream out(absPath(filename), std::ofstream::out | std::ofstream::trunc);
     }
 
     for (size_t n = 0; n < layout->nScaleGraphEntries; n++) {
         const std::string filename = formatLogName(layout->sceneGraphEntries[n].name);
-        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::trunc);
+        std::ofstream out(absPath(filename), std::ofstream::out | std::ofstream::trunc);
+    }
+}
+
+void PerformanceManager::initLogs() {
+    const PerformanceLayout* layout = performanceData();
+    for (size_t n = 0; n < layout->nFunctionEntries; n++) {
+        const std::string filename = formatLogName(layout->functionEntries[n].name);
+        std::ofstream out(absPath(filename), std::ofstream::out | std::ofstream::trunc);
+        out << "time\n";
+    }
+
+    for (size_t n = 0; n < layout->nScaleGraphEntries; n++) {
+        const std::string filename = formatLogName(layout->sceneGraphEntries[n].name);
+        std::ofstream out(absPath(filename), std::ofstream::out | std::ofstream::trunc);
+        out << "render,updateRenderable,updateRotation,updateScaling,updateTranslation,totalTime\n";
     }
 }
 
