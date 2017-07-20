@@ -39,7 +39,7 @@ public:
     BrowserInstance(WebRenderHandler*);
     ~BrowserInstance();
 
-    void load(const std::string&);
+    void loadUrl(const std::string &);
     bool loadLocalPath(std::string);
     void initialize();
     void reshape(const glm::ivec2&);
@@ -48,10 +48,10 @@ public:
     const CefRefPtr<CefBrowser> &getBrowser() const;
 
 private:
-    CefRefPtr<WebRenderHandler> renderHandler;
-    CefRefPtr<BrowserClient> client;
-    CefRefPtr<CefBrowser> browser;
-    bool isInitialized;
+    CefRefPtr<WebRenderHandler> _renderHandler;
+    CefRefPtr<BrowserClient> _client;
+    CefRefPtr<CefBrowser> _browser;
+    bool _isInitialized;
 };
 
 }

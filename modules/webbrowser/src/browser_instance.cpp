@@ -31,30 +31,30 @@ namespace {
 
 namespace openspace {
 
-BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : isInitialized(false) {
-    renderHandler = renderer;
-    client = new BrowserClient(renderHandler);
+BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : _isInitialized(false) {
+    _renderHandler = renderer;
+    _client = new BrowserClient(_renderHandler);
 
     CefBrowserSettings browserSettings;
     CefWindowInfo windowInfo;
     bool renderTransparent = true;
     windowInfo.SetAsWindowless(nullptr, renderTransparent);
     std::string url = "";
-    browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), url, browserSettings, NULL);
+    _browser = CefBrowserHost::CreateBrowserSync(windowInfo, _client.get(), url, browserSettings, NULL);
 
     // send to WebBrowserModule
     auto browserModule = OsEng.moduleEngine().module<WebBrowserModule>();
     if (browserModule) {
-        browserModule->addBrowser(browser);
+        browserModule->addBrowser(_browser);
     }
 }
 
 BrowserInstance::~BrowserInstance() {
-    browser->GetHost()->CloseBrowser(true);
+    _browser->GetHost()->CloseBrowser(false);
 
-    auto pBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
-    if (pBrowserModule) {
-        pBrowserModule->removeBrowser(browser);
+    auto browserModule = OsEng.moduleEngine().module<WebBrowserModule>();
+    if (browserModule) {
+        browserModule->removeBrowser(_browser);
     }
 }
 
@@ -62,16 +62,16 @@ void BrowserInstance::initialize() {
     WindowWrapper &wrapper = OsEng.windowWrapper();
     reshape(wrapper.currentWindowSize());
 
-    isInitialized = true;
+    _isInitialized = true;
 }
 
-void BrowserInstance::load(const std::string& url) {
-    if (!isInitialized) {
+void BrowserInstance::loadUrl(const std::string &url) {
+    if (!_isInitialized) {
         initialize();
     }
 
     LDEBUG(fmt::format("Loading URL: {}", url));
-    browser->GetMainFrame()->LoadURL(url);
+    _browser->GetMainFrame()->LoadURL(url);
 }
 
 /**
@@ -85,7 +85,7 @@ bool BrowserInstance::loadLocalPath(std::string path) {
         return false;
     }
 
-    load(absPath(path));
+    loadUrl(absPath(path));
     return true;
 }
 
@@ -94,19 +94,19 @@ bool BrowserInstance::loadLocalPath(std::string path) {
  * @param wrapper the windowWrapper capable of
  */
 void BrowserInstance::reshape(const glm::ivec2 &windowSize) {
-    renderHandler->reshape(windowSize.x, windowSize.y);
-    browser->GetHost()->WasResized();
+    _renderHandler->reshape(windowSize.x, windowSize.y);
+    _browser->GetHost()->WasResized();
 }
 
 /**
  * encapsulate renderHandler's draw method
  */
 void BrowserInstance::draw() {
-    renderHandler->draw();
+    _renderHandler->draw();
 }
 
 const CefRefPtr<CefBrowser> &BrowserInstance::getBrowser() const {
-    return browser;
+    return _browser;
 }
 
 }

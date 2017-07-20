@@ -38,7 +38,7 @@ void WebGuiModule::internalInitialize() {
             OpenSpaceEngine::CallbackOption::Initialize,
             [this]() {
                 LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", guiLocation));
-                guiInstance->load(guiLocation);
+                guiInstance->loadUrl(guiLocation);
                 auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
                 if (webBrowserModule) {
                     webBrowserModule->attachEventHandler(guiInstance->getBrowser());
