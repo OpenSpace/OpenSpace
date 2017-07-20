@@ -401,42 +401,42 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::next(std::begin(entry.renderTime)),
             std::end(entry.renderTime)
         );
-        entry.renderTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.renderTime).count();
+        entry.renderTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.renderTime).count();
         
         std::rotate(
             std::begin(entry.updateTranslation),
             std::next(std::begin(entry.updateTranslation)),
             std::end(entry.updateTranslation)
         );
-        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeTranslation).count();
+        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeTranslation).count();
 
         std::rotate(
             std::begin(entry.updateRotation),
             std::next(std::begin(entry.updateRotation)),
             std::end(entry.updateRotation)
         );
-        entry.updateRotation[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeRotation).count();
+        entry.updateRotation[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeRotation).count();
 
         std::rotate(
             std::begin(entry.updateScaling),
             std::next(std::begin(entry.updateScaling)),
             std::end(entry.updateScaling)
         );
-        entry.updateScaling[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeScaling).count();
+        entry.updateScaling[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeScaling).count();
 
         std::rotate(
             std::begin(entry.updateRenderable),
             std::next(std::begin(entry.updateRenderable)),
             std::end(entry.updateRenderable)
         );
-        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.updateTimeRenderable).count();
+        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeRenderable).count();
 
         std::rotate(
             std::begin(entry.totalTime),
             std::next(std::begin(entry.totalTime)),
             std::end(entry.totalTime)
         );
-        entry.totalTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration_cast<std::chrono::microseconds>(r.totalTime).count();
+        entry.totalTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.totalTime).count();
         // Reset the total after we log it
         node->clearPerformanceTotalTime();
     }
