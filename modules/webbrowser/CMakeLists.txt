@@ -72,7 +72,7 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 # Add CEF client files
 
 set(WEBBROWSER_SOURCES
-        webbrowsermodule.cpp
+    webbrowsermodule.cpp
     src/browserclient.cpp
     src/eventhandler.cpp
     )
@@ -167,25 +167,25 @@ endif (OS_WINDOWS)
 ##########################################################################################
 # Create OpenSpace module.
 set(OPENSPACE_HEADER_FILES
-        webbrowsermodule.h
+    webbrowsermodule.h
     include/webrenderhandler.h
     include/browserclient.h
     include/screenspacerenderhandler.h
     include/screenspacebrowser.h
-    include/eventhandler.h
     include/browserinstance.h
+    include/eventhandler.h
     )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
-        webbrowsermodule.cpp
+    webbrowsermodule.cpp
     src/webrenderhandler.cpp
     src/browserclient.cpp
     src/screenspacerenderhandler.cpp
     src/screenspacebrowser.cpp
-    src/eventhandler.cpp
     src/browserinstance.cpp
-        )
+    src/eventhandler.cpp
+    )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
