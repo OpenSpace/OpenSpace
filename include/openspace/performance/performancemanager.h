@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -76,6 +76,8 @@ public:
     bool loggingEnabled() const;
 
     PerformanceLayout* performanceData();
+    void clearLogs();
+
 private:
     bool _doPerformanceMeasurements;
     bool _loggingEnabled;

@@ -169,6 +169,9 @@ PerformanceManager::PerformanceManager()
     _performanceMemory = std::make_unique<ghoul::SharedMemory>(localName);
     // Using the placement-new to create a PerformanceLayout in the shared memory
     new (_performanceMemory->memory()) PerformanceLayout;
+
+    // Create or clear the logs
+    clearLogs();
 }
 
 PerformanceManager::~PerformanceManager() {
@@ -447,6 +450,19 @@ void PerformanceManager::storeScenePerformanceMeasurements(
     }
 
     tick();
+}
+
+void PerformanceManager::clearLogs() {
+    const PerformanceLayout* layout = performanceData();
+    for (size_t n = 0; n < layout->nFunctionEntries; n++) {
+        const std::string filename = formatLogName(layout->functionEntries[n].name);
+        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::trunc);
+    }
+
+    for (size_t n = 0; n < layout->nScaleGraphEntries; n++) {
+        const std::string filename = formatLogName(layout->sceneGraphEntries[n].name);
+        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::trunc);
+    }
 }
 
 } // namespace performance
