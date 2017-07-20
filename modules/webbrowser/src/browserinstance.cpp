@@ -26,7 +26,9 @@
 #include "include/browserinstance.h"
 
 namespace {
-    const char* _loggerCat = "CEF BrowserInstance";
+const char* _loggerCat = "CEF BrowserInstance";
+const bool DID_NOT_LEAVE_WINDOW = false;
+const int SINGLE_CLICK = 1;
 }
 
 namespace openspace {
@@ -35,10 +37,13 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : _isInitialized(fa
     _renderHandler = renderer;
     _client = new BrowserClient(_renderHandler);
 
-    CefBrowserSettings browserSettings;
     CefWindowInfo windowInfo;
     bool renderTransparent = true;
     windowInfo.SetAsWindowless(nullptr, renderTransparent);
+
+    CefBrowserSettings browserSettings;
+    browserSettings.windowless_frame_rate = 60;
+
     std::string url = "";
     _browser = CefBrowserHost::CreateBrowserSync(windowInfo, _client.get(), url, browserSettings, NULL);
 
@@ -59,7 +64,7 @@ BrowserInstance::~BrowserInstance() {
 }
 
 void BrowserInstance::initialize() {
-    WindowWrapper &wrapper = OsEng.windowWrapper();
+    auto &wrapper = OsEng.windowWrapper();
     reshape(wrapper.currentWindowSize());
 
     _isInitialized = true;
@@ -107,6 +112,34 @@ void BrowserInstance::draw() {
 
 const CefRefPtr<CefBrowser> &BrowserInstance::getBrowser() const {
     return _browser;
+}
+
+bool BrowserInstance::sendKeyEvent(const CefKeyEvent &event) {
+    _browser->GetHost()->SendKeyEvent(event);
+    return false;
+}
+
+bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
+                                          bool mouseUp) {
+    _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, SINGLE_CLICK);
+    return false;
+}
+
+bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent &event) {
+    // TODO(klas): Replace DID_NOT_LEAVE_WINDOW with real value (if needed?)
+    _browser->GetHost()->SendMouseMoveEvent(event, DID_NOT_LEAVE_WINDOW);
+    return false;
+}
+
+bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent &event, const glm::ivec2 &delta) {
+    // TODO(klas): Figure out how this should be used
+    _browser->GetHost()->SendMouseWheelEvent(event, delta.x, delta.y);
+    // TODO: change so that the return value is something not-false
+    return false;
+}
+
+void BrowserInstance::reloadBrowser() {
+    _browser->Reload();
 }
 
 }

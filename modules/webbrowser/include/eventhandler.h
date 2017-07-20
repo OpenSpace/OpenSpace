@@ -30,23 +30,23 @@
 #include <openspace/util/mouse.h>
 #include <include/cef_browser.h>
 #include <openspace/engine/openspaceengine.h>
+#include "browserinstance.h"
 
 namespace openspace {
 
 class EventHandler {
 public:
-    EventHandler() : mousePosition(0, 0) {};
+    EventHandler() : _mousePosition(0, 0), _browserInstance(nullptr) {};
 
     void initialize();
     void setBrowser(const CefRefPtr<CefBrowser> &browser);
+    void setBrowserInstance(const std::shared_ptr<BrowserInstance> & browserInstance);
     void detachBrowser();
-
-    const int SINGLE_CLICK = 1;
 
 private:
     bool mouseButtonCallback(MouseButton, MouseAction);
     bool mousePositionCallback(double, double);
-    bool mouseWheelCallback(double);
+    bool mouseWheelCallback(const glm::ivec2 &delta);
     bool charCallback(unsigned int, KeyModifier);
     bool keyboardCallback(Key, KeyModifier, KeyAction);
     bool specialKeyEvent(Key);
@@ -57,9 +57,7 @@ private:
 
     bool _leftMouseDown = false;
 
-    void reloadBrowser();
-
-    CefRefPtr<CefBrowser> _browser;
+    std::shared_ptr<BrowserInstance> _browserInstance;
     glm::vec2 _mousePosition;
 };
 

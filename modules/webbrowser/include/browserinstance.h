@@ -27,9 +27,9 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <include/wrapper/cef_helpers.h>
 #include "modules/webbrowser/include/webrenderhandler.h"
-#include "modules/webbrowser/include/eventhandler.h"
 #include "modules/webbrowser/include/browserclient.h"
 
 namespace openspace {
@@ -44,6 +44,12 @@ public:
     void initialize();
     void reshape(const glm::ivec2&);
     void draw();
+
+    bool sendKeyEvent(const CefKeyEvent &event);
+    bool sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button, bool mouseUp);
+    bool sendMouseMoveEvent(const CefMouseEvent &event);
+    bool sendMouseWheelEvent(const CefMouseEvent &event, const glm::ivec2 &delta);
+    void reloadBrowser();
 
     const CefRefPtr<CefBrowser> &getBrowser() const;
 

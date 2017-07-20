@@ -50,7 +50,7 @@ public:
     int addBrowser(CefBrowser*);
     void removeBrowser(CefBrowser*);
 
-    void attachEventHandler(CefRefPtr<CefBrowser>);
+    void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
 
 private:
 	void attachDebugSettings(CefSettings&);

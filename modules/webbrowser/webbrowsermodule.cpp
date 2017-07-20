@@ -122,8 +122,8 @@ void WebBrowserModule::removeBrowser(CefBrowser *browser) {
     }
 }
 
-void WebBrowserModule::attachEventHandler(CefRefPtr<CefBrowser> browser) {
-    eventHandler.setBrowser(browser);
+void WebBrowserModule::attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance) {
+    eventHandler.setBrowserInstance(browserInstance);
 }
 
 }
