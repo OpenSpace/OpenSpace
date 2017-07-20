@@ -46,7 +46,7 @@ public:
 
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    GLuint program, vao, vbo;
+    GLuint _program, _vao, _vbo;
 };
 
 } // namespace openspace

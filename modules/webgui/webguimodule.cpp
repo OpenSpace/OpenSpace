@@ -28,8 +28,8 @@
 namespace openspace {
 
 WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {
-    guiInstance = std::make_unique<BrowserInstance>(new GUIRenderHandler());
-    guiLocation = OsEng.configurationManager().value<std::string>(
+    _guiInstance = std::make_unique<BrowserInstance>(new GUIRenderHandler());
+    _guiLocation = OsEng.configurationManager().value<std::string>(
             ConfigurationManager::KeyWebGuiUrl);
 }
 
@@ -37,11 +37,11 @@ void WebGuiModule::internalInitialize() {
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::Initialize,
             [this]() {
-                LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", guiLocation));
-                guiInstance->loadUrl(guiLocation);
+                LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiLocation));
+                _guiInstance->loadUrl(_guiLocation);
                 auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
                 if (webBrowserModule) {
-                    webBrowserModule->attachEventHandler(guiInstance->getBrowser());
+                    webBrowserModule->attachEventHandler(_guiInstance->getBrowser());
                 }
             }
     );
@@ -52,10 +52,10 @@ void WebGuiModule::internalInitialize() {
 
                 if (wrapper.isMaster()) {
                     if (wrapper.windowHasResized()) {
-                        guiInstance->reshape(wrapper.currentWindowSize());
+                        _guiInstance->reshape(wrapper.currentWindowSize());
                     }
 
-                    guiInstance->draw();
+                    _guiInstance->draw();
                 }
             });
 

@@ -52,11 +52,11 @@ void GUIRenderHandler::initializeGL() {
                      1.0f,  1.0f, -1.0f,
                      1.0f, -1.0f, -1.0f,
                      1.0f,  1.0f,  1.0f};
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glGenBuffers(1, &vbo);
-    glGenTextures(1, &texture);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glGenVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
+    glGenBuffers(1, &_vbo);
+    glGenTextures(1, &_texture);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
@@ -79,10 +79,10 @@ void GUIRenderHandler::draw(void) {
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, _texture);
     _programObject->setUniform("tex", unit);
 
-    glBindVertexArray(vao);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
