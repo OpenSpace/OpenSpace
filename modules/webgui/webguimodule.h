@@ -39,7 +39,7 @@ public:
     void internalInitialize();
 
 private:
-    std::unique_ptr<BrowserInstance> _guiInstance;
+    std::shared_ptr<BrowserInstance> _guiInstance;
     std::string _guiLocation;
 };
 

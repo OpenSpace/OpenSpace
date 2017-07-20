@@ -28,7 +28,7 @@
 namespace openspace {
 
 WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {
-    _guiInstance = std::make_unique<BrowserInstance>(new GUIRenderHandler());
+    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler());
     _guiLocation = OsEng.configurationManager().value<std::string>(
             ConfigurationManager::KeyWebGuiUrl);
 }
@@ -41,7 +41,7 @@ void WebGuiModule::internalInitialize() {
                 _guiInstance->loadUrl(_guiLocation);
                 auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
                 if (webBrowserModule) {
-                    webBrowserModule->attachEventHandler(_guiInstance->getBrowser());
+                    webBrowserModule->attachEventHandler(_guiInstance);
                 }
             }
     );
