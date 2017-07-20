@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,6 +26,7 @@
  
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
@@ -41,8 +42,6 @@
 namespace {
     const char* keyFrame = "Frame";
     const char* keyRadii = "Radii";
-    const char* keyInteractionDepthBelowEllipsoid = "InteractionDepthBelowEllipsoid";
-    const char* keyCameraMinHeight = "CameraMinHeight";
     const char* keySegmentsPerPatch = "SegmentsPerPatch";
     const char* keyLayers = "Layers";
     const char* keyShadowGroup = "Shadow_Group";
@@ -98,8 +97,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("enabled", "Enabled", true),
         BoolProperty("performShading", "perform shading", true),
         BoolProperty("atmosphere", "atmosphere", false),
+        BoolProperty("useAccurateNormals", "useAccurateNormals", false),
         FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
-        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f),        
+        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f),
+        FloatProperty("orenNayarRoughness", "orenNayarRoughness", 0.0f, 0.0f, 1.0f)
     })
     , _debugPropertyOwner("Debug")
     , _texturePropertyOwner("Textures")
@@ -157,21 +158,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     glm::dvec3 radii;
     dictionary.getValue(keyRadii, radii);
     _ellipsoid = Ellipsoid(radii);
-    setBoundingSphere(_ellipsoid.averageRadius());
+    setBoundingSphere(_ellipsoid.maximumRadius());
 
     // Ghoul can't read ints from lua dictionaries...
     double patchSegmentsd;
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
     int patchSegments = patchSegmentsd;
-        
-    if (!dictionary.getValue(keyInteractionDepthBelowEllipsoid,
-        _interactionDepthBelowEllipsoid)) {
-        _interactionDepthBelowEllipsoid = 0;
-    }
-
-    float cameraMinHeight;
-    dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
-    _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
@@ -184,19 +176,18 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
         *this, patchSegments, _layerManager);
+    //_pointGlobe = std::make_shared<PointGlobe>(*this);
         
-    // This distance will be enough to render the globe as one pixel if the field of
-    // view is 'fov' radians and the screen resolution is 'res' pixels.
-    double fov = 2 * glm::pi<double>() / 6; // 60 degrees
-    int res = 2880;
-    double distance = res * _ellipsoid.maximumRadius() / tan(fov / 2);
-    _distanceSwitch.addSwitchValue(_chunkedLodGlobe, distance);
+    _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
+    //_distanceSwitch.addSwitchValue(_pointGlobe);
         
     addProperty(_generalProperties.isEnabled);
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
+    addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
+    addProperty(_generalProperties.orenNayarRoughness);
         
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
@@ -219,6 +210,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _chunkedLodGlobe->notifyShaderRecompilation();
     };
     _generalProperties.atmosphereEnabled.onChange(notifyShaderRecompilation);
+    _generalProperties.useAccurateNormals.onChange(notifyShaderRecompilation);
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
@@ -678,6 +670,10 @@ std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() const{
     return _chunkedLodGlobe;
 }
 
+LayerManager* RenderableGlobe::layerManager() const {
+    return _layerManager.get();
+}
+
 const Ellipsoid& RenderableGlobe::ellipsoid() const{
     return _ellipsoid;
 }
@@ -704,8 +700,33 @@ const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
     return _savedCamera;
 }
 
-double RenderableGlobe::interactionDepthBelowEllipsoid() {
-    return _interactionDepthBelowEllipsoid;
+SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
+                                                       const glm::dvec3& targetModelSpace) 
+{
+    glm::dvec3 centerToEllipsoidSurface =
+        _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
+    glm::dvec3 ellipsoidSurfaceToTarget = targetModelSpace - centerToEllipsoidSurface;
+    // ellipsoidSurfaceOutDirection will point towards the target, we want the outward
+    // direction. Therefore it must be flipped in case the target is under the reference
+    // ellipsoid so that it always points outwards
+    glm::dvec3 ellipsoidSurfaceOutDirection = glm::normalize(ellipsoidSurfaceToTarget);
+    if (glm::dot(ellipsoidSurfaceOutDirection, centerToEllipsoidSurface) < 0) {
+        ellipsoidSurfaceOutDirection *= -1.0;
+    }
+
+    double heightToSurface = getHeight(targetModelSpace);
+    heightToSurface = glm::isnan(heightToSurface) ? 0.0 : heightToSurface;
+    centerToEllipsoidSurface = glm::isnan(glm::length(centerToEllipsoidSurface)) ?
+        (glm::dvec3(0.0, 1.0, 0.0) * static_cast<double>(boundingSphere())) :
+        centerToEllipsoidSurface;
+    ellipsoidSurfaceOutDirection = glm::isnan(glm::length(ellipsoidSurfaceOutDirection)) ?
+        glm::dvec3(0.0, 1.0, 0.0) : ellipsoidSurfaceOutDirection;
+
+    return {
+        centerToEllipsoidSurface,
+        ellipsoidSurfaceOutDirection,
+        heightToSurface
+    };
 }
 
 void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 

@@ -34,7 +34,7 @@
 namespace openspace {
 
 DebuggingModule::DebuggingModule()
-    : OpenSpaceModule("Debugging")
+    : OpenSpaceModule(Name)
 {}
 
 void DebuggingModule::internalInitialize() {
@@ -42,7 +42,6 @@ void DebuggingModule::internalInitialize() {
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
-
 }
 
 } // namespace openspace

@@ -17,11 +17,6 @@
     <BlockSizeY>512</BlockSizeY>
     <BandsCount>3</BandsCount>
     <MaxConnections>5</MaxConnections>
-    <Cache>
-        <Path>./GDAL_Cache/GIBS_Aqua_MODIS_true</Path>
-        <Depth>4</Depth>
-        <Extension>.jpg</Extension>
-    </Cache>
     <OfflineMode>false</OfflineMode>      
     <UnsafeSSL>true</UnsafeSSL>
     <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>

@@ -26,11 +26,17 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <ghoul/glm.h>
 #include <memory>
 
 namespace openspace {
-
+    class Camera;
 namespace globebrowsing {
+    class RenderableGlobe;
+    class TileIndex;
+    class Geodetic2;
+    class Geodetic3;
+
 namespace cache {
     class MemoryAwareTileCache;
 }
@@ -38,19 +44,40 @@ namespace cache {
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
-    static const std::string name;
+    constexpr static const char* Name = "GlobeBrowsing";
 
     GlobeBrowsingModule();
 
+    void goToChunk(int x, int y, int level);
+    void goToGeo(double latitude, double longitude);
+    void goToGeo(double latitude, double longitude, double altitude);
+
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
-    
-
     scripting::LuaLibrary luaLibrary() const override;
-
 protected:
     void internalInitialize() override;
 
 private:
+    
+    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
+                   bool resetCameraDirection);
+    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
+                       bool resetCameraDirection);
+    void goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3,
+                       bool resetCameraDirection);
+    void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
+    globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
+
+    /**
+     \return a comma separated list of layer group names.
+     */
+    static std::string layerGroupNamesList();
+
+    /**
+     \return a comma separated list of layer type names.
+     */
+    static std::string layerTypeNamesList();
+
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 };
 

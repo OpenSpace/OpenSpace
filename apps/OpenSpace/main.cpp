@@ -442,10 +442,10 @@ void mainMousePosCallback(double x, double y) {
     }
 }
 
-void mainMouseScrollCallback(double, double posY) {
+void mainMouseScrollCallback(double posX, double posY) {
     LTRACE("main::mainMouseScrollCallback(begin");
     if (SgctEngine->isMaster()) {
-        OsEng.mouseScrollWheelCallback(posY);
+        OsEng.mouseScrollWheelCallback(posX, posY);
     }
     LTRACE("main::mainMouseScrollCallback(end)");
 }

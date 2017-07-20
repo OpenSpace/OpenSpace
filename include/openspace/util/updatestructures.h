@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -87,6 +87,20 @@ struct DeferredcastData {
     std::string namespaceName;
 };
 
+/**
+ * Defines the position of an object relative to a surface. The surface is defined as
+ * a reference surface together with a height offset from that reference surface.
+ */
+struct SurfacePositionHandle {
+    /// Vector from the center of the object to the reference surface of the object
+    glm::dvec3 centerToReferenceSurface;
+    /// Direction out from the reference. Can conincide with the surface normal but does
+    /// not have to.
+    glm::dvec3 referenceSurfaceOutDirection;
+    /// Height from the reference surface out to the actual surface in the direction of
+    /// the surface normal. Can be positive or negative.
+    double heightToSurface;
+};
 
 } // namespace openspace
 

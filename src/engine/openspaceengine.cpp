@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,7 +36,8 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
@@ -59,6 +60,7 @@
 #include <openspace/util/transformationmanager.h>
 
 #include <ghoul/ghoul.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/misc/onscopeexit.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
@@ -70,6 +72,7 @@
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
+#include <glbinding/callbacks.h>
 
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
@@ -78,6 +81,8 @@
 #ifdef WIN32
 #include <Windows.h>
 #endif
+
+#include <numeric>
 
 #include "openspaceengine_lua.inl"
 
@@ -88,7 +93,7 @@ using namespace ghoul::cmdparser;
 
 namespace {
     const char* _loggerCat = "OpenSpaceEngine";
-    const char* SgctDefaultConfigFile = "${SGCT}/single.xml";
+    const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
     
     const char* SgctConfigArgumentCommand = "-config";
     
@@ -136,7 +141,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
-    , _interactionHandler(new interaction::InteractionHandler)
+    , _navigationHandler(new interaction::NavigationHandler)
+    , _keyBindingManager(new interaction::KeyBindingManager)
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
@@ -147,10 +153,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
-    _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    _navigationHandler->setPropertyOwner(_globalPropertyNamespace.get());
     
     // New property subowners also have to be added to the OnScreenGuiModule callback!
-    _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
+    _globalPropertyNamespace->addPropertySubOwner(_navigationHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
@@ -201,6 +207,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
     
     requestClose = false;
 
+    LDEBUG("Initialize FileSystem");
+
     ghoul::initialize();
 
     // Initialize the LogManager and add the console log as this will be used every time
@@ -213,8 +221,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
     LogMgr.addLog(std::make_unique<ConsoleLog>());
-
-    LDEBUG("Initialize FileSystem");
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
@@ -282,8 +288,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         }
         throw;
     }
-    catch (const ghoul::RuntimeError&) {
+    catch (const ghoul::RuntimeError& e) {
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        LFATALC(e.component, e.message);
         throw;
     }
 
@@ -510,9 +517,9 @@ void OpenSpaceEngine::initialize() {
     _settingsEngine->initialize();
     _settingsEngine->setModules(_moduleEngine->modules());
 
-    // Initialize the InteractionHandler
-    _interactionHandler->initialize();
-
+    // Initialize the NavigationHandler
+    _navigationHandler->initialize();
+    
     // Load a light and a monospaced font
     loadFonts();
 
@@ -596,7 +603,11 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _renderEngine->startFading(1, 3.0);
 
     scene->initialize();
-    _interactionHandler->setCamera(scene->camera());
+    // Update the scene so that position of objects are set in case they are used in
+    // post sync scripts
+    _renderEngine->updateScene();
+    _navigationHandler->setCamera(scene->camera());
+    _navigationHandler->setFocusNode(scene->camera()->parent());
 
     try {
         runPostInitializationScripts(scenePath);
@@ -607,7 +618,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
     // Write keyboard documentation.
     if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
-        interactionHandler().writeDocumentation(
+        keyBindingManager().writeDocumentation(
             absPath(configurationManager().value<std::string>(
                 ConfigurationManager::KeyKeyboardShortcuts
             ))
@@ -633,7 +644,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
-    _interactionHandler->deinitialize();
+    _navigationHandler->deinitialize();
     _renderEngine->deinitialize();
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
@@ -977,6 +988,90 @@ void OpenSpaceEngine::initializeGL() {
         LTRACE("OpenSpaceEngine::initializeGL::DebugContext(end)");
     }
 
+    // The ordering of the KeyCheckOpenGLState and KeyLogEachOpenGLCall are important as
+    // the callback mask in glbinding is stateful for each context, and since
+    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the 
+    // state from KeyCheckOpenGLState
+    if (_configurationManager->hasKey(ConfigurationManager::KeyCheckOpenGLState)) {
+        const bool val = _configurationManager->value<bool>(
+            ConfigurationManager::KeyCheckOpenGLState
+        );
+
+        if (val) {
+            using namespace glbinding;
+            setCallbackMaskExcept(CallbackMask::After, { "glGetError" });
+            setAfterCallback([](const FunctionCall& f) {
+                const GLenum error = glGetError();
+                switch (error) {
+                    case GL_NO_ERROR:
+                        break;
+                    case GL_INVALID_ENUM:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() << ": GL_INVALID_ENUM"
+                        );
+                        break;
+                    case GL_INVALID_VALUE:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() << ": GL_INVALID_VALUE"
+                        );
+                        break;
+                    case GL_INVALID_OPERATION:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() << ": GL_INVALID_OPERATION"
+                        );
+                        break;
+                    case GL_INVALID_FRAMEBUFFER_OPERATION:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() <<
+                                ": GL_INVALID_FRAMEBUFFER_OPERATION"
+                        );
+                        break;
+                    case GL_OUT_OF_MEMORY:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Function " << f.toString() << ": GL_OUT_OF_MEMORY"
+                        );
+                        break;
+                    default:
+                        LERRORC(
+                            "OpenGL Invalid State",
+                            "Unknown error code: " << std::hex << error
+                        );
+                }
+            });
+        }
+    }
+
+    if (_configurationManager->hasKey(ConfigurationManager::KeyLogEachOpenGLCall)) {
+        const bool val = _configurationManager->value<bool>(
+            ConfigurationManager::KeyLogEachOpenGLCall
+        );
+
+        if (val) {
+            using namespace glbinding;
+            setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
+            glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
+                std::string arguments = std::accumulate(
+                        call.parameters.begin(),
+                        call.parameters.end(),
+                        std::string("("),
+                        [](std::string a, AbstractValue* v) {
+                            return a + ", " + v->asString();
+                        }
+                );
+
+                std::string returnValue = call.returnValue ?
+                    " -> " + call.returnValue->asString() :
+                    "";
+
+                LTRACEC("OpenGL", call.function->name() << arguments << returnValue);
+            });
+        }
+    }
 
     LINFO("Initializing Rendering Engine");
     _renderEngine->initializeGL();
@@ -1031,10 +1126,8 @@ void OpenSpaceEngine::preSynchronization() {
             );
         }
 
-        _interactionHandler->updateInputStates(dt);
-        
         _renderEngine->updateScene();
-        _interactionHandler->updateCamera(dt);
+        _navigationHandler->updateCamera(dt);
         _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
@@ -1069,9 +1162,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _renderEngine->camera()->invalidateCache();
     }   
 
-    // Step the camera using the current mouse velocities which are synced
-    //_interactionHandler->updateCamera();
-    
     for (const auto& func : _moduleCallbacks.postSyncPreDraw) {
         func();
     }
@@ -1102,25 +1192,18 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
-    bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
+    LTRACE("OpenSpaceEngine::render(begin)");
 
-    if (showOverlay) {
+    const bool isGuiWindow =
+        _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    if (isGuiWindow) {
         _console->update();
     }
 
-    LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();
-    }
-
-    if (showOverlay) {
-        _renderEngine->renderScreenLog();
-        _console->render();
     }
 
     if (_shutdown.inShutdown) {
@@ -1134,6 +1217,14 @@ void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(begin)");
     
     _renderEngine->postDraw();
+
+    const bool isGuiWindow =
+        _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+
+    if (isGuiWindow) {
+        _renderEngine->renderScreenLog();
+        _console->render();
+    }
 
     for (const auto& func : _moduleCallbacks.postDraw) {
         func();
@@ -1160,7 +1251,8 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-    _interactionHandler->keyboardCallback(key, mod, action);
+    _navigationHandler->keyboardCallback(key, mod, action);
+    _keyBindingManager->keyboardCallback(key, mod, action);
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -1182,7 +1274,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
     
-    _interactionHandler->mouseButtonCallback(button, action);
+    _navigationHandler->mouseButtonCallback(button, action);
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
@@ -1190,18 +1282,18 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
         func(x, y);
     }
 
-    _interactionHandler->mousePositionCallback(x, y);
+    _navigationHandler->mousePositionCallback(x, y);
 }
 
-void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
+void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     for (const auto& func : _moduleCallbacks.mouseScrollWheel) {
-        bool consumed = func(pos);
+        bool consumed = func(posX, posY);
         if (consumed) {
             return;
         }
     }
     
-    _interactionHandler->mouseScrollWheelCallback(pos);
+    _navigationHandler->mouseScrollWheelCallback(posY);
 }
 
 void OpenSpaceEngine::encode() {
@@ -1351,7 +1443,7 @@ void OpenSpaceEngine::registerModuleMousePositionCallback(
 }
 
 void OpenSpaceEngine::registerModuleMouseScrollWheelCallback(
-                                                    std::function<bool (double)> function)
+                                            std::function<bool (double, double)> function)
 {
     _moduleCallbacks.mouseScrollWheel.push_back(std::move(function));
 }
@@ -1411,9 +1503,14 @@ ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
     return *_fontManager;
 }
 
-interaction::InteractionHandler& OpenSpaceEngine::interactionHandler() {
-    ghoul_assert(_interactionHandler, "InteractionHandler must not be nullptr");
-    return *_interactionHandler;
+interaction::NavigationHandler& OpenSpaceEngine::navigationHandler() {
+    ghoul_assert(_navigationHandler, "NavigationHandler must not be nullptr");
+    return *_navigationHandler;
+}
+
+interaction::KeyBindingManager& OpenSpaceEngine::keyBindingManager() {
+    ghoul_assert(_keyBindingManager, "KeyBindingManager must not be nullptr");
+    return *_keyBindingManager;
 }
 
 properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {

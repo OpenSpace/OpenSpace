@@ -31,6 +31,8 @@ namespace openspace {
 
 class NewHorizonsModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "NewHorizons";
+
     NewHorizonsModule();
     
     std::vector<documentation::Documentation> documentations() const override;

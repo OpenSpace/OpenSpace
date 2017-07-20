@@ -117,7 +117,7 @@ void MemoryAwareTileCache::clear() {
 void MemoryAwareTileCache::createDefaultTextureContainers() {
     for (int id = 0; id < layergroupid::NUM_LAYER_GROUPS; id++) {
         TileTextureInitData initData =
-            LayerManager::getTileTextureInitData(layergroupid::ID(id));
+            LayerManager::getTileTextureInitData(layergroupid::GroupID(id));
         assureTextureContainerExists(initData);
     }
 }

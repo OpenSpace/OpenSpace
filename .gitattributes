@@ -1,0 +1,125 @@
+* text=auto
+
+# GitHub files
+ATTRIBUTION text
+AUTHORS text
+CHANGELOG text
+CHANGES text
+CONTRIBUTING text
+COPYING text
+copyright text
+*COPYRIGHT* text
+INSTALL text
+LICENSE text
+NEWS text
+readme text
+*README* text
+TODO text
+
+# Other helpers
+.clang-format text
+.gitattributes text
+.gitconfig text
+.gitignore text
+Doxyfile text
+Jenkinsfile text
+langDef text
+
+# Documents
+*.bib text
+*.cfg text
+*.csv text
+*.ini text
+*.markdown text
+*.md text
+*.xml text
+
+# Graphics
+*.eps binary
+*.gif binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.png binary
+*.svg text
+*.tif binary
+*.tiff binary
+
+# C++ sources
+*.c text
+*.cc text
+*.cxx text
+*.cpp text
+*.c++ text
+*.h text
+*.hh text
+*.hpp text
+*.h++ text
+*.in text
+*.inl text
+
+# CMake
+*.cmake text
+*.template text
+
+# HTML
+*.css text
+*.htm text
+*.html text
+*.hbs text
+*.js text
+
+# GLSL
+*.glsl text
+*.hglsl text
+*.fs text
+*.frag text
+*.vert text
+*.vs text
+
+# Other
+*.am text
+*.json text
+*.lua text
+*.py text
+
+# Web Server Gateway Interface
+*.wsgi text
+
+# Compiled Dynamic libraries
+*.dll binary
+*.dylib binary
+*.so binary
+
+# Compiled Static libraries
+*.a binary
+*.la binary
+*.lai binary
+*.lib binary
+
+# Fonts
+*.otf binary
+*.ttf binary
+
+# Resource files
+*.rc text
+*.qrc text
+
+# OpenSpace specific
+*.scene text
+*.mod text
+*.data text
+
+# SPICE specific
+*.tf text
+*.ti text
+*.tls text
+*.tpc text
+
+# GDAL specific
+*.wkt text
+*.dxf text
+*.gfs text
+*.xsd text
+*.rsc binary
+*.dgn binary

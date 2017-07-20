@@ -45,9 +45,7 @@
 
 namespace openspace {
 
-SpaceModule::SpaceModule()
-    : OpenSpaceModule("Space")
-{}
+SpaceModule::SpaceModule() : OpenSpaceModule(Name) {}
 
 void SpaceModule::internalInitialize() {
     FactoryManager::ref().addFactory(

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/properties/scalarproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -55,6 +56,9 @@ private:
 
     GLuint _vertexBufferID;
     GLuint _vaoID;
+
+    properties::FloatProperty _intensityClamp;
+    properties::FloatProperty _lightIntensity;
 };
 
 } // namespace globebrowsing

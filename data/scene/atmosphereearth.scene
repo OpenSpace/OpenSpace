@@ -41,7 +41,7 @@ function preInitialization()
     openspace.bindKey("F4", "openspace.setPropertyValue('Interaction.origin', 'Earth')")
     openspace.bindKey("F3", "openspace.setPropertyValue('Interaction.origin', 'Moon')")
 
-    openspace.setPathToken("${MARS_DATA}", "C:/Users/Jonathas/Pessoal/Work/OpenSpace/data/scene/lodglobes/mars")
+    openspace.setPathToken("${MARS_DATA}", "C:/Users/jonco_000/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
     --openspace.setPathToken("${MARS_DATA}", "F:/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
 end
 
@@ -87,8 +87,10 @@ return {
         --Rotation = {0.224913, -0.096227, 0.939918, 0.238136},
 
         -- Mars Position
-        Position = {113807010618.012451, -93349316388.687042, 190403814045.631592},
-        Rotation = {0.527685, 0.455945, -0.495623, 0.517707},
+        --Position = {113807010618.012451, -93349316388.687042, 190403814045.631592},
+        --Rotation = {0.527685, 0.455945, -0.495623, 0.517707},
+        Position = {1, 0, 0},
+		Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
     Modules = {
         "sun",
@@ -99,8 +101,8 @@ return {
         "lodglobes/earth",
         "lodglobes/mars",
         "lodglobes/moon",
-        "satellites",
-        "mars-satellites",
+        --"satellites",
+        --"mars-satellites",
         --"toyvolume",
         --"earth",
         "stars",

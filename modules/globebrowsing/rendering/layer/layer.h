@@ -25,14 +25,17 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 
-#include <openspace/properties/propertyowner.h>
-
 #include <modules/globebrowsing/tile/chunktile.h>
+
+#include <modules/globebrowsing/rendering/layer/layeradjustment.h>
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -41,29 +44,55 @@ namespace tileprovider {
     class TileProvider;
 }
 
-/**
- * Simple struct which is used to enable/disable <code>TileProvider</code> 
- * and associate is with a name. It also holds layer specific information
- * which is used in rendering of layer.
- */
 class Layer : public properties::PropertyOwner {
 public:
-    Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict);
+    /**
+     * Properties used when the layer type is not a tile type layer. These properties
+     * can be added or removed depending on the layer type.
+     */
+    struct OtherTypesProperties {
+        properties::Vec3Property color;
+    };
+
+    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict);
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
+    Tile::Status getTileStatus(const TileIndex& index) const;
 
-    bool enabled() const { return _enabled.value(); }
-    tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
-    const LayerRenderSettings& renderSettings() const { return _renderSettings; }
-
+    layergroupid::TypeID type() const;
+    layergroupid::BlendModeID blendMode() const;
+    TileDepthTransform depthTransform() const;
+    bool enabled() const;
+    tileprovider::TileProvider* tileProvider() const;
+    const OtherTypesProperties& otherTypesProperties() const;
+    const LayerRenderSettings& renderSettings() const;
+    const LayerAdjustment& layerAdjustment() const;
+    
     void onChange(std::function<void(void)> callback);
+    
+    void update();
 
 private:
+    layergroupid::TypeID parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const;
+    void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
+    void addVisibleProperties();
+    void removeVisibleProperties();
+    
+    properties::OptionProperty _typeOption;
+    properties::OptionProperty _blendModeOption;
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
+
+    layergroupid::TypeID _type;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
+    OtherTypesProperties _otherTypesProperties;
     LayerRenderSettings _renderSettings;
-};
+    LayerAdjustment _layerAdjustment;
+
+    const layergroupid::GroupID _layerGroupId;
+  
+    std::function<void(void)> _onChangeCallback;
+  };
 
 } // namespace globebrowsing
 } // namespace openspace

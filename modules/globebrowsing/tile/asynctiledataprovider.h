@@ -76,6 +76,9 @@ public:
 
     void update();
     void reset();
+    void prepairToBeDeleted();
+
+    bool shouldBeDeleted();
 
     std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
     float noDataValueAsFloat() const;
@@ -86,6 +89,7 @@ protected:
     enum class ResetMode {
         ShouldResetAll,
         ShouldResetAllButRawTileDataReader,
+        ShouldBeDeleted,
         ShouldNotReset
     };
 
@@ -121,6 +125,7 @@ private:
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 
     ResetMode _resetMode;
+    bool _shouldBeDeleted;
 };
 
 } // namespace globebrowsing
