@@ -46,16 +46,16 @@ ServerModule::~ServerModule() {
 void ServerModule::internalInitialize() {
     using namespace ghoul::io;
 
-//    std::unique_ptr<TcpSocketServer> tcpServer = std::make_unique<TcpSocketServer>();
+    std::unique_ptr<TcpSocketServer> tcpServer = std::make_unique<TcpSocketServer>();
     std::unique_ptr<WebSocketServer> wsServer = std::make_unique<WebSocketServer>();
 
     // Temporary hard coded addresses and ports.
-//    tcpServer->listen("localhost", 8000);
+    tcpServer->listen("localhost", 8000);
     wsServer->listen("localhost", 8001);
-//    LDEBUG(fmt::format("TCP Server listening on {}:{}", tcpServer->address(), tcpServer->port()));
+    LDEBUG(fmt::format("TCP Server listening on {}:{}", tcpServer->address(), tcpServer->port()));
     LDEBUG(fmt::format("WS Server listening on {}:{}", wsServer->address(), wsServer->port()));
 
-//    _servers.push_back(std::move(tcpServer));
+    _servers.push_back(std::move(tcpServer));
     _servers.push_back(std::move(wsServer));
 
     OsEng.registerModuleCallback(
