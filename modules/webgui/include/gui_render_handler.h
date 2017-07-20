@@ -32,7 +32,7 @@
 #include <ghoul/opengl/opengl>
 #include <fmt/format.h>
 #include <include/cef_app.h>
-#include "modules/webbrowser/include/web_render_handler.h"
+#include "modules/webbrowser/include/webrenderhandler.h"
 
 namespace openspace {
 
