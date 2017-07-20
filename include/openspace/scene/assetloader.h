@@ -75,7 +75,7 @@ public:
         std::string assetName();
         std::string assetDirectory();
         AssetLoader* loader();
-        ghoul::Dictionary dataDictionary();
+        ghoul::Dictionary syncDictionary();
         std::string syncDirectory();
         bool isInitialized();
         bool hasLuaTable();

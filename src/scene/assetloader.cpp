@@ -40,7 +40,7 @@ namespace {
     const char* AssetGlobalVariableName = "asset";
     const char* DataFileSuffix = "data";
 
-    const char* DataTableName = "data";
+    const char* SyncTableName = "sync";
     const char* ImportFunctionName = "import";
     const char* ImportToggleFunctionName = "importToggle";
     const char* SyncedResourceFunctionName = "syncedResource";
@@ -550,12 +550,12 @@ AssetLoader* AssetLoader::Asset::loader() {
     return _loader;
 }
 
-ghoul::Dictionary AssetLoader::Asset::dataDictionary() {
+ghoul::Dictionary AssetLoader::Asset::syncDictionary() {
     ghoul::lua::LuaState* state = loader()->luaState();
 
     lua_getglobal(*state, AssetsTableName);
     lua_getfield(*state, -1, id().c_str());
-    lua_getfield(*state, -1, DataTableName);
+    lua_getfield(*state, -1, SyncTableName);
 
     ghoul::Dictionary dictionary;
     ghoul::lua::luaDictionaryFromState(*state, dictionary);

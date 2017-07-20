@@ -2,16 +2,22 @@ local assetHelper = asset.import('assethelper')
 local transforms = asset.import('./transforms')
 
 local sunParentName = transforms.SunIau.Name;
+local texturesPath = asset.syncedResource("textures");
 
-asset.data = {
-    FileRequest = {
-        {
-            Destination = asset.syncedResource("textures"),
-            Identifier = "sun_textures",
-            Version = 1
-        }
+asset.sync = {
+    {
+        Type = "ResourceSynchronization",
+        Destination = texturesPath,
+        Identifier = "sun_textures",
+        Version = 1
+    },
+    {
+        Type = "TorrentSynchronization",
+        Destination = texturesPath,
+        File = "torrentFilePath.torrent",
     }
 }
+
 
 -- Simple sphere to represent the Sun
 asset.Sun = {
@@ -28,7 +34,7 @@ asset.Sun = {
         },
         Textures = {
             Type = "simple",
-            Color = asset.syncedResource("textures/sun.jpg"),
+            Color = texturesPath + "/sun.jpg"),
         },
         PerformShading = false,
     }
@@ -43,7 +49,7 @@ asset.SunGlare = {
         Size = 1.3*10^10.5,
         Origin = "Center",
         Billboard = true,
-        Texture = asset.syncedResource("textures/sun-glare.png"),
+        Texture = texturesPath + "/sun-glare.png"),
         BlendMode = "Additive"
     }
 }
@@ -57,7 +63,7 @@ asset.SunMarker = {
         Size = 3.0E11,
         Origin = "Center",
         Billboard = true,
-        Texture = asset.syncedResource("textures/marker.png"),
+        Texture = texturesPath + "/marker.png"),
         BlendMode = "Additive"
     },
     Transformation = {

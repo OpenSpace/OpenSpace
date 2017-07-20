@@ -98,7 +98,7 @@ class FileInformation:
         source.write('\n')
         source.write('#include "' + self.filename + '.h' + '"\n')
         source.write('\n')
-        source.write('namespacew ' + self.namespace + ' {\n')
+        source.write('namespace ' + self.namespace + ' {\n')
         source.write('\n\n\n')
         source.write('} // namespace ' + self.namespace)
         source.write('\n')

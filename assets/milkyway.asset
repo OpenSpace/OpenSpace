@@ -1,8 +1,8 @@
 local sunTransforms = asset.import('sun/transforms')
 
-asset.data = {
-    FileRequest = {
+asset.sync = { 
         {
+            Type = "ResourceSynchronization"
             Destination = asset.syncedResource("textures"),
             Identifier = "milkyway_textures",
             Version = 2
