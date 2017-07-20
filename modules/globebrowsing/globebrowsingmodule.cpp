@@ -40,6 +40,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+
 #include <modules/globebrowsing/models/renderablesite.h>
 //#include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
 #include <modules/globebrowsing/models/renderableroversurface.h>
@@ -54,6 +55,7 @@
 #include <modules/globebrowsing/tasks/fastbilateralpointcloudfilter.h>
 #include <modules/globebrowsing/tasks/randompointcloudfilter.h>
 #endif
+
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
@@ -69,6 +71,7 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul\filesystem\filesystem.h>
 
+<<<<<<< HEAD
 #include <openspace/util/progressbar.h>
 
 namespace {
@@ -83,6 +86,16 @@ namespace {
 
 namespace openspace {
 
+=======
+#include "globebrowsingmodule_lua.inl"
+
+namespace {
+    const char* _loggerCat = "GlobeBrowsingModule";
+}
+
+namespace openspace {
+
+>>>>>>> master
 GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
 
 void GlobeBrowsingModule::internalInitialize() {
