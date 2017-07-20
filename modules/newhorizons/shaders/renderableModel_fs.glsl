@@ -84,7 +84,7 @@ Fragment getFragment() {
     }
 
     frag.color.a = 1.0;
-    // frag.depth = vs_positionScreenSpace.w;
-    frag.depth = 0.0;
+    frag.depth = vs_positionScreenSpace.w;
+    // frag.depth = 0.0;
     return frag;
 }

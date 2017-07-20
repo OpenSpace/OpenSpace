@@ -1,18 +1,17 @@
-*~
-*.swp
 .DS_Store
 .vscode
 /bin/
 /build/
 /cache/
-Thumbs.db
-tmp/
-
-/documentation
 /doc
-/logs
+/documentation
 /ext/SGCT
+/logs
+tmp/
+Thumbs.db
 
+*~
+*.swp
 *.gglsl
 *.GhoulGenerated.glsl
 *.OpenSpaceGenerated.glsl
@@ -31,7 +30,6 @@ install_manifest.txt
 .project
 
 shaders/ABuffer/constants.hglsl
-log.html
 ScriptLog.txt
 
 data/scene/atmosphereearth/textures
