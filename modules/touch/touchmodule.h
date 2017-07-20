@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <modules/touch/include/TouchMarker.h>
-#include <modules/touch/include/TouchInteraction.h>
+#include <modules/touch/include/touchmarker.h>
+#include <modules/touch/include/touchinteraction.h>
 
 
 namespace openspace {
