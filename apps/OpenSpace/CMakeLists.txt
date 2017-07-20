@@ -138,6 +138,9 @@ target_link_libraries(${APPLICATION_NAME}
     ${SPOUT_LIBRARY}
 )
 
+# Web Browser and Web gui
+# Why not put these in the module's path? Because they do not have access to the
+# target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
     # Add the CEF binary distribution's cmake/ directory to the module path and
     # find CEF to initialize it properly.
