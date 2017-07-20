@@ -45,6 +45,7 @@ struct PerformanceLayout {
         float updateTranslation[NumberValues];
         float updateRotation[NumberValues];
         float updateScaling[NumberValues];
+        float updateSceneGraphNode[NumberValues];
         float totalTime[NumberValues];
     };
     SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];

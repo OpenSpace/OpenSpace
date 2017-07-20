@@ -63,6 +63,7 @@ public:
         std::chrono::nanoseconds updateTimeTranslation;
         std::chrono::nanoseconds updateTimeRotation;
         std::chrono::nanoseconds updateTimeScaling;
+        std::chrono::nanoseconds updateSceneGraphNode;
         std::chrono::nanoseconds totalTime;
     };
 

@@ -241,6 +241,7 @@ void SceneGraphNode::update(const UpdateData& data) {
     auto startUpdate = std::chrono::high_resolution_clock::now();
     auto endUpdate = startUpdate;
     if (data.doPerformanceMeasurement) {
+        glFinish();
         startUpdate = std::chrono::high_resolution_clock::now();
     }
     if (_transform.translation) {
@@ -327,7 +328,9 @@ void SceneGraphNode::update(const UpdateData& data) {
     }
 
     if (data.doPerformanceMeasurement) {
+        glFinish();
         endUpdate = std::chrono::high_resolution_clock::now();
+        _performanceRecord.updateSceneGraphNode = (endUpdate - startUpdate);
         _performanceRecord.totalTime += (endUpdate - startUpdate);
     }
 }
