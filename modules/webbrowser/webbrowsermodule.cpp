@@ -36,13 +36,7 @@ namespace openspace {
 
 WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
     LDEBUG("Starting CEF...");
-    CefMainArgs args;
-    CefSettings settings;
-
-    CefString(&settings.browser_subprocess_path).FromASCII((char*) findHelperExecutable().c_str());
-    attachDebugSettings(settings);
-
-    CefInitialize(args, settings, nullptr, NULL);
+    cefHost = std::make_unique<CefHost>(findHelperExecutable());
     LDEBUG("Starting CEF... done!");
 }
 
@@ -55,7 +49,7 @@ std::string WebBrowserModule::findHelperExecutable() {
     std::string subprocessName = OsEng.configurationManager().value<std::string>(
             ConfigurationManager::KeyWebHelperLocation);
     subprocessName += SUBPROCESS_ENDING;
-	int subLength = (int) subprocessName.length();
+	auto subLength = (int) subprocessName.length();
 
     Directory binDir("${BASE_PATH}/bin/openspace", Directory::AbsolutePath::No);
     std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);
@@ -68,25 +62,11 @@ std::string WebBrowserModule::findHelperExecutable() {
                      return s == subprocessName;
                  });
 
-    if (matchingFiles.size() == 0) {
+    if (matchingFiles.empty()) {
         LERROR(fmt::format("Could not find requested sub process executable file name: {}", subprocessName));
     }
 
     return matchingFiles.back();
-}
-
-WebBrowserModule::~WebBrowserModule() {
-    // we're shutting down, force close all browsers
-    for (auto const& browser : browsers) {
-        browser->GetHost()->CloseBrowser(true);
-    }
-
-    CefShutdown();
-}
-
-void WebBrowserModule::attachDebugSettings(CefSettings &settings) {
-    settings.remote_debugging_port = 8088;
-    LDEBUG(fmt::format("Remote WebBrowser debugging available on http://localhost:{}", settings.remote_debugging_port));
 }
 
 void WebBrowserModule::internalInitialize() {
@@ -96,14 +76,6 @@ void WebBrowserModule::internalInitialize() {
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
-
-    // fire up callbacks used for rendering etc
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
-            [this](){
-                CefDoMessageLoopWork();
-            }
-    );
 }
 
 int WebBrowserModule::addBrowser(CefBrowser *browser) {

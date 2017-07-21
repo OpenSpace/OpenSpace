@@ -22,17 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
+#ifndef __OPENSPACE_MODULE_WEBBROWSER__CEF_HOST_H
+#define __OPENSPACE_MODULE_WEBBROWSER__CEF_HOST_H
 
-#include <openspace/util/openspacemodule.h>
-#include <ghoul/filesystem/directory.h>
-#include <include/openspace/engine/configurationmanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <include/wrapper/cef_helpers.h>
-#include <include/cef_browser.h>
-#include "include/eventhandler.h"
-#include "include/browserinstance.h"
-#include "include/cefhost.h"
+#include "modules/webbrowser/include/browser_client.h"
+#include "modules/webbrowser/include/web_render_handler.h"
+#include "modules/webbrowser/include/event_handler.h"
 
 namespace openspace {
 
@@ -42,24 +39,17 @@ static const std::string SUBPROCESS_ENDING = ".exe";
 static const std::string SUBPROCESS_ENDING = "";
 #endif
 
-class WebBrowserModule : public OpenSpaceModule {
+class CefHost {
 public:
-    static constexpr const char* Name = "WebBrowser";
-    WebBrowserModule();
-    void internalInitialize();
-
-    int addBrowser(CefBrowser*);
-    void removeBrowser(CefBrowser*);
-
-    void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
+    CefHost(std::string helperLocation);
+    ~CefHost();
 
 private:
-    std::vector<CefRefPtr<CefBrowser>> browsers;
-    std::string findHelperExecutable();
-    EventHandler eventHandler;
-	std::unique_ptr<CefHost> cefHost;
+    void initializeCallbacks();
+    void deinitialize();
+    void attachDebugSettings(CefSettings&);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
+#endif //__OPENSPACE_MODULE_WEBBROWSER__CEF_HOST_H

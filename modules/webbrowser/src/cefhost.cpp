@@ -22,44 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
-
-#include <openspace/util/openspacemodule.h>
-#include <ghoul/filesystem/directory.h>
 #include <include/openspace/engine/configurationmanager.h>
-#include <include/wrapper/cef_helpers.h>
-#include <include/cef_browser.h>
-#include "include/eventhandler.h"
-#include "include/browserinstance.h"
-#include "include/cefhost.h"
+#include "include/cef_host.h"
+
+namespace {
+const char* _loggerCat = "CefHost";
+}
 
 namespace openspace {
 
-#ifdef WIN32
-static const std::string SUBPROCESS_ENDING = ".exe";
-#else
-static const std::string SUBPROCESS_ENDING = "";
-#endif
+CefHost::CefHost(std::string helperLocation) {
+    LDEBUG("Initializing CEF...");
+    CefMainArgs args;
+    CefSettings settings;
 
-class WebBrowserModule : public OpenSpaceModule {
-public:
-    static constexpr const char* Name = "WebBrowser";
-    WebBrowserModule();
-    void internalInitialize();
+    CefString(&settings.browser_subprocess_path).FromASCII((char*) helperLocation.c_str());
+    attachDebugSettings(settings);
 
-    int addBrowser(CefBrowser*);
-    void removeBrowser(CefBrowser*);
+    CefInitialize(args, settings, nullptr, NULL);
+    initializeCallbacks();
+    LDEBUG("Initializing CEF... done!");
+}
 
-    void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
+CefHost::~CefHost() {
+    CefShutdown();
+}
 
-private:
-    std::vector<CefRefPtr<CefBrowser>> browsers;
-    std::string findHelperExecutable();
-    EventHandler eventHandler;
-	std::unique_ptr<CefHost> cefHost;
-};
+void CefHost::attachDebugSettings(CefSettings &settings) {
+    settings.remote_debugging_port = 8088;
+    LDEBUG(fmt::format("Remote WebBrowser debugging available on http://localhost:{}", settings.remote_debugging_port));
+}
 
-} // namespace openspace
+void CefHost::deinitialize() {
+}
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
+void CefHost::initializeCallbacks() {
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Deinitialize,
+            [this]() {
+                deinitialize();
+            }
+    );
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Render,
+            [this](){
+                CefDoMessageLoopWork();
+            }
+    );
+}
+
+}
+

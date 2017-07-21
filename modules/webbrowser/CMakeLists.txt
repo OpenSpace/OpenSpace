@@ -174,6 +174,7 @@ set(OPENSPACE_HEADER_FILES
     include/screenspacebrowser.h
     include/browserinstance.h
     include/eventhandler.h
+    include/cefhost.h
     )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
@@ -185,6 +186,7 @@ set(OPENSPACE_SOURCE_FILES
     src/screenspacebrowser.cpp
     src/browserinstance.cpp
     src/eventhandler.cpp
+    src/cefhost.cpp
     )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
