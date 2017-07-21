@@ -27,15 +27,10 @@
 #include "hdr.glsl"
 
 layout (location = 0) out vec4 finalColor;
+
 uniform int nAaSamples;
-
 uniform sampler2DMS mainColorTexture;
-
-//uniform float exposure;
-//const float exposure = 0.4;
 uniform float backgroundExposure;
-//uniform float gamma;
-//const float gamma = 2.2;
 
 void main() {
      vec4 color = vec4(0.0);

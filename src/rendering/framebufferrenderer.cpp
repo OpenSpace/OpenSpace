@@ -690,7 +690,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
     // g-buffer
     if (!tasks.deferredcasterTasks.empty()) {
-        glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _deferredFramebuffer);
         GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, dBuffer);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -700,19 +700,25 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
         ghoul::opengl::TextureUnit mainColorTextureUnit;
         mainColorTextureUnit.activate();
-
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+
         _hdrBackGroundProgram->setUniform("mainColorTexture", mainColorTextureUnit);
         _hdrBackGroundProgram->setUniform("nAaSamples", _nAaSamples);
         _hdrBackGroundProgram->setUniform("exposure", _hdrExposure);
         _hdrBackGroundProgram->setUniform("backgroundExposure", _hdrBackground);
         _hdrBackGroundProgram->setUniform("gamma", _gamma);
+
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+
         glBindVertexArray(_screenQuad);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
-        _hdrBackGroundProgram->deactivate();
-        
+        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
+
+        _hdrBackGroundProgram->deactivate();        
     }
     //} else {
     //    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
@@ -792,18 +798,13 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     }
     
 #ifdef _NEW_RENDERING_    
-    if (tasks.deferredcasterTasks.size()) {
+    if (!tasks.deferredcasterTasks.empty()) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
-        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _deferredColorTexture, 0);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
-
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
-        
         glBlitFramebuffer(0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
             0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
+            GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     } else {
