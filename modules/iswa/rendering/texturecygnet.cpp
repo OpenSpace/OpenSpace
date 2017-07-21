@@ -33,7 +33,7 @@ namespace {
 namespace openspace {
 
 TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
-    :IswaCygnet(dictionary)
+    : IswaCygnet(dictionary)
 { 
     registerProperties();
 }
@@ -41,7 +41,6 @@ TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
 TextureCygnet::~TextureCygnet() {}
 
 bool TextureCygnet::updateTexture() {
-
     std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
                                                         (void*) _imageFile.buffer,
                                                         _imageFile.size, 
@@ -58,17 +57,21 @@ bool TextureCygnet::updateTexture() {
     return false;
 }
 
-bool TextureCygnet::downloadTextureResource(double timestamp){
-
-    if(_futureObject.valid())
+bool TextureCygnet::downloadTextureResource(double timestamp) {
+    if (_futureObject.valid()) {
         return false;
+    }
 
-    if(_textures.empty())
+    if (_textures.empty()) {
         _textures.push_back(nullptr);
+    }
 
-    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(_data->id, timestamp);
+    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(
+        _data->id,
+        timestamp
+    );
 
-    if(future.valid()){
+    if (future.valid()) {
         _futureObject = std::move(future);
         return true;
     }
@@ -83,9 +86,8 @@ bool TextureCygnet::updateTextureResource(){
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
         imageFile = _futureObject.get();
 
-        if(imageFile.corrupted){
-            if(imageFile.buffer)
-                delete[] imageFile.buffer;
+        if (imageFile.corrupted) {
+            delete[] imageFile.buffer;
             return false;
         } else {
             _imageFile = imageFile;
@@ -100,6 +102,5 @@ bool TextureCygnet::updateTextureResource(){
 bool TextureCygnet::readyToRender() const {
     return (isReady() && ((!_textures.empty()) && (_textures[0] != nullptr)));
 }
-
 
 } //namespace openspace

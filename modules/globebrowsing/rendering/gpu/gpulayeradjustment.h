@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSTMENT___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSTMENT___H__
 
 #include <openspace/util/gpudata.h>
 
@@ -49,4 +49,4 @@ private:
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSTMENT___H__

@@ -28,7 +28,7 @@
 #include <openspace/util/timeline.h>
 #include <openspace/network/parallelconnection.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace openspace { class Camera; }

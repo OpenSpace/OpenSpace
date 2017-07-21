@@ -268,6 +268,13 @@ def check_using_namespace(lines):
 
 
 
+def check_end_of_line(lines):
+    if lines[-1][-1] != '\n':
+        return lines[-1][-1]
+    else:
+        return ''
+
+
 previousSymbols  = {}
 def check_header_file(file, component):
     with open(file, 'r+') as f:
@@ -313,6 +320,11 @@ def check_header_file(file, component):
             print(file, '\t', 'Naming convention broken', '\t', naming_subcomponent)
             return
 
+        end_of_line = check_end_of_line(lines)
+        if end_of_line:
+            print(file, '\t', 'Last line does not contain a newline character: ', end_of_line)
+            return
+
         duplicates, symbol = check_duplicates(lines, previousSymbols)
         if not duplicates:
             print(file, '\t', 'Duplicate include guard', symbol, 'first in', previousSymbols[symbol])
@@ -329,9 +341,11 @@ def check_header_file(file, component):
         if core_dependency:
             print(file, '\t', 'Wrong dependency (core depends on module)', core_dependency)
 
-        using_namespaces = check_using_namespace(lines)
-        if using_namespaces:
-            print(file, '\t', 'Using namespace found in header file')
+        if (not 'ghoul_gl.h' in file):
+            # ghoul_gl.h is allowed to use 'using namespace' to pull the gl namespace in
+            using_namespaces = check_using_namespace(lines)
+            if using_namespaces:
+                print(file, '\t', 'Using namespace found in header file')
 
         bom = check_byte_order_mark_character(lines)
         if bom:
@@ -354,6 +368,11 @@ def check_inline_file(file, component):
         core_dependency = check_core_dependency(lines, component)
         if core_dependency:
             print(file, '\t', 'Wrong dependency (core depends on module)', core_dependency)
+
+        end_of_line = check_end_of_line(lines)
+        if end_of_line:
+            print(file, '\t', 'Last line does not contain a newline character: ', end_of_line)
+            return
 
         bom = check_byte_order_mark_character(lines)
         if bom:
@@ -379,6 +398,11 @@ def check_source_file(file, component):
         core_dependency = check_core_dependency(lines, component)
         if core_dependency:
             print(file, '\t' 'Wrong core dependency', core_dependency)
+
+        end_of_line = check_end_of_line(lines)
+        if end_of_line:
+            print(file, '\t', 'Last line does not contain a newline character: ', end_of_line)
+            return
 
         copyright = check_copyright(lines)
         if copyright:

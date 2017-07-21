@@ -28,7 +28,7 @@
 #include <openspace/interaction/delayedvariable.h>
 #include <openspace/interaction/inputstate.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 namespace openspace::interaction {
 

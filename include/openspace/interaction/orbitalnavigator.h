@@ -34,7 +34,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace openspace {

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_TOUCH___INTERACTION___H__
-#define __OPENSPACE_TOUCH___INTERACTION___H__
+#ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_INTERACTION___H__
+#define __OPENSPACE_MODULE_TOUCH___TOUCH_INTERACTION___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -201,5 +201,5 @@ private:
 
 } // openspace namespace
 
-#endif // __OPENSPACE_TOUCH___INTERACTION___H__
+#endif // __OPENSPACE_MODULE_TOUCH___TOUCH_INTERACTION___H__
 

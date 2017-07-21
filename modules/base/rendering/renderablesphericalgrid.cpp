@@ -234,4 +234,5 @@ void RenderableSphericalGrid::update(const UpdateData& data) {
     _parentMatrix = SpiceManager::ref().positionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time.j2000Seconds());
 
 }
-}
+
+} // namespace openspace

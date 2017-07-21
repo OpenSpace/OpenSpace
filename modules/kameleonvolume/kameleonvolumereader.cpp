@@ -214,7 +214,4 @@ float KameleonVolumeReader::maxValue(const std::string & variable) const {
     return _model->getVariableAttribute(variable, "actual_max").getAttributeFloat();
 }
 
-
-
-
-}
+} // namespace openspace

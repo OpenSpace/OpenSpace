@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DEFAULT_TILE_PROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___DEFAULT_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
@@ -90,4 +90,4 @@ private:
 
 } // namespace openspace::globebrowsing::tileprovider
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DEFAULT_TILE_PROVIDER___H__

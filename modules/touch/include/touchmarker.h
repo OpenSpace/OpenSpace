@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_TOUCH___MARKER___H__
-#define __OPENSPACE_TOUCH___MARKER___H__
+#ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
+#define __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 
 #include <modules/touch/include/tuioear.h>
 
@@ -36,8 +36,8 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
+#include <ghoul/glm.h>
 
-#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
@@ -73,4 +73,4 @@ class TouchMarker : public properties::PropertyOwner {
 
 } // openspace namespace
 
-#endif // __OPENSPACE_TOUCH___MARKER___H__
+#endif // __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__

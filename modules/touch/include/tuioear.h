@@ -22,15 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHEAR___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHEAR___H__
+#ifndef __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
+#define __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__
 
 #include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
 #include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
 #include <modules/touch/ext/libTUIO11/TUIO/UdpReceiver.h>
 #include <modules/touch/ext/libTUIO11/TUIO/TcpReceiver.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <math.h>
 #include <vector>
@@ -104,4 +104,4 @@ class TuioEar : public TUIO::TuioListener {
         
 };
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHWRAPPER___H__
+#endif // __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__

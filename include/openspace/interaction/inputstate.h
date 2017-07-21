@@ -28,7 +28,7 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <list>
 
