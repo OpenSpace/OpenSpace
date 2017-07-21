@@ -35,10 +35,9 @@
 
 namespace {
     const char* _loggerCat = "OrbitalNavigator";
-}
+} // namespace
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner("OrbitalNavigator")
@@ -237,7 +236,9 @@ void OrbitalNavigator::startInterpolateCameraDirection(const Camera& camera) {
     double angle = glm::angle(camDir, directionToCenter);
 
     // Minimum is two second. Otherwise proportional to angle
-    _rotateToFocusNodeInterpolator.setInterpolationTime(glm::max(angle * 2.0, 2.0));
+    _rotateToFocusNodeInterpolator.setInterpolationTime(static_cast<float>(
+        glm::max(angle * 2.0, 2.0)
+    ));
     _rotateToFocusNodeInterpolator.start();
 }
 
@@ -309,7 +310,7 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(
 {
     if (_rotateToFocusNodeInterpolator.isInterpolating()) {
         double t = _rotateToFocusNodeInterpolator.value();
-        _rotateToFocusNodeInterpolator.setDeltaTime(deltaTime);
+        _rotateToFocusNodeInterpolator.setDeltaTime(static_cast<float>(deltaTime));
         _rotateToFocusNodeInterpolator.step();
         glm::dquat result = glm::slerp(
             localCameraRotation,
@@ -329,7 +330,7 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(
     double deltaTime,
     const glm::dvec3& cameraPosition,
     const glm::dvec3& objectPosition,
-    const glm::dquat& focusNodeRotationDiff,
+    const glm::dquat& /*focusNodeRotationDiff*/,
     const glm::dquat& globalCameraRotation,
     const SurfacePositionHandle& positionHandle) const
 {
@@ -397,9 +398,9 @@ glm::dvec3 OrbitalNavigator::followFocusNodeRotation(
 
 glm::dquat OrbitalNavigator::rotateGlobally(
     const glm::dquat& globalCameraRotation,
-    const glm::dvec3& objectPosition,
+    const glm::dvec3& /*objectPosition*/,
     const glm::dquat& focusNodeRotationDiff,
-    const glm::dvec3& cameraPosition,
+    const glm::dvec3& /*cameraPosition*/,
     const SurfacePositionHandle& positionHandle) const
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
@@ -443,7 +444,7 @@ glm::dvec3 OrbitalNavigator::translateVertically(
 glm::dquat OrbitalNavigator::rotateHorizontally(
     double deltaTime,
     const glm::dquat& globalCameraRotation,
-    const glm::dvec3& cameraPosition, 
+    const glm::dvec3& /*cameraPosition*/, 
     const SurfacePositionHandle& positionHandle) const
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
@@ -506,8 +507,12 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(
     // Interpolate with a negative delta time if distance is too large to follow
     double interpolationSign = glm::sign(maximumDistanceForRotation - distanceToCamera);
 
-    _followRotationInterpolator.setInterpolationTime(interpolationTime);
-    _followRotationInterpolator.setDeltaTime(interpolationSign * deltaTime);
+    _followRotationInterpolator.setInterpolationTime(static_cast<float>(
+        interpolationTime
+    ));
+    _followRotationInterpolator.setDeltaTime(static_cast<float>(
+        interpolationSign * deltaTime
+    ));
     _followRotationInterpolator.step();
 
     return glm::slerp(
@@ -528,5 +533,4 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
     return posHandle;
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

@@ -22,7 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4800'
+#endif // WIN32
+
 #include "gtest/gtest.h"
+
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
 
 // When running the unit tests we don't want to be asked what to do in the case of an
 // assertion

@@ -258,6 +258,8 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     }
     else {
         ghoul_assert(false, "Eccentricity must not be >= 1.0");
+        LERRORC("KeplerTranslation", "Eccentricity must not be >= 1.0");
+        return 0.0;
     }
 }
 

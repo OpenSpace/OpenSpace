@@ -35,8 +35,7 @@
 
 #include <ghoul/opengl/programobject.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 bool LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
     const LayerGroupPreprocessingData& other) const {
@@ -79,7 +78,15 @@ LayerShaderManager::LayerShaderPreprocessingData
         const LayerGroup& layerGroup = layerManager->layerGroup(i);
         std::vector<std::shared_ptr<Layer>> layers = layerGroup.activeLayers();
         
-        layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
+        // This check was implicit before;  not sure if it will fire or will be handled
+        // elsewhere
+        //ghoul_assert(
+        //    !layerGroup.activeLayers().empty(),
+        //    "If activeLayers is empty the following line will lead to an overflow"
+        //);
+        layeredTextureInfo.lastLayerIdx = static_cast<int>(
+            layerGroup.activeLayers().size() - 1
+        );
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
         for (const std::shared_ptr<Layer>& layer : layers) {
@@ -231,5 +238,4 @@ bool LayerShaderManager::updatedOnLastCall() {
     return _updatedOnLastCall;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

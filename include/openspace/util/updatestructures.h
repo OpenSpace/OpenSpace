@@ -34,9 +34,7 @@ namespace openspace {
 class Deferredcaster;
 class VolumeRaycaster;
 
-struct InitializeData {
-
-};
+struct InitializeData {};
 
 struct TransformData {
     glm::dvec3 translation;
@@ -49,7 +47,6 @@ struct UpdateData {
     const Time time;
     const bool doPerformanceMeasurement;
 };
-
 
 struct RenderData {
     const Camera& camera;

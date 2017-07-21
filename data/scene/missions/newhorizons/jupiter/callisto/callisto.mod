@@ -1,3 +1,5 @@
+local callisto_radius = 1.8213E6
+
 return {
     -- Callisto module
     {   
@@ -7,9 +9,10 @@ return {
             Type = "RenderablePlanetProjection",
             Frame = "IAU_CALLISTO",
             Body = "CALLISTO",
+            Radius = callisto_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 1.8213E6,
+                Radius = callisto_radius,
                 Segments = 100
             },
             Textures = {

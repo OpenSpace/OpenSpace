@@ -29,12 +29,10 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 REGISTER_NUMERICALPROPERTY_HEADER(Mat3Property, glm::mat3x3);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___MAT3PROPERTY___H__

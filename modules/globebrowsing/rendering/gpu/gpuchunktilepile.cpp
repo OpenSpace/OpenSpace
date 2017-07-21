@@ -24,9 +24,7 @@
 
 #include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
 
-
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPUChunkTilePile::setValue(ghoul::opengl::ProgramObject* programObject,
                                 const ChunkTilePile& chunkTilePile)
@@ -56,5 +54,4 @@ void GPUChunkTilePile::deactivate() {
     }
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

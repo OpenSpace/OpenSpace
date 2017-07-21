@@ -24,16 +24,15 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
     LRUThreadPool<KeyType> pool)
     : _threadPool(pool)
 { }
 
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Job<P>> job,
     KeyType key)
 {
@@ -44,29 +43,29 @@ void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Jo
     }, key);
 }
 
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 std::vector<KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::getKeysToUnfinishedJobs() {
     return _threadPool.getUnqueuedTasksKeys();
 }
 
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 std::vector<KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::getKeysToEnqueuedJobs() {
     return _threadPool.getQueuedTasksKeys();
 }
 
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 bool PrioritizingConcurrentJobManager<P, KeyType>::touch(KeyType key) {
     return _threadPool.touch(key);
 }
 
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
     _threadPool.clearEnqueuedTasks();
 }
 
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
     ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
     std::lock_guard<std::mutex> lock(_finishedJobsMutex);
@@ -74,10 +73,9 @@ std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishe
     return result;
 }
 
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 size_t PrioritizingConcurrentJobManager<P, KeyType>::numFinishedJobs() const {
     return _finishedJobs.size();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

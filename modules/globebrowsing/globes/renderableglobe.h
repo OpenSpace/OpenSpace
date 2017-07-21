@@ -34,13 +34,13 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace openspace {
-
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+namespace openspace {
     class AtmosphereDeferredcaster;
+}
 #endif
 
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class ChunkedLodGlobe;
 class PointGlobe;
@@ -134,7 +134,7 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& tasks) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     // Getters that perform calculations
@@ -223,7 +223,6 @@ private:
 #endif
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__

@@ -30,10 +30,11 @@
 
 namespace openspace {
 
-template <typename Voxel>
+template <typename Type>
 class RawVolumeReader {
 public:
-    typedef Voxel VoxelType;
+    using VoxelType = Type;
+
     RawVolumeReader(const std::string& path, const glm::uvec3& dimensions);
     glm::uvec3 dimensions() const;
     std::string path() const;

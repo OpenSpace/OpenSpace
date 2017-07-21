@@ -25,7 +25,7 @@
 #include <modules/iswa/rendering/iswadatagroup.h>
 
 #include <fstream>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
@@ -36,9 +36,9 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
-    const std::string _loggerCat = "IswaDataGroup";
+    const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
-}
+} // namespace
 
 namespace openspace{
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)

@@ -24,16 +24,15 @@
 
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
-namespace openspace {
-namespace globebrowsing {
-
 namespace {
     const char* keyOpacity = "Opacity";
     const char* keyGamma = "Gamma";
     const char* keyMultiplier = "Multiplier";
     const char* keyOffset = "Offset";
     const char* keyValueBlending = "ValueBlending";
-}
+} // namespace
+
+namespace openspace::globebrowsing {
 
 LayerRenderSettings::LayerRenderSettings()
     : properties::PropertyOwner("Settings")
@@ -112,5 +111,4 @@ void LayerRenderSettings::setDefaultValues() {
     valueBlending = 1.f;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

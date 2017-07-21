@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_TOUCH___MARKER___H__
-#define __OPENSPACE_TOUCH___MARKER___H__
+#ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
+#define __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 
-#include <modules/touch/include/TuioEar.h>
+#include <modules/touch/include/tuioear.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/rendering/renderable.h>
@@ -36,22 +36,16 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
+#include <ghoul/glm.h>
 
-#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
-} // namespace opengl
-} // namespace ghoul
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-
-class TouchMarker : public properties::PropertyOwner
-{
+class TouchMarker : public properties::PropertyOwner {
     public:
         TouchMarker();
 
@@ -79,4 +73,4 @@ class TouchMarker : public properties::PropertyOwner
 
 } // openspace namespace
 
-#endif // __OPENSPACE_TOUCH___MARKER___H__
+#endif // __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__

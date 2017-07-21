@@ -30,9 +30,7 @@
 
 namespace openspace {
 
-namespace properties {
-    class Property;
-}
+namespace properties { class Property; }
 
 class Renderable;
 class Scene;

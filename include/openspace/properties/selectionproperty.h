@@ -29,8 +29,7 @@
 
 #include <vector>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 class SelectionProperty : public TemplateProperty<std::vector<int>> {
 public:
@@ -77,7 +76,6 @@ template <>
 template <>
 bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string& outValue, std::vector<int> inValue);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___SELECTIONPROPERTY___H__

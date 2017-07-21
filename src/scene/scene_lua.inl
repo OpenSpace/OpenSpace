@@ -125,10 +125,10 @@ std::string extractUriWithoutGroupName(std::string uri) {
     return uri.substr(pos);
 }
 
-}
+} // namespace
+} // namespace openspace
 
-
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 int setPropertyCall_single(properties::Property* prop, std::string uri, lua_State* L,
                            const int type)
@@ -390,6 +390,4 @@ int removeSceneGraphNode(lua_State* L) {
     return 1;
 }
 
-} // namespace luascriptfunctions
-
-}  // namespace openspace
+}  // namespace openspace::luascriptfunctions

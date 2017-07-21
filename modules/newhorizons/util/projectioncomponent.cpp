@@ -71,7 +71,7 @@ namespace {
         "${OPENSPACE_DATA}/scene/common/textures/placeholder.png";
 
     const char* _loggerCat = "ProjectionComponent";
-}
+} // namespace
 
 namespace openspace {
 

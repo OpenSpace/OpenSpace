@@ -73,7 +73,7 @@ void GlobeBrowsingModule::internalInitialize() {
         // Convert from MB to Bytes
         GdalWrapper::create(
             16ULL * 1024ULL * 1024ULL, // 16 MB
-            CpuCap.installedMainMemory() * 0.25 * 1024 * 1024); // 25% of total RAM
+            static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)); // 25% of total RAM
         addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
     });

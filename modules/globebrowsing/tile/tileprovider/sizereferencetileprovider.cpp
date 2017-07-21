@@ -36,23 +36,18 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 
-using namespace ghoul::fontrendering;
-
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
-    
 namespace {
     const char* KeyRadii = "Radii";
-}
+} // namespace
+
+namespace openspace::globebrowsing::tileprovider {
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers))
     , _backgroundTile(Tile::TileUnavailable)
 {
-	
     _fontSize = 50;
-    _font = OsEng.fontManager().font("Mono", _fontSize);
+    _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
 
     glm::dvec3 radii(1,1,1);
     dictionary.getValue(KeyRadii, radii);
@@ -114,6 +109,4 @@ TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIn
     return key;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

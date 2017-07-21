@@ -34,13 +34,12 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 
-
 namespace {
     const char* GlslRaycastPath = "${MODULES}/kameleonvolume/shaders/raycast.glsl";
     const char* GlslHelperPath = "${MODULES}/kameleonvolume/shaders/helper.glsl";
     const char* GlslBoundsVsPath = "${MODULES}/kameleonvolume/shaders/boundsvs.glsl";
     const char* GlslBoundsFsPath = "${MODULES}/kameleonvolume/shaders/boundsfs.glsl";
-}
+} // namespace
 
 namespace openspace {
 
@@ -121,14 +120,16 @@ void KameleonVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
 
     std::vector<glm::vec3> clipNormals = _clipPlanes->normals();
     std::vector<glm::vec2> clipOffsets = _clipPlanes->offsets();
-    int nClips = clipNormals.size();
+    int nClips = static_cast<int>(clipNormals.size());
 
     program.setUniform("nClips_" + id, nClips);
     program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);
     program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
 }
     
-void KameleonVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+void KameleonVolumeRaycaster::postRaycast(const RaycastData&,
+                                          ghoul::opengl::ProgramObject&)
+{
     // For example: release texture units
     _textureUnit = nullptr;
     _tfUnit = nullptr;

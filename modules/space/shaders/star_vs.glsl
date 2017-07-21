@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,7 @@
 
 #version __CONTEXT__
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 in vec4 in_position;
 in vec3 in_brightness;
@@ -39,9 +37,12 @@ out vec3 vs_velocity;
 out float vs_speed;
 out vec4 vs_gPosition;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-void main() { 
+
+void main() {
     vec4 p = in_position;
     psc_position  = p;
     vs_brightness = in_brightness;
@@ -50,11 +51,11 @@ void main() {
 
     vec4 tmp = p;
     vec4 position = pscTransform(tmp, mat4(1.0));
+    
+    // G-Buffer
     vs_gPosition = position;
-    // vec4 position = pscTransform(tmp, model);
-    // psc_position = tmp;
+    
     position = view * position;
-    // position = ViewProjection * ModelTransform * position;
-    // gl_Position =  z_normalization(position);
+    
     gl_Position = position;
 }

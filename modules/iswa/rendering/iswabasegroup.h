@@ -37,8 +37,8 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <modules/iswa/util/dataprocessor.h>
 
-
 namespace openspace {
+
 class IswaCygnet;
 
 class IswaBaseGroup : public properties::PropertyOwner{

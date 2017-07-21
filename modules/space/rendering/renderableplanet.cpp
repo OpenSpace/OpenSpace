@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -63,7 +63,7 @@ namespace {
     const char* KeyHeightTexture = "Textures.Height";
     const char* KeyShading       = "PerformShading";
        
-    static const std::string _loggerCat = "RenderablePlanet";
+    static const char* _loggerCat = "RenderablePlanet";
 
     const char* keyFrame                         = "Frame";
     const char* keyShadowGroup                   = "Shadow_Group";
@@ -223,7 +223,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(KeyRadius)) {
         // If the user specified a radius, we want to use this
-        _planetRadius = dictionary.value<float>(KeyRadius);
+        _planetRadius = static_cast<float>(dictionary.value<double>(KeyRadius));
     }
     else if (SpiceManager::ref().hasValue(name, "RADII") ) {
         // If the user didn't specfify a radius, but Spice has a radius, we can use this
@@ -705,7 +705,6 @@ void RenderablePlanet::computeModelTransformMatrix(const openspace::TransformDat
         glm::dmat4(transformData.rotation) *  // Spice rotation
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));
 
-
     //earth needs to be rotated for that to work.
     glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
     glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
@@ -713,7 +712,7 @@ void RenderablePlanet::computeModelTransformMatrix(const openspace::TransformDat
     *modelTransform = *modelTransform * rot * roty /** rotProp*/;
 }
 
-void RenderablePlanet::render(const RenderData& data, RendererTasks& tasks) {
+void RenderablePlanet::render(const RenderData& data, RendererTasks& renderTask) {
     // activate shader
     _programObject->activate();
     
@@ -855,7 +854,7 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks& tasks) {
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     if (_atmosphereEnabled) {
         DeferredcasterTask task{ _deferredcaster.get(), data };
-        tasks.deferredcasterTasks.push_back(task);
+        renderTask.deferredcasterTasks.push_back(task);
     }    
 #endif 
 

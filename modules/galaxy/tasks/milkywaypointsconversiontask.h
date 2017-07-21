@@ -32,7 +32,6 @@
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 
-
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -56,6 +55,6 @@ private:
     std::string _outFilename;
 };
 
-}
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GALAXY___MILKYWAYPOINTSCONVERSIONTASK_H__

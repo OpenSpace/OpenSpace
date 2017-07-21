@@ -34,7 +34,7 @@
 #include <math.h>
 
 namespace {
-    static const std::string _loggerCat = "RenderableSphericalGrid";
+    static const char* _loggerCat = "RenderableSphericalGrid";
     const char* KeyGridType = "GridType";
     const char* KeyGridColor = "GridColor";
     const char* KeyGridMatrix = "GridMatrix";
@@ -42,7 +42,8 @@ namespace {
     const char* KeyGridRadius = "GridRadius";
     const char* KeyGridParentsRotation = "ParentsRotation";
     const glm::vec2 GridRadius = { 1.f, 20.f };
-}
+} // namespace
+
 namespace openspace {
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)  
@@ -196,7 +197,7 @@ bool RenderableSphericalGrid::initialize(){
     return completeSuccess;
 }
 
-void RenderableSphericalGrid::render(const RenderData& data){
+void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
     glm::mat4 transform;
@@ -233,4 +234,5 @@ void RenderableSphericalGrid::update(const UpdateData& data) {
     _parentMatrix = SpiceManager::ref().positionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time.j2000Seconds());
 
 }
-}
+
+} // namespace openspace

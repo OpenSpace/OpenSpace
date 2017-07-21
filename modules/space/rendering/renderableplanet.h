@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -39,11 +39,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
 }
 
 namespace openspace {
@@ -59,6 +57,7 @@ class PlanetGeometry;
 }
 
 namespace documentation { struct Documentation; }
+namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanet : public Renderable {
 public:
@@ -83,7 +82,7 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& tasks) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();

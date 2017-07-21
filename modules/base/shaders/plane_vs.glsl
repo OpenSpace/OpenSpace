@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,32 +24,32 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjectionTransform;
-uniform mat4 modelViewTransform;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
+out float vs_screenSpaceDepth;
 out vec4 vs_positionScreenSpace;
-out float s;
 // G-Buffer
 out vec4 vs_gPosition;
 out vec3 vs_gNormal;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 modelViewProjectionTransform;
+uniform mat4 modelViewTransform;
 
-void main()
-{
-    // Transform the damn psc to homogenous coordinate
-    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    gl_Position = vs_positionScreenSpace;
+void main() {
+    const vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+    const vec4 positionClipSpace = modelViewProjectionTransform * position;
+    const vec4 positionScreenSpace = z_normalization(positionClipSpace);
+
+    gl_Position = positionScreenSpace;
 
     // G-Buffer
     vs_gNormal = vec3(0.0);
     vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
 
     vs_st = in_st;
+    vs_screenSpaceDepth = positionScreenSpace.w;
 }

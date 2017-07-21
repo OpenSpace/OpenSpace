@@ -25,8 +25,7 @@
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 const glm::ivec2 TileTextureInitData::tilePixelStartOffset = glm::ivec2(-2);
 const glm::ivec2 TileTextureInitData::tilePixelSizeDifference = glm::ivec2(4);
@@ -148,5 +147,4 @@ unsigned int TileTextureInitData::getUniqueIdFromTextureFormat(
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

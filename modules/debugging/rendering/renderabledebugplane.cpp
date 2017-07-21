@@ -40,8 +40,8 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string _loggerCat = "RenderablePlaneTexture";
-}
+    const char* _loggerCat = "RenderablePlaneTexture";
+} // namespace
 
 namespace openspace {
 
@@ -49,7 +49,7 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texture("texture", "Texture", -1, -1, 255)
     , _billboard("billboard", "Billboard", false)
-    , _size("size", "Size", 10, 0, std::pow(10, 25))
+    , _size("size", "Size", 10.f, 0.f, std::pow(10.f, 25.f))
     , _origin(Origin::Center)
     , _shader(nullptr)
     , _quad(0)
@@ -152,7 +152,7 @@ bool RenderableDebugPlane::deinitialize() {
     return true;
 }
 
-void RenderableDebugPlane::render(const RenderData& data) {
+void RenderableDebugPlane::render(const RenderData& data, RendererTasks&) {
     glm::mat4 transform = glm::mat4(1.0);
     if (_billboard)
         transform = glm::inverse(glm::mat4(data.camera.viewRotationMatrix()));
@@ -175,7 +175,7 @@ void RenderableDebugPlane::render(const RenderData& data) {
     _shader->deactivate();
 }
 
-void RenderableDebugPlane::update(const UpdateData& data) {
+void RenderableDebugPlane::update(const UpdateData&) {
     if (_shader->isDirty())
         _shader->rebuildFromFile();
 

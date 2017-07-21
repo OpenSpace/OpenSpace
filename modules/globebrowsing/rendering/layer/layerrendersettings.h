@@ -30,8 +30,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct LayerRenderSettings : public properties::PropertyOwner {
     LayerRenderSettings();
@@ -60,7 +59,6 @@ private:
     void setDefaultValues();
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__

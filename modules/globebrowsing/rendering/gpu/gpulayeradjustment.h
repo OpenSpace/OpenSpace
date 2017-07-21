@@ -22,19 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSTMENT___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSTMENT___H__
 
 #include <openspace/util/gpudata.h>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-}}
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-struct LayerAdjustment;
+class LayerAdjustment;
 
 class GPULayerAdjustment{
 public:
@@ -50,7 +47,6 @@ private:
     GPUData<float> gpuChromaKeyTolerance;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSTMENT___H__

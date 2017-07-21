@@ -24,8 +24,7 @@
 
 #include "volumeutils.h"
 
-namespace openspace {
-namespace volumeutils {
+namespace openspace::volumeutils {
     
 size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dims) {
     size_t w = dims.x;
@@ -51,6 +50,4 @@ glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dims) {
     return glm::uvec3(x, y, z);
 }
     
-} // namespace volumeutils
-
-} // namespace openspace
+} // namespace openspace::volumeutils

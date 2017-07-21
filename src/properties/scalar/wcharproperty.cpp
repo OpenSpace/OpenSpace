@@ -31,8 +31,7 @@
 
 using std::numeric_limits;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
     [](lua_State* state, bool& success) -> TYPE {                                        \
@@ -71,5 +70,4 @@ namespace properties {
 //                                  DEFAULT_TO_STRING_LAMBDA(wchar_t),
 //                                  LUA_TNUMBER);
 
-}  // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

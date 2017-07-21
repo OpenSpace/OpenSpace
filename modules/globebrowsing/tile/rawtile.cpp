@@ -27,8 +27,7 @@
 #include <modules/globebrowsing/tile/tilemetadata.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 RawTile::RawTile()
     : imageData(nullptr)
@@ -48,5 +47,4 @@ RawTile RawTile::createDefault(const TileTextureInitData& initData) {
 
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

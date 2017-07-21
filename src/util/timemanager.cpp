@@ -124,8 +124,6 @@ void TimeManager::consumeKeyframes(double dt) {
     }
 }
 
-
-
 void TimeManager::addKeyframe(double timestamp, Time time) {
     _timeline.addKeyframe(timestamp, time);
 }

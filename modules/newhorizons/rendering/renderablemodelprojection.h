@@ -36,22 +36,19 @@
 
 #include <openspace/util/powerscaledcoordinate.h>
 
-namespace ghoul {
-namespace opengl {
-class ProgramObject;
-class Texture;
-}
-}
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
+
 namespace documentation { struct Documentation; } 
 
 struct RenderData;
 struct UpdateData;
 
-namespace modelgeometry {
-    class ModelGeometry;
-}
+namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModelProjection : public Renderable {
 public:
@@ -63,7 +60,7 @@ public:
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     virtual void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;

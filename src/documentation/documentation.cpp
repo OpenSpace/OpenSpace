@@ -27,6 +27,7 @@
 
 #include <ghoul/misc/dictionary.h>
 
+#include <algorithm>
 #include <set>
 
 namespace {

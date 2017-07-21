@@ -39,12 +39,10 @@
 
 #include <modules/volume/volumegridtype.h>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-        class ProgramObject;
-        class TextureUnit;
-    }
+namespace ghoul::opengl {
+    class Texture;
+    class ProgramObject;
+    class TextureUnit;
 }
 
 namespace openspace {
@@ -54,7 +52,6 @@ struct RaycastData;
 
 class KameleonVolumeRaycaster : public VolumeRaycaster {
 public:
-
     KameleonVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
         std::shared_ptr<TransferFunction> transferFunction, 

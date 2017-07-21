@@ -29,10 +29,9 @@
 
 namespace std {
     std::string to_string(std::string value);
-}
+} // namespace std
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 template <typename T>
 TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
@@ -355,5 +354,4 @@ std::string DeprecatedVerifier<T>::documentation() const {
     return T::documentation() + " (deprecated)";
 }
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation

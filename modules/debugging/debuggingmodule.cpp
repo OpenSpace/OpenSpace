@@ -33,9 +33,7 @@
 
 namespace openspace {
 
-DebuggingModule::DebuggingModule()
-    : OpenSpaceModule(Name)
-{}
+DebuggingModule::DebuggingModule() : OpenSpaceModule(Name) {}
 
 void DebuggingModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

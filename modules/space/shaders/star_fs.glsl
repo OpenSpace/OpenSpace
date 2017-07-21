@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
@@ -44,15 +46,14 @@ in vec2 texCoord;
 in float billboardSize;
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+//#include "PowerScaling/powerScaling_fs.hglsl"
 
 uniform vec2 magnitudeClamp;
 
-//---------------------------------------------------------------------------
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
-    float t = (bv + 0.4) / (2.0 + 0.4);
+    const float t = (bv + 0.4) / (2.0 + 0.4);
     return texture(colorTexture, t);
 }
 

@@ -22,18 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/syncengine.h>
-#include <openspace/util/syncdata.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__
 
-#include <string>
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4706) // assignment within conditional expression
+#endif // WIN32
 
+#include <modules/iswa/ext/json/json.hpp>
 
-namespace {
-    const std::string _loggerCat = "SyncData";
-}
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
 
-namespace openspace {
-
-}
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__

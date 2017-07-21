@@ -68,14 +68,12 @@ namespace {
     const char* keyBackground = "Background";
     const char* keyGamma = "Gamma";    
 #endif
-}
+} // namespace
 
-namespace openspace {
+using namespace openspace::properties;
 
-using namespace properties;
+namespace openspace::globebrowsing {
 
-namespace globebrowsing {
-    
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : _debugProperties({
         BoolProperty("saveOrThrowCamera", "save or throw camera", false),
@@ -158,12 +156,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     glm::dvec3 radii;
     dictionary.getValue(keyRadii, radii);
     _ellipsoid = Ellipsoid(radii);
-    setBoundingSphere(_ellipsoid.maximumRadius());
+    setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
 
     // Ghoul can't read ints from lua dictionaries...
     double patchSegmentsd;
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
-    int patchSegments = patchSegmentsd;
+    int patchSegments = static_cast<int>(patchSegmentsd);
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
@@ -175,7 +173,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _layerManager = std::make_shared<LayerManager>(layersDictionary);
 
     _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
-        *this, patchSegments, _layerManager);
+        *this,
+        patchSegments,
+        _layerManager
+        );
     //_pointGlobe = std::make_shared<PointGlobe>(*this);
         
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
@@ -587,7 +588,7 @@ bool RenderableGlobe::isReady() const {
     return true;
 }
 
-void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
+void RenderableGlobe::render(const RenderData& data, RendererTasks& renderTask) {
     bool statsEnabled = _debugProperties.collectStats.value();
     _chunkedLodGlobe->stats.setEnabled(statsEnabled);
 
@@ -607,7 +608,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
                 setSaveCamera(nullptr);
             }
         }
-        _distanceSwitch.render(data);
+        _distanceSwitch.render(data, renderTask);
     }
     if (_savedCamera != nullptr) {
         DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
@@ -616,7 +617,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     if (_atmosphereEnabled) {
         DeferredcasterTask task{ _deferredcaster.get(), data };
-        tasks.deferredcasterTasks.push_back(task);
+        renderTask.deferredcasterTasks.push_back(task);
     }
 #endif
 }
@@ -789,5 +790,4 @@ void RenderableGlobe::updateAtmosphereParameters() {
 }
 #endif
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
