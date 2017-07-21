@@ -29,12 +29,10 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 REGISTER_TEMPLATEPROPERTY_HEADER(BVec4Property, glm::bvec4);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___BVEC4PROPERTY___H__

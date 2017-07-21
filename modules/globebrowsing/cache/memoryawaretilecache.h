@@ -41,9 +41,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace openspace::globebrowsing::cache {
 
 struct ProviderTileKey {
     TileIndex tileIndex;
@@ -87,7 +85,6 @@ struct ProviderTileHasher {
 
 class MemoryAwareTileCache : public properties::PropertyOwner {
 public:
-    
     MemoryAwareTileCache();
     ~MemoryAwareTileCache();
 
@@ -131,8 +128,6 @@ private:
     properties::BoolProperty _usePbo;
 };
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::cache
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__

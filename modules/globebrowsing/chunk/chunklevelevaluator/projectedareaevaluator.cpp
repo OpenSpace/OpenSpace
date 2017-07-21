@@ -31,9 +31,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <openspace/util/updatestructures.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace chunklevelevaluator {
+namespace openspace::globebrowsing::chunklevelevaluator {
     
 int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
     // Calculations are done in the reference frame of the globe
@@ -122,9 +120,7 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
 
     double scaledArea =
         globe.generalProperties().lodScaleFactor * projectedChunkAreaApprox;
-    return chunk.tileIndex().level + round(scaledArea - 1);
+    return chunk.tileIndex().level + static_cast<int>(round(scaledArea - 1));
 }
 
-} // namespace chunklevelevaluator
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::chunklevelevaluator

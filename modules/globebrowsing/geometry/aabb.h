@@ -27,8 +27,7 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct AABB1 {
     enum class AABBSpatialRelation {
@@ -99,7 +98,6 @@ struct AABB3 {
     glm::vec3 max;
 };
 
-} // namespace globebrowsing   
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___AABB___H__

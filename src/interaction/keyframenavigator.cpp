@@ -34,8 +34,7 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 void KeyframeNavigator::updateCamera(Camera& camera) {
     double now = OsEng.runTime();
@@ -123,5 +122,4 @@ size_t KeyframeNavigator::nKeyframes() const {
     return _cameraPoseTimeline.nKeyframes();
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

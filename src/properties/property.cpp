@@ -28,8 +28,7 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-namespace openspace {
-namespace properties {
+#include <algorithm>
 
 namespace {
     const char* MetaDataKeyGuiName = "guiName";
@@ -38,7 +37,9 @@ namespace {
     const char* MetaDataKeyReadOnly = "isReadOnly";
 
     const char* _metaDataKeyViewPrefix = "view.";
-}
+} // namespace
+
+namespace openspace::properties {
 
 Property::OnChangeHandle Property::OnChangeHandleAll =
                                                std::numeric_limits<OnChangeHandle>::max();
@@ -240,5 +241,4 @@ std::string Property::generateAdditionalDescription() const {
     return "";
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

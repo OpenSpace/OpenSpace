@@ -150,4 +150,28 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
                    << "</html>"                                                   << '\n';
 }
     
+std::string escapedJson(const std::string& text) {
+    std::string jsonString = "";
+    for (const char& c : text) {
+        switch (c) {
+        case '\t':
+            jsonString += "\\t";
+            break;
+        case '"':
+            // The " character has to be double escaped as JSON.parse will remove a single
+            // escape character, thus leaving only " behind that breaks the string
+            jsonString += "\\\\\"";
+            break;
+        case '\\':
+            jsonString += "\\\\";
+            break;
+        default:
+            jsonString += c;
+        }
+    }
+
+    return jsonString;
+}
+
+
 } // namespace openspace

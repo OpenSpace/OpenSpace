@@ -1,6 +1,8 @@
+local charon_radius = 0.53E5
+
 if UseAccurateNewHorizonsKernels then
     NewHorizonsKernels = {
-        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
+        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp"
     }
 else
     NewHorizonsKernels = {
@@ -17,9 +19,10 @@ return {
             Type = "RenderablePlanet",
             Frame = "IAU_PLUTO",
             Body = "HYDRA",
+            Radius = charon_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.53 , 5 },
+                Radius = charon_radius,
                 Segments = 100
             },
             Textures = {

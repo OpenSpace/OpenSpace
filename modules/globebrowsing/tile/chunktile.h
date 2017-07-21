@@ -30,8 +30,7 @@
 
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct ChunkTile {
     ChunkTile() : tile(Tile::TileUnavailable) {};
@@ -47,7 +46,6 @@ struct ChunkTile {
 
 using ChunkTilePile = std::vector<ChunkTile>;
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__

@@ -30,8 +30,7 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * This class is based largely on the Ellipsoid class defined in the book
@@ -99,7 +98,6 @@ private:
     glm::dvec3 _radii;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__

@@ -25,8 +25,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 template <typename T, typename ScaleType>
 DelayedVariable<T, ScaleType>::DelayedVariable(ScaleType scaleFactor, ScaleType friction)
@@ -72,5 +71,4 @@ T DelayedVariable<T, ScaleType>::get() const {
     return _currentValue;
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

@@ -28,13 +28,13 @@
 
 #include <ghoul/font/fontrenderer.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dict)
-    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers))
-{ }
+    : TextTileProvider(LayerManager::getTileTextureInitData(
+        layergroupid::GroupID::ColorLayers
+    ))
+{}
 
 void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
                                        fontRenderer, const TileIndex& tileIndex) const
@@ -42,7 +42,8 @@ void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
     fontRenderer.render(
         *_font,
         glm::vec2(
-            _initData.dimensionsWithPadding().x / 4 - (_initData.dimensionsWithPadding().x / 32) * log10(1 << tileIndex.level),
+            _initData.dimensionsWithPadding().x / 4 -
+                (_initData.dimensionsWithPadding().x / 32) * log10(1 << tileIndex.level),
             _initData.dimensionsWithPadding().y / 2 + _fontSize),
         glm::vec4(1.0, 1.0, 1.0, 1.0),
         glm::vec4(1.0, 1.0, 1.0, 1.0),
@@ -51,6 +52,4 @@ void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
     );
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+ } // namespace openspace::globebrowsing::tileprovider

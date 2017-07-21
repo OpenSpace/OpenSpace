@@ -26,10 +26,9 @@
 
 namespace {
     const char* _loggerCat = "OptionProperty";
-}
+} // namespace
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
     
 const std::string OptionProperty::OptionsKey = "Options";
 
@@ -115,5 +114,4 @@ std::string OptionProperty::generateAdditionalDescription() const {
     return result;
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

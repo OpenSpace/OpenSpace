@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -89,8 +89,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                 {
                     ConfigurationManager::PartLogDir,
                     new StringVerifier,
-                    "The directory for logs."
-                    "Default value is \"${BASE_PATH}\"",
+                    "The directory for logs. Default value is \"${BASE_PATH}\"",
                     Optional::Yes
                 },
                 {

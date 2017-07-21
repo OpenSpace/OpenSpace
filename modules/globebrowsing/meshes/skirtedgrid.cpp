@@ -26,8 +26,7 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments,
                          TriangleSoup::Positions usePositions,
@@ -61,10 +60,12 @@ int SkirtedGrid::ySegments() const {
     return _ySegments;
 }
 
-void SkirtedGrid::validate(int xSegments, int ySegments) {
+void SkirtedGrid::validate([[maybe_unused]] int xSegments, [[maybe_unused]] int ySegments)
+{
     ghoul_assert(
         xSegments > 0 && ySegments > 0,
-        "Resolution must be at least 1x1. (" + std::to_string(xSegments) + ", " + std::to_string(ySegments) + ")"
+        "Resolution must be at least 1x1. (" + std::to_string(xSegments) + ", " +
+            std::to_string(ySegments) + ")"
     );
 }
 
@@ -172,5 +173,4 @@ std::vector<glm::vec3> SkirtedGrid::createNormals(int xSegments, int ySegments) 
     return normals;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

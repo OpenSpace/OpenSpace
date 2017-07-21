@@ -34,12 +34,10 @@
 
 #include <memory>
 
-namespace ghoul {
-namespace opengl {
+namespace ghoul::opengl {
     class ProgramObject; 
     class Texture;
-} // namespace opengl
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -47,10 +45,7 @@ struct RenderData;
 struct UpdateData;
 
 namespace documentation { struct Documentation; }
-
-namespace modelgeometry {
-class ModelGeometry;
-}
+namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModel : public Renderable {
 public:
@@ -61,7 +56,7 @@ public:
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();

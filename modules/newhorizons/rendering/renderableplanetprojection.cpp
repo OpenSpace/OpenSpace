@@ -52,7 +52,7 @@
 #endif
 
 namespace {
-    const std::string _loggerCat = "RenderablePlanetProjection";
+    const char* _loggerCat = "RenderablePlanetProjection";
 
     const char* keyGeometry = "Geometry";
     const char* keyProjection = "Projection";
@@ -63,7 +63,7 @@ namespace {
     const char* keyRadius = "Geometry.Radius";
 //    const char* keyShading = "PerformShading";
     const char* _mainFrame = "GALACTIC";
-}
+} // namespace
 
 namespace openspace {
 
@@ -174,7 +174,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         _shiftMeridianBy180 = dictionary.value<bool>(keyMeridianShift);
     }
 
-    float radius = std::pow(10.0, 9.0);
+    float radius = std::pow(10.f, 9.f);
     dictionary.getValue(keyRadius, radius);
     setBoundingSphere(radius);
 
@@ -280,7 +280,7 @@ void RenderablePlanetProjection::imageProjectGPU(
 
     if (_geometry->hasProperty("radius")){ 
         ghoul::any r = _geometry->property("radius")->get();
-        if (glm::vec4* radius = ghoul::any_cast<glm::vec4>(&r)){
+        if (glm::vec3* radius = ghoul::any_cast<glm::vec3>(&r)){
             _fboProgramObject->setUniform("_radius", radius);
         }
     }else{
@@ -374,7 +374,7 @@ ghoul::opengl::Texture& RenderablePlanetProjection::baseTexture() const {
     return _projectionComponent.projectionTexture();
 }
 
-void RenderablePlanetProjection::render(const RenderData& data) {
+void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) {
     if (_projectionComponent.needsClearProjection())
         _projectionComponent.clearAllProjections();
 

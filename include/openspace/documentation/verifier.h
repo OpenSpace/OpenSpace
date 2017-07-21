@@ -32,8 +32,7 @@
 #include <functional>
 #include <type_traits>
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 /**
  * The base class of all Verifier%s. Each object must have an Verifier::operator()
@@ -1153,8 +1152,7 @@ extern template struct DeprecatedVerifier<BoolVector4Verifier>;
 extern template struct DeprecatedVerifier<IntVector4Verifier>;
 extern template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation
 
 #include "verifier.inl"
 

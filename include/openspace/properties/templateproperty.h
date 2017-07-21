@@ -27,8 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 /**
  * This concrete subclass of Property handles a single parameter value that is of type
@@ -91,7 +90,7 @@ public:
     virtual ghoul::any get() const override;
 
     /**
-     * Sets the value fro the provided ghoul::any object. If the types between
+     * Sets the value from the provided ghoul::any object. If the types between
      * <code>T</code> and <code>value</code> disagree, an error is logged and the stored
      * value remains unchanged.
      */
@@ -186,8 +185,7 @@ protected:
     T _value;
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #include "openspace/properties/templateproperty.inl"
 

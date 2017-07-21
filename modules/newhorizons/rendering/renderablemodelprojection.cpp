@@ -53,7 +53,7 @@ namespace {
     const char* keyTextureColor = "Textures.Color";
 
     const char* _destination = "GALACTIC";
-}
+} // namespace
 
 namespace openspace {
 
@@ -119,7 +119,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     );
 
     std::string name;
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+    [[maybe_unused]] bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModelProjection");
 
     using ghoul::Dictionary;
@@ -214,7 +214,7 @@ ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
     return _projectionComponent.projectionTexture();
 }
 
-void RenderableModelProjection::render(const RenderData& data) {
+void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     if (_projectionComponent.needsClearProjection())
         _projectionComponent.clearAllProjections();
 

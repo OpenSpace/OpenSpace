@@ -29,13 +29,11 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-    class Dictionary;
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+}
 
 namespace openspace {
 
@@ -76,7 +74,6 @@ public:
     void setBoundingSphere(float boundingSphere);
     float boundingSphere() const;
 
-    virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
     virtual SurfacePositionHandle calculateSurfacePositionHandle(

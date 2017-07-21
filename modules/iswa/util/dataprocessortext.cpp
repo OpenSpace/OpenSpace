@@ -33,8 +33,8 @@
 //#include <boost/spirit/include/phoenix_stl.hpp>
 
 namespace {
-    const std::string _loggerCat = "DataProcessorText";
-}
+    const char* _loggerCat = "DataProcessorText";
+} // namespace
 
 namespace openspace{
 

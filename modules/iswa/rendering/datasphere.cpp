@@ -34,8 +34,8 @@
 #endif
 
 namespace {
-    const std::string _loggerCat = "DataSphere";
-}
+    const char* _loggerCat = "DataSphere";
+} // namespace
 
 namespace openspace {
 
@@ -52,9 +52,9 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     _fsPath = "${MODULE_ISWA}/shaders/datasphere_fs.glsl";
 }
 
-DataSphere::~DataSphere(){}
+DataSphere::~DataSphere() {}
 
-bool DataSphere::initialize(){
+bool DataSphere::initialize() {
     IswaCygnet::initialize();
 
     //rotate 90 degrees because of the texture coordinates in PowerScaledSphere
@@ -90,7 +90,7 @@ bool DataSphere::initialize(){
     return true;
 }
 
-bool DataSphere::createGeometry(){
+bool DataSphere::createGeometry() {
     PowerScaledScalar radius =  PowerScaledScalar(6.371f*_radius, 6.0);
     int segments = 100;
     _sphere = std::make_shared<PowerScaledSphere>(radius, segments);
@@ -98,7 +98,7 @@ bool DataSphere::createGeometry(){
     return true;
 }
 
-bool DataSphere::destroyGeometry(){
+bool DataSphere::destroyGeometry() {
     _sphere = nullptr;
     return true;
 }
@@ -109,18 +109,19 @@ void DataSphere::renderGeometry() const {
     _sphere->render();
 }
 
-std::vector<float*> DataSphere::textureData(){
+std::vector<float*> DataSphere::textureData() {
     // if the buffer in the datafile is empty, do not proceed
-    if(_dataBuffer.empty())
+    if(_dataBuffer.empty()) {
         return std::vector<float*>();
+    }
 
-    if(!_dataOptions.options().size()){ // load options for value selection
+    if(!_dataOptions.options().size()) { // load options for value selection
         fillOptions(_dataBuffer);
         _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
 
         // if this datacygnet has added new values then reload texture
         // for the whole group, including this datacygnet, and return after.
-        if(_group){
+        if(_group) {
             _group->updateGroup();
             return std::vector<float*>();
         }
@@ -129,10 +130,11 @@ std::vector<float*> DataSphere::textureData(){
     return _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
 }
 
-void DataSphere::setUniforms(){
+void DataSphere::setUniforms() {
     // set both data texture and transfer function texture
     setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues.value());
     _shader->setUniform("transparency", _alpha.value());
 }
+
 } //namespace openspace

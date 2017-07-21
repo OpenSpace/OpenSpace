@@ -24,8 +24,7 @@
 
 #include <ghoul/logging/logmanager.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 // The following macros can be used to quickly generate the necessary PropertyDelegate
 // specializations required by the TemplateProperty class. Use the
@@ -240,16 +239,23 @@ const std::type_info& TemplateProperty<T>::type() const {
 
 template <typename T>
 bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
-    bool success = PropertyDelegate<TemplateProperty<T>>::template toLuaValue<T>(state, _value);
+    bool success = PropertyDelegate<TemplateProperty<T>>::template toLuaValue<T>(
+        state,
+        _value
+    );
     return success;
 }
 
 template <typename T>
 bool TemplateProperty<T>::setLuaValue(lua_State* state) {
     bool success = false;
-    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(state, success);
-    if (success)
+    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(
+        state,
+        success
+    );
+    if (success) {
         set(ghoul::any(thisValue));
+    }
     return success;
 }
 
@@ -260,18 +266,24 @@ int TemplateProperty<T>::typeLua() const {
 
 template <typename T>
 bool TemplateProperty<T>::getStringValue(std::string& value) const {
-    bool success = PropertyDelegate<TemplateProperty<T>>::template toString<T>(value, _value);
+    bool success = PropertyDelegate<TemplateProperty<T>>::template toString<T>(
+        value,
+        _value
+    );
     return success;
 }
 
 template <typename T>
 bool TemplateProperty<T>::setStringValue(std::string value) {
     bool success = false;
-    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromString<T>(value, success);
-    if (success)
+    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromString<T>(
+        value,
+        success
+    );
+    if (success) {
         set(ghoul::any(thisValue));
+    }
     return success;
 }
 
-}  // namespace properties
-}  // namespace openspace
+}  // namespace openspace::properties

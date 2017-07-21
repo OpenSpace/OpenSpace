@@ -34,8 +34,7 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 using Optional = ghoul::Boolean;
 using Exhaustive = ghoul::Boolean;
@@ -303,9 +302,7 @@ TestResult testSpecification(const Documentation& documentation,
 void testSpecificationAndThrow(const Documentation& documentation,
     const ghoul::Dictionary& dictionary, std::string component);
 
-} // namespace documentation
-
-} // namespace openspace
+} // namespace openspace::documentation
 
 // Make the overload for std::to_string available for the Offense::Reason for easier
 // error logging

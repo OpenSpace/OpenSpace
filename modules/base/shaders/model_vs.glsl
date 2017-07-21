@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,37 +24,29 @@
 
 #version __CONTEXT__
 
-// Vertex attributes
+#include "PowerScaling/powerScaling_vs.hglsl"
+
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-// Uniforms
+out vec2 vs_st;
+out vec3 vs_normalViewSpace;
+out float vs_screenSpaceDepth;
+out vec4 vs_positionCameraSpace;
+
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
-uniform vec3 cameraDirectionWorldSpace;
-
-uniform float _magnification;
-
-// Outputs
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out vec4 vs_positionScreenSpace;
-out vec4 vs_positionCameraSpace;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-    vec4 position = in_position;
-    position.xyz *= pow(10, _magnification);
-    vs_positionCameraSpace = modelViewTransform * position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
+    vs_positionCameraSpace = modelViewTransform * in_position;
+    const vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
+    const vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-    // Write output
+    gl_Position = positionScreenSpace;
     vs_st = in_st;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    gl_Position = vs_positionScreenSpace;
+    vs_screenSpaceDepth = positionScreenSpace.w;
     
     // The normal transform should be the transposed inverse of the model transform?
     vs_normalViewSpace = normalize(mat3(modelViewTransform) * in_normal);

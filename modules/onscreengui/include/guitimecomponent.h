@@ -27,8 +27,7 @@
 
 #include <modules/onscreengui/include/guicomponent.h>
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 class GuiTimeComponent : public GuiComponent {
 public:
@@ -37,7 +36,6 @@ public:
     void render() override;
 };
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui
 
 #endif // __OPENSPACE_MODULE_ONSCREENGUI___GUITIMECOMPONENT___H__

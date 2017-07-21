@@ -27,15 +27,11 @@
 
 #include <memory>
 
-namespace ghoul { namespace opengl {
-    class ProgramObject;
-} }
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
+namespace openspace { struct RenderData; }
 
-struct RenderData;
-
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class Chunk;
 class Grid;
@@ -103,7 +99,6 @@ private:
     std::shared_ptr<GPULayerManager> _localGpuLayerManager;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK_RENDERER___H__

@@ -22,9 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
-
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 int connect(lua_State* L) {
     int nArguments = lua_gettop(L);
@@ -66,6 +64,4 @@ int resignHostship(lua_State* L) {
     return 0;
 }
 
-} // namespace luascriptfunctions
-
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

@@ -40,7 +40,6 @@
 
 #include <modules/volume/rendering/volumeclipplanes.h>
 
-
 namespace openspace {
 
 struct RenderData;

@@ -36,12 +36,10 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul {
-namespace opengl {
+namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} // namespace opengl
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -86,7 +84,7 @@ public:
      * \c _floatingRenderInformation using the provided \p data
      * \param data The data that is necessary to render this Renderable
      */
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
 protected:
     explicit RenderableTrail(const ghoul::Dictionary& dictionary);

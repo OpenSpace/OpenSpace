@@ -50,8 +50,8 @@
 #include <vector>
 
 namespace {
-    const std::string _loggerCat = "ImageSequencer";
-}
+    const char* _loggerCat = "ImageSequencer";
+} // namespace
 
 namespace openspace {
 

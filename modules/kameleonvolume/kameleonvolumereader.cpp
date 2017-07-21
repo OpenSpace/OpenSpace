@@ -26,15 +26,27 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4345) // #pragma warning: there is no warning number '4345'
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4619'
+#pragma warning (disable : 4675) // #pragma warning: there is no warning number '4675'
+#pragma warning (disable : 4800) // #pragma warning: there is no warning number '4800'
+#endif // WIN32
+
 #include <ccmc/Model.h>
 #include <ccmc/BATSRUS.h>
 #include <ccmc/ENLIL.h>
 #include <ccmc/CCMCTime.h>
 #include <ccmc/Attribute.h>
 
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
+
 namespace {
     const char* _loggerCat = "KameleonVolumeReader";
-}
+} // namespace
 
 namespace openspace {
 
@@ -113,9 +125,22 @@ std::vector<std::string> KameleonVolumeReader::gridVariableNames() const {
     std::string y = tokens.at(1);
     std::string z = tokens.at(2);
 
-    std::transform(x.begin(), x.end(), x.begin(), ::tolower);
-    std::transform(y.begin(), y.end(), y.begin(), ::tolower);
-    std::transform(z.begin(), z.end(), z.begin(), ::tolower);
+    std::transform(
+        x.begin(),
+        x.end(),
+        x.begin(),
+        [](char v) { return static_cast<char>(tolower(v)); }
+    );
+    std::transform(
+        y.begin(),
+        y.end(), y.begin(),
+        [](char v) { return static_cast<char>(tolower(v)); }
+    );
+    std::transform(
+        z.begin(),
+        z.end(), z.begin(),
+        [](char v) { return static_cast<char>(tolower(v)); }
+    );
 
     return std::vector<std::string>{x, y, z};
 }
@@ -189,7 +214,4 @@ float KameleonVolumeReader::maxValue(const std::string & variable) const {
     return _model->getVariableAttribute(variable, "actual_max").getAttributeFloat();
 }
 
-
-
-
-}
+} // namespace openspace

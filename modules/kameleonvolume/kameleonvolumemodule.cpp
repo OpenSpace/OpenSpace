@@ -46,13 +46,10 @@ void KameleonVolumeModule::internalInitialize() {
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<KameleonMetadataToJsonTask>("KameleonMetadataToJsonTask");
     fTask->registerClass<KameleonDocumentationTask>("KameleonDocumentationTask");
-
-  
 }
 
-std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const
-{
-    return std::vector<documentation::Documentation>{KameleonMetadataToJsonTask::documentation()};
+std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const {
+    return { KameleonMetadataToJsonTask::documentation() };
 }
 
 } // namespace openspace

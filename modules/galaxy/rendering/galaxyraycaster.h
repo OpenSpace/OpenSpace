@@ -34,18 +34,16 @@
 #include <openspace/util/boxgeometry.h>
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-        class TextureUnit;
-        class ProgramObject;
-    }
-}
+namespace ghoul::opengl {
+    class Texture;
+    class TextureUnit;
+    class ProgramObject;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
 struct RenderData;
-class RaycastData;
+struct RaycastData;
 
 class GalaxyRaycaster : public VolumeRaycaster {
 public:

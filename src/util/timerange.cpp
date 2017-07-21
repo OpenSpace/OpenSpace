@@ -31,9 +31,9 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string KeyStart = "Start";
-    const std::string KeyEnd = "End";
-}
+    const char* KeyStart = "Start";
+    const char* KeyEnd = "End";
+} // namespace
 
 namespace openspace {
 

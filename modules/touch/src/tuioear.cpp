@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/touch/include/TuioEar.h>
+#include <modules/touch/include/tuioear.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>
@@ -35,13 +35,13 @@
 
 using namespace TUIO;
 
-void TuioEar::addTuioObject(TuioObject *tobj) { }
+void TuioEar::addTuioObject(TuioObject*) { }
 
-void TuioEar::updateTuioObject(TuioObject *tobj) { }
+void TuioEar::updateTuioObject(TuioObject*) { }
 
-void TuioEar::removeTuioObject(TuioObject *tobj) { }
+void TuioEar::removeTuioObject(TuioObject*) { }
 
-void TuioEar::addTuioCursor(TuioCursor *tcur) {
+void TuioEar::addTuioCursor(TuioCursor* tcur) {
     _mx.lock();
     _tap = false;
     // find same id in _list if it exists in _removeList (new input with same ID as a previously stored)
@@ -67,7 +67,7 @@ void TuioEar::addTuioCursor(TuioCursor *tcur) {
     _mx.unlock();
 }
 
-void TuioEar::updateTuioCursor(TuioCursor *tcur) {
+void TuioEar::updateTuioCursor(TuioCursor* tcur) {
     _mx.lock();
     _tap = false;
     int i = tcur->getSessionID();
@@ -81,7 +81,7 @@ void TuioEar::updateTuioCursor(TuioCursor *tcur) {
 }
 
 // save id to be removed and remove it in clearInput
-void TuioEar::removeTuioCursor(TuioCursor *tcur) {
+void TuioEar::removeTuioCursor(TuioCursor* tcur) {
     _mx.lock();
     _removeList.push_back(tcur->getSessionID());
 
@@ -101,13 +101,13 @@ void TuioEar::removeTuioCursor(TuioCursor *tcur) {
     _mx.unlock();
 }
 
-void TuioEar::addTuioBlob(TuioBlob *tblb) { }
+void TuioEar::addTuioBlob(TuioBlob*) { }
 
-void TuioEar::updateTuioBlob(TuioBlob *tblb) { }
+void TuioEar::updateTuioBlob(TuioBlob*) { }
 
-void TuioEar::removeTuioBlob(TuioBlob *tblb) { }
+void TuioEar::removeTuioBlob(TuioBlob*) { }
 
-void TuioEar::refresh(TuioTime frameTime) { } // about every 15ms
+void TuioEar::refresh(TuioTime) { } // about every 15ms
 
 std::vector<TuioCursor> TuioEar::getInput() {
     return _list;

@@ -30,7 +30,6 @@
 #include <modules/multiresvolume/rendering/brickselector.h>
 #include <modules/multiresvolume/rendering/brickcover.h>
 
-
 namespace openspace {
 
 class TSP;
