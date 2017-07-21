@@ -24,6 +24,7 @@
 
 #include "gtest/gtest.h"
 
+#include <openspace/scene/assetloader.h>
 #include <openspace/scene/sceneloader.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/documentation/documentation.h>
@@ -34,39 +35,44 @@
 #include <fstream>
 
 
+class SceneLoaderTest : public ::testing::Test {
+protected:
+    virtual void SetUp() {
+        _assetLoader = std::make_unique<openspace::AssetLoader>(&_luaState, "${TESTDIR}/SceneLoaderTest/", "${TEMPORARY}/resources/");
+        _sceneLoader = std::make_unique<openspace::SceneLoader>(_assetLoader.get());
+    }
+
+    openspace::Scene _scene;
+    ghoul::lua::LuaState _luaState;
+    std::unique_ptr<openspace::AssetLoader> _assetLoader;
+    std::unique_ptr<openspace::SceneLoader> _sceneLoader;
+};
+
 //class SceneLoaderTest : public testing::Test {};
 
-TEST(SceneLoaderTest, NonExistingFileTest) {
+TEST_F(SceneLoaderTest, NonExistingFileTest) {
     const std::string file = absPath("NonExistingFile");
-
-    openspace::SceneLoader loader;
-    EXPECT_THROW(loader.loadScene(file), ghoul::FileNotFoundError);
+    EXPECT_THROW(_sceneLoader->loadScene(&_scene, file), ghoul::FileNotFoundError);
 }
 
-TEST(SceneLoaderTest, IllformedFileTest) {
+TEST_F(SceneLoaderTest, IllformedFileTest) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/illformed.scene");
-
-    openspace::SceneLoader loader;
-    EXPECT_THROW(loader.loadScene(file), ghoul::lua::LuaRuntimeException);
+    EXPECT_THROW(_sceneLoader->loadScene(&_scene, file), ghoul::lua::LuaRuntimeException);
 }
 
 
-TEST(SceneLoaderTest, IllformedFileTestInvalidSceneFolder) {
+TEST_F(SceneLoaderTest, IllformedFileTestInvalidSceneFolder) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/illformedInvalidScene.scene");
-
-    openspace::SceneLoader loader;
-    EXPECT_THROW(loader.loadScene(file), openspace::documentation::SpecificationError);
+    EXPECT_THROW(_sceneLoader->loadScene(&_scene, file), openspace::documentation::SpecificationError);
 }
 
-TEST(SceneLoaderTest, IllformedFileTestWrongType) {
+TEST_F(SceneLoaderTest, IllformedFileTestWrongType) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/illformedWrongType.scene");
-
-    openspace::SceneLoader loader;
-    EXPECT_THROW(loader.loadScene(file), openspace::documentation::SpecificationError);
+    EXPECT_THROW(_sceneLoader->loadScene(&_scene, file), openspace::documentation::SpecificationError);
 }
 
 
-TEST(SceneLoaderTest, AbsoluteScenePath) {
+TEST_F(SceneLoaderTest, AbsoluteScenePath) {
     const std::string scenePath = absPath("${TEMPORARY}/tmp.scene");
     std::ofstream sceneFile(scenePath.c_str());
 
@@ -85,82 +91,70 @@ TEST(SceneLoaderTest, AbsoluteScenePath) {
     sceneFile << "return " << formatter.format(sceneFileDictionary);
     sceneFile.close();
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(scenePath);
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr";
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    _sceneLoader->loadScene(&_scene, scenePath);
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 1) << "Expected scene to consist of one root node";
 }
 
-TEST(SceneLoaderTest, Test00) {
+TEST_F(SceneLoaderTest, Test00) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test00.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
+    _sceneLoader->loadScene(&_scene, file);
 
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr"; 
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 1) << "Expected scene to consist of one root node";
 }
 
 
-TEST(SceneLoaderTest, Test00Location) {
+TEST_F(SceneLoaderTest, Test00Location) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test00-location.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
+    _sceneLoader->loadScene(&_scene, file);
 
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr";
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 1) << "Expected scene to consist of one root node";
 }
 
 
-TEST(SceneLoaderTest, Test01) {
+TEST_F(SceneLoaderTest, Test01) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test01.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
+    _sceneLoader->loadScene(&_scene, file);
 
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr";
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 2) << "Expected scene to consist of two nodes";
 
-    std::map<std::string, openspace::SceneGraphNode*> nodesByName = scene->nodesByName();
+    std::map<std::string, openspace::SceneGraphNode*> nodesByName = _scene.nodesByName();
     EXPECT_EQ(nodesByName.size(), 2) << "Expected scene to consist of two nodes";
     EXPECT_EQ(nodesByName["Root"]->name(), "Root");
     EXPECT_EQ(nodesByName["NoDependency"]->name(), "NoDependency");
     EXPECT_EQ(nodesByName["NoDependency"]->parent(), nodesByName["Root"]);
 }
 
-TEST(SceneLoaderTest, Test01Location) {
+TEST_F(SceneLoaderTest, Test01Location) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test01-location.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
+    _sceneLoader->loadScene(&_scene, file);
 
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr";
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 2) << "Expected scene to consist of two nodes";
     
-    std::map<std::string, openspace::SceneGraphNode*> nodesByName = scene->nodesByName();
+    std::map<std::string, openspace::SceneGraphNode*> nodesByName = _scene.nodesByName();
     EXPECT_EQ(nodesByName.size(), 2) << "Expected scene to consist of two nodes";
     EXPECT_EQ(nodesByName["Root"]->name(), "Root");
     EXPECT_EQ(nodesByName["NoDependency"]->name(), "NoDependency");
     EXPECT_EQ(nodesByName["NoDependency"]->parent(), nodesByName["Root"]);
 }
 
-TEST(SceneLoaderTest, Test02) {
+TEST_F(SceneLoaderTest, Test02) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test02.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
+    _sceneLoader->loadScene(&_scene, file);
 
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr";
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 3) << "Expected scene to consist of two nodes";
 
-    std::map<std::string, openspace::SceneGraphNode*> nodesByName = scene->nodesByName();
+    std::map<std::string, openspace::SceneGraphNode*> nodesByName = _scene.nodesByName();
     EXPECT_EQ(nodesByName.size(), 3) << "Expected scene to consist of two nodes";
     EXPECT_EQ(nodesByName["Root"]->name(), "Root");
     EXPECT_EQ(nodesByName["NoDependency"]->name(), "NoDependency");
@@ -172,17 +166,15 @@ TEST(SceneLoaderTest, Test02) {
     EXPECT_EQ(nodesByName["Child"]->dependencies().size(), 0);
 }
 
-TEST(SceneLoaderTest, Test02Location) {
+TEST_F(SceneLoaderTest, Test02Location) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test02-location.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
+    _sceneLoader->loadScene(&_scene, file);
 
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr";
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 3) << "Expected scene to consist of three nodes";
 
-    std::map<std::string, openspace::SceneGraphNode*> nodesByName = scene->nodesByName();
+    std::map<std::string, openspace::SceneGraphNode*> nodesByName = _scene.nodesByName();
     EXPECT_EQ(nodesByName.size(), 3) << "Expected scene to consist of three nodes";
     EXPECT_EQ(nodesByName["Root"]->name(), "Root");
     EXPECT_EQ(nodesByName["NoDependency"]->name(), "NoDependency");
@@ -196,17 +188,15 @@ TEST(SceneLoaderTest, Test02Location) {
     EXPECT_EQ(nodesByName["Child"]->dependencies().size(), 0);
 }
 
-TEST(SceneLoaderTest, Test03) {
+TEST_F(SceneLoaderTest, Test03) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test03.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
+    _sceneLoader->loadScene(&_scene, file);
 
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr";
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 3) << "Expected scene to consist of three nodes";
 
-    std::map<std::string, openspace::SceneGraphNode*> nodesByName = scene->nodesByName();
+    std::map<std::string, openspace::SceneGraphNode*> nodesByName = _scene.nodesByName();
     EXPECT_EQ(nodesByName.size(), 3) << "Expected scene to consist of three nodes";
     EXPECT_EQ(nodesByName["Root"]->name(), "Root");
     EXPECT_EQ(nodesByName["NoDependency"]->name(), "NoDependency");
@@ -222,17 +212,15 @@ TEST(SceneLoaderTest, Test03) {
     EXPECT_EQ(nodesByName["Dependent"]->dependencies()[0], nodesByName["NoDependency"]);
 }
 
-TEST(SceneLoaderTest, Test04) {
+TEST_F(SceneLoaderTest, Test04) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test04.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
+    _sceneLoader->loadScene(&_scene, file);
 
-    ASSERT_NE(scene, nullptr) << "loadScene returned nullptr";
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
     EXPECT_EQ(nodes.size(), 5) << "Expected scene to consist of five nodes";
 
-    std::map<std::string, openspace::SceneGraphNode*> nodesByName = scene->nodesByName();
+    std::map<std::string, openspace::SceneGraphNode*> nodesByName = _scene.nodesByName();
     EXPECT_EQ(nodesByName.size(), 5) << "Expected scene to consist of five nodes";
     EXPECT_EQ(nodesByName["Root"]->name(), "Root");
     EXPECT_EQ(nodesByName["NoDependency"]->name(), "NoDependency");
@@ -254,12 +242,11 @@ TEST(SceneLoaderTest, Test04) {
     EXPECT_EQ(nodesByName["ChildAndDependent"]->dependencies()[0], nodesByName["Dependent"]);
 }
 
-TEST(SceneLoaderTest, Test05) {
+TEST_F(SceneLoaderTest, Test05) {
     const std::string file = absPath("${TESTDIR}/SceneLoaderTest/test05.scene");
 
-    openspace::SceneLoader loader;
-    std::unique_ptr<openspace::Scene> scene = loader.loadScene(file);
-    std::vector<openspace::SceneGraphNode*> nodes = scene->allSceneGraphNodes();
+    _sceneLoader->loadScene(&_scene, file);
+    std::vector<openspace::SceneGraphNode*> nodes = _scene.allSceneGraphNodes();
 
     EXPECT_EQ(nodes.size(), 1);
     // TODO: Add more tests regarding circular deps.

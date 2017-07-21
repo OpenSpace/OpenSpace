@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/space/spacemodule.h>
+#include <modules/sync/syncmodule.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
@@ -31,35 +31,31 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <modules/sync/syncs/syncrhonization.h>
-#include <modules/sync/syncs/httpsyncrhonization.h>
-#include <modules/sync/syncs/resourcesyncrhonization.h>
-#include <modules/sync/syncs/torrentsyncrhonization.h>
+#include <openspace/util/resourcesynchronization.h>
+
+#include <modules/sync/syncs/httpsynchronization.h>
+//#include <modules/sync/syncs/resourcesyncrhonization.h>
+//#include <modules/sync/syncs/torrentsyncrhonization.h>
 
 
 namespace openspace {
 
-SpaceModule::SpaceModule() : OpenSpaceModule(Name) {}
+SyncModule::SyncModule() : OpenSpaceModule(Name) {}
 
-void SpaceModule::internalInitialize() {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Synchronization>>(),
-        "Synchronization"
-    );
+void SyncModule::internalInitialize() {
 
-    auto fSynchronization = FactoryManager::ref().factory<Synchronization>();
+
+    auto fSynchronization = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(fSynchronization, "Synchronization factory was not created");
 
-    fSynchronization->registerClass<RenderablePlanet>("HttpSyncrhonization");
-    fSynchronization->registerClass<RenderableRings>("ResourceSynchronization");
-    //fSynchronization->registerClass<RenderableConstellationBounds>("TorrentSynchronization");
+    fSynchronization->registerClass<HttpSynchronization>("HttpSyncrhonization");
 }
 
-std::vector<documentation::Documentation> SpaceModule::documentations() const {
+std::vector<documentation::Documentation> SyncModule::documentations() const {
     return {
-        HttpSyncrhonization::Documentation(),
-        ResourceSynchronization::Documentation(),
-        TorrentSynchronization::Documentation()
+        HttpSynchronization::Documentation()
+        //ResourceSynchronization::Documentation(),
+        //TorrentSynchronization::Documentation()
     };
 }
 

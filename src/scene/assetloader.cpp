@@ -81,7 +81,7 @@ int importAsset(lua_State* state) {
     try {
         return assetLoader->importAssetLua(assetName, false, false);
     } catch (const ghoul::RuntimeError& e) {
-        return luaL_error(state, "Failed to import asset '%s'. %s: %s", assetName.c_str(), e.message, e.component);
+        return luaL_error(state, "Failed to import asset '%s'. %s: %s", assetName.c_str(), e.message.c_str(), e.component.c_str());
     }
 }
 
@@ -99,7 +99,7 @@ int importAssetToggle(lua_State* state) {
     try {
         return assetLoader->importAssetLua(assetName, true, toggleEnabled);
     } catch (const ghoul::RuntimeError& e) {
-        return luaL_error(state, "Failed to import asset '%s'. %s: %s", assetName.c_str(), e.message, e.component);
+        return luaL_error(state, "Failed to import asset '%s'. %s: %s", assetName.c_str(), e.message.c_str(), e.component.c_str());
     }
 }
 
@@ -274,7 +274,7 @@ void AssetLoader::pushAsset(Asset* asset) {
 
     // Register empty data table on imported asset
     lua_newtable(*_luaState);
-    lua_setfield(*_luaState, assetTableIndex, DataTableName);
+    lua_setfield(*_luaState, assetTableIndex, SyncTableName);
 
     // Register empty dependant table on imported asset.
     // (importer => dependant object)
