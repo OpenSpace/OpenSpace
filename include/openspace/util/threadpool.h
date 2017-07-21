@@ -22,54 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
+#ifndef __OPENSPACE_CORE___THREAD_POOL___H__
+#define __OPENSPACE_CORE___THREAD_POOL___H__
 
-#include <modules/globebrowsing/other/concurrentqueue.h>
-#include <modules/globebrowsing/other/threadpool.h>
-
+#include <condition_variable>
+#include <functional>
 #include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+#include <atomic>
+
+// Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace {
-namespace globebrowsing {
 
-// Templated abstract base class representing a job to be done.
-// Client code derive from this class and implement the virtual execute() method
-template<typename P>
-struct Job {
-    Job();
-    virtual ~Job();
+class ThreadPool;
 
-    virtual void execute() = 0;
-    virtual std::shared_ptr<P> product() = 0;
+class Worker {
+public: 
+    Worker(ThreadPool& pool);
+    void operator()();
+private:
+    ThreadPool& pool;
 };
 
-/* 
- * Templated Concurrent Job Manager
- * This class is used execute specific jobs on one (1) parallell thread
- */
-template<typename P>
-class ConcurrentJobManager {
+class ThreadPool {
 public:
-    ConcurrentJobManager(ThreadPool pool);
+    ThreadPool(size_t numThreads);
+    ThreadPool(const ThreadPool& toCopy);
+    ~ThreadPool();
 
-    void enqueueJob(std::shared_ptr<Job<P>> job);
-
-    void clearEnqueuedJobs();
-
-    std::shared_ptr<Job<P>> popFinishedJob();
-
-    size_t numFinishedJobs() const;
+    void enqueue(std::function<void()> f);
+    void clearTasks();
 
 private:
-    ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-    std::mutex _finishedJobsMutex;
-    ThreadPool threadPool;
+    friend class Worker;
+
+    std::vector<std::thread> workers;
+
+    std::deque<std::function<void()>> tasks;
+
+    std::mutex queue_mutex;
+    std::condition_variable condition;
+
+    bool stop;
 };
 
-} // namespace globebrowsing
 } // namespace openspace
 
-#include "concurrentjobmanager.inl"
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
+#endif // __OPENSPACE_CORE___THREAD_POOL___H__

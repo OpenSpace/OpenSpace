@@ -22,55 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
+#ifndef __OPENSPACE_CORE___CONCURRENT_QUEUE___H__
+#define __OPENSPACE_CORE___CONCURRENT_QUEUE___H__
 
 #include <condition_variable>
-#include <functional>
 #include <mutex>
 #include <queue>
-#include <thread>
-#include <vector>
-#include <atomic>
-
-// Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace {
-namespace globebrowsing {    
 
-class ThreadPool;
-
-class Worker {
-public: 
-    Worker(ThreadPool& pool);
-    void operator()();
-private:
-    ThreadPool& pool;
-};
-
-class ThreadPool {
+/**
+ * Templated thread-safe queue based on std::thread and std::queue
+ */
+template <typename T>
+class ConcurrentQueue {
 public:
-    ThreadPool(size_t numThreads);
-    ThreadPool(const ThreadPool& toCopy);
-    ~ThreadPool();
+    T pop();
 
-    void enqueue(std::function<void()> f);
-    void clearTasks();
+    void pop(T& item);
+
+    void push(const T& item);
+
+    void push(T&& item);
+
+    size_t size() const;
 
 private:
-    friend class Worker;
-
-    std::vector<std::thread> workers;
-
-    std::deque<std::function<void()>> tasks;
-
-    std::mutex queue_mutex;
-    std::condition_variable condition;
-
-    bool stop;
+    std::queue<T> _queue;
+    mutable std::mutex _mutex;
+    mutable std::condition_variable _cond;
 };
 
-} // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
+#include "concurrentqueue.inl"
+
+#endif // __OPENSPACE_CORE___CONCURRENT_QUEUE___H__

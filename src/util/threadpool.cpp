@@ -22,41 +22,87 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__
-
-#include <condition_variable>
-#include <mutex>
-#include <queue>
+#include <openspace/util/threadpool.h>
 
 namespace openspace {
-namespace globebrowsing {
 
-/**
- * Templated thread-safe queue based on std::thread and std::queue
- */
-template <typename T>
-class ConcurrentQueue {
-public:
-    T pop();
+Worker::Worker(ThreadPool& pool)
+    : pool(pool)
+{}
 
-    void pop(T& item);
+void Worker::operator()() {
+    std::function<void()> task;
+    while (true) {
+        // acquire lock
+        {
+            std::unique_lock<std::mutex> lock(pool.queue_mutex);
 
-    void push(const T& item);
+            // look for a work item
+            while (!pool.stop && pool.tasks.empty()) {
+                // if there are none wait for notification
+                pool.condition.wait(lock);
+            }
 
-    void push(T&& item);
+            if (pool.stop) { // exit if the pool is stopped
+                return;
+            }
 
-    size_t size() const;
+            // get the task from the queue
+            task = pool.tasks.front();
+            pool.tasks.pop_front();
 
-private:
-    std::queue<T> _queue;
-    mutable std::mutex _mutex;
-    mutable std::condition_variable _cond;
-};
+        }// release lock
 
-} // namespace globebrowsing
+        // execute the task
+        task();
+    }
+}
+
+ThreadPool::ThreadPool(size_t numThreads)
+    : stop(false)
+{
+    for (size_t i = 0; i < numThreads; ++i) {
+        workers.push_back(std::thread(Worker(*this)));
+    }
+}
+
+ThreadPool::ThreadPool(const ThreadPool& toCopy)
+    : ThreadPool(toCopy.workers.size())
+{ }
+
+// the destructor joins all threads
+ThreadPool::~ThreadPool() {
+    // stop all threads
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        stop = true;
+    }
+    condition.notify_all();
+
+    // join them
+    for (size_t i = 0; i < workers.size(); ++i) {
+        workers[i].join();
+    }
+}
+
+// add new work item to the pool
+void ThreadPool::enqueue(std::function<void()> f) {
+    { // acquire lock
+        std::unique_lock<std::mutex> lock(queue_mutex);
+
+        // add the task
+        tasks.push_back(f);
+    } // release lock
+
+        // wake up one thread
+    condition.notify_one();
+}
+
+void ThreadPool::clearTasks() {
+    { // acquire lock
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        tasks.clear();
+    } // release lock
+}
+
 } // namespace openspace
-
-#include "concurrentqueue.inl"
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__
