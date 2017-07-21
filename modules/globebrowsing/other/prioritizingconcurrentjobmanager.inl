@@ -29,7 +29,7 @@ namespace globebrowsing {
 
 template<typename P, typename KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
-    std::shared_ptr<LRUThreadPool<KeyType>> pool)
+    LRUThreadPool<KeyType> pool)
     : _threadPool(pool)
 { }
 
@@ -37,7 +37,7 @@ template<typename P, typename KeyType>
 void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Job<P>> job,
     KeyType key)
 {
-    _threadPool->enqueue([this, job]() {
+    _threadPool.enqueue([this, job]() {
         job->execute();
         std::lock_guard<std::mutex> lock(_finishedJobsMutex);
         _finishedJobs.push(job);
@@ -47,23 +47,23 @@ void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Jo
 template<typename P, typename KeyType>
 std::vector<KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::getKeysToUnfinishedJobs() {
-    return _threadPool->getUnqueuedTasksKeys();
+    return _threadPool.getUnqueuedTasksKeys();
 }
 
 template<typename P, typename KeyType>
 std::vector<KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::getKeysToEnqueuedJobs() {
-    return _threadPool->getQueuedTasksKeys();
+    return _threadPool.getQueuedTasksKeys();
 }
 
 template<typename P, typename KeyType>
 bool PrioritizingConcurrentJobManager<P, KeyType>::touch(KeyType key) {
-    return _threadPool->touch(key);
+    return _threadPool.touch(key);
 }
 
 template<typename P, typename KeyType>
 void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
-    _threadPool->clearEnqueuedTasks();
+    _threadPool.clearEnqueuedTasks();
 }
 
 template<typename P, typename KeyType>

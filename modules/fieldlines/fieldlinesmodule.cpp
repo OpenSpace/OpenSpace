@@ -34,7 +34,7 @@
 namespace openspace {
 
 FieldlinesModule::FieldlinesModule()
-    : OpenSpaceModule("Fieldlines")
+    : OpenSpaceModule(Name)
 {}
 
 void FieldlinesModule::internalInitialize() {

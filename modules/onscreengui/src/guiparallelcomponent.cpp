@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/messagestructures.h>
 
@@ -83,7 +83,7 @@ void GuiParallelComponent::renderClientWithHost() {
     renderClientCommon();
 
     const size_t nTimeKeyframes = OsEng.timeManager().nKeyframes();
-    const size_t nCameraKeyframes = OsEng.interactionHandler().nKeyframes();
+    const size_t nCameraKeyframes = OsEng.navigationHandler().keyframeNavigator().nKeyframes();
 
     std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(nTimeKeyframes);
     std::string cameraKeyframeInfo = "CameraKeyframes : " + std::to_string(nCameraKeyframes);

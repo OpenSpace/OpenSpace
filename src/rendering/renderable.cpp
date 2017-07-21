@@ -158,6 +158,17 @@ void Renderable::render(const RenderData& data, RendererTasks&) {
 
 void Renderable::render(const RenderData&) {}
 
+SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
+                                                       const glm::dvec3& targetModelSpace)
+{
+    glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
+	return {
+		directionFromCenterToTarget * static_cast<double>(boundingSphere()),
+        directionFromCenterToTarget,
+		0.0
+	};
+}
+
 void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
                                 const Camera& camera,
                                 const PowerScaledCoordinate& position)

@@ -54,6 +54,7 @@ protected:
 
     properties::BoolProperty _sceneGraphIsEnabled;
     properties::BoolProperty _functionsIsEnabled;
+    properties::BoolProperty _outputLogs;
 };
 
 } // namespace gui

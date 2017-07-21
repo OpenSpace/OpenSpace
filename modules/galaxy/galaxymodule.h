@@ -31,6 +31,8 @@ namespace openspace {
 
 class GalaxyModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "Galaxy";
+
     GalaxyModule();
     void internalInitialize() override;
 };

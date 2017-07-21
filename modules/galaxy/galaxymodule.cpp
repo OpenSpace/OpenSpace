@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-GalaxyModule::GalaxyModule() : OpenSpaceModule("Galaxy") {}
+GalaxyModule::GalaxyModule() : OpenSpaceModule(Name) {}
 
 void GalaxyModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

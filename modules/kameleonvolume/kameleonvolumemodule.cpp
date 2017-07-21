@@ -36,9 +36,10 @@
 
 namespace openspace {
 
+
 using namespace kameleonvolume;
 
-KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule("KameleonVolume") {}
+KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule(Name) {}
 
 void KameleonVolumeModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

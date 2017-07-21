@@ -38,7 +38,7 @@ void GPUHeightLayer::setValue(ghoul::opengl::ProgramObject* programObject,
                               int pileSize)
 {
     GPULayer::setValue(programObject, layer, tileIndex, pileSize);
-    _gpuDepthTransform.setValue(programObject, layer.tileProvider()->depthTransform());
+    _gpuDepthTransform.setValue(programObject, layer.depthTransform());
 }
 
 void GPUHeightLayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,

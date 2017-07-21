@@ -34,9 +34,7 @@ namespace openspace {
 
 using namespace volume;
 
-VolumeModule::VolumeModule() 
-    : OpenSpaceModule("Volume")
-{}
+VolumeModule::VolumeModule()  : OpenSpaceModule(Name) {}
 
 void VolumeModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
