@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -129,9 +129,8 @@ void FramebufferRenderer::initialize() {
     updateResolution();
     updateRendererData();
     updateRaycastData();
-    updateDeferredcastData();
-    updateHDRData();
-
+//    updateDeferredcastData();
+    
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
     // G-buffer
@@ -178,6 +177,10 @@ void FramebufferRenderer::initialize() {
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Deferred framebuffer is not complete");
     }
+
+    // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
+    updateHDRData();
+    updateDeferredcastData();
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
@@ -685,7 +688,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         }
     }
 
-    // g-buffer1
+    // g-buffer
     if (!tasks.deferredcasterTasks.empty()) {
         glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
         GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
