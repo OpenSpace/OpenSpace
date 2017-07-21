@@ -24,7 +24,7 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
-    dofile(openspace.absPath('${SCRIPTS}/config_mrv.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/mrv-settings.lua'))
 end
 
 
