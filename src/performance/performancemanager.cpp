@@ -172,6 +172,10 @@ PerformanceManager::PerformanceManager()
 }
 
 PerformanceManager::~PerformanceManager() {
+    if (loggingEnabled()) {
+        outputLogs();
+    }
+
     if (_performanceMemory) {
         ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
         sharedMemory.acquireLock();
@@ -207,6 +211,7 @@ void PerformanceManager::outputLogs() {
 
     // Log Layout values
     PerformanceLayout* layout = performanceData();
+    const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _tick;
 
     // Log function performance
     for (size_t n = 0; n < layout->nFunctionEntries; n++) {
@@ -215,7 +220,7 @@ void PerformanceManager::outputLogs() {
         std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
 
         // Comma separate data
-        for (size_t i = 0; i < PerformanceLayout::NumberValues; i++) {
+        for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
             const std::vector<float> data = { function.time[i] };
             writeData(out, data);
         }
@@ -231,7 +236,7 @@ void PerformanceManager::outputLogs() {
         std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
         
         // Comma separate data
-        for (size_t i = 0; i < PerformanceLayout::NumberValues; i++) {
+        for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
             const std::vector<float> data = {
                 node.renderTime[i],
                 node.updateRenderable[i],
@@ -255,6 +260,8 @@ void PerformanceManager::writeData(std::ofstream& out, const std::vector<float>&
  std::string PerformanceManager::formatLogName(std::string nodeName) {
     // Replace any colons with dashes
     std::replace(nodeName.begin(), nodeName.end(), ':', '-');
+    // Replace spaces with underscore
+    std::replace(nodeName.begin(), nodeName.end(), ' ', '_');
     return  _logDir + "/" + _prefix + nodeName + _suffix + "." + _ext;
 }
 
