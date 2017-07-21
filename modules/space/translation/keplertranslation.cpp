@@ -142,12 +142,13 @@ documentation::Documentation KeplerTranslation::Documentation() {
 
 KeplerTranslation::KeplerTranslation()
     : Translation()
-    , _eccentricity("eccentricity", "Eccentricity", 0.0, 0.0, 1.0)
-    , _semiMajorAxis("semimajorAxis", "Semi-major axis", 0.0, 0.0, 1e6)
-    , _inclination("inclination", "Inclination", 0.0, 0.0, 360.0)
+    , _eccentricity("eccentricity", "Eccentricity", "", 0.0, 0.0, 1.0) // @TODO Missing documentation
+    , _semiMajorAxis("semimajorAxis", "Semi-major axis", "", 0.0, 0.0, 1e6) // @TODO Missing documentation
+    , _inclination("inclination", "Inclination", "", 0.0, 0.0, 360.0) // @TODO Missing documentation
     , _ascendingNode(
         "ascendingNode",
         "Right ascension of ascending Node",
+        "", // @TODO Missing documentation
         0.0,
         0.0,
         360.0
@@ -155,13 +156,14 @@ KeplerTranslation::KeplerTranslation()
     , _argumentOfPeriapsis(
         "argumentOfPeriapsis",
         "Argument of Periapsis",
+        "", // @TODO Missing documentation
         0.0,
         0.0,
         360.0
     )
-    , _meanAnomalyAtEpoch("meanAnomalyAtEpoch", "Mean anomaly at epoch", 0.0, 0.0, 360.0)
-    , _epoch("epoch", "Epoch", 0.0, 0.0, 1e9)
-    , _period("period", "Orbit period", 0.0, 0.0, 1e6)
+    , _meanAnomalyAtEpoch("meanAnomalyAtEpoch", "Mean anomaly at epoch", "", 0.0, 0.0, 360.0) // @TODO Missing documentation
+    , _epoch("epoch", "Epoch", "", 0.0, 0.0, 1e9) // @TODO Missing documentation
+    , _period("period", "Orbit period", "", 0.0, 0.0, 1e6) // @TODO Missing documentation
     , _orbitPlaneDirty(true)
 {
     auto update = [this]() {

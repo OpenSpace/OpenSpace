@@ -55,7 +55,7 @@ namespace openspace::interaction {
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner("NavigationHandler")
     , _origin("origin", "Origin", "")
-    , _useKeyFrameInteraction("useKeyFrameInteraction", "Use keyframe interaction", false)
+    , _useKeyFrameInteraction("useKeyFrameInteraction", "Use keyframe interaction", "", false) // @TODO Missing documentation
 {
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());

@@ -121,16 +121,16 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath("planetTexture", "RGB Texture")
-    , _heightMapTexturePath("heightMap", "Heightmap Texture")
-    , _rotation("rotation", "Rotation", 0, 0, 360)
+    , _colorTexturePath("planetTexture", "RGB Texture", "") // @TODO Missing documentation
+    , _heightMapTexturePath("heightMap", "Heightmap Texture", "") // @TODO Missing documentation
+    , _rotation("rotation", "Rotation", "", 0, 0, 360) // @TODO Missing documentation
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _heightMapTexture(nullptr)
-    , _shiftMeridianBy180("shiftMeiridian", "Shift Meridian by 180 deg", false)
-    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
-    , _debugProjectionTextureRotation("debug.projectionTextureRotation", "Projection Texture Rotation", 0.f, 0.f, 360.f)
+    , _shiftMeridianBy180("shiftMeiridian", "Shift Meridian by 180 deg", "", false) // @TODO Missing documentation
+    , _heightExaggeration("heightExaggeration", "Height Exaggeration", "", 1.f, 0.f, 100.f) // @TODO Missing documentation
+    , _debugProjectionTextureRotation("debug.projectionTextureRotation", "Projection Texture Rotation", "", 0.f, 0.f, 360.f) // @TODO Missing documentation
     , _capture(false)
 {
     documentation::testSpecificationAndThrow(

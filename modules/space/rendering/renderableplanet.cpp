@@ -121,15 +121,15 @@ documentation::Documentation RenderablePlanet::Documentation() {
 
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath("colorTexture", "Color Texture")
-    , _nightTexturePath("nightTexture", "Night Texture")
-    , _heightMapTexturePath("heightMap", "Heightmap Texture")
+    , _colorTexturePath("colorTexture", "Color Texture", "") // @TODO Missing documentation
+    , _nightTexturePath("nightTexture", "Night Texture", "") // @TODO Missing documentation
+    , _heightMapTexturePath("heightMap", "Heightmap Texture", "") // @TODO Missing documentation
     , _programObject(nullptr)
     , _texture(nullptr)
     , _nightTexture(nullptr)
-    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 10.f)
+    , _heightExaggeration("heightExaggeration", "Height Exaggeration", "", 1.f, 0.f, 10.f) // @TODO Missing documentation
     , _geometry(nullptr)
-    , _performShading("performShading", "Perform Shading", true)
+    , _performShading("performShading", "Perform Shading", "", true) // @TODO Missing documentation
     , _alpha(1.f)
     , _planetRadius(0.f)
     , _hasNightTexture(false)

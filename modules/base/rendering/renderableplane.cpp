@@ -87,9 +87,9 @@ documentation::Documentation RenderablePlane::Documentation() {
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath("texture", "Texture")
-    , _billboard("billboard", "Billboard", false)
-    , _size("size", "Size", 10, 0, std::pow(10, 25))
+    , _texturePath("texture", "Texture", "") // @TODO Missing documentation
+    , _billboard("billboard", "Billboard", "", false) // @TODO Missing documentation
+    , _size("size", "Size", "", 10, 0, std::pow(10, 25)) // @TODO Missing documentation
     , _shader(nullptr)
     , _texture(nullptr)
     , _blendMode(BlendMode::Normal)

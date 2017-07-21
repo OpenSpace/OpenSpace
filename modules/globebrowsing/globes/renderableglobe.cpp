@@ -42,29 +42,29 @@ namespace openspace::globebrowsing {
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : _debugProperties({
-        BoolProperty("saveOrThrowCamera", "save or throw camera", false),
-        BoolProperty("showChunkEdges", "show chunk edges", false),
-        BoolProperty("showChunkBounds", "show chunk bounds", false),
-        BoolProperty("showChunkAABB", "show chunk AABB", false),
-        BoolProperty("showHeightResolution", "show height resolution", false),
-        BoolProperty("showHeightIntensities", "show height intensities", false),
-        BoolProperty("performFrustumCulling", "perform frustum culling", true),
-        BoolProperty("performHorizonCulling", "perform horizon culling", true),
-        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)", true),
-        BoolProperty("resetTileProviders", "reset tile providers", false),
-        BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", false),
-        BoolProperty("collectStats", "collect stats", false),
-        BoolProperty("limitLevelByAvailableData", "Limit level by available data", true),
-        IntProperty("modelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", 10, 1, 22)
+        BoolProperty("saveOrThrowCamera", "save or throw camera", "", false), // @TODO Missing documentation
+        BoolProperty("showChunkEdges", "show chunk edges", "", false), // @TODO Missing documentation
+        BoolProperty("showChunkBounds", "show chunk bounds", "", false), // @TODO Missing documentation
+        BoolProperty("showChunkAABB", "show chunk AABB", "", false), // @TODO Missing documentation
+        BoolProperty("showHeightResolution", "show height resolution", "", false), // @TODO Missing documentation
+        BoolProperty("showHeightIntensities", "show height intensities", "", false), // @TODO Missing documentation
+        BoolProperty("performFrustumCulling", "perform frustum culling", "", true), // @TODO Missing documentation
+        BoolProperty("performHorizonCulling", "perform horizon culling", "", true), // @TODO Missing documentation
+        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)", "", true), // @TODO Missing documentation
+        BoolProperty("resetTileProviders", "reset tile providers", "", false), // @TODO Missing documentation
+        BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", "", false), // @TODO Missing documentation
+        BoolProperty("collectStats", "collect stats", "", false), // @TODO Missing documentation
+        BoolProperty("limitLevelByAvailableData", "Limit level by available data", "", true), // @TODO Missing documentation
+        IntProperty("modelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", "", 10, 1, 22) // @TODO Missing documentation
     })
     , _generalProperties({
-        BoolProperty("enabled", "Enabled", true),
-        BoolProperty("performShading", "perform shading", true),
-        BoolProperty("atmosphere", "atmosphere", false),
-        BoolProperty("useAccurateNormals", "useAccurateNormals", false),
-        FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
-        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f),
-        FloatProperty("orenNayarRoughness", "orenNayarRoughness", 0.0f, 0.0f, 1.0f)
+        BoolProperty("enabled", "Enabled", "", true), // @TODO Missing documentation
+        BoolProperty("performShading", "perform shading", "", true), // @TODO Missing documentation
+        BoolProperty("atmosphere", "atmosphere", "", false), // @TODO Missing documentation
+        BoolProperty("useAccurateNormals", "useAccurateNormals", "", false), // @TODO Missing documentation
+        FloatProperty("lodScaleFactor", "lodScaleFactor", "", 10.0f, 1.0f, 50.0f), // @TODO Missing documentation
+        FloatProperty("cameraMinHeight", "cameraMinHeight", "", 100.0f, 0.0f, 1000.0f), // @TODO Missing documentation
+        FloatProperty("orenNayarRoughness", "orenNayarRoughness", "", 0.0f, 0.0f, 1.0f) // @TODO Missing documentation
     })
     , _debugPropertyOwner("Debug")
 {

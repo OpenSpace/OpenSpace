@@ -134,8 +134,8 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
 
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _period("period", "Period in days", 0.0, 0.0, 1e9)
-    , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1000000)
+    , _period("period", "Period in days", "", 0.0, 0.0, 1e9) // @TODO Missing documentation
+    , _resolution("resolution", "Number of Samples along Orbit", "", 10000, 1, 1000000) // @TODO Missing documentation
     , _needsFullSweep(true)
     , _indexBufferDirty(true)
     , _previousTime(0)

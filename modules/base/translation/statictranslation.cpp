@@ -62,6 +62,7 @@ StaticTranslation::StaticTranslation()
     : _position(
         "position",
         "Position",
+        "", // @TODO Missing documentation
         glm::dvec3(0.0),
         glm::dvec3(-std::numeric_limits<double>::max()),
         glm::dvec3(std::numeric_limits<double>::max())

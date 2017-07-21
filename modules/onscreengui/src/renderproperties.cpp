@@ -42,7 +42,15 @@ using namespace properties;
 
 void renderTooltip(Property* prop) {
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+        ImGui::BeginTooltip();
+        if (!prop->description().empty()) {
+            ImGui::TextWrapped(prop->description().c_str());
+            ImGui::Spacing();
+        }
+        ImGui::Text(
+            (std::string("Identifier: ") + prop->fullyQualifiedIdentifier()).c_str()
+        );
+        ImGui::EndTooltip();
     }
 }
 

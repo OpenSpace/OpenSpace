@@ -41,10 +41,11 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     , _radius(
         "radius",
         "Radius",
+        "", // @TODO Missing documentation
         glm::vec3(1.f, 1.f, 1.f),
         glm::vec3(0.f, 0.f, 0.f),
         glm::vec3(std::pow(10.f, 20.f), std::pow(10.f, 20.f), std::pow(10.f, 20.f)))
-    , _segments("segments", "Segments", 20, 1, 5000)
+    , _segments("segments", "Segments", "", 20, 1, 5000) // @TODO Missing documentation
     , _sphere(nullptr)
 {
     float sphereRadius = 0.f;

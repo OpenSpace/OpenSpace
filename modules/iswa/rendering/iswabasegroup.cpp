@@ -44,9 +44,9 @@ namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     : properties::PropertyOwner(std::move(name))
-    , _enabled("enabled", "Enabled", true)
-    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
-    , _delete("delete", "Delete")
+    , _enabled("enabled", "Enabled", "", true) // @TODO Missing documentation
+    , _alpha("alpha", "Alpha", "", 0.9f, 0.0f, 1.0f) // @TODO Missing documentation
+    , _delete("delete", "Delete", "") // @TODO Missing documentation
     , _registered(false)
     , _type(type)
     , _dataProcessor(nullptr)

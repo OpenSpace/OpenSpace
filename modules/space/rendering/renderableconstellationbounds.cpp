@@ -90,8 +90,8 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     : Renderable(dictionary)
     , _vertexFilename("")
     , _constellationFilename("")
-    , _distance("distance", "Distance to the celestial Sphere", 15.f, 0.f, 30.f)
-    , _constellationSelection("constellationSelection", "Constellation Selection")
+    , _distance("distance", "Distance to the celestial Sphere", "", 15.f, 0.f, 30.f) // @TODO Missing documentation
+    , _constellationSelection("constellationSelection", "Constellation Selection", "") // @TODO Missing documentation
     , _vao(0)
     , _vbo(0)
 {

@@ -64,24 +64,24 @@ namespace openspace {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _dimensions("dimensions", "Dimensions")
-    , _variable("variable", "Variable")
-    , _lowerDomainBound("lowerDomainBound", "Lower Domain Bound")
-    , _upperDomainBound("upperDomainBound", "Upper Domain Bound")
-    , _domainScale("domainScale", "Domain scale")
+    , _dimensions("dimensions", "Dimensions", "") // @TODO Missing documentation
+    , _variable("variable", "Variable", "")  // @TODO Missing documentation
+    , _lowerDomainBound("lowerDomainBound", "Lower Domain Bound", "") // @TODO Missing documentation
+    , _upperDomainBound("upperDomainBound", "Upper Domain Bound", "") // @TODO Missing documentation
+    , _domainScale("domainScale", "Domain scale", "") // @TODO Missing documentation
     , _autoDomainBounds(false)
-    , _lowerValueBound("lowerValueBound", "Lower Value Bound", 0.f, 0.f, 1.f)
-    , _upperValueBound("upperValueBound", "Upper Value Bound", 1.f, 0.01f, 1.f)
+    , _lowerValueBound("lowerValueBound", "Lower Value Bound", "", 0.f, 0.f, 1.f) // @TODO Missing documentation
+    , _upperValueBound("upperValueBound", "Upper Value Bound", "", 1.f, 0.01f, 1.f) // @TODO Missing documentation
     , _autoValueBounds(false)
-    , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
+    , _gridType("gridType", "Grid Type", "", properties::OptionProperty::DisplayType::Dropdown) // @TODO Missing documentation
     , _autoGridType(false)
     , _clipPlanes(nullptr)
-    , _stepSize("stepSize", "Step Size", 0.02f, 0.01f, 1.f)
-    , _sourcePath("sourcePath", "Source Path")
-    , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
+    , _stepSize("stepSize", "Step Size", "", 0.02f, 0.01f, 1.f) // @TODO Missing documentation
+    , _sourcePath("sourcePath", "Source Path", "") // @TODO Missing documentation
+    , _transferFunctionPath("transferFunctionPath", "Transfer Function Path", "") // @TODO Missing documentation
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
-    , _cache("cache", "Cache")
+    , _cache("cache", "Cache", "") // @TODO Missing documentation
 {
 
     glm::vec3 dimensions;

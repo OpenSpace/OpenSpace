@@ -74,26 +74,30 @@ namespace openspace {
 
 TouchInteraction::TouchInteraction()
     : properties::PropertyOwner("TouchInteraction")
-    , _origin("origin", "Origin", "")
+    , _origin("origin", "Origin", "") // @TODO Missing documentation
     , _unitTest(
         "Click to take a unit test",
         "Take a unit test saving the LM data into file",
+        "", // @TODO Missing documentation
         false
     )
     , _touchActive(
         "TouchEvents",
         "True if we have a touch event",
+        "", // @TODO Missing documentation
         false,
         properties::Property::Visibility::Hidden
     )
     , _reset(
         "Default Values",
         "Reset all properties to default",
+        "", // @TODO Missing documentation
         false
     )
     , _maxTapTime(
         "Max Tap Time",
         "Max tap delay (in ms) for double tap",
+        "", // @TODO Missing documentation
         300,
         10,
         1000
@@ -101,6 +105,7 @@ TouchInteraction::TouchInteraction()
     , _deceleratesPerSecond(
         "Decelerates per second",
         "Number of times velocity is decelerated per second",
+        "", // @TODO Missing documentation
         240,
         60,
         300
@@ -108,6 +113,7 @@ TouchInteraction::TouchInteraction()
     , _touchScreenSize(
         "TouchScreenSize",
         "Touch Screen size in inches",
+        "", // @TODO Missing documentation
         55.0f,
         5.5f,
         150.0f
@@ -115,6 +121,7 @@ TouchInteraction::TouchInteraction()
     , _tapZoomFactor(
         "Tap zoom factor",
         "Scaling distance travelled on tap",
+        "", // @TODO Missing documentation
         0.2f,
         0.f,
         0.5f
@@ -122,6 +129,7 @@ TouchInteraction::TouchInteraction()
     , _nodeRadiusThreshold(
         "Activate direct-manipulation",
         "Radius a planet has to have to activate direct-manipulation",
+        "", // @TODO Missing documentation
         0.2f,
         0.0f,
         1.0f
@@ -129,6 +137,7 @@ TouchInteraction::TouchInteraction()
     , _rollAngleThreshold(
         "Interpret roll",
         "Threshold for min angle for roll interpret",
+        "", // @TODO Missing documentation
         0.025f,
         0.f,
         0.05f
@@ -136,6 +145,7 @@ TouchInteraction::TouchInteraction()
     , _orbitSpeedThreshold(
         "Activate orbit spinning",
         "Threshold to activate orbit spinning in direct-manipulation",
+        "", // @TODO Missing documentation
         0.005f,
         0.f,
         0.01f
@@ -143,6 +153,7 @@ TouchInteraction::TouchInteraction()
     , _spinSensitivity(
         "Sensitivity of spinning",
         "Sensitivity of spinning in direct-manipulation",
+        "", // @TODO Missing documentation
         1.f,
         0.f,
         2.f
@@ -150,6 +161,7 @@ TouchInteraction::TouchInteraction()
     , _inputStillThreshold(
         "Input still",
         "Threshold for interpreting input as still",
+        "", // @TODO Missing documentation
         0.0005f,
         0.f,
         0.001f
@@ -157,6 +169,7 @@ TouchInteraction::TouchInteraction()
     , _centroidStillThreshold(
         "Centroid stationary",
         "Threshold for stationary centroid",
+        "", // @TODO Missing documentation
         0.0018f,
         0.f,
         0.01f
@@ -164,6 +177,7 @@ TouchInteraction::TouchInteraction()
     , _interpretPan(
         "Pan delta distance",
         "Delta distance between fingers allowed for interpreting pan interaction",
+        "", // @TODO Missing documentation
         0.015f,
         0.f,
         0.1f
@@ -171,6 +185,7 @@ TouchInteraction::TouchInteraction()
     , _slerpTime(
         "Time to slerp",
         "Time to slerp in seconds to new orientation with new node picking",
+        "", // @TODO Missing documentation
         3.f,
         0.f,
         5.f
@@ -178,6 +193,7 @@ TouchInteraction::TouchInteraction()
     , _guiButton(
         "GUI Button",
         "GUI button size in pixels",
+        "", // @TODO Missing documentation
         glm::ivec2(32, 64),
         glm::ivec2(8, 16),
         glm::ivec2(128, 256)
@@ -185,6 +201,7 @@ TouchInteraction::TouchInteraction()
     , _friction(
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
+        "", // @TODO Missing documentation
         glm::vec4(0.01f, 0.025f, 0.02f, 0.02f),
         glm::vec4(0.f),
         glm::vec4(0.2f)

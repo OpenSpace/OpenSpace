@@ -42,11 +42,11 @@ namespace openspace {
 
 SettingsEngine::SettingsEngine()
     : properties::PropertyOwner("Global Properties")
-    , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
-    , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
-    , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
-    , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
-    , _spiceUseExceptions("enableSpiceExceptions", "Enable Spice Exceptions", false)
+    , _scenes("scenes", "Scene", "", properties::OptionProperty::DisplayType::Dropdown) // @TODO Missing documentation
+    , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", "", false) // @TODO Missing documentation
+    , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", "", false) // @TODO Missing documentation
+    , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", "", false) // @TODO Missing documentation
+    , _spiceUseExceptions("enableSpiceExceptions", "Enable Spice Exceptions", "", false) // @TODO Missing documentation
 {
     _spiceUseExceptions.onChange([this] {
         SpiceManager::ref().setExceptionHandling(

@@ -52,9 +52,11 @@ const char* Property::NameKey = "Name";
 const char* Property::TypeKey = "Type";
 const char* Property::MetaDataKey = "MetaData";
 
-Property::Property(std::string identifier, std::string guiName, Visibility visibility)
+Property::Property(std::string identifier, std::string guiName, std::string description,
+                   Visibility visibility)
     : _owner(nullptr)
     , _identifier(std::move(identifier))
+    , _description(std::move(description))
     , _currentHandleValue(0)
 {
     ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
@@ -118,7 +120,7 @@ std::string Property::guiName() const {
 }
 
 std::string Property::description() const {
-    return "return {" + generateBaseDescription() + "}";
+    return _description;
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
@@ -209,6 +211,8 @@ void Property::notifyListener() {
     }
 }
 
+// This was used in the old version of Property::Description but was never used. Is this
+// still useful? ---abock
 std::string Property::generateBaseDescription() const {
     return
         std::string(TypeKey) + " = \"" + className() + "\", " +

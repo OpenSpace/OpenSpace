@@ -27,8 +27,8 @@
 namespace openspace::properties {
 
 TriggerProperty::TriggerProperty(std::string identifier, std::string guiName,
-                                 Property::Visibility visibility)
-    : Property(std::move(identifier), std::move(guiName), visibility)
+                                 std::string desc, Property::Visibility visibility)
+    : Property(std::move(identifier), std::move(guiName), std::move(desc), visibility)
 {}
 
 std::string TriggerProperty::className() const {

@@ -98,11 +98,12 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner("")
-    , _enabled("enabled", "Is Enabled", true)
-    , _useFlatScreen("flatScreen", "Flat Screen", true)
+    , _enabled("enabled", "Is Enabled", "", true) // @TODO Missing documentation
+    , _useFlatScreen("flatScreen", "Flat Screen", "", true) // @TODO Missing documentation
     , _euclideanPosition(
         "euclideanPosition",
         "Euclidean coordinates",
+        "", // @TODO Missing documentation
         glm::vec2(0.f),
         glm::vec2(-4.f),
         glm::vec2(4.f)
@@ -110,14 +111,15 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _sphericalPosition(
         "sphericalPosition",
         "Spherical coordinates",
+        "", // @TODO Missing documentation
         glm::vec2(0.f, static_cast<float>(M_PI_2)),
         glm::vec2(-static_cast<float>(M_PI)),
         glm::vec2(static_cast<float>(M_PI))
     )
-    , _depth("depth", "Depth", 0.f, 0.f, 1.f)
-    , _scale("scale", "Scale", 0.25f, 0.f, 2.f)
-    , _alpha("alpha", "Alpha", 1.f, 0.f, 1.f)
-    , _delete("delete", "Delete")
+    , _depth("depth", "Depth", "", 0.f, 0.f, 1.f) // @TODO Missing documentation
+    , _scale("scale", "Scale", "", 0.25f, 0.f, 2.f) // @TODO Missing documentation
+    , _alpha("alpha", "Alpha", "", 1.f, 0.f, 1.f) // @TODO Missing documentation
+    , _delete("delete", "Delete", "") // @TODO Missing documentation
     , _quad(0)
     , _vertexPositionBuffer(0)
     , _texture(nullptr)

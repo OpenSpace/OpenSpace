@@ -40,11 +40,13 @@ PointGlobe::PointGlobe(const RenderableGlobe& owner)
     , _intensityClamp(
         "intensityClamp",
         "Intensity clamp",
+        "",  // @TODO Missing documentation
         1, 0, 1
     )
     , _lightIntensity(
         "lightIntensity",
         "Light intensity",
+        "",  // @TODO Missing documentation
         1, 0, 50
     )
 {

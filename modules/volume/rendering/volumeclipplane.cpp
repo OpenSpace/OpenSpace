@@ -33,6 +33,7 @@ VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
     : _normal(
         "normal",
         "Normal",
+        "", // @TODO Missing documentation
         glm::vec3(1.f, 0.f, 0.f),
         glm::vec3(-1.f),
         glm::vec3(1.f)
@@ -40,6 +41,7 @@ VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
     , _offsets(
         "offsets",
         "Offsets",
+        "", // @TODO Missing documentation
         glm::vec2(-2.f, 0.f),
         glm::vec2(-2.f, 0.f),
         glm::vec2(2.f, 1.f)

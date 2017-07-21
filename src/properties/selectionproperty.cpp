@@ -37,9 +37,10 @@ namespace openspace::properties {
 const std::string SelectionProperty::OptionsKey = "Options";
 
 SelectionProperty::SelectionProperty(std::string identifier, std::string guiName,
+                                     std::string desc,
                                      Property::Visibility visibility)
-    : TemplateProperty(std::move(identifier), std::move(guiName), std::vector<int>(),
-                       visibility)
+    : TemplateProperty(std::move(identifier), std::move(guiName), std::move(desc),
+        std::vector<int>(), visibility)
 {}
 
 void SelectionProperty::addOption(Option option) {

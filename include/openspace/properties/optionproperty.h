@@ -60,7 +60,7 @@ public:
      * \param identifier A unique identifier for this property
      * \param guiName The GUI name that should be used to represent this property
      */
-    OptionProperty(std::string identifier, std::string guiName, 
+    OptionProperty(std::string identifier, std::string guiName, std::string description,
         Property::Visibility visibility = Property::Visibility::User);
 
     /**
@@ -70,7 +70,8 @@ public:
     * \param guiName The GUI name that should be used to represent this property
     * \param displayType Optional DisplayType for GUI (default RADIO)
     */
-    OptionProperty(std::string identifier, std::string guiName, DisplayType displayType,
+    OptionProperty(std::string identifier, std::string guiName, std::string description,
+        DisplayType displayType,
         Property::Visibility visibility = Property::Visibility::User);
 
     /**

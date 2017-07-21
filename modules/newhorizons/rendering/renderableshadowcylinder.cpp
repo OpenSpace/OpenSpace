@@ -46,9 +46,9 @@ namespace openspace {
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _numberOfPoints("amountOfPoints", "Points", 190, 1, 300)
-    , _shadowLength("shadowLength", "Shadow Length", 0.1f, 0.0f, 0.5f)
-    , _shadowColor("shadowColor", "Shadow Color",
+    , _numberOfPoints("amountOfPoints", "Points", "", 190, 1, 300) // @TODO Missing documentation
+    , _shadowLength("shadowLength", "Shadow Length", "", 0.1f, 0.0f, 0.5f) // @TODO Missing documentation
+    , _shadowColor("shadowColor", "Shadow Color", "", // @TODO Missing documentation
                    glm::vec4(1.f, 1.f, 1.f, 0.25f), glm::vec4(0.f), glm::vec4(1.f))
     , _shader(nullptr)
     , _vao(0)

@@ -43,13 +43,13 @@ namespace {
 namespace openspace{
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     : IswaBaseGroup(name, type)    
-    , _useLog("useLog","Use Logarithm", false)
-    , _useHistogram("useHistogram", "Auto Contrast", false)
-    , _autoFilter("autoFilter", "Auto Filter", true)
-    , _normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
-    , _backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    , _transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
-    , _dataOptions("dataOptions", "Data Options")
+    , _useLog("useLog","Use Logarithm", "", false) // @TODO Missing documentation
+    , _useHistogram("useHistogram", "Auto Contrast", "", false) // @TODO Missing documentation
+    , _autoFilter("autoFilter", "Auto Filter", "", true) // @TODO Missing documentation
+    , _normValues("normValues", "Normalize Values", "", glm::vec2(1.0, 1.0), glm::vec2(0), glm::vec2(5.0)) // @TODO Missing documentation
+    , _backgroundValues("backgroundValues", "Background Values", "", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0)) // @TODO Missing documentation
+    , _transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf", "") // @TODO Missing documentation
+    , _dataOptions("dataOptions", "Data Options", "") // @TODO Missing documentation
 {
     addProperty(_useLog);
     addProperty(_useHistogram);

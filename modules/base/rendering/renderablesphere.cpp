@@ -92,11 +92,11 @@ documentation::Documentation RenderableSphere::Documentation() {
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath("texture", "Texture")
-    , _orientation("orientation", "Orientation")
-    , _size("size", "Size", 1.f, 0.f, std::pow(10.f, 45))
-    , _segments("segments", "Segments", 8, 4, 100)
-    , _transparency("transparency", "Transparency", 1.f, 0.f, 1.f)
+    , _texturePath("texture", "Texture", "") // @TODO Missing documentation
+    , _orientation("orientation", "Orientation", "") // @TODO Missing documentation
+    , _size("size", "Size", "", 1.f, 0.f, std::pow(10.f, 45)) // @TODO Missing documentation
+    , _segments("segments", "Segments", "", 8, 4, 100) // @TODO Missing documentation
+    , _transparency("transparency", "Transparency", "", 1.f, 0.f, 1.f) // @TODO Missing documentation
     , _shader(nullptr)
     , _texture(nullptr)
     , _sphere(nullptr)

@@ -41,7 +41,7 @@
 
 #include "gui_lua.inl"
 
-//#define SHOW_IMGUI_HELPERS
+#define SHOW_IMGUI_HELPERS
 
 namespace {
 

@@ -85,15 +85,17 @@ public:
      * The constructor for the property. The <code>identifier</code> needs to be unique
      * for each PropertyOwner. The <code>guiName</code> will be stored in the metaData
      * to be accessed by the GUI elements using the <code>guiName</code> key. The default
-     * visibility settings is <code>true</code>, whereas the default read-only state is
+     * visibility settings is Visibility::All, whereas the default read-only state is
      * <code>false</code>.
      * \param identifier A unique identifier for this property. It has to be unique to the
      * PropertyOwner and cannot contain any <code>.</code>s
      * \param guiName The human-readable GUI name for this Property
+     * \param description The human-readable description for this Property
+     * \param visibility The visibility of the Property for user interfaces
      * \pre \p identifier must not be empty
      * \pre \p guiName must not be empty
      */
-    Property(std::string identifier, std::string guiName,
+    Property(std::string identifier, std::string guiName, std::string description,
         Visibility visibility = Visibility::All);
 
     /**
@@ -258,18 +260,12 @@ public:
     std::string guiName() const;
 
     /**
-     * Returns the description for this Property that contains all necessary information
-     * required for creating a GUI representation. The format of the description is a
-     * valid Lua table, i.e., it is surrounded by a pair of <code>{</code> and
-     * <code>}</code> with key,value pairs between. Each value can either be a number, a
-     * string, a bool, or another table. The general values set by this base function
-     * are: <code>Identifier</code>, <code>Name</code>, <code>Type</code>. All other
-     * values are specific to the type and are added in a specific subclass, which require
-     * the subclass to call this method first.
-     * \return The descriptive text for the Property that can be used for constructing a
-     * GUI representation
+     * This function returns a user-facing description of the Property which can be
+     * displayed in the user interface to inform the user what this Property does and how
+     * it affects the rendering.
+     * \return The description of this Property
      */
-    virtual std::string description() const;
+    std::string description() const;
 
     /**
      * Sets the identifier of the group that this Property belongs to. Property groups can
@@ -406,6 +402,9 @@ protected:
 
     /// The identifier for this Property
     std::string _identifier;
+
+    /// The user-facing description of this Property
+    std::string _description;
 
     /// The Dictionary containing all meta data necessary for external applications
     ghoul::Dictionary _metaData;

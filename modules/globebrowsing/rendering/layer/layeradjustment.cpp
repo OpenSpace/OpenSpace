@@ -37,6 +37,7 @@ LayerAdjustment::LayerAdjustment()
     , chromaKeyColor(
         "chromaKeyColor",
         "Chroma key color",
+        "", // @TODO Missing documentation
         glm::vec3(0.f, 0.f, 0.f),
         glm::vec3(0.f),
         glm::vec3(1.f)
@@ -44,6 +45,7 @@ LayerAdjustment::LayerAdjustment()
     , chromaKeyTolerance(
         "chromaKeyTolerance",
         "Chroma key tolerance",
+        "", // @TODO Missing documentation
         0,
         0,
         1
@@ -51,6 +53,7 @@ LayerAdjustment::LayerAdjustment()
     , _typeOption(
         "type",
         "Type",
+        "", // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
       )
     , _onChangeCallback([](){})

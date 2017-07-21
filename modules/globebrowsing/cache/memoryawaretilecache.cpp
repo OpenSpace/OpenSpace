@@ -45,26 +45,26 @@ MemoryAwareTileCache::MemoryAwareTileCache()
     : PropertyOwner("TileCache")
     , _numTextureBytesAllocatedOnCPU(0)
     , _cpuAllocatedTileData(
-        "cpuAllocatedTileData", "CPU allocated tile data (MB)",
+        "cpuAllocatedTileData", "CPU allocated tile data (MB)", "",  // @TODO Missing documentation
         1024,   // Default
         128,    // Minimum
         2048,   // Maximum
         1)      // Step: One MB
     , _gpuAllocatedTileData(
-        "gpuAllocatedTileData", "GPU allocated tile data (MB)",
+        "gpuAllocatedTileData", "GPU allocated tile data (MB)", "",  // @TODO Missing documentation
         1024,   // Default
         128,    // Minimum
         2048,   // Maximum
         1)      // Step: One MB
     , _tileCacheSize(
-        "tileCacheSize", "Tile cache size",
+        "tileCacheSize", "Tile cache size", "", // @TODO Missing documentation
         1024,   // Default
         128,    // Minimum
         2048,   // Maximum
         1)      // Step: One MB
-    , _applyTileCacheSize("applyTileCacheSize", "Apply tile cache size")
-    , _clearTileCache("clearTileCache", "Clear tile cache")
-    , _usePbo("usePbo", "Use PBO", false)
+    , _applyTileCacheSize("applyTileCacheSize", "Apply tile cache size", "") // @TODO Missing documentation
+    , _clearTileCache("clearTileCache", "Clear tile cache", "") // @TODO Missing documentation
+    , _usePbo("usePbo", "Use PBO", "", false) // @TODO Missing documentation
 {
     createDefaultTextureContainers();
 

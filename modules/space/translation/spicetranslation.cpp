@@ -99,10 +99,9 @@ documentation::Documentation SpiceTranslation::Documentation() {
 }
 
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
-    : _target("target", "Target", "")
-    , _origin("origin", "Origin", "")
-    , _frame("frame", "Reference Frame", DefaultReferenceFrame)
-    , _kernelsLoadedSuccessfully(true)
+    : _target("target", "Target", "longlong test asdkl;asd;klas\nasdklasdkl;asl;d") // @TODO Missing documentation
+    , _origin("origin", "Origin", "") // @TODO Missing documentation
+    , _frame("frame", "Reference Frame", "", DefaultReferenceFrame) // @TODO Missing documentation
 {
     documentation::testSpecificationAndThrow(
         Documentation(),

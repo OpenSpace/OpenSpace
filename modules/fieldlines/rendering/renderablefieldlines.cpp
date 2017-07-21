@@ -76,17 +76,18 @@ namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
     : Renderable(dictionary)
-    , _stepSize("stepSize", "Fieldline Step Size", defaultFieldlineStepSize, 0.f, 10.f)
-    , _classification("classification", "Fieldline Classification", true)
+    , _stepSize("stepSize", "Fieldline Step Size", "", defaultFieldlineStepSize, 0.f, 10.f) // @TODO Missing documentation
+    , _classification("classification", "Fieldline Classification", "", true) // @TODO Missing documentation
     , _fieldlineColor(
         "fieldlineColor",
         "Fieldline Color",
+        "", // @TODO Missing documentation
         defaultFieldlineColor,
         glm::vec4(0.f),
         glm::vec4(1.f)
       )
-    , _seedPointSource("source", "SeedPoint Source")
-    , _seedPointSourceFile("sourceFile", "SeedPoint File")
+    , _seedPointSource("source", "SeedPoint Source", "") // @TODO Missing documentation
+    , _seedPointSourceFile("sourceFile", "SeedPoint File", "") // @TODO Missing documentation
     , _program(nullptr)
     , _seedPointsAreDirty(true)
     , _fieldLinesAreDirty(true)

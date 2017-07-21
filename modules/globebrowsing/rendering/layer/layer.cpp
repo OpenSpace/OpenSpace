@@ -44,20 +44,23 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     , _typeOption(
         "type",
         "Type",
+        "", // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _blendModeOption(
         "blendMode",
         "Blend Mode",
+        "", // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _enabled(properties::BoolProperty("enabled", "Enabled", false))
-    , _reset("reset", "Reset")
+    , _enabled(properties::BoolProperty("enabled", "Enabled", "", false)) // @TODO Missing documentation
+    , _reset("reset", "Reset", "") // @TODO Missing documentation
     , _tileProvider(nullptr)
     , _otherTypesProperties{
         properties::Vec3Property (
         "color",
         "Color",
+        "", // @TODO Missing documentation
         glm::vec4(1.f, 1.f, 1.f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f))

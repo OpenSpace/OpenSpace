@@ -33,14 +33,15 @@ namespace openspace::properties {
 const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(std::string identifier, std::string guiName,
-                               Property::Visibility visibility)
-    : IntProperty(std::move(identifier), std::move(guiName), visibility)
+                               std::string desc, Property::Visibility visibility)
+    : IntProperty(std::move(identifier), std::move(guiName), std::move(desc), visibility)
     , _displayType(DisplayType::Radio)
 {}
 
 OptionProperty::OptionProperty(std::string identifier, std::string guiName,
-                               DisplayType displayType, Property::Visibility visibility)
-    : IntProperty(std::move(identifier), std::move(guiName), visibility)
+                               std::string desc, DisplayType displayType,
+                               Property::Visibility visibility)
+    : IntProperty(std::move(identifier), std::move(guiName), std::move(desc), visibility)
     , _displayType(displayType)
 {}
 
