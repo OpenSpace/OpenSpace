@@ -149,6 +149,9 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
         }
         default: {
             ghoul_assert(false, "Unknown layer group ID");
+            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA);
         }
     }
 }

@@ -87,6 +87,20 @@ documentation::Documentation ConfigurationManager::Documentation() {
             ConfigurationManager::KeyLogging,
             new TableVerifier({
                 {
+                    ConfigurationManager::PartLogDir,
+                    new StringVerifier,
+                    "The directory for logs."
+                    "Default value is \"${BASE_PATH}\"",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartLogPerformancePrefix,
+                    new StringVerifier,
+                    "A string to prefix PerformanceMeasurement logfiles."
+                    "Default value is \"PM-\"",
+                    Optional::Yes
+                },
+                {
                     ConfigurationManager::PartLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString

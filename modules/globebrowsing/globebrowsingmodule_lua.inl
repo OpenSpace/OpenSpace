@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
@@ -47,7 +48,6 @@ int addLayer(lua_State* L) {
     // Argument locations
     const int GlobeLocation = -3;
     const int LayerGroupLocation = -2;
-    const int DictionaryLocation = -1;
 
     int nArguments = lua_gettop(L);
     if (nArguments != 3) {
@@ -131,6 +131,47 @@ int deleteLayer(lua_State* L) {
     }
 
     globe->layerManager()->deleteLayer(groupID, LayerName);
+    
+    return 0;
+}
+
+int goToChunk(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+
+    // Check arguments
+    int nArguments = lua_gettop(L);
+    if (nArguments != 3) {
+        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
+    }
+
+    int x = static_cast<int>(lua_tonumber(L, 1));
+    int y = static_cast<int>(lua_tonumber(L, 2));
+    int level = static_cast<int>(lua_tonumber(L, 3));
+
+    OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToChunk(x, y, level);
+
+    return 0;
+}
+
+int goToGeo(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    
+    int nArguments = lua_gettop(L);
+    if (nArguments != 2 && nArguments != 3) {
+        return luaL_error(L, "Expected 2 or 3 arguments.");
+    }
+    
+    double latitude = static_cast<int>(lua_tonumber(L, 1));
+    double longitude = static_cast<int>(lua_tonumber(L, 2));
+
+    if (nArguments == 2) {
+        OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
+    }
+    else if (nArguments == 3) {
+        double altitude = static_cast<int>(lua_tonumber(L, 3));
+        OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude,
+                                                                   altitude);
+    }
     
     return 0;
 }
