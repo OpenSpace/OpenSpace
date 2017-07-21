@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PRIORITIZING_CONCURRENT_JOB_MANAGER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___PRIORITIZING_CONCURRENT_JOB_MANAGER___H__
 
-#include <modules/globebrowsing/other/concurrentqueue.h>
 #include <modules/globebrowsing/other/lruthreadpool.h>
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
+
+#include <openspace/util/concurrentjobmanager.h>
+#include <openspace/util/concurrentqueue.h>
 
 #include <mutex>
 

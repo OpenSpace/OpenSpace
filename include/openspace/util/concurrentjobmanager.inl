@@ -25,7 +25,6 @@
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
-namespace globebrowsing {
 
 template<typename P>
 Job<P>::Job() {}
@@ -64,5 +63,4 @@ size_t ConcurrentJobManager<P>::numFinishedJobs() const {
     return _finishedJobs.size();
 }
 
-} // namespace globebrowsing
 } // namespace openspace

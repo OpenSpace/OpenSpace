@@ -22,54 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__
+#define __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__
+
+#include <openspace/util/concurrentqueue.h>
+#include <openspace/util/threadpool.h>
+
+#include <mutex>
+
 namespace openspace {
-namespace globebrowsing {
 
-template <typename T>
-T ConcurrentQueue<T>::pop() {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    while (_queue.empty()) {
-        _cond.wait(mlock);
-    }
-    auto item = _queue.front();
-    _queue.pop();
-    return item;
-}
+// Templated abstract base class representing a job to be done.
+// Client code derive from this class and implement the virtual execute() method
+template<typename P>
+struct Job {
+    Job();
+    virtual ~Job();
 
-template <typename T>
-void ConcurrentQueue<T>::pop(T& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    while (_queue.empty()) {
-        _cond.wait(mlock);
-    }
-    item = _queue.front();
-    _queue.pop();
-}
+    virtual void execute() = 0;
+    virtual std::shared_ptr<P> product() = 0;
+};
 
-template <typename T>
-void ConcurrentQueue<T>::push(const T& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    _queue.push(item);
-    mlock.unlock();
-    _cond.notify_one();
-}
+/* 
+ * Templated Concurrent Job Manager
+ * This class is used execute specific jobs on one (1) parallell thread
+ */
+template<typename P>
+class ConcurrentJobManager {
+public:
+    ConcurrentJobManager(ThreadPool pool);
 
-template <typename T>
-void ConcurrentQueue<T>::push(T&& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    _queue.push(std::move(item));
-    mlock.unlock();
-    _cond.notify_one();
-}
+    void enqueueJob(std::shared_ptr<Job<P>> job);
 
-template <typename T>
-size_t ConcurrentQueue<T>::size() const {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    size_t s = _queue.size();
-    mlock.unlock();
-    _cond.notify_one();
-    return s;
-}
+    void clearEnqueuedJobs();
 
-} // namespace globebrowsing
+    std::shared_ptr<Job<P>> popFinishedJob();
+
+    size_t numFinishedJobs() const;
+
+private:
+    ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
+    std::mutex _finishedJobsMutex;
+    ThreadPool threadPool;
+};
+
 } // namespace openspace
+
+#include "concurrentjobmanager.inl"
+
+#endif // __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__

@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/tile/tile.h>
+
+#include <openspace/util/concurrentjobmanager.h>
 
 namespace openspace {
 namespace globebrowsing {
