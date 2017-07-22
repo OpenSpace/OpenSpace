@@ -63,14 +63,29 @@ class PropertyOwner;
 class Property {
 public:
     /**
-     * The visibility classes for Property%s. The classes are strictly ordered as
-     * All > Developer > User > Hidden
-     */
+    * The visibility classes for Property%s. The classes are strictly ordered as
+    * All > Developer > User > Hidden
+    */
     enum class Visibility {
         All = 3,  ///< Visible for all types, no matter what
         Hidden = 2, ///< Never visible
         Developer = 1, ///< Visible in Developer mode
         User = 0 ///< Visible in User mode
+    };
+
+    /**
+     * This structure is passed to the constructor of a Property and contains the unique
+     * identifier, a GUI name and descriptive text that are both user facing.
+     */
+    struct PropertyInfo {
+        /// The unique identifier that is part of the fully qualified URI of this Property
+        std::string identifier;
+        /// The name that is displayed in the user interface
+        std::string guiName;
+        /// The user facing description of this Property
+        std::string description;
+        /// Determins the visibility of this Property in the user interface
+        Visibility visibility = Visibility::All;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an 
@@ -87,16 +102,12 @@ public:
      * to be accessed by the GUI elements using the <code>guiName</code> key. The default
      * visibility settings is Visibility::All, whereas the default read-only state is
      * <code>false</code>.
-     * \param identifier A unique identifier for this property. It has to be unique to the
-     * PropertyOwner and cannot contain any <code>.</code>s
-     * \param guiName The human-readable GUI name for this Property
-     * \param description The human-readable description for this Property
-     * \param visibility The visibility of the Property for user interfaces
-     * \pre \p identifier must not be empty
-     * \pre \p guiName must not be empty
+     * \param info The PropertyInfo structure that contains all the required static 
+     * information for initializing this Property.
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
      */
-    Property(std::string identifier, std::string guiName, std::string description,
-        Visibility visibility = Visibility::All);
+    Property(PropertyInfo info);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -403,6 +414,9 @@ protected:
     /// The identifier for this Property
     std::string _identifier;
 
+    /// The GUI user-facing name of this Property
+    std::string _guiName;
+
     /// The user-facing description of this Property
     std::string _description;
 
@@ -414,6 +428,13 @@ protected:
 
 private:
     OnChangeHandle _currentHandleValue;
+
+#ifdef _DEBUG
+    // These identifiers can be used for debugging. Each Property is assigned one unique
+    // identifier.
+    static uint64_t Identifier;
+    uint64_t _id;
+#endif
 };
 
 } // namespace openspace::properties

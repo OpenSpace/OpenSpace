@@ -56,7 +56,7 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeI
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
     : _initDict(dictionary)
-    , _filePath("filePath", "File Path", "")
+    , _filePath({ "filePath", "File Path", "" }, "") // @TODO Missing documentation
     , _successfulInitialization(false)
 {
     std::string filePath;

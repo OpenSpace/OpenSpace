@@ -70,8 +70,10 @@ void applyRegularExpression(lua_State* L, std::regex regex,
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
     bool isGroupMode = !groupName.empty();
-    
+
+    int i = -1;
     for (properties::Property* prop : properties) {
+        ++i;
         // Check the regular expression for all properties
         std::string id = prop->fullyQualifiedIdentifier();
 

@@ -30,7 +30,7 @@
 namespace openspace {
 
 VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
-    : _nClipPlanes("nClipPlanes", "Number of clip planes", "", 0, 0, 10) // @TODO Missing documentation
+    : _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10) // @TODO Missing documentation
 {
     std::vector<std::string> keys = dictionary.keys();
     for (const std::string& key : keys) {

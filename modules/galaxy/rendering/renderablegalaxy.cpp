@@ -57,11 +57,11 @@ namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize("stepSize", "Step Size", "", 0.012, 0.0005, 0.05) // @TODO Missing documentation
-    , _pointStepSize("pointStepSize", "Point Step Size", "", 0.01, 0.01, 0.1) // @TODO Missing documentation
-    , _translation("translation", "Translation", "", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0)) // @TODO Missing documentation
-    , _rotation("rotation", "Euler rotation", "", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28)) // @TODO Missing documentation
-    , _enabledPointsRatio("nEnabledPointsRatio", "Enabled points", "", 0.2, 0, 1) // @TODO Missing documentation
+    , _stepSize({ "stepSize", "Step Size", "" }, 0.012, 0.0005, 0.05) // @TODO Missing documentation
+    , _pointStepSize({ "pointStepSize", "Point Step Size", "" }, 0.01, 0.01, 0.1) // @TODO Missing documentation
+    , _translation({ "translation", "Translation", "" }, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0)) // @TODO Missing documentation
+    , _rotation({ "rotation", "Euler rotation", "" }, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28)) // @TODO Missing documentation
+    , _enabledPointsRatio({ "nEnabledPointsRatio", "Enabled points", "" }, 0.2, 0, 1) // @TODO Missing documentation
 {
     float stepSize;
     glm::vec3 scaling, translation, rotation;

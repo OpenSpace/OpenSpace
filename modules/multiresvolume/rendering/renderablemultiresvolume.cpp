@@ -95,20 +95,20 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _errorHistogramManager(nullptr)
     , _histogramManager(nullptr)
     , _localErrorHistogramManager(nullptr)
-    , _stepSizeCoefficient("stepSizeCoefficient", "Stepsize Coefficient", "", 1.f, 0.01f, 10.f) // @TODO Missing documentation
-    , _currentTime("currentTime", "Current Time", "", 0, 0, 0) // @TODO Missing documentation
-    , _memoryBudget("memoryBudget", "Memory Budget", "", 0, 0, 0) // @TODO Missing documentation
-    , _streamingBudget("streamingBudget", "Streaming Budget", "", 0, 0, 0) // @TODO Missing documentation
-    , _useGlobalTime("useGlobalTime", "Global Time", "", false) // @TODO Missing documentation
-    , _loop("loop", "Loop", "", false) // @TODO Missing documentation
-    , _selectorName("selector", "Brick Selector", "") // @TODO Missing documentation
+    , _stepSizeCoefficient({ "stepSizeCoefficient", "Stepsize Coefficient", "" }, 1.f, 0.01f, 10.f) // @TODO Missing documentation
+    , _currentTime({ "currentTime", "Current Time", "" }, 0, 0, 0) // @TODO Missing documentation
+    , _memoryBudget({ "memoryBudget", "Memory Budget", "" }, 0, 0, 0) // @TODO Missing documentation
+    , _streamingBudget({ "streamingBudget", "Streaming Budget", "" }, 0, 0, 0) // @TODO Missing documentation
+    , _useGlobalTime({ "useGlobalTime", "Global Time", "" }, false) // @TODO Missing documentation
+    , _loop({ "loop", "Loop", "" }, false) // @TODO Missing documentation
+    , _selectorName({ "selector", "Brick Selector", "" }) // @TODO Missing documentation
     , _gatheringStats(false)
-    , _statsToFile("printStats", "Print Stats", "", false) // @TODO Missing documentation
-    , _statsToFileName("printStatsFileName", "Stats Filename", "") // @TODO Missing documentation
-    , _scalingExponent("scalingExponent", "Scaling Exponent", "", 1, -10, 20) // @TODO Missing documentation
-    , _scaling("scaling", "Scaling", "", glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
-    , _translation("translation", "Translation", "", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
-    , _rotation("rotation", "Euler rotation", "", glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f)) // @TODO Missing documentation
+    , _statsToFile({ "printStats", "Print Stats", "" }, false) // @TODO Missing documentation
+    , _statsToFileName({ "printStatsFileName", "Stats Filename", "" }) // @TODO Missing documentation
+    , _scalingExponent({ "scalingExponent", "Scaling Exponent", "" }, 1, -10, 20) // @TODO Missing documentation
+    , _scaling({ "scaling", "Scaling", "" }, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
+    , _translation({ "translation", "Translation", "" }, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
+    , _rotation({ "rotation", "Euler rotation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f)) // @TODO Missing documentation
 {
     std::string name;
     //bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -349,9 +349,9 @@ bool RenderableMultiresVolume::initialize() {
     unsigned int maxInitialBudget = 2048;
     int initialBudget = std::min(maxInitialBudget, maxNumBricks);
 
-    _currentTime = properties::IntProperty("currentTime", "Current Time", "", 0, 0, _tsp->header().numTimesteps_ - 1); // @TODO Missing documentation
-    _memoryBudget = properties::IntProperty("memoryBudget", "Memory Budget", "", initialBudget, 0, maxNumBricks); // @TODO Missing documentation
-    _streamingBudget = properties::IntProperty("streamingBudget", "Streaming Budget", "", initialBudget, 0, maxNumBricks); // @TODO Missing documentation
+    _currentTime = properties::IntProperty({ "currentTime", "Current Time", "" }, 0, 0, _tsp->header().numTimesteps_ - 1); // @TODO Missing documentation
+    _memoryBudget = properties::IntProperty({ "memoryBudget", "Memory Budget", "" }, initialBudget, 0, maxNumBricks); // @TODO Missing documentation
+    _streamingBudget = properties::IntProperty({ "streamingBudget", "Streaming Budget", "" }, initialBudget, 0, maxNumBricks); // @TODO Missing documentation
     addProperty(_currentTime);
     addProperty(_memoryBudget);
     addProperty(_streamingBudget);

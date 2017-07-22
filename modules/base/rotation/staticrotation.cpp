@@ -61,7 +61,7 @@ documentation::Documentation StaticRotation::Documentation() {
 }
 
 StaticRotation::StaticRotation()
-    : _rotationMatrix("rotation", "Rotation", "", glm::dmat3(1.0)) // @TODO Missing documentation
+    : _rotationMatrix({ "rotation", "Rotation", "" }, glm::dmat3(1.0)) // @TODO Missing documentation
 {}
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)

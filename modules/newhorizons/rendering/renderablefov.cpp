@@ -129,52 +129,38 @@ documentation::Documentation RenderableFov::Documentation() {
 
 RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth("lineWidth", "Line Width", "", 1.f, 1.f, 20.f) // @TODO Missing documentation
-    , _drawSolid("solidDraw", "Draw as Quads", "", false) // @TODO Missing documentation
-    , _standOffDistance("standOffDistance", "Standoff Distance", "", 0.9999, 0.99, 1.0, 0.000001) // @TODO Missing documentation
+    , _lineWidth({ "lineWidth", "Line Width", "" }, 1.f, 1.f, 20.f) // @TODO Missing documentation
+    , _drawSolid({ "solidDraw", "Draw as Quads", "" }, false) // @TODO Missing documentation
+    , _standOffDistance({ "standOffDistance", "Standoff Distance", "" }, 0.9999, 0.99, 1.0, 0.000001) // @TODO Missing documentation
     , _programObject(nullptr)
     , _drawFOV(false)
     , _colors({
         {
-            "colors.defaultStart",
-            "Start of default color",
-            "", // @TODO Missing documentation
+            { "colors.defaultStart", "Start of default color", "" }, // @TODO Missing documentation
             glm::vec4(0.4f)
         },
         {
-            "colors.defaultEnd",
-            "End of default color",
-            "", // @TODO Missing documentation
+            { "colors.defaultEnd", "End of default color", "" },  // @TODO Missing documentation
             glm::vec4(0.85f, 0.85f, 0.85f, 1.f)
         },
         {
-            "colors.active",
-            "Active Color",
-            "", // @TODO Missing documentation
+            { "colors.active", "Active Color", "" }, // @TODO Missing documentation
             glm::vec4(0.f, 1.f, 0.f, 1.f)
         },
         {
-            "colors.targetInFieldOfView",
-            "Target-in-field-of-view Color",
-            "", // @TODO Missing documentation
+            { "colors.targetInFieldOfView", "Target-in-field-of-view Color", "" }, // @TODO Missing documentation
             glm::vec4(0.f, 0.5f, 0.7f, 1.f)
         },
         {
-            "colors.intersectionStart",
-            "Start of the intersection",
-            "", // @TODO Missing documentation
+            { "colors.intersectionStart", "Start of the intersection", "" }, // @TODO Missing documentation
             glm::vec4(1.f, 0.89f, 0.f, 1.f)
         },
         {
-            "colors.intersectionEnd",
-            "End of the intersection",
-            "", // @TODO Missing documentation
+            { "colors.intersectionEnd", "End of the intersection", "" }, // @TODO Missing documentation
             glm::vec4(1.f, 0.29f, 0.f, 1.f)
         },
         {
-            "colors.square",
-            "Orthogonal Square",
-            "", // @TODO Missing documentation
+            { "colors.square", "Orthogonal Square", "" }, // @TODO Missing documentation
             glm::vec4(0.85f, 0.85f, 0.85f, 1.f)
         }
     })

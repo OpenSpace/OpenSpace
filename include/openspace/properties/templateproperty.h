@@ -51,29 +51,20 @@ namespace openspace::properties {
 template <typename T>
 class TemplateProperty : public Property {
 public:
+    using Property::PropertyInfo;
     using ValueType = T;
-
-    /**
-     * The constructor initializing the TemplateProperty with the provided
-     * <code>identifier</code> and human-readable <code>guiName</code>. The default value
-     * for the stored type <code>T</code> is retrieved using the PropertyDelegate's
-     * PropertyDelegate::defaultValue method, which must be specialized for new types or
-     * a compile-error will occur.
-     * \param identifier The identifier that is used for this TemplateProperty
-     * \param guiName The human-readable GUI name for this TemplateProperty
-     */
-    //TemplateProperty(std::string identifier, std::string guiName,
-    //    Property::Visibility visibility = Visibility::User);
 
     /**
      * The constructor initializing the TemplateProperty with the provided
      * <code>identifier</code>, human-readable <code>guiName</code> and provided
      * <code>value</code>.
+     * \param info The PropertyInfo structure that contains all the required static
+     * information for initializing this Property.
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
      */
-    TemplateProperty(std::string identifier, std::string guiName,
-        std::string description,
-        T value = PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>(),
-        Property::Visibility visibility = Visibility::User);
+    TemplateProperty(PropertyInfo info,
+        T value = PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>());
 
     /**
      * Returns the class name for this TemplateProperty. The default implementation makes

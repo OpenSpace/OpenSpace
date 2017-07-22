@@ -158,10 +158,8 @@ namespace openspace::properties {
 //}
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName,
-                                      std::string desc,
-                                      T value, Property::Visibility visibility)
-    : Property(std::move(identifier), std::move(guiName), std::move(desc), visibility)
+TemplateProperty<T>::TemplateProperty(PropertyInfo info, T value)
+    : Property(std::move(info))
     , _value(std::move(value))
 {}
 

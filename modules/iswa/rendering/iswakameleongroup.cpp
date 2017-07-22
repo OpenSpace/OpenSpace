@@ -43,8 +43,8 @@ namespace {
 namespace openspace{
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
     : IswaDataGroup(name, type)
-    , _resolution("resolution", "Resolution%", "", 100.0f, 10.0f, 200.0f) // @TODO Missing documentation
-    , _fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints", "") // @TODO Missing documentation
+    , _resolution({ "resolution", "Resolution%", "" }, 100.0f, 10.0f, 200.0f) // @TODO Missing documentation
+    , _fieldlines({ "fieldlineSeedsIndexFile", "Fieldline Seedpoints", "" }) // @TODO Missing documentation
     , _fieldlineIndexFile("")
     , _kameleonPath("")
 {

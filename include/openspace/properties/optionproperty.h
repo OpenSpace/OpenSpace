@@ -40,6 +40,8 @@ namespace openspace::properties {
  */
 class OptionProperty : public IntProperty {
 public:
+    using Property::PropertyInfo;
+
     /**
      * The struct storing a single option consisting of an integer <code>value</code> and
      * a <code>string</code> description.
@@ -57,22 +59,23 @@ public:
     /**
      * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
      * to its super class.
-     * \param identifier A unique identifier for this property
-     * \param guiName The GUI name that should be used to represent this property
+     * \param info The PropertyInfo structure that contains all the required static
+     * information for initializing this Property.
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
      */
-    OptionProperty(std::string identifier, std::string guiName, std::string description,
-        Property::Visibility visibility = Property::Visibility::User);
+    OptionProperty(PropertyInfo info);
 
     /**
     * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
     * to its super class.
-    * \param identifier A unique identifier for this property
-    * \param guiName The GUI name that should be used to represent this property
+    * \param info The PropertyInfo structure that contains all the required static
+    * information for initializing this Property.
     * \param displayType Optional DisplayType for GUI (default RADIO)
+    * \pre \p info.identifier must not be empty
+    * \pre \p info.guiName must not be empty
     */
-    OptionProperty(std::string identifier, std::string guiName, std::string description,
-        DisplayType displayType,
-        Property::Visibility visibility = Property::Visibility::User);
+    OptionProperty(PropertyInfo info, DisplayType displayType);
 
     /**
      * Returns the name of the class for reflection purposes.

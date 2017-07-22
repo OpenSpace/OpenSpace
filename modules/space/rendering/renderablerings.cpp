@@ -85,11 +85,11 @@ documentation::Documentation RenderableRings::Documentation() {
 
 RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath("texture", "Texture", "") // @TODO Missing documentation
-    , _size("size", "Size", "", 1.f, 0.f, std::pow(1.f, 25.f)) // @TODO Missing documentation
-    , _offset("offset", "Offset", "", glm::vec2(0, 1.f), glm::vec2(0.f), glm::vec2(1.f)) // @TODO Missing documentation
-    , _nightFactor("nightFactor", "Night Factor", "", 0.33f, 0.f, 1.f) // @TODO Missing documentation
-    , _transparency("transparency", "Transparency", "", 0.15f, 0.f, 1.f) // @TODO Missing documentation
+    , _texturePath({ "texture", "Texture", "" }) // @TODO Missing documentation
+    , _size({ "size", "Size", "" }, 1.f, 0.f, std::pow(1.f, 25.f)) // @TODO Missing documentation
+    , _offset({ "offset", "Offset", "" }, glm::vec2(0, 1.f), glm::vec2(0.f), glm::vec2(1.f)) // @TODO Missing documentation
+    , _nightFactor({ "nightFactor", "Night Factor", "" }, 0.33f, 0.f, 1.f) // @TODO Missing documentation
+    , _transparency({ "transparency", "Transparency", "" }, 0.15f, 0.f, 1.f) // @TODO Missing documentation
     , _shader(nullptr)
     , _texture(nullptr)
     , _textureFile(nullptr)

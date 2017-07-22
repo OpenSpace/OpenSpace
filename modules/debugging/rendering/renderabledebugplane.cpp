@@ -47,9 +47,9 @@ namespace openspace {
 
 RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texture("texture", "Texture", "", -1, -1, 255) // @TODO Missing documentation
-    , _billboard("billboard", "Billboard", "", false) // @TODO Missing documentation
-    , _size("size", "Size", "", 10.f, 0.f, std::pow(10.f, 25.f)) // @TODO Missing documentation
+    , _texture({ "texture", "Texture", "" }, -1, -1, 255) // @TODO Missing documentation
+    , _billboard({ "billboard", "Billboard", "" }, false) // @TODO Missing documentation
+    , _size({ "size", "Size", "" }, 10.f, 0.f, std::pow(10.f, 25.f)) // @TODO Missing documentation
     , _origin(Origin::Center)
     , _shader(nullptr)
     , _quad(0)

@@ -87,29 +87,25 @@ namespace openspace {
 
 ParallelConnection::ParallelConnection()
     : properties::PropertyOwner("ParallelConnection")
-    , _password("password", "Password", "") // @TODO Missing documentation
-    , _hostPassword("hostPassword", "Host Password", "") // @TODO Missing documentation
-    , _port("port", "Port", "20501", "") // @TODO Missing documentation
-    , _address("address", "Address", "localhost", "") // @TODO Missing documentation
-    , _name("name", "Connection name", "Anonymous", "") // @TODO Missing documentation
-    , _bufferTime("bufferTime", "Buffer Time", "", 1, 0.5, 10) // @TODO Missing documentation
+    , _password({ "password", "Password", "" }) // @TODO Missing documentation
+    , _hostPassword({ "hostPassword", "Host Password", "" }) // @TODO Missing documentation
+    , _port({ "port", "Port", "" }, "20501") // @TODO Missing documentation
+    , _address({ "address", "Address", "" }, "localhost") // @TODO Missing documentation
+    , _name({ "name", "Connection name", "" }, "Anonymous") // @TODO Missing documentation
+    , _bufferTime({ "bufferTime", "Buffer Time", "" }, 1, 0.5, 10) // @TODO Missing documentation
     , _timeKeyframeInterval(
-        "timeKeyframeInterval",
-        "Time keyframe interval",
-        "", // @TODO Missing documentation
+        { "timeKeyframeInterval", "Time keyframe interval", ""}, // @TODO Missing documentation
         0.1f,
         0.f,
         1.f
     )
     , _cameraKeyframeInterval(
-        "cameraKeyframeInterval",
-        "Camera Keyframe interval",
-        "", // @TODO Missing documentation
+        { "cameraKeyframeInterval", "Camera Keyframe interval", "" }, // @TODO Missing documentation
         0.1f,
         0.f,
         1.f
     )
-    , _timeTolerance("timeTolerance", "Time tolerance", "", 1.f, 0.5f, 5.f) // @TODO Missing documentation
+    , _timeTolerance({ "timeTolerance", "Time tolerance", "" }, 1.f, 0.5f, 5.f) // @TODO Missing documentation
     , _lastTimeKeyframeTimestamp(0)
     , _lastCameraKeyframeTimestamp(0)
     , _clientSocket(INVALID_SOCKET)

@@ -78,9 +78,7 @@ int addVirtualProperty(lua_State* L) {
     if (type == "BoolProperty") {
         bool v = lua_toboolean(L, -3);
         prop = std::make_unique<properties::BoolProperty>(
-            identifier,
-            name,
-            description,
+            properties::Property::PropertyInfo{ identifier, name, description },
             v
         );
     }
@@ -90,9 +88,7 @@ int addVirtualProperty(lua_State* L) {
         int max = static_cast<int>(lua_tonumber(L, -1));
 
         prop = std::make_unique<properties::IntProperty>(
-            identifier,
-            name,
-            description,
+            properties::Property::PropertyInfo{ identifier, name, description },
             v,
             min,
             max
@@ -104,9 +100,7 @@ int addVirtualProperty(lua_State* L) {
         float max = static_cast<float>(lua_tonumber(L, -1));
 
         prop = std::make_unique<properties::FloatProperty>(
-            identifier,
-            name,
-            description,
+            properties::Property::PropertyInfo{ identifier, name, description },
             v,
             min,
             max
@@ -114,9 +108,7 @@ int addVirtualProperty(lua_State* L) {
     }
     else if (type == "TriggerProperty") {
         prop = std::make_unique<properties::TriggerProperty>(
-            identifier,
-            name,
-            description
+            properties::Property::PropertyInfo{ identifier, name, description }
         );
     }
     else {

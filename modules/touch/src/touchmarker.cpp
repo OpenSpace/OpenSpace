@@ -39,14 +39,12 @@ namespace openspace {
 
 TouchMarker::TouchMarker()
     : properties::PropertyOwner("TouchMarker")
-    , _visible("TouchMarkers visible", "Toggle visibility of markers", "", true) // @TODO Missing documentation
-    , _radiusSize("Marker size", "Marker radius", "", 30.f, 0.f, 100.f) // @TODO Missing documentation
-    , _transparency("Transparency of marker", "Marker transparency", "", 0.8f, 0.f, 1.f) // @TODO Missing documentation
-    , _thickness("Thickness of marker", "Marker thickness", "", 2.f, 0.f, 4.f) // @TODO Missing documentation
+    , _visible({ "TouchMarkers visible", "Toggle visibility of markers", "" }, true) // @TODO Missing documentation
+    , _radiusSize({ "Marker size", "Marker radius", "" }, 30.f, 0.f, 100.f) // @TODO Missing documentation
+    , _transparency({ "Transparency of marker", "Marker transparency", "" }, 0.8f, 0.f, 1.f) // @TODO Missing documentation
+    , _thickness({ "Thickness of marker", "Marker thickness", "" }, 2.f, 0.f, 4.f) // @TODO Missing documentation
     , _color(
-        "MarkerColor",
-        "Marker color",
-        "", // @TODO Missing documentation
+        { "MarkerColor", "Marker color", "" }, // @TODO Missing documentation
         glm::vec3(204.f / 255.f, 51.f / 255.f, 51.f / 255.f),
         glm::vec3(0.f),
         glm::vec3(1.f)

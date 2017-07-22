@@ -55,10 +55,10 @@ namespace openspace::gui {
 
 GuiPerformanceComponent::GuiPerformanceComponent()
     : GuiComponent("PerformanceComponent")
-    , _sortingSelection("sortingSelection", "Sorting", "", -1, -1, 6) // @TODO Missing documentation
-    , _sceneGraphIsEnabled("showSceneGraph", "Show Scene Graph Measurements", "", false) // @TODO Missing documentation
-    , _functionsIsEnabled("showFunctions", "Show Function Measurements", "", false) // @TODO Missing documentation
-    , _outputLogs("outputLogs", "Output Logs", "", false) // @TODO Missing documentation
+    , _sortingSelection({ "sortingSelection", "Sorting", "" }, -1, -1, 6) // @TODO Missing documentation
+    , _sceneGraphIsEnabled({ "showSceneGraph", "Show Scene Graph Measurements", "" }, false) // @TODO Missing documentation
+    , _functionsIsEnabled({ "showFunctions", "Show Function Measurements", "" }, false) // @TODO Missing documentation
+    , _outputLogs({ "outputLogs", "Output Logs", "" }, false) // @TODO Missing documentation
 {
     addProperty(_sortingSelection);
 

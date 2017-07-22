@@ -168,11 +168,11 @@ documentation::Documentation ProjectionComponent::Documentation() {
 
 ProjectionComponent::ProjectionComponent()
     : properties::PropertyOwner("ProjectionComponent")
-    , _performProjection("performProjection", "Perform Projections", "", true) // @TODO Missing documentation
-    , _clearAllProjections("clearAllProjections", "Clear Projections", "", false) // @TODO Missing documentation
-    , _projectionFading("projectionFading", "Projection Fading", "", 1.f, 0.f, 1.f) // @TODO Missing documentation
-    , _textureSize("textureSize", "Texture Size", "", ivec2(16), ivec2(16), ivec2(32768)) // @TODO Missing documentation
-    , _applyTextureSize("applyTextureSize", "Apply Texture Size", "") // @TODO Missing documentation
+    , _performProjection({ "performProjection", "Perform Projections", "" }, true) // @TODO Missing documentation
+    , _clearAllProjections({ "clearAllProjections", "Clear Projections", "" }, false) // @TODO Missing documentation
+    , _projectionFading({ "projectionFading", "Projection Fading", "" }, 1.f, 0.f, 1.f) // @TODO Missing documentation
+    , _textureSize({ "textureSize", "Texture Size", "" }, ivec2(16), ivec2(16), ivec2(32768)) // @TODO Missing documentation
+    , _applyTextureSize({ "applyTextureSize", "Apply Texture Size", "" }) // @TODO Missing documentation
     , _textureSizeDirty(false)
     , _projectionTexture(nullptr)
 {

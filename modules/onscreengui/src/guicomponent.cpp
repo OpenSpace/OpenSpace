@@ -28,7 +28,7 @@ namespace openspace::gui {
 
 GuiComponent::GuiComponent(std::string name)
     : properties::PropertyOwner(std::move(name))
-    , _isEnabled("enabled", "Is Enabled", "", false) // @TODO Missing documentation
+    , _isEnabled({ "enabled", "Is Enabled", "" }, false) // @TODO Missing documentation
 {
     addProperty(_isEnabled);
 }

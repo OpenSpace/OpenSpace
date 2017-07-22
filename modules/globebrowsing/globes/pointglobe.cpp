@@ -38,15 +38,11 @@ namespace openspace::globebrowsing {
 PointGlobe::PointGlobe(const RenderableGlobe& owner)
     : _owner(owner)
     , _intensityClamp(
-        "intensityClamp",
-        "Intensity clamp",
-        "",  // @TODO Missing documentation
+        { "intensityClamp", "Intensity clamp", ""},  // @TODO Missing documentation
         1, 0, 1
     )
     , _lightIntensity(
-        "lightIntensity",
-        "Light intensity",
-        "",  // @TODO Missing documentation
+        { "lightIntensity", "Light intensity", ""},  // @TODO Missing documentation
         1, 0, 50
     )
 {

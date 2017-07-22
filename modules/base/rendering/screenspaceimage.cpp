@@ -70,7 +70,7 @@ ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _downloadImage(false)
     , _textureIsDirty(false)
-    , _texturePath("texturePath", "Texture path", "")
+    , _texturePath({ "texturePath", "Texture path", "" }) // @TODO Missing documentation
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
