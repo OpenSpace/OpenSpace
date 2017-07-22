@@ -100,32 +100,32 @@ RenderEngine::RenderEngine()
     , _camera(nullptr)
     , _scene(nullptr)
     , _raycasterManager(nullptr)
-    , _performanceMeasurements({ "performanceMeasurements", "Performance Measurements", "" }) // @TODO Missing documentation
+    , _performanceMeasurements({ "PerformanceMeasurements", "Performance Measurements", "" }) // @TODO Missing documentation
     , _performanceManager(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _log(nullptr)
     , _frametimeType(
-        { "frametimeType", "Type of the frametime display", "" }, // @TODO Missing documentation
+        { "FrametimeType", "Type of the frametime display", "" }, // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _showDate({ "showDate", "Show Date Information", "" }, true) // @TODO Missing documentation
-    , _showInfo({ "showInfo", "Show Render Information", "" }, true) // @TODO Missing documentation
-    , _showLog({ "showLog", "Show the OnScreen log", "" }, true) // @TODO Missing documentation
-    , _takeScreenshot({ "takeScreenshot", "Take Screenshot", "" }) // @TODO Missing documentation
+    , _showDate({ "ShowDate", "Show Date Information", "" }, true) // @TODO Missing documentation
+    , _showInfo({ "ShowInfo", "Show Render Information", "" }, true) // @TODO Missing documentation
+    , _showLog({ "ShowLog", "Show the OnScreen log", "" }, true) // @TODO Missing documentation
+    , _takeScreenshot({ "TakeScreenshot", "Take Screenshot", "" }) // @TODO Missing documentation
     , _shouldTakeScreenshot(false)
-    , _applyWarping({ "applyWarpingScreenshot", "Apply Warping to Screenshots", "" }, false) // @TODO Missing documentation
-    , _showFrameNumber({ "showFrameNumber", "Show Frame Number", "" }, false) // @TODO Missing documentation
-    , _disableMasterRendering({ "disableMasterRendering", "Disable Master Rendering", "" }, false) // @TODO Missing documentation
+    , _applyWarping({ "ApplyWarpingScreenshot", "Apply Warping to Screenshots", "" }, false) // @TODO Missing documentation
+    , _showFrameNumber({ "ShowFrameNumber", "Show Frame Number", "" }, false) // @TODO Missing documentation
+    , _disableMasterRendering({ "DisableMasterRendering", "Disable Master Rendering", "" }, false) // @TODO Missing documentation
     , _disableSceneTranslationOnMaster(
-        { "disableSceneTranslationOnMaster", "Disable Scene Translation on Master", "" }, // @TODO Missing documentation
+        { "DisableSceneTranslationOnMaster", "Disable Scene Translation on Master", "" }, // @TODO Missing documentation
         false
     )
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
-    , _nAaSamples({ "nAaSamples", "Number of Antialiasing samples", "" }, 8, 1, 16) // @TODO Missing documentation
+    , _nAaSamples({ "NAaSamples", "Number of Antialiasing samples", "" }, 8, 1, 16) // @TODO Missing documentation
     , _frameNumber(0)
 {
     _performanceMeasurements.onChange([this](){

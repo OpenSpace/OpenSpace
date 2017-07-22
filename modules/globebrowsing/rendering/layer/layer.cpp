@@ -42,19 +42,19 @@ namespace {
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>(keyName))
     , _typeOption(
-        { "type", "Type", "" }, // @TODO Missing documentation
+        { "Type", "Type", "" }, // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _blendModeOption(
-        { "blendMode", "Blend Mode", "" }, // @TODO Missing documentation
+        { "BlendMode", "Blend Mode", "" }, // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _enabled({ "enabled", "Enabled", "" }, false) // @TODO Missing documentation
-    , _reset({ "reset", "Reset", "" }) // @TODO Missing documentation
+    , _enabled({ "Enabled", "Enabled", "" }, false) // @TODO Missing documentation
+    , _reset({ "Reset", "Reset", "" }) // @TODO Missing documentation
     , _tileProvider(nullptr)
     , _otherTypesProperties{
         properties::Vec3Property (
-        { "color", "Color", "" }, // @TODO Missing documentation
+        { "Color", "Color", "" }, // @TODO Missing documentation
         glm::vec4(1.f, 1.f, 1.f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f)

@@ -45,26 +45,26 @@ MemoryAwareTileCache::MemoryAwareTileCache()
     : PropertyOwner("TileCache")
     , _numTextureBytesAllocatedOnCPU(0)
     , _cpuAllocatedTileData(
-        { "cpuAllocatedTileData", "CPU allocated tile data (MB)", "" },  // @TODO Missing documentation
+        { "CpuAllocatedTileData", "CPU allocated tile data (MB)", "" },  // @TODO Missing documentation
         1024,   // Default
         128,    // Minimum
         2048,   // Maximum
         1)      // Step: One MB
     , _gpuAllocatedTileData(
-        { "gpuAllocatedTileData", "GPU allocated tile data (MB)", ""},  // @TODO Missing documentation
+        { "GpuAllocatedTileData", "GPU allocated tile data (MB)", ""},  // @TODO Missing documentation
         1024,   // Default
         128,    // Minimum
         2048,   // Maximum
         1)      // Step: One MB
     , _tileCacheSize(
-        { "tileCacheSize", "Tile cache size", ""}, // @TODO Missing documentation
+        { "TileCacheSize", "Tile cache size", ""}, // @TODO Missing documentation
         1024,   // Default
         128,    // Minimum
         2048,   // Maximum
         1)      // Step: One MB
-    , _applyTileCacheSize({ "applyTileCacheSize", "Apply tile cache size", "" }) // @TODO Missing documentation
-    , _clearTileCache({ "clearTileCache", "Clear tile cache", "" }) // @TODO Missing documentation
-    , _usePbo({ "usePbo", "Use PBO", "" }, false) // @TODO Missing documentation
+    , _applyTileCacheSize({ "ApplyTileCacheSize", "Apply tile cache size", "" }) // @TODO Missing documentation
+    , _clearTileCache({ "ClearTileCache", "Clear tile cache", "" }) // @TODO Missing documentation
+    , _usePbo({ "UsePbo", "Use PBO", "" }, false) // @TODO Missing documentation
 {
     createDefaultTextureContainers();
 

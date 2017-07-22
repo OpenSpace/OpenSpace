@@ -83,8 +83,8 @@ documentation::Documentation SpiceRotation::Documentation() {
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
-    : _sourceFrame({ "source", "Source", "" }) // @TODO Missing documentation
-    , _destinationFrame({ "destination", "Destination", "" }) // @TODO Missing documentation
+    : _sourceFrame({ "Source", "Source", "" }) // @TODO Missing documentation
+    , _destinationFrame({ "Destination", "Destination", "" }) // @TODO Missing documentation
 {
     documentation::testSpecificationAndThrow(
         Documentation(),

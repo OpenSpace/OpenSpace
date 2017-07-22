@@ -35,7 +35,7 @@ namespace openspace::globebrowsing {
 LayerGroup::LayerGroup(layergroupid::GroupID id)
     : properties::PropertyOwner(std::move(layergroupid::LAYER_GROUP_NAMES[id]))
     , _groupId(id)
-    , _levelBlendingEnabled({ "blendTileLevels", "blend tile levels", "" }, false) // @TODO Missing documentation
+    , _levelBlendingEnabled({ "BlendTileLevels", "blend tile levels", "" }, false) // @TODO Missing documentation
 {
     addProperty(_levelBlendingEnabled);
 }

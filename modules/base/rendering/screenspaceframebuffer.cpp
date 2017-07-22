@@ -48,7 +48,7 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
 
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary) 
     : ScreenSpaceRenderable(dictionary)
-    , _size({ "size", "Size", "" }, glm::vec4(0), glm::vec4(0), glm::vec4(2000)) // @TODO Missing documentation
+    , _size({ "Size", "Size", "" }, glm::vec4(0), glm::vec4(0), glm::vec4(2000)) // @TODO Missing documentation
     , _framebuffer(nullptr)
 {
     documentation::testSpecificationAndThrow(

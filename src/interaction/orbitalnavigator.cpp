@@ -41,18 +41,18 @@ namespace openspace::interaction {
 
 OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner("OrbitalNavigator")
-    , _rotationalFriction({ "rotationalFriction", "Rotational friction", "" }, true) // @TODO Missing documentation
-    , _horizontalFriction({ "horizontalFriction", "Horizontal friction", "" }, true) // @TODO Missing documentation
-    , _verticalFriction({ "verticalFriction", "Vertical friction", "" }, true) // @TODO Missing documentation
+    , _rotationalFriction({ "RotationalFriction", "Rotational friction", "" }, true) // @TODO Missing documentation
+    , _horizontalFriction({ "HorizontalFriction", "Horizontal friction", "" }, true) // @TODO Missing documentation
+    , _verticalFriction({ "VerticalFriction", "Vertical friction", "" }, true) // @TODO Missing documentation
     , _followFocusNodeRotationDistance(
-        { "followFocusNodeRotationDistance", "Follow focus node rotation distance", "" }, // @TODO Missing documentation
+        { "FollowFocusNodeRotationDistance", "Follow focus node rotation distance", "" }, // @TODO Missing documentation
         2.0f, 0.0f, 10.f
     )
     , _minimumAllowedDistance(
-        {"minimumAllowedDistance", "Minimum allowed distance", "" }, // @TODO Missing documentation
+        {"MinimumAllowedDistance", "Minimum allowed distance", "" }, // @TODO Missing documentation
         10.0f, 0.0f, 10000.f)
-    , _sensitivity({ "sensitivity", "Sensitivity", "" }, 20.0f, 1.0f, 50.f) // @TODO Missing documentation
-    , _motionLag({ "motionLag", "Motion lag", "" }, 0.5f, 0.f, 1.f) // @TODO Missing documentation
+    , _sensitivity({ "Sensitivity", "Sensitivity", "" }, 20.0f, 1.0f, 50.f) // @TODO Missing documentation
+    , _motionLag({ "MotionLag", "Motion lag", "" }, 0.5f, 0.f, 1.f) // @TODO Missing documentation
     , _mouseStates(_sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001))
 {
     auto smoothStep = 

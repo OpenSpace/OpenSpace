@@ -64,24 +64,24 @@ namespace openspace {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _dimensions({ "dimensions", "Dimensions", "" }) // @TODO Missing documentation
-    , _variable({ "variable", "Variable", "" })  // @TODO Missing documentation
-    , _lowerDomainBound({ "lowerDomainBound", "Lower Domain Bound", "" }) // @TODO Missing documentation
-    , _upperDomainBound({ "upperDomainBound", "Upper Domain Bound", "" }) // @TODO Missing documentation
-    , _domainScale({ "domainScale", "Domain scale", "" }) // @TODO Missing documentation
+    , _dimensions({ "Dimensions", "Dimensions", "" }) // @TODO Missing documentation
+    , _variable({ "Variable", "Variable", "" })  // @TODO Missing documentation
+    , _lowerDomainBound({ "LowerDomainBound", "Lower Domain Bound", "" }) // @TODO Missing documentation
+    , _upperDomainBound({ "UpperDomainBound", "Upper Domain Bound", "" }) // @TODO Missing documentation
+    , _domainScale({ "DomainScale", "Domain scale", "" }) // @TODO Missing documentation
     , _autoDomainBounds(false)
-    , _lowerValueBound({ "lowerValueBound", "Lower Value Bound", "" }, 0.f, 0.f, 1.f) // @TODO Missing documentation
-    , _upperValueBound({ "upperValueBound", "Upper Value Bound", "" }, 1.f, 0.01f, 1.f) // @TODO Missing documentation
+    , _lowerValueBound({ "LowerValueBound", "Lower Value Bound", "" }, 0.f, 0.f, 1.f) // @TODO Missing documentation
+    , _upperValueBound({ "UpperValueBound", "Upper Value Bound", "" }, 1.f, 0.01f, 1.f) // @TODO Missing documentation
     , _autoValueBounds(false)
-    , _gridType({ "gridType", "Grid Type", "" }, properties::OptionProperty::DisplayType::Dropdown) // @TODO Missing documentation
+    , _gridType({ "GridType", "Grid Type", "" }, properties::OptionProperty::DisplayType::Dropdown) // @TODO Missing documentation
     , _autoGridType(false)
     , _clipPlanes(nullptr)
-    , _stepSize({ "stepSize", "Step Size", "" }, 0.02f, 0.01f, 1.f) // @TODO Missing documentation
-    , _sourcePath({ "sourcePath", "Source Path", "" }) // @TODO Missing documentation
-    , _transferFunctionPath({ "transferFunctionPath", "Transfer Function Path", "" }) // @TODO Missing documentation
+    , _stepSize({ "StepSize", "Step Size", "" }, 0.02f, 0.01f, 1.f) // @TODO Missing documentation
+    , _sourcePath({ "SourcePath", "Source Path", "" }) // @TODO Missing documentation
+    , _transferFunctionPath({ "TransferFunctionPath", "Transfer Function Path", "" }) // @TODO Missing documentation
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
-    , _cache({ "cache", "Cache", "" }) // @TODO Missing documentation
+    , _cache({ "Cache", "Cache", "" }) // @TODO Missing documentation
 {
 
     glm::vec3 dimensions;

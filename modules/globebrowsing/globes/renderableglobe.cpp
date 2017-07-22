@@ -42,29 +42,29 @@ namespace openspace::globebrowsing {
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : _debugProperties({
-        BoolProperty({ "saveOrThrowCamera", "save or throw camera", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "showChunkEdges", "show chunk edges", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "showChunkBounds", "show chunk bounds", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "showChunkAABB", "show chunk AABB", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "showHeightResolution", "show height resolution", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "showHeightIntensities", "show height intensities", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "performFrustumCulling", "perform frustum culling", "" }, true), // @TODO Missing documentation
-        BoolProperty({ "performHorizonCulling", "perform horizon culling", "" }, true), // @TODO Missing documentation
-        BoolProperty({ "levelByProjectedAreaElseDistance", "level by projected area (else distance)", "" }, true), // @TODO Missing documentation
-        BoolProperty({ "resetTileProviders", "reset tile providers", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "toggleEnabledEveryFrame", "toggle enabled every frame", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "collectStats", "collect stats", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "limitLevelByAvailableData", "Limit level by available data", "" }, true), // @TODO Missing documentation
-        IntProperty({ "modelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", "" }, 10, 1, 22) // @TODO Missing documentation
+        BoolProperty({ "SaveOrThrowCamera", "save or throw camera", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "ShowChunkEdges", "show chunk edges", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "ShowChunkBounds", "show chunk bounds", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "ShowChunkAABB", "show chunk AABB", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "ShowHeightResolution", "show height resolution", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "ShowHeightIntensities", "show height intensities", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "PerformFrustumCulling", "perform frustum culling", "" }, true), // @TODO Missing documentation
+        BoolProperty({ "PerformHorizonCulling", "perform horizon culling", "" }, true), // @TODO Missing documentation
+        BoolProperty({ "LevelByProjectedAreaElseDistance", "level by projected area (else distance)", "" }, true), // @TODO Missing documentation
+        BoolProperty({ "ResetTileProviders", "reset tile providers", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "ToggleEnabledEveryFrame", "toggle enabled every frame", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "CollectStats", "collect stats", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "LimitLevelByAvailableData", "Limit level by available data", "" }, true), // @TODO Missing documentation
+        IntProperty({ "ModelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", "" }, 10, 1, 22) // @TODO Missing documentation
     })
     , _generalProperties({
-        BoolProperty({ "enabled", "Enabled", "" }, true), // @TODO Missing documentation
-        BoolProperty({ "performShading", "perform shading", "" }, true), // @TODO Missing documentation
-        BoolProperty({ "atmosphere", "atmosphere", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "useAccurateNormals", "useAccurateNormals", "" }, false), // @TODO Missing documentation
-        FloatProperty({ "lodScaleFactor", "lodScaleFactor", "" }, 10.0f, 1.0f, 50.0f), // @TODO Missing documentation
-        FloatProperty({ "cameraMinHeight", "cameraMinHeight", "" }, 100.0f, 0.0f, 1000.0f), // @TODO Missing documentation
-        FloatProperty({ "orenNayarRoughness", "orenNayarRoughness", "" }, 0.0f, 0.0f, 1.0f) // @TODO Missing documentation
+        BoolProperty({ "Enabled", "Enabled", "" }, true), // @TODO Missing documentation
+        BoolProperty({ "PerformShading", "perform shading", "" }, true), // @TODO Missing documentation
+        BoolProperty({ "Atmosphere", "atmosphere", "" }, false), // @TODO Missing documentation
+        BoolProperty({ "UseAccurateNormals", "useAccurateNormals", "" }, false), // @TODO Missing documentation
+        FloatProperty({ "LodScaleFactor", "lodScaleFactor", "" }, 10.0f, 1.0f, 50.0f), // @TODO Missing documentation
+        FloatProperty({ "CameraMinHeight", "cameraMinHeight", "" }, 100.0f, 0.0f, 1000.0f), // @TODO Missing documentation
+        FloatProperty({ "OrenNayarRoughness", "orenNayarRoughness", "" }, 0.0f, 0.0f, 1.0f) // @TODO Missing documentation
     })
     , _debugPropertyOwner("Debug")
 {

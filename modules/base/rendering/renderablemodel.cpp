@@ -95,10 +95,10 @@ documentation::Documentation RenderableModel::Documentation() {
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _geometry(nullptr)
-    , _colorTexturePath({ "colorTexture", "Color Texture", "" }) // @TODO Missing documentation
-    , _performFade({ "performFading", "Perform Fading", "" }, false) // @TODO Missing documentation
-    , _performShading({ "performShading", "Perform Shading", "" }, true) // @TODO Missing documentation
-    , _fading({ "fading", "Fade", "" }, 0) // @TODO Missing documentation
+    , _colorTexturePath({ "ColorTexture", "Color Texture", "" }) // @TODO Missing documentation
+    , _performFade({ "PerformFading", "Perform Fading", "" }, false) // @TODO Missing documentation
+    , _performShading({ "PerformShading", "Perform Shading", "" }, true) // @TODO Missing documentation
+    , _fading({ "Fading", "Fade", "" }, 0) // @TODO Missing documentation
     , _programObject(nullptr)
     , _texture(nullptr)
     , _modelTransform(1.0)

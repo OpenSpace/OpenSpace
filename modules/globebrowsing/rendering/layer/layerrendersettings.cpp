@@ -36,12 +36,12 @@ namespace openspace::globebrowsing {
 
 LayerRenderSettings::LayerRenderSettings()
     : properties::PropertyOwner("Settings")
-    , setDefault({ "setDefault", "Set Default", "" }) // @TODO Missing documentation
-    , opacity(properties::FloatProperty({ "opacity", "Opacity", "" }, 1.f, 0.f, 1.f)) // @TODO Missing documentation
-    , gamma(properties::FloatProperty({ "gamma", "Gamma", "" }, 1, 0, 5))// @TODO Missing documentation
-    , multiplier(properties::FloatProperty({ "multiplier", "Multiplier", "" }, 1.f, 0.f, 20.f))// @TODO Missing documentation
-    , offset(properties::FloatProperty({ "offset", "Offset", "" }, 0.f, -10000.f, 10000.f))// @TODO Missing documentation
-    , valueBlending(properties::FloatProperty({ "valueBlending", "Value Blending", "" }, // @TODO Missing documentation
+    , setDefault({ "SetDefault", "Set Default", "" }) // @TODO Missing documentation
+    , opacity(properties::FloatProperty({ "Opacity", "Opacity", "" }, 1.f, 0.f, 1.f)) // @TODO Missing documentation
+    , gamma(properties::FloatProperty({ "Gamma", "Gamma", "" }, 1, 0, 5))// @TODO Missing documentation
+    , multiplier(properties::FloatProperty({ "Multiplier", "Multiplier", "" }, 1.f, 0.f, 20.f))// @TODO Missing documentation
+    , offset(properties::FloatProperty({ "Offset", "Offset", "" }, 0.f, -10000.f, 10000.f))// @TODO Missing documentation
+    , valueBlending(properties::FloatProperty({ "ValueBlending", "Value Blending", "" }, // @TODO Missing documentation
                                                1.f, 0.f, 1.f))
     , useValueBlending(false)
 {

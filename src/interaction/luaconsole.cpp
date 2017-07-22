@@ -75,39 +75,39 @@ namespace openspace {
 
 LuaConsole::LuaConsole()
     : properties::PropertyOwner("LuaConsole")
-    , _isVisible({ "isVisible", "Is Visible", "" }, false) // @TODO Missing documentation
-    , _remoteScripting({ "remoteScripting", "Remote scripting", "" }, false) // @TODO Missing documentation
+    , _isVisible({ "IsVisible", "Is Visible", "" }, false) // @TODO Missing documentation
+    , _remoteScripting({ "RemoteScripting", "Remote scripting", "" }, false) // @TODO Missing documentation
     , _backgroundColor(
-        { "backgroundColor", "Background Color", "" }, // @TODO Missing documentation
+        { "BackgroundColor", "Background Color", "" }, // @TODO Missing documentation
         glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _highlightColor(
-        { "highlightColor", "Highlight Color", "" }, // @TODO Missing documentation
+        { "HighlightColor", "Highlight Color", "" }, // @TODO Missing documentation
         glm::vec4(1.f, 1.f, 1.f, 0.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _separatorColor(
-        { "separatorColor", "Separator Color", "" }, // @TODO Missing documentation
+        { "SeparatorColor", "Separator Color", "" }, // @TODO Missing documentation
         glm::vec4(0.4f, 0.4f, 0.4f, 0.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _entryTextColor(
-        { "entryTextColor", "Entry Text Color", "" }, // @TODO Missing documentation
+        { "EntryTextColor", "Entry Text Color", "" }, // @TODO Missing documentation
         glm::vec4(1.f, 1.f, 1.f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _historyTextColor(
-        { "historyTextColor", "History Text Color", "" }, // @TODO Missing documentation
+        { "HistoryTextColor", "History Text Color", "" }, // @TODO Missing documentation
         glm::vec4(1.0f, 1.0f, 1.0f, 0.65f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _historyLength({ "historyLength", "History Length", "" }, 13, 0, 100) // @TODO Missing documentation
+    , _historyLength({ "HistoryLength", "History Length", "" }, 13, 0, 100) // @TODO Missing documentation
     , _inputPosition(0)
     , _activeCommand(0)
     , _autoCompleteInfo({NoAutoComplete, false, ""})

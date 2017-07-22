@@ -133,13 +133,13 @@ documentation::Documentation RenderableTrail::Documentation() {
 
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor({ "lineColor", "Color", "" }, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f)) // @TODO Missing documentation
-    , _useLineFade({ "useLineFade", "Use Line Fade", "" }, true) // @TODO Missing documentation
-    , _lineFade({ "lineFade", "Line Fade", "" }, 1.f, 0.f, 20.f) // @TODO Missing documentation
-    , _lineWidth({ "lineWidth", "Line Width", "" }, 2.f, 1.f, 20.f) // @TODO Missing documentation
-    , _pointSize({ "pointSize", "Point Size", "" }, 1, 1, 64) // @TODO Missing documentation
+    , _lineColor({ "LineColor", "Color", "" }, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f)) // @TODO Missing documentation
+    , _useLineFade({ "UseLineFade", "Use Line Fade", "" }, true) // @TODO Missing documentation
+    , _lineFade({ "LineFade", "Line Fade", "" }, 1.f, 0.f, 20.f) // @TODO Missing documentation
+    , _lineWidth({ "LineWidth", "Line Width", "" }, 2.f, 1.f, 20.f) // @TODO Missing documentation
+    , _pointSize({ "PointSize", "Point Size", "" }, 1, 1, 64) // @TODO Missing documentation
     , _renderingModes(
-        { "renderingMode", "Rendering Mode", "" }, // @TODO Missing documentation
+        { "RenderingMode", "Rendering Mode", "" }, // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
     )
 {

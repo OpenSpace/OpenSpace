@@ -95,20 +95,20 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _errorHistogramManager(nullptr)
     , _histogramManager(nullptr)
     , _localErrorHistogramManager(nullptr)
-    , _stepSizeCoefficient({ "stepSizeCoefficient", "Stepsize Coefficient", "" }, 1.f, 0.01f, 10.f) // @TODO Missing documentation
-    , _currentTime({ "currentTime", "Current Time", "" }, 0, 0, 0) // @TODO Missing documentation
-    , _memoryBudget({ "memoryBudget", "Memory Budget", "" }, 0, 0, 0) // @TODO Missing documentation
-    , _streamingBudget({ "streamingBudget", "Streaming Budget", "" }, 0, 0, 0) // @TODO Missing documentation
-    , _useGlobalTime({ "useGlobalTime", "Global Time", "" }, false) // @TODO Missing documentation
-    , _loop({ "loop", "Loop", "" }, false) // @TODO Missing documentation
-    , _selectorName({ "selector", "Brick Selector", "" }) // @TODO Missing documentation
+    , _stepSizeCoefficient({ "StepSizeCoefficient", "Stepsize Coefficient", "" }, 1.f, 0.01f, 10.f) // @TODO Missing documentation
+    , _currentTime({ "CurrentTime", "Current Time", "" }, 0, 0, 0) // @TODO Missing documentation
+    , _memoryBudget({ "MemoryBudget", "Memory Budget", "" }, 0, 0, 0) // @TODO Missing documentation
+    , _streamingBudget({ "StreamingBudget", "Streaming Budget", "" }, 0, 0, 0) // @TODO Missing documentation
+    , _useGlobalTime({ "UseGlobalTime", "Global Time", "" }, false) // @TODO Missing documentation
+    , _loop({ "Loop", "Loop", "" }, false) // @TODO Missing documentation
+    , _selectorName({ "Selector", "Brick Selector", "" }) // @TODO Missing documentation
     , _gatheringStats(false)
-    , _statsToFile({ "printStats", "Print Stats", "" }, false) // @TODO Missing documentation
-    , _statsToFileName({ "printStatsFileName", "Stats Filename", "" }) // @TODO Missing documentation
-    , _scalingExponent({ "scalingExponent", "Scaling Exponent", "" }, 1, -10, 20) // @TODO Missing documentation
-    , _scaling({ "scaling", "Scaling", "" }, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
-    , _translation({ "translation", "Translation", "" }, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
-    , _rotation({ "rotation", "Euler rotation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f)) // @TODO Missing documentation
+    , _statsToFile({ "PrintStats", "Print Stats", "" }, false) // @TODO Missing documentation
+    , _statsToFileName({ "PrintStatsFileName", "Stats Filename", "" }) // @TODO Missing documentation
+    , _scalingExponent({ "ScalingExponent", "Scaling Exponent", "" }, 1, -10, 20) // @TODO Missing documentation
+    , _scaling({ "Scaling", "Scaling", "" }, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
+    , _translation({ "Translation", "Translation", "" }, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
+    , _rotation({ "Rotation", "Euler rotation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f)) // @TODO Missing documentation
 {
     std::string name;
     //bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);

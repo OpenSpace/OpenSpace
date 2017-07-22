@@ -104,13 +104,13 @@ documentation::Documentation RenderableModelProjection::Documentation() {
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath({ "colorTexture", "Color Texture", "" }) // @TODO Missing documentation
-    , _rotation({ "rotation", "Rotation", "" }, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f)) // @TODO Missing documentation
+    , _colorTexturePath({ "ColorTexture", "Color Texture", "" }) // @TODO Missing documentation
+    , _rotation({ "Rotation", "Rotation", "" }, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f)) // @TODO Missing documentation
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _geometry(nullptr)
-    , _performShading({ "performShading", "Perform Shading", "" }, true) // @TODO Missing documentation
+    , _performShading({ "PerformShading", "Perform Shading", "" }, true) // @TODO Missing documentation
 {
     documentation::testSpecificationAndThrow(
         Documentation(),

@@ -125,14 +125,14 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
 
 RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _startTime({ "startTime", "Start Time", "" }) // @TODO Missing documentation
-    , _endTime({ "endTime", "End Time", "" }) // @TODO Missing documentation
-    , _sampleInterval({ "sampleInterval", "Sample Interval", "" }, 2.0, 2.0, 1e6) // @TODO Missing documentation
+    , _startTime({ "StartTime", "Start Time", "" }) // @TODO Missing documentation
+    , _endTime({ "EndTime", "End Time", "" }) // @TODO Missing documentation
+    , _sampleInterval({ "SampleInterval", "Sample Interval", "" }, 2.0, 2.0, 1e6) // @TODO Missing documentation
     , _timeStampSubsamplingFactor(
-        { "subSample", "Time Stamp Subsampling Factor", "" }, // @TODO Missing documentation
+        { "SubSample", "Time Stamp Subsampling Factor", "" }, // @TODO Missing documentation
         1, 1, 1000000000
     )
-    , _renderFullTrail({ "renderFullTrail", "Render Full Trail", "" }, false) // @TODO Missing documentation
+    , _renderFullTrail({ "RenderFullTrail", "Render Full Trail", "" }, false) // @TODO Missing documentation
     , _needsFullSweep(true)
     , _subsamplingIsDirty(true)
 {

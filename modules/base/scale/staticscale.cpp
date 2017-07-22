@@ -49,7 +49,7 @@ documentation::Documentation StaticScale::Documentation() {
 }
 
 StaticScale::StaticScale()
-    : _scaleValue({ "scale", "Scale", "" }, 1.0, 1.0, 1000.0) // @TODO Missing documentation
+    : _scaleValue({ "Scale", "Scale", "" }, 1.0, 1.0, 1000.0) // @TODO Missing documentation
 {
     addProperty(_scaleValue);
 }

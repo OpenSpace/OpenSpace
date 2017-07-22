@@ -36,7 +36,7 @@ namespace openspace::globebrowsing::tileprovider {
     
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : _tile(nullptr, nullptr, Tile::Status::Unavailable)
-    , _filePath({ "filePath", "File Path", "" }) // @TODO Missing documentation
+    , _filePath({ "FilePath", "File Path", "" }) // @TODO Missing documentation
 {
     // Required input
     std::string filePath;
@@ -50,7 +50,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
 SingleImageProvider::SingleImageProvider(const std::string& imagePath)
     : _tile(nullptr, nullptr, Tile::Status::Unavailable)
-    , _filePath({ "filePath", "File Path", "" }, imagePath) // @TODO Missing documentation
+    , _filePath({ "FilePath", "File Path", "" }, imagePath) // @TODO Missing documentation
 {
     reset();
 }

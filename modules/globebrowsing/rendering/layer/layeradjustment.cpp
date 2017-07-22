@@ -35,19 +35,19 @@ namespace openspace::globebrowsing {
 LayerAdjustment::LayerAdjustment()
     : properties::PropertyOwner("adjustment")
     , chromaKeyColor(
-        { "chromaKeyColor", "Chroma key color", "" }, // @TODO Missing documentation
+        { "ChromaKeyColor", "Chroma key color", "" }, // @TODO Missing documentation
         glm::vec3(0.f, 0.f, 0.f),
         glm::vec3(0.f),
         glm::vec3(1.f)
       )
     , chromaKeyTolerance(
-        { "chromaKeyTolerance", "Chroma key tolerance", "" }, // @TODO Missing documentation
+        { "ChromaKeyTolerance", "Chroma key tolerance", "" }, // @TODO Missing documentation
         0,
         0,
         1
       )
     , _typeOption(
-        { "type", "Type", "" }, // @TODO Missing documentation
+        { "Type", "Type", "" }, // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
       )
     , _onChangeCallback([](){})

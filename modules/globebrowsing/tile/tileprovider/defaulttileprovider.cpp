@@ -55,8 +55,8 @@ namespace openspace::globebrowsing::tileprovider {
     
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
-    , _filePath({ "filePath", "File Path", "" }, "") // @TODO Missing documentation
-    , _tilePixelSize({ "tilePixelSize", "Tile Pixel Size", "" }, 32, 32, 1024) // @TODO Missing documentation
+    , _filePath({ "FilePath", "File Path", "" }, "") // @TODO Missing documentation
+    , _tilePixelSize({ "TilePixelSize", "Tile Pixel Size", "" }, 32, 32, 1024) // @TODO Missing documentation
     , _preCacheLevel(0)
 {
     _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();

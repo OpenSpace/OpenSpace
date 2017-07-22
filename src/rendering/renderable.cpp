@@ -93,7 +93,7 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
 
 Renderable::Renderable()
     : properties::PropertyOwner("renderable")
-    , _enabled({ "enabled", "Is Enabled", "" }, true) // @TODO Missing documentation
+    , _enabled({ "Enabled", "Is Enabled", "" }, true) // @TODO Missing documentation
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
@@ -102,7 +102,7 @@ Renderable::Renderable()
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner("renderable")
-    , _enabled({ "enabled", "Is Enabled", "" }, true) // @TODO Missing documentation
+    , _enabled({ "Enabled", "Is Enabled", "" }, true) // @TODO Missing documentation
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")

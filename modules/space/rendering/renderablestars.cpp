@@ -125,20 +125,20 @@ documentation::Documentation RenderableStars::Documentation() {
 
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _pointSpreadFunctionTexturePath({ "psfTexture", "Point Spread Function Texture", "" }) // @TODO Missing documentation
+    , _pointSpreadFunctionTexturePath({ "PsfTexture", "Point Spread Function Texture", "" }) // @TODO Missing documentation
     , _pointSpreadFunctionTexture(nullptr)
     , _pointSpreadFunctionTextureIsDirty(true)
-    , _colorTexturePath({ "colorTexture", "ColorBV Texture", "" }) // @TODO Missing documentation
+    , _colorTexturePath({ "ColorTexture", "ColorBV Texture", "" }) // @TODO Missing documentation
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
     , _colorOption(
-        { "colorOption", "Color Option", "" }, // @TODO Missing documentation
+        { "ColorOption", "Color Option", "" }, // @TODO Missing documentation
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _dataIsDirty(true)
-    , _alphaValue({ "alphaValue", "Transparency", "" }, 1.f, 0.f, 1.f) // @TODO Missing documentation
-    , _scaleFactor({ "scaleFactor", "Scale Factor", "" }, 1.f, 0.f, 10.f) // @TODO Missing documentation
-    , _minBillboardSize({ "minBillboardSize", "Min Billboard Size", "" }, 1.f, 1.f, 100.f) // @TODO Missing documentation
+    , _alphaValue({ "AlphaValue", "Transparency", "" }, 1.f, 0.f, 1.f) // @TODO Missing documentation
+    , _scaleFactor({ "ScaleFactor", "Scale Factor", "" }, 1.f, 0.f, 10.f) // @TODO Missing documentation
+    , _minBillboardSize({ "MinBillboardSize", "Min Billboard Size", "" }, 1.f, 1.f, 100.f) // @TODO Missing documentation
     , _program(nullptr)
     , _speckFile("")
     , _nValuesPerStar(0)

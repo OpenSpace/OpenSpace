@@ -74,7 +74,7 @@ namespace openspace {
 
 TouchInteraction::TouchInteraction()
     : properties::PropertyOwner("TouchInteraction")
-    , _origin({ "origin", "Origin", "" }) // @TODO Missing documentation
+    , _origin({ "Origin", "Origin", "" }) // @TODO Missing documentation
     , _unitTest(
         { "Click to take a unit test", "Take a unit test saving the LM data into file", "" }, // @TODO Missing documentation
         false
