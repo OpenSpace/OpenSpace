@@ -14,12 +14,12 @@ helper.scheduledScript.reversible = {}
 helper.setCommonKeys = function()
     openspace.bindKeyLocal(
         "F1",
-        helper.property.invert('Global Properties.OnScreenGUI.Main.enabled'),
+        helper.property.invert('Global Properties.OnScreenGUI.Main.Enabled'),
         "Toggles the visibility of the on-screen GUI."
     )
     openspace.bindKeyLocal(
         "F2",
-        helper.property.invert("RenderEngine.performanceMeasurements"),
+        helper.property.invert("RenderEngine.PerformanceMeasurements"),
         "Toogles performance measurements that shows rendering time informations."
     )
 
@@ -30,7 +30,7 @@ helper.setCommonKeys = function()
     )
     openspace.bindKeyLocal(
         "PRINT_SCREEN",
-        "openspace.setPropertyValueSingle('RenderEngine.takeScreenshot', nil)",
+        "openspace.setPropertyValueSingle('RenderEngine.TakeScreenshot', nil)",
         "Saves the contents of the screen to a file in the working directory."
     )
     openspace.bindKey(
@@ -52,18 +52,18 @@ helper.setCommonKeys = function()
 
     openspace.bindKey(
         "f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.horizontalFriction'),
+        helper.property.invert('NavigationHandler.OrbitalNavigator.HorizontalFriction'),
         "Toggles the horizontal friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely."
     )
 
     openspace.bindKey(
         "Shift+f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.verticalFriction'),
+        helper.property.invert('NavigationHandler.OrbitalNavigator.VerticalFriction'),
         "Toggles the vertical friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely."
     )
     openspace.bindKey(
         "Ctrl+f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.rotationalFriction'),
+        helper.property.invert('NavigationHandler.OrbitalNavigator.RotationalFriction'),
         "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around its own axis indefinitely."
     )
 
@@ -116,12 +116,12 @@ end
 
 -- Function that returns the string that enables/disables the renderable 'renderable'
 helper.renderable.toggle = function(renderable)
-    return helper.property.invert(renderable .. ".renderable.enabled")
+    return helper.property.invert(renderable .. ".renderable.Enabled")
 end
 
 -- Function that returns the string that sets the enabled property of <renderable> to <enabled>
 helper.renderable.setEnabled = function(renderable, enabled)
-    return "openspace.setPropertyValue('" .. renderable .. ".renderable.enabled', " .. (enabled and "true" or "false") .. ");";
+    return "openspace.setPropertyValue('" .. renderable .. ".renderable.Enabled', " .. (enabled and "true" or "false") .. ");";
 end
 
 -- Function that returns a lua table specifying a reversible ScheduledScript for 

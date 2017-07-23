@@ -67,10 +67,10 @@ public:
     * All > Developer > User > Hidden
     */
     enum class Visibility {
-        All = 3,  ///< Visible for all types, no matter what
-        Hidden = 2, ///< Never visible
-        Developer = 1, ///< Visible in Developer mode
-        User = 0 ///< Visible in User mode
+        Hidden = 3, ///< Never visible
+        Developer = 2, ///< Visible in Developer mode
+        User = 1, ///< Visible in User mode
+        All = 0,  ///< Visible for all types, no matter what
     };
 
     /**
