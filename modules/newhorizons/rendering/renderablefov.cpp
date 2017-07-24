@@ -51,6 +51,30 @@ namespace {
     const char* KeyFrameConversions     = "FrameConversions";
 
     const int InterpolationSteps = 5;
+
+    static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value determines width of the lines connecting the instrument to the "
+        "corners of the field of view."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DrawSolidInfo = {
+        "SolidDraw",
+        "Solid Draw",
+        "This value determines whether the field of view should be rendered as a solid "
+        "or as lines only."
+    };
+
+    static const openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
+        "StandOffDistance",
+        "Standoff Distance Factor",
+        "This value determines the standoff distance factor which influences the "
+        "distance of the plane to the focus object. If this value is '1', the field of "
+        "view will be rendered exactly on the surface of, for example, a planet. With a "
+        "value of smaller than 1, the field of view will hover of ther surface, thus "
+        "making it more visible."
+    };
 } // namespace
 
 namespace openspace {
@@ -121,6 +145,18 @@ documentation::Documentation RenderableFov::Documentation() {
                 "A list of frame conversions that should be registered with the "
                 "SpiceManager.",
                 Optional::Yes
+            },
+            {
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
+                LineWidthInfo.description,
+                Optional::Yes
+            },
+            {
+                StandoffDistanceInfo.identifier,
+                new DoubleVerifier,
+                StandoffDistanceInfo.description,
+                Optional::Yes
             }
         }
     };
@@ -129,9 +165,9 @@ documentation::Documentation RenderableFov::Documentation() {
 
 RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth({ "LineWidth", "Line Width", "" }, 1.f, 1.f, 20.f) // @TODO Missing documentation
-    , _drawSolid({ "SolidDraw", "Draw as Quads", "" }, false) // @TODO Missing documentation
-    , _standOffDistance({ "StandOffDistance", "Standoff Distance", "" }, 0.9999, 0.99, 1.0, 0.000001) // @TODO Missing documentation
+    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+    , _drawSolid(DrawSolidInfo, false)
+    , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
     , _programObject(nullptr)
     , _drawFOV(false)
     , _colors({
@@ -199,6 +235,18 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
                 fc.value<std::string>(key)
             );
         }
+    }
+
+    if (dictionary.hasKey(LineWidthInfo.identifier)) {
+        _lineWidth = static_cast<float>(dictionary.value<double>(
+            LineWidthInfo.identifier
+        ));
+    }
+
+    if (dictionary.hasKey(StandoffDistanceInfo.identifier)) {
+        _standOffDistance = static_cast<float>(dictionary.value<double>(
+            StandoffDistanceInfo.identifier
+        ));
     }
 
     addProperty(_lineWidth);
