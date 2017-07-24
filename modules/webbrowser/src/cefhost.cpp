@@ -38,7 +38,13 @@ CefHost::CefHost(std::string helperLocation) {
     CefString(&settings.browser_subprocess_path).FromASCII((char*) helperLocation.c_str());
     attachDebugSettings(settings);
 
-    CefInitialize(args, settings, nullptr, NULL);
+#ifdef WIN32
+    // Enable High-DPI support on Windows 7 or newer.
+    CefEnableHighDPISupport();
+#endif
+    CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
+
+    CefInitialize(args, settings, app.get(), NULL);
     initializeCallbacks();
     LDEBUG("Initializing CEF... done!");
 }
@@ -50,6 +56,7 @@ CefHost::~CefHost() {
 void CefHost::attachDebugSettings(CefSettings &settings) {
     settings.remote_debugging_port = 8088;
     LDEBUG(fmt::format("Remote WebBrowser debugging available on http://localhost:{}", settings.remote_debugging_port));
+//    settings.single_process = true;
 }
 
 void CefHost::initializeCallbacks() {

@@ -27,6 +27,7 @@
 // be found in the LICENSE file.
 
 #include "include/cef_app.h"
+#include "include/webbrowserapp.h"
 
 // Entry point function for sub-processes.
 int main(HINSTANCE hInstance,
@@ -36,6 +37,8 @@ int main(HINSTANCE hInstance,
   // Provide CEF with command-line arguments.
   CefMainArgs main_args(hInstance);
 
+  CefRefPtr<openspace::WebBrowserApp> app(new openspace::WebBrowserApp);
+
   // Execute the sub-process.
-  return CefExecuteProcess(main_args, NULL, NULL);
+  return CefExecuteProcess(main_args, app.get(), NULL);
 }

@@ -75,6 +75,7 @@ set(WEBBROWSER_SOURCES
     webbrowsermodule.cpp
     src/browserclient.cpp
     src/eventhandler.cpp
+    src/webbrowserapp.cpp
     )
 set(WEBBROWSER_SOURCES_LINUX
     )
@@ -100,6 +101,9 @@ set(WEBBROWSER_SOURCES
     )
 
 # CEF helper sources
+set(WEBBROWSER_HELPER_SOURCES
+    src/webbrowserapp.cpp
+	)
 set(WEBBROWSER_HELPER_SOURCES_MACOSX
     src/processhelpermac.cpp
 	)
@@ -174,6 +178,7 @@ set(OPENSPACE_HEADER_FILES
     include/screenspacebrowser.h
     include/browserinstance.h
     include/eventhandler.h
+    include/webbrowserapp.h
     include/cefhost.h
     )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
@@ -186,6 +191,7 @@ set(OPENSPACE_SOURCE_FILES
     src/screenspacebrowser.cpp
     src/browserinstance.cpp
     src/eventhandler.cpp
+    src/webbrowserapp.cpp
     src/cefhost.cpp
     )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})

@@ -46,21 +46,10 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : _isInitialized(fa
 
     std::string url = "";
     _browser = CefBrowserHost::CreateBrowserSync(windowInfo, _client.get(), url, browserSettings, NULL);
-
-    // send to WebBrowserModule
-    auto browserModule = OsEng.moduleEngine().module<WebBrowserModule>();
-    if (browserModule) {
-//        browserModule->addBrowser(_browser);
-    }
 }
 
 BrowserInstance::~BrowserInstance() {
     _browser->GetHost()->CloseBrowser(false);
-
-    auto browserModule = OsEng.moduleEngine().module<WebBrowserModule>();
-    if (browserModule) {
-//        browserModule->removeBrowser(_browser);
-    }
 }
 
 void BrowserInstance::initialize() {
