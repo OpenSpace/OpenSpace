@@ -39,7 +39,6 @@ void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
     CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
     CefRefPtr<CefV8Value> global = context->GetGlobal();
     global->SetValue("IsWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
-    frame->ExecuteJavaScript("alert('hej');", frame->GetURL(), 0);
 }
 
 }
