@@ -52,7 +52,7 @@ private:
     properties::StringProperty _url;
     properties::Vec2Property _dimensions;
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-    std::unique_ptr<BrowserInstance> _browserInstance;
+    std::shared_ptr<BrowserInstance> _browserInstance;
 
     bool _urlIsDirty;
     bool _dimensionsAreDirty;

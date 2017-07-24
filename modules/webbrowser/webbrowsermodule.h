@@ -46,18 +46,21 @@ class WebBrowserModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebBrowser";
     WebBrowserModule();
+    ~WebBrowserModule();
     void internalInitialize();
 
-    int addBrowser(CefBrowser*);
-    void removeBrowser(CefBrowser*);
+    int addBrowser(std::shared_ptr<BrowserInstance>);
+    void removeBrowser(std::shared_ptr<BrowserInstance>);
 
     void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
 
 private:
-    std::vector<CefRefPtr<CefBrowser>> browsers;
+    void deinitialize();
     std::string findHelperExecutable();
-    EventHandler eventHandler;
-	std::unique_ptr<CefHost> cefHost;
+
+    std::vector<std::shared_ptr<BrowserInstance>> _browsers;
+    EventHandler _eventHandler;
+	std::unique_ptr<CefHost> _cefHost;
 };
 
 } // namespace openspace

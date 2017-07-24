@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <webbrowsermodule.h>
 #include "include/screenspacebrowser.h"
 
 
@@ -62,13 +63,18 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 
     _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(windowDimensions, 1.0f));
     _renderHandler = new ScreenSpaceRenderHandler();
-    _browserInstance = std::make_unique<BrowserInstance>(_renderHandler);
+    _browserInstance = std::make_shared<BrowserInstance>(_renderHandler);
 
     _url.onChange([this]() { _urlIsDirty = true; });
     _dimensions.onChange([this]() { _dimensionsAreDirty = true; });
 
     addProperty(_url);
     addProperty(_dimensions);
+
+    auto webBrowser = OsEng.moduleEngine().module<WebBrowserModule>();
+    if (webBrowser != nullptr) {
+        webBrowser->addBrowser(_browserInstance);
+    }
 }
 
 bool ScreenSpaceBrowser::initialize() {
@@ -85,7 +91,21 @@ bool ScreenSpaceBrowser::initialize() {
 }
 
 bool ScreenSpaceBrowser::deinitialize() {
-    return true;
+    std::string urlString;
+    _url.getStringValue(urlString);
+    LDEBUG(fmt::format("Deinitializing ScreenSpaceBrowser: {}", urlString));
+
+    _browserInstance->close(true);
+
+    auto webBrowser = OsEng.moduleEngine().module<WebBrowserModule>();
+    if (webBrowser != nullptr) {
+        webBrowser->removeBrowser(_browserInstance);
+        _browserInstance.reset();
+        return true;
+    }
+
+    LWARNING("Could not find WebBrowserModule");
+    return false;
 }
 
 void ScreenSpaceBrowser::render() {

@@ -25,19 +25,13 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__CEF_HOST_H
 #define __OPENSPACE_MODULE_WEBBROWSER__CEF_HOST_H
 
-#include <ghoul/filesystem/filesystem.h>
 #include <include/wrapper/cef_helpers.h>
-#include "modules/webbrowser/include/browser_client.h"
-#include "modules/webbrowser/include/web_render_handler.h"
-#include "modules/webbrowser/include/event_handler.h"
+#include <include/cef_app.h>
+#include <fmt/format.h>
+#include <include/openspace/engine/openspaceengine.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
-
-#ifdef WIN32
-static const std::string SUBPROCESS_ENDING = ".exe";
-#else
-static const std::string SUBPROCESS_ENDING = "";
-#endif
 
 class CefHost {
 public:
@@ -46,7 +40,6 @@ public:
 
 private:
     void initializeCallbacks();
-    void deinitialize();
     void attachDebugSettings(CefSettings&);
 };
 

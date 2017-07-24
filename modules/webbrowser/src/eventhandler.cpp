@@ -28,7 +28,7 @@
 #include "include/eventhandler.h"
 
 namespace {
-    std::string _loggerCat = "WebBrowser:EventHandler";
+std::string _loggerCat = "WebBrowser:EventHandler";
 }
 
 namespace openspace {
@@ -196,7 +196,15 @@ CefMouseEvent EventHandler::mouseEvent() {
 }
 
 void EventHandler::setBrowserInstance(const std::shared_ptr<BrowserInstance> &browserInstance) {
+    LDEBUG("Setting browser instance.");
     _browserInstance = browserInstance;
+}
+
+void EventHandler::detachBrowser() {
+    if (_browserInstance) {
+        LDEBUG(fmt::format("Detaching browser instance with use count {}", _browserInstance.use_count()));
+    }
+    _browserInstance = nullptr;
 }
 
 } // namespace openspace

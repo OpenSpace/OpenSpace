@@ -50,7 +50,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : _isInitialized(fa
     // send to WebBrowserModule
     auto browserModule = OsEng.moduleEngine().module<WebBrowserModule>();
     if (browserModule) {
-        browserModule->addBrowser(_browser);
+//        browserModule->addBrowser(_browser);
     }
 }
 
@@ -59,7 +59,7 @@ BrowserInstance::~BrowserInstance() {
 
     auto browserModule = OsEng.moduleEngine().module<WebBrowserModule>();
     if (browserModule) {
-        browserModule->removeBrowser(_browser);
+//        browserModule->removeBrowser(_browser);
     }
 }
 
@@ -108,6 +108,11 @@ void BrowserInstance::reshape(const glm::ivec2 &windowSize) {
  */
 void BrowserInstance::draw() {
     _renderHandler->draw();
+}
+
+void BrowserInstance::close(bool force) {
+    LDEBUG(fmt::format("Closing browser. {}", force ? "Forcing." : ""));
+    _browser->GetHost()->CloseBrowser(force);
 }
 
 const CefRefPtr<CefBrowser> &BrowserInstance::getBrowser() const {

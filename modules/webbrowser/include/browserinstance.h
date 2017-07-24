@@ -44,6 +44,7 @@ public:
     void initialize();
     void reshape(const glm::ivec2&);
     void draw();
+    void close(bool force = false);
 
     bool sendKeyEvent(const CefKeyEvent &event);
     bool sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button, bool mouseUp);

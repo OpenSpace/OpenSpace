@@ -36,8 +36,24 @@ namespace openspace {
 
 WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
     LDEBUG("Starting CEF...");
-    cefHost = std::make_unique<CefHost>(findHelperExecutable());
+    _cefHost = std::make_unique<CefHost>(findHelperExecutable());
     LDEBUG("Starting CEF... done!");
+
+    OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::Deinitialize,
+        [this](){ deinitialize(); }
+    );
+}
+
+WebBrowserModule::~WebBrowserModule() {}
+
+void WebBrowserModule::deinitialize() {
+    _eventHandler.detachBrowser();
+
+    bool forceBrowserShutdown = true;
+    for (auto browser : _browsers) {
+        browser->close(forceBrowserShutdown);
+    }
 }
 
 /**
@@ -70,32 +86,34 @@ std::string WebBrowserModule::findHelperExecutable() {
 }
 
 void WebBrowserModule::internalInitialize() {
-    eventHandler.initialize();
+    _eventHandler.initialize();
 
-    // register ScreenSpaceRenderable
+    // register ScreenSpaceBrowser
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
-int WebBrowserModule::addBrowser(CefBrowser *browser) {
+int WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
     static int browserId = 0;
-    browsers.push_back(browser);
+    _browsers.push_back(browser);
     int givenId = browserId++;
     return givenId;
 }
 
-void WebBrowserModule::removeBrowser(CefBrowser *browser) {
-    auto p = std::find(browsers.begin(), browsers.end(), browser);
-    if (p != browsers.end()) {
-        browsers.erase(p);
+void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
+    auto p = std::find(_browsers.begin(), _browsers.end(), browser);
+    if (p != _browsers.end()) {
+        _browsers.erase(p);
     } else {
         LWARNING("Could not find browser in list of browsers.");
     }
+
+    LDEBUG(fmt::format("Number of browsers stored: {}", _browsers.size()));
 }
 
 void WebBrowserModule::attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance) {
-    eventHandler.setBrowserInstance(browserInstance);
+    _eventHandler.setBrowserInstance(browserInstance);
 }
 
 }

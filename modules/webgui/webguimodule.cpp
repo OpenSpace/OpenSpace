@@ -25,6 +25,10 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #include "webguimodule.h"
 
+namespace {
+const std::string _loggerCat = "WebGui";
+}
+
 namespace openspace {
 
 WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {
@@ -40,8 +44,9 @@ void WebGuiModule::internalInitialize() {
                 LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiLocation));
                 _guiInstance->loadUrl(_guiLocation);
                 auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
-                if (webBrowserModule) {
+                if (webBrowserModule != nullptr) {
                     webBrowserModule->attachEventHandler(_guiInstance);
+                    webBrowserModule->addBrowser(_guiInstance);
                 }
             }
     );
@@ -49,7 +54,6 @@ void WebGuiModule::internalInitialize() {
             OpenSpaceEngine::CallbackOption::Render,
             [this](){
                 WindowWrapper& wrapper = OsEng.windowWrapper();
-
                 if (wrapper.isMaster()) {
                     if (wrapper.windowHasResized()) {
                         _guiInstance->reshape(wrapper.currentWindowSize());
@@ -58,7 +62,16 @@ void WebGuiModule::internalInitialize() {
                     _guiInstance->draw();
                 }
             });
-
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Deinitialize,
+            [this](){
+                _guiInstance->close(true);
+                auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
+                if (webBrowserModule != nullptr) {
+                    webBrowserModule->removeBrowser(_guiInstance);
+                }
+                _guiInstance.reset();
+            });
 }
 
 }

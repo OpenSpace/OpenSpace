@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <include/openspace/engine/configurationmanager.h>
-#include "include/cef_host.h"
+#include "include/cefhost.h"
 
 namespace {
 const char* _loggerCat = "CefHost";
@@ -53,16 +52,7 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
     LDEBUG(fmt::format("Remote WebBrowser debugging available on http://localhost:{}", settings.remote_debugging_port));
 }
 
-void CefHost::deinitialize() {
-}
-
 void CefHost::initializeCallbacks() {
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Deinitialize,
-            [this]() {
-                deinitialize();
-            }
-    );
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::Render,
             [this](){
