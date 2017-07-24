@@ -799,12 +799,14 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     
 #ifdef _NEW_RENDERING_    
     if (!tasks.deferredcasterTasks.empty()) {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);        
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
+        GLenum dBuffer[] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, dBuffer);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
         glBlitFramebuffer(0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
             0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
-            GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            GL_COLOR_BUFFER_BIT, GL_NEAREST);
         
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     } else {

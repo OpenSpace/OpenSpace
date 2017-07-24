@@ -123,51 +123,9 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = marsEllipsoid,
-            SegmentsPerPatch = 90,
-            -- Allows camera to go down 10000 meters below the reference ellipsoid InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
-             Atmosphere = {
-                -- Atmosphere radius in Km
-                AtmosphereRadius = 3463.17495,
-                --PlanetRadius    = 3396.19,
-                --PlanetRadius = 3393.0,
-                PlanetRadius = 3386.190,
-                PlanetAverageGroundReflectance = 0.1,
-                Rayleigh = {
-                    Coefficients = {
-                        -- Wavelengths are given in 10^-9m
-                        Wavelengths = {680, 550, 440},
-                        -- Reflection coefficients are given in km^-1
-                        Scattering = {19.918E-3, 13.57E-3, 5.75E-3},
-                        -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
-                    },
-                    -- Thichkness of atmosphere if its density were uniform, in Km
-                    H_R = 10.43979,
-                },
-                -- Default
-                Mie = {
-                    Coefficients = {
-                        -- Reflection coefficients are given in km^-1
-                        Scattering = {53.61771e-3, 53.61771e-3, 53.61771e-3},
-                        -- Extinction coefficients are a fraction of the Scattering coefficients
-                        Extinction = {53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979}                        
-                    },
-                    -- Mie Height scale (atmosphere thickness for constant density) in Km
-                    H_M = 3.09526,
-                    -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
-                    G = 0.85,
-                },
-                Image = {
-                    ToneMapping = jToneMapping,
-                    Exposure = 0.4,
-                    Background = 1.8,
-                    Gamma = 1.85,                                                                      
-                },
-                Debug = {
-                    -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
-                    PreCalculatedTextureScale = 1.0,
-                    SaveCalculatedTextures = false, 
-                },   
-            },                                     
+            SegmentsPerPatch = 128,
+            -- Allows camera to go down 10000 meters below the reference ellipsoid InteractionDepthBelowEllipsoid = 10000,
+            -- Useful when having negative height map values                                                 
             Layers = {
                 ColorLayers = {
                     {
@@ -287,9 +245,62 @@ return {
                         FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",
                     },]]--
                 },
+            }, -- Layers
+        }, -- Renderable
+    }, -- Renderable Globe
+           
+    -- Mars Atmosphere
+    {
+      Name = "MarsAtmosphere",
+      Parent = "Mars",        
+      Renderable = {
+        Type = "RenderableAtmosphere",
+        Atmosphere = {
+          Type = "RenderableGlobe",
+          -- Atmosphere radius in Km
+          AtmosphereRadius = 3463.17495,
+          --PlanetRadius    = 3396.19,
+          --PlanetRadius = 3393.0,
+          PlanetRadius = 3386.190,
+          PlanetAverageGroundReflectance = 0.1,
+          Rayleigh = {
+            Coefficients = {
+              -- Wavelengths are given in 10^-9m
+              Wavelengths = {680, 550, 440},
+              -- Reflection coefficients are given in km^-1
+              Scattering = {19.918E-3, 13.57E-3, 5.75E-3},
+              -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
             },
-        }
-    },
+            -- Thichkness of atmosphere if its density were uniform, in Km
+            H_R = 10.43979,
+          },
+          -- Default
+          Mie = {
+            Coefficients = {
+              -- Reflection coefficients are given in km^-1
+              Scattering = {53.61771e-3, 53.61771e-3, 53.61771e-3},
+              -- Extinction coefficients are a fraction of the Scattering coefficients
+              Extinction = {53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979}                        
+            },
+            -- Mie Height scale (atmosphere thickness for constant density) in Km
+            H_M = 3.09526,
+            -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
+            G = 0.85,
+          },
+          Image = {
+            ToneMapping = jToneMapping,
+            Exposure = 0.4,
+            Background = 1.8,
+            Gamma = 1.85,                                                                      
+          },
+          Debug = {
+            -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
+            PreCalculatedTextureScale = 1.0,
+            SaveCalculatedTextures = false, 
+          },   
+        },
+      },
+    },       
     -- Trail module
     {   
         Name = "MarsTrail",

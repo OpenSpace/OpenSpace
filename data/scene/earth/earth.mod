@@ -42,12 +42,32 @@ return {
                 Color = "textures/earth_bluemarble.jpg",
                 Night = "textures/earth_night.jpg",
                 Height = "textures/earth_bluemarble_height.jpg"
+            },            
+        },
+        Tag = {"planet_solarSystem", "planet_terrestrial"},
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_EARTH",
+                DestinationFrame = "GALACTIC",
             },
-            Atmosphere = {
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
+        },
+        GuiName = "/Solar/Planets/Earth"
+    },
+    -- Earth Atmosphere
+    {
+         Name = "EarthAtmosphere",
+         Parent = "Earth",
+         Renderable = {
+              Type = "RenderableAtmosphere",
+              Atmosphere = {
+                Type = "RenderablePlanet",
                 -- Atmosphere radius in Km
-                --AtmoshereRadius = 6450,
-                --AtmoshereRadius = 6420.0,
-                AtmoshereRadius = 6447.0,
+                AtmosphereRadius = 6447.0,
                 --PlanetRadius    = 6378.137,
                 PlanetRadius    = 6356.752,
                 --PlanetRadius    = 6360.0,
@@ -86,24 +106,6 @@ return {
                     -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
                     G = 0.85
                 },
-                -- Clear Sky
-                -- Mie = {
-                --     Coefficients = {
-                --         Scattering = {20e-3, 20e-3, 20e-3},
-                --         Extinction = 1.0/0.9,
-                --      }
-                --     H_M = 1.2,
-                --     G = 0.76,
-                -- },
-                -- Cloudy
-                -- Mie = {
-                --     Coefficients = {
-                --         Scattering = {3e-3, 3e-3, 3e-3},
-                --         Extinction = 1.0/0.9,
-                --      }
-                --     H_M = 3.0,
-                --     G = 0.65,
-                -- },
                 Image = {
                     ToneMapping = jToneMapping,
                     Exposure = 0.4,
@@ -114,21 +116,8 @@ return {
                     PreCalculatedTextureScale = 1.0,
                     SaveCalculatedTextures = false, 
                 },                   
-            },
-        },
-        Tag = {"planet_solarSystem", "planet_terrestrial"},
-        Transform = {
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "IAU_EARTH",
-                DestinationFrame = "GALACTIC",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
-        },
-        GuiName = "/Solar/Planets/Earth"
+              },
+         },
     },
     -- EarthTrail module
     {   

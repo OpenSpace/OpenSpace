@@ -46,10 +46,6 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-class AtmosphereDeferredcaster;
-#endif
-
 struct TransformData;
 
 namespace planetgeometry {
@@ -92,9 +88,6 @@ protected:
 
 private: 
     void computeModelTransformMatrix(const openspace::TransformData & transformData, glm::dmat4 * modelTransform);
-#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-    void updateAtmosphereParameters();
-#endif
 
 private:
     properties::StringProperty _colorTexturePath;
@@ -111,54 +104,6 @@ private:
         
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     
-
-#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-    properties::FloatProperty _atmosphereHeightP;
-    properties::FloatProperty _groundAverageReflectanceP;
-    properties::FloatProperty _rayleighHeightScaleP;
-    properties::FloatProperty _rayleighScatteringCoeffXP;
-    properties::FloatProperty _rayleighScatteringCoeffYP;
-    properties::FloatProperty _rayleighScatteringCoeffZP;
-    properties::BoolProperty  _ozoneEnabledP;
-    properties::FloatProperty _ozoneHeightScaleP;
-    properties::FloatProperty _ozoneCoeffXP;
-    properties::FloatProperty _ozoneCoeffYP;
-    properties::FloatProperty _ozoneCoeffZP;
-    properties::FloatProperty _mieHeightScaleP;
-    properties::FloatProperty _mieScatteringCoefficientP;
-    properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
-    properties::FloatProperty _mieAsymmetricFactorGP;
-    properties::FloatProperty _sunIntensityP;
-    properties::FloatProperty _hdrExpositionP;
-    properties::FloatProperty _backgroundExposureP;
-    properties::FloatProperty _gammaConstantP;
-
-    bool _atmosphereEnabled;
-    bool _ozoneLayerEnabled;
-    float _atmosphereRadius;
-    float _atmospherePlanetRadius;
-    float _planetAverageGroundReflectance;
-    float _rayleighHeightScale;
-    float _ozoneHeightScale;
-    float _mieHeightScale;
-    float _miePhaseConstant;
-    float _sunRadianceIntensity;
-    float _hdrConstant;
-    float _exposureBackgroundConstant;
-    float _gammaConstant;
-
-    glm::vec3 _mieExtinctionCoeff;
-    glm::vec3 _rayleighScatteringCoeff;
-    glm::vec3 _ozoneExtinctionCoeff;
-    glm::vec3 _mieScatteringCoeff;
-
-    // Atmosphere Debug
-    bool _saveCalculationsToTexture;
-    float _preCalculatedTexturesScale;
-
-    std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
-#endif
-
     float _alpha;
     float _planetRadius;
     bool _hasNightTexture;
@@ -168,9 +113,7 @@ private:
 
     glm::dmat3 _stateMatrix;
 
-    std::vector< ShadowConf > _shadowConfArray;
-
-    
+    std::vector< ShadowConf > _shadowConfArray;    
 };
 
 } // namespace openspace

@@ -64,80 +64,7 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = earthEllipsoid,
-            SegmentsPerPatch = 64,
-            Atmosphere = {
-                -- Atmosphere radius in Km
-                --AtmosphereRadius = 6450,
-                --AtmosphereRadius = 6420.0,
-                AtmosphereRadius = 6447.0,
-                --PlanetRadius    = 6378.137,
-                PlanetRadius    = 6377.0,
-                --PlanetRadius    = 6360.0,
-                PlanetAverageGroundReflectance = 0.1,
-                Rayleigh = {
-                    Coefficients = {
-                        -- Wavelengths are given in 10^-9m
-                        Wavelengths = {680, 550, 440},
-                        -- Reflection coefficients are given in km^-1
-                        Scattering = {5.8E-3, 13.5E-3, 33.1E-3},
-                        -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
-                    },
-                    -- Thichkness of atmosphere if its density were uniform, in Km
-                    H_R = 8.0,
-                },
-                --[[
-                Ozone = {
-                     Coefficients = {
-                        -- Extinction coefficients 
-                        Extinction = {3.426, 8.298, 0.356}
-                     },
-                     H_O = 8.0,
-                },
-                ]]
-                -- Default
-                Mie = {
-                    Coefficients = {
-                        -- Reflection coefficients are given in km^-1
-                        Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
-                        --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
-                        -- Extinction coefficients are a fraction of the Mie coefficients
-                        Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
-                    },
-                    -- Height scale (atmosphere thickness for constant density) in Km
-                    H_M = 1.2,
-                    -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
-                    G = 0.85
-                },
-                -- Clear Sky
-                -- Mie = {
-                --     Coefficients = {
-                --         Scattering = {20e-3, 20e-3, 20e-3},
-                --         Extinction = 1.0/0.9,
-                --      }
-                --     H_M = 1.2,
-                --     G = 0.76,
-                -- },
-                -- Cloudy
-                -- Mie = {
-                --     Coefficients = {
-                --         Scattering = {3e-3, 3e-3, 3e-3},
-                --         Extinction = 1.0/0.9,
-                --      }
-                --     H_M = 3.0,
-                --     G = 0.65,
-                -- },
-                Image = {
-                    ToneMapping = jToneMapping,
-                    Exposure = 0.4,
-                    Background = 1.8,
-                    Gamma = 1.85,                                                                      
-                },
-                Debug = {
-                    -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
-                    PreCalculatedTextureScale = 1.0,
-                    SaveCalculatedTextures = false, 
-                },                   
-            },
+            SegmentsPerPatch = 128,      
             Layers = {
                 ColorLayers = {
                     {
@@ -262,4 +189,86 @@ return {
             },
         }
     },
+    -- Earth Atmosphere
+    {
+         Name = "EarthAtmosphere",
+         Parent = "Earth",
+         Renderable = {
+              Type = "RenderableAtmosphere",
+              Atmosphere = {
+                Type = "RenderableGlobe",
+                -- Atmosphere radius in Km
+                --AtmosphereRadius = 6450,
+                --AtmosphereRadius = 6420.0,
+                AtmosphereRadius = 6447.0,
+                --PlanetRadius    = 6378.137,
+                PlanetRadius    = 6377.0,
+                --PlanetRadius    = 6360.0,
+                PlanetAverageGroundReflectance = 0.1,
+                Rayleigh = {
+                  Coefficients = {
+                    -- Wavelengths are given in 10^-9m
+                    Wavelengths = {680, 550, 440},
+                    -- Reflection coefficients are given in km^-1
+                    Scattering = {5.8E-3, 13.5E-3, 33.1E-3},
+                    -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
+                  },
+                  -- Thichkness of atmosphere if its density were uniform, in Km
+                  H_R = 8.0,
+                },
+                --[[
+                    Ozone = {
+                    Coefficients = {
+                      -- Extinction coefficients 
+                      Extinction = {3.426, 8.298, 0.356}
+                    },
+                    H_O = 8.0,
+                  },
+                  ]]
+                  -- Default
+                  Mie = {
+                     Coefficients = {
+                       -- Reflection coefficients are given in km^-1
+                       Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
+                       --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
+                       -- Extinction coefficients are a fraction of the Mie coefficients
+                       Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
+                     },
+                     -- Height scale (atmosphere thickness for constant density) in Km
+                     H_M = 1.2,
+                     -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
+                     G = 0.85
+                  },
+                  -- Clear Sky
+                  -- Mie = {
+                  --     Coefficients = {
+                  --         Scattering = {20e-3, 20e-3, 20e-3},
+                  --         Extinction = 1.0/0.9,
+                  --      }
+                  --     H_M = 1.2,
+                  --     G = 0.76,
+                  -- },
+                  -- Cloudy
+                  -- Mie = {
+                  --     Coefficients = {
+                  --         Scattering = {3e-3, 3e-3, 3e-3},
+                  --         Extinction = 1.0/0.9,
+                  --      }
+                  --     H_M = 3.0,
+                  --     G = 0.65,
+                  -- },
+                  Image = {
+                     ToneMapping = jToneMapping,
+                     Exposure = 0.4,
+                     Background = 1.8,
+                     Gamma = 1.85,                                                                      
+                  },
+                  Debug = {
+                     -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
+                     PreCalculatedTextureScale = 1.0,
+                     SaveCalculatedTextures = false, 
+                  },                   
+              },
+         },
+    },          
 }
