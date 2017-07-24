@@ -52,19 +52,19 @@ helper.setCommonKeys = function()
 
     openspace.bindKey(
         "f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.HorizontalFriction'),
-        "Toggles the horizontal friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely."
+        helper.property.invert('NavigationHandler.OrbitalNavigator.RotationalFriction'),
+        "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely."
     )
 
     openspace.bindKey(
         "Shift+f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.VerticalFriction'),
-        "Toggles the vertical friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely."
+        helper.property.invert('NavigationHandler.OrbitalNavigator.ZoomFriction'),
+        "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely."
     )
     openspace.bindKey(
         "Ctrl+f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.RotationalFriction'),
-        "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around its own axis indefinitely."
+        helper.property.invert('NavigationHandler.OrbitalNavigator.RollFriction'),
+        "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely."
     )
 
     openspace.bindKey(

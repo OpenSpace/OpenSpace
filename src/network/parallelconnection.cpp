@@ -81,17 +81,51 @@ namespace {
     const uint32_t ProtocolVersion = 2;
     const size_t MaxLatencyDiffs = 64;
     const char* _loggerCat = "ParallelConnection";
+
+    static const openspace::properties::Property::PropertyInfo PasswordInfo = {
+        "Password",
+        "Password",
+        "The general password that allows this OpenSpace instance access to the Wormhole "
+        "server."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HostPasswordInfo = {
+        "HostPassword",
+        "Host Password",
+        "The password that is required to take control of the joint session and thus "
+        "send all commands to connected clients."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PortInfo = {
+        "Port",
+        "Port",
+        "The port on which the Wormhole server is listening to connections from "
+        "OpenSpace."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AddressInfo = {
+        "Address",
+        "Address",
+        "The address of the Wormhole server either as a DNS name or an IP address."
+    };
+
+    static const openspace::properties::Property::PropertyInfo NameInfo = {
+        "Name",
+        "Connection Name",
+        "The name of this OpenSpace instance that will be potentially broadcast to other "
+        "connected instances."
+    };
 } // namespace
 
 namespace openspace {
 
 ParallelConnection::ParallelConnection()
     : properties::PropertyOwner("ParallelConnection")
-    , _password({ "Password", "Password", "" }) // @TODO Missing documentation
-    , _hostPassword({ "HostPassword", "Host Password", "" }) // @TODO Missing documentation
-    , _port({ "Port", "Port", "" }, "20501") // @TODO Missing documentation
-    , _address({ "Address", "Address", "" }, "localhost") // @TODO Missing documentation
-    , _name({ "Name", "Connection name", "" }, "Anonymous") // @TODO Missing documentation
+    , _password(PasswordInfo)
+    , _hostPassword(HostPasswordInfo)
+    , _port(PortInfo, "20501")
+    , _address(AddressInfo, "localhost")
+    , _name(NameInfo, "Anonymous")
     , _bufferTime({ "BufferTime", "Buffer Time", "" }, 1, 0.5, 10) // @TODO Missing documentation
     , _timeKeyframeInterval(
         { "TimeKeyframeInterval", "Time keyframe interval", ""}, // @TODO Missing documentation

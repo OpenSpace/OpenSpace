@@ -42,6 +42,12 @@ namespace {
     const char* keyEnd = "EndTime";
     const char* KeyType = "Type";
     const char* KeyTag = "Tag";
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "This setting determines whether this object will be visible or not."
+    };
 } // namespace
 
 namespace openspace {
@@ -91,18 +97,18 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     return result;
 }
 
-Renderable::Renderable()
-    : properties::PropertyOwner("renderable")
-    , _enabled({ "Enabled", "Is Enabled", "" }, true) // @TODO Missing documentation
-    , _renderBin(RenderBin::Opaque)
-    , _startTime("")
-    , _endTime("")
-    , _hasTimeInterval(false)
-{}
+//Renderable::Renderable()
+//    : properties::PropertyOwner("renderable")
+//    , _enabled(EnabledInfo, true)
+//    , _renderBin(RenderBin::Opaque)
+//    , _startTime("")
+//    , _endTime("")
+//    , _hasTimeInterval(false)
+//{}
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner("renderable")
-    , _enabled({ "Enabled", "Is Enabled", "" }, true) // @TODO Missing documentation
+    , _enabled(EnabledInfo, true)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")

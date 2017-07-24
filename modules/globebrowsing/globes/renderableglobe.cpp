@@ -41,7 +41,8 @@ using namespace openspace::properties;
 namespace openspace::globebrowsing {
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-    : _debugProperties({
+    : Renderable(dictionary)
+    , _debugProperties({
         BoolProperty({ "SaveOrThrowCamera", "save or throw camera", "" }, false), // @TODO Missing documentation
         BoolProperty({ "ShowChunkEdges", "show chunk edges", "" }, false), // @TODO Missing documentation
         BoolProperty({ "ShowChunkBounds", "show chunk bounds", "" }, false), // @TODO Missing documentation
@@ -52,13 +53,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty({ "PerformHorizonCulling", "perform horizon culling", "" }, true), // @TODO Missing documentation
         BoolProperty({ "LevelByProjectedAreaElseDistance", "level by projected area (else distance)", "" }, true), // @TODO Missing documentation
         BoolProperty({ "ResetTileProviders", "reset tile providers", "" }, false), // @TODO Missing documentation
-        BoolProperty({ "ToggleEnabledEveryFrame", "toggle enabled every frame", "" }, false), // @TODO Missing documentation
         BoolProperty({ "CollectStats", "collect stats", "" }, false), // @TODO Missing documentation
         BoolProperty({ "LimitLevelByAvailableData", "Limit level by available data", "" }, true), // @TODO Missing documentation
         IntProperty({ "ModelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", "" }, 10, 1, 22) // @TODO Missing documentation
     })
     , _generalProperties({
-        BoolProperty({ "Enabled", "Enabled", "" }, true), // @TODO Missing documentation
         BoolProperty({ "PerformShading", "perform shading", "" }, true), // @TODO Missing documentation
         BoolProperty({ "Atmosphere", "atmosphere", "" }, false), // @TODO Missing documentation
         BoolProperty({ "UseAccurateNormals", "useAccurateNormals", "" }, false), // @TODO Missing documentation
@@ -102,7 +101,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
     //_distanceSwitch.addSwitchValue(_pointGlobe);
         
-    addProperty(_generalProperties.isEnabled);
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
@@ -122,7 +120,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _debugProperties.levelByProjectedAreaElseDistance
     );
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
-    _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
     _debugPropertyOwner.addProperty(_debugProperties.collectStats);
     _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
@@ -160,12 +157,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
     bool statsEnabled = _debugProperties.collectStats.value();
     _chunkedLodGlobe->stats.setEnabled(statsEnabled);
 
-    if (_debugProperties.toggleEnabledEveryFrame.value()) {
-        _generalProperties.isEnabled.setValue(
-            !_generalProperties.isEnabled.value()
-        );
-    }
-    if (_generalProperties.isEnabled.value()) {
+    if (_enabled) {
         if (_debugProperties.saveOrThrowCamera.value()) {
             _debugProperties.saveOrThrowCamera.setValue(false);
 

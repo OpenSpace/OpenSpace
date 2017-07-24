@@ -46,6 +46,21 @@ namespace {
     const char* KeyFocus = "Focus";
     const char* KeyPosition = "Position";
     const char* KeyRotation = "Rotation";
+
+    static const openspace::properties::Property::PropertyInfo OriginInfo = {
+        "Origin",
+        "Origin",
+        "The name of the scene graph node that is the origin of the camera interaction. "
+        "The camera is always focussed on this object and every interaction is relative "
+        "towards this object. Any scene graph node can be the origin node."
+    };
+
+    static const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
+        "UseKeyFrameInteraction",
+        "Use keyframe interaction",
+        "If this is set to 'true' the entire interaction is based off key frames rather "
+        "than using the mouse interaction."
+    };
 } // namespace
 
 #include "navigationhandler_lua.inl"
@@ -54,8 +69,8 @@ namespace openspace::interaction {
 
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner("NavigationHandler")
-    , _origin({ "Origin", "Origin", "" }) // @TODO Missing documentation
-    , _useKeyFrameInteraction({ "UseKeyFrameInteraction", "Use keyframe interaction", "" }, false) // @TODO Missing documentation
+    , _origin(OriginInfo)
+    , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
@@ -77,15 +92,20 @@ NavigationHandler::NavigationHandler()
     addPropertySubOwner(*_orbitalNavigator);
 }
 
-NavigationHandler::~NavigationHandler()
-{ }
+NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
-    OsEng.parallelConnection().connectionEvent()->subscribe("NavigationHandler", "statusChanged", [this]() {
-    if (OsEng.parallelConnection().status() == ParallelConnection::Status::ClientWithHost) {
-            _useKeyFrameInteraction = true;
+    OsEng.parallelConnection().connectionEvent()->subscribe(
+        "NavigationHandler",
+        "statusChanged",
+        [this]() {
+            if (OsEng.parallelConnection().status() ==
+                ParallelConnection::Status::ClientWithHost)
+            {
+                _useKeyFrameInteraction = true;
+            }
         }
-    });
+    );
 }
 
 void NavigationHandler::deinitialize() {

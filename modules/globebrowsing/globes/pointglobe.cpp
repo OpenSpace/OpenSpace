@@ -36,7 +36,8 @@
 namespace openspace::globebrowsing {
 
 PointGlobe::PointGlobe(const RenderableGlobe& owner)
-    : _owner(owner)
+    : Renderable({ { "Name", owner.name() } })
+    , _owner(owner)
     , _intensityClamp(
         { "IntensityClamp", "Intensity clamp", ""},  // @TODO Missing documentation
         1, 0, 1

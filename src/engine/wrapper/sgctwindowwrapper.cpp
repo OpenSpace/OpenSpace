@@ -31,13 +31,28 @@
 
 namespace {
     const char* GuiWindowTag = "GUI";
+
+    static const openspace::properties::Property::PropertyInfo EyeSeparationInfo = {
+        "EyeSeparation",
+        "Eye Separation",
+        "Sets a static eye separation for use in stereoscopic rendering. If no "
+        "stereoscopic rendering is performed, this value is unused."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowStatsGraphInfo = {
+        "ShowStatsGraph",
+        "Show Statistics Graph",
+        "Toggles the rendering of the SGCT statistics graph that is rendered on top of "
+        "every image. The statistics show the frame time, synchronization time, and many "
+        "other timings as reported by SGCT."
+    };
 } // namespace
 
 namespace openspace {
 
 SGCTWindowWrapper::SGCTWindowWrapper()
-    : _eyeSeparation({ "EyeSeparation", "Eye Separation", "" }, 0.f, 0.f, 10.f) // @TODO Missing documentation
-    , _showStatsGraph({ "ShowStatsGraph", "Show Stats Graph", "" }, false) // @TODO Missing documentation
+    : _eyeSeparation(EyeSeparationInfo, 0.f, 0.f, 10.f)
+    , _showStatsGraph(ShowStatsGraphInfo, false)
 {
     _showStatsGraph.onChange([this](){
         sgct::Engine::instance()->setStatsGraphVisibility(_showStatsGraph);

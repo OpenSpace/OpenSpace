@@ -61,7 +61,7 @@ public:
     static std::unique_ptr<Renderable> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
-    Renderable();
+    //Renderable();
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();
 
