@@ -38,10 +38,39 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const char* KeySize = "Size";
-    const char* KeyBillboard = "Billboard";
     const char* KeyBlendMode = "BlendMode";
-    const char* KeyTexture = "Texture";
+
+    enum BlendMode {
+        BlendModeNormal = 0,
+        BlendModeAdditive
+    };
+
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "Texture",
+        "Texture",
+        "This value specifies an image that is loaded from disk and is used as a texture "
+        "that is applied to this plane. This image has to be square."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BillboardInfo = {
+        "Billboard",
+        "Billboard mode",
+        "This value specifies whether the plane is a billboard, which means that it is "
+        "always facing the camera. If this is false, it can be oriented using other "
+        "transformations."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size (in meters)",
+        "This value specifies the size of the plane in meters."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+        "BlendMode",
+        "Blending Mode",
+        "This determines the blending mode that is applied to this plane."
+    };
 } // namespace
 
 namespace openspace {
@@ -53,31 +82,27 @@ documentation::Documentation RenderablePlane::Documentation() {
         "base_renderable_plane",
         {
             {
-                KeySize,
+                SizeInfo.identifier,
                 new DoubleVerifier,
-                "Specifies the size of the square plane in meters.",
+                SizeInfo.description,
                 Optional::No
             },
             {
-                KeyBillboard,
+                BillboardInfo.identifier,
                 new BoolVerifier,
-                "Specifies whether the plane is a billboard, which means that it is "
-                "always facing the camera. If this is false, it can be oriented using "
-                "other transformations. The default is 'false'.",
+                BillboardInfo.description,
                 Optional::Yes
             },
             {
-                KeyBlendMode,
+                BlendModeInfo.identifier,
                 new StringInListVerifier({ "Normal", "Additive" }),
-                "Specifies the blend mode that is applied to this plane. The default "
-                "value is 'Normal'.",
+                BlendModeInfo.description, // + " The default value is 'Normal'.",
                 Optional::Yes
             },
             {
-                KeyTexture,
+                TextureInfo.identifier,
                 new StringVerifier,
-                "Specifies the texture that is applied to this plane. This image has to "
-                "be a square image.",
+                TextureInfo.description,
                 Optional::No
             }
         }
@@ -87,12 +112,13 @@ documentation::Documentation RenderablePlane::Documentation() {
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath({ "Texture", "Texture", "" }) // @TODO Missing documentation
-    , _billboard({ "Billboard", "Billboard", "" }, false) // @TODO Missing documentation
-    , _size({ "Size", "Size", "" }, 10, 0, std::pow(10, 25)) // @TODO Missing documentation
+    , _texturePath(TextureInfo)
+    , _billboard(BillboardInfo, false)
+    , _size(SizeInfo, 10.f, 0.f, 1e25)
+    , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _shader(nullptr)
     , _texture(nullptr)
-    , _blendMode(BlendMode::Normal)
+    //, _blendMode(BlendMode::Normal)
     , _quad(0)
     , _vertexPositionBuffer(0)
     , _planeIsDirty(false)
@@ -104,23 +130,39 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         "RenderablePlane"
     );
 
-    _size = static_cast<float>(dictionary.value<double>(KeySize));
+    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
 
-    if (dictionary.hasKey(KeyBillboard)) {
-        _billboard = dictionary.value<bool>(KeyBillboard);
+    if (dictionary.hasKey(BillboardInfo.identifier)) {
+        _billboard = dictionary.value<bool>(BillboardInfo.identifier);
     }
+
+    _blendMode.addOptions({
+        { BlendModeNormal, "Normal" },
+        { BlendModeAdditive, "Additive"}
+    });
+    _blendMode.onChange([&]() {
+        switch (_blendMode) {
+            case BlendModeNormal:
+                setRenderBin(Renderable::RenderBin::Opaque);
+                break;
+            case BlendModeAdditive:
+                setRenderBin(Renderable::RenderBin::Transparent);
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    });
 
     if (dictionary.hasKey(KeyBlendMode)) {
         const std::string v = dictionary.value<std::string>(KeyBlendMode);
         if (v == "Normal") {
-            _blendMode = BlendMode::Normal;
+            _blendMode = BlendModeNormal;
         }
         else if (v == "Additive") {
-            _blendMode = BlendMode::Additive;
-            setRenderBin(Renderable::RenderBin::Transparent);
+            _blendMode = BlendModeAdditive;
         }
     }
-    _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 
     addProperty(_billboard);
