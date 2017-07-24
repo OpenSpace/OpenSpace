@@ -26,12 +26,12 @@
 
 #include <algorithm>
 #include <iterator>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 
 namespace {
-    const std::string _loggerCat = "DataProcessorJson";
+    const char* _loggerCat = "DataProcessorJson";
     using json = nlohmann::json;
-}
+} // namespace
 
 namespace openspace {
 

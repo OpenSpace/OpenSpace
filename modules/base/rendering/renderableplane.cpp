@@ -104,7 +104,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         "RenderablePlane"
     );
 
-    _size = dictionary.value<double>(KeySize);
+    _size = static_cast<float>(dictionary.value<double>(KeySize));
 
     if (dictionary.hasKey(KeyBillboard)) {
         _billboard = dictionary.value<bool>(KeyBillboard);
@@ -173,7 +173,7 @@ bool RenderablePlane::deinitialize() {
     return true;
 }
 
-void RenderablePlane::render(const RenderData& data) {
+void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
     //if (_projectionListener){
     //    //get parent node-texture and set with correct dimensions  

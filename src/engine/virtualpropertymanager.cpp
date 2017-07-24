@@ -24,13 +24,11 @@
 
 #include <openspace/engine/virtualpropertymanager.h>
 
+#include <algorithm>
+
 namespace openspace {
 
-VirtualPropertyManager::VirtualPropertyManager()
-    : properties::PropertyOwner("")
-{
-
-}
+VirtualPropertyManager::VirtualPropertyManager() : properties::PropertyOwner("") {}
 
 void VirtualPropertyManager::addProperty(std::unique_ptr<properties::Property> prop) {
     // PropertyOwner does not take the ownership of the pointer
@@ -53,6 +51,5 @@ void VirtualPropertyManager::removeProperty(properties::Property* prop) {
         _properties.end()
     );
 }
-
 
 } // namespace openspace

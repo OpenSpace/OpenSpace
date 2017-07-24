@@ -29,7 +29,7 @@
 
 namespace {
     const char* KeyRotation = "Rotation";
-}
+} // namespace
 
 namespace openspace {
 

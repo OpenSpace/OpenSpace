@@ -43,7 +43,7 @@ namespace {
     const char* JsFilename = "${OPENSPACE_DATA}/web/kameleondocumentation/script.js";
     const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
     const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
-}
+} // namespace
 
 namespace openspace {
 

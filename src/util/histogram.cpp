@@ -28,9 +28,10 @@
 
 #include <cmath>
 #include <cassert>
+
 namespace {
-    const std::string _loggerCat = "Histogram";
-}
+    const char* _loggerCat = "Histogram";
+} // namespace
 
 namespace openspace {
 

@@ -22,9 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
+namespace openspace::luascriptfunctions {
 
-namespace luascriptfunctions {
 /**
  * \ingroup LuaScripts
  * setOrigin():
@@ -107,7 +106,4 @@ int resetCameraDirection(lua_State* L) {
     return 0;
 }
 
-
-} // namespace luascriptfunctions
-
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

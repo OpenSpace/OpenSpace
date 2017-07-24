@@ -29,8 +29,7 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 GeodeticPatch::GeodeticPatch(double centerLat, double centerLon, double halfSizeLat,
                              double halfSizeLon)
@@ -241,5 +240,4 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     return Geodetic2(clampedLat, clampedLon);
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

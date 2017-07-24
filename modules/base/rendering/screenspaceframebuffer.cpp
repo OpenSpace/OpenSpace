@@ -181,4 +181,5 @@ int ScreenSpaceFramebuffer::id(){
     static int id = 0;
     return id++;
 }
+
 } //namespace openspace

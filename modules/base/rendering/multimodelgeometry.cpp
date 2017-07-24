@@ -28,8 +28,7 @@
 
 #include <cstring>
 
-namespace openspace {
-namespace modelgeometry {
+namespace openspace::modelgeometry {
 
 MultiModelGeometry::MultiModelGeometry(const ghoul::Dictionary& dictionary)
     : ModelGeometry(dictionary)
@@ -59,5 +58,4 @@ bool MultiModelGeometry::loadModel(const std::string& filename)  {
     return true;
 }
 
-}  // namespace modelgeometry
-}  // namespace openspace
+}  // namespace openspace::modelgeometry

@@ -45,7 +45,7 @@
 
 namespace {
 
-const std::string _loggerCat = "GUI";
+const char* _loggerCat = "GUI";
 const char* configurationFile = "imgui.ini";
 const char* GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
 const ImVec2 size = ImVec2(350, 500);
@@ -225,8 +225,7 @@ void addScreenSpaceBrowser(std::string url) {
 }
 } // namespace 
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GUI::GUI() 
     : GuiComponent("Main")
@@ -676,5 +675,4 @@ void GUI::renderAndUpdatePropertyVisibility() {
 }
 
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui

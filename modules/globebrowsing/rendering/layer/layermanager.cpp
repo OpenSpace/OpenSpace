@@ -28,23 +28,22 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
-namespace openspace {
-namespace globebrowsing {
-
 namespace {
-	const char* _loggerCat = "LayerManager";
-}
+    const char* _loggerCat = "LayerManager";
+} // namespace
+
+namespace openspace::globebrowsing {
 
 LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     : properties::PropertyOwner("Layers")
 {
-	// First create empty layer groups in case not all are specified
+    // First create empty layer groups in case not all are specified
     _layerGroups.resize(layergroupid::NUM_LAYER_GROUPS);
     for (int i = 0; i < _layerGroups.size(); ++i) {
-		ghoul::Dictionary emptyDict;
+        ghoul::Dictionary emptyDict;
         _layerGroups[i] = std::make_shared<LayerGroup>(
-			static_cast<layergroupid::GroupID>(i), emptyDict
-		);
+            static_cast<layergroupid::GroupID>(i), emptyDict
+        );
     }
 
     std::vector<std::string> layerGroupNamesInDict = layerGroupsDict.keys();
@@ -57,8 +56,8 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
         if (groupId != layergroupid::GroupID::Unknown) {
             ghoul::Dictionary layerGroupDict =
                 layerGroupsDict.value<ghoul::Dictionary>(groupName);
-			_layerGroups[static_cast<int>(groupId)] =
-				std::make_shared<LayerGroup>(groupId, layerGroupDict);
+            _layerGroups[static_cast<int>(groupId)] =
+                std::make_shared<LayerGroup>(groupId, layerGroupDict);
         }
         else {
             LWARNING("Unknown layer group: " + groupName);
@@ -170,5 +169,4 @@ void LayerManager::onChange(std::function<void(void)> callback) {
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -28,6 +28,7 @@
 #include <modules/iswa/rendering/datacygnet.h>
 
 namespace openspace {
+
 class PowerScaledSphere;
 
 /**

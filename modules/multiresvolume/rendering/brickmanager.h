@@ -30,11 +30,7 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-    }
-}
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 

@@ -41,7 +41,7 @@ namespace {
     const char* KeyTexture = "Texture";
     const char* KeySize = "Size";
     const char* KeyOffset = "Offset";
-}
+} // namespace
 
 namespace openspace {
 
@@ -169,7 +169,7 @@ bool RenderableRings::deinitialize() {
     return true;
 }
 
-void RenderableRings::render(const RenderData& data) {
+void RenderableRings::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     glm::dmat4 modelTransform =

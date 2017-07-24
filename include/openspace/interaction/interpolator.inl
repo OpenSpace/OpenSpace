@@ -26,8 +26,7 @@
 
 #include <functional>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 template <typename T>
 Interpolator<T>::Interpolator()
@@ -81,5 +80,4 @@ bool Interpolator<T>::isInterpolating() const {
     return _t < 1.0 && _t >= 0.0;
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

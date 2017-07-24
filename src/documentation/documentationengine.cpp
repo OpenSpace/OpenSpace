@@ -31,6 +31,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <streambuf>
@@ -44,8 +45,7 @@ namespace {
     const char* JsFilename = "${OPENSPACE_DATA}/web/documentation/script.js";
 } // namespace
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
@@ -156,7 +156,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
         result << "\"key\": \"" << p.key << "\",";
         result << "\"optional\": " << (p.optional ? "true" : "false") << ",";
         result << "\"type\": \"" << p.verifier->type() << "\",";
-        result << "\"documentation\": \"" << p.documentation << "\",";
+        result << "\"documentation\": \"" << escapedJson(p.documentation) << "\",";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
@@ -210,7 +210,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
              << "\t\t<td></td>\n"
              << "\t\t<td>" << p.key << "</td>\n"
              << "\t\t<td>" << (p.optional ? "Optional" : "Required") << "</td>\n"
-             << "\t\t<td>" << p.documentation << "</td>\n"
+             << "\t\t<td>" << escapedJson(p.documentation) << "</td>\n"
              << "\t\t<td>" << p.verifier->type() << "</td>\n";
 
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
@@ -285,11 +285,12 @@ std::string DocumentationEngine::generateJson() const {
 
     std::string jsonString = "";
     for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        }
-        else {
-            jsonString += c;
+        switch (c) {
+            case '\'':
+                jsonString += "\\'";
+                break;
+            default:
+                jsonString += c;
         }
     }
 
@@ -297,14 +298,6 @@ std::string DocumentationEngine::generateJson() const {
 }
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
-    for (const DocumentationEntry& e : doc.entries) {
-        (void)e; // Unused variable in Release mode
-        ghoul_assert(
-            e.documentation.find('"') == std::string::npos,
-            "Documentation cannot contain \" character"
-        );
-    }
-
     if (doc.id.empty()) {
         _documentations.push_back(std::move(doc));
     }
@@ -328,5 +321,4 @@ std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,14 +30,14 @@
 uniform int xSegments;
 uniform float skirtLength;
 
-bool tileVertexIsSkirtVertex(){
-    int vertexIDx = gl_VertexID % (xSegments + 3);
-    int vertexIDy = gl_VertexID / (xSegments + 3);
+bool tileVertexIsSkirtVertex() {
+    const int vertexIDx = gl_VertexID % (xSegments + 3);
+    const int vertexIDy = gl_VertexID / (xSegments + 3);
     return vertexIDx == 0 || vertexIDy == 0 ||
         vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
 }
 
-float getTileVertexSkirtLength(){
+float getTileVertexSkirtLength() {
     return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
 }
 

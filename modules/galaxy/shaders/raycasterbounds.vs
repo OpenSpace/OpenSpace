@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,29 +21,26 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #version __CONTEXT__
 
-layout(location = 0) in vec4 vertPosition;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform mat4 viewProjection;
-uniform mat4 modelTransform;
+layout(location = 0) in vec4 vertPosition;
 
 out vec3 vPosition;
 out vec4 worldPosition;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 viewProjection;
+uniform mat4 modelTransform;
+
 
 void main() {
-	vPosition = vertPosition.xyz;
+    vPosition = vertPosition.xyz;
 
-	worldPosition = modelTransform * vec4(vertPosition.xyz, 1.0);
+    worldPosition = modelTransform * vec4(vertPosition.xyz, 1.0);
     worldPosition.w = 0.0;
-	vec4 position = pscTransform(worldPosition, mat4(1.0));
+    const vec4 position = pscTransform(worldPosition, mat4(1.0));
 
-
-    
-	// project the position to view space
     gl_Position =  z_normalization(viewProjection * position);
-    //gl_Position.z = 1.0;
 }

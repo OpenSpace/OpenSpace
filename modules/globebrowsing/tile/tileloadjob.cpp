@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
     const TileIndex& tileIndex)
@@ -75,5 +74,4 @@ bool TileLoadJob::hasOwnershipOfData() const {
     return _hasOwnershipOfData;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

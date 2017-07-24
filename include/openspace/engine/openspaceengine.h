@@ -35,14 +35,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    
-class Dictionary;
-
-namespace cmdparser { class CommandlineParser; }
-namespace fontrendering { class FontManager; }
-
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
+namespace ghoul::cmdparser { class CommandlineParser; }
+namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 

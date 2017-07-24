@@ -77,13 +77,13 @@ public:
     void update();
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
 
-
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() override;
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
+
 private:
 
     void clear();

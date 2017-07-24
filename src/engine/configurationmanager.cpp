@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -40,7 +40,7 @@ namespace {
     const char* _configurationFile = "openspace.cfg";
     const char* _keyBasePath = "BASE_PATH";
     const char* _initialConfigHelper = "${BASE_PATH}/scripts/configuration_helper.lua";
-}
+} // namespace
 
 namespace openspace {
 

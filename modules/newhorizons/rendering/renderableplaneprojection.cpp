@@ -129,7 +129,7 @@ bool RenderablePlaneProjection::deinitialize() {
     return true;
 }
 
-void RenderablePlaneProjection::render(const RenderData& data) {
+void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
     bool active = ImageSequencer::ref().instrumentActive(_instrument);
     if (!_hasImage || (_moving && !active))
         return;

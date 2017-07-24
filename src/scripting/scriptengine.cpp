@@ -41,7 +41,7 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const std::string _loggerCat = "ScriptEngine";
+    const char* _loggerCat = "ScriptEngine";
 
     const char* LuaGlobalNamespace = "_G";
     const char* PrintFunctionName = "print";
@@ -54,8 +54,7 @@ namespace {
     const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
 } // namespace
 
-namespace openspace {
-namespace scripting {
+namespace openspace::scripting {
 
 std::string ScriptEngine::OpenSpaceLibraryName = "openspace";
 
@@ -76,8 +75,6 @@ void ScriptEngine::initialize() {
     addBaseLibrary();
     LDEBUG("Initializing Lua state");
     initializeLuaState(_state);
-    //LDEBUG("Remapping Print functions");
-    //remapPrintFunction();
 }
 
 void ScriptEngine::deinitialize() {}
@@ -603,8 +600,8 @@ std::string ScriptEngine::generateJson() const {
         for (const LuaLibrary::Function& f : l.functions) {
             json << "{";
             json << "\"name\": \"" << f.name << "\", ";
-            json << "\"arguments\": \"" << f.argumentText << "\", ";
-            json << "\"help\": \"" << f.helpText << "\"";
+            json << "\"arguments\": \"" << escapedJson(f.argumentText) << "\", ";
+            json << "\"help\": \"" << escapedJson(f.helpText) << "\"";
             json << "}";
             if (&f != &l.functions.back() || !l.documentations.empty()) {
                 json << ",";
@@ -614,8 +611,8 @@ std::string ScriptEngine::generateJson() const {
         for (const LuaLibrary::Documentation& doc : l.documentations) {
             json << "{";
             json << "\"name\": \"" << doc.name << "\", ";
-            json << "\"arguments\": \"" << doc.parameter<< "\", ";
-            json << "\"help\": \"" << doc.description<< "\"";
+            json << "\"arguments\": \"" << escapedJson(doc.parameter) << "\", ";
+            json << "\"help\": \"" << escapedJson(doc.description) << "\"";
             json << "}";
             if (&doc != &l.documentations.back()) {
                 json << ",";
@@ -753,5 +750,4 @@ void ScriptEngine::queueScript(const std::string &script, ScriptEngine::RemoteSc
     _mutex.unlock();
 }
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting

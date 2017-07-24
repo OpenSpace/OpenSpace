@@ -33,9 +33,7 @@
 
 namespace openspace {
 
-FieldlinesModule::FieldlinesModule()
-    : OpenSpaceModule(Name)
-{}
+FieldlinesModule::FieldlinesModule() : OpenSpaceModule(Name) {}
 
 void FieldlinesModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

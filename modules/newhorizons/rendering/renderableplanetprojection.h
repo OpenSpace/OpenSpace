@@ -32,13 +32,12 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
+
 namespace documentation { struct Documentation; }
 
 struct Image;
 
-namespace planetgeometry {
-    class PlanetGeometry;
-}
+namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanetProjection : public Renderable {
 public:
@@ -49,7 +48,7 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture& baseTexture() const;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,60 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-//uniform vec3 camdir; // add this for specular
-
-uniform vec3 sun_pos;
-
-uniform bool _performShading = true;
-uniform float transparency;
-uniform int shadows;
-
-uniform float time;
-uniform sampler2D texture1;
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
 in vec2 vs_st;
 in vec4 vs_normal;
 in vec4 vs_position;
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+uniform vec4 objpos;
+uniform vec3 sun_pos;
+uniform bool _performShading = true;
+uniform float transparency;
+uniform sampler2D texture1;
 
-//#include "PowerScaling/powerScaling_vs.hglsl"
+
 Fragment getFragment() {
     vec4 diffuse = texture(texture1, vs_st);
 
     Fragment frag;
     if (_performShading) {
-        // directional lighting
-        vec3 origin = vec3(0.0);
-        vec4 spec = vec4(0.0);
-        
-        vec3 n = normalize(vs_normal.xyz);
-        //vec3 e = normalize(camdir);
-        vec3 l_pos = vec3(sun_pos); // sun.
-        vec3 l_dir = normalize(l_pos-objpos.xyz);
-        float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
-        
-        float shine = 0.0001;
-
-        vec4 specular = vec4(0.5);
-        vec4 ambient = vec4(0.0,0.0,0.0,transparency);
-        /*
-        if(intensity > 0.f){
-            // halfway vector
-            vec3 h = normalize(l_dir + e);
-            // specular factor
-            float intSpec = max(dot(h,n),0.0);
-            spec = specular * pow(intSpec, shine);
-        }
-        */
+        const vec4 ambient = vec4(0.0,0.0,0.0,transparency);
+        const vec3 n = normalize(vs_normal.xyz);
+        const vec3 l_pos = vec3(sun_pos); // sun
+        const vec3 l_dir = normalize(l_pos - objpos.xyz);
+        const float intensity = min(max(5.0 * dot(n, l_dir), 0.0), 1.0);
         diffuse = max(intensity * diffuse, ambient);
     }
 
-    diffuse[3] = transparency;
-    frag.color = diffuse;
+    frag.color = vec4(diffuse.rgb, transparency);
     frag.depth = vs_position.w;
 
     return frag;

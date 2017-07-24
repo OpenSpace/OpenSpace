@@ -27,13 +27,11 @@
 
 #include <openspace/scripting/lualibrary.h>
 
-namespace openspace {
-namespace scripting {
+namespace openspace::scripting {
 
 LuaLibrary generalSystemCapabilities();
 LuaLibrary openglSystemCapabilities();
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting
 
 #endif // __OPENSPACE_CORE___SYSTEMCAPABILITIESBINDING___H__

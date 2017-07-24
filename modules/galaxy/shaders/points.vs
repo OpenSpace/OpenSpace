@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,7 @@
 
 #version __CONTEXT__
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 in vec3 inPosition;
 in vec3 inColor;
@@ -34,15 +32,17 @@ in vec3 inColor;
 out vec3 vsPosition;
 out vec3 vsColor;
 
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
 
-void main() { 
+void main() {
     vec4 p = vec4(inPosition, 1.0);
 
-	vec4 worldPosition = model * p;
+    vec4 worldPosition = model * vec4(inPosition, 1.0);
     worldPosition.w = 0.0;
-	vec4 position = worldPosition; //pscTransform(worldPosition, model);
+    vec4 position = worldPosition; //pscTransform(worldPosition, model);
 
 
     position = pscTransform(position, mat4(1.0));

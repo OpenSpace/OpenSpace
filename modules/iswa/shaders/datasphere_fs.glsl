@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,13 +21,16 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-uniform float time;
 
-// uniform sampler2D texture1;
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
+
+in vec2 vs_st;
+in vec4 vs_position;
+
+
 uniform sampler2D textures[6];
 uniform sampler2D transferFunctions[6];
-// uniform sampler2D tf;
-// uniform sampler2D tfs[6];
 
 uniform int numTextures;
 uniform int numTransferFunctions;
@@ -35,54 +38,47 @@ uniform bool averageValues;
 uniform vec2 backgroundValues;
 uniform float transparency;
 
-// uniform float background;
+const vec4 Transparent = vec4(0.0);
 
-in vec2 vs_st;
-in vec4 vs_position;
-
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
 
 Fragment getFragment() {
     vec4 position = vs_position;
-    float depth = pscDepth(position);
-    vec4 transparent = vec4(0.0f);
-    vec4 diffuse = transparent;
-    float v = 0;
+    const float depth = pscDepth(position);
+    vec4 diffuse = Transparent;
 
-    float x = backgroundValues.x;
-    float y = backgroundValues.y;
+    const float x = backgroundValues.x;
+    const float y = backgroundValues.y;
     
-    if((numTransferFunctions == 1) || (numTextures > numTransferFunctions)){
-        for(int i=0; i<numTextures; i++){
+    if ((numTransferFunctions == 1) || (numTextures > numTransferFunctions)) {
+        float v = 0;
+        for (int i = 0; i < numTextures; i++) {
             v += texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
         }
         v /= numTextures;
         
-        vec4 color = texture(transferFunctions[0], vec2(v,0));
-        if((v<(x+y)) && v>(x-y))
-            color = mix(transparent, color, clamp(1,0,abs(v-x)));
+        vec4 color = texture(transferFunctions[0], vec2(v, 0.0));
+        if ((v < (x + y)) && v > (x - y)) {
+            color = mix(Transparent, color, clamp(1.0, 0.0, abs(v - x)));
+        }
 
         diffuse = color;
-    }else{
-        for(int i=0; i<numTextures; i++){
-            v = texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
-            vec4 color = texture(transferFunctions[i], vec2(v,0));
-            if((v<(x+y)) && v>(x-y))
-                color = mix(transparent, color, clamp(1,0,abs(v-x)));
+    } else {
+        for (int i = 0; i < numTextures; i++) {
+            float v = texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
+            vec4 color = texture(transferFunctions[i], vec2(v, 0.0));
+            if ((v < (x + y)) && v > (x - y)) {
+                color = mix(Transparent, color, clamp(1.0, 0.0, abs(v - x)));
+            }
             diffuse += color;
         }
     }
 
-    if (diffuse.a <= backgroundValues.y)
+    if (diffuse.a <= backgroundValues.y) {
         discard;
+    }
 
-    diffuse.a *= transparency;
-    
-    // diffuse = vec4(vs_st.s, 0,0,1);
     Fragment frag;
-    frag.color = diffuse;
+    frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);
     frag.depth = depth;
     return frag;
-
 }

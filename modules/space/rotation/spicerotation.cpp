@@ -35,7 +35,7 @@ namespace {
     const char* KeySourceFrame = "SourceFrame";
     const char* KeyDestinationFrame = "DestinationFrame";
     const char* KeyKernels = "Kernels";
-}
+} // namespace
 
 namespace openspace {
     

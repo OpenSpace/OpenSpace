@@ -152,21 +152,17 @@ float Renderable::boundingSphere() const {
 
 void Renderable::update(const UpdateData&) {}
 
-void Renderable::render(const RenderData& data, RendererTasks&) {
-    render(data);
-}
-
-void Renderable::render(const RenderData&) {}
+void Renderable::render(const RenderData& data, RendererTasks&) {}
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                        const glm::dvec3& targetModelSpace)
 {
     glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
-	return {
-		directionFromCenterToTarget * static_cast<double>(boundingSphere()),
+    return {
+        directionFromCenterToTarget * static_cast<double>(boundingSphere()),
         directionFromCenterToTarget,
-		0.0
-	};
+        0.0
+    };
 }
 
 void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,

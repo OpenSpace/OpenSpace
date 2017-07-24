@@ -27,8 +27,7 @@
 
 #include <openspace/properties/templateproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
@@ -73,8 +72,7 @@ protected:
     T _stepping;
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #include "openspace/properties/numericalproperty.inl"
 

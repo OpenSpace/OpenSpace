@@ -36,17 +36,15 @@
 #include <fstream>
 
 namespace {
-    const std::string _loggerCat = "TemporalTileProvider";
+    const char* _loggerCat = "TemporalTileProvider";
 
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
     const char* KeyPreCacheStartTime = "PreCacheStartTime";
     const char* KeyPreCacheEndTime = "PreCacheEndTime";
-}
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
     
 const char* TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
@@ -284,7 +282,7 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(const Time& 
 std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(
     const TimeKey& timekey)
 {
-	std::unordered_map<TimeKey, std::shared_ptr<TileProvider>>::iterator it = _tileProviderMap.find(timekey);
+    std::unordered_map<TimeKey, std::shared_ptr<TileProvider>>::iterator it = _tileProviderMap.find(timekey);
     if (it != _tileProviderMap.end()) {
         return it->second;
     }
@@ -481,8 +479,6 @@ std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) c
     return result;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // GLOBEBROWSING_USE_GDAL
