@@ -293,7 +293,7 @@ bool TfBrickSelector::calculateBrickErrors() {
     std::vector<float> gradients = getTfGradients();
     if (!gradients.size()) return false;
 
-    size_t tfWidth = tf->width();
+    size_t tfWidth = _transferFunction->width();
     unsigned int nHistograms = _tsp->numTotalNodes();
     _brickErrors = std::vector<float>(nHistograms);
 
