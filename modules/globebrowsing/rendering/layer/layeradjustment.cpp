@@ -24,14 +24,13 @@
 
 #include <modules/globebrowsing/rendering/layer/layeradjustment.h>
 
-namespace openspace {
-namespace globebrowsing {
-
 namespace {
     const char* keyType = "Type";
     const char* keyChromaKeyColor = "ChromaKeyColor";
     const char* keyChromaKeyTolerance = "ChromaKeyTolerance";
-}
+} // namespace
+
+namespace openspace::globebrowsing {
 
 LayerAdjustment::LayerAdjustment()
     : properties::PropertyOwner("adjustment")
@@ -130,5 +129,4 @@ void LayerAdjustment::onChange(std::function<void(void)> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -27,9 +27,7 @@
 
 #include <string>
 
-namespace openspace {
-namespace globebrowsing {
-namespace layergroupid  {
+namespace openspace::globebrowsing::layergroupid {
 
 static const int NUM_LAYER_GROUPS = 5;
 static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
@@ -152,8 +150,6 @@ static layergroupid::BlendModeID getBlendModeIDFromName(
     return BlendModeID::Normal;
 }
 
-} // namespace layergroupid
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::layergroupid
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__

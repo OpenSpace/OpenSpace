@@ -54,10 +54,9 @@ namespace {
     };
     
     const char* LocalSharedMemoryNameBase = "PerformanceMeasurement_";
-}
+} // namespace
 
-namespace openspace {
-namespace performance {
+namespace openspace::performance {
 
 // The Performance Manager will use a level of indirection in order to support multiple
 // PerformanceManagers running in parallel:
@@ -495,6 +494,4 @@ void PerformanceManager::initLogs() {
         out << "render,updateRenderable,updateRotation,updateScaling,updateTranslation,updateSceneGraphNode,totalTime\n";
     }
 }
-
-} // namespace performance
-} // namespace openspace
+} // namespace openspace::performance

@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___SIMPLETFBRICKSELECTOR___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___SIMPLETFBRICKSELECTOR___H__
 
-#include <vector>
 #include <modules/multiresvolume/rendering/tspbrickselector.h>
 
+#include <vector>
 
 namespace openspace {
 
@@ -36,7 +36,8 @@ class HistogramManager;
 
 class SimpleTfBrickSelector : public TSPBrickSelector {
 public:
-    SimpleTfBrickSelector(std::shared_ptr<TSP> tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    SimpleTfBrickSelector(std::shared_ptr<TSP> tsp, HistogramManager* hm,
+                          TransferFunction* tf, int memoryBudget, int streamingBudget);
     ~SimpleTfBrickSelector();
 
     virtual bool initialize();

@@ -48,7 +48,6 @@ namespace {
         float position[3];
         float color[4];
     };
-
 } // namespace
 
 namespace openspace {
@@ -187,7 +186,7 @@ bool RenderableCrawlingLine::deinitialize(){
     return true;
 }
 
-void RenderableCrawlingLine::render(const RenderData& data) {
+void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
     if (!_drawLine) {
         return;
     }

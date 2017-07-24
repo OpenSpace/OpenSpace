@@ -30,12 +30,14 @@
 #include <cassert>
 
 namespace {
-    const std::string _loggerCat = "TfBrickSelector";
-}
+    const char* _loggerCat = "TfBrickSelector";
+} // namespace
 
 namespace openspace {
 
-TfBrickSelector::TfBrickSelector(std::shared_ptr<TSP> tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
+TfBrickSelector::TfBrickSelector(std::shared_ptr<TSP> tsp, ErrorHistogramManager* hm,
+                                 TransferFunction* tf, int memoryBudget,
+                                 int streamingBudget)
     : TSPBrickSelector(tsp, tf, memoryBudget, streamingBudget)
     , _histogramManager(hm) {}
 
@@ -87,13 +89,12 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
         if (bs.splitType == BrickSelection::SplitType::Temporal) {
             unsigned int childBrickIndex;
             bool pickRightTimeChild = bs.timestepInRightChild(timestep);
-        //        assert(!pickRightTimeChild && "picked right child");
 
             // On average on the whole time period, splitting this spatial brick in two time steps
             // would generate twice as much streaming. Current number of streams of this spatial brick
             // is 2^nTemporalSplits over the whole time period.
 
-            int newStreams = std::pow(2, bs.nTemporalSplits);
+            int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
 
             // Refining this one more step would require the double amount of streams
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
@@ -125,7 +126,7 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
             // On average on the whole time period, splitting this spatial brick into eight spatial bricks
             // would generate eight times as much streaming. Current number of streams of this spatial brick
             // is 2^nTemporalStreams over the whole time period.
-            int newStreams = 7*std::pow(2, bs.nTemporalSplits);
+            int newStreams = 7 * static_cast<int>(std::pow(2, bs.nTemporalSplits));
 
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // Reached dead end (streaming budget would be exceeded)
@@ -185,7 +186,7 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
             temporalSplitQueue.pop_back();
 
             unsigned int brickIndex = bs.brickIndex;
-            int newStreams = std::pow(2, bs.nTemporalSplits);
+            int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // The current best choice would make us exceed the streaming budget, try next instead.
                 deadEnds.push_back(bs);
@@ -292,6 +293,7 @@ bool TfBrickSelector::calculateBrickErrors() {
     std::vector<float> gradients = getTfGradients();
     if (!gradients.size()) return false;
 
+    size_t tfWidth = tf->width();
     unsigned int nHistograms = _tsp->numTotalNodes();
     _brickErrors = std::vector<float>(nHistograms);
 
@@ -302,7 +304,7 @@ bool TfBrickSelector::calculateBrickErrors() {
             const Histogram* histogram = _histogramManager->getHistogram(brickIndex);
             float error = 0;
             for (int i = 0; i < gradients.size(); i++) {
-                float x = (i + 0.5) / _transferFunction->width();
+                float x = static_cast<float>(i + 0.5f) / static_cast<float>(tfWidth);
                 float sample = histogram->interpolate(x);
                 assert(sample >= 0);
                 assert(gradients[i] >= 0);

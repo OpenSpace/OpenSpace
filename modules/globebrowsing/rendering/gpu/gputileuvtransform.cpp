@@ -30,8 +30,7 @@
 //#include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPUTileUvTransform::setValue(ghoul::opengl::ProgramObject* programObject,
                                   const TileUvTransform& tileUvTransform)
@@ -47,5 +46,4 @@ void GPUTileUvTransform::bind(ghoul::opengl::ProgramObject* programObject,
     _gpuUvScale.bind(programObject, nameBase + "uvScale");
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

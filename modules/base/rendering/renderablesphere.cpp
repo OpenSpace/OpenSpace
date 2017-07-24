@@ -108,7 +108,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         "RenderableSphere"
     );
 
-    _size = dictionary.value<double>(KeySize);
+    _size = static_cast<float>(dictionary.value<double>(KeySize));
     _segments = static_cast<int>(dictionary.value<double>(KeySegments));
     _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
 
@@ -181,7 +181,7 @@ bool RenderableSphere::deinitialize() {
     return true;
 }
 
-void RenderableSphere::render(const RenderData& data) {
+void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glm::mat4 transform = glm::mat4(1.0);
 
     transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));

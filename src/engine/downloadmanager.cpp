@@ -120,7 +120,7 @@ namespace {
  
         return 0;
     }
-}
+} // namespace
 
 namespace openspace {
 

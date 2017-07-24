@@ -25,18 +25,14 @@
 #ifndef __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
-//std includes
 #include <string>
 #include <vector>
 
-//glm includes
 #include <glm/gtx/quaternion.hpp>
 
-//openspace includes
 #include <openspace/util/camera.h>
 
-namespace openspace{
-namespace datamessagestructures {
+namespace openspace::datamessagestructures {
 enum class Type : uint32_t {
     CameraData = 0,
     TimeData,
@@ -187,7 +183,6 @@ struct ScriptMessage {
     };
 };
             
-} //namespace messagestructures
-} // namespace openspace
+} // namespace openspace::messagestructures
 
 #endif // __OPENSPACE_CORE___MESSAGESTRUCTURES___H__

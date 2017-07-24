@@ -40,7 +40,6 @@
 namespace openspace {
 class TSP {
 public:
-
     struct Header {
         unsigned int gridType_;
         unsigned int numOrigTimesteps_;

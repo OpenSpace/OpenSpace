@@ -42,7 +42,7 @@
 #include <stdint.h>
 
 namespace {
-    static const std::string _loggerCat = "RenderableStars";
+    const char* _loggerCat = "RenderableStars";
 
     const char* KeyFile = "File";
     const char* KeyTexture = "Texture";
@@ -79,7 +79,7 @@ namespace {
 
         float speed;
     };
-}
+}  // namespace
 
 namespace openspace {
 
@@ -234,7 +234,7 @@ bool RenderableStars::deinitialize() {
     return true;
 }
 
-void RenderableStars::render(const RenderData& data) {
+void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _program->activate();
 
@@ -522,7 +522,7 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
         int8_t version = 0;
         fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
         if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed, deleting old cache");
+            LINFO("The format of the cached file has changed: deleting old cache");
             fileStream.close();
             FileSys.deleteFile(file);
             return false;

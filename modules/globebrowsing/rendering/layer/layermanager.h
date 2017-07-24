@@ -34,8 +34,7 @@
 
 #include <functional>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
     
 struct LayerGroup;
 
@@ -69,7 +68,6 @@ private:
     std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__

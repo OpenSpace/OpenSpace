@@ -32,7 +32,6 @@
 
 #include <ghoul/opengl/programobject.h>
 
-
 namespace {
     const char* KeyType        = "TerminatorType";
     const char* KeyLightSource = "LightSource";
@@ -41,7 +40,7 @@ namespace {
     const char* KeyBodyFrame   = "BodyFrame";
     const char* KeyMainFrame   = "MainFrame";
     const char* KeyAberration  = "Aberration";
-}
+} // namespace
 
 namespace openspace {
 
@@ -106,7 +105,7 @@ bool RenderableShadowCylinder::isReady() const {
     return true;
 }
     
-void RenderableShadowCylinder::render(const RenderData& data){
+void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _shader->activate();
 

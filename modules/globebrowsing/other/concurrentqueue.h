@@ -29,8 +29,7 @@
 #include <mutex>
 #include <queue>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Templated thread-safe queue based on std::thread and std::queue
@@ -54,8 +53,7 @@ private:
     mutable std::condition_variable _cond;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "concurrentqueue.inl"
 

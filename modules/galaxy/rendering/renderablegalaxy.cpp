@@ -186,8 +186,6 @@ bool RenderableGalaxy::initialize() {
 
     float maxdist = 0;
     
-
-    float x, y, z, r, g, b, a;
     for (size_t i = 0; i < _nPoints; ++i) {
         float x = pointData[i * 7 + 0];
         float y = pointData[i * 7 + 1];

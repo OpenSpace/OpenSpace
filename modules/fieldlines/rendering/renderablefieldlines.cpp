@@ -70,7 +70,7 @@ namespace {
 
     const int SeedPointSourceFile = 0;
     const int SeedPointSourceTable = 1;
-}
+} // namespace
 
 namespace openspace {
 
@@ -239,7 +239,7 @@ bool RenderableFieldlines::deinitialize() {
     return true;
 }
 
-void RenderableFieldlines::render(const RenderData& data) {
+void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
     _program->activate();
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));

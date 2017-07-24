@@ -38,7 +38,7 @@
 #include <numeric>
 
 namespace {
-    const std::string _loggerCat = "GuiPerformanceComponent";
+    const char* _loggerCat = "GuiPerformanceComponent";
 
     enum class Sorting {
         NoSorting = -1,
@@ -51,10 +51,9 @@ namespace {
         UpdateSceneGraphNode = 6,
         TotalTime = 7
     };
-}
+} // namespace
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GuiPerformanceComponent::GuiPerformanceComponent()
     : GuiComponent("PerformanceComponent")
@@ -529,5 +528,4 @@ void GuiPerformanceComponent::render() {
     ImGui::End();
 }
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui

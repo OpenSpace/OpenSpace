@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                         const TileIndex& tileIndex, int pileSize)
@@ -84,5 +83,4 @@ void GPULayer::deactivate() {
     gpuChunkTilePile.deactivate();
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

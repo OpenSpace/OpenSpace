@@ -69,22 +69,23 @@
 
 
 namespace {
-    const std::string _loggerCat = "RenderableMultiresVolume";
-    const std::string KeyDataSource = "Source";
-    const std::string KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    const std::string KeyHints = "Hints";
-    const std::string KeyTransferFunction = "TransferFunction";
-    const std::string KeyTspType = "TspType";
+    const char* _loggerCat = "RenderableMultiresVolume";
+    const char* KeyDataSource = "Source";
+    const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
+    const char* KeyHints = "Hints";
+    const char* KeyTransferFunction = "TransferFunction";
+    const char* KeyTspType = "TspType";
 
-    const std::string KeyVolumeName = "VolumeName";
-    const std::string KeyBrickSelector = "BrickSelector";
-    const std::string KeyStartTime = "StartTime";
-    const std::string KeyEndTime = "EndTime";
-    const std::string GlslHelpersPath = "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
-    const std::string GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
-    const std::string GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
+    const char* KeyVolumeName = "VolumeName";
+    const char* KeyBrickSelector = "BrickSelector";
+    const char* KeyStartTime = "StartTime";
+    const char* KeyEndTime = "EndTime";
+    const char* GlslHelpersPath = "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
+    const char* GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
+    const char* GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
-}
+
+} // namespace
 
 namespace openspace {
 
@@ -137,11 +138,11 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _statsToFile("printStats", "Print Stats", false)
     , _statsToFileName("printStatsFileName", "Stats Filename")
     , _scalingExponent("scalingExponent", "Scaling Exponent", 1, -10, 20)
-    , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
-    , _toleranceSpatial("spatialTolerance", "Spatial Tolerance", 1.f, 0.00f, 2.f)
-    , _toleranceTemporal("temporalTolerance", "Temporal Tolerance", 1.f, 0.00f, 2.f)
+    , _scaling("scaling", "Scaling", glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _translation("translation", "Translation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _rotation("rotation", "Euler rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _toleranceSpatial("spatialTolerance", "Spatial Tolerance", 1.f, 0.f, 2.f)
+    , _toleranceTemporal("temporalTolerance", "Temporal Tolerance", 1.f, 0.f, 2.f)
     , _tspType(RenderableMultiresVolume::TSP_DEFAULT)
 {
     std::string name;
@@ -170,7 +171,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     glm::vec3 scaling, translation, rotation;
 
     if (dictionary.getValue("ScalingExponent", scalingExponent)) {
-        _scalingExponent = scalingExponent;
+        _scalingExponent = static_cast<int>(scalingExponent);
     }
     if (dictionary.getValue("Scaling", scaling)) {
         _scaling = scaling;
@@ -277,7 +278,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 std::shared_ptr<TfBrickSelector> tbs;
                 _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
                 _tfBrickSelector = tbs = std::make_shared<TfBrickSelector>(_tsp, _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
-                _transferFunction->setCallback([tbs](const TransferFunction &tf) {
+                _transferFunction->setCallback([tbs](const TransferFunction&) {
                     tbs->initialize();
                 });
                 return initializeSelector();
@@ -289,7 +290,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
                 tbs = std::make_shared< TimeBrickSelector>(_tsp, _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _timeBrickSelector = tbs;
-                _transferFunction->setCallback([tbs](const TransferFunction &tf) {
+                _transferFunction->setCallback([tbs](const TransferFunction&) {
                     tbs->initialize();
                 });
                 return initializeSelector();
@@ -300,7 +301,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 std::shared_ptr<SimpleTfBrickSelector> stbs;
                 _histogramManager = new HistogramManager(_tsp.get());
                 _simpleTfBrickSelector = stbs = std::make_shared<SimpleTfBrickSelector>(_tsp, _histogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
-                _transferFunction->setCallback([stbs](const TransferFunction &tf) {
+                _transferFunction->setCallback([stbs](const TransferFunction&) {
                     stbs->initialize();
                 });
                 return initializeSelector();
@@ -312,7 +313,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 std::shared_ptr< LocalTfBrickSelector> ltbs;
                 _localErrorHistogramManager = new LocalErrorHistogramManager(_tsp.get());
                 _localTfBrickSelector = ltbs = std::make_shared<LocalTfBrickSelector>(_tsp, _localErrorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
-                _transferFunction->setCallback([ltbs](const TransferFunction &tf) {
+                _transferFunction->setCallback([ltbs](const TransferFunction&) {
                     ltbs->initialize();
                 });
                 return initializeSelector();
@@ -322,7 +323,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
             if (!_shenBrickSelector) {
                 std::shared_ptr<ShenBrickSelector> sbs;
                 _shenBrickSelector = sbs = std::make_shared<ShenBrickSelector>(_tsp, _tsp->getMaxError(TSP::NodeType::SPATIAL), _tsp->getMaxError(TSP::NodeType::TEMPORAL));
-                _transferFunction->setCallback([sbs](const TransferFunction &tf) {
+                _transferFunction->setCallback([sbs](const TransferFunction&) {
                     sbs->initialize();
                 });
                 return initializeSelector();

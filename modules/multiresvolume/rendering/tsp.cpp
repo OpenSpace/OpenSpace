@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//#include <sgct.h>
 #include <modules/multiresvolume/rendering/tsp.h>
 
 // ghoul
@@ -40,8 +39,8 @@
 #include <queue>
 
 namespace {
-    const std::string _loggerCat = "TSP";
-}
+    const char* _loggerCat = "TSP";
+} // namespace
 
 namespace openspace {
 
@@ -333,7 +332,7 @@ std::vector<float> TSP::calculateBrickAverages() {
         for (size_t i = 0; i < numBrickVals; i++) {
             average += voxelData[brickStart + i];
         }
-        averages[brick] = average / static_cast<double>(numBrickVals);
+        averages[brick] = static_cast<float>(average / static_cast<double>(numBrickVals));
     }
 
     return averages;

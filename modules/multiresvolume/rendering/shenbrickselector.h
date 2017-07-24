@@ -27,18 +27,20 @@
 
 #include <modules/multiresvolume/rendering/tspbrickselector.h>
 
-namespace openspace {
+#include <vector>
 
+namespace openspace {
 
 class ShenBrickSelector : public TSPBrickSelector {
 public:
-    ShenBrickSelector(std::shared_ptr<TSP> tsp, float spatialTolerance, float temporalTolerance);
+    ShenBrickSelector(std::shared_ptr<TSP> tsp,
+                      float spatialTolerance, float temporalTolerance);
     ~ShenBrickSelector();
     bool initialize();
     void setSpatialTolerance(float spatialTolerance);
     void setTemporalTolerance(float temporalTolerance);
-    void selectBricks(int timestep,
-                      std::vector<int>& bricks);
+    void selectBricks(int timestep, std::vector<int>& bricks);
+
 private:
     float _spatialTolerance;
     float _temporalTolerance;
@@ -64,7 +66,8 @@ private:
                       BrickCover coveredBricks,
                       std::vector<int>& bricks);
 
-    void selectCover(BrickCover coveredBricks, unsigned int brickIndex, std::vector<int>& bricks);
+    void selectCover(BrickCover coveredBricks, unsigned int brickIndex,
+                     std::vector<int>& bricks);
 };
 
 } // namespace openspace

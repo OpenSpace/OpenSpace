@@ -169,7 +169,7 @@ bool RenderableConstellationBounds::isReady() const {
     return (_vao != 0) && (_vbo != 0) && _program;
 }
 
-void RenderableConstellationBounds::render(const RenderData& data) {
+void RenderableConstellationBounds::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
     setPscUniforms(*_program.get(), data.camera, data.position);

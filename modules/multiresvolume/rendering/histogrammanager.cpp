@@ -33,8 +33,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const std::string _loggerCat = "HistogramManager";
-}
+    const char* _loggerCat = "HistogramManager";
+} // namespace
 
 namespace openspace {
 

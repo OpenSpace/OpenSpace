@@ -38,13 +38,14 @@ namespace openspace {
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _scalingExponent("scalingExponent", "Scaling Exponent", 1, -10, 20)
-    , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
-    , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
+    , _stepSize("stepSize", "Step Size", 0.02f, 0.01f, 1.f)
+    , _scaling("scaling", "Scaling", glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _translation("translation", "Translation", glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation("rotation", "Euler rotation", glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
-    , _color("color", "Color", glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f)) {
-
-    float scalingExponent, stepSize;
+    , _color("color", "Color", glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
+{
+    float stepSize;
+    int scalingExponent;
     glm::vec3 scaling, translation, rotation;
     glm::vec4 color;
     if (dictionary.getValue("ScalingExponent", scalingExponent)) {

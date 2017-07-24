@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/touch/include/TouchMarker.h>
+#include <modules/touch/include/touchmarker.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -40,9 +40,9 @@ namespace openspace {
 TouchMarker::TouchMarker()
     : properties::PropertyOwner("TouchMarker")
     , _visible("TouchMarkers visible", "Toggle visibility of markers", true)
-    , _radiusSize("Marker size", "Marker radius", 30, 0, 100)
-    , _transparency("Transparency of marker", "Marker transparency", 0.8, 0, 1.0)
-    , _thickness("Thickness of marker", "Marker thickness", 2.0, 0, 4.0)
+    , _radiusSize("Marker size", "Marker radius", 30.f, 0.f, 100.f)
+    , _transparency("Transparency of marker", "Marker transparency", 0.8f, 0.f, 1.f)
+    , _thickness("Thickness of marker", "Marker thickness", 2.f, 0.f, 4.f)
     , _color(
         "MarkerColor",
         "Marker color",
@@ -116,12 +116,12 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
 }
 
 void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor>& list) {
-    _numFingers = list.size();
+    _numFingers = static_cast<int>(list.size());
     GLfloat vertexData[MAX_FINGERS];
     int i = 0;
     for (const TUIO::TuioCursor& c : list) {
-        vertexData[i] = 2 * (c.getX() - 0.5);
-        vertexData[i + 1] = -2 * (c.getY() - 0.5);
+        vertexData[i] = 2 * (c.getX() - 0.5f);
+        vertexData[i + 1] = -2 * (c.getY() - 0.5f);
         i += 2;
     }
 

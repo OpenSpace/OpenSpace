@@ -27,9 +27,9 @@
 
 #include <modules/newhorizons/util/sequenceparser.h>
 
-
 namespace openspace {
-class LabelParser : public SequenceParser{
+
+class LabelParser : public SequenceParser {
 public:
     LabelParser();
     LabelParser(std::string name,

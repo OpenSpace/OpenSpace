@@ -33,24 +33,24 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const std::string _loggerCat = "DataCygnet";
-}
+    const char* _loggerCat = "DataCygnet";
+} // namespace
 
-namespace openspace{
+namespace openspace {
 
 DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
-    :IswaCygnet(dictionary)
-    ,_dataProcessor(nullptr)
-    ,_dataOptions("dataOptions", "Data Options")
-    ,_useLog("useLog","Use Logarithm", false)
-    ,_useHistogram("useHistogram", "Auto Contrast", false)
-    ,_autoFilter("autoFilter", "Auto Filter", true)
-    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
-    ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
+    : IswaCygnet(dictionary)
+    , _dataProcessor(nullptr)
+    , _dataOptions("dataOptions", "Data Options")
+    , _useLog("useLog","Use Logarithm", false)
+    , _useHistogram("useHistogram", "Auto Contrast", false)
+    , _autoFilter("autoFilter", "Auto Filter", true)
+    , _normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
+    , _backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
+    , _transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
     //FOR TESTING
-    ,_numOfBenchmarks(0)
-    ,_avgBenchmarkTime(0.0f)
+    , _numOfBenchmarks(0)
+    , _avgBenchmarkTime(0.0f)
 {
     addProperty(_dataOptions);
     addProperty(_useLog);

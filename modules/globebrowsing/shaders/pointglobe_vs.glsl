@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,26 +28,27 @@
 
 layout(location = 0) in vec2 in_position;
 
+out vec4 vs_positionClipSpace;
+out vec4 vs_positionCameraSpace;
+out vec2 vs_positionModelSpace;
+
 uniform float lightIntensityClamped;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform mat4 directionToSunViewSpace;
 
-out vec4 vs_positionClipSpace;
-out vec4 vs_positionCameraSpace;
-out vec2 vs_positionModelSpace;
-
 void main() {
     vs_positionModelSpace = in_position;
 
-    float totalIntensity = lightIntensityClamped;
+    const float totalIntensity = lightIntensityClamped;
+
+    const vec4 positionCameraSpace = modelViewTransform * vec4(
+        in_position * totalIntensity,
+        0.0,
+        1.0
+    );
     
-    vec4 positionCameraSpace = modelViewTransform * vec4(in_position * totalIntensity, 0, 1);
-    
-    // Position
-    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
-    
+    const vec4 positionClipSpace = projectionTransform * positionCameraSpace;
     vs_positionClipSpace = z_normalization(positionClipSpace);
-    
     gl_Position = z_normalization(positionClipSpace);
 }

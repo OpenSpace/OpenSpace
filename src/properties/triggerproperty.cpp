@@ -24,8 +24,7 @@
 
 #include <openspace/properties/triggerproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 TriggerProperty::TriggerProperty(std::string identifier, std::string guiName,
                                  Property::Visibility visibility)
@@ -45,5 +44,4 @@ void TriggerProperty::set(ghoul::any) {
     notifyListener();
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

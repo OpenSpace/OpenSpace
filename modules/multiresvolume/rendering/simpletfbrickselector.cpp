@@ -31,12 +31,15 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const std::string _loggerCat = "SimpleTfBrickSelector";
-}
+    const char* _loggerCat = "SimpleTfBrickSelector";
+} // namespace
 
 namespace openspace {
 
-    SimpleTfBrickSelector::SimpleTfBrickSelector(std::shared_ptr<TSP> tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
+    SimpleTfBrickSelector::SimpleTfBrickSelector(std::shared_ptr<TSP> tsp,
+                                                 HistogramManager* hm,
+                                                 TransferFunction* tf, int memoryBudget,
+                                                 int streamingBudget)
     : TSPBrickSelector(tsp, tf, memoryBudget, streamingBudget)
     , _histogramManager(hm) {}
 
@@ -88,7 +91,7 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             // On average on the whole time period, splitting this spatial brick in two time steps
             // would generate twice as much streaming. Current number of streams of this spatial brick
             // is 2^nTemporalSplits over the whole time period.
-            int newStreams = std::pow(2, bs.nTemporalSplits);
+            int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
 
             // Refining this one more step would require the double amount of streams
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
@@ -121,7 +124,7 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             // On average on the whole time period, splitting this spatial brick into eight spatial bricks
             // would generate eight times as much streaming. Current number of streams of this spatial brick
             // is 2^nTemporalStreams over the whole time period.
-            int newStreams = 7*std::pow(2, bs.nTemporalSplits);
+            int newStreams = 7 * static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // Reached dead end (streaming budget would be exceeded)
                 // However, temporal split might be possible
@@ -178,7 +181,7 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
             temporalSplitQueue.pop_back();
 
             unsigned int brickIndex = bs.brickIndex;
-            int newStreams = std::pow(2, bs.nTemporalSplits);
+            int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // The current best choice would make us exceed the streaming budget, try next instead.
                 deadEnds.push_back(bs);
@@ -231,14 +234,14 @@ float SimpleTfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
     if (_tsp->isBstLeaf(brickIndex)) {
         return -1;
     }
-    return _brickImportances[brickIndex] * 0.5;
+    return _brickImportances[brickIndex] * 0.5f;
 }
 
 float SimpleTfBrickSelector::spatialSplitPoints(unsigned int brickIndex) {
     if (_tsp->isOctreeLeaf(brickIndex)) {
         return -1;
     }
-    return _brickImportances[brickIndex] * 0.125;
+    return _brickImportances[brickIndex] * 0.125f;
 }
 
 float SimpleTfBrickSelector::splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType) {
@@ -265,10 +268,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
     TransferFunction *tf = _transferFunction;
     if (!tf) return false;
 
-    float tfWidth = tf->width();
-    if (tfWidth <= 0) return false;
-    LINFO("Transfer function width: " << tfWidth);
-    // The importance of every brick. Each brick has a histogram.
+    size_t tfWidth = tf->width();
     size_t nHistograms = _tsp->numTotalNodes();
     _brickImportances = std::vector<float>(nHistograms);
 
@@ -283,7 +283,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
         for (size_t i = 0; i < tfWidth; i++) {
             // For the width of the transfer function, get the bin as a percentage instead
             // of an index, so we can sample histogram
-            float x = float(i) / tfWidth;
+            float x = static_cast<float>(i) / static_cast<float>(tfWidth);
 
             // Get the value of the bin at x
             float sample = histogram->interpolate(x);

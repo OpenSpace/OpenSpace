@@ -44,6 +44,7 @@
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
 namespace openspace {
+
 class IswaBaseGroup;
 
 struct Metadata {
@@ -72,7 +73,7 @@ public:
     virtual bool initialize();
     virtual bool deinitialize();
     virtual bool isReady() const;
-    void render(const RenderData& data);
+    void render(const RenderData& data, RendererTasks& rendererTask);
     void update(const UpdateData& data);
 
 protected:

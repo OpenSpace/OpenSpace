@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,5 +32,5 @@ in vec4 out_color;
 out vec4 FragColor;
 
 void main() {
-  FragColor = out_color * texture(tex, out_uv);
+    FragColor = out_color * texture(tex, out_uv);
 }

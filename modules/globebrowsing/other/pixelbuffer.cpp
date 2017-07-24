@@ -27,9 +27,9 @@
 
 namespace {
     const char* _loggerCat = "PixelBuffer";
-};
+} // namespace
 
-using namespace openspace::globebrowsing;
+namespace openspace::globebrowsing {
 
 PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
     : _numBytes(numBytes)
@@ -82,3 +82,5 @@ bool PixelBuffer::isMapped() const {
 PixelBuffer::operator GLuint() const {
     return _id;
 }
+
+} // namespace openspace::globebrowsing

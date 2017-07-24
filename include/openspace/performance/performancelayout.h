@@ -27,8 +27,7 @@
 
 #include <cstdint>
 
-namespace openspace {
-namespace performance {
+namespace openspace::performance {
 
 struct PerformanceLayout {
     static const int8_t Version = 0;
@@ -59,7 +58,6 @@ struct PerformanceLayout {
     int16_t nFunctionEntries;
 };
 
-} // namespace performance
-} // namespace openspace
+} // namespace openspace::performance
 
 #endif // __OPENSPACE_CORE___PERFORMANCELAYOUT___H__

@@ -27,6 +27,8 @@
 
 #include <modules/multiresvolume/rendering/tspbrickselector.h>
 
+#include <vector>
+
 namespace openspace {
 
 class LocalErrorHistogramManager;

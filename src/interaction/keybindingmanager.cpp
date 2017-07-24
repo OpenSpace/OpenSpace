@@ -46,8 +46,7 @@ namespace {
 
 #include "keybindingmanager_lua.inl"
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 KeyBindingManager::KeyBindingManager()
     : DocumentationGenerator(
@@ -124,7 +123,7 @@ std::string KeyBindingManager::generateJson() const {
         json << "\"key\": \"" << std::to_string(p.first) << "\",";
         json << "\"script\": \"" << p.second.command << "\",";
         json << "\"remoteScripting\": " << (p.second.synchronization ? "true," : "false,");
-        json << "\"documentation\": \"" << p.second.documentation << "\"";
+        json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\"";
         json << "}";
     }
     json << "]";
@@ -174,5 +173,4 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
     };
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
+
+in vec2 vs_st;
+in vec2 vs_nightTex;
+in vec4 vs_normal;
+in vec4 vs_position;
+
 uniform vec4 objpos;
 
 uniform vec3 sun_pos;
@@ -35,45 +42,29 @@ uniform float time;
 uniform sampler2D texture1;
 uniform sampler2D nightTex;
 
-in vec2 vs_st;
-in vec2 vs_nightTex;
-in vec4 vs_normal;
-in vec4 vs_position;
-in vec4 test;
-
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
-
 Fragment getFragment() {
     vec4 diffuse = texture(texture1, vs_st);
-    vec4 diffuse2 = texture(nightTex, vs_st);
+    const vec4 diffuse2 = texture(nightTex, vs_st);
 
     Fragment frag;
     if (_performShading) {
-        // directional lighting
-        vec3 origin = vec3(0.0);
-        vec4 spec = vec4(0.0);
+        const vec3 n = normalize(vs_normal.xyz);
+        const vec3 l_pos = sun_pos; // sun
+        const vec3 l_dir = normalize(l_pos - objpos.xyz);
+        const float intensity = min(max(5 * dot(n, l_dir), 0.0), 1.0);
+        const float darkSide  = min(max(5 * dot(n, -l_dir), 0.0), 1.0);
         
-        vec3 n = normalize(vs_normal.xyz);
-        //vec3 e = normalize(camdir);
-        vec3 l_pos = vec3(sun_pos); // sun.
-        vec3 l_dir = normalize(l_pos-objpos.xyz);
-        float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
-        float darkSide  = min(max(5*dot(n,-l_dir), 0.0), 1);
-        
-        float shine = 0.0001;
+        // float shine = 0.0001;
 
-        vec4 specular = vec4(0.5);
-        vec4 ambient = vec4(0.0,0.0,0.0,transparency);
+        const vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
         
-        vec4 daytex = max(intensity * diffuse, ambient);
-        vec4 mixtex = mix(diffuse, diffuse2,  (1+dot(n,-l_dir))/2);
+        const vec4 daytex = max(intensity * diffuse, ambient);
+        const vec4 mixtex = mix(diffuse, diffuse2,  (1.0 + dot(n, -l_dir)) / 2.0);
         
-        diffuse = (daytex*2 + mixtex)/3;
+        diffuse = (daytex * 2.0 + mixtex) / 3.0;
     }
 
-    diffuse[3] = transparency;
-    frag.color = diffuse;
+    frag.color = vec4(diffuse.rgb, transparency);
     frag.depth = vs_position.w;
 
     return frag;

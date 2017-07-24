@@ -24,8 +24,7 @@
 
 #include <modules/globebrowsing/geometry/angle.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 template <typename T>
 const T Angle<T>::PI = 3.14159265358979323846264338327950;
@@ -240,5 +239,4 @@ Angle<T> Angle<T>::getAbs() const {
     return Angle<T>(*this).abs();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

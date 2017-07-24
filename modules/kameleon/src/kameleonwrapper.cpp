@@ -463,7 +463,7 @@ float* KameleonWrapper::getUniformSliceValues(
 
                 if(value != missingValue){
                     doubleData[index] = value;
-                    data[index] = value;
+                    data[index] = static_cast<float>(value);
                     // if(value > maxValue){
                     //     maxValue = value;
                     // }
@@ -636,7 +636,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getFieldLines(
 
 KameleonWrapper::Fieldlines KameleonWrapper::getLorentzTrajectories(
     const std::vector<glm::vec3>& seedPoints, 
-    const glm::vec4& color, 
+    const glm::vec4& /*color*/, 
     float stepsize) 
 {
     LINFO("Creating " << seedPoints.size() << " Lorentz force trajectories");

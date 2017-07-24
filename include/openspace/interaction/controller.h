@@ -30,8 +30,7 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/vector_angle.hpp>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 class NavigationHandler;
 
@@ -47,7 +46,6 @@ protected:
     NavigationHandler* _handler;
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___CONTROLLER___H__

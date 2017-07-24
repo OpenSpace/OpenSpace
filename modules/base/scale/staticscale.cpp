@@ -29,7 +29,7 @@
 
 namespace {
     const char* KeyValue = "Scale";
-}
+} // namespace
 
 namespace openspace {
 
