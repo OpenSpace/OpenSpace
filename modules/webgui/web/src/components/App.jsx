@@ -4,8 +4,9 @@ import '../styles/base.scss';
 import styles from './App.scss';
 import Sidebar from './Sidebar/Sidebar';
 import BottomBar from './BottomBar/BottomBar';
-import DataManager from '../api/DataManager';
 import Connection from '../api/Connection';
+import DataManager from '../api/DataManager';
+import InteractionManager from '../api/InteractionManager';
 
 class App extends Component {
   constructor(props) {
@@ -75,11 +76,11 @@ class App extends Component {
     if (target === currentTarget) {
       if (this.isHovered) {
         this.isHovered = false;
-        console.log('blur');
+        InteractionManager.blur();
       }
     } else if (!this.isHovered) {
       this.isHovered = true;
-      console.log('focus');
+      InteractionManager.focus();
     }
   }
 
@@ -87,6 +88,9 @@ class App extends Component {
     return (
       <div className={styles.app}>
         <section className={styles.Grid__Left} onMouseMove={this.hoverControl}>
+          { this.state.connectionLost && (
+            <section>Connection lost.</section>
+          )}
           <Sidebar />
         </section>
         <section className={styles.Grid__Right} onMouseMove={this.hoverControl}>
