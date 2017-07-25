@@ -24,11 +24,19 @@
 
 #include <modules/onscreengui/include/guicomponent.h>
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "This setting determines whether this object will be visible or not."
+    };
+} // namespace
+
 namespace openspace::gui {
 
 GuiComponent::GuiComponent(std::string name)
     : properties::PropertyOwner(std::move(name))
-    , _isEnabled({ "Enabled", "Is Enabled", "" }, false) // @TODO Missing documentation
+    , _isEnabled(EnabledInfo, false)
 {
     addProperty(_isEnabled);
 }

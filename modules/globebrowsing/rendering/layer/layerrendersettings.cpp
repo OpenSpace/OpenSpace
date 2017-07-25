@@ -76,22 +76,23 @@ LayerRenderSettings::LayerRenderSettings()
     , gamma(GammaInfo, 1.f, 0.f, 5.f)
     , multiplier(MultiplierInfo, 1.f, 0.f, 20.f)
     , offset(OffsetInfo, 0.f, -10000.f, 10000.f)
-    , valueBlending(properties::FloatProperty({ "ValueBlending", "Value Blending", "" }, // @TODO Missing documentation
-                                               1.f, 0.f, 1.f))
-    , useValueBlending(false)
 {
-    // Implicitly added properties (other ones are not for all layer types)
     addProperty(opacity);
     addProperty(gamma);
     addProperty(multiplier);
     addProperty(offset);
     addProperty(setDefault);
 
-    setDefault.onChange([this](){ setDefaultValues(); });
+    setDefault.onChange([this](){
+        opacity = 1.f;
+        gamma = 1.f;
+        multiplier = 1.f;
+        offset = 0.f;
+    });
 }
 
 void LayerRenderSettings::setValuesFromDictionary(
-    const ghoul::Dictionary& renderSettingsDict)
+                                              const ghoul::Dictionary& renderSettingsDict)
 {
     float dictOpacity;
     float dictGamma;
@@ -99,21 +100,17 @@ void LayerRenderSettings::setValuesFromDictionary(
     float dictOffset;
     float dictValueBlending;
     
-    if(renderSettingsDict.getValue(keyOpacity, dictOpacity)) {
+    if (renderSettingsDict.getValue(keyOpacity, dictOpacity)) {
         opacity = dictOpacity;
     }
-    if(renderSettingsDict.getValue(keyGamma, dictGamma)) {
+    if (renderSettingsDict.getValue(keyGamma, dictGamma)) {
         gamma = dictGamma;
     }
-    if(renderSettingsDict.getValue(keyMultiplier, dictMultiplier)) {
+    if (renderSettingsDict.getValue(keyMultiplier, dictMultiplier)) {
         multiplier = dictMultiplier;
     }
-    if(renderSettingsDict.getValue(keyOffset, dictOffset)) {
+    if (renderSettingsDict.getValue(keyOffset, dictOffset)) {
         multiplier = dictOffset;
-    }
-    if(renderSettingsDict.getValue(keyValueBlending, dictValueBlending)) {
-        valueBlending = dictValueBlending;
-        useValueBlending = true;
     }
 }
 
@@ -136,14 +133,6 @@ glm::vec4 LayerRenderSettings::performLayerSettings(glm::vec4 currentValue) cons
         performLayerSettings(currentValue.a));
 
     return newValue;
-}
-
-void LayerRenderSettings::setDefaultValues() {
-    opacity = 1.f;
-    gamma = 1.f;
-    multiplier = 1.f;
-    offset = 0.f;
-    valueBlending = 1.f;
 }
 
 } // namespace openspace::globebrowsing

@@ -38,13 +38,26 @@
 namespace {
     const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
+
+    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Resolution%",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
+        "FieldlineSeedsIndexFile",
+        "Fieldline Seedpoints",
+        "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 namespace openspace{
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
     : IswaDataGroup(name, type)
-    , _resolution({ "Resolution", "Resolution%", "" }, 100.0f, 10.0f, 200.0f) // @TODO Missing documentation
-    , _fieldlines({ "FieldlineSeedsIndexFile", "Fieldline Seedpoints", "" }) // @TODO Missing documentation
+    , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
+    , _fieldlines(FieldlineSeedInfo)
     , _fieldlineIndexFile("")
     , _kameleonPath("")
 {

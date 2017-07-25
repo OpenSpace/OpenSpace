@@ -35,10 +35,6 @@ void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObjec
     gpuGamma.setValue(programObject, layerSettings.gamma.value());
     gpuMultiplier.setValue(programObject, layerSettings.multiplier.value());
     gpuOffset.setValue(programObject, layerSettings.offset.value());
-
-    if (layerSettings.useValueBlending) {
-        gpuValueBlending.setValue(programObject, layerSettings.valueBlending.value());
-    }
 }
 
 void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings,
@@ -49,10 +45,6 @@ void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings,
     gpuGamma.bind(programObject, nameBase + "gamma");
     gpuMultiplier.bind(programObject, nameBase + "multiplier");
     gpuOffset.bind(programObject, nameBase + "offset");
-    
-    if (layerSettings.useValueBlending) {
-        gpuValueBlending.bind(programObject, nameBase + "valueBlending");
-    }
 }
 
 }  // namespace openspace::globebrowsing

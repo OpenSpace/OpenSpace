@@ -58,30 +58,102 @@ namespace {
     const char* KeyCache = "Cache";
     const char* KeyGridType = "GridType";
     const char* ValueSphericalGridType = "Spherical";
+
+    static const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+        "Dimensions",
+        "Dimensions",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo VariableInfo = {
+        "Variable",
+        "Variable",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
+        "LowerDomainBound",
+        "Lower Domain Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
+        "UpperDomainBound",
+        "Upper Domain Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo DomainScaleInfo = {
+        "DomainScale",
+        "Domain scale",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
+        "LowerValueBound",
+        "Lower Value Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
+        "UpperValueBound",
+        "Upper Value Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+        "GridType",
+        "Grid Type",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SourcePathInfo = {
+        "SourcePath",
+        "Source Path",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+        "TransferFunctionPath",
+        "Transfer Function Path",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CacheInfo = {
+        "Cache",
+        "Cache",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _dimensions({ "Dimensions", "Dimensions", "" }) // @TODO Missing documentation
-    , _variable({ "Variable", "Variable", "" })  // @TODO Missing documentation
-    , _lowerDomainBound({ "LowerDomainBound", "Lower Domain Bound", "" }) // @TODO Missing documentation
-    , _upperDomainBound({ "UpperDomainBound", "Upper Domain Bound", "" }) // @TODO Missing documentation
-    , _domainScale({ "DomainScale", "Domain scale", "" }) // @TODO Missing documentation
+    , _dimensions(DimensionsInfo)
+    , _variable(VariableInfo)
+    , _lowerDomainBound(LowerDomainBoundInfo)
+    , _upperDomainBound(UpperDomainBoundInfo)
+    , _domainScale(DomainScaleInfo)
     , _autoDomainBounds(false)
-    , _lowerValueBound({ "LowerValueBound", "Lower Value Bound", "" }, 0.f, 0.f, 1.f) // @TODO Missing documentation
-    , _upperValueBound({ "UpperValueBound", "Upper Value Bound", "" }, 1.f, 0.01f, 1.f) // @TODO Missing documentation
+    , _lowerValueBound(LowerValueBoundInfo, 0.f, 0.f, 1.f)
+    , _upperValueBound(UpperValueBoundInfo, 1.f, 0.01f, 1.f)
     , _autoValueBounds(false)
-    , _gridType({ "GridType", "Grid Type", "" }, properties::OptionProperty::DisplayType::Dropdown) // @TODO Missing documentation
+    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _autoGridType(false)
     , _clipPlanes(nullptr)
-    , _stepSize({ "StepSize", "Step Size", "" }, 0.02f, 0.01f, 1.f) // @TODO Missing documentation
-    , _sourcePath({ "SourcePath", "Source Path", "" }) // @TODO Missing documentation
-    , _transferFunctionPath({ "TransferFunctionPath", "Transfer Function Path", "" }) // @TODO Missing documentation
+    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
+    , _sourcePath(SourcePathInfo)
+    , _transferFunctionPath(TransferFunctionInfo)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
-    , _cache({ "Cache", "Cache", "" }) // @TODO Missing documentation
+    , _cache(CacheInfo)
 {
 
     glm::vec3 dimensions;

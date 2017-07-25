@@ -70,22 +70,52 @@ namespace {
 
     const int SeedPointSourceFile = 0;
     const int SeedPointSourceTable = 1;
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Fieldline Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo Classification = {
+        "Classification",
+        "Fieldline Classification",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
+        "FieldlineColor",
+        "Fieldline Color",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
+        "Source",
+        "SeedPoint Source",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
+        "SourceFile",
+        "SeedPoint File",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
     : Renderable(dictionary)
-    , _stepSize({ "StepSize", "Fieldline Step Size", "" }, defaultFieldlineStepSize, 0.f, 10.f) // @TODO Missing documentation
-    , _classification({ "Classification", "Fieldline Classification", "" }, true) // @TODO Missing documentation
+    , _stepSize(StepSizeInfo, defaultFieldlineStepSize, 0.f, 10.f)
+    , _classification(Classification, true)
     , _fieldlineColor(
-        { "FieldlineColor", "Fieldline Color", "" }, // @TODO Missing documentation
+        FieldlineColorInfo,
         defaultFieldlineColor,
         glm::vec4(0.f),
         glm::vec4(1.f)
       )
-    , _seedPointSource({ "Source", "SeedPoint Source", "" }) // @TODO Missing documentation
-    , _seedPointSourceFile({ "SourceFile", "SeedPoint File", "" }) // @TODO Missing documentation
+    , _seedPointSource(SeedPointSourceInfo)
+    , _seedPointSourceFile(SeedPointFileInfo)
     , _program(nullptr)
     , _seedPointsAreDirty(true)
     , _fieldLinesAreDirty(true)

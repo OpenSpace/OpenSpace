@@ -75,6 +75,61 @@ namespace {
         "value of smaller than 1, the field of view will hover of ther surface, thus "
         "making it more visible."
     };
+
+    static const openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
+        "Colors.DefaultStart",
+        "Start of default color",
+        "This value determines the color of the field of view frustum close to the "
+        "instrument. The final colors are interpolated between this value and the end "
+        "color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DefaultEndColorInfo = {
+        "Colors.DefaultEnd",
+        "End of default color",
+        "This value determines the color of the field of view frustum close to the "
+        "target. The final colors are interpolated between this value and the start "
+        "color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ActiveColorInfo = {
+        "Colors.Active",
+        "Active Color",
+        "This value determines the color that is used when the instrument's field of "
+        "view is active."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TargetInFovInfo = {
+        "Colors.TargetInFieldOfView",
+        "Target in field-of-view Color",
+        "This value determines the color that is used if the target is inside the field "
+        "of view of the instrument but the instrument is not yet active."
+    };
+
+    static const openspace::properties::Property::PropertyInfo IntersectionStartInfo = {
+        "Colors.IntersectionStart",
+        "Start of the intersection",
+        "This value determines the color that is used close to the instrument if one of "
+        "the field of view corners is intersecting the target object. The final color is "
+        "retrieved by interpolating between this color and the intersection end color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo IntersectionEndInfo = {
+        "Colors.IntersectionEnd",
+        "End of the intersection",
+        "This value determines the color that is used close to the target if one of the "
+        "field of view corners is intersecting the target object. The final color is "
+        "retrieved by interpolating between this color and the intersection begin color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SquareColorInfo = {
+        "Colors.Square",
+        "Orthogonal Square",
+        "This value determines the color that is used for the field of view square in "
+        "the case that there is no intersection and that the instrument is not currently "
+        "active."
+    };
+
 } // namespace
 
 namespace openspace {
@@ -171,34 +226,13 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _programObject(nullptr)
     , _drawFOV(false)
     , _colors({
-        {
-            { "Colors.DefaultStart", "Start of default color", "" }, // @TODO Missing documentation
-            glm::vec4(0.4f)
-        },
-        {
-            { "Colors.DefaultEnd", "End of default color", "" },  // @TODO Missing documentation
-            glm::vec4(0.85f, 0.85f, 0.85f, 1.f)
-        },
-        {
-            { "Colors.Active", "Active Color", "" }, // @TODO Missing documentation
-            glm::vec4(0.f, 1.f, 0.f, 1.f)
-        },
-        {
-            { "Colors.TargetInFieldOfView", "Target-in-field-of-view Color", "" }, // @TODO Missing documentation
-            glm::vec4(0.f, 0.5f, 0.7f, 1.f)
-        },
-        {
-            { "Colors.IntersectionStart", "Start of the intersection", "" }, // @TODO Missing documentation
-            glm::vec4(1.f, 0.89f, 0.f, 1.f)
-        },
-        {
-            { "Colors.IntersectionEnd", "End of the intersection", "" }, // @TODO Missing documentation
-            glm::vec4(1.f, 0.29f, 0.f, 1.f)
-        },
-        {
-            { "Colors.Square", "Orthogonal Square", "" }, // @TODO Missing documentation
-            glm::vec4(0.85f, 0.85f, 0.85f, 1.f)
-        }
+        { DefaultStartColorInfo, glm::vec4(0.4f) },
+        { DefaultEndColorInfo, glm::vec4(0.85f, 0.85f, 0.85f, 1.f) },
+        { ActiveColorInfo, glm::vec4(0.f, 1.f, 0.f, 1.f) },
+        { TargetInFovInfo, glm::vec4(0.f, 0.5f, 0.7f, 1.f) },
+        { IntersectionStartInfo, glm::vec4(1.f, 0.89f, 0.f, 1.f) },
+        { IntersectionEndInfo, glm::vec4(1.f, 0.29f, 0.f, 1.f) },
+        { SquareColorInfo, glm::vec4(0.85f, 0.85f, 0.85f, 1.f) }
     })
 {
     documentation::testSpecificationAndThrow(

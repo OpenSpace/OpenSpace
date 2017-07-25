@@ -85,7 +85,7 @@ namespace {
         "MinimumAllowedDistance",
         "Minimum allowed distance",
         "" // @TODO Missing documentation
-    }
+    };
 } // namespace
 
 namespace openspace::interaction {

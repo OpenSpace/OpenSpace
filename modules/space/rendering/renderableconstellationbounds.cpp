@@ -41,10 +41,7 @@
 #include "SpiceZpr.h"
 
 namespace {
-    const char* KeyVertexFile = "File";
-    const char* KeyConstellationFile = "ConstellationFile";
     const char* KeyReferenceFrame = "ReferenceFrame";
-
 
     const char* DefaultReferenceFrame = "J2000";
 
@@ -55,6 +52,35 @@ namespace {
         // 360 degrees / 24h = 15 degrees/h
         return deg2rad(rightAscension * 15);
     }
+
+
+    static const openspace::properties::Property::PropertyInfo VertexInfo = {
+        "File",
+        "Vertex File Path",
+        "The file pointed to with this value contains the vertex locations of the "
+        "constellations."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ConstellationInfo = {
+        "ConstellationFile",
+        "Constellation File Path",
+        "Specifies the file that contains the mapping between constellation "
+        "abbreviations and full name of the constellation. If this value is empty, the "
+        "abbreviations are used as the full names."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DistanceInfo = {
+        "Distance",
+        "Distance to the celestial sphere",
+        "This value specifies the value to the celestial sphere in kilometers at which "
+        "the constellations are projected."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SelectionInfo = {
+        "ConstellationSelection",
+        "Constellation Selection",
+        "The constellations that are selected are displayed on the celestial sphere."
+    };
 } // namespace
 
 namespace openspace {
@@ -66,18 +92,29 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
         "space_renderable_constellationbounds",
         {
             {
-                KeyVertexFile,
+                VertexInfo.identifier,
                 new StringVerifier,
-                "Specifies the file containing the bounds information about the "
-                "constellation locations.",
+                VertexInfo.description,
                 Optional::No
             },
             {
-                KeyConstellationFile,
+                ConstellationInfo.identifier,
                 new StringVerifier,
                 "Specifies the file that contains the mapping between constellation "
                 "abbreviations and full name of the constellation. If the file is "
                 "omitted, the abbreviations are used as the full names.",
+                Optional::Yes
+            },
+            {
+                DistanceInfo.identifier,
+                new DoubleVerifier,
+                DistanceInfo.description,
+                Optional::Yes
+            },
+            {
+                SelectionInfo.identifier,
+                new StringListVerifier,
+                SelectionInfo.description,
                 Optional::Yes
             }
         }
@@ -88,10 +125,10 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
 RenderableConstellationBounds::RenderableConstellationBounds(
     const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _vertexFilename("")
-    , _constellationFilename("")
-    , _distance({ "Distance", "Distance to the celestial Sphere", "" }, 15.f, 0.f, 30.f) // @TODO Missing documentation
-    , _constellationSelection({ "ConstellationSelection", "Constellation Selection", "" }) // @TODO Missing documentation
+    , _vertexFilename(VertexInfo)
+    , _constellationFilename(ConstellationInfo)
+    , _distance(DistanceInfo, 15.f, 0.f, 30.f)
+    , _constellationSelection(SelectionInfo)
     , _vao(0)
     , _vbo(0)
 {
@@ -101,13 +138,26 @@ RenderableConstellationBounds::RenderableConstellationBounds(
         "RenderableConstellationBounds"
     );
 
-    _vertexFilename = dictionary.value<std::string>(KeyVertexFile);
+    _vertexFilename.onChange([&](){
+        loadVertexFile();
+    });
+    addProperty(_vertexFilename);
+    _vertexFilename = dictionary.value<std::string>(VertexInfo.identifier);
 
-    if (dictionary.hasKey(KeyConstellationFile)) {
-        _constellationFilename = dictionary.value<std::string>(KeyConstellationFile);
+    _constellationFilename.onChange([&](){
+        loadConstellationFile();
+    });
+    addProperty(_constellationFilename);
+    if (dictionary.hasKey(ConstellationInfo.identifier)) {
+        _constellationFilename = dictionary.value<std::string>(ConstellationInfo.identifier);
     }
 
+    if (dictionary.hasKey(DistanceInfo.identifier)) {
+        _distance = static_cast<float>(dictionary.value<double>(DistanceInfo.identifier));
+    }
     addProperty(_distance);
+
+    fillSelectionProperty();
     addProperty(_constellationSelection);
     _constellationSelection.onChange(
         [this]() { selectionPropertyHasChanged(); }
@@ -115,20 +165,12 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 }
 
 bool RenderableConstellationBounds::initialize() {
-    _program = OsEng.renderEngine().buildRenderProgram("ConstellationBounds",
+    _program = OsEng.renderEngine().buildRenderProgram(
+        "ConstellationBounds",
         "${MODULE_SPACE}/shaders/constellationbounds_vs.glsl",
-        "${MODULE_SPACE}/shaders/constellationbounds_fs.glsl");
+        "${MODULE_SPACE}/shaders/constellationbounds_fs.glsl"
+    );
 
-    bool loadSuccess = loadVertexFile();
-    if (!loadSuccess) {
-        return false;
-    }
-    loadSuccess = loadConstellationFile();
-    if (!loadSuccess) {
-        return false;
-    }
-
-    fillSelectionProperty();
 
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
@@ -199,7 +241,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
 }
 
 bool RenderableConstellationBounds::loadVertexFile() {
-    if (_vertexFilename.empty()) {
+    if (_vertexFilename.value().empty()) {
         return false;
     }
 
@@ -292,7 +334,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
 }
 
 bool RenderableConstellationBounds::loadConstellationFile() {
-    if (_constellationFilename.empty()) {
+    if (_constellationFilename.value().empty()) {
         return true;
     }
 

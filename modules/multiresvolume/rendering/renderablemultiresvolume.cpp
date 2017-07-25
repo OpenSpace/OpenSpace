@@ -80,6 +80,85 @@ namespace {
     const char* GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
     const char* GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
+
+    static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
+        "StepSizeCoefficient",
+        "Stepsize Coefficient",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
+        "CurrentTime",
+        "Current Time",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
+        "MemoryBudget",
+        "Memory Budget",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
+        "StreamingBudget",
+        "Streaming Budget",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
+        "UseGlobalTime",
+        "Global Time",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LoopInfo = {
+        "Loop",
+        "Loop",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SelectorNameInfo = {
+        "Selector",
+        "Brick Selector",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo StatsToFileInfo = {
+        "PrintStats",
+        "Print Stats",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
+        "PrintStatsFileName",
+        "Stats Filename",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+        "ScalingExponent",
+        "Scaling Exponent",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ScalingInfo = {
+        "Scaling",
+        "Scaling",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+        "Translation",
+        "Translation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+        "Rotation",
+        "Euler rotation",
+        "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 namespace openspace {
@@ -95,20 +174,20 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _errorHistogramManager(nullptr)
     , _histogramManager(nullptr)
     , _localErrorHistogramManager(nullptr)
-    , _stepSizeCoefficient({ "StepSizeCoefficient", "Stepsize Coefficient", "" }, 1.f, 0.01f, 10.f) // @TODO Missing documentation
-    , _currentTime({ "CurrentTime", "Current Time", "" }, 0, 0, 0) // @TODO Missing documentation
-    , _memoryBudget({ "MemoryBudget", "Memory Budget", "" }, 0, 0, 0) // @TODO Missing documentation
-    , _streamingBudget({ "StreamingBudget", "Streaming Budget", "" }, 0, 0, 0) // @TODO Missing documentation
-    , _useGlobalTime({ "UseGlobalTime", "Global Time", "" }, false) // @TODO Missing documentation
-    , _loop({ "Loop", "Loop", "" }, false) // @TODO Missing documentation
-    , _selectorName({ "Selector", "Brick Selector", "" }) // @TODO Missing documentation
+    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f) 
+    , _currentTime(CurrentTimeInfo, 0, 0, 0)
+    , _memoryBudget(MemoryBudgetInfo, 0, 0, 0)
+    , _streamingBudget(StreamingBudgetInfo, 0, 0, 0)
+    , _useGlobalTime(UseGlobalTimeInfo, false)
+    , _loop(LoopInfo, false)
+    , _selectorName(SelectorNameInfo)
     , _gatheringStats(false)
-    , _statsToFile({ "PrintStats", "Print Stats", "" }, false) // @TODO Missing documentation
-    , _statsToFileName({ "PrintStatsFileName", "Stats Filename", "" }) // @TODO Missing documentation
-    , _scalingExponent({ "ScalingExponent", "Scaling Exponent", "" }, 1, -10, 20) // @TODO Missing documentation
-    , _scaling({ "Scaling", "Scaling", "" }, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
-    , _translation({ "Translation", "Translation", "" }, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
-    , _rotation({ "Rotation", "Euler rotation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f)) // @TODO Missing documentation
+    , _statsToFile(StatsToFileInfo, false)
+    , _statsToFileName(StatsToFileNameInfo)
+    , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
+    , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
 {
     std::string name;
     //bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -349,9 +428,24 @@ bool RenderableMultiresVolume::initialize() {
     unsigned int maxInitialBudget = 2048;
     int initialBudget = std::min(maxInitialBudget, maxNumBricks);
 
-    _currentTime = properties::IntProperty({ "currentTime", "Current Time", "" }, 0, 0, _tsp->header().numTimesteps_ - 1); // @TODO Missing documentation
-    _memoryBudget = properties::IntProperty({ "memoryBudget", "Memory Budget", "" }, initialBudget, 0, maxNumBricks); // @TODO Missing documentation
-    _streamingBudget = properties::IntProperty({ "streamingBudget", "Streaming Budget", "" }, initialBudget, 0, maxNumBricks); // @TODO Missing documentation
+    _currentTime = properties::IntProperty(
+        CurrentTimeInfo,
+        0,
+        0,
+        _tsp->header().numTimesteps_ - 1
+    );
+    _memoryBudget = properties::IntProperty(
+        MemoryBudgetInfo,
+        initialBudget,
+        0,
+        maxNumBricks
+    );
+    _streamingBudget = properties::IntProperty(
+        StreamingBudgetInfo,
+        initialBudget,
+        0,
+        maxNumBricks
+    );
     addProperty(_currentTime);
     addProperty(_memoryBudget);
     addProperty(_streamingBudget);

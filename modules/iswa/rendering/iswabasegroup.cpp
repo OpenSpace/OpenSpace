@@ -38,15 +38,34 @@
 namespace {
     const char* _loggerCat = "IswaBaseGroup";
     using json = nlohmann::json;
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+        "Alpha",
+        "Alpha",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+        "Delete",
+        "Delete",
+        "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     : properties::PropertyOwner(std::move(name))
-    , _enabled({ "Enabled", "Enabled", "" }, true) // @TODO Missing documentation
-    , _alpha({ "Alpha", "Alpha", "" }, 0.9f, 0.0f, 1.0f) // @TODO Missing documentation
-    , _delete({ "Delete", "Delete", "" }) // @TODO Missing documentation
+    , _enabled(EnabledInfo, true) 
+    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
+    , _delete(DeleteInfo)
     , _registered(false)
     , _type(type)
     , _dataProcessor(nullptr)
@@ -55,7 +74,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     addProperty(_alpha);
     addProperty(_delete);
 
-    _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary> >();
+    _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary>>();
     registerProperties();
 }
 

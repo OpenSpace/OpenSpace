@@ -33,19 +33,27 @@
 
 #include <ghoul/opengl/programobject.h>
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo IntensityClampInfo = {
+        "IntensityClamp",
+        "Intensity clamp",
+        "" 
+    };
+
+    static const openspace::properties::Property::PropertyInfo LightIntensityInfo = {
+        "LightIntensity",
+        "Light intensity",
+        "" // @TODO Missing documentation
+    };
+} // namespace
+
 namespace openspace::globebrowsing {
 
 PointGlobe::PointGlobe(const RenderableGlobe& owner)
     : Renderable({ { "Name", owner.name() } })
     , _owner(owner)
-    , _intensityClamp(
-        { "IntensityClamp", "Intensity clamp", ""},  // @TODO Missing documentation
-        1, 0, 1
-    )
-    , _lightIntensity(
-        { "LightIntensity", "Light intensity", ""},  // @TODO Missing documentation
-        1, 0, 50
-    )
+    , _intensityClamp(IntensityClampInfo, 1.f, 0.f, 1.f)
+    , _lightIntensity(LightIntensityInfo, 1.f, 0.f, 50.f)
 {
     addProperty(_intensityClamp);
     addProperty(_lightIntensity);

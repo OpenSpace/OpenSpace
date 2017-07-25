@@ -51,17 +51,47 @@ namespace {
     const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
     const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
     const std::string _loggerCat       = "Renderable Galaxy";
-}
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
+        "PointStepSize",
+        "Point Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+        "Translation",
+        "Translation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+        "Rotation",
+        "Euler rotation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
+        "NEnabledPointsRatio",
+        "Enabled points",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize({ "StepSize", "Step Size", "" }, 0.012, 0.0005, 0.05) // @TODO Missing documentation
-    , _pointStepSize({ "PointStepSize", "Point Step Size", "" }, 0.01, 0.01, 0.1) // @TODO Missing documentation
-    , _translation({ "Translation", "Translation", "" }, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0)) // @TODO Missing documentation
-    , _rotation({ "Rotation", "Euler rotation", "" }, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28)) // @TODO Missing documentation
-    , _enabledPointsRatio({ "NEnabledPointsRatio", "Enabled points", "" }, 0.2, 0, 1) // @TODO Missing documentation
+    , _stepSize(StepSizeInfo, 0.012f, 0.0005f, 0.05f)
+    , _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
+    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
 {
     float stepSize;
     glm::vec3 scaling, translation, rotation;

@@ -42,6 +42,13 @@ namespace {
     const char* KeyBasePath = "BasePath";
     const char* KeyPreCacheStartTime = "PreCacheStartTime";
     const char* KeyPreCacheEndTime = "PreCacheEndTime";
+
+    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+        "FilePath",
+        "File Path",
+        "This is the path to the XML configuration file that describes the temporal tile "
+        "information."
+    };
 } // namespace
 
 namespace openspace::globebrowsing::tileprovider {
@@ -56,7 +63,7 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeI
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
     : _initDict(dictionary)
-    , _filePath({ "FilePath", "File Path", "" }, "") // @TODO Missing documentation
+    , _filePath(FilePathInfo)
     , _successfulInitialization(false)
 {
     std::string filePath;

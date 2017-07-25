@@ -210,7 +210,7 @@ ProjectionComponent::ProjectionComponent()
     , _clearAllProjections(ClearProjectionInfo, false)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)
     , _textureSize(TextureSizeInfo, ivec2(16), ivec2(16), ivec2(32768))
-    , _applyTextureSize(ApplyTextureSizeInfo) // @TODO Missing documentation
+    , _applyTextureSize(ApplyTextureSizeInfo)
     , _textureSizeDirty(false)
     , _projectionTexture(nullptr)
 {
