@@ -74,6 +74,18 @@ namespace {
         "Friction', and 'Zoom Friction' values are enabled. The lower this value is, the "
         "faster the camera movements will stop."
     };
+
+    static const openspace::properties::Property::PropertyInfo FollowFocusNodeInfo = {
+        "FollowFocusNodeRotationDistance",
+        "Follow focus node rotation distance",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
+        "MinimumAllowedDistance",
+        "Minimum allowed distance",
+        "" // @TODO Missing documentation
+    }
 } // namespace
 
 namespace openspace::interaction {
@@ -83,13 +95,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _rollFriction(RollFrictionInfo, true)
     , _rotationalFriction(RotationalFrictionInfo, true)
     , _zoomFriction(ZoomFrictionInfo, true)
-    , _followFocusNodeRotationDistance(
-        { "FollowFocusNodeRotationDistance", "Follow focus node rotation distance", "" }, // @TODO Missing documentation
-        2.0f, 0.0f, 10.f
-    )
-    , _minimumAllowedDistance(
-        {"MinimumAllowedDistance", "Minimum allowed distance", "" }, // @TODO Missing documentation
-        10.0f, 0.0f, 10000.f)
+    , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 2.0f, 0.0f, 10.f)
+    , _minimumAllowedDistance(FollowFocusNodeInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
     , _motionLag(FrictionInfo, 0.5f, 0.f, 1.f)
     , _mouseStates(_sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001))

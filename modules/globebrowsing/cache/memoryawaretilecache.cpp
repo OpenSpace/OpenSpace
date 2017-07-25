@@ -37,6 +37,46 @@
 
 namespace {
     const char* _loggerCat = "MemoryAwareTileCache";
+
+    static const openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
+        "CpuAllocatedTileData",
+        "CPU allocated tile data (MB)",
+        "This value denotes the amount of RAM memory (in MB) that this tile cache is "
+        "utilizing."
+    };
+
+    static const openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
+        "GpuAllocatedTileData",
+        "GPU allocated tile data (MB)",
+        "This value denotes the amount of GPU memory (in MB) that this tile cache is "
+        "utilizing."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+        "TileCacheSize",
+        "Tile cache size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
+        "ApplyTileCacheSize",
+        "Apply tile cache size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
+        "ClearTileCache",
+        "Clear tile cache",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UsePboInfo = {
+        "UsePbo",
+        "Use PBO",
+        "If this value is enabled, pixel buffer objects are used to upload the texture "
+        "data asynchronously. If this value is disabled, the upload is synchronously."
+    };
+
 } // namespace
 
 namespace openspace::globebrowsing::cache {
@@ -44,27 +84,12 @@ namespace openspace::globebrowsing::cache {
 MemoryAwareTileCache::MemoryAwareTileCache()
     : PropertyOwner("TileCache")
     , _numTextureBytesAllocatedOnCPU(0)
-    , _cpuAllocatedTileData(
-        { "CpuAllocatedTileData", "CPU allocated tile data (MB)", "" },  // @TODO Missing documentation
-        1024,   // Default
-        128,    // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _gpuAllocatedTileData(
-        { "GpuAllocatedTileData", "GPU allocated tile data (MB)", ""},  // @TODO Missing documentation
-        1024,   // Default
-        128,    // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _tileCacheSize(
-        { "TileCacheSize", "Tile cache size", ""}, // @TODO Missing documentation
-        1024,   // Default
-        128,    // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _applyTileCacheSize({ "ApplyTileCacheSize", "Apply tile cache size", "" }) // @TODO Missing documentation
-    , _clearTileCache({ "ClearTileCache", "Clear tile cache", "" }) // @TODO Missing documentation
-    , _usePbo({ "UsePbo", "Use PBO", "" }, false) // @TODO Missing documentation
+    , _cpuAllocatedTileData(CpuAllocatedDataInfo, 1024, 128, 2048, 1)
+    , _gpuAllocatedTileData(GpuAllocatedDataInfo, 1024, 128, 2048, 1)
+    , _tileCacheSize(TileCacheSizeInfo, 1024, 128, 2048, 1)
+    , _applyTileCacheSize(ApplyTileCacheInfo)
+    , _clearTileCache(ClearTileCacheInfo)
+    , _usePbo(UsePboInfo, false)
 {
     createDefaultTextureContainers();
 

@@ -115,6 +115,30 @@ namespace {
         "The name of this OpenSpace instance that will be potentially broadcast to other "
         "connected instances."
     };
+
+    static const openspace::properties::Property::PropertyInfo BufferTimeInfo = {
+        "BufferTime",
+        "Buffer Time",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
+        "TimeKeyframeInterval",
+        "Time keyframe interval",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
+        "CameraKeyframeInterval",
+        "Camera Keyframe interval",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
+        "TimeTolerance",
+        "Time tolerance",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
@@ -126,20 +150,10 @@ ParallelConnection::ParallelConnection()
     , _port(PortInfo, "20501")
     , _address(AddressInfo, "localhost")
     , _name(NameInfo, "Anonymous")
-    , _bufferTime({ "BufferTime", "Buffer Time", "" }, 1, 0.5, 10) // @TODO Missing documentation
-    , _timeKeyframeInterval(
-        { "TimeKeyframeInterval", "Time keyframe interval", ""}, // @TODO Missing documentation
-        0.1f,
-        0.f,
-        1.f
-    )
-    , _cameraKeyframeInterval(
-        { "CameraKeyframeInterval", "Camera Keyframe interval", "" }, // @TODO Missing documentation
-        0.1f,
-        0.f,
-        1.f
-    )
-    , _timeTolerance({ "TimeTolerance", "Time tolerance", "" }, 1.f, 0.5f, 5.f) // @TODO Missing documentation
+    , _bufferTime(BufferTimeInfo, 1, 0.5, 10)
+    , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _timeTolerance(TimeToleranceInfo, 1.f, 0.5f, 5.f)
     , _lastTimeKeyframeTimestamp(0)
     , _lastCameraKeyframeTimestamp(0)
     , _clientSocket(INVALID_SOCKET)
