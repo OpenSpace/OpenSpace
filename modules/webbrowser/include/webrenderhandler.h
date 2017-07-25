@@ -25,11 +25,11 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 #define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 
+#include <memory>
 #include <ghoul/opengl/opengl>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 #include <include/cef_render_handler.h>
-#include <include/cef_app.h>
 
 namespace openspace {
 
@@ -43,10 +43,23 @@ public:
     bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
     void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects, const void *buffer,
                  int width, int height) override;
+    bool hasContent(int x, int y);
 
 protected:
     int _width = 0, _height = 0;
     GLuint _texture;
+
+    /**
+     * Alpha mask showing whether or not a pixel is filled with content
+     *
+     * Depending on what config you're running (Debug/Release), use different types here.
+     * This is to increase performance
+     */
+#if !(defined(NDEBUG) || defined(DEBUG))
+    std::vector<char> _alphaMask;
+#else
+    std::vector<bool> _alphaMask;
+#endif
 
     IMPLEMENT_REFCOUNTING(WebRenderHandler);
 };

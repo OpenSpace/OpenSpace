@@ -115,7 +115,10 @@ bool BrowserInstance::sendKeyEvent(const CefKeyEvent &event) {
 
 bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
                                           bool mouseUp) {
-    _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, SINGLE_CLICK);
+    if (hasContent(event.x, event.y)) {
+        _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, SINGLE_CLICK);
+        return true;
+    }
     return false;
 }
 
@@ -134,6 +137,10 @@ bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent &event, const glm:
 
 void BrowserInstance::reloadBrowser() {
     _browser->Reload();
+}
+
+bool BrowserInstance::hasContent(int x, int y) {
+    return _renderHandler->hasContent(x, y);
 }
 
 }

@@ -29,8 +29,8 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <include/wrapper/cef_helpers.h>
-#include "modules/webbrowser/include/webrenderhandler.h"
-#include "modules/webbrowser/include/browserclient.h"
+#include "browserclient.h"
+#include "webrenderhandler.h"
 
 namespace openspace {
 
@@ -53,6 +53,8 @@ public:
     void reloadBrowser();
 
     const CefRefPtr<CefBrowser> &getBrowser() const;
+
+    bool hasContent(int x, int y);
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;

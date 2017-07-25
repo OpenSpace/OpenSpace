@@ -30,6 +30,8 @@ void WebRenderHandler::reshape(int w, int h) {
 //    LDEBUGC("WebRenderHandler", fmt::format("Reshaping browser window. Width: {}, height: {}", w, h));
     _width = w;
     _height = h;
+    _alphaMask.clear();
+    _alphaMask.resize(w * h);
 }
 
 bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) {
@@ -47,6 +49,18 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    // copy alpha channel from buffer into the alpha mask
+    int maskSize = w * h;
+    auto bf = (unsigned char*) buffer;
+    int bufferIndex = 3, maskIndex = 0;
+    for (; maskIndex < maskSize; bufferIndex += 4, ++maskIndex) {
+        _alphaMask[maskIndex] = bf[bufferIndex] > 0;
+    }
+}
+
+bool WebRenderHandler::hasContent(int x, int y) {
+    return _alphaMask[x  + _width * y];
 }
 
 }
