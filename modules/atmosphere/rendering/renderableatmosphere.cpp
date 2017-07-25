@@ -656,7 +656,7 @@ namespace openspace {
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
             _deferredcaster->setRenderableClass(_atmosphereType);
             _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
-
+            //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
             if (executeComputation)
                 _deferredcaster->preCalculateAtmosphereParam();
         }
