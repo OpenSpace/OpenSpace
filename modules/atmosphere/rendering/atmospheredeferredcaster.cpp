@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -21,6 +21,42 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
+ /***************************************************************************************
+ * Modified part of the code (4D texture mechanism) from Eric Bruneton is used in the
+ * following code.
+ ****************************************************************************************/
+
+ /**
+ * Precomputed Atmospheric Scattering
+ * Copyright (c) 2008 INRIA
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+
+ */
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
@@ -58,8 +94,7 @@ namespace {
 namespace openspace {
 
 AtmosphereDeferredcaster::AtmosphereDeferredcaster()
-    : //_programObject(nullptr)
-    _transmittanceProgramObject(nullptr)
+    : _transmittanceProgramObject(nullptr)
     , _irradianceProgramObject(nullptr)
     , _irradianceSupTermsProgramObject(nullptr)
     , _inScatteringProgramObject(nullptr)
@@ -95,6 +130,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _atmosphereCalculated(false)
     , _atmosphereEnabled(false)
     , _ozoneEnabled(false)
+    , _sunFollowingCameraEnabled(false)
     , _atmosphereRadius(0.f)
     , _atmospherePlanetRadius(0.f)
     , _planetAverageGroundReflectance(0.f)
@@ -129,13 +165,7 @@ void AtmosphereDeferredcaster::initialize()
 
 void AtmosphereDeferredcaster::deinitialize()
 {
-    // TODO
-    // Review if the programs should be part of the renderEngine.
     RenderEngine& renderEngine = OsEng.renderEngine();
-//    if (_programObject) {
-//        renderEngine.removeRenderProgram(_programObject);
-//        _programObject = nullptr;
-//    }
 
     if (_transmittanceProgramObject) {
         _transmittanceProgramObject = nullptr;
@@ -218,71 +248,58 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("SAMPLES_NU", (int)_nu_samples);
 
     program.setUniform("ModelTransformMatrix", _modelTransform);
-    program.setUniform("dInverseModelTransformMatrix", glm::inverse(_modelTransform));
-    program.setUniform("dSGCTEyeToOSWorldTransformMatrix", glm::inverse(renderData.camera.combinedViewMatrix()));
-    
-    // Object Space
-    //program.setUniform("inverseTransformMatrix", glm::inverse(_modelTransform));
-    program.setUniform("dInverseTransformMatrix", glm::inverse(_modelTransform));
 
+    // Object Space
+    glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
+    program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
+        
     // The following scale comes from PSC transformations.
     float fScaleFactor = renderData.camera.scaling().x * pow(10.0, renderData.camera.scaling().y);
     glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(fScaleFactor));
     program.setUniform("dInverseScaleTransformMatrix", glm::inverse(dfScaleCamTransf));
-
-    // Object Space to World Space (in meters)
-    //glm::dmat4 dObj2World = glm::translate(data.position.dvec3()) * glm::dmat4(transform);
-    //glm::dmat4 dWorld2Obj = glm::inverse(dObj2World);
-    //program.setUniform("dObjToWorldTransform", dObj2World);
-    //program.setUniform("dWorldToObjectTransform", dWorld2Obj);
-
+   
     // World to Eye Space in OS
-    //glm::dmat4 dWorld2Eye = dfScaleCamTransf * renderData.camera.viewRotationMatrix() *
-    //    glm::translate(-renderData.camera.positionVec3());
-    //glm::dmat4 dEye2World = glm::inverse(dWorld2Eye);
     program.setUniform("dInverseCamRotTransform", glm::mat4_cast((glm::dquat)renderData.camera.rotationQuaternion()));
-    //program.setUniform("dWorldToOsEyeTransform", dWorld2Eye);
-    //program.setUniform("dOsEyeToWorldTransform", dEye2World);
-
+    
     program.setUniform("dInverseSgctEyeToWorldTranform", glm::inverse(renderData.camera.combinedViewMatrix()));
 
     // Eye Space in OS to Eye Space in SGCT
     glm::dmat4 dOsEye2SGCTEye = glm::dmat4(renderData.camera.viewMatrix());
-    glm::dmat4 dSgctEye2OSEye = glm::inverse(dOsEye2SGCTEye);
-    
-    //program.setUniform("dOsEyeToSGCTEyeTranform", dOsEye2SGCTEye);
+    glm::dmat4 dSgctEye2OSEye = glm::inverse(dOsEye2SGCTEye);    
     program.setUniform("dSgctEyeToOSEyeTranform", dSgctEye2OSEye);
 
     // Eye Space in SGCT to Projection (Clip) Space in SGCT
     glm::dmat4 dSgctEye2Clip = glm::dmat4(renderData.camera.projectionMatrix());
     glm::dmat4 dInverseProjection = glm::inverse(dSgctEye2Clip);
 
-    //program.setUniform("dSgctEyeToClipTranform", dSgctEye2Clip);
     program.setUniform("dInverseSgctProjectionMatrix", dInverseProjection);
-    //program.setUniform("dSgctProjectionMatrix", glm::dmat4(data.camera.projectionMatrix()));           
-
+    
     program.setUniform("dObjpos", glm::dvec4(renderData.position.dvec3(), 1.0));
     program.setUniform("dCampos", renderData.camera.positionVec3());
-    //program.setUniform("dCamrot", glm::dmat3(data.camera.viewRotationMatrix()));
-    // I know it is (0,0,0). It is here just for sake of sanity. :-p
+    
     double lt;
     glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
     glm::dvec4 sunPosObj = glm::dvec4(0.0);
 
-    if (_renderableClass == RenderablePlanet) {
-        sunPosObj = glm::inverse(_modelTransform) * 
-            glm::dvec4(sunPosWorld - renderData.position.dvec3(), 1.0);
+    // Sun following camera position
+    if (_sunFollowingCameraEnabled) {        
+        sunPosObj = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
     }
-    else if (_renderableClass == RenderableGlobe) {
-        sunPosObj = glm::inverse(_modelTransform) * 
-            glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
-    }
-
-    program.setUniform("ellipsoidRadii", _ellipsoidRadii);    
-
-    //program.setUniform("sunPositionObj", sunPosObj);
+    else {
+        if (_renderableClass == RenderablePlanet) {
+            sunPosObj = inverseModelMatrix *
+                glm::dvec4(sunPosWorld - renderData.position.dvec3(), 1.0);
+        }
+        else if (_renderableClass == RenderableGlobe) {
+            sunPosObj = inverseModelMatrix *
+                glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
+        }
+    }          
+    
+    // Sun Position in Object Space
     program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
-    //program.setUniform("_performShading", _performShading);
+    
+    program.setUniform("ellipsoidRadii", _ellipsoidRadii);
 
     _transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
@@ -521,6 +538,10 @@ void AtmosphereDeferredcaster::setRenderableClass(const AtmosphereDeferredcaster
     _renderableClass = rc;
 }
 
+void AtmosphereDeferredcaster::enableSunFollowing(const bool enable) {
+    _sunFollowingCameraEnabled = enable;
+}
+
 void AtmosphereDeferredcaster::setPrecalculationTextureScale(const float _preCalculatedTexturesScale) {
     _calculationTextureScale = _preCalculatedTexturesScale;
     _transmittance_table_width *= static_cast<unsigned int>(_calculationTextureScale);
@@ -533,7 +554,6 @@ void AtmosphereDeferredcaster::setPrecalculationTextureScale(const float _preCal
     _mu_samples *= static_cast<unsigned int>(_calculationTextureScale);
     _mu_s_samples *= static_cast<unsigned int>(_calculationTextureScale);
     _nu_samples *= static_cast<unsigned int>(_calculationTextureScale);
-    //preCalculateAtmosphereParam();
 }
 
 void AtmosphereDeferredcaster::enablePrecalculationTexturesSaving() {

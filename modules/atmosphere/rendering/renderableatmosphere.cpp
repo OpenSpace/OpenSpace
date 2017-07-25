@@ -22,6 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <openspace/documentation/documentation.h>
@@ -95,21 +96,12 @@ namespace openspace {
         return {
             "RenderableAtmosphere",
             "atmosphere_renderable_atmosphere",
-            {
-                /*
+            {   /*
                 {
-                    KeyGeometry,
-                    new ReferencingVerifier("space_geometry_planet"),
-                    "Specifies the planet geometry that is used for this RenderableAtmosphere.",
+                    keyAtmosphereRadius,
+                    new ReferencingVerifier("atmosphere"),
+                    "Specifies the atmosphere's height in this RenderableAtmosphere.",
                     Optional::No
-                },
-                
-                {
-                    KeyRadius,
-                    new DoubleVerifier,
-                    "Specifies the radius of the planet. If this value is not specified, it "
-                    "will try to query the SPICE library for radius values.",
-                    Optional::Yes
                 },
                 
                 {
@@ -127,10 +119,6 @@ namespace openspace {
 
     RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
-        // TODO: Enable the shading program later to test spherical atmosphere (JCC)
-        //, _programObject(nullptr)
-        // TODO: Enable the geometry later to test spherical atmosphere (JCC)
-        //, _geometry(nullptr)
         , _atmosphereHeightP("atmmosphereHeight", "Atmosphere Height (KM)", 60.0f, 0.1f, 99.0f)
         , _groundAverageReflectanceP("averageGroundReflectance", "Average Ground Reflectance (%)", 0.1f, 0.0f, 1.0f)
         , _rayleighHeightScaleP("rayleighHeightScale", "Rayleigh Height Scale (KM)", 8.0f, 0.1f, 20.0f)
@@ -152,8 +140,10 @@ namespace openspace {
         , _sunIntensityP("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 1000.0f)
         , _hdrExpositionP("hdrExposition", "HDR", 0.4f, 0.01f, 5.0f)
         , _gammaConstantP("gamma", "Gamma Correction", 1.8f, 0.1f, 3.0f)
+        , _sunFollowingCameraEnabledP("sunFollowingCamera", "Enable Sun On Camera Position", false)
         , _atmosphereEnabled(false)
         , _ozoneLayerEnabled(false)
+        , _sunFollowingCameraEnabled(false)
         , _atmosphereRadius(0.f)
         , _atmospherePlanetRadius(0.f)
         , _planetAverageGroundReflectance(0.f)
@@ -171,7 +161,6 @@ namespace openspace {
         , _mieScatteringCoeff(glm::vec3(0.f))
         , _saveCalculationsToTexture(false)
         , _preCalculatedTexturesScale(1.0)
-        //, _planetRadius(0.f)
         , _shadowEnabled(false)
         , _time(0.f)
     {
@@ -187,32 +176,6 @@ namespace openspace {
         );
 
         const std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
-
-        // TODO: Enable the geometry later to test spherical atmosphere (JCC)
-        /*
-        ghoul::Dictionary geomDict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
-
-        if (dictionary.hasKey(KeyRadius)) {
-            // If the user specified a radius, we want to use this
-            _planetRadius = static_cast<float>(dictionary.value<double>(KeyRadius));
-        }
-        else if (SpiceManager::ref().hasValue(name, "RADII")) {
-            // If the user didn't specfify a radius, but Spice has a radius, we can use this
-            glm::dvec3 radius;
-            SpiceManager::ref().getValue(name, "RADII", radius);
-            radius *= 1000.0; // Spice gives radii in KM.
-            std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
-            geomDict.setValue(KeyRadius, radius);
-
-            _planetRadius = static_cast<float>((radius.x + radius.y + radius.z) / 3.0);
-        }
-        else {
-            LERRORC("RenderableAtmosphere", "Missing radius specification");
-        }
-
-        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geomDict);        
-        addPropertySubOwner(_geometry.get());
-        */
                 
         //================================================================
         //======== Reads Shadow (Eclipses) Entries in mod file ===========
@@ -528,6 +491,10 @@ namespace openspace {
                 _gammaConstantP.set(_gammaConstant);
                 _gammaConstantP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
                 addProperty(_gammaConstantP);
+
+                _sunFollowingCameraEnabledP.set(_sunFollowingCameraEnabled);
+                _sunFollowingCameraEnabledP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                addProperty(_sunFollowingCameraEnabledP);
             }
         }
     }
@@ -535,27 +502,6 @@ namespace openspace {
     bool RenderableAtmosphere::initialize() {
         RenderEngine& renderEngine = OsEng.renderEngine();
 
-        // TODO: Enable the shading program later to test spherical atmosphere (JCC)
-        /*
-        if (_programObject == nullptr ) {
-            // TODO: Change for the right shading program (JCC)
-            _programObject = renderEngine.buildRenderProgram(
-                "shadowNightProgram",
-                "${MODULE_ATMOSPHERE}/shaders/shadow_nighttexture_vs.glsl",
-                "${MODULE_ATMOSPHERE}/shaders/shadow_nighttexture_fs.glsl");
-        }
-        
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-        _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
-
-        // Deactivate any previously activated shader program.
-        _programObject->deactivate();
-        */
-
-        // TODO: Enable the geometry later to test spherical atmosphere (JCC)
-        //_geometry->initialize(this);        
-        
         if (_atmosphereEnabled) {
             _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
             if (_deferredcaster) {
@@ -578,6 +524,7 @@ namespace openspace {
                 // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
                 //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
                 _deferredcaster->setRenderableClass(_atmosphereType);
+                _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
 
                 _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
                 if (_saveCalculationsToTexture)
@@ -604,22 +551,6 @@ namespace openspace {
     }
 
     bool RenderableAtmosphere::deinitialize() {
-        // TODO: Enable the geometry later to test spherical atmosphere (JCC)
-        /*
-        if (_geometry) {
-            _geometry->deinitialize();            
-        }
-        _geometry = nullptr;
-        */
-
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        // TODO: Enable the shading program later to test spherical atmosphere (JCC)
-        /*
-        if (_programObject) {
-            renderEngine.removeRenderProgram(_programObject);
-        }
-        _programObject = nullptr;
-        */
 
         if (_deferredcaster) {
             OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
@@ -631,10 +562,6 @@ namespace openspace {
 
     bool RenderableAtmosphere::isReady() const {
         bool ready = true;
-        // TODO: Enable the shading program later to test spherical atmosphere (JCC)
-        //ready &= (_programObject != nullptr);
-        // TODO: Enable the geometry later to test spherical atmosphere (JCC)
-        //ready &= (_geometry != nullptr);
         ready &= (_deferredcaster != nullptr);
         return ready;
     }
@@ -650,111 +577,6 @@ namespace openspace {
 
     void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
 
-        // TODO: Enable the shading program later to test spherical atmosphere (JCC)
-        /*
-        _programObject->activate();
-
-        glm::dmat4 modelTransform = glm::dmat4(1.0);
-        computeModelTransformMatrix(data.modelTransform, &modelTransform);
-
-        glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
-        _programObject->setUniform("transparency", _alpha);
-        _programObject->setUniform("modelViewTransform", modelViewTransform);
-        _programObject->setUniform("modelViewProjectionTransform",
-            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform)
-        );
-        _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));
-
-        setPscUniforms(*_programObject.get(), data.camera, data.position);
-                
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        //=============================================================================
-        //============= Eclipse Shadow Calculations and Uniforms Loading ==============
-        //=============================================================================
-        // TODO: Move Calculations to VIEW SPACE (let's avoid precision problems...)
-        double lt;
-        if (!_shadowConfArray.empty()) {
-            std::vector<ShadowRenderingStruct> shadowDataArray;
-            shadowDataArray.reserve(_shadowConfArray.size());
-
-            for (const auto & shadowConf : _shadowConfArray) {
-                // TO REMEMBER: all distances and lengths in world coordinates are in meters!!! We need to move this to view space...
-                // Getting source and caster:
-                glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(shadowConf.source.first, "SUN", "GALACTIC", {}, _time, lt);
-                sourcePos *= 1000.0; // converting to meters
-                glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, _time, lt);
-                casterPos *= 1000.0; // converting to meters
-                psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
-
-                // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
-                glm::vec3 planetCasterVec = (caster_pos - data.position).vec3();
-                glm::vec3 sourceCasterVec = glm::vec3(casterPos - sourcePos);
-                float sc_length = glm::length(sourceCasterVec);
-                glm::vec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) * sourceCasterVec;
-                float d_test = glm::length(planetCasterVec - planetCaster_proj);
-                float xp_test = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
-                float rp_test = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
-
-                double casterDistSun = glm::length(casterPos);
-                float planetDistSun = glm::length(data.position.vec3());
-
-                ShadowRenderingStruct shadowData;
-                shadowData.isShadowing = false;
-
-                if (((d_test - rp_test) < _planetRadius) &&
-                    (casterDistSun < planetDistSun)) {
-                    // The current caster is shadowing the current planet
-                    shadowData.isShadowing = true;
-                    shadowData.rs = shadowConf.source.second;
-                    shadowData.rc = shadowConf.caster.second;
-                    shadowData.sourceCasterVec = sourceCasterVec;
-                    shadowData.xp = xp_test;
-                    shadowData.xu = shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
-                    shadowData.casterPositionVec = glm::vec3(casterPos);
-                }
-                shadowDataArray.push_back(shadowData);
-            }
-
-            const std::string uniformVarName("shadowDataArray[");
-            unsigned int counter = 0;
-            for (const auto & sd : shadowDataArray) {
-                std::stringstream ss;
-                ss << uniformVarName << counter << "].isShadowing";
-                _programObject->setUniform(ss.str(), sd.isShadowing);
-                if (sd.isShadowing) {
-                    ss.str(std::string());
-                    ss << uniformVarName << counter << "].xp";
-                    _programObject->setUniform(ss.str(), sd.xp);
-                    ss.str(std::string());
-                    ss << uniformVarName << counter << "].xu";
-                    _programObject->setUniform(ss.str(), sd.xu);
-                    //ss.str(std::string());
-                    //ss << uniformVarName << counter << "].rs";
-                    //_programObject->setUniform(ss.str(), sd.rs);
-                    ss.str(std::string());
-                    ss << uniformVarName << counter << "].rc";
-                    _programObject->setUniform(ss.str(), sd.rc);
-                    ss.str(std::string());
-                    ss << uniformVarName << counter << "].sourceCasterVec";
-                    _programObject->setUniform(ss.str(), sd.sourceCasterVec);
-                    ss.str(std::string());
-                    ss << uniformVarName << counter << "].casterPositionVec";
-                    _programObject->setUniform(ss.str(), sd.casterPositionVec);
-                }
-                counter++;
-            }
-        }
-
-        // render
-        _geometry->render();
-
-        // disable shader
-        _programObject->deactivate();
-        */
-
         if (_atmosphereEnabled) {
             DeferredcasterTask task{ _deferredcaster.get(), data };
             renderTask.deferredcasterTasks.push_back(task);
@@ -766,11 +588,6 @@ namespace openspace {
         _stateMatrix = data.modelTransform.rotation;
         _time = data.time.j2000Seconds();
 
-        // TODO: Enable the shading program later to test spherical atmosphere (JCC)
-        /*
-        if (_programObject && _programObject->isDirty())
-            _programObject->rebuildFromFile();
-        */
         if (_deferredcaster) {
             _deferredcaster->setTime(data.time.j2000Seconds());
             glm::dmat4 modelTransform;
@@ -794,7 +611,8 @@ namespace openspace {
         if (_sunRadianceIntensity != _sunIntensityP ||
             _hdrConstant != _hdrExpositionP ||
             _exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground() ||
-            _gammaConstant != _gammaConstantP)
+            _gammaConstant != _gammaConstantP ||
+            _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP)
             executeComputation = false;
 
         _atmosphereRadius = _atmospherePlanetRadius + _atmosphereHeightP;
@@ -802,8 +620,8 @@ namespace openspace {
         _rayleighHeightScale = _rayleighHeightScaleP;
         _rayleighScatteringCoeff = glm::vec3(_rayleighScatteringCoeffXP * 0.001f, _rayleighScatteringCoeffYP * 0.001f,
             _rayleighScatteringCoeffZP * 0.001f);
-        _ozoneLayerEnabled = _ozoneEnabledP.value();
-        _ozoneHeightScale = _ozoneHeightScaleP.value();
+        _ozoneLayerEnabled = _ozoneEnabledP;
+        _ozoneHeightScale = _ozoneHeightScaleP;
         _ozoneExtinctionCoeff = glm::vec3(_ozoneCoeffXP.value() * 0.00001f,
             _ozoneCoeffYP.value() * 0.00001f,
             _ozoneCoeffZP.value() * 0.00001f);
@@ -815,7 +633,9 @@ namespace openspace {
         _sunRadianceIntensity = _sunIntensityP;
         _hdrConstant = _hdrExpositionP;
         _exposureBackgroundConstant = OsEng.renderEngine().renderer()->hdrBackground();
-        _gammaConstant = _gammaConstantP.value();
+        _gammaConstant = _gammaConstantP;
+        _sunFollowingCameraEnabled = _sunFollowingCameraEnabledP;
+
 
         if (_deferredcaster) {
             _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
@@ -835,6 +655,7 @@ namespace openspace {
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
             _deferredcaster->setRenderableClass(_atmosphereType);
+            _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
 
             if (executeComputation)
                 _deferredcaster->preCalculateAtmosphereParam();

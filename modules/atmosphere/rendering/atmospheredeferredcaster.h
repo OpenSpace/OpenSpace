@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -55,24 +55,6 @@ public:
     };
 
 public:
-    // See: Precomputed Atmospheric Scattering from Bruneton et al.
-    // for explanation of the following parameters.
-    
-    /*const unsigned int TRANSMITTANCE_TABLE_WIDTH = 256;
-    const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 64;
-
-    const unsigned int IRRADIANCE_TABLE_WIDTH = 64;
-    const unsigned int IRRADIANCE_TABLE_HEIGHT = 16;
-
-    const unsigned int DELTA_E_TABLE_WIDTH = 64;
-    const unsigned int DELTA_E_TABLE_HEIGHT = 16;
-        
-    const unsigned int R_SAMPLES = 32;
-    const unsigned int MU_SAMPLES = 128;
-    const unsigned int MU_S_SAMPLES = 32;
-    const unsigned int NU_SAMPLES = 8;*/
-
-public:
     AtmosphereDeferredcaster();
     virtual ~AtmosphereDeferredcaster();
 
@@ -110,6 +92,7 @@ public:
     void setMieExtinctionCoefficients(const glm::vec3 & mieExtCoeff);
     void setEllipsoidRadii(const glm::dvec3 & radii);
     void setRenderableClass(const AtmosphereDeferredcaster::AtmospherRenderableClass rc);
+    void enableSunFollowing(const bool enable);
 
     void setPrecalculationTextureScale(const float _preCalculatedTexturesScale);
     void enablePrecalculationTexturesSaving();
@@ -167,6 +150,7 @@ private:
     bool _atmosphereCalculated;
     bool _atmosphereEnabled;
     bool _ozoneEnabled;
+    bool _sunFollowingCameraEnabled;
     float _atmosphereRadius;
     float _atmospherePlanetRadius;
     float _planetAverageGroundReflectance;

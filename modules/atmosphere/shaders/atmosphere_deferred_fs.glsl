@@ -21,10 +21,43 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#version __CONTEXT__
 
-const int RenderablePlanet = 1;
-const int RenderableGlobe  = 2;
+/*****************************************************************************************
+ * Modified parts of the code (4D texture mechanism) from Eric Bruneton is used in the   *
+ * following code.                                                                       * 
+ ****************************************************************************************/
+
+ /**
+ * Precomputed Atmospheric Scattering
+ * Copyright (c) 2008 INRIA
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#version __CONTEXT__
 
 #define EPSILON 0.0001f
 #include "floatoperations.glsl"
@@ -32,9 +65,16 @@ const int RenderableGlobe  = 2;
 #include "hdr.glsl"
 #include "atmosphere_common.glsl"
 
+const int RenderablePlanet = 1;
+const int RenderableGlobe  = 2;
+
+out vec4 renderTarget;
+in vec3 interpolatedNDCPos;
+
 // Atmosphere applied over a RenderablePlanet or
 // a RenderableGlobe
 uniform int RenderableClass;
+uniform int nAaSamples;
 
 // Background exposure hack
 uniform float backgroundExposure;
@@ -46,111 +86,27 @@ uniform sampler2DMS mainNormalTexture;
 uniform sampler2DMS mainColorTexture;
 uniform sampler2DMS otherDataTexture;
 
-uniform int nAaSamples;
-
-//layout(location = 0) out vec4 renderTarget;
-out vec4 renderTarget;
-
-in vec3 interpolatedNDCPos;
-
 // Model Transform Matrix Used for Globe Rendering
-uniform dmat4 dInverseTransformMatrix; 
 uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
 uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye *
 uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye *
 uniform dmat4 dInverseCamRotTransform; 
 uniform dmat4 dInverseModelTransformMatrix; 
-uniform dmat4 dSGCTEyeToOSWorldTransformMatrix;
+//uniform dmat4 dSGCTEyeToOSWorldTransformMatrix;
 
-// Double Precision Versions:
 uniform dvec4 dObjpos;
 uniform dvec3 dCampos;
-
 uniform dvec3 sunDirectionObj;
-
 uniform dvec3 ellipsoidRadii;
 
 /*******************************************************************************
  ****** ALL CALCULATIONS FOR ATMOSPHERE ARE KM AND IN OBJECT SPACE SYSTEM ******
  *******************************************************************************/
 
-/* Calculates the intersection of the view ray direction with the atmosphere and 
- * returns the first intersection (0.0 when inside atmosphere): offset
- * and the second intersection: maxLength
- */
-
 struct dRay {
   dvec4 origin;
   dvec4 direction;
 };
-
-struct Ellipsoid {
-  dvec4 center;
-  dvec3 size;
-};
-
-bool dIntersectEllipsoid(const dRay ray, const Ellipsoid ellipsoid, out double offset, out double maxLength) {
-  dvec4 O_C = ray.origin - ellipsoid.center;
-  dvec4 dir = normalize(ray.direction);
-
-  offset    = 0.0f;
-  maxLength = 0.0f;
-
-  double a =
-    ((dir.x*dir.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((dir.y*dir.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((dir.z*dir.z)/(ellipsoid.size.z*ellipsoid.size.z));
-  double b =
-    ((2.f*O_C.x*dir.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((2.f*O_C.y*dir.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((2.f*O_C.z*dir.z)/(ellipsoid.size.z*ellipsoid.size.z));
-  double c =
-    ((O_C.x*O_C.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((O_C.y*O_C.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((O_C.z*O_C.z)/(ellipsoid.size.z*ellipsoid.size.z))
-    - 1.f;
-  
-  double d = ((b * b)-(4.0 * a * c));
-  if ( d < 0.f || a == 0.f || b == 0.f || c == 0.f )
-    return false;
-  
-  d = sqrt(d);
-  
-  double t1 = (-b+d) / (2.0 * a);
-  double t2 = (-b-d) / (2.0 * a);
-  
-  if ( t1 <= EPSILON && t2 <= EPSILON )
-    return false; // both intersections are behind the ray origin
-
-  // If only one intersection (t>0) then we are inside the ellipsoid and the intersection is at the back of the ellipsoid
-  bool back = (t1 <= EPSILON || t2 <= EPSILON); 
-  double t  = 0.0;
-  if ( t1 <= EPSILON ) {
-    t = t2;
-  } else {
-    if( t2 <= EPSILON )
-      t = t1;
-    else
-      t = (t1 < t2) ? t1 : t2;
-  }
-
-  if ( t<EPSILON ) 
-    return false; // Too close to intersection
-
-  offset = t;
-  // dvec4 intersection = ray.origin + t * dir;
-  // dvec4 normal       = intersection - ellipsoid.center;
-  // normal.x = 2.0 * normal.x / (ellipsoid.size.x * ellipsoid.size.x);
-  // normal.y = 2.0 * normal.y / (ellipsoid.size.y * ellipsoid.size.y);
-  // normal.z = 2.0 * normal.z / (ellipsoid.size.z * ellipsoid.size.z);
-  
-  // normal.w = 0.0;
-  // normal  *= (back) ? -1.0 : 1.0;
-  // normal  = normalize(normal);
-  
-  return true;
-}
-
 
 /* Function to calculate the initial intersection of the eye (camera) ray
  * with the atmosphere.
@@ -231,10 +187,7 @@ void dCalculateRayRenderableGlobe(out dRay ray, out dvec4 planetPositionObjectCo
   // Using the interpolated coords:
   // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
   dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0) / gl_FragCoord.w; 
-  // This next line is needed because OS or SGCT is not inverting Y axis from 
-  // window space. 
-  //clipCoords.y = (-interpolatedNDCPos.y) / gl_FragCoord.w;
- 
+
   // Clip to SGCT Eye
   dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
   //sgctEyeCoords /= sgctEyeCoords.w;
@@ -248,15 +201,15 @@ void dCalculateRayRenderableGlobe(out dRay ray, out dvec4 planetPositionObjectCo
   dvec4 worldCoords = dvec4(dvec3(tmpRInv) + dCampos, 1.0);
   
   // World to Object
-  dvec4 objectCoords = dInverseTransformMatrix * worldCoords;
+  dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
 
   // Planet Position in Object Space
   // JCC: Applying the inverse of the model transformation on the object postion in World 
   // space results in imprecision. 
-  planetPositionObjectCoords = dvec4(0.0,0.0,0.0,1.0);//dInverseTransformMatrix * dvec4(dObjpos.xyz, 1.0);
+  planetPositionObjectCoords = dvec4(0.0,0.0,0.0,1.0);//dInverseModelTransformMatrix * dvec4(dObjpos.xyz, 1.0);
 
   // Camera Position in Object Space
-  cameraPositionInObject = dInverseTransformMatrix * dvec4(dCampos, 1.0);
+  cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);
     
   // ============================
   // ====== Building Ray ========
@@ -284,9 +237,6 @@ void dCalculateRayRenderablePlanet(out dRay ray, out dvec4 planetPositionObjectC
   // Using the interpolated coords:
   // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
   dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0) / gl_FragCoord.w; 
-  // This next line is needed because OS or SGCT is not inverting Y axis from 
-  // window space. 
-  //clipCoords.y = (-interpolatedNDCPos.y) / gl_FragCoord.w;
  
   // Clip to SGCT Eye
   dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
@@ -294,13 +244,13 @@ void dCalculateRayRenderablePlanet(out dRay ray, out dvec4 planetPositionObjectC
   sgctEyeCoords.w = 1.0;
     
   // SGCT Eye to OS World
-  dvec4 worldCoords = dSGCTEyeToOSWorldTransformMatrix * sgctEyeCoords;
+  dvec4 worldCoords = dInverseSgctEyeToWorldTranform * sgctEyeCoords;
 
   // World to Object
   dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
 
   // Planet Position in Object Space
-  planetPositionObjectCoords =  dvec4(0.0,0.0,0.0,1.0);//dInverseTransformMatrix * dvec4(-dObjpos.xyz + dObjpos.xyz, 1.0);
+  planetPositionObjectCoords =  dvec4(0.0,0.0,0.0,1.0);//dInverseModelTransformMatrix * dvec4(-dObjpos.xyz + dObjpos.xyz, 1.0);
 
   // Camera Position in Object Space
   cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);
@@ -488,9 +438,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   float r0 = length(x0);
   // Normal of intersection point.
   vec3 n = normalize(normal);
-  //n = normalize(vec3(1.0, 1.0, 1.0));
   vec4 groundReflectance = groundMeanColor * vec4(.37);
-  //reflectance.w = 1.0;
             
   // L0 is not included in the irradiance texture.
   // We first calculate the light attenuation from the top of the atmosphere
@@ -620,7 +568,7 @@ void main() {
         }
         dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * farthestPosition);
         */
-        dvec4 fragWorldCoords  = dSGCTEyeToOSWorldTransformMatrix * meanPosition;
+        dvec4 fragWorldCoords  = dInverseSgctEyeToWorldTranform * meanPosition;
         dvec4 fragObjectCoords = dInverseModelTransformMatrix * fragWorldCoords;
         //dvec4 fragObjectCoords = dInverseModelTransformMatrix * meanPosition;//fragWorldCoords;
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
@@ -671,10 +619,7 @@ void main() {
                   
           renderTarget = finalRadiance;
         }      
-      } else {
-        //renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
-        //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
-      }
+      } 
     } else if ( RenderableClass == RenderableGlobe) {
       // Get the ray from camera to atm in object space
       dCalculateRayRenderableGlobe(ray, planetPositionObjectCoords, cameraPositionInObject);
@@ -729,6 +674,7 @@ void main() {
         }
         dvec4 tmpRInvPos            = dInverseCamRotTransform * farthestPosition;        
         */
+        
         // Version with milkway enabled
         dvec4 tmpRInvPos            = dInverseCamRotTransform * dSgctEyeToOSEyeTranform * meanPosition;        
         dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
@@ -736,7 +682,7 @@ void main() {
         //dvec4 fragNormalWorldCoords = dvec4(dvec3(tmpRInvNormal) + dCampos, 1.0);
 
         // World to Object (Normal and Position in meters)
-        dvec4 fragObjectCoords       = dInverseTransformMatrix * fragWorldCoords;
+        dvec4 fragObjectCoords       = dInverseModelTransformMatrix * fragWorldCoords;
         //dvec4 fragNormalObjectCoords = dInverseTransformMatrix * fragNormalWorldCoords;
 
         // Normal in Object Space already (changed 05/26/2017).
@@ -786,24 +732,9 @@ void main() {
           // Final Color of ATM plus terrain:
           vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
           
-          // Debug:
-          //finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
-          //finalRadiance = mix(finalRadiance, meanColor);
-          //finalRadiance = vec4(inscatterColor, 1.0);
-          //vec4 finalRadiance = vec4(HDR(groundColor), 1.0);
-          //finalRadiance = vec4(HDR(inscatterColor), 1.0);
-          //finalRadiance = vec4(HDR(inscatterColor + meanColor.xyz), meanColor.w);
-          //vec4 finalRadiance = vec4(HDR(sunColor), 1.0);
-          //finalRadiance = vec4(sunColor, 1.0);
-          //finalRadiance = vec4(HDR(inscatterColor + groundColor), 1.0);
-          //finalRadiance = vec4(1.0 - HDR(vec3(pixelDepth/100)),1.0);
-                    
           renderTarget = finalRadiance;
         }
-      } else {
-        //renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
-        //renderTarget = meanColor;
-      }
+      } 
     }                     
 }
 

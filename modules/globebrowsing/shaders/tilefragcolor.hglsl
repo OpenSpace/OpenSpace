@@ -46,6 +46,7 @@ uniform Layer Overlays[NUMLAYERS_OVERLAY];
 
 #if USE_WATERMASK
 uniform Layer WaterMasks[NUMLAYERS_WATERMASK];
+float waterReflectance = 0.0;
 #endif // USE_WATERMASK
 
 #if SHOW_HEIGHT_RESOLUTION
@@ -58,7 +59,6 @@ uniform vec2 vertexResolution;
 
 #if USE_NIGHTTEXTURE || USE_WATERMASK || USE_ATMOSPHERE || PERFORM_SHADING
 uniform vec3 lightDirectionCameraSpace;
-float waterReflectance = 0.0;
 #endif
 
 #if PERFORM_SHADING

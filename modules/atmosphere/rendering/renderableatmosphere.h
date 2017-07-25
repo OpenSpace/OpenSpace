@@ -92,11 +92,6 @@ private:
     void updateAtmosphereParameters();
 
 private:
-    // TODO: Enable the shading program later to test spherical atmosphere (JCC)
-    //std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-        
-    // TODO: Enable the geometry later to test spherical atmosphere (JCC)
-    //std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     
     AtmosphereDeferredcaster::AtmospherRenderableClass _atmosphereType;
 
@@ -120,9 +115,11 @@ private:
     properties::FloatProperty _sunIntensityP;
     properties::FloatProperty _hdrExpositionP;
     properties::FloatProperty _gammaConstantP;
+    properties::BoolProperty  _sunFollowingCameraEnabledP;
 
     bool _atmosphereEnabled;
     bool _ozoneLayerEnabled;
+    bool _sunFollowingCameraEnabled;
     float _atmosphereRadius;
     float _atmospherePlanetRadius;
     float _planetAverageGroundReflectance;
@@ -146,8 +143,6 @@ private:
 
     std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
 
-    //float _alpha;
-    //float _planetRadius;
     bool _shadowEnabled;
     double _time;
 
