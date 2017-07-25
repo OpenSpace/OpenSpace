@@ -37,6 +37,20 @@
 
 namespace {
     const char* _loggerCat = "GdalWrapper";
+
+    static const openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
+        "LogGdalErrors",
+        "Log GDAL errors",
+        "If this value is enabled, any error that is raised by GDAL will be logged using "
+        "the logmanager. If this value is disabled, any error will be ignored."
+    };
+
+    static const openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {
+        "GdalMaximumCacheSize",
+        "GDAL maximum cache size",
+        "This function sets the maximum amount of RAM memory in MB that GDAL is "
+        "permitted to use for caching."
+    };
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -56,8 +70,7 @@ void gdalErrorHandler(CPLErr eErrClass, int errNo, const char *msg) {
 GdalWrapper* GdalWrapper::_singleton = nullptr;
 std::mutex GdalWrapper::_mutexLock;
 
-void GdalWrapper::create(size_t maximumCacheSize,
-                         size_t maximumMaximumCacheSize) {
+void GdalWrapper::create(size_t maximumCacheSize, size_t maximumMaximumCacheSize) {
     std::lock_guard<std::mutex> guard(_mutexLock);
     _singleton = new GdalWrapper(maximumCacheSize, maximumMaximumCacheSize);
 }
@@ -85,12 +98,11 @@ bool GdalWrapper::logGdalErrors() const {
     return _logGdalErrors;
 }
 
-GdalWrapper::GdalWrapper(size_t maximumCacheSize,
-                         size_t maximumMaximumCacheSize)
+GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
     : PropertyOwner("GdalWrapper")
-    , _logGdalErrors({ "LogGdalErrors", "Log GDAL errors", "" }, true) // @TODO Missing documentation
+    , _logGdalErrors(LogGdalErrorInfo, true)
     , _gdalMaximumCacheSize (
-        { "GdalMaximumCacheSize", "GDAL maximum cache size", "" }, // @TODO Missing documentation
+        GdalMaximumCacheInfo,
         maximumCacheSize / (1024 * 1024),           // Default
         0,                                          // Minimum: No caching
         maximumMaximumCacheSize / (1024 * 1024),    // Maximum

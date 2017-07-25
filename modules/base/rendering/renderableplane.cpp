@@ -257,10 +257,10 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
         OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
-        _shader->setUniform("additiveBlending", _blendMode == BlendMode::Additive);
+        _shader->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
     }
 
-    bool additiveBlending = _blendMode == BlendMode::Additive && usingFramebufferRenderer;
+    bool additiveBlending = _blendMode == BlendModeAdditive && usingFramebufferRenderer;
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);

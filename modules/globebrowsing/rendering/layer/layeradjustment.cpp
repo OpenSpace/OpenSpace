@@ -28,29 +28,34 @@ namespace {
     const char* keyType = "Type";
     const char* keyChromaKeyColor = "ChromaKeyColor";
     const char* keyChromaKeyTolerance = "ChromaKeyTolerance";
+
+    static const openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
+        "ChromaKeyColor",
+        "Chroma Key Color",
+        "This color is used as the chroma key for the layer that is adjusted."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
+        "ChromaKeyTolerance",
+        "Chroma Key Tolerance",
+        "This value determines the tolerance that is used to determine whether a color "
+        "is matching the selected Chroma key."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+        "Type",
+        "Type",
+        "The type of layer adjustment that is applied to the underlying layer."
+    };
 } // namespace
 
 namespace openspace::globebrowsing {
 
 LayerAdjustment::LayerAdjustment()
     : properties::PropertyOwner("adjustment")
-    , chromaKeyColor(
-        { "ChromaKeyColor", "Chroma key color", "" }, // @TODO Missing documentation
-        glm::vec3(0.f, 0.f, 0.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-      )
-    , chromaKeyTolerance(
-        { "ChromaKeyTolerance", "Chroma key tolerance", "" }, // @TODO Missing documentation
-        0,
-        0,
-        1
-      )
-    , _typeOption(
-        { "Type", "Type", "" }, // @TODO Missing documentation
-        properties::OptionProperty::DisplayType::Dropdown
-      )
-    , _onChangeCallback([](){})
+    , chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
+    , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     // Add options to option properties
     for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
@@ -63,7 +68,9 @@ LayerAdjustment::LayerAdjustment()
         removeVisibleProperties();
         _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
         addVisibleProperties();
-        _onChangeCallback();
+        if (_onChangeCallback) {
+            _onChangeCallback();
+        }
     });
     chromaKeyColor.setViewOption(properties::Property::ViewOptions::Color);
 

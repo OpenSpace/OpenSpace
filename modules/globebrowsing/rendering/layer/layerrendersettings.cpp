@@ -30,17 +30,52 @@ namespace {
     const char* keyMultiplier = "Multiplier";
     const char* keyOffset = "Offset";
     const char* keyValueBlending = "ValueBlending";
+
+    static const openspace::properties::Property::PropertyInfo SetDefaultInfo = {
+        "SetDefault",
+        "Set Default",
+        "If this value is triggered it will reset all of these values to their default "
+        "values."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "Opacity",
+        "Opacity",
+        "This value sets the transparency of this layer. If this value is equal to '1', "
+        "the layer is completely opaque. If this value is equal to '0', the layer is "
+        "completely transparent."
+    };
+
+    static const openspace::properties::Property::PropertyInfo GammaInfo = {
+        "Gamma",
+        "Gamma",
+        "This value is used as an exponent to adjust the color for each tile."
+    };
+
+    static const openspace::properties::Property::PropertyInfo MultiplierInfo = {
+        "Multiplier",
+        "Multiplier",
+        "This value is used as a multiplier to adjust the color applied after taking the "
+        "gamma value as an exponent."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OffsetInfo = {
+        "Offset",
+        "Offset",
+        "This value is used as an additive modifier to adjust the color applied after "
+        "the gamma exponent and the multiplier has been performed."
+    };
 } // namespace
 
 namespace openspace::globebrowsing {
 
 LayerRenderSettings::LayerRenderSettings()
     : properties::PropertyOwner("Settings")
-    , setDefault({ "SetDefault", "Set Default", "" }) // @TODO Missing documentation
-    , opacity(properties::FloatProperty({ "Opacity", "Opacity", "" }, 1.f, 0.f, 1.f)) // @TODO Missing documentation
-    , gamma(properties::FloatProperty({ "Gamma", "Gamma", "" }, 1, 0, 5))// @TODO Missing documentation
-    , multiplier(properties::FloatProperty({ "Multiplier", "Multiplier", "" }, 1.f, 0.f, 20.f))// @TODO Missing documentation
-    , offset(properties::FloatProperty({ "Offset", "Offset", "" }, 0.f, -10000.f, 10000.f))// @TODO Missing documentation
+    , setDefault(SetDefaultInfo)
+    , opacity(OpacityInfo, 1.f, 0.f, 1.f)
+    , gamma(GammaInfo, 1.f, 0.f, 5.f)
+    , multiplier(MultiplierInfo, 1.f, 0.f, 20.f)
+    , offset(OffsetInfo, 0.f, -10000.f, 10000.f)
     , valueBlending(properties::FloatProperty({ "ValueBlending", "Value Blending", "" }, // @TODO Missing documentation
                                                1.f, 0.f, 1.f))
     , useValueBlending(false)

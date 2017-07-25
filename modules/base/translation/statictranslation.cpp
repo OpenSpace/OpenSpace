@@ -45,6 +45,12 @@ documentation::Documentation StaticTranslation::Documentation() {
         "base_transform_translation_static",
         {
             {
+                "Type",
+                new StringEqualVerifier("StaticTranslation"),
+                "",
+                Optional::No
+            },
+            {
                 PositionInfo.identifier,
                 new DoubleVector3Verifier,
                 PositionInfo.description,
@@ -73,7 +79,7 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "StaticEphemeris"
+        "StaticTranslation"
     );
 
     _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);

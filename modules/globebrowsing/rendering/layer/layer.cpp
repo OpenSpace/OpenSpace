@@ -37,29 +37,55 @@ namespace {
     const char* keySettings = "Settings";
     const char* keyAdjustment = "Adjustment";
     const char* KeyBlendMode = "BlendMode";
+
+    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+        "Type",
+        "Type",
+        "The type of this Layer. This value is a read-only property and thus cannot be "
+        "changed."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+        "BlendMode",
+        "Blend Mode",
+        "This value specifies the blend mode that is applied to this layer. The blend "
+        "mode determines how this layer is added to the underlying layers beneath."
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "If this value is enabled, the layer will be used for the final composition of "
+        "the planet. If this value is disabled, the layer will be ignored in the "
+        "composition."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ResetInfo = {
+        "Reset",
+        "Reset",
+        "If this value is triggered, this layer will be reset. This will delete the "
+        "local cache for this layer and will trigger a fresh load of all tiles."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
+        "If the 'Type' of this layer is a solid color, this value determines what this "
+        "solid color is."
+    };
+
 } // namespace
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>(keyName))
-    , _typeOption(
-        { "Type", "Type", "" }, // @TODO Missing documentation
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _blendModeOption(
-        { "BlendMode", "Blend Mode", "" }, // @TODO Missing documentation
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _enabled({ "Enabled", "Enabled", "" }, false) // @TODO Missing documentation
-    , _reset({ "Reset", "Reset", "" }) // @TODO Missing documentation
+    , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _blendModeOption(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _enabled(EnabledInfo, false)
+    , _reset(ResetInfo)
     , _tileProvider(nullptr)
-    , _otherTypesProperties{
-        properties::Vec3Property (
-        { "Color", "Color", "" }, // @TODO Missing documentation
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-        )
-    }
+    , _otherTypesProperties({
+        { ColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f) }
+    })
     , _layerGroupId(id)
 {
     layergroupid::TypeID typeID = parseTypeIdFromDictionary(layerDict);
