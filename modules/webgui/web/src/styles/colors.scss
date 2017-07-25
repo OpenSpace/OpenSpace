@@ -2,12 +2,17 @@
 $dark-grey: #252525;
 $green: #D9DA6D;
 $blue: #3DBDEE;
+$red: #FF4136;
+$orange: #FF851B;
 
 // color usage
 $ui-background-solid: $dark-grey;
 $ui-background: rgba($ui-background-solid, 0.9);
 $ui-background-hover: rgba(white, 0.1);
 $ui-background-active: rgba(black, 0.1);
+
+$ui-danger: $red;
+$ui-warning: $orange;
 
 $ui-divider: darken($ui-background, 1%);
 

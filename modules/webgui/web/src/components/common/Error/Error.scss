@@ -1,0 +1,18 @@
+@import '../../../styles/all';
+
+.ErrorBox {
+  border-bottom: 2px solid transparent;
+  padding: $sidebar-padding;
+  width: 100%;
+}
+
+.severe,
+.error {
+  background: $ui-danger;
+  border-color: darken($ui-danger, 20%);
+}
+
+.warning {
+  background: $ui-warning;
+  border-color: darken($ui-warning, 20%)
+}

@@ -4,6 +4,7 @@ import '../styles/base.scss';
 import styles from './App.scss';
 import Sidebar from './Sidebar/Sidebar';
 import BottomBar from './BottomBar/BottomBar';
+import Error from './common/Error/Error';
 import Connection from '../api/Connection';
 import DataManager from '../api/DataManager';
 
@@ -74,7 +75,9 @@ class App extends Component {
       <div className={styles.app}>
         <section className={styles.Grid__Left}>
           { this.state.connectionLost && (
-            <section>Connection lost.</section>
+            <Error>
+              Connection lost. Trying to reconnect again soon.
+            </Error>
           )}
           <Sidebar />
         </section>
