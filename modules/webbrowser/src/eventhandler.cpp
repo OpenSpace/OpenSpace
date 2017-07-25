@@ -28,7 +28,7 @@
 #include "include/eventhandler.h"
 
 namespace {
-std::string _loggerCat = "WebBrowser:EventHandler";
+const std::string _loggerCat = "WebBrowser:EventHandler";
 }
 
 namespace openspace {
@@ -37,36 +37,32 @@ void EventHandler::initialize() {
             [this](unsigned int charCode, KeyModifier mod) -> bool {
                 if (_browserInstance) {
                     return charCallback(charCode, mod);
-                } else {
-                    return false;
                 }
+                return false;
             }
     );
     OsEng.registerModuleKeyboardCallback(
             [this](Key key, KeyModifier mod, KeyAction action) -> bool {
                 if (_browserInstance) {
                     return keyboardCallback(key, mod, action);
-                } else {
-                    return false;
                 }
+                return false;
             }
     );
     OsEng.registerModuleMousePositionCallback(
             [this](double x, double y) -> bool {
                 if (_browserInstance) {
                     return mousePositionCallback(x, y);
-                } else {
-                    return false;
                 }
+                return false;
             }
     );
     OsEng.registerModuleMouseButtonCallback(
             [this](MouseButton button, MouseAction action) -> bool {
                 if (_browserInstance) {
                     return mouseButtonCallback(button, action);
-                } else {
-                    return false;
                 }
+                return false;
             }
     );
     OsEng.registerModuleMouseScrollWheelCallback(
@@ -74,9 +70,8 @@ void EventHandler::initialize() {
                 if (_browserInstance) {
                     const glm::ivec2 delta(x, y);
                     return mouseWheelCallback(delta);
-                } else {
-                    return false;
                 }
+                return false;
             }
     );
 
