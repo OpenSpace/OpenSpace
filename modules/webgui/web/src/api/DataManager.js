@@ -2,10 +2,17 @@ import Subscription from './Subscription';
 import Connection from './Connection';
 
 const TOPIC_TYPES = {
-  subscribe: 'subscribe',
   get: 'get',
+  interaction: 'interaction',
   set: 'set',
+  subscribe: 'subscribe',
 };
+
+function UnknownTypeException(message, type = '') {
+  this.message = message;
+  this.type = type;
+  this.allowedTypes = TOPIC_TYPES;
+}
 
 /**
  * Send and receive data from the socket server. This allows you to
@@ -41,46 +48,67 @@ class DataManager {
   }
 
   getValue(key, receivingCallback) {
-    const topic = this.nextTopicId;
-    const payload = {
-      topic,
+    const message = {
       type: TOPIC_TYPES.get,
       payload: {
         getProperty: key,
       },
     };
     const callback = (...args) => {
-      this.connection.clearTopic(topic);
+      this.connection.clearTopic(message.topic);
       receivingCallback(args);
     };
-    this.connection.send(payload, callback);
+    this.send(message, callback);
   }
 
   setValue(key, value) {
-    const payload = {
-      topic: this.nextTopicId,
+    const message = this.wrapMessage({
       type: TOPIC_TYPES.get,
       payload: {
         setProperty: key,
         value,
       },
-    };
-    this.connection.send(payload);
+    });
+    this.send(message);
   }
 
   createSubscription(key) {
-    const topic = this.nextTopicId;
-    const payload = {
-      topic,
+    const message = this.wrapMessage({
       type: TOPIC_TYPES.subscribe,
       payload: {
         subscriptionProperty: key,
       },
-    };
-    const subscription = new Subscription(key, topic);
+    });
+    const subscription = new Subscription(key, message.topic);
     const resubscribeOnReconnect = true;
-    this.connection.send(payload, subscription.onMessage, resubscribeOnReconnect);
+    this.send(message, subscription.onMessage, resubscribeOnReconnect);
     return subscription;
+  }
+
+  /**
+   * wrap the Connection.send method
+   * @param message - the message to send
+   * @param args - optional args to send Connection.send
+   */
+  send(message, ...args) {
+    this.connection.send(message, ...args);
+  }
+
+  /**
+   * Wrap a message to be sent
+   *
+   * @param payload - the payload to send
+   * @param type - the topic type to use one of TOPIC_TYPES
+   * @param topic - optional. the topicID to use.
+   *
+   * @returns {{payload: *, type: *, topic: *}}
+   * @throws UnknownTypeException - unless provided `type` is in `TOPIC_TYPES`
+   */
+  wrapMessage({ payload, type, topic = this.nextTopicId }) {
+    if (!TOPIC_TYPES[type]) {
+      throw new UnknownTypeException('Unknown type provided.', type);
+    }
+    return { payload, type, topic };
   }
 
   get nextTopicId() {
@@ -103,7 +131,9 @@ class DataManager {
   }
 }
 
+// Export as a singleton
 const instance = new DataManager();
 Object.seal(instance);
 
+export const TopicTypes = TOPIC_TYPES;
 export default instance;
