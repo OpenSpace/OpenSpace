@@ -1,0 +1,15 @@
+﻿  Building Custom Rule C:/Users/territo/Development/OpenSpace/CMakeLists.txt
+  CMake does not need to re-run because C:/Users/territo/Development/OpenSpace/build/CMakeFiles/generate.stamp is up-to-date.
+  main.cpp
+c:\users\territo\development\openspace\ext\sgct\include\sgct\engine.h(267): warning C4100: 'index': unreferenced formal parameter
+c:\users\territo\development\openspace\ext\sgct\include\external\tinythread.h(559): warning C4100: 'order': unreferenced formal parameter
+c:\users\territo\development\openspace\ext\sgct\include\external\tinythread.h(611): warning C4100: 'order': unreferenced formal parameter
+c:\users\territo\development\openspace\ext\ghoul\ext\cppformat\fmt\format.h(46): warning C4574: '_SECURE_SCL' is defined to be '0': did you mean to use '#if _SECURE_SCL'?
+c:\users\territo\development\openspace\ext\ghoul\ext\cppformat\fmt\format.h(120): warning C4574: '__has_feature' is defined to be '0': did you mean to use '#if __has_feature'?
+main.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:ICF' specification
+  glbinding.lib(types.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
+main.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:ICF' specification
+     Creating library C:/Users/territo/Development/OpenSpace/bin/lib/Release/OpenSpace.lib and object C:/Users/territo/Development/OpenSpace/bin/lib/Release/OpenSpace.exp
+  Generating code
+  Finished generating code
+  OpenSpace.vcxproj -> C:\Users\territo\Development\OpenSpace\bin\openspace\Release\OpenSpace.exe
