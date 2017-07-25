@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -231,6 +231,7 @@ void LayerShaderManager::recompileShaderProgram(
     ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
     using IgnoreError = ghoul::opengl::ProgramObject::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
     _updatedOnLastCall = true;
 }
 
