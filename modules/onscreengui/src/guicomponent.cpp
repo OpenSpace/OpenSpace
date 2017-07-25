@@ -24,8 +24,7 @@
 
 #include <modules/onscreengui/include/guicomponent.h>
 
-namespace openspace {
-namespace gui {
+namespace openspace::gui {
 
 GuiComponent::GuiComponent(std::string name)
     : properties::PropertyOwner(std::move(name))
@@ -50,5 +49,4 @@ void GuiComponent::deinitialize() {}
 
 void GuiComponent::deinitializeGL() {}
 
-} // namespace gui
-} // namespace openspace
+} // namespace openspace::gui

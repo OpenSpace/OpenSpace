@@ -29,9 +29,7 @@
 
 #include <modules/globebrowsing/geometry/aabb.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace culling {
+namespace openspace::globebrowsing::culling {
 
 /**
  * Culls all chunks that are completely outside the view frustum.
@@ -56,8 +54,6 @@ private:
     const AABB3 _viewFrustum;
 };
 
-} // namespace culling
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::culling
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___FRUSTUMCULLER___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,7 @@ uniform bool hasSunPosition;
 uniform vec3 sunPosition;
 uniform float _nightFactor;
 
+
 Fragment getFragment() {
     // Moving the origin to the center
     vec2 st = (vs_st - vec2(0.5)) * 2.0;
@@ -53,16 +54,17 @@ Fragment getFragment() {
     // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
     // textureOffset.x -> 0
     // textureOffset.y -> 1
-    float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-    if (texCoord < 0.f || texCoord > 1.f)
+    const float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+    if (texCoord < 0.f || texCoord > 1.f) {
         discard;
+    }
         
     vec4 diffuse = texture(texture1, texCoord);
-    float colorValue = length(diffuse.rgb);
+    const float colorValue = length(diffuse.rgb);
     // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
     // to normalize the transparency value to [0,1]
-    if (colorValue < 3*transparency) {
-        diffuse.a = pow(colorValue / (3*transparency), 1);
+    if (colorValue < 3.0 * transparency) {
+        diffuse.a = pow(colorValue / (3.0 * transparency), 1);
     }
 
     // The normal for the one plane depends on whether we are dealing
@@ -79,8 +81,9 @@ Fragment getFragment() {
 
     // Reduce the color of the fragment by the user factor
     // if we are facing away from the Sun
-    if (dot(sunPosition, normal) < 0)
+    if (dot(sunPosition, normal) < 0) {
         diffuse.xyz *= _nightFactor;
+    }
 
     Fragment frag;
     frag.color = diffuse;
@@ -91,5 +94,4 @@ Fragment getFragment() {
     //frag.gNormal    = vs_gNormal;
 
     return frag;
-
 }

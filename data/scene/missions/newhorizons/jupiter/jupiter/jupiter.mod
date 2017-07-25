@@ -1,3 +1,5 @@
+local jupiter_local = 0.71492E8
+
 return {
     -- Jupiter barycenter module
     {
@@ -20,9 +22,10 @@ return {
             Type = "RenderablePlanetProjection",
             Frame = "IAU_JUPITER",
             Body = "JUPITER",
+            Radius = jupiter_local,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 0.71492E8,
+                Radius = jupiter_local,
                 Segments = 200,
             },
             Textures = {

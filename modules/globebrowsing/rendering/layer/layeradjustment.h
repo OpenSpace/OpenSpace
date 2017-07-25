@@ -33,15 +33,11 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/vectorproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-namespace tileprovider {
-    class TileProvider;
-}
+namespace tileprovider { class TileProvider; }
 
-class LayerAdjustment : public properties::PropertyOwner
-{
+class LayerAdjustment : public properties::PropertyOwner {
 public:
     LayerAdjustment();
     ~LayerAdjustment() = default;
@@ -66,7 +62,6 @@ private:
     std::function<void(void)> _onChangeCallback;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__

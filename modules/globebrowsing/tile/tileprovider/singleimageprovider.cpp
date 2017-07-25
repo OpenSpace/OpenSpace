@@ -30,11 +30,9 @@
 
 namespace {
     const char* KeyFilePath = "FilePath";
-}
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
     
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : _tile(nullptr, nullptr, Tile::Status::Unavailable)
@@ -57,11 +55,11 @@ SingleImageProvider::SingleImageProvider(const std::string& imagePath)
     reset();
 }
 
-Tile SingleImageProvider::getTile(const TileIndex& tileIndex) {
+Tile SingleImageProvider::getTile(const TileIndex&) {
     return _tile;
 }
 
-Tile::Status SingleImageProvider::getTileStatus(const TileIndex& index) {
+Tile::Status SingleImageProvider::getTileStatus(const TileIndex&) {
     return _tile.status();
 }
 
@@ -98,6 +96,4 @@ int SingleImageProvider::maxLevel() {
     return 1337; // unlimited
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

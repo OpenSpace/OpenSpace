@@ -672,7 +672,7 @@ void main() {
           renderTarget = finalRadiance;
         }      
       } else {
-        renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
+        //renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
         //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
       }
     } else if ( RenderableClass == RenderableGlobe) {

@@ -32,30 +32,26 @@
 #include "imgui.h"
 
 namespace {
-    const std::string _loggerCat = "GuiPropertyComponent";
+    const char* _loggerCat = "GuiPropertyComponent";
     const ImVec2 size = ImVec2(350, 500);
-}
 
-namespace openspace {
-
-namespace {
-int nVisibleProperties(const std::vector<properties::Property*>& properties,
-    properties::Property::Visibility visibility)
-{
-    return static_cast<int>(std::count_if(
-        properties.begin(),
-        properties.end(),
-        [visibility](properties::Property* p) {
-            using V = properties::Property::Visibility;
-            return
-                static_cast<std::underlying_type_t<V>>(visibility) >=
-                static_cast<std::underlying_type_t<V>>(p->visibility());
-        }
-    ));
-}
+    int nVisibleProperties(const std::vector<openspace::properties::Property*>& props,
+        openspace::properties::Property::Visibility visibility)
+    {
+        return static_cast<int>(std::count_if(
+            props.begin(),
+            props.end(),
+            [visibility](openspace::properties::Property* p) {
+                using V = openspace::properties::Property::Visibility;
+                return
+                    static_cast<std::underlying_type_t<V>>(visibility) >=
+                    static_cast<std::underlying_type_t<V>>(p->visibility());
+            }
+        ));
+    }
 } // namespace
 
-namespace gui {
+namespace openspace::gui {
 
 GuiPropertyComponent::GuiPropertyComponent(std::string name) 
     : GuiComponent(std::move(name))
@@ -232,5 +228,4 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
     }
 }
 
-} // gui
-} // openspace
+} // namespace openspace::gui

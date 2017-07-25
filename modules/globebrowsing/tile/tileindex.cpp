@@ -34,10 +34,9 @@ namespace {
     const char* KeyLevel = "Level";
     const char* KeyX = "X";
     const char* KeyY = "Y";
-}
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 TileIndex::TileIndex(int x, int y, int level)
     : x(x), y(y), level(level)
@@ -154,5 +153,4 @@ std::ostream& operator<<(std::ostream& os, const TileIndex& ci) {
     return os;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -44,7 +44,8 @@ BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(
     : _initialized(false)
     , _vaoId(0)
     , _vBufferId(0)
-    , _size(blockSize) {}
+    , _size(blockSize)
+{}
 
 BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
     glDeleteBuffers(1, &_vBufferId);

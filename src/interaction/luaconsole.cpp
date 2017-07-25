@@ -52,9 +52,7 @@ namespace {
     // A high number is chosen since we didn't have a version number before
     // any small number might also be equal to the console history length
 
-    // @CPP17
-    //const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
-    const uint64_t CurrentVersion = 0xFEEEFEEE00000001;
+    const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
     const openspace::Key CommandInputButton = openspace::Key::GraveAccent;
 
@@ -71,7 +69,6 @@ namespace {
      // The number of characters to display after the cursor
      // when horizontal scrolling is required.
      const int NVisibleCharsAfterCursor = 5;
-
 } // namespace
 
 namespace openspace {
@@ -548,9 +545,12 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     default:
         return true;
     }
+
 }
 
-void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
+void LuaConsole::charCallback(unsigned int codepoint,
+                              [[maybe_unused]] KeyModifier modifier)
+{
     if (!_isVisible) {
         return;
     }
@@ -600,7 +600,7 @@ void LuaConsole::update() {
     const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     _currentHeight += (_targetHeight - _currentHeight) *
-        std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
+        std::pow(0.98f, 1.f / (ConsoleOpenSpeed / dpiScaling.y * frametime));
 
     _currentHeight = std::max(0.0f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
@@ -690,10 +690,10 @@ void LuaConsole::render() {
         }
 
         // Since the overflow is positive, at least one character needs to be removed.
-        const size_t nCharsOverflow = std::min(
+        const size_t nCharsOverflow = static_cast<size_t>(std::min(
             std::max(1.f, overflow / _font->glyph('m')->width()),
             static_cast<float>(currentCommand.size())
-        );
+        ));
 
         // Do not hide the cursor and `NVisibleCharsAfterCursor` more characters in the end.
         const size_t maxAdditionalCharsToChopEnd = std::max(
@@ -750,7 +750,7 @@ void LuaConsole::render() {
         res.y - HistoryFontSize * 1.5f + _fullHeight - _currentHeight
     );
 
-    // @CPP17: Replace with array_view
+    // @CPP: Replace with array_view
     std::vector<std::string> commandSubset;
     if (_commandsHistory.size() < static_cast<size_t>(_historyLength)) {
         commandSubset = _commandsHistory;

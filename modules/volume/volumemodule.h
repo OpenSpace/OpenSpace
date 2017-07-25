@@ -34,9 +34,6 @@ public:
     constexpr static const char* Name = "Volume";
 
     VolumeModule();
-    
-protected:
-    void internalInitialize() override;
 };
 
 } // namespace openspace

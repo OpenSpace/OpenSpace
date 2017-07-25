@@ -29,12 +29,14 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 
+#include <algorithm>
+
 namespace {
     const char* KeyName = "Name";
     const char* KeyDescription = "Description";
     const char* KeyPhases = "Phases";
     const char* KeyTimeRange = "TimeRange";
-}
+} // namespace
 
 namespace openspace {
 

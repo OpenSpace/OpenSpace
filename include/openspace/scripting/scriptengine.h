@@ -38,11 +38,9 @@
 #include <memory>
 #include <set>
 
-namespace openspace {
+namespace openspace { class SyncBuffer; }
 
-class SyncBuffer;
-
-namespace scripting {
+namespace openspace::scripting {
 
 /**
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
@@ -132,7 +130,6 @@ private:
     std::string _logFilename;
 };
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting
 
 #endif // __OPENSPACE_CORE___SCRIPTENGINE___H__

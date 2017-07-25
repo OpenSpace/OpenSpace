@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -267,8 +267,8 @@ void RenderEngine::initialize() {
     _raycasterManager = std::make_unique<RaycasterManager>();
     _deferredcasterManager = std::make_unique<DeferredcasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
-    
-    LINFO("Seting renderer from string: " << renderingMethod);
+
+    LINFO("Setting renderer from string: " << renderingMethod);
     setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL

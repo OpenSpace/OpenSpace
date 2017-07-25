@@ -26,10 +26,6 @@
 
 #include <ghoul/misc/dictionary.h>
 
-namespace {
-    const std::string _loggerCat = "ScannerDecoder";
-}
-
 namespace openspace {
    
 ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCANNER")

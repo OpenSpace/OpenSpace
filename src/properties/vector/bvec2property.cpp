@@ -32,8 +32,7 @@
 
 using std::numeric_limits;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(__TYPE__, __CONVFUNC__, __TESTFUNC__)                    \
     [](lua_State * state, bool& success) -> __TYPE__ {                                   \
@@ -105,12 +104,6 @@ namespace properties {
     }
 
 
-// Forcing value from int to bool is acceptable here (line 48)
-#ifdef WIN32
-#pragma warning(disable : 4800)
-#endif
-
-
 REGISTER_TEMPLATEPROPERTY_SOURCE(BVec2Property, glm::bvec2, glm::bvec2(false),
                                  DEFAULT_FROM_LUA_LAMBDA(glm::bvec2, lua_toboolean,
                                                          lua_isboolean),
@@ -119,9 +112,4 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BVec2Property, glm::bvec2, glm::bvec2(false),
                                  DEFAULT_TO_STRING_LAMBDA(glm::bvec2),
                                  LUA_TTABLE);
 
-#ifdef WIN32
-#pragma warning(default : 4800)
-#endif
-
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

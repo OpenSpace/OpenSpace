@@ -29,9 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 class TileProviderByLevel : public TileProvider {
 public:
@@ -53,8 +51,6 @@ private:
     std::vector<std::shared_ptr<TileProvider>> _levelTileProviders;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__

@@ -33,14 +33,12 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul {
-namespace filesystem { class File; }
+namespace ghoul::filesystem { class File; }
 
-namespace opengl {
+namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -60,7 +58,7 @@ public:
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();

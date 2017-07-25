@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,47 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float time;
-uniform sampler2D texture1;
-uniform bool additiveBlending;
+#include "fragment.glsl"
 
+in float vs_screenSpaceDepth;
 in vec2 vs_st;
-in vec4 vs_positionScreenSpace;
 in vec4 vs_gPosition;
 in vec3 vs_gNormal;
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+uniform sampler2D texture1;
+uniform bool additiveBlending;
+
 
 Fragment getFragment() {
-    vec4 diffuse;
-    if(gl_FrontFacing)
-        diffuse = texture(texture1, vs_st);
-    else
-        diffuse = texture(texture1, vec2(1-vs_st.s,vs_st.t));
-
-    //vec4 diffuse = vec4(1,vs_st,1);
-    //vec4 diffuse = vec4(1,0,0,1);
-    // if(position.w > 9.0) {
-    //     diffuse = vec4(1,0,0,1);
-    // }
-
-    if (diffuse.a == 0.0)
-        discard;
-
     Fragment frag;
-    frag.color = diffuse;
-    frag.depth = vs_positionScreenSpace.w;
+    if (gl_FrontFacing) {
+        frag.color = texture(texture1, vs_st);
+    }
+    else {
+        frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+    }
+
+    if (frag.color.a == 0.0) {
+        discard;
+    }
+
+    frag.depth = vs_screenSpaceDepth;
 
     if (additiveBlending) {
         frag.blend = BLEND_MODE_ADDITIVE;
     }
 
     // G-Buffer 
-    frag.gOtherData = vec4(diffuse.xyz, 1.0);
+    frag.gOtherData = vec4(frag.color.xyz, 1.0);
     frag.gPosition  = vs_gPosition;
     frag.gNormal    = vec4(vs_gNormal, 1.0);
     
     return frag;
-
 }

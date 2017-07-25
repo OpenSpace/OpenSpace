@@ -51,7 +51,6 @@ namespace {
     const char* keyBody        = "Body";
     const char* keyStart       = "StartTime";
     const char* keyEnd         = "EndTime";
-    
 } // namespace
 
 namespace openspace {
@@ -177,7 +176,7 @@ bool RenderableModel::deinitialize() {
     return true;
 }
 
-void RenderableModel::render(const RenderData& data) {
+void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
     
     // Fading

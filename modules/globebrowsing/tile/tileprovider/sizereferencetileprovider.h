@@ -29,9 +29,7 @@
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
     
 /**
  * Constructed with an ellipsoid and uses that to render the longitudal length of each
@@ -53,8 +51,6 @@ private:
     Tile _backgroundTile;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__

@@ -42,11 +42,9 @@
 
 namespace {
     const char* _loggerCat = "TileDataType";
-}
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
-namespace tiledatatype {
+namespace openspace::globebrowsing::tiledatatype {
 
 #ifdef GLOBEBROWSING_USE_GDAL
 
@@ -618,6 +616,4 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
     }
 }
 
-} // namespace tiledatatype
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tiledatatype

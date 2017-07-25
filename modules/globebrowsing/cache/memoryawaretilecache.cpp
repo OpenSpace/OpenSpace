@@ -35,13 +35,11 @@
 #include <numeric>
 #include <algorithm>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
-
 namespace {
     const char* _loggerCat = "MemoryAwareTileCache";
-}
+} // namespace
+
+namespace openspace::globebrowsing::cache {
 
 MemoryAwareTileCache::MemoryAwareTileCache()
     : PropertyOwner("TileCache")
@@ -80,11 +78,14 @@ MemoryAwareTileCache::MemoryAwareTileCache()
         setSizeEstimated(_tileCacheSize * 1024 * 1024);
     });
     _cpuAllocatedTileData.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
     _gpuAllocatedTileData.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
     _tileCacheSize.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
   
     setSizeEstimated(_tileCacheSize * 1024 * 1024);
   
@@ -262,10 +263,13 @@ void MemoryAwareTileCache::put(const ProviderTileKey& key,
 }
 
 void MemoryAwareTileCache::update() {
-    size_t dataSizeCPU = getCPUAllocatedDataSize();
-    size_t dataSizeGPU = getGPUAllocatedDataSize();
-    _cpuAllocatedTileData.setValue(dataSizeCPU / 1024 / 1024);
-    _gpuAllocatedTileData.setValue(dataSizeGPU / 1024 / 1024);
+    const size_t dataSizeCPU = getCPUAllocatedDataSize();
+    const size_t dataSizeGPU = getGPUAllocatedDataSize();
+
+    const size_t ByteToMegaByte = 1024 * 1024;
+
+    _cpuAllocatedTileData.setValue(dataSizeCPU / ByteToMegaByte);
+    _gpuAllocatedTileData.setValue(dataSizeGPU / ByteToMegaByte);
 }
 
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
@@ -306,7 +310,4 @@ bool MemoryAwareTileCache::shouldUsePbo() const {
     return _usePbo;
 }
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
-
+} // namespace openspace::globebrowsing::cache

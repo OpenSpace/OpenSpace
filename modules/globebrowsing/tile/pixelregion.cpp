@@ -26,8 +26,7 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
    
 PixelRegion::PixelRegion(const PixelCoordinate& pixelStart,
                          const PixelRange& numberOfPixels)
@@ -258,13 +257,15 @@ PixelRegion::PixelCoordinate PixelRegion::end() const {
 
 bool PixelRegion::lineIntersect(Side side, int p) {
     switch (side) {
-    case Side::LEFT:
-    case Side::RIGHT:
-        return start.x <= p && p <= (start.x + numPixels.x);
+        case Side::LEFT:
+        case Side::RIGHT:
+            return start.x <= p && p <= (start.x + numPixels.x);
 
-    case Side::TOP:
-    case Side::BOTTOM:
-        return start.y <= p && p <= (start.y + numPixels.y);
+        case Side::TOP:
+        case Side::BOTTOM:
+            return start.y <= p && p <= (start.y + numPixels.y);
+        default:
+            throw ghoul::MissingCaseException();
     }
 }
 
@@ -278,5 +279,4 @@ bool PixelRegion::equals(const PixelRegion& r) const {
     return start == r.start && numPixels == r.numPixels;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

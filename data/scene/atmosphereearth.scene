@@ -41,8 +41,8 @@ function preInitialization()
     openspace.bindKey("F4", "openspace.setPropertyValue('Interaction.origin', 'Earth')")
     openspace.bindKey("F3", "openspace.setPropertyValue('Interaction.origin', 'Moon')")
 
-    openspace.setPathToken("${MARS_DATA}", "C:/Users/jonco_000/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
-    --openspace.setPathToken("${MARS_DATA}", "F:/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
+    --openspace.setPathToken("${MARS_DATA}", "C:/Users/jonco_000/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
+    openspace.setPathToken("${MARS_DATA}", "F:/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
 end
 
 function postInitialization()

@@ -94,6 +94,7 @@ function (set_compile_settings project)
         "/w44350"   # behavior change: 'member1' called instead of 'member2'
         "/w44431"   # missing type specifier - int assumed. Note: C no longer supports default-int
         "/w44471"   # a forward declaration of an unscoped enumeration must have an underlying type (int assumed)
+        "/wd4505"   # unreferenced local function has been removed
         "/w44545"   # expression before comma evaluates to a function which is missing an argument list
         "/w44546"   # function call before comma missing argument list
         "/w44547"   # 'operator': operator before comma has no effect; expected operator with side-effect
@@ -110,13 +111,16 @@ function (set_compile_settings project)
         "/w44946"   # reinterpret_cast used between related classes: 'class1' and 'class2'
         "/w44986"   # 'symbol': exception specification does not match previous declaration
         "/w44988"   # 'symbol': variable declared outside class/function scope
-        # "/std:c++latest"      # Boost as of 1.64 still uses unary_function
+        "/std:c++latest"
         "/permissive-"
         "/Zc:strictStrings-"    # Windows header don't adhere to this
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "/WX")
         endif ()
+
+        # Boost as of 1.64 still uses unary_function unless we define this
+        target_compile_definitions(${project} PRIVATE "_HAS_AUTO_PTR_ETC")
     elseif (APPLE)
         target_compile_definitions(${project} PRIVATE "__APPLE__")
 
@@ -391,9 +395,7 @@ function (handle_option_tests)
                 "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
             )
         endif ()
-        set_property(TARGET OpenSpaceTest PROPERTY FOLDER "Unit Tests")
-        set_property(TARGET OpenSpaceTest PROPERTY CXX_STANDARD 14)
-        set_property(TARGET OpenSpaceTest PROPERTY CXX_STANDARD_REQUIRED On)
+        set_compile_settings(OpenSpaceTest)
     endif (OPENSPACE_HAVE_TESTS)
     if (TARGET GhoulTest)
         if (NOT TARGET gtest)

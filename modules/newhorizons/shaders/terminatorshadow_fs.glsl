@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,19 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//in vec4 vs_point_position;
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
+
 in vec4 vs_positionScreenSpace;
 in vec4 vs_point_velocity;
-
-//in float fade;
-//uniform float forceFade;
+in vec4 vs_color;
 
 uniform vec3 color;
 
-in vec4 vs_color;
-
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
 
 Fragment getFragment() {
     Fragment frag;

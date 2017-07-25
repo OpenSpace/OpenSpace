@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,65 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// Uniforms
-uniform float transparency;
-uniform float fading;
-uniform bool performShading = true;
+#include "fragment.glsl"
 
-uniform vec3 directionToSunViewSpace;
-
-uniform sampler2D texture1;
-
-// Input from the vertex shader
 in vec2 vs_st;
 in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
-in vec4 vs_positionScreenSpace;
+in float vs_screenSpaceDepth;
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+uniform float fading;
+uniform bool performShading = true;
+uniform vec3 directionToSunViewSpace;
+uniform sampler2D texture1;
+
+const vec3 SpecularAlbedo = vec3(1.0);
 
 Fragment getFragment() {
-    vec4 textureSample = texture(texture1, vs_st);
-    
-    vec3 diffuseAlbedo = textureSample.rgb;
-    vec3 specularAlbedo = vec3(1);
+    const vec3 diffuseAlbedo = texture(texture1, vs_st).rgb;
 
-    vec3 color;
+    Fragment frag;
 
     if (performShading) {
         // Some of these values could be passed in as uniforms
-        vec3 lightColorAmbient = vec3(1);    
-        vec3 lightColor = vec3(1);    
+        const vec3 lightColorAmbient = vec3(1.0);
+        const vec3 lightColor = vec3(1.0);
         
-        vec3 n = normalize(vs_normalViewSpace);
-        vec3 l = directionToSunViewSpace;
-        vec3 c = normalize(vs_positionCameraSpace.xyz);
-        vec3 r = reflect(l, n);
+        const vec3 n = normalize(vs_normalViewSpace);
+        const vec3 l = directionToSunViewSpace;
+        const vec3 c = normalize(vs_positionCameraSpace.xyz);
+        const vec3 r = reflect(l, n);
 
-        float ambientIntensity = 0.2;
-        float diffuseIntensity = 1;
-        float specularIntensity = 1;
+        const float ambientIntensity = 0.2;
+        const float diffuseIntensity = 1;
+        const float specularIntensity = 1;
 
-        float diffuseCosineFactor = dot(n,l);
-        float specularCosineFactor = dot(c,r);
-        float specularPower = 100;
+        const float diffuseCosineFactor = dot(n,l);
+        const float specularCosineFactor = dot(c,r);
+        const float specularPower = 100.0;
 
-        vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-        vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
-        vec3 specularColor = specularIntensity * lightColor * specularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
+        const vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
+        const vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
+        const vec3 specularColor = specularIntensity * lightColor * SpecularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
 
-        color = ambientColor + diffuseColor + specularColor;
+        frag.color.rgb = ambientColor + diffuseColor + specularColor;
     }
     else {
-        color = diffuseAlbedo;
+        frag.color.rgb = diffuseAlbedo;
     }
 
-    float alpha = fading * transparency;
-
-    Fragment frag;
-    frag.color = vec4(color, alpha);
-    frag.depth = vs_positionScreenSpace.w;
+    frag.color.a = fading;
+    frag.depth = vs_screenSpaceDepth;
 
     return frag;
 }

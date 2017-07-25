@@ -34,9 +34,7 @@
 
 #include <climits>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 unsigned int TileProvider::_numTileProviders = 0;
 
@@ -189,6 +187,4 @@ Tile TileProvider::getDefaultTile() const {
     return _defaultTile;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

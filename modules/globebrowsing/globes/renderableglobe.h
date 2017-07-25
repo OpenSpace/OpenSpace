@@ -34,13 +34,13 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace openspace {
-
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+namespace openspace {
     class AtmosphereDeferredcaster;
+}
 #endif
 
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class ChunkedLodGlobe;
 class PointGlobe;
@@ -99,33 +99,6 @@ public:
         glm::vec3 casterPositionVec;
         bool isShadowing;
     };
-
-#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-    struct AtmosphereProperties {
-        properties::FloatProperty atmosphereHeightP;
-        properties::FloatProperty groundAverageReflectanceP;
-        properties::FloatProperty rayleighHeightScaleP;
-        properties::FloatProperty rayleighScatteringCoeffXP;
-        properties::FloatProperty rayleighScatteringCoeffYP;
-        properties::FloatProperty rayleighScatteringCoeffZP;        
-        properties::FloatProperty ozoneHeightScaleP;
-        properties::FloatProperty ozoneLayerExtinctionCoeffXP;
-        properties::FloatProperty ozoneLayerExtinctionCoeffYP;
-        properties::FloatProperty ozoneLayerExtinctionCoeffZP;
-        properties::FloatProperty mieHeightScaleP;
-        properties::FloatProperty mieScatteringCoeffXP;
-        properties::FloatProperty mieScatteringCoeffYP;
-        properties::FloatProperty mieScatteringCoeffZP;
-        properties::FloatProperty mieScatteringExtinctionPropCoefficientP;
-        properties::FloatProperty mieAsymmetricFactorGP;
-        properties::FloatProperty sunIntensityP;
-        properties::FloatProperty hdrExpositionP;
-        properties::FloatProperty gammaConstantP;
-        properties::BoolProperty ozoneLayerEnabledP;
-    };
-
-    const AtmosphereProperties& atmosphereProperties() const;
-#endif
     
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
@@ -134,7 +107,7 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& tasks) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     // Getters that perform calculations
@@ -184,46 +157,8 @@ private:
     // Shadow
     bool _shadowEnabled;
     std::vector< ShadowConf > _shadowConfArray;
-
-#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-    // Atmosphere Data
-    bool _atmosphereEnabled;
-    bool _ozoneLayerEnabled;
-    float _atmosphereRadius;
-    float _atmospherePlanetRadius;
-    float _planetAverageGroundReflectance;
-    float _rayleighHeightScale;
-    float _ozoneLayerHeightScale;
-    float _mieHeightScale;
-    float _miePhaseConstant;
-    float _sunRadianceIntensity;
-    float _exposureConstant;
-    float _exposureBackgroundConstant;
-    float _gammaConstant;
-    
-    glm::vec3 _rayleighScatteringCoeff;
-    glm::vec3 _ozoneLayerExtinctionCoeff;
-    glm::vec3 _mieScatteringCoeff;
-    glm::vec3 _mieExtinctionCoeff;
-
-    // Atmosphere Debug
-    bool _saveCalculationsToTexture;
-    float _preCalculatedTexturesScale;
-
-    AtmosphereProperties _atmosphereProperties;
-    properties::PropertyOwner _atmospherePropertyOwner;
-
-    // Deferred ATM Rendering
-    std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
-#endif
-
-private:
-#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-    void updateAtmosphereParameters();
-#endif
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__

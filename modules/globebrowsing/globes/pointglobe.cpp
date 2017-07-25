@@ -33,8 +33,7 @@
 
 #include <ghoul/opengl/programobject.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 PointGlobe::PointGlobe(const RenderableGlobe& owner)
     : _owner(owner)
@@ -69,7 +68,7 @@ bool PointGlobe::initialize() {
 
     glBindVertexArray(_vaoID);
 
-	std::array<glm::vec2, 6> quadVertexData = {{
+    std::array<glm::vec2, 6> quadVertexData = {{
       glm::vec2(-1.0f, -1.0f),
       glm::vec2(1.0f, -1.0f),
       glm::vec2(-1.0f, 1.0f),
@@ -104,7 +103,7 @@ bool PointGlobe::isReady() const {
     return (_vaoID != 0) && (_vertexBufferID != 0);
 }
     
-void PointGlobe::render(const RenderData& data) {
+void PointGlobe::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
     // Calculate variables to be used as uniform variables in shader
@@ -116,10 +115,12 @@ void PointGlobe::render(const RenderData& data) {
         glm::normalize(glm::dvec3(1000000.0f) - bodyPosition));
   
     glm::dvec3 camToBody = bodyPosition - data.camera.positionVec3();
-    float distanceToBody = glm::length(camToBody);
+    float distanceToBody = static_cast<float>(glm::length(camToBody));
 
-    float avgRadius = _owner.ellipsoid().averageRadius();
-    float lightIntensity = _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody;
+    float avgRadius = static_cast<float>(_owner.ellipsoid().averageRadius());
+    float lightIntensity = static_cast<float>(
+        _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody
+    );
     float lightIntensityClamped = glm::min(lightIntensity, _intensityClamp.value());
     //float lightOverflow = glm::max(lightIntensity - lightIntensityClamped, 0.0f);
 
@@ -162,5 +163,4 @@ void PointGlobe::render(const RenderData& data) {
     _programObject->deactivate();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

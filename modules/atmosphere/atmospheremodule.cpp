@@ -28,7 +28,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-//#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
+#include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 namespace openspace {
 
@@ -39,7 +39,7 @@ AtmosphereModule::AtmosphereModule() :
 void AtmosphereModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    //fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+    fRenderable->registerClass<RenderableAtmosphere>("RenderableAtmosphere");
 }
 
 } // namespace openspace
