@@ -293,7 +293,6 @@ bool RenderablePlanet::initialize() {
             "shadowNightProgram",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl");
-        std::cout << "--------- Using shadow_nighttexture program. ----------" << std::endl;
     } 
     else if (_programObject == nullptr && _shadowEnabled) {
         // shadow program
@@ -301,7 +300,6 @@ bool RenderablePlanet::initialize() {
             "shadowProgram",
             "${MODULE_SPACE}/shaders/shadow_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_fs.glsl");
-        std::cout << "--------- Using shadow program. ----------" << std::endl;
     } 
     else if (_programObject == nullptr && _hasNightTexture) {
         // Night texture program
@@ -309,7 +307,6 @@ bool RenderablePlanet::initialize() {
             "nightTextureProgram",
             "${MODULE_SPACE}/shaders/nighttexture_vs.glsl",
             "${MODULE_SPACE}/shaders/nighttexture_fs.glsl");
-        std::cout << "--------- Using nighttexture program. ----------" << std::endl;
     }
     else if (_programObject == nullptr) {
         // pscstandard
@@ -317,7 +314,6 @@ bool RenderablePlanet::initialize() {
             "pscstandard",
             "${MODULE_SPACE}/shaders/renderableplanet_vs.glsl",
             "${MODULE_SPACE}/shaders/renderableplanet_fs.glsl");
-        std::cout << "--------- Using renderableplanet program. ----------" << std::endl;
     }
 
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
