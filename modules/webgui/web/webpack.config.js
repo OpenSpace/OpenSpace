@@ -34,7 +34,8 @@ module.exports = {
       // Load SASS!
       {
         test: /\.scss$/,
-        use: [{
+        use: [
+          {
             loader: 'style-loader',
           }, {
             loader: 'css-loader?modules',

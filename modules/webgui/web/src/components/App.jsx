@@ -22,6 +22,7 @@ class App extends Component {
     this.initializeConnection = this.initializeConnection.bind(this);
     this.resetConnection = this.resetConnection.bind(this);
     this.connectionStatusCallback = this.connectionStatusCallback.bind(this);
+    this.hoverControl = this.hoverControl.bind(this);
   }
 
   componentDidMount() {
@@ -69,13 +70,26 @@ class App extends Component {
     }, connectionWait);
   }
 
+  hoverControl(event) {
+    const { target, currentTarget } = event;
+    if (target === currentTarget) {
+      if (this.isHovered) {
+        this.isHovered = false;
+        console.log('blur');
+      }
+    } else if (!this.isHovered) {
+      this.isHovered = true;
+      console.log('focus');
+    }
+  }
+
   render() {
     return (
       <div className={styles.app}>
-        <section className={styles.Grid__Left}>
+        <section className={styles.Grid__Left} onMouseMove={this.hoverControl}>
           <Sidebar />
         </section>
-        <section className={styles.Grid__Right}>
+        <section className={styles.Grid__Right} onMouseMove={this.hoverControl}>
           <BottomBar />
         </section>
       </div>

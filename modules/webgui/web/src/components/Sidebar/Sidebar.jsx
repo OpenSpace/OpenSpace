@@ -36,9 +36,10 @@ class Sidebar extends React.Component {
   }
 
   render() {
-    const SelectedView = views[this.state.view];
+    const { view } = this.state;
+    const SelectedView = views[view];
     return (
-      <section className={styles.Sidebar}>
+      <section className={`${styles.Sidebar} ${view ? styles.active : ''}`}>
         { SelectedView && (<SelectedView closeCallback={this.selectView} />)}
 
         <TabMenu>
