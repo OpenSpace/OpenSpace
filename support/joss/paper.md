@@ -6,8 +6,7 @@ tags:
 authors:
     - name: Alexander Bock
       orcid: 0000-0002-2849-6146
-      affiliation: 1
-      affiliation: 4
+      affiliation: 1,4
     - name: Emil Axelsson
       orcid: 0000-0003-3482-6356
       affiliation: 1
@@ -42,9 +41,9 @@ affiliations:
       index: 2
     - name: Community Coordinated Modeling Center
       index: 3
-    - New York University
+    - name: New York University
       index: 4
-    - University of Utah
+    - name: University of Utah
       index: 5
 date: 25 July 2017
 bibliography: paper.bib
