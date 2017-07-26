@@ -51,7 +51,6 @@ namespace openspace::properties {
 template <typename T>
 class TemplateProperty : public Property {
 public:
-    using Property::PropertyInfo;
     using ValueType = T;
 
     /**
@@ -63,7 +62,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    TemplateProperty(PropertyInfo info,
+    TemplateProperty(Property::PropertyInfo info,
         T value = PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>());
 
     /**

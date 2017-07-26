@@ -143,7 +143,7 @@ namespace openspace::properties {
 
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(PropertyInfo info, T value)
+TemplateProperty<T>::TemplateProperty(Property::PropertyInfo info, T value)
     : Property(std::move(info))
     , _value(std::move(value))
 {}

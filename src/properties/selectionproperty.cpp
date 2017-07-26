@@ -36,7 +36,7 @@ namespace openspace::properties {
 
 const std::string SelectionProperty::OptionsKey = "Options";
 
-SelectionProperty::SelectionProperty(PropertyInfo info)
+SelectionProperty::SelectionProperty(Property::PropertyInfo info)
     : TemplateProperty(std::move(info), std::vector<int>())
 {}
 

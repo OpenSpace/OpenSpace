@@ -33,14 +33,12 @@ namespace openspace::properties {
 
 class SelectionProperty : public TemplateProperty<std::vector<int>> {
 public:
-    using Property::PropertyInfo;
-
     struct Option {
         int value;
         std::string description;
     };
 
-    SelectionProperty(PropertyInfo info);
+    SelectionProperty(Property::PropertyInfo info);
     
     void addOption(Option option);
     void removeOptions();

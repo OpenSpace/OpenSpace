@@ -40,8 +40,6 @@ namespace openspace::properties {
  */
 class OptionProperty : public IntProperty {
 public:
-    using Property::PropertyInfo;
-
     /**
      * The struct storing a single option consisting of an integer <code>value</code> and
      * a <code>string</code> description.
@@ -64,7 +62,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    OptionProperty(PropertyInfo info);
+    OptionProperty(Property::PropertyInfo info);
 
     /**
     * The constructor delegating the <code>identifier</code> and the <code>guiName</code>

@@ -32,12 +32,10 @@ namespace openspace::properties {
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
-    using TemplateProperty<T>::PropertyInfo;
-
-    NumericalProperty(PropertyInfo info);
-    NumericalProperty(PropertyInfo info, T value);
-    NumericalProperty(PropertyInfo info, T value, T minimumValue, T maximumValue);
-    NumericalProperty(PropertyInfo info, T value, T minimumValue, T maximumValue,
+    NumericalProperty(Property::PropertyInfo info);
+    NumericalProperty(Property::PropertyInfo info, T value);
+    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue, T maximumValue);
+    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue, T maximumValue,
         T steppingValue);
 
     bool getLuaValue(lua_State* state) const override;

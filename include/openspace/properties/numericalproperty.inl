@@ -232,7 +232,7 @@ const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
 // a single constructor    
         
 template <typename T>
-NumericalProperty<T>::NumericalProperty(PropertyInfo info)
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info)
     : NumericalProperty<T>(
         std::move(info),
         PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
@@ -243,7 +243,7 @@ NumericalProperty<T>::NumericalProperty(PropertyInfo info)
 {}
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(PropertyInfo info, T value)
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value)
     : NumericalProperty<T>(
         std::move(info),
         std::move(value),
@@ -254,8 +254,8 @@ NumericalProperty<T>::NumericalProperty(PropertyInfo info, T value)
 {}
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(PropertyInfo info, T value, T minimumValue,
-                                        T maximumValue)
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
+                                        T minimumValue, T maximumValue)
     : NumericalProperty<T>(
         std::move(info),
         std::move(value), std::move(minimumValue), std::move(maximumValue),
@@ -264,7 +264,7 @@ NumericalProperty<T>::NumericalProperty(PropertyInfo info, T value, T minimumVal
 {}
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(PropertyInfo info, T value,
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
                                         T minimumValue, T maximumValue, T steppingValue)
     : TemplateProperty<T>(std::move(info), std::move(value))
     , _minimumValue(std::move(minimumValue))
