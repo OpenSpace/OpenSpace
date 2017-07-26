@@ -38,9 +38,42 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const char* KeyTexture = "Texture";
-    const char* KeySize = "Size";
-    const char* KeyOffset = "Offset";
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "Texture",
+        "Texture",
+        "This value is the path to a texture on disk that contains a one-dimensional "
+        "texture which is used for these rings."
+    };
+    
+    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size",
+        "This value specifies the radius of the rings in meter."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OffsetInfo = {
+        "Offset",
+        "Offset",
+        "This value is used to limit the width of the rings.Each of the two values is a "
+        "value between 0 and 1, where 0 is the center of the ring and 1 is the maximum "
+        "extent at the radius. If this value is, for example {0.5, 1.0}, the ring is "
+        "only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
+    };
+
+    static const openspace::properties::Property::PropertyInfo NightFactorInfo = {
+        "NightFactor",
+        "Night Factor",
+        "This value is a multiplicative factor that is applied to the side of the rings "
+        "that is facing away from the Sun. If this value is equal to '1', no darkening "
+        "of the night side occurs."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+        "Transparency",
+        "Transparency",
+        "This value determines the transparency of part of the rings depending on the "
+        "color values. For this value v, the transparency is equal to length(color) / v."
+    };
 } // namespace
 
 namespace openspace {
@@ -58,25 +91,33 @@ documentation::Documentation RenderableRings::Documentation() {
                 Optional::No
             },
             {
-                KeyTexture,
+                TextureInfo.identifier,
                 new StringVerifier,
-                "The one dimensional texture that is used for both sides of the ring.",
+                TextureInfo.description,
                 Optional::No
             },
             {
-                KeySize,
+                SizeInfo.identifier,
                 new DoubleVerifier,
-                "The radius of the rings in meters.",
+                SizeInfo.description,
                 Optional::No
             },
             {
-                KeyOffset,
+                OffsetInfo.identifier,
                 new DoubleVector2Verifier,
-                "The offset that is used to limit the width of the rings. Each of the "
-                "two values is a value between 0 and 1, where 0 is the center of the "
-                "ring and 1 is the maximum extent at the radius. If this value is, for "
-                "example {0.5, 1.0}, the ring is only shown between radius/2 and radius. "
-                "It defaults to {0.0, 1.0}.",
+                OffsetInfo.description,
+                Optional::Yes
+            },
+            {
+                NightFactorInfo.identifier,
+                new DoubleVerifier,
+                NightFactorInfo.description,
+                Optional::Yes
+            },
+            {
+                TransparencyInfo.identifier,
+                new DoubleVerifier,
+                TransparencyInfo.description,
                 Optional::Yes
             }
         }
@@ -85,11 +126,11 @@ documentation::Documentation RenderableRings::Documentation() {
 
 RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath("texture", "Texture")
-    , _size("size", "Size", 1.f, 0.f, std::pow(1.f, 25.f))
-    , _offset("offset", "Offset", glm::vec2(0, 1.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _nightFactor("nightFactor", "Night Factor", 0.33f, 0.f, 1.f)
-    , _transparency("transparency", "Transparency", 0.15f, 0.f, 1.f)
+    , _texturePath(TextureInfo)
+    , _size(SizeInfo, 1.f, 0.f, 1e25f)
+    , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
+    , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
     , _shader(nullptr)
     , _texture(nullptr)
     , _textureFile(nullptr)
@@ -106,26 +147,37 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
         "RenderableRings"
     );
 
-    _size = static_cast<float>(dictionary.value<double>(KeySize));
+    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
     setBoundingSphere(_size);
-    addProperty(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
+    addProperty(_size);
 
-    _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (dictionary.hasKeyAndValue<glm::vec2>(KeyOffset)) {
-        _offset = dictionary.value<glm::vec2>(KeyOffset);
+    if (dictionary.hasKey(OffsetInfo.identifier)) {
+        _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
     
 
+    _texturePath.onChange([&]() { loadTexture(); });
     addProperty(_texturePath);
-    _texturePath.onChange([&](){ loadTexture(); });
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
     
+    if (dictionary.hasKey(NightFactorInfo.identifier)) {
+        _nightFactor = static_cast<float>(
+            dictionary.value<double>(NightFactorInfo.identifier)
+        );
+    }
     addProperty(_nightFactor);
+
+    if (dictionary.hasKey(TransparencyInfo.identifier)) {
+        _transparency = static_cast<float>(
+            dictionary.value<double>(TransparencyInfo.identifier)
+        );
+    }
     addProperty(_transparency);
 }
 

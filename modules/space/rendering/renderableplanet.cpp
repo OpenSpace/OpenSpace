@@ -65,6 +65,44 @@ namespace {
     const char* keyShadowSource                  = "Source";
     const char* keyShadowCaster                  = "Caster";
     const char* keyBody                          = "Body";
+    
+    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+        "PlanetTexture",
+        "Color Base Texture",
+        "The path to the base color texture that is used on the planet prior to any "
+        "image projection."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightTextureInfo = {
+        "HeightMap",
+        "Heightmap Texture",
+        "The path to the height map texture that is used for the planet. If no height "
+        "map is specified the planet does not use a height field."
+    };
+
+    static const openspace::properties::Property::PropertyInfo NightTextureInfo = {
+        "NightTexture",
+        "Night Texture",
+        "The path to the night texture that is used for the part of the planet that is "
+        "facing away from the Sun. If no night texture is loaded, the night side of the "
+        "planet is rendered dark."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
+         "HeightExaggeration",
+         "Height Exaggeration",
+         "This value determines the level of height exaggeration that is applied to a "
+         "potential height field. A value of '0' inhibits the height field, whereas a "
+         "value of '1' uses the measured height field."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "If this value is enabled, the model will be shaded based on the relative "
+        "location to the Sun. If this value is disabled, shading is disabled and the "
+        "entire model is rendered brightly."
+    };
 } // namespace
 
 namespace openspace {
@@ -89,19 +127,19 @@ documentation::Documentation RenderablePlanet::Documentation() {
                 Optional::Yes
             },
             {
-                KeyColorTexture,
+                KeyColorTexture, // @TODO Use ColorTextureInfo.identifier instead
                 new StringVerifier,
                 "Specifies the color texture that is used for this RenderablePlanet.",
                 Optional::Yes
             },
             {
-                KeyHeightTexture,
+                KeyHeightTexture, // @TODO Use HeightTextureInfo.identifier instead
                 new StringVerifier,
                 "Specifies the height texture that is used for this RenderablePlanet.",
                 Optional::Yes
             },
             {
-                KeyNightTexture,
+                KeyNightTexture, // @TODO Use NightTextureInfo.identifier instead
                 new StringVerifier,
                 "Specifies the texture that is used for the night side of this "
                 "RenderablePlanet.",
@@ -114,6 +152,18 @@ documentation::Documentation RenderablePlanet::Documentation() {
                 "this value is 'false', any existing night texture will not be used. "
                 "This value defaults to 'true'.",
                 Optional::Yes
+            },
+            {
+                HeightExaggerationInfo.identifier,
+                new DoubleVerifier,
+                HeightExaggerationInfo.description,
+                Optional::Yes
+            },
+            {
+                PerformShadingInfo.identifier,
+                new BoolVerifier,
+                PerformShadingInfo.description,
+                Optional::Yes
             }
         }
     };
@@ -121,15 +171,15 @@ documentation::Documentation RenderablePlanet::Documentation() {
 
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath("colorTexture", "Color Texture")
-    , _nightTexturePath("nightTexture", "Night Texture")
-    , _heightMapTexturePath("heightMap", "Heightmap Texture")
+    , _colorTexturePath(ColorTextureInfo)
+    , _nightTexturePath(NightTextureInfo)
+    , _heightMapTexturePath(HeightTextureInfo)
     , _programObject(nullptr)
     , _texture(nullptr)
     , _nightTexture(nullptr)
-    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 10.f)
+    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 10.f)
     , _geometry(nullptr)
-    , _performShading("performShading", "Perform Shading", true)
+    , _performShading(PerformShadingInfo, true)
     , _alpha(1.f)
     , _planetRadius(0.f)
     , _hasNightTexture(false)
@@ -201,7 +251,16 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     addProperty(_heightMapTexturePath);
     _heightMapTexturePath.onChange(loadTextureCallback);
 
+    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
+        _heightExaggeration = static_cast<float>(
+            dictionary.value<double>(HeightExaggerationInfo.identifier)
+        );
+    }
     addProperty(_heightExaggeration);
+
+    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
+        _performShading = dictionary.value<bool>(HeightExaggerationInfo.identifier);
+    }
     addProperty(_performShading);
 
     // Shadow data:

@@ -38,25 +38,22 @@
 
 #include <string>
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo SceneInfo = {
+        "Scenes",
+        "Current Scene",
+        "Specifies the currently loaded scene. If this value is changed it will cause "
+        "the current scene to be unloaded and the newly selected scene to be loaded"
+    };
+
+} // namespace
+
 namespace openspace {
 
 SettingsEngine::SettingsEngine()
     : properties::PropertyOwner("Global Properties")
-    , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
-    , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
-    , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
-    , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
-    , _spiceUseExceptions("enableSpiceExceptions", "Enable Spice Exceptions", false)
+    , _scenes(SceneInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    _spiceUseExceptions.onChange([this] {
-        SpiceManager::ref().setExceptionHandling(
-            SpiceManager::UseException(_spiceUseExceptions)
-        );
-    });
-    addProperty(_spiceUseExceptions);
-    addProperty(_busyWaitForDecode);
-    addProperty(_logSGCTOutOfOrderErrors);
-    addProperty(_useDoubleBuffering);
     addProperty(_scenes);
 }
 
@@ -85,18 +82,6 @@ void SettingsEngine::setModules(const std::vector<OpenSpaceModule*>& modules) {
     for (OpenSpaceModule* m : modules) {
         addPropertySubOwner(m);
     }
-}
-
-bool SettingsEngine::busyWaitForDecode() {
-    return _busyWaitForDecode;
-}
-
-bool SettingsEngine::logSGCTOutOfOrderErrors() {
-    return _logSGCTOutOfOrderErrors;
-}
-
-bool SettingsEngine::useDoubleBuffering() {
-    return _useDoubleBuffering;
 }
 
 }  // namespace openspace

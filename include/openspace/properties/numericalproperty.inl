@@ -232,50 +232,41 @@ const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
 // a single constructor    
         
 template <typename T>
-NumericalProperty<T>::NumericalProperty(std::string identifier, std::string guiName,
-                                        Property::Visibility visibility)
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info)
     : NumericalProperty<T>(
-        std::move(identifier), std::move(guiName),
+        std::move(info),
         PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
-        visibility
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
     )
 {}
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(std::string identifier,
-                                        std::string guiName, T value,
-                                        Property::Visibility visibility)
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value)
     : NumericalProperty<T>(
-        std::move(identifier), std::move(guiName), std::move(value),
+        std::move(info),
+        std::move(value),
         PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
-        visibility
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
     )
 {}
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(std::string identifier, std::string guiName,
-                                        T value, T minimumValue, T maximumValue,
-                                        Property::Visibility visibility)
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
+                                        T minimumValue, T maximumValue)
     : NumericalProperty<T>(
-        std::move(identifier) , std::move(guiName), std::move(value),
-        std::move(minimumValue), std::move(maximumValue),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
-        visibility
+        std::move(info),
+        std::move(value), std::move(minimumValue), std::move(maximumValue),
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
     )
 {}
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(std::string identifier,
-                                        std::string guiName, T value,
-                                        T minimumValue, T maximumValue, T steppingValue,
-                                        Property::Visibility visibility)
-    : TemplateProperty<T>(std::move(identifier), std::move(guiName), std::move(value),
-                          visibility)
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
+                                        T minimumValue, T maximumValue, T steppingValue)
+    : TemplateProperty<T>(std::move(info), std::move(value))
     , _minimumValue(std::move(minimumValue))
     , _maximumValue(std::move(maximumValue))
     , _stepping(std::move(steppingValue))

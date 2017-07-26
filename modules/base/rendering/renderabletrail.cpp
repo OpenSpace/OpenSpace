@@ -35,12 +35,6 @@
 
 namespace {
     const char* KeyTranslation = "Translation";
-    const char* KeyColor = "Color";
-    const char* KeyEnableFade = "EnableFade";
-    const char* KeyFade = "Fade";
-    const char* KeyLineWidth = "LineWidth";
-    const char* KeyPointSize = "PointSize";
-    const char* KeyRendering = "Rendering";
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -56,6 +50,54 @@ namespace {
         { "Lines+Points", RenderingModeLinesPoints },
         { "Points+Lines", RenderingModeLinesPoints }
     };
+
+    static const openspace::properties::Property::PropertyInfo LineColorInfo = {
+        "Color",
+        "Color",
+        "This value determines the RGB main color for the lines and points of the trail."
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnableFadeInfo = {
+        "EnableFade",
+        "Enable line fading of old points",
+        "Toggles whether the trail should fade older points out. If this value is "
+        "'true', the 'Fade' parameter determines the speed of fading. If this value is "
+        "'false', the entire trail is rendered at full opacity and color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FadeInfo = {
+        "Fade",
+        "Line fade",
+        "The fading factor that is applied to the trail if the 'EnableFade' value is "
+        "'true'. If it is 'false', this setting has no effect. The higher the number, "
+        "the less fading is applied."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width of the trail if the selected rendering "
+        "method includes lines. If the rendering mode is set to Points, this value is "
+        "ignored."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PointSizeInfo = {
+        "PointSize",
+        "Point Size",
+        "This value specifies the base size of the points along the line if the selected "
+        "rendering method includes points. If the rendering mode is set the Lines, this "
+        "value is ignored. If a subsampling of the values is performed, the subsampled "
+        "values are half this size."
+    };
+
+    static const openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+        "Rendering",
+        "Rendering Mode",
+        "Determines how the trail should be rendered to the screen.If 'Lines' is "
+        "selected, only the line part is visible, if 'Points' is selected, only the "
+        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts."
+    };
+
 } // namespace
 
 namespace openspace {
@@ -74,56 +116,42 @@ documentation::Documentation RenderableTrail::Documentation() {
                 Optional::No
             },
             {
-                KeyColor,
+                LineColorInfo.identifier,
                 new DoubleVector3Verifier,
-                "The main color the for lines and points on this trail. The value is "
-                "interpreted as an RGB value.",
+                LineColorInfo.description,
                 Optional::No
             },
             {
-                KeyEnableFade,
+                EnableFadeInfo.identifier,
                 new BoolVerifier,
-                "Toggles whether the trail should fade older points out. If this value "
-                "is 'true', the 'Fade' parameter determines the speed of fading. If this "
-                "value is 'false', the entire trail is rendered at full opacity and "
-                "color. The default value is 'true'.",
+                EnableFadeInfo.description,
                 Optional::Yes
             },
             {
-                KeyFade,
+                FadeInfo.identifier,
                 new DoubleVerifier,
-                "The fading factor that is applied to the trail if the 'EnableFade' "
-                "value is 'true'. If it is 'false', this setting has no effect. The "
-                "higher the number, the less fading is applied. This value defaults to "
-                "1.0.",
+                FadeInfo.description,
                 Optional::Yes
             },
             {
-                KeyLineWidth,
+                LineWidthInfo.identifier,
                 new DoubleVerifier,
-                "This value specifies the line width of the trail if this rendering "
-                "method is selected. It defaults to 2.0.",
+                LineWidthInfo.description,
                 Optional::Yes
             },
             {
-                KeyPointSize,
+                PointSizeInfo.identifier,
                 new DoubleVerifier,
-                "This value specifies the base size of the points along the line if this "
-                "rendering method is selected. If a subsampling of the values is "
-                "performed, the subsampled values are half this size. The default value "
-                "is 1.0.",
+                PointSizeInfo.description,
                 Optional::Yes
             },
             {
-                KeyRendering,
+                RenderingModeInfo.identifier,
                 new StringInListVerifier(
                     // Taken from the RenderingModeConversion map above
-                    { "Lines", "Points", "Lines+Points", "Points + Lines" }
+                    { "Lines", "Points", "Lines+Points", "Points+Lines" }
                 ),
-                "Determines how the trail should be rendered to the screen. If 'Lines' "
-                "is selected, only the line part is visible, if 'Points' is selected, "
-                "only the corresponding points (and subpoints) are shown. "
-                "Lines+Points' shows both parts. On default, only the lines are rendered",
+                RenderingModeInfo.description,
                 Optional::Yes
             }
         },
@@ -133,15 +161,12 @@ documentation::Documentation RenderableTrail::Documentation() {
 
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor("lineColor", "Color", glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _useLineFade("useLineFade", "Use Line Fade", true)
-    , _lineFade("lineFade", "Line Fade", 1.f, 0.f, 20.f)
-    , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
-    , _pointSize("pointSize", "Point Size", 1, 1, 64)
-    , _renderingModes(
-        "renderingMode",
-        "Rendering Mode",
-        properties::OptionProperty::DisplayType::Dropdown
+    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _useLineFade(EnableFadeInfo, true)
+    , _lineFade(FadeInfo, 1.f, 0.f, 30.f)
+    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , _pointSize(PointSizeInfo, 1, 1, 64)
+    , _renderingModes(RenderingModeInfo, properties::OptionProperty::DisplayType::Dropdown
     )
 {
     _translation = std::unique_ptr<Translation>(Translation::createFromDictionary(
@@ -149,26 +174,28 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     ));
     addPropertySubOwner(_translation.get());
 
-    _lineColor = dictionary.value<glm::vec3>(KeyColor);
+    _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
     addProperty(_lineColor);
 
-    if (dictionary.hasKeyAndValue<bool>(KeyEnableFade)) {
-        _useLineFade = dictionary.value<bool>(KeyEnableFade);
+    if (dictionary.hasKeyAndValue<bool>(EnableFadeInfo.identifier)) {
+        _useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
     }
     addProperty(_useLineFade);
 
-    if (dictionary.hasKeyAndValue<double>(KeyFade)) {
-        _lineFade = static_cast<float>(dictionary.value<double>(KeyFade));
+    if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
+        _lineFade = static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
     }
     addProperty(_lineFade);
 
-    if (dictionary.hasKeyAndValue<double>(KeyLineWidth)) {
-        _lineWidth = static_cast<float>(dictionary.value<double>(KeyLineWidth));
+    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+        _lineWidth = static_cast<float>(dictionary.value<double>(
+            LineWidthInfo.identifier
+        ));
     }
     addProperty(_lineWidth);
 
-    if (dictionary.hasKeyAndValue<double>(KeyPointSize)) {
-        _pointSize = static_cast<int>(dictionary.value<double>(KeyPointSize));
+    if (dictionary.hasKeyAndValue<double>(PointSizeInfo.identifier)) {
+        _pointSize = static_cast<int>(dictionary.value<double>(PointSizeInfo.identifier));
     }
     addProperty(_pointSize);
 
@@ -180,9 +207,9 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
     // This map is not accessed out of order as long as the Documentation is adapted
     // whenever the map changes. The documentation will check for valid values
-    if (dictionary.hasKeyAndValue<std::string>(KeyRendering)) {
+    if (dictionary.hasKeyAndValue<std::string>(RenderingModeInfo.identifier)) {
         _renderingModes = RenderingModeConversion.at(
-            dictionary.value<std::string>(KeyRendering)
+            dictionary.value<std::string>(RenderingModeInfo.identifier)
         );
     }
     else {

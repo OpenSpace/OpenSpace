@@ -65,9 +65,9 @@ private:
     };
 
     // Properties
+    properties::BoolProperty _rollFriction;
     properties::BoolProperty _rotationalFriction;
-    properties::BoolProperty _horizontalFriction;
-    properties::BoolProperty _verticalFriction;
+    properties::BoolProperty _zoomFriction;
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _sensitivity;

@@ -28,14 +28,23 @@
 
 namespace {
     const char* _loggerCat = "LayerGroup";
-}
+
+    static const openspace::properties::Property::PropertyInfo BlendTileInfo = {
+        "BlendTileLevels",
+        "Blend between levels",
+        "If this value is enabled, images between different levels are interpolated, "
+        "rather than switching between levels abruptly. This makes transitions smoother "
+        "and more visually pleasing."
+    };
+
+} // namespace
 
 namespace openspace::globebrowsing {
 
 LayerGroup::LayerGroup(layergroupid::GroupID id)
     : properties::PropertyOwner(std::move(layergroupid::LAYER_GROUP_NAMES[id]))
     , _groupId(id)
-    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", false)
+    , _levelBlendingEnabled(BlendTileInfo, true)
 {
     addProperty(_levelBlendingEnabled);
 }

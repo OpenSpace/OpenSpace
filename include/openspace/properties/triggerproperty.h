@@ -38,11 +38,12 @@ public:
     /**
      * Initializes the TriggerProperty by delegating the <code>identifier</code> and
      * <code>guiName</code> to the Property constructor.
-     * \param identifier The unique identifier used for this Property
-     * \param guiName The human-readable name of this Property
+     * \param info The PropertyInfo structure that contains all the required static
+     * information for initializing this Property.
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
      */
-    TriggerProperty(std::string identifier, std::string guiName,
-        Property::Visibility visibility = Property::Visibility::User);
+    TriggerProperty(PropertyInfo info);
 
     /**
      * Returns the class name <code>TriggerProperty</code>.

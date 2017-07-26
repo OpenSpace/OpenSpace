@@ -32,9 +32,21 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    const char* KeySourceFrame = "SourceFrame";
-    const char* KeyDestinationFrame = "DestinationFrame";
     const char* KeyKernels = "Kernels";
+
+    static const openspace::properties::Property::PropertyInfo SourceInfo = {
+        "SourceFrame",
+        "Source",
+        "This value specifies the source frame that is used as the basis for the "
+        "coordinate transformation. This has to be a valid SPICE name."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DestinationInfo = {
+        "DestinationFrame",
+        "Destination",
+        "This value specifies the destination frame that is used for the coordinate "
+        "transformation. This has to be a valid SPICE name."
+    };
 } // namespace
 
 namespace openspace {
@@ -52,25 +64,21 @@ documentation::Documentation SpiceRotation::Documentation() {
                 Optional::No
             },
             {
-                KeySourceFrame,
+                SourceInfo.identifier,
                 new StringAnnotationVerifier("A valid SPICE NAIF name or integer"),
-                "The source frame that is used as the basis for the coordinate "
-                "transformation. This has to be a valid SPICE name.",
+                SourceInfo.description,
                 Optional::No
             },
             {
-                KeyDestinationFrame,
+                DestinationInfo.identifier,
                 new StringAnnotationVerifier("A valid SPICE NAIF name or integer"),
-                "The destination frame that is used for the coordinate transformation. "
-                "This has to be a valid SPICE name.",
+                DestinationInfo.description,
                 Optional::No
             },
             {
                 KeyKernels,
                 new OrVerifier(
-                    new TableVerifier({
-                        { "*", new StringVerifier }
-                    }),
+                    new StringListVerifier,
                     new StringVerifier
                 ),
                 "A single kernel or list of kernels that this SpiceTranslation depends "
@@ -83,8 +91,8 @@ documentation::Documentation SpiceRotation::Documentation() {
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
-    : _sourceFrame("source", "Source", "")
-    , _destinationFrame("destination", "Destination", "")
+    : _sourceFrame(SourceInfo) // @TODO Missing documentation
+    , _destinationFrame(DestinationInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -92,8 +100,8 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
         "SpiceRotation"
     );
 
-    _sourceFrame = dictionary.value<std::string>(KeySourceFrame);
-    _destinationFrame = dictionary.value<std::string>(KeyDestinationFrame);
+    _sourceFrame = dictionary.value<std::string>(SourceInfo.identifier);
+    _destinationFrame = dictionary.value<std::string>(DestinationInfo.identifier);
 
     if (dictionary.hasKeyAndValue<std::string>(KeyKernels)) {
         SpiceManager::ref().loadKernel(dictionary.value<std::string>(KeyKernels));

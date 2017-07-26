@@ -78,7 +78,6 @@ private:
     properties::BoolProperty _shiftMeridianBy180;
 
     properties::FloatProperty _heightExaggeration;
-    properties::FloatProperty _debugProjectionTextureRotation;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     

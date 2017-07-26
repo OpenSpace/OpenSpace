@@ -52,7 +52,7 @@ void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access 
             _pixelBuffers[i]->unbind();
             if (dataPtr) { // Success in mapping
                 // Add this index to the map of mapped pixel buffers
-                _indexMap.emplace(key, i);
+                _indexMap.emplace(key, static_cast<int>(i));
                 return dataPtr;
             }
         }

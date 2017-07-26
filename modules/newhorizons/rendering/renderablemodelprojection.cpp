@@ -53,6 +53,21 @@ namespace {
     const char* keyTextureColor = "Textures.Color";
 
     const char* _destination = "GALACTIC";
+
+    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+        "ColorTexture",
+        "Color Base Texture",
+        "This is the path to a local image file that is used as the base texture for "
+        "the model on which the image projections are layered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "If this value is enabled, the model will be shaded based on the relative "
+        "location to the Sun. If this value is disabled, shading is disabled and the "
+        "entire model is rendered brightly."
+    };
 } // namespace
 
 namespace openspace {
@@ -83,11 +98,16 @@ documentation::Documentation RenderableModelProjection::Documentation() {
                 Optional::No
             },
             {
-                keyTextureColor,
+                keyTextureColor, // @TODO Change to ColorTextureInfo.identifier
                 new StringVerifier,
-                "The base texture for the model that is shown before any projection "
-                "occurred.",
+                ColorTextureInfo.description,
                 Optional::No
+            },
+            {
+                PerformShadingInfo.identifier,
+                new BoolVerifier,
+                PerformShadingInfo.description,
+                Optional::Yes
             },
             {
                 keyBoundingSphereRadius,
@@ -104,13 +124,13 @@ documentation::Documentation RenderableModelProjection::Documentation() {
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath("colorTexture", "Color Texture")
-    , _rotation("rotation", "Rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f))
+    , _colorTexturePath(ColorTextureInfo)
+    , _rotation({ "Rotation", "Rotation", "" }, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f)) // @TODO Remove this property
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _geometry(nullptr)
-    , _performShading("performShading", "Perform Shading", true)
+    , _performShading(PerformShadingInfo, true)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -119,7 +139,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     );
 
     std::string name;
-    [[maybe_unused]] bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+    [[ maybe_unused ]] bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModelProjection");
 
     using ghoul::Dictionary;
@@ -145,6 +165,10 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     float boundingSphereRadius = 1.0e9;
     dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
     setBoundingSphere(boundingSphereRadius);
+
+    if (dictionary.hasKey(PerformShadingInfo.identifier)) {
+        _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
+    }
 
     Renderable::addProperty(_performShading);
     Renderable::addProperty(_rotation);

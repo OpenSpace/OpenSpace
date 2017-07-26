@@ -347,7 +347,7 @@ return {
                 Type = "SpiceTranslation",
                 Body = "OSIRIS-REX",
                 Frame = "IAU_EARTH",
-            Observer = "EARTH",
+                Observer = "EARTH",
             },
             Color = { 0.9, 0.9, 0.0 },
             StartTime = "2016 SEP 8 23:05:00.50",
