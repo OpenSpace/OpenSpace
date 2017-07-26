@@ -34,11 +34,30 @@
 
 namespace {
     const char* KeyBody = "Body";
-    const char* KeyObserver = "Observer";
-    const char* KeyFrame = "Frame";
     const char* KeyKernels = "Kernels";
 
-    const char* DefaultReferenceFrame = "GALACTIC";
+    static const openspace::properties::Property::PropertyInfo TargetInfo = {
+        "Target",
+        "Target",
+        "This is the SPICE NAIF name for the body whose translation is to be computed by "
+        "the SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') "
+        "or a NAIF integer id code (such as '399')."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OriginInfo = {
+        "Origin",
+        "Origin",
+        "This is the SPICE NAIF name for the parent of the body whose translation is to "
+        "be computed by the SpiceTranslation. It can either be a fully qualified name "
+        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FrameInfo = {
+        "Frame",
+        "Reference Frame",
+        "This is the SPICE NAIF name for the reference frame in which the position "
+        "should be retrieved. The default value is GALACTIC."
+    };
 } // namespace
 
 namespace openspace {
@@ -57,7 +76,7 @@ documentation::Documentation SpiceTranslation::Documentation() {
                 Optional::No
             },
             {
-                KeyBody,
+                KeyBody, // @TODO Rename to TargetInfo.identifier
                 new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
                 "This is the SPICE NAIF name for the body whose translation is to be "
                 "computed by the SpiceTranslation. It can either be a fully qualified "
@@ -65,22 +84,18 @@ documentation::Documentation SpiceTranslation::Documentation() {
                 Optional::No
             },
             {
-                KeyObserver,
+                OriginInfo.identifier,
                 new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
-                "This is the SPICE NAIF name for the parent of the body whose "
-                "translation is to be computed by the SpiceTranslation. It can either be "
-                "a fully qualified name (such as 'SOLAR SYSTEM BARYCENTER') or a NAIF "
-                "integer id code (such as '0').",
+                OriginInfo.description,
                 Optional::No
             },
             {
-                KeyFrame,
+                FrameInfo.identifier,
                 new StringAnnotationVerifier(
                     "A valid SPICE NAIF name for a reference frame"
                 ),
-                "This is the SPICE NAIF name for the reference frame in which the "
-                "position should be retrieved. The default value is GALACTIC",
-                Optional::Yes
+                FrameInfo.description,
+                Optional::No
             },
             {
                 KeyKernels,
@@ -99,9 +114,9 @@ documentation::Documentation SpiceTranslation::Documentation() {
 }
 
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
-    : _target({ "Target", "Target", "" }) // @TODO Missing documentation
-    , _origin({ "Origin", "Origin", "" }) // @TODO Missing documentation
-    , _frame({ "Frame", "Reference Frame", "" }, DefaultReferenceFrame) // @TODO Missing documentation
+    : _target(TargetInfo)
+    , _origin(OriginInfo)
+    , _frame(FrameInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -109,12 +124,9 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
         "SpiceTranslation"
     );
 
-    _target = dictionary.value<std::string>(KeyBody);
-    _origin = dictionary.value<std::string>(KeyObserver);
-
-    if (dictionary.hasKey(KeyFrame)) {
-        _frame = dictionary.value<std::string>(KeyFrame);
-    }
+    _target = dictionary.value<std::string>(TargetInfo.identifier);
+    _origin = dictionary.value<std::string>(OriginInfo.identifier);
+    _frame = dictionary.value<std::string>(FrameInfo.identifier);
 
     auto loadKernel = [](const std::string& kernel) {
         if (!FileSys.fileExists(kernel)) {
