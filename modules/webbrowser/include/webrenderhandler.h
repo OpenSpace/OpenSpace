@@ -53,7 +53,8 @@ protected:
      * Alpha mask showing whether or not a pixel is filled with content
      *
      * Depending on what config you're running (Debug/Release), use different types here.
-     * This is to increase performance
+     * This is to increase performance on Debug, since VS is performing lots of extra
+     * checks on vector<bool>.
      */
 #if !(defined(NDEBUG) || defined(DEBUG))
     std::vector<char> _alphaMask;

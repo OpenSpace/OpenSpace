@@ -46,7 +46,7 @@ public:
 private:
     bool mouseButtonCallback(MouseButton, MouseAction);
     bool mousePositionCallback(double, double);
-    bool mouseWheelCallback(const glm::ivec2 &delta);
+    bool mouseWheelCallback(glm::ivec2 delta);
     bool charCallback(unsigned int, KeyModifier);
     bool keyboardCallback(Key, KeyModifier, KeyAction);
     bool specialKeyEvent(Key);

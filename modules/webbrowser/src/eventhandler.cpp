@@ -98,7 +98,12 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     return false;
 }
 
-bool EventHandler::mouseWheelCallback(const glm::ivec2 &delta) {
+bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
+#ifdef WIN32
+    // scroll wheel returns very low numbers on Windows machines
+    delta.x *= 50;
+    delta.y *= 50;
+#endif
     return _browserInstance->sendMouseWheelEvent(mouseEvent(), delta);
 }
 

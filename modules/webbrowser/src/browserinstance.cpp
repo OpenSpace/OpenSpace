@@ -115,11 +115,8 @@ bool BrowserInstance::sendKeyEvent(const CefKeyEvent &event) {
 
 bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
                                           bool mouseUp) {
-    if (hasContent(event.x, event.y)) {
-        _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, SINGLE_CLICK);
-        return true;
-    }
-    return false;
+    _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, SINGLE_CLICK);
+    return hasContent(event.x, event.y);
 }
 
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent &event) {
@@ -128,11 +125,15 @@ bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent &event) {
     return false;
 }
 
-bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent &event, const glm::ivec2 &delta) {
-    // TODO(klas): Figure out how this should be used
+/**
+ * send scroll wheel event to browser
+ * @param event - key event with position
+ * @param delta - the scroll amount in pixels
+ * @return if this scroll should be blocked or not
+ */
+bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent &event, glm::ivec2 delta) {
     _browser->GetHost()->SendMouseWheelEvent(event, delta.x, delta.y);
-    // TODO: change so that the return value is something not-false
-    return false;
+    return hasContent(event.x, event.y);
 }
 
 void BrowserInstance::reloadBrowser() {

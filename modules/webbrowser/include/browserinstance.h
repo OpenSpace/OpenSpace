@@ -49,7 +49,7 @@ public:
     bool sendKeyEvent(const CefKeyEvent &event);
     bool sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button, bool mouseUp);
     bool sendMouseMoveEvent(const CefMouseEvent &event);
-    bool sendMouseWheelEvent(const CefMouseEvent &event, const glm::ivec2 &delta);
+    bool sendMouseWheelEvent(const CefMouseEvent &event, glm::ivec2 delta);
     void reloadBrowser();
 
     const CefRefPtr<CefBrowser> &getBrowser() const;
