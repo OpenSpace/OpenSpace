@@ -55,7 +55,6 @@ private:
     bool charCallback(unsigned int, KeyModifier);
     bool keyboardCallback(Key, KeyModifier, KeyAction);
     bool specialKeyEvent(Key);
-    bool shouldSendMoveEvent();
     int mapFromGlfwToNative(Key);
 
     CefMouseEvent mouseEvent();

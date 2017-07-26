@@ -119,7 +119,6 @@ bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent &event, CefBrowser
 }
 
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent &event) {
-    // TODO(klas): Replace DID_NOT_LEAVE_WINDOW with real value (if needed?)
     _browser->GetHost()->SendMouseMoveEvent(event, DID_NOT_LEAVE_WINDOW);
     return false;
 }

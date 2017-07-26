@@ -96,7 +96,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
         _lastClickPosition = _mousePosition;
     }
 
-    return _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, _leftMouseDown, clickCount);
+    return _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, !_leftMouseDown, clickCount);
 }
 
 bool EventHandler::isDoubleClick() const {
@@ -120,28 +120,8 @@ bool EventHandler::isDoubleClick() const {
 bool EventHandler::mousePositionCallback(double x, double y) {
     _mousePosition.x = (int) x;
     _mousePosition.y = (int) y;
-
-    if (shouldSendMoveEvent()) {
-        _browserInstance->sendMouseMoveEvent(mouseEvent());
-    }
-
+    _browserInstance->sendMouseMoveEvent(mouseEvent());
     // Let the mouse event trickle on
-    return false;
-}
-
-/**
- * decide if a mouseMove event should be sent or not. This is to support drag and drop.
- * @return
- */
-bool EventHandler::shouldSendMoveEvent() {
-    // if the mouse button isn't down - always send event
-    if (!_leftMouseDown) {
-        return true;
-    }
-
-    // figure out how big the movement has been
-
-    // default - send false
     return false;
 }
 
