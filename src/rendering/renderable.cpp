@@ -97,15 +97,6 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     return result;
 }
 
-//Renderable::Renderable()
-//    : properties::PropertyOwner("renderable")
-//    , _enabled(EnabledInfo, true)
-//    , _renderBin(RenderBin::Opaque)
-//    , _startTime("")
-//    , _endTime("")
-//    , _hasTimeInterval(false)
-//{}
-
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner("renderable")
     , _enabled(EnabledInfo, true)

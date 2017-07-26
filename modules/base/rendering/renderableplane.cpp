@@ -38,8 +38,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const char* KeyBlendMode = "BlendMode";
-
     enum BlendMode {
         BlendModeNormal = 0,
         BlendModeAdditive
@@ -118,7 +116,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _shader(nullptr)
     , _texture(nullptr)
-    //, _blendMode(BlendMode::Normal)
     , _quad(0)
     , _vertexPositionBuffer(0)
     , _planeIsDirty(false)
@@ -153,8 +150,8 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     });
 
-    if (dictionary.hasKey(KeyBlendMode)) {
-        const std::string v = dictionary.value<std::string>(KeyBlendMode);
+    if (dictionary.hasKey(BlendModeInfo.identifier)) {
+        const std::string v = dictionary.value<std::string>(BlendModeInfo.identifier);
         if (v == "Normal") {
             _blendMode = BlendModeNormal;
         }

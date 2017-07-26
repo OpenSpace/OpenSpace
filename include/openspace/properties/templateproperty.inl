@@ -142,21 +142,6 @@ namespace openspace::properties {
     }                                                                                    \
 
 
-
-// Delegating constructors are necessary; automatic template deduction cannot
-// deduce template argument for 'U' if 'default' methods are used as default values in
-// a single constructor
-
-//template <typename T>
-//TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName,
-//                                      Property::Visibility visibility)
-//    : TemplateProperty<T>(
-//            std::move(identifier), std::move(guiName),
-//            PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>(),
-//            visibility)
-//{
-//}
-
 template <typename T>
 TemplateProperty<T>::TemplateProperty(PropertyInfo info, T value)
     : Property(std::move(info))
@@ -167,11 +152,6 @@ template <typename T>
 std::string TemplateProperty<T>::className() const {
     return PropertyDelegate<TemplateProperty<T>>::className();
 }
-
-//template <typename T>
-//std::string TemplateProperty<T>::description() {
-//    return
-//}
 
 template <typename T>
 TemplateProperty<T>::operator T() {
