@@ -41,7 +41,7 @@ public:
 
 private:
     properties::StringProperty _target;
-    properties::StringProperty _origin;
+    properties::StringProperty _observer;
     properties::StringProperty _frame;
 
     glm::dvec3 _position;

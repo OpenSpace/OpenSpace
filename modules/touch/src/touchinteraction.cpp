@@ -26,6 +26,7 @@
 #include <modules/onscreengui/onscreenguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -213,7 +214,8 @@ TouchInteraction::TouchInteraction()
     });
 
     levmarq_init(&_lmstat);
-    OnScreenGUIModule::touchInput = { false, glm::vec2(0), 0 };
+
+
     _time.initSession();
 }
 
@@ -248,17 +250,20 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
     WindowWrapper& wrapper = OsEng.windowWrapper();
     glm::ivec2 res = wrapper.currentWindowSize();
     glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
-    _guiON = OnScreenGUIModule::gui.isEnabled();
+
+    OnScreenGUIModule& module = *(OsEng.moduleEngine().module<OnScreenGUIModule>());
+    _guiON = module.gui.isEnabled();
+
     if (_tap && list.size() == 1 && std::abs(pos.x) < _guiButton.value().x && std::abs(pos.y) < _guiButton.value().y) { // pressed invisible button
         _guiON = !_guiON;
-        OnScreenGUIModule::gui.setEnabled(_guiON);
+        module.gui.setEnabled(_guiON);
 
         std::string mode = (_guiON) ? "" : "de";
         LINFO("GUI mode is " << mode << "activated. Inside box by: (" <<
             static_cast<int>(100 * (pos.x / _guiButton.value().x)) << "%, " << static_cast<int>(100 * (pos.y / _guiButton.value().y)) << "%)\n");
     }
     else if (_guiON) {
-        OnScreenGUIModule::touchInput = { _guiON, pos, 1 }; // emulate touch input as a mouse
+        module.touchInput = { _guiON, pos, 1 }; // emulate touch input as a mouse
     }
     return _guiON;
 }
@@ -450,7 +455,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         _vel.pan = glm::dvec2(0.0, 0.0);
     }
     else { // prevents touch to infinitely be active (due to windows bridge case where event doesnt get consumed sometimes when LMA fails to converge)
-        OnScreenGUIModule::touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
+        OsEng.moduleEngine().module<OnScreenGUIModule>()->touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
         resetAfterInput();
     }
 }
@@ -809,22 +814,23 @@ void TouchInteraction::resetAfterInput() {
         }
     }
     // Reset emulated mouse values
+    OnScreenGUIModule& module = *(OsEng.moduleEngine().module<OnScreenGUIModule>());
     if (_guiON) {
-        bool activeLastFrame = OnScreenGUIModule::touchInput.action;
-        OnScreenGUIModule::touchInput.active = false;
+        bool activeLastFrame = module.touchInput.action;
+        module.touchInput.active = false;
         if (activeLastFrame) {
-            OnScreenGUIModule::touchInput.active = true;
-            OnScreenGUIModule::touchInput.action = 0;
+            module.touchInput.active = true;
+            module.touchInput.action = 0;
         }
     }
     else {
-        OnScreenGUIModule::touchInput.active = false;
-        OnScreenGUIModule::touchInput.action = 0;
+        module.touchInput.active = false;
+        module.touchInput.action = 0;
     }
     
     _lmSuccess = true;
     // Ensure that _guiON is consistent with properties in OnScreenGUI and
-    _guiON = OnScreenGUIModule::gui.isEnabled();
+    _guiON = module.gui.isEnabled();
 
     // Reset variables
     _lastVel.orbit = glm::dvec2(0.0, 0.0);

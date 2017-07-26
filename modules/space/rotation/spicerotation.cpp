@@ -32,19 +32,17 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    const char* KeySourceFrame = "SourceFrame";
-    const char* KeyDestinationFrame = "DestinationFrame";
     const char* KeyKernels = "Kernels";
 
     static const openspace::properties::Property::PropertyInfo SourceInfo = {
-        "Source",
+        "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
         "coordinate transformation. This has to be a valid SPICE name."
     };
 
     static const openspace::properties::Property::PropertyInfo DestinationInfo = {
-        "Destination",
+        "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
         "transformation. This has to be a valid SPICE name."
