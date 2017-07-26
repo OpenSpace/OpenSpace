@@ -32,7 +32,7 @@ namespace openspace::properties {
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
-    using Property::PropertyInfo;
+    using TemplateProperty<T>::PropertyInfo;
 
     NumericalProperty(PropertyInfo info);
     NumericalProperty(PropertyInfo info, T value);
