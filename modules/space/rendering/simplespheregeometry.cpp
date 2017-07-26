@@ -54,12 +54,6 @@ documentation::Documentation SimpleSphereGeometry::Documentation() {
         "space_geometry_simplesphere",
         {
             {
-                "Type",
-                new StringEqualVerifier("SimpleSphereGeometry"),
-                "",
-                Optional::No
-            },
-            {
                 RadiusInfo.identifier,
                 new OrVerifier(
                     new DoubleVerifier,
@@ -74,8 +68,7 @@ documentation::Documentation SimpleSphereGeometry::Documentation() {
                 SegmentsInfo.description,
                 Optional::No
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -102,7 +95,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
         _radius = dictionary.value<glm::vec3>(RadiusInfo.identifier);
     }
 
-    _segments = dictionary.value<int>(SegmentsInfo.identifier);
+    _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
 
     // The shader need the radii values but they are not changeable runtime
     // TODO: Possibly add a scaling property @AA

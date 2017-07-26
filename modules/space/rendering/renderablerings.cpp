@@ -120,8 +120,7 @@ documentation::Documentation RenderableRings::Documentation() {
                 TransparencyInfo.description,
                 Optional::Yes
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
