@@ -117,6 +117,8 @@ private:
     void saveTextureToPPMFile(const GLenum color_buffer_attachment,
                               const std::string & fileName,
                               const int width, const int height) const;    
+    bool isAtmosphereInFrustum(const double * MVMatrix, const glm::dvec3 position, const double radius) const;
+
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;

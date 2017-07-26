@@ -314,27 +314,13 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("inscatterTexture", _inScatteringTableTextureUnit); 
 
     // Atmosphere Frustum Culling
-    glm::dvec4 tPlanetPosObj = glm::dvec4(renderData.position.dvec3(), 1.0);
-    glm::dvec4 tPlanetPosWorld = _modelTransform * tPlanetPosObj;
-    glm::dvec4 tPlanetPosSGCTEyeCoords = renderData.camera.combinedViewMatrix() * tPlanetPosWorld;
-    glm::dvec4 tPlanetPosSGCTViewCoords = renderData.camera.projectionMatrix() * tPlanetPosSGCTEyeCoords;
-    tPlanetPosSGCTViewCoords /= tPlanetPosSGCTViewCoords.w;
-    //tPlanetPosSGCTViewCoords *= -1.0;
-    
-    glm::dvec3 perpVec = glm::cross(glm::dvec3(tPlanetPosObj.y, tPlanetPosObj.x, tPlanetPosObj.z), glm::dvec3(tPlanetPosObj));
-    double radius = (_atmosphereRadius + 2.0) * 1000.0;
-    perpVec = glm::normalize(perpVec) * glm::dvec3(radius);
-    glm::dvec4 tPlanetPosSGCTViewCoordsR = glm::dmat4(renderData.camera.projectionMatrix()) * renderData.camera.combinedViewMatrix() *
-        _modelTransform * (tPlanetPosObj + glm::dvec4(perpVec, 0.0));
-    tPlanetPosSGCTViewCoordsR /= tPlanetPosSGCTViewCoordsR.w;
-    //tPlanetPosSGCTViewCoordsR *= -1.0;
-    double dX = tPlanetPosSGCTViewCoords.x - std::max(-1.0, std::min(tPlanetPosSGCTViewCoords.x, 1.0));
-    double dY = (1.0 - tPlanetPosSGCTViewCoords.y) - std::max(-1.0, std::min((1.0 - tPlanetPosSGCTViewCoords.y), 1.0));
-    double dd = glm::distance(tPlanetPosSGCTViewCoords, tPlanetPosSGCTViewCoordsR);
-    std::cout << "----- Circle Center: " << glm::to_string(tPlanetPosSGCTViewCoords) << ", radius: " << dd
-        << " --------" << std::endl;
-    std::cout << "========= Test In Space: " << ((dX*dX + dY*dY) < (dd*dd))
-        << " ==========" << std::endl;       
+    glm::dmat4 MV = glm::dmat4(renderData.camera.sgctInternal.projectionMatrix()) * renderData.camera.combinedViewMatrix();
+    glm::dvec3 tPlanetPosWorld = glm::dvec3(_modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+
+    if (isAtmosphereInFrustum(glm::value_ptr(MV), tPlanetPosWorld, (_atmosphereRadius + 2.0)*1000.0))
+        std::cout << "========= Inside Frustum ========" << std::endl;
+    else
+        std::cout << "--------- Outside Frustum -------" << std::endl;
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData & renderData, const DeferredcastData& deferredData,
@@ -1532,5 +1518,69 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(const GLenum color_buffer_at
     }
 }
 
+bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double * MVMatrix, const glm::dvec3 position, const double radius) const {
+
+    // Frustum Planes
+    glm::dvec3 col1(MVMatrix[0], MVMatrix[1], MVMatrix[2]);
+    glm::dvec3 col2(MVMatrix[4], MVMatrix[5], MVMatrix[6]);
+    glm::dvec3 col3(MVMatrix[8], MVMatrix[9], MVMatrix[10]);
+    glm::dvec3 col4(MVMatrix[12], MVMatrix[13], MVMatrix[14]);
+
+    glm::dvec3 leftNormal   = col4 + col1;
+    glm::dvec3 rightNormal  = col4 - col1;
+    glm::dvec3 bottomNormal = col4 + col2;
+    glm::dvec3 topNormal    = col4 - col2;
+    glm::dvec3 nearNormal   = col3 + col4; // maybe only col3?
+    glm::dvec3 farNormal    = col4 - col3;
+
+    // Plane Distances
+    double leftDistance   = MVMatrix[15] + MVMatrix[3];
+    double rightDistance  = MVMatrix[15] - MVMatrix[3];
+    double bottomDistance = MVMatrix[15] + MVMatrix[7];
+    double topDistance    = MVMatrix[15] - MVMatrix[7];
+    double nearDistance   = MVMatrix[15] + MVMatrix[11];
+    double farDistance    = MVMatrix[15] - MVMatrix[11];
+    
+    // Normalize Planes
+    double invMag = 1.0 / glm::length(leftNormal);
+    leftNormal   *= invMag;
+    leftDistance *= invMag;
+
+    invMag = 1.0 / glm::length(rightNormal);
+    rightNormal   *= invMag;
+    rightDistance *= invMag;
+
+    invMag = 1.0 / glm::length(bottomNormal);
+    bottomNormal   *= invMag;
+    bottomDistance *= invMag;
+
+    invMag = 1.0 / glm::length(topNormal);
+    topNormal   *= invMag;
+    topDistance *= invMag;
+
+    invMag = 1.0 / glm::length(nearNormal);
+    nearNormal   *= invMag;
+    nearDistance *= invMag;
+
+    invMag = 1.0 / glm::length(farNormal);
+    farNormal   *= invMag;
+    farDistance *= invMag;
+ 
+    if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
+        return false;
+    } else if ((glm::dot(rightNormal, position) + rightDistance) < -radius) {
+        return false;
+    } else if ((glm::dot(bottomNormal, position) + bottomDistance) < -radius) {
+        return false;
+    } else if ((glm::dot(topNormal, position) + topDistance) < -radius) {
+        return false;
+    } else if ((glm::dot(nearNormal, position) + nearDistance) < -radius) {
+        return false;
+    } else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
+        return false;
+    }
+
+    return true;
+}
 
 } // openspace

@@ -48,6 +48,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderer.h>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include <memory>
 #include <fstream>
 
@@ -572,7 +574,7 @@ namespace openspace {
         *modelTransform =
             glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
             glm::dmat4(transformData.rotation) *  // Spice rotation
-            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));        
+            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));          
     }
 
     void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
