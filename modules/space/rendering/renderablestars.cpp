@@ -212,10 +212,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         "RenderableStars"
     );
 
-    _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
+        PsfTextureInfo.identifier
+    ));
     _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
 
-    _colorTexturePath = absPath(dictionary.value<std::string>(KeyColorMap));
+    _colorTexturePath = absPath(dictionary.value<std::string>(
+        ColorTextureInfo.identifier
+    ));
     _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
     _speckFile = absPath(dictionary.value<std::string>(KeyFile));

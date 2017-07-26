@@ -139,7 +139,7 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _period(PeriodInfo, 0.0, 0.0, 1e9)
-    , _resolution(ResolutionInfo, 1e4, 1, 1e6)
+    , _resolution(ResolutionInfo, 10000, 1, 1000000)
     , _needsFullSweep(true)
     , _indexBufferDirty(true)
     , _previousTime(0)

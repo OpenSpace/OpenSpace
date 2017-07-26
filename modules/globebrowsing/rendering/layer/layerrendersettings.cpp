@@ -98,7 +98,6 @@ void LayerRenderSettings::setValuesFromDictionary(
     float dictGamma;
     float dictMultiplier;
     float dictOffset;
-    float dictValueBlending;
     
     if (renderSettingsDict.getValue(keyOpacity, dictOpacity)) {
         opacity = dictOpacity;

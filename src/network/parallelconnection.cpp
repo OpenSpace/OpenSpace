@@ -56,9 +56,15 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+
+#pragma warning (push)
+#pragma warning (disable: 4574) // 'INCL_WINSOCK_API_TYPEDEFS' is defined to be '0'
+
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
+
+#pragma warning (pop)
 #endif
 
 #include <openspace/network/parallelconnection.h>

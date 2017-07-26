@@ -169,7 +169,8 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
   
     size_t sumTextureTypeSize = std::accumulate(
         _textureContainerMap.cbegin(),
-        _textureContainerMap.cend(), 0,
+        _textureContainerMap.cend(),
+        size_t(0),
         [](size_t s, const std::pair<const TileTextureInitData::HashKey,
         TextureContainerTileCache>& p)
         {

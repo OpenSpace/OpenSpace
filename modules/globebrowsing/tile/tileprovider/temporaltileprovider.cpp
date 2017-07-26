@@ -71,7 +71,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     try {
         filePath = absPath(filePath);
     }
-    catch (const std::runtime_error& e) {
+    catch (const std::runtime_error&) {
         // File path was not a path to a file but a GDAL config or empty
     }
   
@@ -123,7 +123,7 @@ bool TemporalTileProvider::readFilePath() {
             ghoul::filesystem::File(_filePath.value()).directoryName()
         );
     }
-    catch (const std::runtime_error& e) {
+    catch (const std::runtime_error&) {
         // File path was not a path to a file but a GDAL config or empty
     }
 

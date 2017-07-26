@@ -37,7 +37,7 @@ void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObjec
     gpuOffset.setValue(programObject, layerSettings.offset.value());
 }
 
-void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings,
+void GPULayerRenderSettings::bind(const LayerRenderSettings&,
                                   ghoul::opengl::ProgramObject* programObject,
                                   const std::string& nameBase)
 {

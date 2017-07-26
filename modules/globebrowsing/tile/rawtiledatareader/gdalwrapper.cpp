@@ -33,7 +33,17 @@
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
 
+
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4251) // needs to have dll-interface to be used by clients
+#endif // WIN32
+
 #include <gdal_priv.h>
+
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
 
 namespace {
     const char* _loggerCat = "GdalWrapper";

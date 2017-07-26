@@ -91,7 +91,6 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
         "SimpleSphereGeometry"
     );
 
-    float sphereRadius = 0.f;
     glm::vec3 ellipsoidRadius;
     if (dictionary.hasKeyAndValue<double>(RadiusInfo.identifier)) {
         const float r = static_cast<float>(

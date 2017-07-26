@@ -145,7 +145,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
     , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
-    , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1e9)
+    , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
     , _needsFullSweep(true)
     , _subsamplingIsDirty(true)

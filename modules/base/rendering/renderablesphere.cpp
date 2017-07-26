@@ -128,7 +128,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _size(SizeInfo, 1.f, 0.f, 1e35)
+    , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _transparency(TransparencyInfo, 1.f, 0.f, 1.f)
     , _shader(nullptr)
@@ -187,7 +187,9 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         }
     });
     if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _transparency = dictionary.value<double>(TransparencyInfo.identifier);
+        _transparency = static_cast<float>(
+            dictionary.value<double>(TransparencyInfo.identifier)
+        );
     }
     addProperty(_transparency);
 

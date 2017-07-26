@@ -246,6 +246,7 @@ template <typename T>
 NumericalProperty<T>::NumericalProperty(PropertyInfo info, T value)
     : NumericalProperty<T>(
         std::move(info),
+        std::move(value),
         PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
