@@ -47,7 +47,8 @@ public:
     void close(bool force = false);
 
     bool sendKeyEvent(const CefKeyEvent &event);
-    bool sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button, bool mouseUp);
+    bool sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
+                             bool mouseUp, int clickCount = SINGLE_CLICK);
     bool sendMouseMoveEvent(const CefMouseEvent &event);
     bool sendMouseWheelEvent(const CefMouseEvent &event, glm::ivec2 delta);
     void reloadBrowser();
@@ -55,6 +56,8 @@ public:
     const CefRefPtr<CefBrowser> &getBrowser() const;
 
     bool hasContent(int x, int y);
+
+    const static int SINGLE_CLICK = 1;
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;

@@ -80,21 +80,68 @@ void EventHandler::initialize() {
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (button != MouseButton::Left) return false;
 
+    int clickCount = BrowserInstance::SINGLE_CLICK;
+
+    // click or release?
     if (action == MouseAction::Release) {
         _leftMouseDown = false;
     } else {
+        if (isDoubleClick() ) {
+            ++clickCount;
+        } else {
+            _lastClickTime = std::chrono::high_resolution_clock::now();
+        }
+
         _leftMouseDown = true;
+        _lastClickPosition = _mousePosition;
     }
-    // TODO(klas): Figure out when to block and when to not block
-    return _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, _leftMouseDown);
+
+    return _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, _leftMouseDown, clickCount);
+}
+
+bool EventHandler::isDoubleClick() const {
+    // check time
+    using namespace std::chrono;
+    auto now = high_resolution_clock::now();
+    milliseconds maxTimeDifference(EventHandler::doubleClickTime());
+    auto requiredTime = _lastClickTime + maxTimeDifference;
+    if (requiredTime < now) {
+        return false;
+    }
+
+    // check position
+    float maxDist = EventHandler::maxDoubleClickDistance() / 2;
+    bool x = abs(_mousePosition.x - _lastClickPosition.x) < maxDist;
+    bool y = abs(_mousePosition.y - _lastClickPosition.y) < maxDist;
+
+    return x && y;
 }
 
 bool EventHandler::mousePositionCallback(double x, double y) {
     _mousePosition.x = (int) x;
     _mousePosition.y = (int) y;
-    _browserInstance->sendMouseMoveEvent(mouseEvent());
+
+    if (shouldSendMoveEvent()) {
+        _browserInstance->sendMouseMoveEvent(mouseEvent());
+    }
 
     // Let the mouse event trickle on
+    return false;
+}
+
+/**
+ * decide if a mouseMove event should be sent or not. This is to support drag and drop.
+ * @return
+ */
+bool EventHandler::shouldSendMoveEvent() {
+    // if the mouse button isn't down - always send event
+    if (!_leftMouseDown) {
+        return true;
+    }
+
+    // figure out how big the movement has been
+
+    // default - send false
     return false;
 }
 
@@ -205,6 +252,22 @@ void EventHandler::detachBrowser() {
         LDEBUG(fmt::format("Detaching browser instance with use count {}", _browserInstance.use_count()));
     }
     _browserInstance = nullptr;
+}
+
+int EventHandler::doubleClickTime() {
+#ifdef WIN32
+    return GetDoubleClickTime();
+#else
+    return 500;
+#endif
+}
+
+int EventHandler::maxDoubleClickDistance() {
+#ifdef WIN32
+    return GetSystemMetrics(SM_CXDOUBLECLK);
+#else
+    return MAX_DOUBLE_CLICK_DISTANCE;
+#endif
 }
 
 } // namespace openspace

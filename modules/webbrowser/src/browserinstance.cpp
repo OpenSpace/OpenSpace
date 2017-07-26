@@ -28,7 +28,6 @@
 namespace {
 const char* _loggerCat = "CEF BrowserInstance";
 const bool DID_NOT_LEAVE_WINDOW = false;
-const int SINGLE_CLICK = 1;
 }
 
 namespace openspace {
@@ -114,8 +113,8 @@ bool BrowserInstance::sendKeyEvent(const CefKeyEvent &event) {
 }
 
 bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
-                                          bool mouseUp) {
-    _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, SINGLE_CLICK);
+                                          bool mouseUp, int clickCount) {
+    _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, clickCount);
     return hasContent(event.x, event.y);
 }
 

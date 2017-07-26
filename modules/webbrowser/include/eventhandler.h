@@ -26,6 +26,7 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___EVENT_HANDLER___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___EVENT_HANDLER___H__
 
+#include <chrono>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <include/cef_browser.h>
@@ -36,7 +37,7 @@ namespace openspace {
 
 class EventHandler {
 public:
-    EventHandler() : _mousePosition(0, 0), _browserInstance(nullptr) {};
+    EventHandler() : _mousePosition(0, 0), _browserInstance(nullptr), _lastClickPosition(0, 0) {};
 
     void initialize();
     void setBrowser(const CefRefPtr<CefBrowser> &browser);
@@ -44,12 +45,17 @@ public:
     void detachBrowser();
 
 private:
+#if !defined(WIN32)
+    static const int MAX_DOUBLE_CLICK_DISTANCE = 4;
+#endif
+
     bool mouseButtonCallback(MouseButton, MouseAction);
     bool mousePositionCallback(double, double);
     bool mouseWheelCallback(glm::ivec2 delta);
     bool charCallback(unsigned int, KeyModifier);
     bool keyboardCallback(Key, KeyModifier, KeyAction);
     bool specialKeyEvent(Key);
+    bool shouldSendMoveEvent();
     int mapFromGlfwToNative(Key);
 
     CefMouseEvent mouseEvent();
@@ -58,7 +64,26 @@ private:
     bool _leftMouseDown = false;
 
     std::shared_ptr<BrowserInstance> _browserInstance;
-    glm::vec2 _mousePosition;
+    glm::vec2 _mousePosition, _lastClickPosition;
+    std::chrono::high_resolution_clock::time_point _lastClickTime;
+
+    /**
+     * determines if a click should be sent as a double click or not
+     * @return
+     */
+    bool isDoubleClick() const;
+
+    /**
+     * get the number of milliseconds that is allowed between two clicks for it to count as a double click
+     * @return
+     */
+    static int doubleClickTime();
+
+    /**
+     * get the rectangle width around the first click in a double click that the second click has to be _within_
+     * @return
+     */
+    static int maxDoubleClickDistance();
 };
 
 
