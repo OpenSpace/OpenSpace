@@ -55,8 +55,7 @@ documentation::Documentation StaticTranslation::Documentation() {
                 Optional::No,
                 PositionInfo.description
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

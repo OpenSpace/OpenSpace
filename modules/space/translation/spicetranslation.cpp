@@ -108,8 +108,7 @@ documentation::Documentation SpiceTranslation::Documentation() {
                 "on. All provided kernels will be loaded before any other operation is "
                 "performed."
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

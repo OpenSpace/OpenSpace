@@ -53,8 +53,7 @@ documentation::Documentation Translation::Documentation() {
                 "configuration of the application and can be written to disk "
                 "on application startup into the FactoryDocumentation."
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 

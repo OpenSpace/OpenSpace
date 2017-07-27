@@ -154,8 +154,7 @@ documentation::Documentation RenderableTrail::Documentation() {
                 Optional::Yes,
                 RenderingModeInfo.description
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 

@@ -111,8 +111,7 @@ documentation::Documentation LogFactoryDocumentation() {
                 "Determines whether the log entries should be stamped with the log level "
                 "that was used to create the log message."
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

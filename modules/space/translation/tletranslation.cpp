@@ -254,8 +254,7 @@ documentation::Documentation TLETranslation::Documentation() {
                 "Specifies the line number within the file where the group of 3 TLE "
                 "lines begins (1-based)."
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 

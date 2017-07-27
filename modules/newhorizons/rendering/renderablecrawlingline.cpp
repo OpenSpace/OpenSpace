@@ -82,20 +82,17 @@ documentation::Documentation RenderableCrawlingLine::Documentation() {
                 KeyColor,
                 new TableVerifier({
                     {
-                        {
-                            KeyColorStart,
-                            new DoubleVector4Verifier,
-                            Optional::No,
-                            "The color at the start of the line",
-                        },
-                        {
-                            KeyColorEnd,
-                            new DoubleVector4Verifier,
-                            Optional::No,
-                            "The color at the end of the line"
-                        }
+                        KeyColorStart,
+                        new DoubleVector4Verifier,
+                        Optional::No,
+                        "The color at the start of the line",
                     },
-                    Exhaustive::Yes
+                    {
+                        KeyColorEnd,
+                        new DoubleVector4Verifier,
+                        Optional::No,
+                        "The color at the end of the line"
+                    }
                 }),
                 Optional::No,
                 "Specifies the colors that are used for the crawling line. One value "

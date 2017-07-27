@@ -74,8 +74,7 @@ documentation::Documentation MissionPhase::Documentation() {
                 Optional::Yes,
                 "The phases into which this mission or mission phase is separated."
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

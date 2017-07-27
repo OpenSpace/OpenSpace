@@ -112,8 +112,7 @@ documentation::Documentation RenderableDebugPlane::Documentation() {
                 Optional::Yes,
                 OriginInfo.description
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

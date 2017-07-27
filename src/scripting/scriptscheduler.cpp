@@ -93,8 +93,7 @@ documentation::Documentation ScriptScheduler::Documentation() {
                 }),
                 Optional::No
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

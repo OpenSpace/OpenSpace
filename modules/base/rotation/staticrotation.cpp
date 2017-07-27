@@ -59,8 +59,7 @@ documentation::Documentation StaticRotation::Documentation() {
                 "Stores the static rotation as either a vector containing Euler angles "
                 "or by specifiying the 3x3 rotation matrix directly"
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

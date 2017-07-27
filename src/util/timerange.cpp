@@ -55,8 +55,7 @@ documentation::Documentation TimeRange::Documentation() {
                 Optional::No,
                 "The end date of the time range"
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

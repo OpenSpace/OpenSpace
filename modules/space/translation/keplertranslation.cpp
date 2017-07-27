@@ -179,8 +179,7 @@ documentation::Documentation KeplerTranslation::Documentation() {
                 Optional::No,
                 PeriodInfo.description
             },
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
