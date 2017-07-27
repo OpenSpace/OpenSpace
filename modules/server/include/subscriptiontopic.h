@@ -26,7 +26,7 @@
 #define OPENSPACE_MODULES_SERVER__SUBSCRIPTION_TOPIC_H
 
 #include <openspace/util/timemanager.h>
-
+#include <openspace/query/query.h>
 #include "topic.h"
 #include "connection.h"
 
@@ -42,7 +42,6 @@ public:
 private:
     bool _requestedResourceIsSubscribable;
     void handleSpecialCase(std::string);
-    nlohmann::json wrappedPayload(nlohmann::json &payload);
 };
 
 }

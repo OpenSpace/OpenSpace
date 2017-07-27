@@ -357,6 +357,12 @@ public:
      */
     const ghoul::Dictionary& metaData() const;
 
+    /**
+     * Convert the Property into a string containing a JSON representation of the Property
+     * @return the JSON string
+     */
+    std::string toJson() const { return "{}"; }
+
 protected:
     static const char* IdentifierKey;
     static const char* NameKey;

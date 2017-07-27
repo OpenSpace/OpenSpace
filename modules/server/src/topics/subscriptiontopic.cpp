@@ -60,21 +60,14 @@ void SubscriptionTopic::handleSpecialCase(std::string instruction) {
     if (instruction == "currentTime") {
         _requestedResourceIsSubscribable = true;
         _connection->addRefreshCall([this]() {
-            nlohmann::json timeJson = {{"time", OsEng.timeManager().time().ISO8601() }};
+            nlohmann::json timeJson = {{ "time", OsEng.timeManager().time().ISO8601() }};
             return wrappedPayload(timeJson);
         });
-    } else {
+    }
+    else {
         LERROR("Unknown special case: " << instruction);
         _requestedResourceIsSubscribable = false;
     }
-}
-
-nlohmann::json SubscriptionTopic::wrappedPayload(nlohmann::json &payload) {
-    nlohmann::json j = {
-            {"topic", _topicId},
-            {"payload", payload}
-    };
-    return j;
 }
 
 } // namespace openspace

@@ -32,6 +32,24 @@ void Topic::initialize(Connection* connection, size_t topicId) {
     _topicId = topicId;
 };
 
+nlohmann::json Topic::wrappedPayload(nlohmann::json &payload) {
+    nlohmann::json j = {
+        { "topic", _topicId },
+        { "payload", payload }
+    };
+    return j;
+};
+
+nlohmann::json Topic::wrappedError(std::string message, int code) {
+    nlohmann::json j = {
+        { "topic", _topicId },
+        { "status", "error" },
+        { "message", message },
+        { "code", code }
+    };
+    return j;
+};
+
 void BounceTopic::handleJson(nlohmann::json json) {
     _connection->sendJson(json);
 };

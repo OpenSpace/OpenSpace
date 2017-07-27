@@ -22,7 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/getpropertytopic.h"
+#include <openspace/properties/property.h>
+#include <modules/server/include/getpropertytopic.h>
+
+using nlohmann::json;
 
 namespace {
 std::string _loggerCat = "GetPropertyTopic";
@@ -40,9 +43,31 @@ bool GetPropertyTopic::isDone() {
     return true;
 }
 
-void GetPropertyTopic::handleJson(nlohmann::json json) {
-    std::string requestedKey = json.at("getProperty").get<std::string>();
+void GetPropertyTopic::handleJson(json j) {
+    std::string requestedKey = j.at("propertyUri").get<std::string>();
+    json response = (requestedKey == "__all") ? getAllKeys()
+                                              : getPropertyFromKey(requestedKey);
+    _connection->sendJson(response);
+}
 
+json GetPropertyTopic::getAllKeys() {
+    json jsonProps = json::array();
+    for (const auto &prop : allProperties()) {
+        json propJson = prop->toJson();
+        jsonProps.push_back(propJson);
+    }
+    json payload{{ "value", jsonProps }};
+    return wrappedPayload(payload);
+}
+
+json GetPropertyTopic::getPropertyFromKey(const std::string& key) {
+    properties::Property* prop = property(key);
+    if (prop != nullptr) {
+        json payload = {{ "propertyUri", key }, { "value", prop->toJson() }};
+        return wrappedPayload(payload);
+    }
+
+    return wrappedError(fmt::format("property '{}' not found", key), 404);
 }
 
 } // namespace openspace

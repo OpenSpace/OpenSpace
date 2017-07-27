@@ -25,6 +25,7 @@
 #ifndef OPENSPACE_MODULES_SERVER__GETPROPERTY_TOPIC_H
 #define OPENSPACE_MODULES_SERVER__GETPROPERTY_TOPIC_H
 
+#include <openspace/query/query.h>
 #include "topic.h"
 #include "connection.h"
 
@@ -36,6 +37,10 @@ public:
     ~GetPropertyTopic() {};
     void handleJson(nlohmann::json json);
     bool isDone();
+
+private:
+    nlohmann::json getAllKeys();
+    nlohmann::json getPropertyFromKey(const std::string& key);
 };
 
 }
