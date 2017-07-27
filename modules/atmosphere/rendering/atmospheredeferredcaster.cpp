@@ -1583,7 +1583,9 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double * MVMatrix, co
         return false;
     } else if ((glm::dot(nearNormal, position) + nearDistance) < -radius) {
         return false;
-    } /*else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
+    } 
+    // The far plane testing is disabled because the atm has no depth.
+    /*else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
         return false;
     }*/
 

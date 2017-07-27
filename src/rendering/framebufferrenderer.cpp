@@ -129,7 +129,6 @@ void FramebufferRenderer::initialize() {
     updateResolution();
     updateRendererData();
     updateRaycastData();
-//    updateDeferredcastData();
     
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
@@ -230,7 +229,6 @@ void FramebufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
 }
 
 void FramebufferRenderer::deferredcastersChanged(Deferredcaster& deferredcaster, bool attached) {
-    // TODO
     (void) deferredcaster;
     (void) attached;
     _dirtyDeferredcastData = true;
@@ -500,7 +498,6 @@ void FramebufferRenderer::updateRaycastData() {
 }
 
 void FramebufferRenderer::updateDeferredcastData() {
-    // TODO
     _deferredcastData.clear();
     _deferredcastPrograms.clear();
     
@@ -720,12 +717,6 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
         _hdrBackGroundProgram->deactivate();        
     }
-    //} else {
-    //    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
-    //    glDrawBuffers(4, textureBuffers);
-    //    //GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-    //    //glDrawBuffers(1, dBuffer);
-    //}
     
     for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
 
@@ -763,15 +754,9 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainNormalTexture);
             deferredcastProgram->setUniform("mainNormalTexture", mainNormalTextureUnit);
 
-            //            ghoul::opengl::TextureUnit mainDepthTextureUnit;
-            //            mainDepthTextureUnit.activate();
-            //            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
-            //            deferredcastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
-
-
+       
             deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
-            //deferredcastProgram->setUniform("hdrExposure", _nAaSamples);
-
+       
             deferredcaster->preRaycast(deferredcasterTask.renderData, 
                                        _deferredcastData[deferredcaster], 
                                        *deferredcastProgram);

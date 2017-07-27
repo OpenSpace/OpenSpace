@@ -545,8 +545,6 @@ namespace openspace {
                     OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
                 }
             };
-
-            onEnabledChange(onChange);
         }
 
         return isReady();
