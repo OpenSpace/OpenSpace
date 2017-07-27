@@ -48,7 +48,7 @@ RosettaKernels = {
     "${OPENSPACE_DATA}/spice/Rosetta/PCK/ROS_CGS_RSOC_V03.TPC",
 }
 
-RotationMatrix = {
+local RotationMatrix = {
     0, 1, 0,
     0, 0, 1,
     1, 0, 0
@@ -99,7 +99,7 @@ return {
                 Type = "simple",
                 Color = "textures/foil_silver_ramp.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -116,7 +116,7 @@ return {
                 Type = "simple",
                 Color = "textures/foil_silver_ramp.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -133,7 +133,7 @@ return {
                 Type = "simple",
                 Color = "textures/dish_AO.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         },
         -- Transform = {
@@ -158,7 +158,7 @@ return {
                 Type = "simple",
                 Color = "textures/parts2_AO.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         }
     },
@@ -176,7 +176,7 @@ return {
                 Type = "simple",
                 Color = "textures/foil_silver_ramp.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         }
     },
@@ -194,7 +194,7 @@ return {
                 Type = "simple",
                 Color = "textures/tex_01.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         }
     },
@@ -212,7 +212,7 @@ return {
                 Type = "simple",
                 Color = "textures/tex_01.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         },
         -- Transform = {
@@ -237,7 +237,7 @@ return {
                 Type = "simple",
                 Color = "textures/tex_01.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         },
         -- Transform = {
@@ -262,7 +262,7 @@ return {
                 Type = "simple",
                 Color = "textures/foil_gold_ramp.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         }
     },
@@ -304,7 +304,7 @@ return {
                 Type = "simple",
                 Color = "textures/foil_silver_ramp.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         }
     },
@@ -322,7 +322,7 @@ return {
                 Type = "simple",
                 Color = "textures/parts2_AO.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         }
     },
@@ -340,7 +340,7 @@ return {
                 Type = "simple",
                 Color = "textures/foil_silver_ramp.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
 
         }
     },
@@ -358,7 +358,7 @@ return {
                 Type = "simple",
                 Color = "textures/tex_01.png"
             },
-            Rotation = { ModelTransform = RotationMatrix }
+            ModelTransform = RotationMatrix
         }
     },
     {

@@ -112,14 +112,14 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
             {
                 PeriodInfo.identifier,
                 new DoubleVerifier,
-                PeriodInfo.description,
-                Optional::No
+                Optional::No,
+                PeriodInfo.description
             },
             {
                 ResolutionInfo.identifier,
                 new IntVerifier,
-                ResolutionInfo.description,
-                Optional::No
+                Optional::No,
+                ResolutionInfo.description
             }
         }
     };

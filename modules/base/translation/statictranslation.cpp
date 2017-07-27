@@ -47,14 +47,13 @@ documentation::Documentation StaticTranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("StaticTranslation"),
-                "",
                 Optional::No
             },
             {
                 PositionInfo.identifier,
                 new DoubleVector3Verifier,
-                PositionInfo.description,
-                Optional::No
+                Optional::No,
+                PositionInfo.description
             }
         },
         Exhaustive::Yes
@@ -88,7 +87,5 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
 glm::dvec3 StaticTranslation::position() const {
     return _position;
 }
-
-void StaticTranslation::update(const UpdateData&) {}
 
 } // namespace openspace

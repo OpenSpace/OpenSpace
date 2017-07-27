@@ -199,8 +199,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // Init layer manager
     ghoul::Dictionary layersDictionary;
     if (!dictionary.getValue(keyLayers, layersDictionary)) {
-        throw ghoul::RuntimeError(
-            std::string(keyLayers) + " must be specified specified!");
+        throw ghoul::RuntimeError(std::string(keyLayers) + " must be specified");
     }
 
     _layerManager = std::make_shared<LayerManager>(layersDictionary);

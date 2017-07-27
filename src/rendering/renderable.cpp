@@ -62,11 +62,11 @@ documentation::Documentation Renderable::Documentation() {
         {
             KeyType,
             new StringAnnotationVerifier("A valid Renderable created by a factory"),
+            Optional::No,
             "This key specifies the type of Renderable that gets created. It has to be one"
             "of the valid Renderables that are available for creation (see the "
             "FactoryDocumentation for a list of possible Renderables), which depends on "
-            "the configration of the application",
-            Optional::No
+            "the configration of the application"
         }
         }
     };

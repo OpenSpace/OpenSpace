@@ -116,54 +116,54 @@ documentation::Documentation RenderablePlanet::Documentation() {
             {
                 KeyGeometry,
                 new ReferencingVerifier("space_geometry_planet"),
-                "Specifies the planet geometry that is used for this RenderablePlanet.",
-                Optional::No
+                Optional::No,
+                "Specifies the planet geometry that is used for this RenderablePlanet."
             },
             {
                 KeyRadius,
                 new DoubleVerifier,
+                Optional::Yes,
                 "Specifies the radius of the planet. If this value is not specified, it "
-                "will try to query the SPICE library for radius values.",
-                Optional::Yes
+                "will try to query the SPICE library for radius values."
             },
             {
                 KeyColorTexture, // @TODO Use ColorTextureInfo.identifier instead
                 new StringVerifier,
-                "Specifies the color texture that is used for this RenderablePlanet.",
-                Optional::Yes
+                Optional::Yes,
+                "Specifies the color texture that is used for this RenderablePlanet."
             },
             {
                 KeyHeightTexture, // @TODO Use HeightTextureInfo.identifier instead
                 new StringVerifier,
-                "Specifies the height texture that is used for this RenderablePlanet.",
-                Optional::Yes
+                Optional::Yes,
+                "Specifies the height texture that is used for this RenderablePlanet."
             },
             {
                 KeyNightTexture, // @TODO Use NightTextureInfo.identifier instead
                 new StringVerifier,
+                Optional::Yes,
                 "Specifies the texture that is used for the night side of this "
-                "RenderablePlanet.",
-                Optional::Yes
+                "RenderablePlanet."
             },
             {
                 KeyShading,
                 new BoolVerifier,
+                Optional::Yes,
                 "Specifies whether the planet should be rendered shaded by the Sun. If "
                 "this value is 'false', any existing night texture will not be used. "
-                "This value defaults to 'true'.",
-                Optional::Yes
+                "This value defaults to 'true'."
             },
             {
                 HeightExaggerationInfo.identifier,
                 new DoubleVerifier,
-                HeightExaggerationInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                HeightExaggerationInfo.description
             },
             {
                 PerformShadingInfo.identifier,
                 new BoolVerifier,
-                PerformShadingInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                PerformShadingInfo.description
             }
         }
     };

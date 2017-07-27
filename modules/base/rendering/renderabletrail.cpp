@@ -111,39 +111,39 @@ documentation::Documentation RenderableTrail::Documentation() {
             {
                 KeyTranslation,
                 new ReferencingVerifier("core_transform_translation"),
+                Optional::No,
                 "This object is used to compute locations along the path. Any "
-                "Translation object can be used here.",
-                Optional::No
+                "Translation object can be used here."
             },
             {
                 LineColorInfo.identifier,
                 new DoubleVector3Verifier,
-                LineColorInfo.description,
-                Optional::No
+                Optional::No,
+                LineColorInfo.description
             },
             {
                 EnableFadeInfo.identifier,
                 new BoolVerifier,
-                EnableFadeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                EnableFadeInfo.description
             },
             {
                 FadeInfo.identifier,
                 new DoubleVerifier,
-                FadeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                FadeInfo.description
             },
             {
                 LineWidthInfo.identifier,
                 new DoubleVerifier,
-                LineWidthInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                LineWidthInfo.description
             },
             {
                 PointSizeInfo.identifier,
                 new DoubleVerifier,
-                PointSizeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                PointSizeInfo.description
             },
             {
                 RenderingModeInfo.identifier,
@@ -151,8 +151,8 @@ documentation::Documentation RenderableTrail::Documentation() {
                     // Taken from the RenderingModeConversion map above
                     { "Lines", "Points", "Lines+Points", "Points+Lines" }
                 ),
-                RenderingModeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                RenderingModeInfo.description
             }
         },
         Exhaustive::No

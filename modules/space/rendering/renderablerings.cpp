@@ -87,38 +87,37 @@ documentation::Documentation RenderableRings::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableRings"),
-                "",
                 Optional::No
             },
             {
                 TextureInfo.identifier,
                 new StringVerifier,
-                TextureInfo.description,
-                Optional::No
+                Optional::No,
+                TextureInfo.description
             },
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                SizeInfo.description,
-                Optional::No
+                Optional::No,
+                SizeInfo.description
             },
             {
                 OffsetInfo.identifier,
                 new DoubleVector2Verifier,
-                OffsetInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                OffsetInfo.description
             },
             {
                 NightFactorInfo.identifier,
                 new DoubleVerifier,
-                NightFactorInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                NightFactorInfo.description
             },
             {
                 TransparencyInfo.identifier,
                 new DoubleVerifier,
-                TransparencyInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TransparencyInfo.description
             }
         }
     };

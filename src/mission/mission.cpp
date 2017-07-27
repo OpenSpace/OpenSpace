@@ -50,29 +50,29 @@ documentation::Documentation MissionPhase::Documentation() {
             {
                 KeyName,
                 new StringVerifier,
+                Optional::No,
                 "The human readable name of this mission or mission phase that is "
-                "displayed to the user.",
-                Optional::No
+                "displayed to the user."
             },
             {
                 KeyDescription,
                 new StringVerifier,
-                "A description of this mission or mission phase.",
-                Optional::Yes
+                Optional::Yes,
+                "A description of this mission or mission phase."
             },
             {
                 KeyTimeRange,
                 new ReferencingVerifier("core_util_timerange"),
+                Optional::Yes,
                 "The time range for which this mission or mission phase is valid. If no "
                 "time range is specified, the ranges of sub mission phases are used "
-                "instead.",
-                Optional::Yes
+                "instead."
             },
             {
                 KeyPhases,
                 new ReferencingVerifier("core_mission_mission"),
-                "The phases into which this mission or mission phase is separated.",
-                Optional::Yes
+                Optional::Yes,
+                "The phases into which this mission or mission phase is separated."
             }
         },
         Exhaustive::Yes

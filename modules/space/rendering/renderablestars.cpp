@@ -132,53 +132,52 @@ documentation::Documentation RenderableStars::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableStars"),
-                "",
                 Optional::No
             },
             {
                 KeyFile,
                 new StringVerifier,
+                Optional::No,
                 "The path to the SPECK file that contains information about the stars "
-                "being rendered.",
-                Optional::No
+                "being rendered."
             },
             {
                 PsfTextureInfo.identifier,
                 new StringVerifier,
-                PsfTextureInfo.description,
-                Optional::No
+                Optional::No,
+                PsfTextureInfo.description
             },
             {
                 ColorTextureInfo.identifier,
                 new StringVerifier,
-                ColorTextureInfo.description,
-                Optional::No
+                Optional::No,
+                ColorTextureInfo.description
             },
             {
                 ColorOptionInfo.identifier,
                 new StringInListVerifier({
                     "Color", "Velocity", "Speed"
                 }),
-                ColorOptionInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ColorOptionInfo.description
             },
             {
                 TransparencyInfo.identifier,
                 new DoubleVerifier,
-                TransparencyInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TransparencyInfo.description
             },
             {
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
-                ScaleFactorInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ScaleFactorInfo.description
             },
             {
                 MinBillboardSizeInfo.identifier,
                 new DoubleVerifier,
-                MinBillboardSizeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                MinBillboardSizeInfo.description
             }
         }
     };

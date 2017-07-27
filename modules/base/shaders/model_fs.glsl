@@ -29,7 +29,6 @@ in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in float vs_screenSpaceDepth;
 
-uniform float fading;
 uniform bool performShading = true;
 uniform vec3 directionToSunViewSpace;
 uniform sampler2D texture1;
@@ -69,7 +68,7 @@ Fragment getFragment() {
         frag.color.rgb = diffuseAlbedo;
     }
 
-    frag.color.a = fading;
+    frag.color.a = 1.0;
     frag.depth = vs_screenSpaceDepth;
 
     return frag;

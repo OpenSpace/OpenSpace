@@ -82,26 +82,26 @@ documentation::Documentation RenderablePlane::Documentation() {
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                SizeInfo.description,
-                Optional::No
+                Optional::No,
+                SizeInfo.description
             },
             {
                 BillboardInfo.identifier,
                 new BoolVerifier,
-                BillboardInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                BillboardInfo.description
             },
             {
                 BlendModeInfo.identifier,
                 new StringInListVerifier({ "Normal", "Additive" }),
+                Optional::Yes,
                 BlendModeInfo.description, // + " The default value is 'Normal'.",
-                Optional::Yes
             },
             {
                 TextureInfo.identifier,
                 new StringVerifier,
+                Optional::No,
                 TextureInfo.description,
-                Optional::No
             }
         }
     };

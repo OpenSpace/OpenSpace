@@ -162,7 +162,7 @@ struct DocumentationEntry {
      * \pre \p verifier must not be nullptr
      */
     DocumentationEntry(std::string key, std::shared_ptr<Verifier> verifier,
-                       std::string doc = "", Optional optional = Optional::No);
+        Optional optional, std::string doc = "");
 
     /**
     * The constructor for a DocumentationEntry describing a \p key in a Documentation.
@@ -185,8 +185,8 @@ struct DocumentationEntry {
     * \pre \p key must not be empty
     * \pre \p verifier must not be nullptr
     */
-    DocumentationEntry(std::string key, Verifier* verifier, std::string doc = "",
-        Optional optional = Optional::No);
+    DocumentationEntry(std::string key, Verifier* verifier, Optional optional,
+        std::string doc = "");
 
     /// The key that is described by this DocumentationEntry
     std::string key;

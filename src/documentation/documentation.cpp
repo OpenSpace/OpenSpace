@@ -115,7 +115,7 @@ SpecificationError::SpecificationError(TestResult res, std::string component)
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
-                                       std::string doc, Optional opt)
+                                       Optional opt, std::string doc)
     : key(std::move(k))
     , verifier(std::move(v))
     , optional(opt)
@@ -125,10 +125,10 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
     ghoul_assert(verifier, "Verifier must not be nullptr");
 }
 
-DocumentationEntry::DocumentationEntry(std::string key, Verifier* v, std::string doc,
-                                       Optional optional)
-    : DocumentationEntry(std::move(key), std::shared_ptr<Verifier>(v), std::move(doc),
-                         optional)
+DocumentationEntry::DocumentationEntry(std::string key, Verifier* v, Optional optional,
+                                       std::string doc)
+    : DocumentationEntry(std::move(key), std::shared_ptr<Verifier>(v), optional,
+                         std::move(doc))
 {}
 
 Documentation::Documentation(std::string n, std::string id, DocumentationEntries entries,

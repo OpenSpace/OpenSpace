@@ -129,56 +129,55 @@ documentation::Documentation KeplerTranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("KeplerTranslation"),
-                "",
                 Optional::No
             },
             {
                 EccentricityInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 1.0),
-                EccentricityInfo.description,
-                Optional::No
+                Optional::No,
+                EccentricityInfo.description
             },
             {
                 SemiMajorAxisInfo.identifier,
                 new DoubleVerifier,
-                SemiMajorAxisInfo.description,
-                Optional::No
+                Optional::No,
+                SemiMajorAxisInfo.description
             },
             {
                 InclinationInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                InclinationInfo.description,
-                Optional::No
+                Optional::No,
+                InclinationInfo.description
             },
             {
                 AscendingNodeInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                AscendingNodeInfo.description,
-                Optional::No
+                Optional::No,
+                AscendingNodeInfo.description
             },
             {
                 ArgumentOfPeriapsisInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                ArgumentOfPeriapsisInfo.description,
-                Optional::No
+                Optional::No,
+                ArgumentOfPeriapsisInfo.description
             },
             {
                 MeanAnomalyAtEpochInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                MeanAnomalyAtEpochInfo.description,
-                Optional::No
+                Optional::No,
+                MeanAnomalyAtEpochInfo.description
             },
             {
                 EpochInfo.identifier,
                 new StringVerifier,
-                EpochInfo.description,
-                Optional::No
+                Optional::No,
+                EpochInfo.description
             },
             {
                 PeriodInfo.identifier,
                 new DoubleGreaterVerifier(0.0),
-                PeriodInfo.description,
-                Optional::No
+                Optional::No,
+                PeriodInfo.description
             },
         },
         Exhaustive::Yes

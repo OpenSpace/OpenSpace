@@ -112,26 +112,26 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableShadowCylinder"),
-                "",
-                Optional::No
+                Optional::No,
+                ""
             },
             {
                 NumberPointsInfo.identifier,
                 new IntVerifier,
-                NumberPointsInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                NumberPointsInfo.description
             },
             {
                 ShadowLengthInfo.identifier,
                 new DoubleVerifier,
-                ShadowLengthInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ShadowLengthInfo.description
             },
             {
                 ShadowColorInfo.identifier,
                 new DoubleVector4Verifier,
-                ShadowColorInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ShadowColorInfo.description
             },
             {
                 TerminatorTypeInfo.identifier,
@@ -139,32 +139,32 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
                     // Synchronized with SpiceManager::terminatorTypeFromString
                     "UMBRAL", "PENUMBRAL"
                 }),
-                TerminatorTypeInfo.description,
-                Optional::No
+                Optional::No,
+                TerminatorTypeInfo.description
             },
             {
                 LightSourceInfo.identifier,
                 new StringVerifier,
-                LightSourceInfo.description,
-                Optional::No
+                Optional::No,
+                LightSourceInfo.description
             },
             {
                 ObserverInfo.identifier,
                 new StringVerifier,
-                ObserverInfo.description,
-                Optional::No
+                Optional::No,
+                ObserverInfo.description
             },
             {
                 BodyInfo.identifier,
                 new StringVerifier,
-                BodyInfo.description,
-                Optional::No
+                Optional::No,
+                BodyInfo.description
             },
             {
                 BodyFrameInfo.identifier,
                 new StringVerifier,
-                BodyFrameInfo.description,
-                Optional::No
+                Optional::No,
+                BodyFrameInfo.description
             },
             {
                 AberrationInfo.identifier,
@@ -172,8 +172,8 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
                     // SpiceManager::AberrationCorrection::AberrationCorrection
                     "NONE", "LT", "LT+S", "CN", "CN+S"
                 }),
-        AberrationInfo.description,
-                Optional::No
+                Optional::No,
+                AberrationInfo.description
             },
         },
         Exhaustive::Yes

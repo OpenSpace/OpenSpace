@@ -45,8 +45,8 @@ documentation::Documentation PlanetGeometry::Documentation() {
             {
                 KeyType,
                 new StringVerifier,
-                "The type of the PlanetGeometry that will can be constructed.",
-                Optional::No
+                Optional::No,
+                "The type of the PlanetGeometry that will can be constructed."
             }
         }
     };

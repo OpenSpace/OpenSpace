@@ -82,41 +82,41 @@ documentation::Documentation RenderableModelProjection::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableModelProjection"),
-                "",
-                Optional::No
+                Optional::No,
+                ""
             },
             {
                 keyGeometry,
                 new ReferencingVerifier("base_geometry_model"),
-                "The geometry that is used for rendering this model.",
-                Optional::No
+                Optional::No,
+                "The geometry that is used for rendering this model."
             },
             {
                 keyProjection,
                 new ReferencingVerifier("newhorizons_projectioncomponent"),
-                "Contains information about projecting onto this planet.",
-                Optional::No
+                Optional::No,
+                "Contains information about projecting onto this planet."
             },
             {
                 keyTextureColor, // @TODO Change to ColorTextureInfo.identifier
                 new StringVerifier,
-                ColorTextureInfo.description,
-                Optional::No
+                Optional::No,
+                ColorTextureInfo.description
             },
             {
                 PerformShadingInfo.identifier,
                 new BoolVerifier,
-                PerformShadingInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                PerformShadingInfo.description
             },
             {
                 keyBoundingSphereRadius,
                 new DoubleVerifier,
+                Optional::Yes,
                 "The radius of the bounding sphere of this object. This has to be a "
                 "radius that is larger than anything that is rendered by it. It has to "
                 "be at least as big as the convex hull of the object. The default value "
-                "is 10e9 meters.",
-                Optional::Yes
+                "is 10e9 meters."
             }
         }
     };
@@ -125,7 +125,6 @@ documentation::Documentation RenderableModelProjection::Documentation() {
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath(ColorTextureInfo)
-    , _rotation({ "Rotation", "Rotation", "" }, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f)) // @TODO Remove this property
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
@@ -171,7 +170,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     }
 
     Renderable::addProperty(_performShading);
-    Renderable::addProperty(_rotation);
 }
 
 RenderableModelProjection::~RenderableModelProjection() {
@@ -376,30 +374,11 @@ void RenderableModelProjection::attitudeParameters(double time) {
         return;
     }
 
-    _transform = glm::mat4(1);
-    glm::mat4 rotPropX = glm::rotate(
-        _transform,
-        glm::radians(static_cast<float>(_rotation.value().x)),
-        glm::vec3(1, 0, 0)
-    );
-    glm::mat4 rotPropY = glm::rotate(
-        _transform,
-        glm::radians(static_cast<float>(_rotation.value().y)),
-        glm::vec3(0, 1, 0)
-    );
-    glm::mat4 rotPropZ = glm::rotate(
-        _transform, 
-        glm::radians(static_cast<float>(_rotation.value().z)),
-        glm::vec3(0, 0, 1)
-    );
-        
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             _transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
         }
     }
-    _transform = _transform * rotPropX * rotPropY * rotPropZ;
-
     glm::dvec3 boresight;
     try {
         SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_projectionComponent.instrumentId());
@@ -409,13 +388,14 @@ void RenderableModelProjection::attitudeParameters(double time) {
     }
 
     double lightTime;
-    glm::dvec3 p =
-        SpiceManager::ref().targetPosition(
-            _projectionComponent.projectorId(),
-            _projectionComponent.projecteeId(),
-            _destination,
-            _projectionComponent.aberration(),
-            time, lightTime);
+    glm::dvec3 p = SpiceManager::ref().targetPosition(
+        _projectionComponent.projectorId(),
+        _projectionComponent.projecteeId(),
+        _destination,
+        _projectionComponent.aberration(),
+        time, lightTime
+    );
+
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
     position[3] += 4;
@@ -433,8 +413,6 @@ void RenderableModelProjection::attitudeParameters(double time) {
         _boresight
     );
 }
-
-
 
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {

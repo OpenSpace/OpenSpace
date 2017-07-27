@@ -74,30 +74,29 @@ documentation::Documentation SpiceTranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("SpiceTranslation"),
-                "",
                 Optional::No
             },
             {
                 KeyBody, // @TODO Rename to TargetInfo.identifier
                 new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
+                Optional::No,
                 "This is the SPICE NAIF name for the body whose translation is to be "
                 "computed by the SpiceTranslation. It can either be a fully qualified "
-                "name (such as 'EARTH') or a NAIF integer id code (such as '399').",
-                Optional::No
+                "name (such as 'EARTH') or a NAIF integer id code (such as '399')."
             },
             {
                 ObserverInfo.identifier,
                 new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
-                ObserverInfo.description,
-                Optional::No
+                Optional::No,
+                ObserverInfo.description
             },
             {
                 FrameInfo.identifier,
                 new StringAnnotationVerifier(
                     "A valid SPICE NAIF name for a reference frame"
                 ),
-                FrameInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                FrameInfo.description
             },
             {
                 KeyKernels,
@@ -105,10 +104,10 @@ documentation::Documentation SpiceTranslation::Documentation() {
                     new StringListVerifier,
                     new StringVerifier
                 ),
+                Optional::Yes,
                 "A single kernel or list of kernels that this SpiceTranslation depends "
                 "on. All provided kernels will be loaded before any other operation is "
-                "performed.",
-                Optional::Yes
+                "performed."
             }
         },
         Exhaustive::Yes

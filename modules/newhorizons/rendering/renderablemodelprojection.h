@@ -78,8 +78,6 @@ private:
 
     properties::StringProperty _colorTexturePath;
 
-    properties::Vec3Property _rotation;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;

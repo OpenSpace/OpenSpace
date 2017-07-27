@@ -92,32 +92,32 @@ documentation::Documentation RenderableSphere::Documentation() {
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                SizeInfo.description,
-                Optional::No
+                Optional::No,
+                SizeInfo.description
             },
             {
                 SegmentsInfo.identifier,
                 new IntVerifier,
-                SegmentsInfo.description,
-                Optional::No
+                Optional::No,
+                SegmentsInfo.description
             },
             {
                 TextureInfo.identifier,
                 new StringVerifier,
-                TextureInfo.description,
-                Optional::No
+                Optional::No,
+                TextureInfo.description
             },
             {
                 OrientationInfo.identifier,
                 new StringInListVerifier({ "Inside", "Outside", "Inside/Outside" }),
-                OrientationInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                OrientationInfo.description
             },
             {
                 TransparencyInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 1.0),
-                TransparencyInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TransparencyInfo.description
             }
         }
     };

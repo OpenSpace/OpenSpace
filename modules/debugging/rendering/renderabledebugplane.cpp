@@ -89,28 +89,28 @@ documentation::Documentation RenderableDebugPlane::Documentation() {
             {
                 TextureInfo.identifier,
                 new IntVerifier,
-                TextureInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TextureInfo.description
             },
             {
                 BillboardInfo.identifier,
                 new BoolVerifier,
-                BillboardInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                BillboardInfo.description
             },
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                SizeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                SizeInfo.description
             },
             {
                 OriginInfo.identifier,
                 new StringInListVerifier(
                     { "LowerLeft", "LowerRight", "UpperLeft", "UpperRight", "Center" }
                 ),
-                OriginInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                OriginInfo.description
             }
         },
         Exhaustive::Yes

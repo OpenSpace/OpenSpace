@@ -41,11 +41,11 @@ documentation::Documentation Task::documentation() {
             {
                 "Type",
                 new StringAnnotationVerifier("A valid Task created by a factory"),
+                Optional::No,
                 "This key specifies the type of Task that gets created. It has to be one"
                 "of the valid Tasks that are available for creation (see the "
                 "FactoryDocumentation for a list of possible Tasks), which depends on "
-                "the configration of the application",
-                Optional::No
+                "the configration of the application"
             }
         }
     };

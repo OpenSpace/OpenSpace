@@ -55,16 +55,16 @@ documentation:: Documentation ModelGeometry::Documentation() {
             {
                 KeyType,
                 new StringVerifier,
-                "The type of the Model Geometry that should be generated",
-                Optional::No
+                Optional::No,
+                "The type of the Model Geometry that should be generated"
             },
             {
                 KeyGeomModelFile,
                 new StringVerifier,
+                Optional::No,
                 "The file that should be loaded in this ModelGeometry. The file can "
                 "contain filesystem tokens or can be specified relatively to the "
-                "location of the .mod file.",
-                Optional::No
+                "location of the .mod file."
             }
         }
     };

@@ -104,45 +104,45 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderablePlanetProjection"),
-                "",
-                Optional::No
+                Optional::No,
+                ""
             },
             {
                 keyGeometry,
                 new ReferencingVerifier("space_geometry_planet"),
+                Optional::No,
                 "The geometry that is used for rendering this planet.",
-                Optional::No
             },
             {
                 keyProjection,
                 new ReferencingVerifier("newhorizons_projectioncomponent"),
+                Optional::No,
                 "Contains information about projecting onto this planet.",
-                Optional::No
             },
             {
                 keyMeridianShift,
                 new BoolVerifier,
+                Optional::Yes,
                 "Determines whether the meridian of the planet should be shifted by 180 "
-                "degrees. The default value is 'false'",
-                Optional::Yes
+                "degrees. The default value is 'false'"
             },
             {
                 keyColorTexture, // @TODO This should be ColorTextureInfo.identifier
                 new StringVerifier,
-                ColorTextureInfo.description,
-                Optional::No
+                Optional::No,
+                ColorTextureInfo.description
             },
             {
                 keyHeightTexture, // @TODO This should be HeightTextureInfo.identifier
                 new StringVerifier,
-                HeightTextureInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                HeightTextureInfo.description
             },
             {
                 HeightExaggerationInfo.identifier,
                 new DoubleVerifier,
-                HeightExaggerationInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                HeightExaggerationInfo.description
             }
         }
     };

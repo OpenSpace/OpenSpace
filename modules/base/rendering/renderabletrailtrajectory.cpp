@@ -97,32 +97,32 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
             {
                 StartTimeInfo.identifier,
                 new StringAnnotationVerifier("A valid date in ISO 8601 format"),
-                StartTimeInfo.description,
-                Optional::No
+                Optional::No,
+                StartTimeInfo.description
             },
             {
                 EndTimeInfo.identifier,
                 new StringAnnotationVerifier("A valid date in ISO 8601 format"),
-                EndTimeInfo.description,
-                Optional::No
+                Optional::No,
+                EndTimeInfo.description
             },
             {
                 SampleIntervalInfo.identifier,
                 new DoubleVerifier,
-                SampleIntervalInfo.description,
-                Optional::No
+                Optional::No,
+                SampleIntervalInfo.description
             },
             {
                 TimeSubSampleInfo.identifier,
                 new IntVerifier,
-                TimeSubSampleInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TimeSubSampleInfo.description
             },
             {
                 RenderFullPathInfo.identifier,
                 new BoolVerifier,
-                RenderFullPathInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                RenderFullPathInfo.description
             }
         }
     };

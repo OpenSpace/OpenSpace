@@ -94,28 +94,28 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
             {
                 VertexInfo.identifier,
                 new StringVerifier,
-                VertexInfo.description,
-                Optional::No
+                Optional::No,
+                VertexInfo.description
             },
             {
                 ConstellationInfo.identifier,
                 new StringVerifier,
+                Optional::Yes,
                 "Specifies the file that contains the mapping between constellation "
                 "abbreviations and full name of the constellation. If the file is "
-                "omitted, the abbreviations are used as the full names.",
-                Optional::Yes
+                "omitted, the abbreviations are used as the full names."
             },
             {
                 DistanceInfo.identifier,
                 new DoubleVerifier,
-                DistanceInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                DistanceInfo.description
             },
             {
                 SelectionInfo.identifier,
                 new StringListVerifier,
-                SelectionInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                SelectionInfo.description
             }
         }
     };

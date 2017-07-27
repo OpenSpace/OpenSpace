@@ -42,10 +42,10 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-namespace { 
+namespace {
     const char* KeyGeometry = "Geometry";
     const char* KeyTexture = "Textures.Color";
-    const char* KeyModelTransform = "Rotation.ModelTransform";
+    const char* KeyModelTransform = "ModelTransform";
 
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "ColorTexture", // @TODO replace with only "Texture"
@@ -60,6 +60,13 @@ namespace {
         "This value determines whether this model should be shaded by using the position "
         "of the Sun."
     };
+
+    static const openspace::properties::Property::PropertyInfo ModelTransformInfo = {
+        "ModelTransform",
+        "Model Transform",
+        "This value specifies the model transform that is applied to the model before "
+        "all other transformations are applied."
+    };
 } // namespace
 
 namespace openspace {
@@ -73,27 +80,26 @@ documentation::Documentation RenderableModel::Documentation() {
             {
                 KeyGeometry,
                 new ReferencingVerifier("base_geometry_model"),
-                "This specifies the model that is rendered by the Renderable.",
-                Optional::No
+                Optional::No,
+                "This specifies the model that is rendered by the Renderable."
             },
             {
                 KeyTexture, // @TODO replace with TextureInfo.identifier
                 new StringVerifier,
-                TextureInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TextureInfo.description
             },
             {
                 ShadingInfo.identifier,
                 new BoolVerifier,
-                ShadingInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ShadingInfo.description
             },
             {
-                KeyModelTransform,
+                ModelTransformInfo.identifier,
                 new DoubleMatrix3Verifier,
-                "Specifies a distinct transformation matrix that is applied to the "
-                "model. If it is not specified, it is equal to the Identity matrix.",
-                Optional::Yes
+                Optional::Yes,
+                ModelTransformInfo.description
             }
         }
     };
@@ -104,9 +110,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _geometry(nullptr)
     , _colorTexturePath(TextureInfo)
     , _performShading(ShadingInfo, true)
+    , _modelTransform(ModelTransformInfo, glm::mat3(1.0))
     , _programObject(nullptr)
     , _texture(nullptr)
-    , _modelTransform(1.0)
 {
     ghoul_precondition(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
@@ -187,7 +193,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(_modelTransform), glm::dvec3(data.modelTransform.scale)));
+        glm::dmat4(glm::scale(glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale)));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
@@ -197,7 +203,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
     _programObject->setUniform("performShading", _performShading);
-    _programObject->setUniform("fading", 1.f); // @TODO remove this
 
     _geometry->setUniforms(*_programObject);
 

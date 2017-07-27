@@ -121,11 +121,11 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
             {
                 KeyType,
                 new StringAnnotationVerifier("Must name a valid Screenspace renderable"),
+                Optional::No,
                 "The type of the Screenspace renderable that is to be created. The "
                 "available types of Screenspace renderable depend on the configuration of"
                 "the application and can be written to disk on application startup into "
-                "the FactoryDocumentation.",
-                Optional::No
+                "the FactoryDocumentation."
             }
         }
     };

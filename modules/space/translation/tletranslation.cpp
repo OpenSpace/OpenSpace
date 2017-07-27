@@ -239,20 +239,20 @@ documentation::Documentation TLETranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("TLETranslation"),
-                "",
                Optional::No
             },
             {
                 KeyFile,
                 new StringVerifier,
-                "Specifies the filename of the Two-Line-Element file",
-                Optional::No
+                Optional::No,
+                "Specifies the filename of the Two-Line-Element file"
             },
             {
                 KeyLineNum,
                 new DoubleGreaterVerifier(0),
-                "Specifies the line number within the file where the group of 3 TLE lines begins (1-based)",
-                Optional::No
+                Optional::No,
+                "Specifies the line number within the file where the group of 3 TLE "
+                "lines begins (1-based)."
             }
         },
         Exhaustive::No
