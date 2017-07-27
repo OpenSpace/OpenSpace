@@ -95,10 +95,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/black_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
+            ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
         }
     },
@@ -112,10 +109,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/black_parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
+            ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
         }
     },
@@ -129,20 +123,9 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/dish.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/dish_AO.png"
-            },
+            ColorTexture = "textures/dish_AO.png",
             ModelTransform = RotationMatrix
-
         },
-        -- Transform = {
-        --     Rotation = {
-        --         Type = "SpiceRotation",
-        --         SourceFrame = "-226071", -- ROS_HGA
-        --         DestinationFrame = "ROS_SPACECRAFT",
-        --     }
-        -- }
     },
     {
         Name = "Rosetta_parts",
@@ -154,12 +137,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/parts2_AO.png"
-            },
+            ColorTexture = "textures/parts2_AO.png",
             ModelTransform = RotationMatrix
-
         }
     },
     {
@@ -172,12 +151,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/silver_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
+            ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
-
         }
     },
     {
@@ -190,12 +165,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/vents.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
+            ColorTexture = "textures/tex_01.png",
             ModelTransform = RotationMatrix
-
         }
     },
     {
@@ -208,20 +179,9 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/wingA.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
+            ColorTexture = "textures/tex_01.png",
             ModelTransform = RotationMatrix
-
         },
-        -- Transform = {
-        --     Rotation = {
-        --         Type = "SpiceRotation",
-        --         SourceFrame = "-226015", -- ROS_SA
-        --         DestinationFrame = "ROS_SPACECRAFT",
-        --     }
-        -- }
     },
     {
         Name = "Rosetta_wing_b",
@@ -233,12 +193,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/wingB.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
+            ColorTexture = "textures/tex_01.png",
             ModelTransform = RotationMatrix
-
         },
         -- Transform = {
         --     Rotation = {
@@ -258,12 +214,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/yellow_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_gold_ramp.png"
-            },
+            ColorTexture = "textures/foil_gold_ramp.png",
             ModelTransform = RotationMatrix
-
         }
     },
     {
@@ -300,12 +252,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
+            ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
-
         }
     },
     {
@@ -318,12 +266,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_lids.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/parts2_AO.png"
-            },
+            ColorTexture = "textures/parts2_AO.png",
             ModelTransform = RotationMatrix
-
         }
     },
     {
@@ -336,12 +280,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
+            ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
-
         }
     },
     {
@@ -354,10 +294,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_solarp.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
+            ColorTexture = "textures/tex_01.png",
             ModelTransform = RotationMatrix
         }
     },

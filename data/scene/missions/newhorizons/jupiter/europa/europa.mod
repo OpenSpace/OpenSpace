@@ -15,9 +15,9 @@ return {
                 Radius = europa_radius,
                 Segments = 100
             },
+            ColorTexture = "textures/europa.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/europa.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },

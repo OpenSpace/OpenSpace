@@ -31,10 +31,8 @@ return {
                 Radius = charon_radius,
                 Segments = 100
             },
-            Textures = {
-                Color = ColorTexture,
-                Height = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
-            },
+            ColorTexture = ColorTexture,
+            HeightTexture = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
             Projection = {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",
@@ -99,7 +97,6 @@ return {
             Observer = "NEW HORIZONS",
             Body = "CHARON",
             BodyFrame = "IAU_CHARON",
-            MainFrame = "GALACTIC",
             Aberration = "NONE",
         },
     },    

@@ -24,10 +24,7 @@ return {
                 Radius = 6.957E8,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/sun.jpg",
-            },
+            ColorTexture = "textures/sun.jpg",
             PerformShading = false,
         },
         Transform = {

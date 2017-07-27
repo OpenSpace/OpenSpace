@@ -15,9 +15,9 @@ return {
                 Radius = io_radius,
                 Segments = 100
             },
+            ColorTexture = "textures/io.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/io.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },

@@ -44,21 +44,18 @@
 
 namespace {
     const char* _loggerCat = "RenderableModelProjection";
-    const char* keySource = "Rotation.Source";
-    const char* keyDestination = "Rotation.Destination";
+
     const char* keyGeometry = "Geometry";
     const char* keyProjection = "Projection";
     const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
-    const char* keyTextureColor = "Textures.Color";
-
-    const char* _destination = "GALACTIC";
+    const char* DestinationFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
         "Color Base Texture",
-        "This is the path to a local image file that is used as the base texture for "
-        "the model on which the image projections are layered."
+        "This is the path to a local image file that is used as the base texture for the "
+        "model on which the image projections are layered."
     };
 
     static const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
@@ -82,8 +79,7 @@ documentation::Documentation RenderableModelProjection::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableModelProjection"),
-                Optional::No,
-                ""
+                Optional::No
             },
             {
                 keyGeometry,
@@ -98,7 +94,7 @@ documentation::Documentation RenderableModelProjection::Documentation() {
                 "Contains information about projecting onto this planet."
             },
             {
-                keyTextureColor, // @TODO Change to ColorTextureInfo.identifier
+                ColorTextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
                 ColorTextureInfo.description
@@ -149,7 +145,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         ModelGeometry::createFromDictionary(geometryDictionary)
     );
 
-    _colorTexturePath = absPath(dictionary.value<std::string>(keyTextureColor));
+    _colorTexturePath = absPath(dictionary.value<std::string>(
+        ColorTextureInfo.identifier
+    ));
         
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
@@ -172,11 +170,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     Renderable::addProperty(_performShading);
 }
 
-RenderableModelProjection::~RenderableModelProjection() {
-    // This empty method needs to be here in order to use forward declaration with 
-    // std::unique_ptr
-}
-
+// This empty method needs to be here in order to use forward declaration with
+// std::unique_ptr
+RenderableModelProjection::~RenderableModelProjection() {}
 
 bool RenderableModelProjection::isReady() const {
     bool ready = true;
@@ -218,8 +214,9 @@ bool RenderableModelProjection::initialize() {
 }
 
 bool RenderableModelProjection::deinitialize() {
-    if (_geometry)
+    if (_geometry) {
         _geometry->deinitialize();
+    }
 
     _geometry = nullptr;
     _baseTexture = nullptr;
@@ -237,13 +234,15 @@ ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
 }
 
 void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
-    if (_projectionComponent.needsClearProjection())
+    if (_projectionComponent.needsClearProjection()) {
         _projectionComponent.clearAllProjections();
+    }
 
     _up = data.camera.lookUpVectorCameraSpace();
 
-    if (_capture && _projectionComponent.doesPerformProjection())
+    if (_capture && _projectionComponent.doesPerformProjection()) {
         project();
+    }
 
     _programObject->activate();
 
@@ -296,8 +295,9 @@ void RenderableModelProjection::update(const UpdateData& data) {
 
     _projectionComponent.update();
         
-    if (_depthFboProgramObject->isDirty())
+    if (_depthFboProgramObject->isDirty()) {
         _depthFboProgramObject->rebuildFromFile();
+    }
 
     _time = data.time.j2000Seconds();
 
@@ -368,7 +368,11 @@ void RenderableModelProjection::imageProjectGPU(
 
 void RenderableModelProjection::attitudeParameters(double time) {
     try {
-        _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_projectionComponent.instrumentId(), _destination, time);
+        _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
+            _projectionComponent.instrumentId(),
+            DestinationFrame,
+            time
+        );
     }
     catch (const SpiceManager::SpiceException&) {
         return;
@@ -381,7 +385,9 @@ void RenderableModelProjection::attitudeParameters(double time) {
     }
     glm::dvec3 boresight;
     try {
-        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_projectionComponent.instrumentId());
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
+            _projectionComponent.instrumentId()
+        );
         boresight = std::move(res.boresightVector);
     } catch (const SpiceManager::SpiceException&) {
         return;
@@ -391,7 +397,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     glm::dvec3 p = SpiceManager::ref().targetPosition(
         _projectionComponent.projectorId(),
         _projectionComponent.projecteeId(),
-        _destination,
+        DestinationFrame,
         _projectionComponent.aberration(),
         time, lightTime
     );
@@ -417,7 +423,10 @@ void RenderableModelProjection::attitudeParameters(double time) {
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
         attitudeParameters(img.timeRange.start);
-        auto projTexture = _projectionComponent.loadProjectionTexture(img.path, img.isPlaceholder);
+        auto projTexture = _projectionComponent.loadProjectionTexture(
+            img.path,
+            img.isPlaceholder
+        );
         imageProjectGPU(projTexture);
     }
     _capture = false;
@@ -426,8 +435,9 @@ void RenderableModelProjection::project() {
 bool RenderableModelProjection::loadTextures() {
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
-        ;
+        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
         if (_baseTexture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _baseTexture->uploadTexture();

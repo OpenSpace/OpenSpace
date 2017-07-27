@@ -11,9 +11,7 @@ return {
                 Radius = 0.2575E4,
                 Segments = 50
             },
-            Textures = {
-                Color = "textures/titan.jpg"
-            }
+            ColorTexture = "textures/titan.jpg"
         },
         Transform = {
             Translation = {

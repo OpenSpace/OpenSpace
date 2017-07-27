@@ -13,10 +13,7 @@ return {
                 GeometryFile = "Juno.obj",
                 Magnification = 4,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             Rotation = {
                 Source = "JUNO_SPACECRAFT",
                 Destination = "GALACTIC",

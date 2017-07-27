@@ -12,15 +12,7 @@ return {
                 Radius = 2.631E6,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/callisto.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
+            ColorTexture = "textures/callisto.jpg",
         },
         Transform = {
             Translation = {

@@ -11,9 +11,7 @@ return {
                 Radius = 0.563E3,
                 Segments = 50
             },
-            Textures = {
-                Color = "textures/dione.jpg"
-            }
+            ColorTexture = "textures/dione.jpg"
         },
         Transform = {
             Translation = {

@@ -26,15 +26,7 @@ return {
                 Radius = 5.8232E7,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/saturn.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
+            ColorTexture = "textures/saturn.jpg",
         },
         Tag = "planet_solarSystem",
         Transform = {

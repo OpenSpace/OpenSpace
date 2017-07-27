@@ -37,17 +37,9 @@ return {
                 Radius = 6.371E6,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/earth_bluemarble.jpg",
-                Night = "textures/earth_night.jpg",
-                Height = "textures/earth_bluemarble_height.jpg"
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
+            ColorTexture = "textures/earth_bluemarble.jpg",
+            HeightTexture = "textures/earth_bluemarble_height.jpg",
+            NightTexture = "textures/earth_night.jpg",
         },
         Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {

@@ -169,10 +169,7 @@ return {
                 GeometryFile = "models/orx_base_resized_12_sep_2016.obj",
                 Magnification = 0,
             },
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -204,10 +201,7 @@ return {
                 GeometryFile = "models/orx_polycam_resized_12_sep_2016.obj",
                 Magnification = 0,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -237,10 +231,7 @@ return {
                 GeometryFile = "models/orx_rexis_resized_12_sep_2016.obj",
                 Magnification = 0,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,

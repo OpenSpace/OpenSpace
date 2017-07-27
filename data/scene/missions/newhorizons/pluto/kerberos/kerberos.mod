@@ -25,10 +25,7 @@ return {
                 Radius = kerberos_radius,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.jpg",
-            }
+            ColorTexture = "textures/gray.jpg",
         },
         Transform = {
             Translation = {

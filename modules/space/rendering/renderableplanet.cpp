@@ -53,10 +53,6 @@
 namespace {
     const char* KeyGeometry = "Geometry";
     const char* KeyRadius = "Radius";
-    const char* KeyColorTexture = "Textures.Color";
-    const char* KeyNightTexture = "Textures.Night";
-    const char* KeyHeightTexture = "Textures.Height";
-    const char* KeyShading = "PerformShading";
 
     static const char* _loggerCat = "RenderablePlanet";
 
@@ -67,14 +63,14 @@ namespace {
     const char* keyBody                          = "Body";
     
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
-        "PlanetTexture",
+        "ColorTexture",
         "Color Base Texture",
         "The path to the base color texture that is used on the planet prior to any "
         "image projection."
     };
 
     static const openspace::properties::Property::PropertyInfo HeightTextureInfo = {
-        "HeightMap",
+        "HeightTexture",
         "Heightmap Texture",
         "The path to the height map texture that is used for the planet. If no height "
         "map is specified the planet does not use a height field."
@@ -101,7 +97,8 @@ namespace {
         "Perform Shading",
         "If this value is enabled, the model will be shaded based on the relative "
         "location to the Sun. If this value is disabled, shading is disabled and the "
-        "entire model is rendered brightly."
+        "entire model is rendered brightly. If this value is 'false', any existing night "
+        "texture will not be used."
     };
 } // namespace
 
@@ -127,31 +124,28 @@ documentation::Documentation RenderablePlanet::Documentation() {
                 "will try to query the SPICE library for radius values."
             },
             {
-                KeyColorTexture, // @TODO Use ColorTextureInfo.identifier instead
+                ColorTextureInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
-                "Specifies the color texture that is used for this RenderablePlanet."
+                ColorTextureInfo.description
             },
             {
-                KeyHeightTexture, // @TODO Use HeightTextureInfo.identifier instead
+                HeightTextureInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
-                "Specifies the height texture that is used for this RenderablePlanet."
+                HeightTextureInfo.description
             },
             {
-                KeyNightTexture, // @TODO Use NightTextureInfo.identifier instead
+                NightTextureInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
-                "Specifies the texture that is used for the night side of this "
-                "RenderablePlanet."
+                NightTextureInfo.description
             },
             {
-                KeyShading,
+                PerformShadingInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
-                "Specifies whether the planet should be rendered shaded by the Sun. If "
-                "this value is 'false', any existing night texture will not be used. "
-                "This value defaults to 'true'."
+                PerformShadingInfo.description
             },
             {
                 HeightExaggerationInfo.identifier,
@@ -221,27 +215,33 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geomDict);
 
-    if (dictionary.hasKey(KeyColorTexture)) {
-        _colorTexturePath = absPath(dictionary.value<std::string>(KeyColorTexture));
+    if (dictionary.hasKey(ColorTextureInfo.identifier)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(
+            ColorTextureInfo.identifier
+        ));
     }
 
-    if (dictionary.hasKey(KeyNightTexture)) {
+    if (dictionary.hasKey(NightTextureInfo.identifier)) {
         _hasNightTexture = true;
-        _nightTexturePath = absPath(dictionary.value<std::string>(KeyNightTexture));
+        _nightTexturePath = absPath(dictionary.value<std::string>(
+            NightTextureInfo.identifier
+        ));
     }
 
-    if (dictionary.hasKey(KeyHeightTexture)) {
+    if (dictionary.hasKey(HeightTextureInfo.identifier)) {
         _hasHeightTexture = true;
-        _heightMapTexturePath = absPath(dictionary.value<std::string>(KeyHeightTexture));
+        _heightMapTexturePath = absPath(dictionary.value<std::string>(
+            HeightTextureInfo.identifier
+        ));
     }
 
-    if (dictionary.hasKey(KeyShading)) {
-        _performShading = dictionary.value<bool>(KeyShading);
+    if (dictionary.hasKey(PerformShadingInfo.identifier)) {
+        _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
 
     addPropertySubOwner(_geometry.get());
 
-    auto loadTextureCallback = [this]() {loadTexture(); };
+    auto loadTextureCallback = [this]() { loadTexture(); };
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(loadTextureCallback);
 

@@ -22,11 +22,7 @@ return {
                     Radius = 6.371E6
                 },
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/Moon16K.dds",
-                --Color = "textures/moonmap4k.jpg",
-            },
+            ColorTexture = "textures/Moon16K.dds",
         },
         Transform = {
             Translation = {

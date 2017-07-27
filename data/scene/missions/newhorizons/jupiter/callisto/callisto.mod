@@ -15,9 +15,9 @@ return {
                 Radius = callisto_radius,
                 Segments = 100
             },
+            ColorTexture = "textures/callisto.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/callisto.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },

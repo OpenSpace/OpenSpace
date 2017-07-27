@@ -25,15 +25,7 @@ return {
                 Radius = 2.4397E6,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/mercury.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
+            ColorTexture = "textures/mercury.jpg",
         },
         Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {

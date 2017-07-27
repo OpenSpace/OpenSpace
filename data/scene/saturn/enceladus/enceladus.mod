@@ -11,9 +11,7 @@ return {
                 Radius = 0.257E3,
                 Segments = 50
             },
-            Textures = {
-                Color = "textures/enceladus.jpg"
-            }
+            ColorTexture = "textures/enceladus.jpg"
         },
         Transform = {
             Translation = {

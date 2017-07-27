@@ -54,34 +54,25 @@
 namespace {
     const char* _loggerCat = "RenderablePlanetProjection";
 
-    const char* keyGeometry = "Geometry";
-    const char* keyProjection = "Projection";
-    const char* keyMeridianShift = "Textures.MeridianShift";
-    const char* keyColorTexture = "Textures.Color";
-    const char* keyHeightTexture = "Textures.Height";
+    const char* KeyGeometry = "Geometry";
+    const char* KeyProjection = "Projection";
 
-    const char* keyRadius = "Geometry.Radius";
+    const char* KeyRadius = "Geometry.Radius";
 //    const char* keyShading = "PerformShading";
     const char* _mainFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
-        "PlanetTexture",
+        "ColorTexture",
         "Color Base Texture",
         "The path to the base color texture that is used on the planet prior to any "
         "image projection."
     };
 
     static const openspace::properties::Property::PropertyInfo HeightTextureInfo = {
-        "HeightMap",
+        "HeightTexture",
         "Heightmap Texture",
         "The path to the height map texture that is used for the planet. If no height "
         "map is specified the planet does not use a height field."
-    };
-
-    static const openspace::properties::Property::PropertyInfo ShiftMeridianInfo = {
-        "ShiftMeridian",
-        "Shift Meridian by 180 deg",
-        "Shift the position of the meridian by 180 degrees. This value "
     };
 
     static const openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
@@ -108,32 +99,25 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
                 ""
             },
             {
-                keyGeometry,
+                KeyGeometry,
                 new ReferencingVerifier("space_geometry_planet"),
                 Optional::No,
                 "The geometry that is used for rendering this planet.",
             },
             {
-                keyProjection,
+                KeyProjection,
                 new ReferencingVerifier("newhorizons_projectioncomponent"),
                 Optional::No,
                 "Contains information about projecting onto this planet.",
             },
             {
-                keyMeridianShift,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the meridian of the planet should be shifted by 180 "
-                "degrees. The default value is 'false'"
-            },
-            {
-                keyColorTexture, // @TODO This should be ColorTextureInfo.identifier
+                ColorTextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
                 ColorTextureInfo.description
             },
             {
-                keyHeightTexture, // @TODO This should be HeightTextureInfo.identifier
+                HeightTextureInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
                 HeightTextureInfo.description
@@ -152,12 +136,10 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     : Renderable(dictionary)
     , _colorTexturePath(ColorTextureInfo)
     , _heightMapTexturePath(HeightTextureInfo)
-    , _rotation({ "Rotation", "Rotation", "" }, 0, 0, 360) // @TODO Missing documentation
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _heightMapTexture(nullptr)
-    , _shiftMeridianBy180({"asd", "", ""  }, false) // @TODO Missing documentation
     , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 100.f)
     , _capture(false)
 {
@@ -172,8 +154,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     ghoul_assert(success, "");
 
     ghoul::Dictionary geometryDictionary;
-    success = dictionary.getValue(
-        keyGeometry, geometryDictionary);
+    success = dictionary.getValue(KeyGeometry, geometryDictionary);
     if (success) {
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
         using planetgeometry::PlanetGeometry;
@@ -182,38 +163,34 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         );
     }
 
-    _projectionComponent.initialize(dictionary.value<ghoul::Dictionary>(keyProjection));
+    _projectionComponent.initialize(dictionary.value<ghoul::Dictionary>(KeyProjection));
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
     std::string texturePath = "";
-    success = dictionary.getValue("Textures.Color", texturePath);
+    success = dictionary.getValue(ColorTextureInfo.identifier, texturePath);
     if (success) {
         _colorTexturePath = absPath(texturePath); 
     }
 
     std::string heightMapPath = "";
-    success = dictionary.getValue("Textures.Height", heightMapPath);
+    success = dictionary.getValue(HeightTextureInfo.identifier, heightMapPath);
     if (success) {
         _heightMapTexturePath = absPath(heightMapPath);
     }
 
-    if (dictionary.hasKeyAndValue<bool>(keyMeridianShift)) {
-        _shiftMeridianBy180 = dictionary.value<bool>(keyMeridianShift);
-    }
-
     float radius = std::pow(10.f, 9.f);
-    dictionary.getValue(keyRadius, radius);
+    dictionary.getValue(KeyRadius, radius);
     setBoundingSphere(radius);
 
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
 
     addProperty(_colorTexturePath);
-    _colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
+    _colorTexturePath.onChange([&]() { loadTextures(); });
 
     addProperty(_heightMapTexturePath);
-    _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
+    _heightMapTexturePath.onChange([&]() { loadTextures(); });
 
     if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
         _heightExaggeration = static_cast<float>(
@@ -222,8 +199,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
 
     addProperty(_heightExaggeration);
-
-    addProperty(_shiftMeridianBy180);
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
@@ -231,12 +206,14 @@ RenderablePlanetProjection::~RenderablePlanetProjection() {}
 bool RenderablePlanetProjection::initialize() {
     bool completeSuccess = true;
 
-    _programObject = OsEng.renderEngine().buildRenderProgram("projectiveProgram",
+    _programObject = OsEng.renderEngine().buildRenderProgram(
+        "projectiveProgram",
         "${MODULE_NEWHORIZONS}/shaders/renderablePlanet_vs.glsl",
         "${MODULE_NEWHORIZONS}/shaders/renderablePlanet_fs.glsl"
     );
 
-    _fboProgramObject = ghoul::opengl::ProgramObject::Build("fboPassProgram",
+    _fboProgramObject = ghoul::opengl::ProgramObject::Build(
+        "fboPassProgram",
         "${MODULE_NEWHORIZONS}/shaders/renderablePlanetProjection_vs.glsl",
         "${MODULE_NEWHORIZONS}/shaders/renderablePlanetProjection_fs.glsl"
     );
@@ -311,17 +288,17 @@ void RenderablePlanetProjection::imageProjectGPU(
     _fboProgramObject->setUniform("_scaling"       , _camScaling);
     _fboProgramObject->setUniform("boresight"      , _boresight);
 
-    if (_geometry->hasProperty("radius")){ 
-        ghoul::any r = _geometry->property("radius")->get();
+    if (_geometry->hasProperty("Radius")){ 
+        ghoul::any r = _geometry->property("Radius")->get();
         if (glm::vec3* radius = ghoul::any_cast<glm::vec3>(&r)){
             _fboProgramObject->setUniform("_radius", radius);
         }
-    }else{
+    } else {
         LERROR("Geometry object needs to provide radius");
     }
-    if (_geometry->hasProperty("segments")){
-        ghoul::any s = _geometry->property("segments")->get();
-        if (int* segments = ghoul::any_cast<int>(&s)){
+    if (_geometry->hasProperty("Segments")) {
+        ghoul::any s = _geometry->property("Segments")->get();
+        if (int* segments = ghoul::any_cast<int>(&s)) {
             _fboProgramObject->setUniform("_segments", segments[0]);
         }
     }else{
@@ -353,13 +330,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         static_cast<float>(M_PI_2),
         glm::vec3(0, -1, 0)
     );
-    glm::mat4 rotProp = glm::rotate(
-        _transform,
-        static_cast<float>(glm::radians(static_cast<float>(_rotation))),
-        glm::vec3(0, 1, 0)
-    );
 
-    _transform = glm::mat4(_stateMatrix) * rot * roty * rotProp;
+    _transform = glm::mat4(_stateMatrix) * rot * roty;
 
     glm::dvec3 bs;
     try {
@@ -464,8 +436,6 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     //_programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
 
     //setPscUniforms(*_programObject.get(), data.camera, data.position);
-
-    _programObject->setUniform("shiftMeridian", _shiftMeridianBy180);
 
     ghoul::opengl::TextureUnit unit[3];
     unit[0].activate();

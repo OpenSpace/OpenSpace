@@ -26,15 +26,7 @@ return {
                 Radius = 3.760E6,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/venus.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
+            ColorTexture = "textures/venus.jpg",
         },
         Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {

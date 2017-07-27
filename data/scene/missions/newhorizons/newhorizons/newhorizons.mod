@@ -98,10 +98,7 @@ return {
                 GeometryFile = "models/NewHorizonsCleanModel.obj",
                 -- Magnification = 4,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/NHTexture.jpg",
-            },
+            ColorTexture = "textures/NHTexture.jpg",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -145,9 +142,9 @@ return {
                 GeometryFile = "models/Labels.obj",
                 -- Magnification = 4,
             }, 
+            ColorTexture =  "textures/labels.png",
             Textures = {
                 Type = "simple",
-                Color =  "textures/labels.png",
                 BumpMap = "textures/goldfoilbump.tif"
             },
             Rotation = {

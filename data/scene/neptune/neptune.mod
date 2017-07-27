@@ -26,10 +26,7 @@ return {
                 Radius = 2.4622E7,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/neptune.jpg",
-            }
+            ColorTexture = "textures/neptune.jpg",
         },
         Tag = "planet_solarSystem",
         Transform = {

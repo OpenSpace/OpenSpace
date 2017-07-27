@@ -11,9 +11,7 @@ return {
                 Radius = 0.538E3,
                 Segments = 50
             },
-            Textures = {
-                Color = "textures/tethys.jpg"
-            }
+            ColorTexture = "textures/tethys.jpg"
         },
         Transform = {
             Translation = {

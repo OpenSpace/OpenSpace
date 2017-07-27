@@ -11,9 +11,9 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/vestaprojection_2/obj/VestaComet_5000.obj",
             },
+            ColorTexture = "textures/dummy.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/dummy.jpg",
                 Project = "textures/projectMe.png",
                 Default = "textures/defaultProj_backup.png"
             },

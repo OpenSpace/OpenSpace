@@ -11,9 +11,7 @@ return {
                 Radius = 0.28E3,
                 Segments = 50
             },
-            Textures = {
-                Color = "textures/mimas.jpg"
-            }
+            ColorTexture = "textures/mimas.jpg"
         },
         Transform = {
             Translation = {

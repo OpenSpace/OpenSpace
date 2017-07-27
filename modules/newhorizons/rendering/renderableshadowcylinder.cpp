@@ -34,7 +34,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* KeyMainFrame   = "MainFrame";
+    const char* MainFrame   = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "AmountOfPoints",
@@ -175,8 +175,7 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
                 Optional::No,
                 AberrationInfo.description
             },
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -197,7 +196,6 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _observer(ObserverInfo)
     , _body(BodyInfo)
     , _bodyFrame(BodyFrameInfo)
-    , _mainFrame({"mainFrame", "Main Frame", ""}) // @TODO Remove this
     , _aberration(AberrationInfo)
     , _shader(nullptr)
     , _vao(0)
@@ -246,8 +244,6 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     _observer = dictionary.value<std::string>(ObserverInfo.identifier);
     _body = dictionary.value<std::string>(BodyInfo.identifier);
     _bodyFrame = dictionary.value<std::string>(BodyFrameInfo.identifier);
-    _mainFrame = dictionary.value<std::string>(KeyMainFrame);
-    
 
     using T = SpiceManager::AberrationCorrection::Type;
     _aberration.addOptions({
@@ -330,7 +326,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 void RenderableShadowCylinder::update(const UpdateData& data) {
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(
         _bodyFrame,
-        _mainFrame,
+        MainFrame,
         data.time.j2000Seconds()
     );
     if (_shader->isDirty()) {
@@ -383,7 +379,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
     glm::dvec3 vecLightSource = SpiceManager::ref().targetPosition(
         _body,
         _lightSource,
-        _mainFrame,
+        MainFrame,
         {
             SpiceManager::AberrationCorrection::Type(_aberration.value()),
             SpiceManager::AberrationCorrection::Direction::Reception

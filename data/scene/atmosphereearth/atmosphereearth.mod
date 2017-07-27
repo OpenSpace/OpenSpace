@@ -40,10 +40,10 @@ return {
                 },
                 --Caster2 = { Name = "Independency Day Ship", Radius = 0 }
             },
+            ColorTexture = "textures/earth_bluemarble.jpg",
+            NightTexture = "textures/earth_night.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/earth_bluemarble.jpg",
-                Night = "textures/earth_night.jpg",
                 --Height = "textures/earth_bluemarble_height.jpg",                
                 -- Depth = "textures/earth_depth.png",
                 Reflectance = "textures/earth_reflectance.png",

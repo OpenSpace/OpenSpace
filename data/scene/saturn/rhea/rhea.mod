@@ -11,9 +11,7 @@ return {
                 Radius = 0.765E3,
                 Segments = 50
             },
-            Textures = {
-                Color = "textures/rhea.jpg"
-            }
+            ColorTexture = "textures/rhea.jpg"
         },
         Transform = {
             Translation = {

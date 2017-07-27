@@ -67,15 +67,11 @@ private:
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _heightMapTexturePath;
 
-    properties::IntProperty _rotation;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-
-    properties::BoolProperty _shiftMeridianBy180;
 
     properties::FloatProperty _heightExaggeration;
 

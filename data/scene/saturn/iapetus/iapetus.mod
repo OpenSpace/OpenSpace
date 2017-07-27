@@ -11,9 +11,7 @@ return {
                 Radius = 0.746E3,
                 Segments = 50
             },
-            Textures = {
-                Color = "textures/iapetus.jpg"
-            }
+            ColorTexture = "textures/iapetus.jpg"
         },
         Transform = {
             Translation = {

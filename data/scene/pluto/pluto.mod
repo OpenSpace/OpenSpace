@@ -28,15 +28,7 @@ return {
                 Radius = 1.173E6,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/pluto.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
+            ColorTexture = "textures/pluto.jpg",
         },
         Transformation = {
             Translation = {
@@ -64,15 +56,7 @@ return {
                 Radius = 6.035E5,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
+            ColorTexture = "textures/gray.jpg",
         },
         Transformation = {
             Translation = {

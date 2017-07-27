@@ -44,10 +44,8 @@ return {
                 Radius = pluto_radius,
                 Segments = 100
             },
-            Textures = {
-                Color = ColorTexture,
-                Height = "textures/pluto_shenk_heightmap.jpg",
-            },
+            ColorTexture = ColorTexture,
+            HeightTexture = "textures/pluto_shenk_heightmap.jpg",
             Projection = {
                 Sequence       = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/images",
                 EventFile      = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
@@ -231,7 +229,6 @@ return {
             Observer = "NEW HORIZONS",
             Body = "PLUTO",
             BodyFrame = "IAU_PLUTO",
-            MainFrame = "GALACTIC",
             Aberration = "NONE",
         },
     },

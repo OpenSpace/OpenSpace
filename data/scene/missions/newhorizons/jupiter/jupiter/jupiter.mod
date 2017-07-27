@@ -28,9 +28,9 @@ return {
                 Radius = jupiter_local,
                 Segments = 200,
             },
+            ColorTexture = "textures/jupiterFlipped_low.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/jupiterFlipped_low.jpg",
                 Project = "textures/lorriTest1.jpg",
                 Sequencing = "true",
             },

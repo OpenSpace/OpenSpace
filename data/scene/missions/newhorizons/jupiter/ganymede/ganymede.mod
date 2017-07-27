@@ -15,9 +15,9 @@ return {
                 Radius = ganymede_local,
                 Segments = 100
             },
+            ColorTexture = "textures/ganymede.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/ganymede.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },

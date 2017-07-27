@@ -44,11 +44,9 @@
 
 namespace {
     const char* KeyGeometry = "Geometry";
-    const char* KeyTexture = "Textures.Color";
-    const char* KeyModelTransform = "ModelTransform";
 
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
-        "ColorTexture", // @TODO replace with only "Texture"
+        "ColorTexture",
         "Color Texture",
         "This value points to a color texture file that is applied to the geometry "
         "rendered in this object."
@@ -84,7 +82,7 @@ documentation::Documentation RenderableModel::Documentation() {
                 "This specifies the model that is rendered by the Renderable."
             },
             {
-                KeyTexture, // @TODO replace with TextureInfo.identifier
+                TextureInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
                 TextureInfo.description
@@ -132,12 +130,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _geometry = modelgeometry::ModelGeometry::createFromDictionary(dict);
     }
 
-    if (dictionary.hasKey(KeyTexture)) {
-        _colorTexturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    if (dictionary.hasKey(TextureInfo.identifier)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(
+            TextureInfo.identifier
+        ));
     }
 
-    if (dictionary.hasKey(KeyModelTransform)) {
-        _modelTransform = dictionary.value<glm::dmat3>(KeyModelTransform);
+    if (dictionary.hasKey(ModelTransformInfo.identifier)) {
+        _modelTransform = dictionary.value<glm::dmat3>(ModelTransformInfo.identifier);
     }
 
     if (dictionary.hasKey(ShadingInfo.identifier)) {

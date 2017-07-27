@@ -11,10 +11,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/mainbodydawn.obj",
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             Rotation = {
                 Source = "DAWN_SPACECRAFT",
                 Destination = "GALACTIC"
@@ -634,10 +631,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/solarpanelleft.obj",
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             Rotation = {
                 Source = "DAWN_SA-Y",
                 Destination = "GALACTIC"
@@ -657,10 +651,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/solarpanelright.obj",
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             Rotation = {
                 Source = "DAWN_SA+Y",
                 Destination = "GALACTIC"
