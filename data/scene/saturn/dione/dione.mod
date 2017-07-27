@@ -3,15 +3,18 @@ return {
         Name = "Dione",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_DIONE",
-            Body = "DIONE",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.563E3,
-                Segments = 50
-            },
-            ColorTexture = "textures/dione.jpg"
+            Type = "RenderableGlobe",
+            Radii = 561400,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Dione Texture",
+                        FilePath = "textures/dione.jpg",
+                        Enabled = true
+                    }
+                }
+            }
         },
         Transform = {
             Translation = {

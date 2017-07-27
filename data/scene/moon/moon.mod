@@ -1,29 +1,8 @@
 return {
     -- Moon module
-    {   
+    {
         Name = "Moon",
         Parent = "EarthBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_MOON",
-            Body = "MOON",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 1.737E6,
-                Segments = 100
-            },
-            Shadow_Group = {
-                Source1 = {
-                    Name = "Sun",
-                    Radius = 696.3E6
-                },
-                Caster1 = { 
-                    Name = "Earth",
-                    Radius = 6.371E6
-                },
-            },
-            ColorTexture = "textures/Moon16K.dds",
-        },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
@@ -34,9 +13,44 @@ return {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MOON",
-                DestinationFrame = "ECLIPJ2000"
-            },
+                DestinationFrame = "GALACTIC"
+            }
         },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = 1738140,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "OnMoonColorGrayscale",
+                        FilePath = "map_service_configs/OnMoonColor.xml",
+                        Enabled = true,
+                    },
+                    {
+                        Name = "ClemUvvis",
+                        FilePath = "map_service_configs/Utah/ClemUvvis.wms"
+                    },
+                    {
+                        Name = "Kaguya",
+                        FilePath = "map_service_configs/Utah/Kaguya.wms"
+                    },
+                    {
+                        Name = "WAC",
+                        FilePath = "map_service_configs/Utah/Wac.wms"
+                    }
+                },
+                HeightLayers = {
+                    {
+                        Name = "LolaDem",
+                        FilePath = "map_service_configs/Utah/LolaDem.wms",
+                        Enabled = true,
+                        TilePixelSize = 64,
+                        Settings = { Multiplier = 0.5 },
+                    }
+                }
+            }
+        }
     },
     -- MoonTrail module
     {   
@@ -47,11 +61,11 @@ return {
             Translation = {
                 Type = "SpiceTranslation",
                 Target = "MOON",
-                Observer = "EARTH BARYCENTER",
+                Observer = "EARTH BARYCENTER"
             },
             Color = { 0.5, 0.3, 0.3 },
             Period =  27,
             Resolution = 1000
-        },
+        }
     }
 }

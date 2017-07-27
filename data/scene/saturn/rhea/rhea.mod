@@ -3,15 +3,18 @@ return {
         Name = "Rhea",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_RHEA",
-            Body = "RHEA",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.765E3,
-                Segments = 50
-            },
-            ColorTexture = "textures/rhea.jpg"
+            Type = "RenderableGlobe",
+            Radii = 765000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Rhea Texture",
+                        FilePath = "textures/rhea.jpg",
+                        Enabled = true
+                    }
+                }
+            }
         },
         Transform = {
             Translation = {

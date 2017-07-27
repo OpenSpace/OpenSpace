@@ -3,15 +3,18 @@ return {
         Name = "Tethys",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_TETHYS",
-            Body = "TETHYS",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.538E3,
-                Segments = 50
-            },
-            ColorTexture = "textures/tethys.jpg"
+            Type = "RenderableGlobe",
+            Radii = 531100,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Tethys Texture",
+                        FilePath = "textures/tethys.jpg",
+                        Enabled = true
+                    }
+                }
+            }
         },
         Transform = {
             Translation = {

@@ -3,15 +3,18 @@ return {
         Name = "Mimas",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_MIMAS",
-            Body = "MIMAS",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.28E3,
-                Segments = 50
-            },
-            ColorTexture = "textures/mimas.jpg"
+            Type = "RenderableGlobe",
+            Radii = 198000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Mimas Texture",
+                        FilePath = "textures/mimas.jpg",
+                        Enabled = true
+                    }
+                }
+            }
         },
         Transform = {
             Translation = {

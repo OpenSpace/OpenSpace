@@ -3,16 +3,19 @@ return {
         Name = "Titan",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_TITAN",
-            Body = "TITAN",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.2575E4,
-                Segments = 50
-            },
-            ColorTexture = "textures/titan.jpg"
-        },
+            Type = "RenderableGlobe",
+            Radii = 2576000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Titan Texture",
+                        FilePath = "textures/titan.jpg",
+                        Enabled = true
+                    }
+                }
+            }
+        },        
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",

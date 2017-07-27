@@ -1,34 +1,38 @@
 return {
-    -- Europa module
-    {   
+    -- RenderableGlobe module
+    {
         Name = "Europa",
         Parent = "JupiterBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_EUROPA", -- should exist. 
-            Body = "EUROPA",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 1.561E6,
-                Segments = 100
-            },
-            ColorTexture = "textures/europa.jpg",
-        },
         Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_EUROPA",
+                DestinationFrame = "GALACTIC",
+            },
             Translation = {
                 Type = "SpiceTranslation",
                 Target = "EUROPA",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
             },
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "IAU_EUROPA",
-                DestinationFrame = "IAU_JUPITER",
-            }
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = 1560800,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Europa Texture",
+                        FilePath = "textures/europa.jpg",
+                        Enabled = true,
+                    },
+                },
+            },
         }
     },
-    -- EuropaTrail module
+
+    -- Trail module
     {   
         Name = "EuropaTrail",
         Parent = "JupiterBarycenter",

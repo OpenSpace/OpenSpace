@@ -186,10 +186,16 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     dictionary.getValue(keyFrame, _frame);
 
     // Read the radii in to its own dictionary
-    glm::dvec3 radii;
-    dictionary.getValue(keyRadii, radii);
-    _ellipsoid = Ellipsoid(radii);
-    setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    if (dictionary.hasKeyAndValue<glm::dvec3>(keyRadii)) {
+        const glm::dvec3 radii = dictionary.value<glm::vec3>(keyRadii);
+        _ellipsoid = Ellipsoid(radii);
+        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    }
+    else if (dictionary.hasKeyAndValue<double>(keyRadii)) {
+        const double radius = dictionary.value<double>(keyRadii);
+        _ellipsoid = Ellipsoid({ radius, radius, radius });
+        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    }
 
     // Ghoul can't read ints from lua dictionaries...
     double patchSegmentsd;

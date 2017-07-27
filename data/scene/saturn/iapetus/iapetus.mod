@@ -3,15 +3,18 @@ return {
         Name = "Iapetus",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_IAPETUS",
-            Body = "IAPETUS",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.746E3,
-                Segments = 50
-            },
-            ColorTexture = "textures/iapetus.jpg"
+            Type = "RenderableGlobe",
+            Radii = 734000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Iapetus Texture",
+                        FilePath = "textures/iapetus.jpg",
+                        Enabled = true
+                    }
+                }
+            }
         },
         Transform = {
             Translation = {

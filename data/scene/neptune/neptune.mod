@@ -1,5 +1,5 @@
 return {
-    -- Neptune barycenter module
+    -- Barycenter module
     {
         Name = "NeptuneBarycenter",
         Parent = "SolarSystemBarycenter",
@@ -12,36 +12,35 @@ return {
             }
         }
     },
-
-    -- Neptune module
+    -- RenderableGlobe module
     {   
         Name = "Neptune",
         Parent = "NeptuneBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_NEPTUNE",
-            Body = "NEPTUNE BARYCENTER",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 2.4622E7,
-                Segments = 100
-            },
-            ColorTexture = "textures/neptune.jpg",
-        },
-        Tag = "planet_solarSystem",
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_NEPTUNE",
                 DestinationFrame = "GALACTIC"
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
-        }
+            }
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = { 24764000, 24764000, 24314000 },
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Texture",
+                        FilePath = "textures/neptune.jpg",
+                        Enabled = true
+                    }
+                }
+            }
+        },
+        Tag = { "planet_solarSystem", "planet_giants" },
+
     },
-    -- NeptuneTrail module
+    -- Trail module
     {   
         Name = "NeptuneTrail",
         Parent = "SolarSystemBarycenter",
@@ -50,12 +49,12 @@ return {
             Translation = {
                 Type = "SpiceTranslation",
                 Target = "NEPTUNE BARYCENTER",
-                Observer = "SUN",
+                Observer = "SUN"
             },
             Color = {0.2, 0.5, 1.0 },
             Period  = 60200,
-            Resolution = 1000,
-            Tag = "planetTrail_solarSystem"
-        }
+            Resolution = 1000
+        },
+        Tag = { "planetTrail_solarSystem", "planetTrail_giants" }
     }
 }

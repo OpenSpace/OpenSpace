@@ -1,38 +1,37 @@
 return {
-    -- Io module
-    {   
+    -- RenderableGlobe module
+    {
         Name = "Io",
         Parent = "JupiterBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_IO", -- should exist. 
-            Body = "IO",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 1.8213E6,
-                Segments = 100
-            },
-            ColorTexture = "textures/io.jpg",
-        },
         Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_IO",
+                DestinationFrame = "GALACTIC"
+            },
             Translation = {
                 Type = "SpiceTranslation",
                 Target = "IO",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
             },
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "IAU_IO",
-                DestinationFrame = "IAU_JUPITER",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = 1821600,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Io Texture",
+                        FilePath = "textures/io.jpg",
+                        Enabled = true
+                    }
+                }
+            }
         }
     },
-    -- IoTrail module
+    -- Trail module
     {   
         Name = "IoTrail",
         Parent = "JupiterBarycenter",
@@ -41,7 +40,7 @@ return {
             Translation = {
                 Type = "SpiceTranslation",
                 Target = "IO",
-                Observer = "JUPITER BARYCENTER",
+                Observer = "JUPITER BARYCENTER"
             },
             Color = { 0.4, 0.4, 0.2 },
             Period =  42 / 24,
