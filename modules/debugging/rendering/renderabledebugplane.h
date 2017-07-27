@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/updatestructures.h>
@@ -36,6 +37,8 @@ namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
+
+namespace documentation { struct Documentation; }
 
 namespace openspace {
 
@@ -54,19 +57,15 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-private:
-    enum class Origin {
-        LowerLeft, LowerRight, UpperLeft, UpperRight, Center
-    };
+    static documentation::Documentation Documentation();
 
+private:
     void createPlane();
 
     properties::IntProperty _texture;
     properties::BoolProperty _billboard;
     properties::FloatProperty _size;
-
-    Origin _origin;
-    std::string _nodeName;
+    properties::OptionProperty _origin;
 
     bool _planeIsDirty;
 

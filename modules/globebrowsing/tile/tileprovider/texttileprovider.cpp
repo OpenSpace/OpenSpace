@@ -47,7 +47,7 @@ TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t f
     , _fontSize(fontSize)
 {
     _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
-    _font = OsEng.fontManager().font("Mono", _fontSize);
+    _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
         
     _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
     _fontRenderer->setFramebufferSize(_initData.dimensionsWithPadding());

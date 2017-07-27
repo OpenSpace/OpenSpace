@@ -42,6 +42,13 @@ namespace {
     const char* KeyBasePath = "BasePath";
     const char* KeyPreCacheStartTime = "PreCacheStartTime";
     const char* KeyPreCacheEndTime = "PreCacheEndTime";
+
+    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+        "FilePath",
+        "File Path",
+        "This is the path to the XML configuration file that describes the temporal tile "
+        "information."
+    };
 } // namespace
 
 namespace openspace::globebrowsing::tileprovider {
@@ -56,7 +63,7 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeI
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
     : _initDict(dictionary)
-    , _filePath("filePath", "File Path", "")
+    , _filePath(FilePathInfo)
     , _successfulInitialization(false)
 {
     std::string filePath;
@@ -64,7 +71,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     try {
         filePath = absPath(filePath);
     }
-    catch (const std::runtime_error& e) {
+    catch (const std::runtime_error&) {
         // File path was not a path to a file but a GDAL config or empty
     }
   
@@ -116,7 +123,7 @@ bool TemporalTileProvider::readFilePath() {
             ghoul::filesystem::File(_filePath.value()).directoryName()
         );
     }
-    catch (const std::runtime_error& e) {
+    catch (const std::runtime_error&) {
         // File path was not a path to a file but a GDAL config or empty
     }
 

@@ -25,12 +25,12 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
-    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
-    openspace.setPropertyValue("MilkyWay.renderable.enabled", false)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
-    openspace.setPropertyValue("EarthTrail.renderable.enabled", false)
-    openspace.setPropertyValue("Earth.renderable.performShading", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
+    openspace.setPropertyValue("SunGlare.renderable.Enabled", false)
+    openspace.setPropertyValue("MilkyWay.renderable.Enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.Enabled", false)
+    openspace.setPropertyValue("EarthTrail.renderable.Enabled", false)
+    openspace.setPropertyValue("Earth.renderable.PerformShading", false)
 
     openspace.navigation.resetCameraDirection()
 

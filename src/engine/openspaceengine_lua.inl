@@ -65,35 +65,51 @@ int writeDocumentation(lua_State* L) {
  */
 int addVirtualProperty(lua_State* L) {
     const int nArguments = lua_gettop(L);
-    if (nArguments != 6) {
-        return luaL_error(L, "Expected %i arguments, got %i", 6, nArguments);
+    if (nArguments != 7) {
+        return luaL_error(L, "Expected %i arguments, got %i", 7, nArguments);
     }
 
-    const std::string type = lua_tostring(L, -6);
-    const std::string name = lua_tostring(L, -5);
-    const std::string identifier = lua_tostring(L, -4);
+    const std::string type = lua_tostring(L, -7);
+    const std::string name = lua_tostring(L, -6);
+    const std::string identifier = lua_tostring(L, -5);
+    const std::string description = lua_tostring(L, -4);
 
     std::unique_ptr<properties::Property> prop;
     if (type == "BoolProperty") {
         bool v = lua_toboolean(L, -3);
-        prop = std::make_unique<properties::BoolProperty>(identifier, name, v);
+        prop = std::make_unique<properties::BoolProperty>(
+            properties::Property::PropertyInfo{ identifier, name, description },
+            v
+        );
     }
     else if (type == "IntProperty") {
         int v = static_cast<int>(lua_tonumber(L, -3));
         int min = static_cast<int>(lua_tonumber(L, -2));
         int max = static_cast<int>(lua_tonumber(L, -1));
 
-        prop = std::make_unique<properties::IntProperty>(identifier, name, v, min, max);
+        prop = std::make_unique<properties::IntProperty>(
+            properties::Property::PropertyInfo{ identifier, name, description },
+            v,
+            min,
+            max
+        );
     }
     else if (type == "FloatProperty") {
         float v = static_cast<float>(lua_tonumber(L, -3));
         float min = static_cast<float>(lua_tonumber(L, -2));
         float max = static_cast<float>(lua_tonumber(L, -1));
 
-        prop = std::make_unique<properties::FloatProperty>(identifier, name, v, min, max);
+        prop = std::make_unique<properties::FloatProperty>(
+            properties::Property::PropertyInfo{ identifier, name, description },
+            v,
+            min,
+            max
+        );
     }
     else if (type == "TriggerProperty") {
-        prop = std::make_unique<properties::TriggerProperty>(identifier, name);
+        prop = std::make_unique<properties::TriggerProperty>(
+            properties::Property::PropertyInfo{ identifier, name, description }
+        );
     }
     else {
         return luaL_error(L, "Unknown property type '%s'", type.c_str());

@@ -40,7 +40,7 @@
  * @} @}
  */
 
-#include <openspace/properties/numericalproperty.h>
+#include <openspace/properties/templateproperty.h>
 
 namespace openspace::properties {
 

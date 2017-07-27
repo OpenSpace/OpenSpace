@@ -37,6 +37,120 @@ namespace {
     const char* keyShadowGroup = "Shadow_Group";
     const char* keyShadowSource = "Source";
     const char* keyShadowCaster = "Caster";
+
+    static const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
+        "SaveOrThrowCamera",
+        "Save or throw camera",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowChunkEdgeInfo = {
+        "ShowChunkEdges",
+        "Show chunk edges",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowChunkBoundsInfo = {
+        "ShowChunkBounds",
+        "Show chunk bounds",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowChunkAABBInfo = {
+        "ShowChunkAABB",
+        "Show chunk AABB",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightResolutionInfo = {
+        "ShowHeightResolution",
+        "Show height resolution",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightIntensityInfo = {
+        "ShowHeightIntensities",
+        "Show height intensities",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo FrustumCullingInfo = {
+        "PerformFrustumCulling",
+        "Perform frustum culling",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo HorizonCullingInfo = {
+        "PerformHorizonCulling",
+        "Perform horizon culling",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LevelProjectedAreaInfo = {
+        "LevelByProjectedAreaElseDistance",
+        "Level by projected area (else distance)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
+        "ResetTileProviders",
+        "Reset tile providers",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CollectStatsInfo = {
+        "CollectStats",
+        "Collect stats",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LimitLevelInfo = {
+        "LimitLevelByAvailableData",
+        "Limit level by available data",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
+        "ModelSpaceRenderingCutoffLevel",
+        "Model Space Rendering Cutoff Level",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+        "PerformShading",
+        "Perform shading",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo AtmosphereInfo = {
+        "Atmosphere",
+        "Atmosphere",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
+        "UseAccurateNormals",
+        "Use Accurate Normals",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LodScaleFactorInfo = {
+        "LodScaleFactor",
+        "Level of Detail Scale Factor",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CameraMinHeightInfo = {
+        "CameraMinHeight",
+        "Camera Minimum Height",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
+        "OrenNayarRoughness",
+        "orenNayarRoughness",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 using namespace openspace::properties;
@@ -44,30 +158,29 @@ using namespace openspace::properties;
 namespace openspace::globebrowsing {
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-    : _debugProperties({
-        BoolProperty("saveOrThrowCamera", "save or throw camera", false),
-        BoolProperty("showChunkEdges", "show chunk edges", false),
-        BoolProperty("showChunkBounds", "show chunk bounds", false),
-        BoolProperty("showChunkAABB", "show chunk AABB", false),
-        BoolProperty("showHeightResolution", "show height resolution", false),
-        BoolProperty("showHeightIntensities", "show height intensities", false),
-        BoolProperty("performFrustumCulling", "perform frustum culling", true),
-        BoolProperty("performHorizonCulling", "perform horizon culling", true),
-        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)", true),
-        BoolProperty("resetTileProviders", "reset tile providers", false),
-        BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", false),
-        BoolProperty("collectStats", "collect stats", false),
-        BoolProperty("limitLevelByAvailableData", "Limit level by available data", true),
-        IntProperty("modelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", 10, 1, 22)
+    : Renderable(dictionary)
+    , _debugProperties({
+        BoolProperty(SaveOrThrowInfo, false), 
+        BoolProperty(ShowChunkEdgeInfo, false),
+        BoolProperty(ShowChunkBoundsInfo, false),
+        BoolProperty(ShowChunkAABBInfo, false),
+        BoolProperty(HeightResolutionInfo, false), 
+        BoolProperty(HeightIntensityInfo, false),
+        BoolProperty(FrustumCullingInfo, true),
+        BoolProperty(HorizonCullingInfo, true),
+        BoolProperty(LevelProjectedAreaInfo, true),
+        BoolProperty(ResetTileProviderInfo, false),
+        BoolProperty(CollectStatsInfo, false),
+        BoolProperty(LimitLevelInfo, true),
+        IntProperty(ModelSpaceRenderingInfo, 10, 1, 22)
     })
     , _generalProperties({
-        BoolProperty("enabled", "Enabled", true),
-        BoolProperty("performShading", "perform shading", true),
-        BoolProperty("atmosphere", "atmosphere", false),
-        BoolProperty("useAccurateNormals", "useAccurateNormals", false),
-        FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
-        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f),
-        FloatProperty("orenNayarRoughness", "orenNayarRoughness", 0.0f, 0.0f, 1.0f)
+        BoolProperty(PerformShadingInfo, true),
+        BoolProperty(AtmosphereInfo, false),
+        BoolProperty(AccurateNormalsInfo, false),
+        FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
+        FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
+        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
     , _debugPropertyOwner("Debug")
     , _texturePropertyOwner("Textures")
@@ -107,7 +220,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
     //_distanceSwitch.addSwitchValue(_pointGlobe);
         
-    addProperty(_generalProperties.isEnabled);
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
@@ -127,7 +239,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _debugProperties.levelByProjectedAreaElseDistance
     );
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
-    _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
     _debugPropertyOwner.addProperty(_debugProperties.collectStats);
     _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
@@ -240,12 +351,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& renderTask) 
     bool statsEnabled = _debugProperties.collectStats.value();
     _chunkedLodGlobe->stats.setEnabled(statsEnabled);
 
-    if (_debugProperties.toggleEnabledEveryFrame.value()) {
-        _generalProperties.isEnabled.setValue(
-            !_generalProperties.isEnabled.value()
-        );
-    }
-    if (_generalProperties.isEnabled.value()) {
+    if (_enabled) {
         if (_debugProperties.saveOrThrowCamera.value()) {
             _debugProperties.saveOrThrowCamera.setValue(false);
 

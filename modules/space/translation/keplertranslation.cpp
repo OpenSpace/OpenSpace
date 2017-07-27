@@ -34,15 +34,6 @@
 #include <math.h>
 
 namespace {
-    const char* KeyEccentricity = "Eccentricity";
-    const char* KeySemiMajorAxis = "SemiMajorAxis";
-    const char* KeyInclination = "Inclination";
-    const char* KeyAscendingNode = "AscendingNode";
-    const char* KeyArgumentOfPeriapsis = "ArgumentOfPeriapsis";
-    const char* KeyMeanAnomaly = "MeanAnomaly";
-    const char* KeyEpoch = "Epoch";
-    const char* KeyPeriod = "Period";
-
 
 template <typename T, typename Func>
 T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 100) {
@@ -59,6 +50,67 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
 
     return x2;
 }
+
+    static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
+        "Eccentricity",
+        "Eccentricity",
+        "This value determines the eccentricity, that is the deviation from a perfect "
+        "sphere, for this orbit. Currently, hyperbolic orbits using Keplerian elements "
+        "are not supported."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
+        "SemiMajorAxis",
+        "Semi-major axis",
+        "This value determines the semi-major axis, that is the distance of the object "
+        "from the central body in kilometers (semi-major axis = average of periapsis and "
+        "apoapsis)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo InclinationInfo = {
+        "Inclination",
+        "Inclination",
+        "This value determines the degrees of inclination, or the angle of the orbital "
+        "plane, relative to the reference plane, on which the object orbits around the "
+        "central body."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
+        "AscendingNode",
+        "Right ascension of ascending Node",
+        "This value determines the right ascension of the ascending node in degrees, "
+        "that is the location of position along the orbit where the inclined plane and "
+        "the horizonal reference plane intersect."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
+        "ArgumentOfPeriapsis",
+        "Argument of Periapsis",
+        "This value determines the argument of periapsis in degrees, that is the "
+        "position on the orbit that is closest to the orbiting body."
+    };
+
+    static const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
+        "MeanAnomaly",
+        "Mean anomaly at epoch",
+        "This value determines the mean anomaly at the epoch in degrees, which "
+        "determines the initial location of the object along the orbit at epoch."
+    };
+
+    static const openspace::properties::Property::PropertyInfo EpochInfo = {
+        "Epoch",
+        "Epoch",
+        "This value determines the epoch for which the initial location is defined in "
+        "the form of YYYY MM DD HH:mm:ss."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PeriodInfo = {
+        "Period",
+        "Orbit period",
+        "Specifies the orbital period (in seconds)."
+    };
+
+
 } // namespace
 
 namespace openspace {
@@ -81,58 +133,51 @@ documentation::Documentation KeplerTranslation::Documentation() {
                 Optional::No
             },
             {
-                KeyEccentricity,
+                EccentricityInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 1.0),
-                "Specifies the eccentricity of the orbit; currently, OpenSpace does not "
-                "support hyperbolic orbits using Keplerian elements.",
+                EccentricityInfo.description,
                 Optional::No
             },
             {
-                KeySemiMajorAxis,
+                SemiMajorAxisInfo.identifier,
                 new DoubleVerifier,
-                "Specifies the semi-major axis of the orbit in kilometers (semi-major "
-                "axis = average of periapsis and apoapsis).",
+                SemiMajorAxisInfo.description,
                 Optional::No
             },
             {
-                KeyInclination,
+                InclinationInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                "Specifies the inclination angle (degrees) of the orbit relative to the "
-                "reference plane (in the case of Earth, the equatorial plane.",
+                InclinationInfo.description,
                 Optional::No
             },
             {
-                KeyAscendingNode,
+                AscendingNodeInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                "Specifies the right ascension of the ascending node (in degrees!) "
-                "relative to the vernal equinox.",
+                AscendingNodeInfo.description,
                 Optional::No
             },
             {
-                KeyArgumentOfPeriapsis,
+                ArgumentOfPeriapsisInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                "Specifies the argument of periapsis as angle (in degrees) from the "
-                "ascending.",
+                ArgumentOfPeriapsisInfo.description,
                 Optional::No
             },
             {
-                KeyMeanAnomaly,
+                MeanAnomalyAtEpochInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                "Specifies the position of the orbiting body (in degrees) along the "
-                "elliptical orbit at epoch time.",
+                MeanAnomalyAtEpochInfo.description,
                 Optional::No
             },
             {
-                KeyEpoch,
+                EpochInfo.identifier,
                 new StringVerifier,
-                "Specifies the epoch time used for position as a string of the form: "
-                "YYYY MM DD HH:mm:ss",
+                EpochInfo.description,
                 Optional::No
             },
             {
-                KeyPeriod,
+                PeriodInfo.identifier,
                 new DoubleGreaterVerifier(0.0),
-                "Specifies the orbital period (in seconds).",
+                PeriodInfo.description,
                 Optional::No
             },
         },
@@ -142,26 +187,14 @@ documentation::Documentation KeplerTranslation::Documentation() {
 
 KeplerTranslation::KeplerTranslation()
     : Translation()
-    , _eccentricity("eccentricity", "Eccentricity", 0.0, 0.0, 1.0)
-    , _semiMajorAxis("semimajorAxis", "Semi-major axis", 0.0, 0.0, 1e6)
-    , _inclination("inclination", "Inclination", 0.0, 0.0, 360.0)
-    , _ascendingNode(
-        "ascendingNode",
-        "Right ascension of ascending Node",
-        0.0,
-        0.0,
-        360.0
-    )
-    , _argumentOfPeriapsis(
-        "argumentOfPeriapsis",
-        "Argument of Periapsis",
-        0.0,
-        0.0,
-        360.0
-    )
-    , _meanAnomalyAtEpoch("meanAnomalyAtEpoch", "Mean anomaly at epoch", 0.0, 0.0, 360.0)
-    , _epoch("epoch", "Epoch", 0.0, 0.0, 1e9)
-    , _period("period", "Orbit period", 0.0, 0.0, 1e6)
+    , _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
+    , _semiMajorAxis(SemiMajorAxisInfo, 0.0, 0.0, 1e6)
+    , _inclination(InclinationInfo, 0.0, 0.0, 360.0)
+    , _ascendingNode(AscendingNodeInfo, 0.0, 0.0, 360.0)
+    , _argumentOfPeriapsis(ArgumentOfPeriapsisInfo, 0.0, 0.0, 360.0)
+    , _meanAnomalyAtEpoch(MeanAnomalyAtEpochInfo, 0.0, 0.0, 360.0)
+    , _epoch(EpochInfo, 0.0, 0.0, 1e9)
+    , _period(PeriodInfo, 0.0, 0.0, 1e6)
     , _orbitPlaneDirty(true)
 {
     auto update = [this]() {
@@ -201,14 +234,14 @@ KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     );
 
     setKeplerElements(
-        dictionary.value<double>(KeyEccentricity),
-        dictionary.value<double>(KeySemiMajorAxis),
-        dictionary.value<double>(KeyInclination),
-        dictionary.value<double>(KeyAscendingNode),
-        dictionary.value<double>(KeyArgumentOfPeriapsis),
-        dictionary.value<double>(KeyMeanAnomaly),
-        dictionary.value<double>(KeyPeriod),
-        dictionary.value<std::string>(KeyEpoch)
+        dictionary.value<double>(EccentricityInfo.identifier),
+        dictionary.value<double>(SemiMajorAxisInfo.identifier),
+        dictionary.value<double>(InclinationInfo.identifier),
+        dictionary.value<double>(AscendingNodeInfo.identifier),
+        dictionary.value<double>(ArgumentOfPeriapsisInfo.identifier),
+        dictionary.value<double>(MeanAnomalyAtEpochInfo.identifier),
+        dictionary.value<double>(PeriodInfo.identifier),
+        dictionary.value<std::string>(EpochInfo.identifier)
     );
 }
 

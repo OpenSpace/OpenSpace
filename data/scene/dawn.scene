@@ -20,15 +20,15 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    openspace.setPropertyValue("Sun.renderable.Enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", true)
+    openspace.setPropertyValue("EarthMarker.renderable.Enabled", true)
     --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
-    openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
-    openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTrail.renderable.Enabled", false)
+    openspace.setPropertyValue("PlutoTexture.renderable.Enabled", false)
 
-    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
-    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+    openspace.setPropertyValue("MilkyWay.renderable.Transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.Segments", 50)
 
     openspace.printInfo("Done setting default values")
 end

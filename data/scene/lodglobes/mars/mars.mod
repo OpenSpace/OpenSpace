@@ -1,7 +1,7 @@
 --local marsEllipsoid = {3396190.0, 3396190.0, 3376200.0}
---local marsEllipsoid = {3376200.0, 3376200.0, 3376200.0}
 local marsEllipsoid = {3396190.0, 3396190.0, 3396190.0}
-                           
+
+--[[
 local patches = {
     {
         Name = "West Candor Chasma",
@@ -74,7 +74,7 @@ local patches = {
         Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt")
     },
 }
-
+]]
 local function createTextureLayers(patches)
     result = {}
     for k,v in pairs(patches) do
@@ -138,16 +138,7 @@ return {
                         FilePath = "map_service_configs/Utah/MolaPseudoColor.xml",
                         -- Enabled = true,
                     },
-                    {
-                        Name = "Mars COL v006",
-                        FilePath = openspace.absPath("${MARS_DATA}/map_datasets/mars_COL_v006_mars2000_rgb.vrt"),
-                        Enabled = true
-                    },
-                    {
-                        Name = "MOLA Pseudo Color",
-                        FilePath = "map_service_configs/Utah/MolaPseudoColor.xml",
-                        -- Enabled = true,
-                    },
+                    --[[
                     {
                         Name = "Mars COL v006",
                         FilePath = openspace.absPath("${MARS_DATA}/map_datasets/mars_COL_v006_mars2000_rgb.vrt"),
@@ -158,12 +149,14 @@ return {
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
                         --Enabled = true,
                     },
+                    ]]
                     {
                         Name = "CTX Mosaic [Utah]",
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
                     },
-                    table.unpack(createTextureLayers(patches))
-                    --[[{
+                    --table.unpack(createTextureLayers(patches))
+                    --[[
+                    {
                         Name = "Themis IR Day",
                         FilePath = "map_service_configs/Utah/ThemisIRDay.xml",
                     },                    
@@ -203,7 +196,7 @@ return {
                         TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
-                    table.unpack(createHeightLayers(patches))
+                    --table.unpack(createHeightLayers(patches))
                     --[[
                     {
                         Name = "Mola Elevation [Utah]",

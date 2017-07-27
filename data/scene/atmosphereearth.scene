@@ -41,7 +41,7 @@ function preInitialization()
     openspace.bindKey("F4", "openspace.setPropertyValue('Interaction.origin', 'Earth')")
     openspace.bindKey("F3", "openspace.setPropertyValue('Interaction.origin', 'Moon')")
 
-    openspace.setPathToken("${MARS_DATA}", "C:/Users/jonco_000/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
+    --openspace.setPathToken("${MARS_DATA}", "C:/Users/jonco_000/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
     --openspace.setPathToken("${MARS_DATA}", "F:/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
 end
 
@@ -58,14 +58,10 @@ function postInitialization()
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 
-    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
-    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
-
-    --openspace.resetCameraDirection()
+    openspace.setPropertyValue("MilkyWay.renderable.Transparency", 0.33)
+    openspace.setPropertyValue("MilkyWay.renderable.Segments", 50)
     
     openspace.printInfo("Done setting default values")
-
-    --openspace.setInteractionMode('GlobeBrowsing')
 
     if openspace.modules.isLoaded("ISWA") then
         openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
@@ -78,36 +74,15 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        --Focus = "Mars",
-        --Position = {526781518487.171326, 257168309890.072144, -1381125204152.817383},
-        --Rotation = {-0.106166, 0.981574, -0.084545, 0.134513},        
-        --Position = {-21230341452.764542, -75199905816.520981, 126295587136.952240},
-        --Rotation = {0.243724, 0.002268, 0.964416, 0.102449},
-        --Position = {-21235464763.652920, -75191278487.585068, 126294839057.346405},
-        --Rotation = {0.224913, -0.096227, 0.939918, 0.238136},
-
-        -- Mars Position
-        --Position = {113807010618.012451, -93349316388.687042, 190403814045.631592},
-        --Rotation = {0.527685, 0.455945, -0.495623, 0.517707},
         Position = {1, 0, 0},
 		Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
     Modules = {
         "sun",
-        --"atmosphereearth",
-        --"atmospheremars",
-        --"moon",
-   
         "lodglobes/earth",
         "lodglobes/mars",
         "lodglobes/moon",
-        --"satellites",
-        --"mars-satellites",
-        --"toyvolume",
-        --"earth",
         "stars",
-        --"stars-denver",
         "milkyway",
-        -- "milkyway-eso",
     }
 }

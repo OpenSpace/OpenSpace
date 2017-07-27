@@ -41,14 +41,43 @@
 #include <math.h>
 
 namespace {
-    const char* KeySize = "Size";
-    const char* KeySegments = "Segments";
-    const char* KeyTexture = "Texture";
-    const char* KeyOrientation = "Orientation";
-
     enum Orientation {
         Outside = 1,
         Inside = 2
+    };
+
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "Texture",
+        "Texture",
+        "This value specifies an image that is loaded from disk and is used as a texture "
+        "that is applied to this sphere. This image is expected to be an equirectangular "
+        "projection."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OrientationInfo = {
+        "Orientation",
+        "Orientation",
+        "Specifies whether the texture is applied to the inside of the sphere, the "
+        "outside of the sphere, or both."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+        "Segments",
+        "Number of Segments",
+        "This value specifies the number of segments that the sphere is separated in."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size (in meters)",
+        "This value specifies the radius of the sphere in meters."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+        "Alpha",
+        "Transparency",
+        "This value determines the transparency of the sphere. If this value is set to "
+        "1, the sphere is completely opaque. At 0, the sphere is completely transparent."
     };
 } // namespace
 
@@ -61,28 +90,33 @@ documentation::Documentation RenderableSphere::Documentation() {
         "base_renderable_sphere",
         {
             {
-                KeySize,
+                SizeInfo.identifier,
                 new DoubleVerifier,
-                "Specifies the radius of the sphere in meters.",
+                SizeInfo.description,
                 Optional::No
             },
             {
-                KeySegments,
+                SegmentsInfo.identifier,
                 new IntVerifier,
-                "Specifies the number of segments the sphere is separated in.",
+                SegmentsInfo.description,
                 Optional::No
             },
             {
-                KeyTexture,
+                TextureInfo.identifier,
                 new StringVerifier,
-                "Specifies the texture that is applied to the sphere.",
+                TextureInfo.description,
                 Optional::No
             },
             {
-                KeyOrientation,
+                OrientationInfo.identifier,
                 new StringInListVerifier({ "Inside", "Outside", "Inside/Outside" }),
-                "Specifies whether the texture is applied to the inside of the sphere, "
-                "the outside of the sphere, or both. The default value is 'Outside'.",
+                OrientationInfo.description,
+                Optional::Yes
+            },
+            {
+                TransparencyInfo.identifier,
+                new DoubleInRangeVerifier(0.0, 1.0),
+                TransparencyInfo.description,
                 Optional::Yes
             }
         }
@@ -92,11 +126,11 @@ documentation::Documentation RenderableSphere::Documentation() {
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath("texture", "Texture")
-    , _orientation("orientation", "Orientation")
-    , _size("size", "Size", 1.f, 0.f, std::pow(10.f, 45))
-    , _segments("segments", "Segments", 8, 4, 100)
-    , _transparency("transparency", "Transparency", 1.f, 0.f, 1.f)
+    , _texturePath(TextureInfo)
+    , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _size(SizeInfo, 1.f, 0.f, 1e35f)
+    , _segments(SegmentsInfo, 8, 4, 1000)
+    , _transparency(TransparencyInfo, 1.f, 0.f, 1.f)
     , _shader(nullptr)
     , _texture(nullptr)
     , _sphere(nullptr)
@@ -108,16 +142,18 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         "RenderableSphere"
     );
 
-    _size = static_cast<float>(dictionary.value<double>(KeySize));
-    _segments = static_cast<int>(dictionary.value<double>(KeySegments));
-    _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
+    _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
+    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
 
-    _orientation.addOption(Outside, "Outside");
-    _orientation.addOption(Inside, "Inside");
-    _orientation.addOption(Outside | Inside, "Inside/Outside");
+    _orientation.addOptions({
+        { Outside, "Outside" },
+        { Inside, "Inside" },
+        { Outside | Inside, "Inside/Outside" }
+    });
 
-    if (dictionary.hasKey(KeyOrientation)) {
-        const std::string v = dictionary.value<std::string>(KeyOrientation);
+    if (dictionary.hasKey(OrientationInfo.identifier)) {
+        const std::string v = dictionary.value<std::string>(OrientationInfo.identifier);
         if (v == "Inside") {
             _orientation = Inside;
         }
@@ -128,7 +164,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
             _orientation = Outside | Inside;
         }
         else {
-            ghoul_assert(false, "Missing 'case' label");
+            throw ghoul::MissingCaseException();
         }
     }
     else {
@@ -142,12 +178,24 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_segments);
     _segments.onChange([this](){ _sphereIsDirty = true; });
 
+    _transparency.onChange([this](){
+        if (_transparency > 0.f && _transparency < 1.f) {
+            setRenderBin(Renderable::RenderBin::Transparent);
+        }
+        else {
+            setRenderBin(Renderable::RenderBin::Opaque);
+        }
+    });
+    if (dictionary.hasKey(TransparencyInfo.identifier)) {
+        _transparency = static_cast<float>(
+            dictionary.value<double>(TransparencyInfo.identifier)
+        );
+    }
     addProperty(_transparency);
+
     addProperty(_texturePath);
-    _texturePath.onChange([this]() {loadTexture(); });
+    _texturePath.onChange([this]() { loadTexture(); });
 
-
-    setRenderBin(Renderable::RenderBin::Transparent);
 }
 
 bool RenderableSphere::isReady() const {

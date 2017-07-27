@@ -35,21 +35,70 @@
 
 namespace {
     const char* _loggerCat = "OrbitalNavigator";
+
+    static const openspace::properties::Property::PropertyInfo RollFrictionInfo = {
+        "RollFriction",
+        "Roll Friction",
+        "If this is enabled, a small friction is applied to the rolling part of the "
+        "camera motion, thus slowing it down within a small time period. If this value "
+        "is disabled, the camera will roll forever."
+    };
+
+    static const openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
+        "RotationalFriction",
+        "Rotational Friction",
+        "If this is enabled, a small friction is applied to the rotational part of the "
+        "camera motion, thus slowing it down within a small time period. If this value "
+        "is disabled, the camera will rotate forever."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
+        "ZoomFriction",
+        "Zoom Friction",
+        "If this is enabled, a small friction is applied to the zoom part of the camera "
+        "motion, thus slowing it down within a small time period. If this value is "
+        "disabled, the camera will zoom in or out forever."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SensitivityInfo = {
+        "Sensitivity",
+        "Sensitivity",
+        "Determines the sensitivity of the camera motion. The lower the sensitivity is "
+        "the less impact a mouse mothion will have."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FrictionInfo = {
+        "Friction",
+        "Friction Factor",
+        "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
+        "Friction', and 'Zoom Friction' values are enabled. The lower this value is, the "
+        "faster the camera movements will stop."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FollowFocusNodeInfo = {
+        "FollowFocusNodeRotationDistance",
+        "Follow focus node rotation distance",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
+        "MinimumAllowedDistance",
+        "Minimum allowed distance",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace::interaction {
 
 OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner("OrbitalNavigator")
-    , _rotationalFriction("rotationalFriction", "Rotational friction", true)
-    , _horizontalFriction("horizontalFriction", "Horizontal friction", true)
-    , _verticalFriction("verticalFriction", "Vertical friction", true)
-    , _followFocusNodeRotationDistance("followFocusNodeRotationDistance",
-        "Follow focus node rotation distance", 2.0f, 0.0f, 10.f)
-    , _minimumAllowedDistance("minimumAllowedDistance",
-        "Minimum allowed distance", 10.0f, 0.0f, 10000.f)
-    , _sensitivity("sensitivity", "Sensitivity", 20.0f, 1.0f, 50.f)
-    , _motionLag("motionLag", "Motion lag", 0.5f, 0.f, 1.f)
+    , _rollFriction(RollFrictionInfo, true)
+    , _rotationalFriction(RotationalFrictionInfo, true)
+    , _zoomFriction(ZoomFrictionInfo, true)
+    , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 2.0f, 0.0f, 10.f)
+    , _minimumAllowedDistance(FollowFocusNodeInfo, 10.0f, 0.0f, 10000.f)
+    , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
+    , _motionLag(FrictionInfo, 0.5f, 0.f, 1.f)
     , _mouseStates(_sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001))
 {
     auto smoothStep = 
@@ -81,14 +130,14 @@ OrbitalNavigator::OrbitalNavigator()
     _rotateToFocusNodeInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
 
     // Define callback functions for changed properties
+    _rollFriction.onChange([&]() {
+        _mouseStates.setRotationalFriction(_rollFriction);
+    });
     _rotationalFriction.onChange([&]() {
-        _mouseStates.setRotationalFriction(_rotationalFriction);
+        _mouseStates.setHorizontalFriction(_rotationalFriction);
     });
-    _horizontalFriction.onChange([&]() {
-        _mouseStates.setHorizontalFriction(_horizontalFriction);
-    });
-    _verticalFriction.onChange([&]() {
-        _mouseStates.setVerticalFriction(_verticalFriction);
+    _zoomFriction.onChange([&]() {
+        _mouseStates.setVerticalFriction(_zoomFriction);
     });
     _sensitivity.onChange([&]() {
         _mouseStates.setSensitivity(_sensitivity * pow(10.0,-4));
@@ -98,9 +147,9 @@ OrbitalNavigator::OrbitalNavigator()
     });
 
     // Add the properties
+    addProperty(_rollFriction);
     addProperty(_rotationalFriction);
-    addProperty(_horizontalFriction);
-    addProperty(_verticalFriction);
+    addProperty(_zoomFriction);
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);

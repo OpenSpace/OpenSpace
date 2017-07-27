@@ -26,6 +26,7 @@
 #include <modules/onscreengui/onscreenguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -74,117 +75,99 @@ namespace openspace {
 
 TouchInteraction::TouchInteraction()
     : properties::PropertyOwner("TouchInteraction")
-    , _origin("origin", "Origin", "")
+    , _origin({ "Origin", "Origin", "" }) // @TODO Missing documentation
     , _unitTest(
-        "Click to take a unit test",
-        "Take a unit test saving the LM data into file",
+        { "Click to take a unit test", "Take a unit test saving the LM data into file", "" }, // @TODO Missing documentation
         false
     )
     , _touchActive(
-        "TouchEvents",
-        "True if we have a touch event",
-        false,
-        properties::Property::Visibility::Hidden
+        { "TouchEvents", "True if we have a touch event", "",  properties::Property::Visibility::Hidden }, // @TODO Missing documentation
+        false
     )
     , _reset(
-        "Default Values",
-        "Reset all properties to default",
+        { "Default Values", "Reset all properties to default", "" }, // @TODO Missing documentation
         false
     )
     , _maxTapTime(
-        "Max Tap Time",
-        "Max tap delay (in ms) for double tap",
+        { "Max Tap Time", "Max tap delay (in ms) for double tap", "" }, // @TODO Missing documentation
         300,
         10,
         1000
     )
     , _deceleratesPerSecond(
-        "Decelerates per second",
-        "Number of times velocity is decelerated per second",
+        { "Decelerates per second", "Number of times velocity is decelerated per second", "" }, // @TODO Missing documentation
         240,
         60,
         300
     )
     , _touchScreenSize(
-        "TouchScreenSize",
-        "Touch Screen size in inches",
+        { "TouchScreenSize", "Touch Screen size in inches", "" }, // @TODO Missing documentation
         55.0f,
         5.5f,
         150.0f
     )
     , _tapZoomFactor(
-        "Tap zoom factor",
-        "Scaling distance travelled on tap",
+        { "Tap zoom factor", "Scaling distance travelled on tap", "" }, // @TODO Missing documentation
         0.2f,
         0.f,
         0.5f
     )
     , _nodeRadiusThreshold(
-        "Activate direct-manipulation",
-        "Radius a planet has to have to activate direct-manipulation",
+        { "Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", "" }, // @TODO Missing documentation
         0.2f,
         0.0f,
         1.0f
     )
     , _rollAngleThreshold(
-        "Interpret roll",
-        "Threshold for min angle for roll interpret",
+        { "Interpret roll", "Threshold for min angle for roll interpret", "" }, // @TODO Missing documentation
         0.025f,
         0.f,
         0.05f
     )
     , _orbitSpeedThreshold(
-        "Activate orbit spinning",
-        "Threshold to activate orbit spinning in direct-manipulation",
+        { "Activate orbit spinning", "Threshold to activate orbit spinning in direct-manipulation", "" }, // @TODO Missing documentation
         0.005f,
         0.f,
         0.01f
     )
     , _spinSensitivity(
-        "Sensitivity of spinning",
-        "Sensitivity of spinning in direct-manipulation",
+        { "Sensitivity of spinning", "Sensitivity of spinning in direct-manipulation", "" }, // @TODO Missing documentation
         1.f,
         0.f,
         2.f
     )
     , _inputStillThreshold(
-        "Input still",
-        "Threshold for interpreting input as still",
+        { "Input still", "Threshold for interpreting input as still", "" }, // @TODO Missing documentation
         0.0005f,
         0.f,
         0.001f
     )
     , _centroidStillThreshold(
-        "Centroid stationary",
-        "Threshold for stationary centroid",
+        { "Centroid stationary", "Threshold for stationary centroid", "" }, // @TODO Missing documentation
         0.0018f,
         0.f,
         0.01f
     ) // used to void wrongly interpreted roll interactions
     , _interpretPan(
-        "Pan delta distance",
-        "Delta distance between fingers allowed for interpreting pan interaction",
+        { "Pan delta distance", "Delta distance between fingers allowed for interpreting pan interaction", "" }, // @TODO Missing documentation
         0.015f,
         0.f,
         0.1f
     )
     , _slerpTime(
-        "Time to slerp",
-        "Time to slerp in seconds to new orientation with new node picking",
+        { "Time to slerp", "Time to slerp in seconds to new orientation with new node picking", "" }, // @TODO Missing documentation
         3.f,
         0.f,
         5.f
     )
     , _guiButton(
-        "GUI Button",
-        "GUI button size in pixels",
+        { "GUI Button", "GUI button size in pixels", "" }, // @TODO Missing documentation
         glm::ivec2(32, 64),
         glm::ivec2(8, 16),
         glm::ivec2(128, 256)
     )
     , _friction(
-        "Friction",
-        "Friction for different interactions (orbit, zoom, roll, pan)",
+        { "Friction", "Friction for different interactions (orbit, zoom, roll, pan)", "" }, // @TODO Missing documentation
         glm::vec4(0.01f, 0.025f, 0.02f, 0.02f),
         glm::vec4(0.f),
         glm::vec4(0.2f)
@@ -231,7 +214,8 @@ TouchInteraction::TouchInteraction()
     });
 
     levmarq_init(&_lmstat);
-    OnScreenGUIModule::touchInput = { false, glm::vec2(0), 0 };
+
+
     _time.initSession();
 }
 
@@ -266,17 +250,20 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
     WindowWrapper& wrapper = OsEng.windowWrapper();
     glm::ivec2 res = wrapper.currentWindowSize();
     glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
-    _guiON = OnScreenGUIModule::gui.isEnabled();
+
+    OnScreenGUIModule& module = *(OsEng.moduleEngine().module<OnScreenGUIModule>());
+    _guiON = module.gui.isEnabled();
+
     if (_tap && list.size() == 1 && std::abs(pos.x) < _guiButton.value().x && std::abs(pos.y) < _guiButton.value().y) { // pressed invisible button
         _guiON = !_guiON;
-        OnScreenGUIModule::gui.setEnabled(_guiON);
+        module.gui.setEnabled(_guiON);
 
         std::string mode = (_guiON) ? "" : "de";
         LINFO("GUI mode is " << mode << "activated. Inside box by: (" <<
             static_cast<int>(100 * (pos.x / _guiButton.value().x)) << "%, " << static_cast<int>(100 * (pos.y / _guiButton.value().y)) << "%)\n");
     }
     else if (_guiON) {
-        OnScreenGUIModule::touchInput = { _guiON, pos, 1 }; // emulate touch input as a mouse
+        module.touchInput = { _guiON, pos, 1 }; // emulate touch input as a mouse
     }
     return _guiON;
 }
@@ -468,7 +455,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         _vel.pan = glm::dvec2(0.0, 0.0);
     }
     else { // prevents touch to infinitely be active (due to windows bridge case where event doesnt get consumed sometimes when LMA fails to converge)
-        OnScreenGUIModule::touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
+        OsEng.moduleEngine().module<OnScreenGUIModule>()->touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
         resetAfterInput();
     }
 }
@@ -827,22 +814,23 @@ void TouchInteraction::resetAfterInput() {
         }
     }
     // Reset emulated mouse values
+    OnScreenGUIModule& module = *(OsEng.moduleEngine().module<OnScreenGUIModule>());
     if (_guiON) {
-        bool activeLastFrame = OnScreenGUIModule::touchInput.action;
-        OnScreenGUIModule::touchInput.active = false;
+        bool activeLastFrame = module.touchInput.action;
+        module.touchInput.active = false;
         if (activeLastFrame) {
-            OnScreenGUIModule::touchInput.active = true;
-            OnScreenGUIModule::touchInput.action = 0;
+            module.touchInput.active = true;
+            module.touchInput.action = 0;
         }
     }
     else {
-        OnScreenGUIModule::touchInput.active = false;
-        OnScreenGUIModule::touchInput.action = 0;
+        module.touchInput.active = false;
+        module.touchInput.action = 0;
     }
     
     _lmSuccess = true;
     // Ensure that _guiON is consistent with properties in OnScreenGUI and
-    _guiON = OnScreenGUIModule::gui.isEnabled();
+    _guiON = module.gui.isEnabled();
 
     // Reset variables
     _lastVel.orbit = glm::dvec2(0.0, 0.0);

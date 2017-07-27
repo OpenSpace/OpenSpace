@@ -46,11 +46,20 @@ namespace {
     const char* KeyGeometry = "Geometry";
     const char* KeyTexture = "Textures.Color";
     const char* KeyModelTransform = "Rotation.ModelTransform";
-    const char* KeyFading = "Shading.Fadeable";
 
-    const char* keyBody        = "Body";
-    const char* keyStart       = "StartTime";
-    const char* keyEnd         = "EndTime";
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "ColorTexture", // @TODO replace with only "Texture"
+        "Color Texture",
+        "This value points to a color texture file that is applied to the geometry "
+        "rendered in this object."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShadingInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "This value determines whether this model should be shaded by using the position "
+        "of the Sun."
+    };
 } // namespace
 
 namespace openspace {
@@ -68,10 +77,15 @@ documentation::Documentation RenderableModel::Documentation() {
                 Optional::No
             },
             {
-                KeyTexture,
+                KeyTexture, // @TODO replace with TextureInfo.identifier
                 new StringVerifier,
-                "A color texture that can be applied to the model specified by the "
-                "Geometry.",
+                TextureInfo.description,
+                Optional::Yes
+            },
+            {
+                ShadingInfo.identifier,
+                new BoolVerifier,
+                ShadingInfo.description,
                 Optional::Yes
             },
             {
@@ -79,13 +93,6 @@ documentation::Documentation RenderableModel::Documentation() {
                 new DoubleMatrix3Verifier,
                 "Specifies a distinct transformation matrix that is applied to the "
                 "model. If it is not specified, it is equal to the Identity matrix.",
-                Optional::Yes
-            },
-            {
-                KeyFading,
-                new BoolVerifier,
-                "Specifies whether the model should be periodically fading in and out. "
-                "If this value is not specified, it will not fade.",
                 Optional::Yes
             }
         }
@@ -95,10 +102,8 @@ documentation::Documentation RenderableModel::Documentation() {
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _geometry(nullptr)
-    , _colorTexturePath("colorTexture", "Color Texture")
-    , _performFade("performFading", "Perform Fading", false)
-    , _performShading("performShading", "Perform Shading", true)
-    , _fading("fading", "Fade", 0)
+    , _colorTexturePath(TextureInfo)
+    , _performShading(ShadingInfo, true)
     , _programObject(nullptr)
     , _texture(nullptr)
     , _modelTransform(1.0)
@@ -129,8 +134,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _modelTransform = dictionary.value<glm::dmat3>(KeyModelTransform);
     }
 
-    if (dictionary.hasKey(KeyFading)) {
-        _performFade = dictionary.value<bool>(KeyFading);
+    if (dictionary.hasKey(ShadingInfo.identifier)) {
+        _performShading = dictionary.value<bool>(ShadingInfo.identifier);
     }
 
     addPropertySubOwner(_geometry.get());
@@ -139,7 +144,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
     addProperty(_performShading);
-    addProperty(_performFade);
 }
 
 bool RenderableModel::isReady() const {
@@ -179,14 +183,6 @@ bool RenderableModel::deinitialize() {
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
     
-    // Fading
-    if (_performFade && _fading > 0.f) {
-        _fading = _fading - 0.01f;
-    }
-    else if (!_performFade && _fading < 1.f) {
-        _fading = _fading + 0.01f;
-    }
-
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
@@ -201,7 +197,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
     _programObject->setUniform("performShading", _performShading);
-    _programObject->setUniform("fading", _fading);
+    _programObject->setUniform("fading", 1.f); // @TODO remove this
 
     _geometry->setUniforms(*_programObject);
 

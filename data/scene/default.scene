@@ -20,14 +20,22 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
-    openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.Enabled", false)
+    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
 
-    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
-    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+    openspace.setPropertyValue("MilkyWay.renderable.Transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.Segments", 50)
 
-    openspace.addVirtualProperty("BoolProperty", "Show Trails", "*Trail.renderable.enabled", true, nil, nil)
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "*Trail.renderable.enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
 
     openspace.navigation.resetCameraDirection()
 

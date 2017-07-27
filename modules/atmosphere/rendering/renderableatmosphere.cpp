@@ -89,6 +89,132 @@ namespace {
     const char* keyATMDebug                 = "Debug";
     const char* keyTextureScale             = "PreCalculatedTextureScale";
     const char* keySaveTextures             = "SaveCalculatedTextures";
+
+    static const openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
+        "atmmosphereHeight",
+        "Atmosphere Height (KM)",
+        "" // @TODO Missing documentation
+    };
+        
+    static const openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo = {
+        "AverageGroundReflectance", 
+        "Average Ground Reflectance (%)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
+        "RayleighHeightScale", 
+        "Rayleigh Height Scale (KM)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffXInfo = {
+        "RayleighScatteringCoeffX", 
+        "Rayleigh Scattering Coeff X (x10e-3)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffYInfo = {
+        "RayleighScatteringCoeffY",
+        "Rayleigh Scattering Coeff Y (x10e-3)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffZInfo = {
+        "RayleighScatteringCoeffZ",
+        "Rayleigh Scattering Coeff Z (x10e-3)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
+        "Ozone", 
+        "Ozone Layer Enabled",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
+        "OzoneLayerHeightScale", 
+        "Ozone Height Scale (KM)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffXInfo = {
+        "OzoneLayerCoeffX", 
+        "Ozone Layer Extinction Coeff X (x10e-5)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffYInfo = {
+        "OzoneLayerCoeffY",
+        "Ozone Layer Extinction Coeff Y (x10e-5)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffZInfo = {
+        "OzoneLayerCoeffZ",
+        "Ozone Layer Extinction Coeff Z (x10e-5)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
+        "MieHeightScale", 
+        "Mie Height Scale (KM)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MieScatteringCoeffXInfo = {
+        "MieScatteringCoeffX",
+        "Mie Scattering Coeff X (x10e-3)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MieScatteringCoeffYInfo = {
+        "MieScatteringCoeffY",
+        "Mie Scattering Coeff Y (x10e-3)",
+        "" // @TODO Missing documentation
+    };
+    
+    static const openspace::properties::Property::PropertyInfo MieScatteringCoeffZInfo = {
+        "MieScatteringCoeffZ",
+        "Mie Scattering Coeff Z (x10e-3)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MieScatteringExtinctionPropCoeffInfo = {
+        "MieScatteringExtinctionPropCoefficient",
+        "Mie Scattering/Extinction Proportion Coefficient (%)",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
+        "MieAsymmetricFactorG", 
+        "Mie Asymmetric Factor G",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SunIntensityInfo = {
+        "SunIntensity", 
+        "Sun Intensity",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo AtmosphereExposureInfo = {
+        "HdrExposure", 
+        "Atmosphere Exposure",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo AtmosphereGammaInfo = {
+        "Gamma", 
+        "Gamma Correction",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnableSunOnCameraPositionInfo = {
+        "SunFollowingCamera", 
+        "Enable Sun On Camera Position",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
@@ -121,28 +247,27 @@ namespace openspace {
 
     RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
-        , _atmosphereHeightP("atmmosphereHeight", "Atmosphere Height (KM)", 60.0f, 0.1f, 99.0f)
-        , _groundAverageReflectanceP("averageGroundReflectance", "Average Ground Reflectance (%)", 0.1f, 0.0f, 1.0f)
-        , _rayleighHeightScaleP("rayleighHeightScale", "Rayleigh Height Scale (KM)", 8.0f, 0.1f, 20.0f)
-        , _rayleighScatteringCoeffXP("rayleighScatteringCoeffX", "Rayleigh Scattering Coeff X (x10e-3)", 1.0f, 0.01f, 100.0f)
-        , _rayleighScatteringCoeffYP("rayleighScatteringCoeffY", "Rayleigh Scattering Coeff Y (x10e-3)", 1.0f, 0.01f, 100.0f)
-        , _rayleighScatteringCoeffZP("rayleighScatteringCoeffZ", "Rayleigh Scattering Coeff Z (x10e-3)", 1.0f, 0.01f, 100.0f)
-        , _ozoneEnabledP("ozone", "Ozone Layer Enabled", true)
-        , _ozoneHeightScaleP("ozoneLayerHeightScale", "Ozone Height Scale (KM)", 8.0f, 0.1f, 20.0f)
-        , _ozoneCoeffXP("ozoneLayerCoeffX", "Ozone Layer Extinction Coeff X (x10e-5)", 3.426f, 0.01f, 100.0f)
-        , _ozoneCoeffYP("ozoneLayerCoeffY", "Ozone Layer Extinction Coeff Y (x10e-5)", 8.298f, 0.01f, 100.0f)
-        , _ozoneCoeffZP("ozoneLayerCoeffZ", "Ozone Layer Extinction Coeff Z (x10e-5)", 0.356f, 0.01f, 100.0f)
-        , _mieHeightScaleP("mieHeightScale", "Mie Height Scale (KM)", 1.2f, 0.1f, 20.0f)
-        , _mieScatteringCoeffXP("mieScatteringCoeffX", "Mie Scattering Coeff X (x10e-3)", 4.0f, 0.01f, 1000.0f)
-        , _mieScatteringCoeffYP("mieScatteringCoeffY", "Mie Scattering Coeff Y (x10e-3)", 4.0f, 0.01f, 1000.0f)
-        , _mieScatteringCoeffZP("mieScatteringCoeffZ", "Mie Scattering Coeff Z (x10e-3)", 4.0f, 0.01f, 1000.0f)
-        , _mieScatteringExtinctionPropCoefficientP("mieScatteringExtinctionPropCoefficient",
-            "Mie Scattering/Extinction Proportion Coefficient (%)", 0.9f, 0.01f, 1.0f)
-        , _mieAsymmetricFactorGP("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 0.85f, -1.0f, 1.0f)
-        , _sunIntensityP("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 1000.0f)
-        , _hdrExpositionP("hdrExposition", "HDR", 0.4f, 0.01f, 5.0f)
-        , _gammaConstantP("gamma", "Gamma Correction", 1.8f, 0.1f, 3.0f)
-        , _sunFollowingCameraEnabledP("sunFollowingCamera", "Enable Sun On Camera Position", false)
+        , _atmosphereHeightP(AtmosphereHeightInfo, 60.0f, 0.1f, 99.0f)
+        , _groundAverageReflectanceP(AverageGroundReflectanceInfo, 0.1f, 0.0f, 1.0f)
+        , _rayleighHeightScaleP(RayleighHeightScaleInfo, 8.0f, 0.1f, 20.0f)
+        , _rayleighScatteringCoeffXP(RayleighScatteringCoeffXInfo, 1.0f, 0.01f, 100.0f)
+        , _rayleighScatteringCoeffYP(RayleighScatteringCoeffYInfo, 1.0f, 0.01f, 100.0f)
+        , _rayleighScatteringCoeffZP(RayleighScatteringCoeffZInfo, 1.0f, 0.01f, 100.0f)
+        , _ozoneEnabledP(OzoneLayerInfo, true)
+        , _ozoneHeightScaleP(OzoneHeightScaleInfo, 8.0f, 0.1f, 20.0f)
+        , _ozoneCoeffXP(OzoneLayerCoeffXInfo, 3.426f, 0.01f, 100.0f)
+        , _ozoneCoeffYP(OzoneLayerCoeffYInfo, 8.298f, 0.01f, 100.0f)
+        , _ozoneCoeffZP(OzoneLayerCoeffZInfo, 0.356f, 0.01f, 100.0f)
+        , _mieHeightScaleP(MieHeightScaleInfo, 1.2f, 0.1f, 20.0f)
+        , _mieScatteringCoeffXP(MieScatteringCoeffXInfo, 4.0f, 0.01f, 1000.0f)
+        , _mieScatteringCoeffYP(MieScatteringCoeffYInfo, 4.0f, 0.01f, 1000.0f)
+        , _mieScatteringCoeffZP(MieScatteringCoeffZInfo, 4.0f, 0.01f, 1000.0f)
+        , _mieScatteringExtinctionPropCoefficientP(MieScatteringExtinctionPropCoeffInfo, 0.9f, 0.01f, 1.0f)
+        , _mieAsymmetricFactorGP(MieAsymmetricFactorGInfo, 0.85f, -1.0f, 1.0f)
+        , _sunIntensityP(SunIntensityInfo, 50.0f, 0.1f, 1000.0f)
+        , _hdrExpositionP(AtmosphereExposureInfo, 0.4f, 0.01f, 5.0f)
+        , _gammaConstantP(AtmosphereGammaInfo, 1.8f, 0.1f, 3.0f)
+        , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
         , _atmosphereEnabled(false)
         , _ozoneLayerEnabled(false)
         , _sunFollowingCameraEnabled(false)

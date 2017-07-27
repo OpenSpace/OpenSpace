@@ -91,6 +91,118 @@ namespace {
 
     const char* KeyFontMono = "Mono";
     const char* KeyFontLight = "Light";
+
+    static const openspace::properties::Property::PropertyInfo PerformanceInfo = {
+        "PerformanceMeasurements",
+        "Performance Measurements",
+        "If this value is enabled, detailed performance measurements about the updates "
+        "and rendering of the scene graph nodes are collected each frame. These values "
+        "provide some information about the impact of individual nodes on the overall "
+        "performance."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FrametimeInfo = {
+        "FrametimeType",
+        "Type of the frame time display",
+        "This value determines the units in which the frame time is displayed."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowDateInfo = {
+        "ShowDate",
+        "Show Date Information",
+        "This values determines whether the date will be printed in the top left corner "
+        "of the rendering window if a regular rendering window is used (as opposed to a "
+        "fisheye rendering, for example)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowInfoInfo = {
+        "ShowInfo",
+        "Show Rendering Information",
+        "This value determines whether the rendering info, which is the delta time and "
+        "the frame time, is shown in the top left corner of the rendering window if a "
+        "regular rendering window is used (as opposed to a fisheye rendering, for "
+        "example)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowLogInfo = {
+        "ShowLog",
+        "Show the on-screen log",
+        "This value determines whether the on-screen log will be shown or hidden. Even "
+        "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
+        "log."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
+        "TakeScreenshot",
+        "Take Screenshot",
+        "If this property is triggered, a screenshot is taken and stored in the current "
+        "working directory (which is the same directory where the OpenSpace.exe) is "
+        "located in most cases. The images are prefixed with 'SGCT' and postfixed with "
+        "the number of frames. This function will silently overwrite images that are "
+        "already present in the folder."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
+        "ApplyWarpingScreenshot",
+        "Apply Warping to Screenshots",
+        "This value determines whether a warping should be applied before taking a "
+        "screenshot. If it is enabled, all post processing is applied as well, which "
+        "includes everything rendered on top of the rendering, such as the user "
+        "interface."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
+        "ShowFrameNumber",
+        "Show Frame Number",
+        "If this value is enabled, the current frame number is rendered into the window."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableMasterInfo = {
+        "DisableMasterRendering",
+        "Disable Master Rendering",
+        "If this value is enabled, the rendering on the master node will be disabled. "
+        "Every other aspect of the application will be unaffected by this and it will "
+        "still respond to user input. This setting is reasonably only useful in the case "
+        "of multi-pipeline environments, such as planetariums, where the output of the "
+        "master node is not required and performance can be gained by disabling it."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableTranslationInfo = {
+        "DisableSceneTranslationOnMaster",
+        "Disable Scene Translation on Master",
+        "If this value is enabled, any scene translations such as specified in, for "
+        "example an SGCT configuration, is disabled for the master node. This setting "
+        "can be useful if a planetarium environment requires a scene translation to be "
+        "applied, which would otherwise make interacting through the master node "
+        "difficult."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AaSamplesInfo = {
+        "AaSamples",
+        "Number of Anti-aliasing samples",
+        "This value determines the number of anti-aliasing samples to be used in the "
+        "rendering for the MSAA method."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HDRExposureInfo = {
+        "HDRExposure",
+        "HDR Exposure",
+        "This value determines the amount of light per unit area reaching the "
+        "equivalent of an electronic image sensor."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
+        "Background Exposure",
+        "BackgroundExposure",
+        "This value determines the amount of light per unit area reaching the "
+        "equivalent of an electronic image sensor for the background image."
+    };
+
+    static const openspace::properties::Property::PropertyInfo GammaInfo = {
+        "Gamma",
+        "Gamma Correction",
+        "Gamma, is the nonlinear operation used to encode and decode luminance or tristimulus values in the image."        
+    };
 } // namespace
 
 
@@ -102,37 +214,29 @@ RenderEngine::RenderEngine()
     , _scene(nullptr)
     , _raycasterManager(nullptr)
     , _deferredcasterManager(nullptr)
-    , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
+    , _performanceMeasurements(PerformanceInfo)
     , _performanceManager(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _log(nullptr)
-    , _frametimeType(
-        "frametimeType",
-        "Type of the frametime display",
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _showDate("showDate", "Show Date Information", true)
-    , _showInfo("showInfo", "Show Render Information", true)
-    , _showLog("showLog", "Show the OnScreen log", true)
-    , _takeScreenshot("takeScreenshot", "Take Screenshot")
+    , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _showDate(ShowDateInfo, true)
+    , _showInfo(ShowInfoInfo, true)
+    , _showLog(ShowLogInfo, true)
+    , _takeScreenshot(TakeScreenshotInfo)
     , _shouldTakeScreenshot(false)
-    , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
-    , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
-    , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
-    , _disableSceneTranslationOnMaster(
-        "disableSceneTranslationOnMaster",
-        "Disable Scene Translation on Master",
-        false
-    )
+    , _applyWarping(ApplyWarpingInfo, false)
+    , _showFrameNumber(ShowFrameNumberInfo, false)
+    , _disableMasterRendering(DisableMasterInfo, false)
+    , _disableSceneTranslationOnMaster(DisableTranslationInfo, false)
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
-    , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
-    , _hdrExposure("hdrExposure", "HDR Exposure", 0.4f, 0.01f, 10.0f)
-    , _hdrBackground("backgroundExposure", "HDR Background Exposure", 2.8f, 0.01f, 10.0f)
-    , _gamma("gamma", "Gamma Constant", 2.2f, 0.01f, 10.0f)
+    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
+    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
+    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _nAaSamples(AaSamplesInfo, 8, 1, 16)
     , _frameNumber(0)
 {
     _performanceMeasurements.onChange([this]() {
