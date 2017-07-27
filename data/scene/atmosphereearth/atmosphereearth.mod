@@ -4,26 +4,27 @@ return {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
         Static = true,
-        Transform = {
-            Translation = {
-                Type = "Spice",
-                Body = "EARTH BARYCENTER",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
-        }
+        --Transform = {
+        --    Translation = {
+        --        Type = "Spice",
+        --        Body = "EARTH BARYCENTER",
+        --        Observer = "SUN",
+        --        Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+        --    },
+        --}
     },
     -- Earth module
     {   
         Name = "Earth",
         Parent = "EarthBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
+            Type = "RenderablePlanetAtmosphere",
             Frame = "IAU_EARTH",
             Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.371, 6 },
+                Radius = 6.3781366E6,
+                --Radius = 6.420E6,                  
                 Segments = 100
             },
             Shadow_Group = {
@@ -43,8 +44,8 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
-                Night = "textures/earth_night.jpg",
-                --Height = "textures/earth_bluemarble_height.jpg",                
+				Night = "textures/earth_night.jpg",
+                Height = "textures/earth_bluemarble_height.jpg",                
                 -- Depth = "textures/earth_depth.png",
                 Reflectance = "textures/earth_reflectance.png",
                 Clouds = "textures/earth_clouds.jpg"
@@ -54,7 +55,7 @@ return {
                 AtmoshereRadius = 6420,
                 --AtmoshereRadius = 6390,
                 --PlanetRadius    = 6371,
-                PlanetRadius    = 6360,
+                PlanetRadius    = 6378.1366,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {
@@ -71,15 +72,16 @@ return {
                 Mie = {
                     Coefficients = {
                         -- Reflection coefficients are given in km^-1
-                        Scattering = {4e-3, 4e-3, 4e-3},
-                        --Scattering = {2e-5, 2e-5, 2e-5},
+                        Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
+                        --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
                         -- Extinction coefficients are a fraction of the Scattering coefficients
-                        Extinction = {4e-3/0.9, 4e-3/0.9, 4e-3/0.9}
+                        Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
                         -- Height scale (atmosphere thickness for constant density) in Km
                     },
                     H_M = 1.2,
                     -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
-                    G = 1.0,
+                    --G = 1.0,
+                    G = 0.85
                 },
                 -- Clear Sky
                 -- Mie = {
@@ -98,9 +100,32 @@ return {
                 --      }
                 --     H_M = 3.0,
                 --     G = 0.65,
-                -- },                
+                -- },
+                Debug = {
+                    -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
+                    PreCalculatedTextureScale = 1.0, 
+                    SaveCalculatedTextures = false, 
+                },    
             }
-        }
+        },
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EARTH",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_EARTH",
+                DestinationFrame = "GALACTIC",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
+        },
+        GuiName = "/Solar/Planets/Earth"
     },
     -- EarthTrail module
     {   
@@ -122,6 +147,7 @@ return {
         },
         GuiName = "/Solar/EarthTrail"
     },
+    --[[
     {
         Name = "EarthMarker",
         Parent = "Earth",
@@ -138,6 +164,7 @@ return {
             Position = {0, 0, 0, 5}
         }
     }
+    ]]
  -- Plane
     -- {   
     --     Name = "EarthPlane",

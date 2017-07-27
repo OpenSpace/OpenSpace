@@ -32,6 +32,7 @@
 #include <vector>
 #include <map>
 
+#include <openspace/rendering/deferredcasterlistener.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/util/updatestructures.h>
@@ -50,7 +51,7 @@ class RenderableVolume;
 class Camera;
 class Scene;
     
-class FramebufferRenderer : public Renderer, public RaycasterListener {
+class FramebufferRenderer : public Renderer, public RaycasterListener, public DeferredcasterListener {
 public:
     FramebufferRenderer();
     virtual ~FramebufferRenderer();
@@ -60,11 +61,18 @@ public:
 
     void updateResolution();
     void updateRaycastData();
-    
+    void updateDeferredcastData();
+    void updateHDRData();
+
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
-    void setNAaSamples(int nAaSamples) override;
+    void setNAaSamples(const int nAaSamples) override;
+    void setHDRExposure(const float hdrExposure) override;
+    void setHDRBackground(const float hdrBackground) override;
+    void setGamma(const float gamma) override;
+
+    float hdrBackground() const override;
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -76,6 +84,8 @@ public:
     virtual void updateRendererData() override;
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
+    virtual void deferredcastersChanged(Deferredcaster& deferredcaster, bool attached) override;
+
 private:
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
@@ -83,17 +93,27 @@ private:
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _raycastPrograms;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _insideRaycastPrograms;
 
+    std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
+    std::map<Deferredcaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _deferredcastPrograms;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
 
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
     GLuint _mainColorTexture;
+    GLuint _mainOtherDataTexture;
+    GLuint _mainPositionTexture;
+    GLuint _mainNormalTexture;
     GLuint _mainDepthTexture;
     GLuint _exitColorTexture;
     GLuint _mainFramebuffer;
     GLuint _exitDepthTexture;
     GLuint _exitFramebuffer;
+    GLuint _deferredFramebuffer;
+    GLuint _deferredColorTexture;
 
+    bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
 
@@ -101,6 +121,9 @@ private:
     Scene* _scene;
     glm::vec2 _resolution;
     int _nAaSamples;
+    float _hdrExposure;
+    float _hdrBackground;
+    float _gamma;
 
     ghoul::Dictionary _rendererData;
 };

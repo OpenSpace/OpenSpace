@@ -30,6 +30,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
 namespace ghoul {
@@ -46,6 +47,7 @@ namespace scripting { struct LuaLibrary; }
 
 class Camera;
 class RaycasterManager;
+class DeferredcasterManager;
 class Renderer;
 class Scene;
 class SceneManager;
@@ -83,6 +85,7 @@ public:
     Renderer* renderer() const;
     RendererImplementation rendererImplementation() const;
     RaycasterManager& raycasterManager();
+    DeferredcasterManager& deferredcasterManager();
 
     // sgct wrapped functions
     
@@ -183,6 +186,7 @@ private:
     Camera* _camera;
     Scene* _scene;
     std::unique_ptr<RaycasterManager> _raycasterManager;
+    std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
     properties::BoolProperty _performanceMeasurements;
     std::unique_ptr<performance::PerformanceManager> _performanceManager;
@@ -213,6 +217,10 @@ private:
     float _currentFadeTime;
     int _fadeDirection;
     properties::IntProperty _nAaSamples;
+    properties::FloatProperty _hdrExposure;
+    properties::FloatProperty _hdrBackground;
+    properties::FloatProperty _gamma;
+
     uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;

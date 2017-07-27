@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -195,7 +195,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     }
 
     const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
-
+    
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
         // Calculations are done in the reference frame of the globe. Hence, the
         // camera position needs to be transformed with the inverse model matrix
@@ -225,6 +225,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         "modelViewProjectionTransform", modelViewProjectionTransform);
     programObject->setUniform("minLatLon", glm::vec2(swCorner.toLonLatVec2()));
     programObject->setUniform("lonLatScalingFactor", glm::vec2(patchSize.toLonLatVec2()));
+    // Ellipsoid Radius (Model Space)
     programObject->setUniform("radiiSquared", glm::vec3(ellipsoid.radiiSquared()));
 
     if (_layerManager->layerGroup(
@@ -288,20 +289,24 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     }
 
     // Calculate other uniform variables needed for rendering
+    // Send the matrix inverse to the fragment for the global and local shader (JCC)
     dmat4 modelTransform = chunk.owner().modelTransform();
     dmat4 viewTransform = data.camera.combinedViewMatrix();
     dmat4 modelViewTransform = viewTransform * modelTransform;
 
     std::vector<std::string> cornerNames = { "p01", "p11", "p00", "p10" };
     std::vector<glm::dvec3> cornersCameraSpace(4);
+    std::vector<glm::dvec3> cornersModelSpace(4);
     for (int i = 0; i < 4; ++i) {
         Quad q = static_cast<Quad>(i);
         Geodetic2 corner = chunk.surfacePatch().getCorner(q);
         glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
+        cornersModelSpace[i] = cornerModelSpace;
         glm::dvec3 cornerCameraSpace =
             glm::dvec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
         cornersCameraSpace[i] = cornerCameraSpace;
         programObject->setUniform(cornerNames[i], vec3(cornerCameraSpace));
+
     }
 
     // TODO: Patch normal can be calculated for all corners and then linearly
@@ -312,7 +317,18 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
             cornersCameraSpace[Quad::NORTH_EAST] -
                 cornersCameraSpace[Quad::SOUTH_WEST]));
 
+    // In order to improve performance, lets use the normal in object space (model space)
+    // for deferred rendering.
+    vec3 patchNormalModelSpace = normalize(
+        cross(cornersModelSpace[Quad::SOUTH_EAST] -
+            cornersModelSpace[Quad::SOUTH_WEST],
+            cornersModelSpace[Quad::NORTH_EAST] -
+            cornersModelSpace[Quad::SOUTH_WEST]));
+
+
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
+    // TODO (JCC): Enable the right normal for displaced points in the patch
+    programObject->setUniform("patchNormalModelSpace", glm::normalize(patchNormalModelSpace));
     programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
 
     if (_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0) {

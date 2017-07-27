@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,13 +27,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
@@ -51,13 +50,13 @@
 
 
 namespace {
-    const char* KeyGeometry = "Geometry";
-    const char* KeyRadius = "Radius";
-    const char* KeyColorTexture = "Textures.Color";
-    const char* KeyNightTexture = "Textures.Night";
+    const char* KeyGeometry      = "Geometry";
+    const char* KeyRadius        = "Radius";
+    const char* KeyColorTexture  = "Textures.Color";
+    const char* KeyNightTexture  = "Textures.Night";
     const char* KeyHeightTexture = "Textures.Height";
-    const char* KeyShading = "PerformShading";
-
+    const char* KeyShading       = "PerformShading";
+       
     static const char* _loggerCat = "RenderablePlanet";
 
     const char* keyFrame                         = "Frame";
@@ -185,6 +184,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _hasNightTexture(false)
     , _hasHeightTexture(false)
     , _shadowEnabled(false)
+    , _time(0.f)
 {
     ghoul_precondition(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
@@ -263,7 +263,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     }
     addProperty(_performShading);
 
-    // Shadow data:
+    //================================================================
+    //======== Reads Shadow (Eclipses) Entries in mod file ===========
+    //================================================================
     ghoul::Dictionary shadowDictionary;
     bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
     bool disableShadows = false;
@@ -370,12 +372,14 @@ bool RenderablePlanet::initialize() {
             "${MODULE_SPACE}/shaders/renderableplanet_vs.glsl",
             "${MODULE_SPACE}/shaders/renderableplanet_fs.glsl");
     }
+
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     _geometry->initialize(this);
 
+    // Deactivate any previously activated shader program.
     _programObject->deactivate();
 
     loadTexture();
@@ -410,46 +414,39 @@ bool RenderablePlanet::isReady() const {
     return ready;
 }
 
-void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
-    // activate shader
-    _programObject->activate();
+void RenderablePlanet::computeModelTransformMatrix(const openspace::TransformData & transformData, glm::dmat4 * modelTransform) {
+    // scale the planet to appropriate size since the planet is a unit sphere    
+    *modelTransform =
+        glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
+        glm::dmat4(transformData.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
-
-    // scale the planet to appropriate size since the planet is a unit sphere
-    //glm::mat4 transform = glm::mat4(1);
-    
     //earth needs to be rotated for that to work.
     glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
     glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
     //glm::dmat4 rotProp = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0));
-    modelTransform = modelTransform * rot * roty /** rotProp*/;
+    *modelTransform = *modelTransform * rot * roty /** rotProp*/;
+}
+
+void RenderablePlanet::render(const RenderData& data, RendererTasks& renderTask) {
+    // activate shader
+    _programObject->activate();
+    
+    glm::dmat4 modelTransform = glm::dmat4(1.0);
+    computeModelTransformMatrix(data.modelTransform, &modelTransform);
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
+    
     _programObject->setUniform("transparency", _alpha);
-    _programObject->setUniform(
-        "modelViewProjectionTransform", 
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    _programObject->setUniform("modelViewTransform", modelViewTransform);
+    _programObject->setUniform("modelViewProjectionTransform", 
+        data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));
 
-    // Normal Transformation
-    glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
-    glm::mat4 translateCamTrans = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
-    float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
-    glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
-
-//    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
-//        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
-    
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     
     _programObject->setUniform("_performShading", _performShading);
-
     _programObject->setUniform("_hasHeightMap", _hasHeightTexture);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
 
@@ -457,7 +454,6 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit dayUnit;
     ghoul::opengl::TextureUnit nightUnit;
     ghoul::opengl::TextureUnit heightUnit;
-
 
     dayUnit.activate();
     _texture->bind();
@@ -479,10 +475,11 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    // TODO: Move Calculations to VIEW SPACE (precision problems avoidance...)
-
+    //=============================================================================
+    //============= Eclipse Shadow Calculations and Uniforms Loading ==============
+    //=============================================================================
+    // TODO: Move Calculations to VIEW SPACE (let's avoid precision problems...)
     double lt;
-    // Shadow calculations..
     if (!_shadowConfArray.empty()) {
         std::vector<ShadowRenderingStruct> shadowDataArray;
         shadowDataArray.reserve(_shadowConfArray.size());
@@ -495,7 +492,6 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
             glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, _time, lt);
             casterPos           *= 1000.0; // converting to meters
             psc caster_pos       = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
-
             
             // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
             glm::vec3 planetCasterVec   = (caster_pos - data.position).vec3();
@@ -512,8 +508,8 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
             ShadowRenderingStruct shadowData;
             shadowData.isShadowing = false;
 
-            if (((d_test - rp_test) < _planetRadius) &&
-                (casterDistSun < planetDistSun) ) {
+            if ( ((d_test - rp_test) < _planetRadius) &&
+                 (casterDistSun < planetDistSun) ) {
                 // The current caster is shadowing the current planet
                 shadowData.isShadowing       = true;
                 shadowData.rs                = shadowConf.source.second;
@@ -567,8 +563,10 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 void RenderablePlanet::update(const UpdateData& data) {
     // set spice-orientation in accordance to timestamp
     _stateMatrix = data.modelTransform.rotation;
-    //_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
     _time = data.time.j2000Seconds();
+
+    if (_programObject && _programObject->isDirty())
+        _programObject->rebuildFromFile();
 }
 
 void RenderablePlanet::loadTexture() {
@@ -616,5 +614,4 @@ void RenderablePlanet::loadTexture() {
         }
     }
 }
-
 }  // namespace openspace

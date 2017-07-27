@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,6 +31,7 @@
 
 namespace openspace {
 
+class Deferredcaster;
 class VolumeRaycaster;
 
 struct InitializeData {};
@@ -63,11 +64,22 @@ struct RaycasterTask {
     RenderData renderData;
 };
 
+struct DeferredcasterTask {
+    Deferredcaster* deferredcaster;
+    RenderData renderData;
+};
+
 struct RendererTasks {
     std::vector<RaycasterTask> raycasterTasks;
+    std::vector<DeferredcasterTask> deferredcasterTasks;
 };
 
 struct RaycastData {
+    int id;
+    std::string namespaceName;
+};
+
+struct DeferredcastData {
     int id;
     std::string namespaceName;
 };

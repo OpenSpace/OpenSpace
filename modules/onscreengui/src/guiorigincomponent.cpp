@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -69,7 +69,7 @@ void GuiOriginComponent::render() {
     bool hasChanged = ImGui::Combo("Origin", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('NavigationHandler.origin', '" +
+            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
             nodes[currentPosition]->name() + "');",
             scripting::ScriptEngine::RemoteScripting::Yes
         );

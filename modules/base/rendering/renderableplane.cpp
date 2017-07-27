@@ -241,6 +241,9 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+
+    _shader->setUniform("modelViewTransform",
+        glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform)));
     
     ghoul::opengl::TextureUnit unit;
     unit.activate();

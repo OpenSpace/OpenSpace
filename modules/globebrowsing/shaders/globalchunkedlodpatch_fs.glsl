@@ -32,6 +32,15 @@ Fragment getFragment() {
 #if SHOW_CHUNK_EDGES
     frag.color += patchBorderOverlay(fs_uv, vec3(0.0, 1.0, 0.0), 0.02);
 #endif // SHOW_CHUNK_EDGES
+    
+#if USE_WATERMASK
+    frag.gOtherData = vec4(waterReflectance, waterReflectance, waterReflectance, 1.0);
+#else
+    frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
+#endif
+    // Normal is written in Camera Rig (OS Eye) Space
+    frag.gNormal    = vec4(fs_normal, 1.0); 
+    frag.gPosition  = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
 
     frag.depth = fs_position.w;
     return frag;

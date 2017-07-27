@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,6 +33,12 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+namespace openspace {
+    class AtmosphereDeferredcaster;
+}
+#endif
 
 namespace openspace::globebrowsing {
 
@@ -74,8 +80,22 @@ public:
         properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty useAccurateNormals;
         properties::FloatProperty lodScaleFactor;
-        properties::FloatProperty cameraMinHeight;
+        properties::FloatProperty cameraMinHeight;        
         properties::FloatProperty orenNayarRoughness;
+    };
+
+    // Shadow structure
+    typedef struct {
+        std::pair<std::string, float> source;
+        std::pair<std::string, float> caster;
+    } ShadowConf;
+
+    struct ShadowRenderingStruct {
+        float xu, xp;
+        float rs, rc;
+        glm::vec3 sourceCasterVec;
+        glm::vec3 casterPositionVec;
+        bool isShadowing;
     };
     
     RenderableGlobe(const ghoul::Dictionary& dictionary);
@@ -130,6 +150,11 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
+    properties::PropertyOwner _texturePropertyOwner;
+
+    // Shadow
+    bool _shadowEnabled;
+    std::vector< ShadowConf > _shadowConfArray;
 };
 
 } // namespace openspace::globebrowsing

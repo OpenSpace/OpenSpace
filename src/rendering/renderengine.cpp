@@ -1,26 +1,26 @@
-/*****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
+﻿/*****************************************************************************************
+*                                                                                       *
+* OpenSpace                                                                             *
+*                                                                                       *
+* Copyright (c) 2014-2017                                                               *
+*                                                                                       *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+* software and associated documentation files (the "Software"), to deal in the Software *
+* without restriction, including without limitation the rights to use, copy, modify,    *
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+* permit persons to whom the Software is furnished to do so, subject to the following   *
+* conditions:                                                                           *
+*                                                                                       *
+* The above copyright notice and this permission notice shall be included in all copies *
+* or substantial portions of the Software.                                              *
+*                                                                                       *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+****************************************************************************************/
 
 #include <openspace/rendering/renderengine.h> 
 
@@ -38,6 +38,7 @@
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -83,11 +84,11 @@
 namespace {
     const char* _loggerCat = "RenderEngine";
 
-    const char* KeyRenderingMethod = "RenderingMethod";   
+    const char* KeyRenderingMethod = "RenderingMethod";
     const std::chrono::seconds ScreenLogTimeToLive(15);
     const char* DefaultRenderingMethod = "ABuffer";
     const char* RenderFsPath = "${SHADERS}/render.frag";
-    
+
     const char* KeyFontMono = "Mono";
     const char* KeyFontLight = "Light";
 
@@ -182,6 +183,26 @@ namespace {
         "This value determines the number of anti-aliasing samples to be used in the "
         "rendering for the MSAA method."
     };
+
+    static const openspace::properties::Property::PropertyInfo HDRExposureInfo = {
+        "HDRExposure",
+        "HDR Exposure",
+        "This value determines the amount of light per unit area reaching the "
+        "equivalent of an electronic image sensor."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
+        "Background Exposure",
+        "BackgroundExposure",
+        "This value determines the amount of light per unit area reaching the "
+        "equivalent of an electronic image sensor for the background image."
+    };
+
+    static const openspace::properties::Property::PropertyInfo GammaInfo = {
+        "Gamma",
+        "Gamma Correction",
+        "Gamma, is the nonlinear operation used to encode and decode luminance or tristimulus values in the image."        
+    };
 } // namespace
 
 
@@ -192,6 +213,7 @@ RenderEngine::RenderEngine()
     , _camera(nullptr)
     , _scene(nullptr)
     , _raycasterManager(nullptr)
+    , _deferredcasterManager(nullptr)
     , _performanceMeasurements(PerformanceInfo)
     , _performanceManager(nullptr)
     , _renderer(nullptr)
@@ -211,10 +233,13 @@ RenderEngine::RenderEngine()
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
+    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
+    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
+    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
     , _nAaSamples(AaSamplesInfo, 8, 1, 16)
     , _frameNumber(0)
 {
-    _performanceMeasurements.onChange([this](){
+    _performanceMeasurements.onChange([this]() {
         if (_performanceMeasurements) {
             if (!_performanceManager) {
                 _performanceManager = std::make_unique<performance::PerformanceManager>();
@@ -228,11 +253,7 @@ RenderEngine::RenderEngine()
                 }
             }
         }
-        else {
-            _performanceManager = nullptr;
-        }
-
-    });
+    });      
     addProperty(_performanceMeasurements);
 
     _frametimeType.addOption(
@@ -258,7 +279,26 @@ RenderEngine::RenderEngine()
             _renderer->setNAaSamples(_nAaSamples);
         }
     });
+    _hdrExposure.onChange([this]() {
+        if (_renderer) {
+            _renderer->setHDRExposure(_hdrExposure);
+        }
+    });
+    _hdrBackground.onChange([this]() {
+        if (_renderer) {
+            _renderer->setHDRBackground(_hdrBackground);
+        }
+    });
+    _gamma.onChange([this]() {
+        if (_renderer) {
+            _renderer->setGamma(_gamma);
+        }
+    });
+
     addProperty(_nAaSamples);
+    addProperty(_hdrExposure);
+    addProperty(_hdrBackground);
+    addProperty(_gamma);
     addProperty(_applyWarping);
     
     _takeScreenshot.onChange([this](){
@@ -304,7 +344,8 @@ void RenderEngine::initialize() {
     auto& confManager = OsEng.configurationManager();
     if (confManager.hasKeyAndValue<std::string>(KeyRenderingMethod)) {
         renderingMethod = confManager.value<std::string>(KeyRenderingMethod);
-    } else {
+    }
+    else {
         using Version = ghoul::systemcapabilities::Version;
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
@@ -314,20 +355,21 @@ void RenderEngine::initialize() {
             renderingMethod = "Framebuffer";
         }
     }
-    
+
     if (confManager.hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
         _disableMasterRendering = confManager.value<bool>(
             ConfigurationManager::KeyDisableMasterRendering
-        );
+            );
     }
 
     if (confManager.hasKey(ConfigurationManager::KeyDisableSceneOnMaster)) {
         _disableSceneTranslationOnMaster = confManager.value<bool>(
             ConfigurationManager::KeyDisableSceneOnMaster
-        );
+            );
     }
 
     _raycasterManager = std::make_unique<RaycasterManager>();
+    _deferredcasterManager = std::make_unique<DeferredcasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
     LINFO("Setting renderer from string: " << renderingMethod);
@@ -390,7 +432,7 @@ void RenderEngine::initializeGL() {
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
 }
-
+    
 void RenderEngine::deinitialize() {
     for (std::shared_ptr<ScreenSpaceRenderable> ssr : _screenSpaceRenderables) {
         ssr->deinitialize();
@@ -467,7 +509,6 @@ glm::ivec2 RenderEngine::fontResolution() const {
     }
 }
 
-
 void RenderEngine::updateFade() {
     // Temporary fade funtionality
     const float fadedIn = 1.0;
@@ -491,7 +532,8 @@ void RenderEngine::updateFade() {
                     0.f,
                     _currentFadeTime / _fadeDuration
                 );
-            } else {
+            }
+            else {
                 _globalBlackOutFactor = glm::smoothstep(
                     0.f,
                     1.f,
@@ -500,13 +542,13 @@ void RenderEngine::updateFade() {
             }
             _currentFadeTime += static_cast<float>(
                 OsEng.windowWrapper().averageDeltaTime()
-            );
+                );
         }
     }
 }
 
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
-                          const glm::mat4& projectionMatrix)
+    const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
     WindowWrapper& wrapper = OsEng.windowWrapper();
@@ -518,7 +560,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
     }
     _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
-    
+
 
     if (!(wrapper.isMaster() && _disableMasterRendering) && !wrapper.isGuiWindow()) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
@@ -534,12 +576,12 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             fontResolution().x / 2 - 50,
             fontResolution().y / 3
         );
-        
+
         RenderFont(*_fontBig, penPosition, "%i", _frameNumber);
     }
-    
+
     _frameNumber++;
-    
+
     for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
         if (ssr->isEnabled() && ssr->isReady()) {
             ssr->render();
@@ -599,6 +641,10 @@ RaycasterManager& RenderEngine::raycasterManager() {
     return *_raycasterManager;
 }
 
+DeferredcasterManager& RenderEngine::deferredcasterManager() {
+    return *_deferredcasterManager;
+}
+
 void RenderEngine::setScene(Scene* scene) {
     _scene = scene;
     if (_renderer) {
@@ -640,11 +686,11 @@ void RenderEngine::startFading(int direction, float fadeDuration) {
 }
 
 /**
- * Build a program object for rendering with the used renderer
- */
+* Build a program object for rendering with the used renderer
+*/
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
-                                                     std::string name, std::string vsPath,
-                                        std::string fsPath, const ghoul::Dictionary& data)
+    std::string name, std::string vsPath,
+    std::string fsPath, const ghoul::Dictionary& data)
 {
 
     ghoul::Dictionary dict = data;
@@ -671,12 +717,12 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 /**
- * Build a program object for rendering with the used renderer
- */
+* Build a program object for rendering with the used renderer
+*/
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
-                                                     std::string name, std::string vsPath,
-                                                   std::string fsPath, std::string csPath,
-                                                            const ghoul::Dictionary& data)
+    std::string name, std::string vsPath,
+    std::string fsPath, std::string csPath,
+    const ghoul::Dictionary& data)
 {
     ghoul::Dictionary dict = data;
     dict.setValue("rendererData", _rendererData);
@@ -702,7 +748,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 void RenderEngine::removeRenderProgram(
-                             const std::unique_ptr<ghoul::opengl::ProgramObject>& program)
+    const std::unique_ptr<ghoul::opengl::ProgramObject>& program)
 {
     if (!program) {
         return;
@@ -720,10 +766,10 @@ void RenderEngine::removeRenderProgram(
 }
 
 /**
- * Set renderer data
- * Called from the renderer, whenever it needs to update
- * the dictionary of all rendering programs.
- */
+* Set renderer data
+* Called from the renderer, whenever it needs to update
+* the dictionary of all rendering programs.
+*/
 void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
     _rendererData = data;
     for (ghoul::opengl::ProgramObject* program : _programs) {
@@ -763,8 +809,8 @@ void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
 }
 
 /**
- * Set renderer
- */
+* Set renderer
+*/
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     if (_renderer) {
         _renderer->deinitialize();
@@ -773,13 +819,14 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     _renderer = std::move(renderer);
     _renderer->setResolution(renderingResolution());
     _renderer->setNAaSamples(_nAaSamples);
+    _renderer->setHDRExposure(_hdrExposure);
     _renderer->initialize();
     _renderer->setCamera(_camera);
     _renderer->setScene(_scene);
 }
 
 scripting::LuaLibrary RenderEngine::luaLibrary() {
-    return {
+    return{
         "",
         {
             {
@@ -800,7 +847,7 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "number",
                 ""
             },
-            //also temporary @JK
+        //also temporary @JK
             {
                 "fadeOut",
                 &luascriptfunctions::fadeOut,
@@ -838,7 +885,7 @@ void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRend
 }
 
 void RenderEngine::unregisterScreenSpaceRenderable(
-                                                 std::shared_ptr<ScreenSpaceRenderable> s)
+    std::shared_ptr<ScreenSpaceRenderable> s)
 {
     auto it = std::find(
         _screenSpaceRenderables.begin(),
@@ -852,7 +899,7 @@ void RenderEngine::unregisterScreenSpaceRenderable(
     }
 }
 
-void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
+void RenderEngine::unregisterScreenSpaceRenderable(std::string name) {
     std::shared_ptr<ScreenSpaceRenderable> s = screenSpaceRenderable(name);
     if (s) {
         unregisterScreenSpaceRenderable(s);
@@ -860,7 +907,7 @@ void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
 }
 
 std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(
-                                                                         std::string name)
+    std::string name)
 {
     for (auto s : _screenSpaceRenderables) {
         if (s->name() == name) {
@@ -882,7 +929,7 @@ std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const
 }
 
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(
-                                                                  const std::string& impl)
+    const std::string& impl)
 {
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
         { "ABuffer", RendererImplementation::ABuffer },
@@ -947,91 +994,96 @@ void RenderEngine::renderInformation() {
 
             FrametimeType frametimeType = FrametimeType(_frametimeType.value());
             switch (frametimeType) {
-                case FrametimeType::DtTimeAvg:
-                    RenderFontCr(
-                        *_fontInfo,
-                        penPosition,
-                        "Avg. Frametime: %.5f",
-                        OsEng.windowWrapper().averageDeltaTime()
-                    );
-                    break;
-                case FrametimeType::FPS:
-                    RenderFontCr(
-                        *_fontInfo,
-                        penPosition,
-                        "FPS: %3.2f",
-                        1.0 / OsEng.windowWrapper().deltaTime()
-                    );
-                    break;
-                case FrametimeType::FPSAvg:
-                    RenderFontCr(
-                        *_fontInfo,
-                        penPosition,
-                        "Avg. FPS: %3.2f",
-                        1.0 / OsEng.windowWrapper().averageDeltaTime()
-                    );
-                    break;
-                default:
-                    RenderFontCr(
-                        *_fontInfo,
-                        penPosition,
-                        "Avg. Frametime: %.5f",
-                        OsEng.windowWrapper().averageDeltaTime()
-                    );
-                    break;
+            case FrametimeType::DtTimeAvg:
+                RenderFontCr(
+                    *_fontInfo,
+                    penPosition,
+                    "Avg. Frametime: %.5f",
+                    OsEng.windowWrapper().averageDeltaTime()
+                );
+                break;
+            case FrametimeType::FPS:
+                RenderFontCr(
+                    *_fontInfo,
+                    penPosition,
+                    "FPS: %3.2f",
+                    1.0 / OsEng.windowWrapper().deltaTime()
+                );
+                break;
+            case FrametimeType::FPSAvg:
+                RenderFontCr(
+                    *_fontInfo,
+                    penPosition,
+                    "Avg. FPS: %3.2f",
+                    1.0 / OsEng.windowWrapper().averageDeltaTime()
+                );
+                break;
+            default:
+                RenderFontCr(
+                    *_fontInfo,
+                    penPosition,
+                    "Avg. Frametime: %.5f",
+                    OsEng.windowWrapper().averageDeltaTime()
+                );
+                break;
             }
 
-        ParallelConnection::Status status = OsEng.parallelConnection().status();
-        size_t nConnections = OsEng.parallelConnection().nConnections();
-        const std::string& hostName = OsEng.parallelConnection().hostName();
+            ParallelConnection::Status status = OsEng.parallelConnection().status();
+            size_t nConnections = OsEng.parallelConnection().nConnections();
+            const std::string& hostName = OsEng.parallelConnection().hostName();
 
-        std::string connectionInfo = "";
-        int nClients = static_cast<int>(nConnections);
-        if (status == ParallelConnection::Status::Host) {
-            nClients--;
-            if (nClients == 1) {
-                connectionInfo = "Hosting session with 1 client";
-            } else {
-                connectionInfo =
-                    "Hosting session with " + std::to_string(nClients) + " clients";
+            std::string connectionInfo = "";
+            int nClients = static_cast<int>(nConnections);
+            if (status == ParallelConnection::Status::Host) {
+                nClients--;
+                if (nClients == 1) {
+                    connectionInfo = "Hosting session with 1 client";
+                }
+                else {
+                    connectionInfo =
+                        "Hosting session with " + std::to_string(nClients) + " clients";
+                }
             }
-        } else if (status == ParallelConnection::Status::ClientWithHost) {
-            nClients--;
-            connectionInfo = "Session hosted by '" + hostName + "'";
-        } else if (status == ParallelConnection::Status::ClientWithoutHost) {
-            connectionInfo = "Host is disconnected";
-        }
-
-        if (status == ParallelConnection::Status::ClientWithHost ||
-            status == ParallelConnection::Status::ClientWithoutHost) {
-            connectionInfo += "\n";
-            if (nClients > 2) {
-                std::string c = std::to_string(nClients - 1);
-                connectionInfo += "You and " + c + " more clients are tuned in";
-            } else if (nClients == 2) {
-                std::string c = std::to_string(nClients - 1);
-                connectionInfo += "You and " + c + " more client are tuned in";
-            } else if (nClients == 1) {
-                connectionInfo += "You are the only client";
+            else if (status == ParallelConnection::Status::ClientWithHost) {
+                nClients--;
+                connectionInfo = "Session hosted by '" + hostName + "'";
             }
-        }
+            else if (status == ParallelConnection::Status::ClientWithoutHost) {
+                connectionInfo = "Host is disconnected";
+            }
 
-        if (connectionInfo != "") {
-            RenderFontCr(
-                *_fontInfo,
-                penPosition,
-                connectionInfo.c_str()
-            );
-        }
+            if (status == ParallelConnection::Status::ClientWithHost ||
+                status == ParallelConnection::Status::ClientWithoutHost) {
+                connectionInfo += "\n";
+                if (nClients > 2) {
+                    std::string c = std::to_string(nClients - 1);
+                    connectionInfo += "You and " + c + " more clients are tuned in";
+                }
+                else if (nClients == 2) {
+                    std::string c = std::to_string(nClients - 1);
+                    connectionInfo += "You and " + c + " more client are tuned in";
+                }
+                else if (nClients == 1) {
+                    connectionInfo += "You are the only client";
+                }
+            }
+
+            if (connectionInfo != "") {
+                RenderFontCr(
+                    *_fontInfo,
+                    penPosition,
+                    connectionInfo.c_str()
+                );
+            }
 
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-        bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
-        double currentTime = OsEng.timeManager().time().j2000Seconds();
+            bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+            double currentTime = OsEng.timeManager().time().j2000Seconds();
 
-        if (MissionManager::ref().hasCurrentMission()) {
+            if (MissionManager::ref().hasCurrentMission()) {
 
-            const Mission& mission = MissionManager::ref().currentMission();
+                const Mission& mission = MissionManager::ref().currentMission();
 
                 if (mission.phases().size() > 0) {
                     static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
@@ -1086,7 +1138,7 @@ void RenderEngine::renderInformation() {
                                 phase->name().c_str(),
                                 progress.c_str(),
                                 t * 100
-                                );
+                            );
                         }
                         else {
                             RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, phase->name().c_str());
@@ -1127,9 +1179,9 @@ void RenderEngine::renderInformation() {
                         float distToSurf = glm::length(nhPos.vec3()) - radius;
 
                         RenderFont(*_fontInfo,
-                                   penPosition,
-                                   "Distance to Pluto: % .1f (KM)",
-                                   distToSurf
+                            penPosition,
+                            "Distance to Pluto: % .1f (KM)",
+                            distToSurf
                         );
                         penPosition.y -= _fontInfo->height();
                     }
@@ -1145,13 +1197,13 @@ void RenderEngine::renderInformation() {
                 std::string str = SpiceManager::ref().dateFromEphemerisTime(
                     ImageSequencer::ref().getNextCaptureTime(),
                     "YYYY MON DD HR:MN:SC"
-                    );
+                );
 
                 glm::vec4 active(0.6, 1, 0.00, 1);
                 glm::vec4 brigther_active(0.9, 1, 0.75, 1);
 
                 if (remaining > 0) {
-                
+
                     std::string progress = progressToStr(25, t);
                     brigther_active *= (1 - t);
 
@@ -1159,21 +1211,21 @@ void RenderEngine::renderInformation() {
                         penPosition,
                         active * t + brigther_active,
                         "Next instrument activity:"
-                        );
+                    );
 
                     RenderFontCr(*_fontInfo,
                         penPosition,
                         active * t + brigther_active,
                         "%.0f s %s %.1f %%",
                         remaining, progress.c_str(), t * 100
-                        );
+                    );
 
                     RenderFontCr(*_fontInfo,
                         penPosition,
                         active,
                         "Data acquisition time: %s",
                         str.c_str()
-                        );
+                    );
                 }
                 std::pair<double, std::string> nextTarget = ImageSequencer::ref().getNextTarget();
                 std::pair<double, std::string> currentTarget = ImageSequencer::ref().getCurrentTarget();
@@ -1204,10 +1256,10 @@ void RenderEngine::renderInformation() {
                         targetColor,
                         "Data acquisition adjacency: [%s:%s:%s]",
                         hh.c_str(), mm.c_str(), ss.c_str()
-                        );
+                    );
 
-    #if 0
-    // Why is it (2) in the original? ---abock
+#if 0
+                    // Why is it (2) in the original? ---abock
                     //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(0);
                     //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
                     std::string space;
@@ -1218,19 +1270,16 @@ void RenderEngine::renderInformation() {
                         t = (p > isize / 2) ? 1 - t : t;
                         t += 0.3;
                         color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
-
                         RenderFont(*_fontInfo,
                             penPosition,
                             color,
                             "%s%s",
                             space.c_str(), incidentTargets.second[p].c_str()
-                            );
-
-
+                        );
                         for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
                             space += " ";
                     }
-    #endif
+#endif
                     penPosition.y -= _fontInfo->height();
 
                     std::map<std::string, bool> activeMap = ImageSequencer::ref().getActiveInstruments();
@@ -1241,21 +1290,21 @@ void RenderEngine::renderInformation() {
                         penPosition,
                         active,
                         "Active Instruments:"
-                        );
+                    );
 
-                    for (auto t : activeMap) {
-                        if (t.second == false) {
+                    for (auto ac : activeMap) {
+                        if (ac.second == false) {
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "| |"
-                                );
+                            );
                             RenderFontCr(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "    %5s",
-                                t.first.c_str()
-                                );
+                                ac.first.c_str()
+                            );
 
                         }
                         else {
@@ -1263,25 +1312,25 @@ void RenderEngine::renderInformation() {
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "|"
-                                );
-                            if (t.first == "NH_LORRI") {
+                            );
+                            if (ac.first == "NH_LORRI") {
                                 RenderFont(*_fontInfo,
                                     penPosition,
                                     firing,
                                     " + "
-                                    );
+                                );
                             }
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "  |"
-                                );
+                            );
                             RenderFontCr(*_fontInfo,
                                 penPosition,
                                 active,
                                 "    %5s",
-                                t.first.c_str()
-                                );
+                                ac.first.c_str()
+                            );
                         }
                     }
                 }
@@ -1306,8 +1355,8 @@ void RenderEngine::renderScreenLog() {
     auto entries = _log->entries();
     auto lastEntries =
         entries.size() > max ?
-            std::make_pair(entries.rbegin(), entries.rbegin() + max) :
-            std::make_pair(entries.rbegin(), entries.rend());
+        std::make_pair(entries.rbegin(), entries.rbegin() + max) :
+        std::make_pair(entries.rbegin(), entries.rend());
 
 
     size_t nr = 1;
@@ -1352,21 +1401,21 @@ void RenderEngine::renderScreenLog() {
 
         glm::vec4 color(glm::uninitialize);
         switch (e->level) {
-            case ghoul::logging::LogLevel::Debug:
-                color = Green;
-                break;
-            case ghoul::logging::LogLevel::Warning:
-                color = Yellow;
-                break;
-            case ghoul::logging::LogLevel::Error:
-                color = Red;
-                break;
-            case ghoul::logging::LogLevel::Fatal:
-                color = Blue;
-                break;
-            default:
-                color = White;
-                break;
+        case ghoul::logging::LogLevel::Debug:
+            color = Green;
+            break;
+        case ghoul::logging::LogLevel::Warning:
+            color = Yellow;
+            break;
+        case ghoul::logging::LogLevel::Error:
+            color = Red;
+            break;
+        case ghoul::logging::LogLevel::Fatal:
+            color = Blue;
+            break;
+        default:
+            color = White;
+            break;
         }
 
         //                    const float font_with_light = 5;
@@ -1386,10 +1435,11 @@ void RenderEngine::renderScreenLog() {
     }
 }
 
-std::vector<Syncable*> RenderEngine::getSyncables(){
+std::vector<Syncable*> RenderEngine::getSyncables() {
     if (_camera) {
         return _camera->getSyncables();
-    } else {
+    }
+    else {
         return std::vector<Syncable*>();
     }
 }
@@ -1399,10 +1449,10 @@ void RenderEngine::sortScreenspaceRenderables() {
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
         [](const std::shared_ptr<ScreenSpaceRenderable>& j,
-           const std::shared_ptr<ScreenSpaceRenderable>& i)
-        {
-            return i->depth() > j->depth();
-        }
+            const std::shared_ptr<ScreenSpaceRenderable>& i)
+    {
+        return i->depth() > j->depth();
+    }
     );
 }
 

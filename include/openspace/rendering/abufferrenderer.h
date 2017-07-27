@@ -69,7 +69,12 @@ public:
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
-    void setNAaSamples(int nAaSamples) override;
+    void setNAaSamples(const int nAaSamples) override;
+    void setHDRExposure(const float hdrExposure) override;
+    void setHDRBackground(const float hdrBackground) override;
+    void setGamma(const float gamma) override;
+
+    float hdrBackground() const override;
 
     void preRaycast(const RaycasterTask& raycasterTask);
     void postRaycast(const RaycasterTask& raycasterTask);
@@ -130,6 +135,9 @@ private:
     GLuint _vertexPositionBuffer;
     int _nAaSamples;
 
+    float _hdrExposure;
+    float _hdrBackground;
+    float _gamma;
     float _blackoutFactor;
 
     ghoul::Dictionary _rendererData;

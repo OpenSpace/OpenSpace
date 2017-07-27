@@ -34,7 +34,7 @@ return {
             Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 6.371E6,
+                Radius = 6.3781365E6,
                 Segments = 100
             },
             Textures = {
@@ -42,12 +42,7 @@ return {
                 Color = "textures/earth_bluemarble.jpg",
                 Night = "textures/earth_night.jpg",
                 Height = "textures/earth_bluemarble_height.jpg"
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
+            },            
         },
         Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
@@ -62,6 +57,67 @@ return {
             },
         },
         GuiName = "/Solar/Planets/Earth"
+    },
+    -- Earth Atmosphere
+    {
+         Name = "EarthAtmosphere",
+         Parent = "Earth",
+         Renderable = {
+              Type = "RenderableAtmosphere",
+              Atmosphere = {
+                Type = "RenderablePlanet",
+                -- Atmosphere radius in Km
+                AtmosphereRadius = 6447.0,
+                --PlanetRadius    = 6378.137,
+                PlanetRadius    = 6356.752,
+                --PlanetRadius    = 6360.0,
+                PlanetAverageGroundReflectance = 0.1,
+                Rayleigh = {
+                    Coefficients = {
+                        -- Wavelengths are given in 10^-9m
+                        Wavelengths = {680, 550, 440},
+                        -- Reflection coefficients are given in km^-1
+                        Scattering = {5.8E-3, 13.5E-3, 33.1E-3},
+                        -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
+                    },
+                    -- Thichkness of atmosphere if its density were uniform, in Km
+                    H_R = 8.0,
+                },
+                --[[
+                Ozone = {
+                     Coefficients = {
+                        -- Extinction coefficients 
+                        Extinction = {3.426E-5, 8.298E-5, 0.356E-5}
+                     },
+                     H_O = 8.0,
+                },
+                ]]--
+                -- Default
+                Mie = {
+                    Coefficients = {
+                        -- Reflection coefficients are given in km^-1
+                        Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
+                        --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
+                        -- Extinction coefficients are a fraction of the Mie coefficients
+                        Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
+                    },
+                    -- Height scale (atmosphere thickness for constant density) in Km
+                    H_M = 1.2,
+                    -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
+                    G = 0.85
+                },
+                Image = {
+                    ToneMapping = jToneMapping,
+                    Exposure = 0.4,
+                    Gamma = 1.85,                                                                      
+                },
+                Debug = {
+                    -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
+                    PreCalculatedTextureScale = 1.0,
+                    SaveCalculatedTextures = false, 
+                },                   
+              },
+         },
     },
     -- EarthTrail module
     {   

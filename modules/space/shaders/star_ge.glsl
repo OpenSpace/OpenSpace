@@ -30,11 +30,14 @@ layout(points) in;
 in vec4 psc_position[];
 in vec3 vs_brightness[];
 in vec3 vs_velocity[];
+in vec4 vs_gPosition[];
 in float vs_speed[];
 in vec4 cam_position[];
 
 layout(triangle_strip, max_vertices = 4) out;
+
 out vec4 vs_position;
+out vec4 ge_gPosition;               
 out vec3 ge_brightness;
 out vec3 ge_velocity;
 out float ge_speed;
@@ -92,9 +95,13 @@ void main() {
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
         gl_Position = projPos[i];
-        texCoord = corners[i];
+        texCoord    = corners[i];
+
+        // G-Buffer
+        ge_gPosition  = vs_gPosition[0];
         billboardSize = sizeInPixels;
-      EmitVertex();
+        EmitVertex();
     }
+
     EndPrimitive();
 }

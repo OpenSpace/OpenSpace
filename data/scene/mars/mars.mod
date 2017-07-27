@@ -22,7 +22,7 @@ return {
             Body = "MARS BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 6.390E6,
+                Radius = 3.390E6,
                 Segments = 100
             },
             Textures = {

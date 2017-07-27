@@ -395,7 +395,7 @@ vec4 calculateOverlay(
 
     return color;
 }
-
+// Get the Reflectance from Here (JCC)
 vec4 calculateWater(
     const vec4 currentColor,
     const vec2 uv,
@@ -403,7 +403,8 @@ vec4 calculateWater(
     const Layer WaterMasks[NUMLAYERS_WATERMASK],
     const vec3 ellipsoidNormalCameraSpace,
     const vec3 lightDirectionCameraSpace,
-    const vec3 positionCameraSpace) {
+    const vec3 positionCameraSpace,
+    out float reflectance) {
 
     vec4 waterColor = vec4(0,0,0,0);
 
@@ -435,8 +436,10 @@ vec4 calculateWater(
 
     vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
 
+    reflectance = waterColor.a;
     //return blendNormal(currentColor, waterColor);
-    return currentColor + vec4(specularTotal, 1);
+    //return currentColor + vec4(specularTotal, 1);
+    return currentColor;
 }
 
 #endif // TEXTURETILEMAPPING_HGLSL
