@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <algorithm>
 #include "include/webrenderhandler.h"
 
 namespace openspace {
@@ -60,7 +61,9 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::
 }
 
 bool WebRenderHandler::hasContent(int x, int y) {
-    return _alphaMask[x  + _width * y];
+    int index = x + (_width * y);
+    index = std::clamp(index, (int) 0, (int) _alphaMask.size() - 1);
+    return _alphaMask[index];
 }
 
 }
