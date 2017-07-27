@@ -217,90 +217,105 @@ void AtmosphereDeferredcaster::deinitialize()
 void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const DeferredcastData& deferredData,
                                           ghoul::opengl::ProgramObject& program) 
 {    
-    program.setUniform("Rg", _atmospherePlanetRadius);
-    program.setUniform("Rt", _atmosphereRadius);
-    program.setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
-    program.setUniform("HR", _rayleighHeightScale);
-    program.setUniform("betaRayleigh", _rayleighScatteringCoeff);
-    program.setUniform("HM", _mieHeightScale);
-    program.setUniform("betaMieScattering", _mieScatteringCoeff);
-    program.setUniform("betaMieExtinction", _mieExtinctionCoeff);
-    program.setUniform("mieG", _miePhaseConstant);
-    program.setUniform("sunRadiance", _sunRadianceIntensity);
-    program.setUniform("ozoneLayerEnabled", (bool)_ozoneEnabled);
-    program.setUniform("HO", _ozoneHeightScale);
-    program.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
+    // Atmosphere Frustum Culling
+    glm::dvec3 tPlanetPosWorld = glm::dvec3(_modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
 
-    program.setUniform("exposure", _exposureConstant);
-    program.setUniform("backgroundExposure", _exposureBackgroundConstant);
-    program.setUniform("gamma", _gammaConstant);
-    program.setUniform("RenderableClass", static_cast<int>(_renderableClass));
-    
-    program.setUniform("TRANSMITTANCE_W", (int)_transmittance_table_width);
-    program.setUniform("TRANSMITTANCE_H", (int)_transmittance_table_height);
-    program.setUniform("SKY_W", (int)_irradiance_table_width);
-    program.setUniform("SKY_H", (int)_irradiance_table_height);
-    program.setUniform("OTHER_TEXTURES_W", (int)_delta_e_table_width);
-    program.setUniform("OTHER_TEXTURES_H", (int)_delta_e_table_height);
-    program.setUniform("SAMPLES_R", (int)_r_samples);
-    program.setUniform("SAMPLES_MU", (int)_mu_samples);
-    program.setUniform("SAMPLES_MU_S", (int)_mu_s_samples);
-    program.setUniform("SAMPLES_NU", (int)_nu_samples);
-
-    program.setUniform("ModelTransformMatrix", _modelTransform);
-
-    // Object Space
-    glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
-    program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
-        
-    // The following scale comes from PSC transformations.
-    float fScaleFactor = renderData.camera.scaling().x * pow(10.0, renderData.camera.scaling().y);
-    glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(fScaleFactor));
-    program.setUniform("dInverseScaleTransformMatrix", glm::inverse(dfScaleCamTransf));
-   
-    // World to Eye Space in OS
-    program.setUniform("dInverseCamRotTransform", glm::mat4_cast((glm::dquat)renderData.camera.rotationQuaternion()));
-    
-    program.setUniform("dInverseSgctEyeToWorldTranform", glm::inverse(renderData.camera.combinedViewMatrix()));
-
-    // Eye Space in OS to Eye Space in SGCT
-    glm::dmat4 dOsEye2SGCTEye = glm::dmat4(renderData.camera.viewMatrix());
-    glm::dmat4 dSgctEye2OSEye = glm::inverse(dOsEye2SGCTEye);    
-    program.setUniform("dSgctEyeToOSEyeTranform", dSgctEye2OSEye);
-
-    // Eye Space in SGCT to Projection (Clip) Space in SGCT
-    glm::dmat4 dSgctEye2Clip = glm::dmat4(renderData.camera.projectionMatrix());
-    glm::dmat4 dInverseProjection = glm::inverse(dSgctEye2Clip);
-
-    program.setUniform("dInverseSgctProjectionMatrix", dInverseProjection);
-    
-    program.setUniform("dObjpos", glm::dvec4(renderData.position.dvec3(), 1.0));
-    program.setUniform("dCampos", renderData.camera.positionVec3());
-    
-    double lt;
-    glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
-    glm::dvec4 sunPosObj = glm::dvec4(0.0);
-
-    // Sun following camera position
-    if (_sunFollowingCameraEnabled) {        
-        sunPosObj = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
+    if (glm::distance(tPlanetPosWorld, renderData.camera.positionVec3()) > DISTANCE_CULLING) {
+        program.setUniform("cullAtmosphere", 1);
     }
     else {
-        if (_renderableClass == RenderablePlanet) {
-            sunPosObj = inverseModelMatrix *
-                glm::dvec4(sunPosWorld - renderData.position.dvec3(), 1.0);
+        glm::dmat4 MV = glm::dmat4(renderData.camera.sgctInternal.projectionMatrix()) * renderData.camera.combinedViewMatrix();
+        if (!isAtmosphereInFrustum(glm::value_ptr(MV), tPlanetPosWorld, (_atmosphereRadius + 2.0)*1000.0)) {
+            program.setUniform("cullAtmosphere", 1);
         }
-        else if (_renderableClass == RenderableGlobe) {
-            sunPosObj = inverseModelMatrix *
-                glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
-        }
-    }          
-    
-    // Sun Position in Object Space
-    program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
-    
-    program.setUniform("ellipsoidRadii", _ellipsoidRadii);
+        else {
+            program.setUniform("cullAtmosphere", 0);
+            program.setUniform("Rg", _atmospherePlanetRadius);
+            program.setUniform("Rt", _atmosphereRadius);
+            program.setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
+            program.setUniform("HR", _rayleighHeightScale);
+            program.setUniform("betaRayleigh", _rayleighScatteringCoeff);
+            program.setUniform("HM", _mieHeightScale);
+            program.setUniform("betaMieScattering", _mieScatteringCoeff);
+            program.setUniform("betaMieExtinction", _mieExtinctionCoeff);
+            program.setUniform("mieG", _miePhaseConstant);
+            program.setUniform("sunRadiance", _sunRadianceIntensity);
+            program.setUniform("ozoneLayerEnabled", (bool)_ozoneEnabled);
+            program.setUniform("HO", _ozoneHeightScale);
+            program.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 
+            program.setUniform("exposure", _exposureConstant);
+            program.setUniform("backgroundExposure", _exposureBackgroundConstant);
+            program.setUniform("gamma", _gammaConstant);
+            program.setUniform("RenderableClass", static_cast<int>(_renderableClass));
+
+            program.setUniform("TRANSMITTANCE_W", (int)_transmittance_table_width);
+            program.setUniform("TRANSMITTANCE_H", (int)_transmittance_table_height);
+            program.setUniform("SKY_W", (int)_irradiance_table_width);
+            program.setUniform("SKY_H", (int)_irradiance_table_height);
+            program.setUniform("OTHER_TEXTURES_W", (int)_delta_e_table_width);
+            program.setUniform("OTHER_TEXTURES_H", (int)_delta_e_table_height);
+            program.setUniform("SAMPLES_R", (int)_r_samples);
+            program.setUniform("SAMPLES_MU", (int)_mu_samples);
+            program.setUniform("SAMPLES_MU_S", (int)_mu_s_samples);
+            program.setUniform("SAMPLES_NU", (int)_nu_samples);
+
+            program.setUniform("ModelTransformMatrix", _modelTransform);
+
+            // Object Space
+            glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
+            program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
+
+            // The following scale comes from PSC transformations.
+            float fScaleFactor = renderData.camera.scaling().x * pow(10.0, renderData.camera.scaling().y);
+            glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(fScaleFactor));
+            program.setUniform("dInverseScaleTransformMatrix", glm::inverse(dfScaleCamTransf));
+
+            // World to Eye Space in OS
+            program.setUniform("dInverseCamRotTransform", glm::mat4_cast((glm::dquat)renderData.camera.rotationQuaternion()));
+
+            program.setUniform("dInverseSgctEyeToWorldTranform", glm::inverse(renderData.camera.combinedViewMatrix()));
+
+            // Eye Space in OS to Eye Space in SGCT
+            glm::dmat4 dOsEye2SGCTEye = glm::dmat4(renderData.camera.viewMatrix());
+            glm::dmat4 dSgctEye2OSEye = glm::inverse(dOsEye2SGCTEye);
+            program.setUniform("dSgctEyeToOSEyeTranform", dSgctEye2OSEye);
+
+            // Eye Space in SGCT to Projection (Clip) Space in SGCT
+            glm::dmat4 dSgctEye2Clip = glm::dmat4(renderData.camera.projectionMatrix());
+            glm::dmat4 dInverseProjection = glm::inverse(dSgctEye2Clip);
+
+            program.setUniform("dInverseSgctProjectionMatrix", dInverseProjection);
+
+            program.setUniform("dObjpos", glm::dvec4(renderData.position.dvec3(), 1.0));
+            program.setUniform("dCampos", renderData.camera.positionVec3());
+
+            double lt;
+            glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
+            glm::dvec4 sunPosObj = glm::dvec4(0.0);
+
+            // Sun following camera position
+            if (_sunFollowingCameraEnabled) {
+                sunPosObj = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
+            }
+            else {
+                if (_renderableClass == RenderablePlanet) {
+                    sunPosObj = inverseModelMatrix *
+                        glm::dvec4(sunPosWorld - renderData.position.dvec3(), 1.0);
+                }
+                else if (_renderableClass == RenderableGlobe) {
+                    sunPosObj = inverseModelMatrix *
+                        glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
+                }
+            }
+
+            // Sun Position in Object Space
+            program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
+
+            program.setUniform("ellipsoidRadii", _ellipsoidRadii);
+            
+        }
+    }             
     _transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
     program.setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
@@ -311,16 +326,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
 
     _inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
-    program.setUniform("inscatterTexture", _inScatteringTableTextureUnit); 
-
-    // Atmosphere Frustum Culling
-    glm::dmat4 MV = glm::dmat4(renderData.camera.sgctInternal.projectionMatrix()) * renderData.camera.combinedViewMatrix();
-    glm::dvec3 tPlanetPosWorld = glm::dvec3(_modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
-
-    if (isAtmosphereInFrustum(glm::value_ptr(MV), tPlanetPosWorld, (_atmosphereRadius + 2.0)*1000.0))
-        std::cout << "========= Inside Frustum ========" << std::endl;
-    else
-        std::cout << "--------- Outside Frustum -------" << std::endl;
+    program.setUniform("inscatterTexture", _inScatteringTableTextureUnit);
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData & renderData, const DeferredcastData& deferredData,
@@ -1521,25 +1527,26 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(const GLenum color_buffer_at
 bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double * MVMatrix, const glm::dvec3 position, const double radius) const {
 
     // Frustum Planes
-    glm::dvec3 col1(MVMatrix[0], MVMatrix[1], MVMatrix[2]);
-    glm::dvec3 col2(MVMatrix[4], MVMatrix[5], MVMatrix[6]);
-    glm::dvec3 col3(MVMatrix[8], MVMatrix[9], MVMatrix[10]);
-    glm::dvec3 col4(MVMatrix[12], MVMatrix[13], MVMatrix[14]);
+    glm::dvec3 col1(MVMatrix[0], MVMatrix[4], MVMatrix[8]);
+    glm::dvec3 col2(MVMatrix[1], MVMatrix[5], MVMatrix[9]);
+    glm::dvec3 col3(MVMatrix[2], MVMatrix[6], MVMatrix[10]);
+    glm::dvec3 col4(MVMatrix[3], MVMatrix[7], MVMatrix[11]);
 
-    glm::dvec3 leftNormal   = col4 + col1;
-    glm::dvec3 rightNormal  = col4 - col1;
+    glm::dvec3 leftNormal = col4 + col1;
+    glm::dvec3 rightNormal = col4 - col1;
     glm::dvec3 bottomNormal = col4 + col2;
-    glm::dvec3 topNormal    = col4 - col2;
-    glm::dvec3 nearNormal   = col3 + col4; // maybe only col3?
-    glm::dvec3 farNormal    = col4 - col3;
+    glm::dvec3 topNormal = col4 - col2;
+    glm::dvec3 nearNormal = col3 + col4;
+    glm::dvec3 farNormal = col4 - col3;
+
 
     // Plane Distances
-    double leftDistance   = MVMatrix[15] + MVMatrix[3];
-    double rightDistance  = MVMatrix[15] - MVMatrix[3];
-    double bottomDistance = MVMatrix[15] + MVMatrix[7];
-    double topDistance    = MVMatrix[15] - MVMatrix[7];
-    double nearDistance   = MVMatrix[15] + MVMatrix[11];
-    double farDistance    = MVMatrix[15] - MVMatrix[11];
+    double leftDistance   = MVMatrix[15] + MVMatrix[12];
+    double rightDistance  = MVMatrix[15] - MVMatrix[12];
+    double bottomDistance = MVMatrix[15] + MVMatrix[13];
+    double topDistance    = MVMatrix[15] - MVMatrix[13];
+    double nearDistance   = MVMatrix[15] + MVMatrix[14];
+    double farDistance    = MVMatrix[15] - MVMatrix[14];
     
     // Normalize Planes
     double invMag = 1.0 / glm::length(leftNormal);
@@ -1565,7 +1572,7 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double * MVMatrix, co
     invMag = 1.0 / glm::length(farNormal);
     farNormal   *= invMag;
     farDistance *= invMag;
- 
+
     if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
         return false;
     } else if ((glm::dot(rightNormal, position) + rightDistance) < -radius) {
@@ -1576,9 +1583,9 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double * MVMatrix, co
         return false;
     } else if ((glm::dot(nearNormal, position) + nearDistance) < -radius) {
         return false;
-    } else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
+    } /*else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
         return false;
-    }
+    }*/
 
     return true;
 }

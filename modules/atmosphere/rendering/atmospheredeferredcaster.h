@@ -120,6 +120,9 @@ private:
     bool isAtmosphereInFrustum(const double * MVMatrix, const glm::dvec3 position, const double radius) const;
 
 private:
+
+    const double DISTANCE_CULLING = 1e10;
+    
     std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceSupTermsProgramObject;
