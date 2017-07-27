@@ -33,7 +33,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NIX",
+                Target = "NIX",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -63,7 +63,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NIX",
+                Target = "NIX",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},

@@ -6,7 +6,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PLUTO BARYCENTER",
+                Target = "PLUTO BARYCENTER",
                 Observer = "SUN",
                 Kernels = {
                     "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
@@ -41,7 +41,7 @@ return {
         Transformation = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PLUTO",
+                Target = "PLUTO",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/plu055.bsp", 
             },
@@ -77,7 +77,7 @@ return {
         Transformation = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHARON",
+                Target = "CHARON",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/plu055.bsp", 
             },
@@ -96,7 +96,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHARON",
+                Target = "CHARON",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00,0.62,1.00},
@@ -112,7 +112,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PLUTO BARYCENTER",
+                Target = "PLUTO BARYCENTER",
                 Observer = "SUN",
             },
             Color = {0.58, 0.61, 1.00},
@@ -128,7 +128,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PLUTO",
+                Target = "PLUTO",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.58, 0.61, 1.00},

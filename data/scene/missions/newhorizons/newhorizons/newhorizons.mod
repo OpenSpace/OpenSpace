@@ -74,7 +74,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NEW HORIZONS",
+                Target = "NEW HORIZONS",
                 Observer = "SUN",
                 Kernels = NewHorizonsKernels
             },
@@ -168,7 +168,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NEW HORIZONS",
+                Target = "NEW HORIZONS",
                 Observer = "PLUTO BARYCENTER"
             },
             Color = { 1.0, 0.8, 0.4 },

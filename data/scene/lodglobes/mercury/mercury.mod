@@ -6,7 +6,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MERCURY",
+                Target = "MERCURY",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -63,7 +63,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MERCURY",
+                Target = "MERCURY",
                 Observer = "SUN",
             },
             Color = {0.6, 0.5, 0.5 },

@@ -33,7 +33,6 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    const char* KeyBody = "Body";
     const char* KeyKernels = "Kernels";
 
     const char* DefaultReferenceFrame = "GALACTIC";
@@ -77,7 +76,7 @@ documentation::Documentation SpiceTranslation::Documentation() {
                 Optional::No
             },
             {
-                KeyBody, // @TODO Rename to TargetInfo.identifier
+                TargetInfo.identifier,
                 new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
                 Optional::No,
                 "This is the SPICE NAIF name for the body whose translation is to be "
@@ -125,7 +124,7 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
         "SpiceTranslation"
     );
 
-    _target = dictionary.value<std::string>(KeyBody);
+    _target = dictionary.value<std::string>(TargetInfo.identifier);
     _observer = dictionary.value<std::string>(ObserverInfo.identifier);
 
     if (dictionary.hasKey(FrameInfo.identifier)) {

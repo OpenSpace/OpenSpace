@@ -182,7 +182,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = "SUN",
                 Kernels = OsirisRexKernels
             },
@@ -345,7 +345,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Frame = "IAU_EARTH",
                 Observer = "EARTH",
             },
@@ -364,7 +364,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = "SUN",
             },
             Color = { 0.2, 0.9, 0.2 },
@@ -382,7 +382,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = BENNU_BODY,
             },
             Color = { 0.9, 0.2, 0.9 },

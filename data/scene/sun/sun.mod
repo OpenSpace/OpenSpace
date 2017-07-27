@@ -33,7 +33,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "SUN",
+                Target = "SUN",
                 Observer = "SSB",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -59,7 +59,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "SUN",
+                Target = "SUN",
                 Observer = "SSB",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }

@@ -6,7 +6,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHURYUMOV-GERASIMENKO",
+                Target = "CHURYUMOV-GERASIMENKO",
                 Observer = "SUN",
             },
         },
@@ -90,7 +90,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHURYUMOV-GERASIMENKO",
+                Target = "CHURYUMOV-GERASIMENKO",
                 Observer = "SUN",
             },
             Color = { 0.1, 0.9, 0.2 },

@@ -6,7 +6,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NEPTUNE BARYCENTER",
+                Target = "NEPTUNE BARYCENTER",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
@@ -52,7 +52,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NEPTUNE BARYCENTER",
+                Target = "NEPTUNE BARYCENTER",
                 Observer = "SUN",
             },
             Color = {0.2, 0.5, 1.0 },

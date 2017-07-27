@@ -25,7 +25,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "EUROPA",
+                Target = "EUROPA",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
             },
@@ -44,7 +44,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "EUROPA",
+                Target = "EUROPA",
                 Observer = "JUPITER BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

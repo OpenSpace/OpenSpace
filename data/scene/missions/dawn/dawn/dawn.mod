@@ -703,7 +703,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "DAWN",
+                Target = "DAWN",
                 Observer = "SUN",
             },
             Color = { 0.7, 0.4, 0.9 },

@@ -63,7 +63,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "ROSETTA",
+                Target = "ROSETTA",
                 Observer = "SUN",
                 Kernels = RosettaKernels
             },  
@@ -274,7 +274,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PHILAE",
+                Target = "PHILAE",
                 Observer = "CHURYUMOV-GERASIMENKO",
                 Kernels = RosettaKernels
             },
@@ -368,7 +368,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "ROSETTA",
+                Target = "ROSETTA",
                 Observer = "CHURYUMOV-GERASIMENKO",
             },
             Color = { 0.288, 0.375, 0.934 },
@@ -384,7 +384,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PHILAE",
+                Target = "PHILAE",
                 Observer = "CHURYUMOV-GERASIMENKO",
             },
             Color = { 0.8, 0.5, 1.0 },

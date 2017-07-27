@@ -129,7 +129,7 @@ return {
             Type = "RenderableTrailTrajectory",
              Translation = {
                 Type = "SpiceTranslation",
-                Body = "JUNO",
+                Target = "JUNO",
                 Observer = "JUPITER BARYCENTER"
             },
             Color = { 0.70, 0.50, 0.20 },

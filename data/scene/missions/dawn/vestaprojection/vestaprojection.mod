@@ -103,7 +103,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "VESTA",
+                Target = "VESTA",
                 Observer = "SUN",
             },
             Color = { 0.7, 0.8, 0.7 },

@@ -18,7 +18,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "DIONE",
+                Target = "DIONE",
                 Observer = "SATURN BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/sat375.bsp"
             },
@@ -36,7 +36,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "DIONE",
+                Target = "DIONE",
                 Observer = "SATURN BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

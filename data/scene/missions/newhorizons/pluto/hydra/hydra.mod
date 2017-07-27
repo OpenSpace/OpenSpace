@@ -33,7 +33,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "HYDRA",
+                Target = "HYDRA",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -69,7 +69,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "HYDRA",
+                Target = "HYDRA",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},

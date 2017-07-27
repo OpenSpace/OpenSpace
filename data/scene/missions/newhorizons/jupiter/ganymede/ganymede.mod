@@ -45,7 +45,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "GANYMEDE",
+                Target = "GANYMEDE",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -82,7 +82,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "GANYMEDE",
+                Target = "GANYMEDE",
                 Observer = "JUPITER BARYCENTER",
             },
             Color = { 0.4, 0.3, 0.3 },
