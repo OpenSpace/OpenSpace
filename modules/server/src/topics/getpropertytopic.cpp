@@ -53,8 +53,9 @@ void GetPropertyTopic::handleJson(json j) {
 json GetPropertyTopic::getAllKeys() {
     json jsonProps = json::array();
     for (const auto &prop : allProperties()) {
-        json propJson = prop->toJson();
-        jsonProps.push_back(propJson);
+        const std::string &jsonString = prop->toJson();
+        json propAsJson = json::parse(jsonString);
+        jsonProps.push_back(propAsJson);
     }
     json payload{{ "value", jsonProps }};
     return wrappedPayload(payload);
@@ -63,8 +64,8 @@ json GetPropertyTopic::getAllKeys() {
 json GetPropertyTopic::getPropertyFromKey(const std::string& key) {
     properties::Property* prop = property(key);
     if (prop != nullptr) {
-        json payload = {{ "propertyUri", key }, { "value", prop->toJson() }};
-        return wrappedPayload(payload);
+        json propJson = json::parse(prop->toJson());
+        return wrappedPayload(propJson);
     }
 
     return wrappedError(fmt::format("property '{}' not found", key), 404);

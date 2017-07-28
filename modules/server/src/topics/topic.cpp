@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/server/servermodule.h>
-#include "include/topic.h"
+#include <modules/server/include/topic.h>
 
 namespace openspace {
 
@@ -33,6 +33,7 @@ void Topic::initialize(Connection* connection, size_t topicId) {
 };
 
 nlohmann::json Topic::wrappedPayload(nlohmann::json &payload) {
+    // TODO: add message time
     nlohmann::json j = {
         { "topic", _topicId },
         { "payload", payload }
