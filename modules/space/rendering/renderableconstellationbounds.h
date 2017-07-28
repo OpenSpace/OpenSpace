@@ -29,6 +29,7 @@
 
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <ghoul/opengl/programobject.h>
 #include <array>
 
@@ -93,8 +94,11 @@ private:
      */
     void selectionPropertyHasChanged();
 
-    std::string _vertexFilename; ///< The filename containing the constellation bounds
-    std::string _constellationFilename; ///< The file containing constellation names
+    /// The filename containing the constellation bounds
+    properties::StringProperty _vertexFilename;
+
+    /// The file containing constellation names
+    properties::StringProperty _constellationFilename; 
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 

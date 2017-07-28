@@ -71,7 +71,9 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
 
     glm::vec2 textPosition;
     textPosition.x = 0;
-    textPosition.y = aboveEquator ? _fontSize / 2 : _initData.dimensionsWithPadding().y - 3 * _fontSize / 2;
+    textPosition.y = aboveEquator ?
+        _fontSize / 2.f :
+        _initData.dimensionsWithPadding().y - 3.f * _fontSize / 2.f;
     glm::vec4 color(1.0, 1.0, 1.0, 1.0);
 
     fontRenderer.render(
@@ -80,7 +82,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
         color,
         " %.0f %s",
         tileLongitudalLength, unit.c_str()
-        );
+    );
 }
 
 int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileIndex) const {
@@ -95,7 +97,7 @@ int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileInde
     if (useKm) {
         l /= 1000;
     }
-    l = std::round(l);
+    l = static_cast<int>(std::round(l));
     if (useKm) {
         l *= 1000;
     }

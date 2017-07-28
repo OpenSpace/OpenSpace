@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/moduleengine.h>
+
 namespace openspace::gui::luascriptfunctions {
    
 /**
@@ -35,7 +37,7 @@ int show(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OnScreenGUIModule::gui.setEnabled(true);
+    OsEng.moduleEngine().module<OnScreenGUIModule>()->gui.setEnabled(true);
     return 0;
 }
 
@@ -50,7 +52,7 @@ int hide(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OnScreenGUIModule::gui.setEnabled(false);
+    OsEng.moduleEngine().module<OnScreenGUIModule>()->gui.setEnabled(false);
     return 0;
 }
 
@@ -65,7 +67,9 @@ int toggle(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OnScreenGUIModule::gui.setEnabled(!OnScreenGUIModule::gui.isEnabled());
+    OsEng.moduleEngine().module<OnScreenGUIModule>()->gui.setEnabled(
+        !OsEng.moduleEngine().module<OnScreenGUIModule>()->gui.isEnabled()
+    );
     return 0;
 }
 

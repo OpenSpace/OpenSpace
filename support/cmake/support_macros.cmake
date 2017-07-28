@@ -170,7 +170,7 @@ function (add_external_dependencies)
     set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
     set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
     set(JPEG_TURBO_WITH_SIMD OFF CACHE BOOL "" FORCE)
-    
+
     add_subdirectory(${OPENSPACE_EXT_DIR}/sgct)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${OPENSPACE_EXT_DIR}/sgct/include)
     target_link_libraries(
@@ -243,6 +243,7 @@ function (add_external_dependencies)
         set(CMAKE_PREFIX_PATH
             "~/Qt/5.6/clang_64/lib/cmake"
             "~/Qt/5.7/clang_64/lib/cmake"
+            "~/Qt/5.8/clang_64/lib/cmake"
             PARENT_SCOPE
         )
     endif ()

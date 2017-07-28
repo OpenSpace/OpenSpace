@@ -1354,7 +1354,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
-                "type, name, identifier, [value, minimumValue, maximumValue]",
+                "type, name, identifier, description,"
+                "[value, minimumValue, maximumValue]",
                 "Adds a virtual property that will set a group of properties"
             },
             {

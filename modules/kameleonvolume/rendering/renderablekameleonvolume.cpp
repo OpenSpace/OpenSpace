@@ -58,30 +58,102 @@ namespace {
     const char* KeyCache = "Cache";
     const char* KeyGridType = "GridType";
     const char* ValueSphericalGridType = "Spherical";
+
+    static const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+        "Dimensions",
+        "Dimensions",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo VariableInfo = {
+        "Variable",
+        "Variable",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
+        "LowerDomainBound",
+        "Lower Domain Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
+        "UpperDomainBound",
+        "Upper Domain Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo DomainScaleInfo = {
+        "DomainScale",
+        "Domain scale",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
+        "LowerValueBound",
+        "Lower Value Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
+        "UpperValueBound",
+        "Upper Value Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+        "GridType",
+        "Grid Type",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SourcePathInfo = {
+        "SourcePath",
+        "Source Path",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+        "TransferFunctionPath",
+        "Transfer Function Path",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CacheInfo = {
+        "Cache",
+        "Cache",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _dimensions("dimensions", "Dimensions")
-    , _variable("variable", "Variable")
-    , _lowerDomainBound("lowerDomainBound", "Lower Domain Bound")
-    , _upperDomainBound("upperDomainBound", "Upper Domain Bound")
-    , _domainScale("domainScale", "Domain scale")
+    , _dimensions(DimensionsInfo)
+    , _variable(VariableInfo)
+    , _lowerDomainBound(LowerDomainBoundInfo)
+    , _upperDomainBound(UpperDomainBoundInfo)
+    , _domainScale(DomainScaleInfo)
     , _autoDomainBounds(false)
-    , _lowerValueBound("lowerValueBound", "Lower Value Bound", 0.f, 0.f, 1.f)
-    , _upperValueBound("upperValueBound", "Upper Value Bound", 1.f, 0.01f, 1.f)
+    , _lowerValueBound(LowerValueBoundInfo, 0.f, 0.f, 1.f)
+    , _upperValueBound(UpperValueBoundInfo, 1.f, 0.01f, 1.f)
     , _autoValueBounds(false)
-    , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
+    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _autoGridType(false)
     , _clipPlanes(nullptr)
-    , _stepSize("stepSize", "Step Size", 0.02f, 0.01f, 1.f)
-    , _sourcePath("sourcePath", "Source Path")
-    , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
+    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
+    , _sourcePath(SourcePathInfo)
+    , _transferFunctionPath(TransferFunctionInfo)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
-    , _cache("cache", "Cache")
+    , _cache(CacheInfo)
 {
 
     glm::vec3 dimensions;

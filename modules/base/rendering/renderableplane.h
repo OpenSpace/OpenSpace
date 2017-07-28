@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -64,23 +65,17 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum class BlendMode : int {
-        Normal = 0,
-        Additive
-    };
-
     void loadTexture();
     void createPlane();
 
     properties::StringProperty _texturePath;
     properties::BoolProperty _billboard;
     properties::FloatProperty _size;
+    properties::OptionProperty _blendMode;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
-
-    BlendMode _blendMode;
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;

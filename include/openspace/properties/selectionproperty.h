@@ -38,8 +38,7 @@ public:
         std::string description;
     };
 
-    SelectionProperty(std::string identifier, std::string guiName,
-        Property::Visibility visibility = Property::Visibility::User);
+    SelectionProperty(Property::PropertyInfo info);
     
     void addOption(Option option);
     void removeOptions();

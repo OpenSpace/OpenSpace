@@ -63,6 +63,34 @@ namespace {
     const char* keyRadius = "Geometry.Radius";
 //    const char* keyShading = "PerformShading";
     const char* _mainFrame = "GALACTIC";
+
+    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+        "PlanetTexture",
+        "Color Base Texture",
+        "The path to the base color texture that is used on the planet prior to any "
+        "image projection."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightTextureInfo = {
+        "HeightMap",
+        "Heightmap Texture",
+        "The path to the height map texture that is used for the planet. If no height "
+        "map is specified the planet does not use a height field."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShiftMeridianInfo = {
+        "ShiftMeridian",
+        "Shift Meridian by 180 deg",
+        "Shift the position of the meridian by 180 degrees. This value "
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
+        "HeightExaggeration",
+        "Height Exaggeration",
+        "This value determines the level of height exaggeration that is applied to a "
+        "potential height field. A value of '0' inhibits the height field, whereas a "
+        "value of '1' uses the measured height field."
+    };
 } // namespace
 
 namespace openspace {
@@ -99,20 +127,21 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
                 Optional::Yes
             },
             {
-                keyColorTexture,
+                keyColorTexture, // @TODO This should be ColorTextureInfo.identifier
                 new StringVerifier,
-                "The path to the base color texture that is used on the planet prior to "
-                "any image projection. The path can use tokens of the form '${...}' or "
-                "be specified relative to the directory of the mod file.",
+                ColorTextureInfo.description,
                 Optional::No
             },
             {
-                keyHeightTexture,
+                keyHeightTexture, // @TODO This should be HeightTextureInfo.identifier
                 new StringVerifier,
-                "The path to the height map texture that is used on the planet. The path "
-                "can use tokens of the form '${...}' or be specified relative to the "
-                "directory of the mod file. If no height map is specified the planet "
-                "does not use a height field.",
+                HeightTextureInfo.description,
+                Optional::Yes
+            },
+            {
+                HeightExaggerationInfo.identifier,
+                new DoubleVerifier,
+                HeightExaggerationInfo.description,
                 Optional::Yes
             }
         }
@@ -121,16 +150,15 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath("planetTexture", "RGB Texture")
-    , _heightMapTexturePath("heightMap", "Heightmap Texture")
-    , _rotation("rotation", "Rotation", 0, 0, 360)
+    , _colorTexturePath(ColorTextureInfo)
+    , _heightMapTexturePath(HeightTextureInfo)
+    , _rotation({ "Rotation", "Rotation", "" }, 0, 0, 360) // @TODO Missing documentation
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _heightMapTexture(nullptr)
-    , _shiftMeridianBy180("shiftMeiridian", "Shift Meridian by 180 deg", false)
-    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
-    , _debugProjectionTextureRotation("debug.projectionTextureRotation", "Projection Texture Rotation", 0.f, 0.f, 360.f)
+    , _shiftMeridianBy180({"asd", "", ""  }, false) // @TODO Missing documentation
+    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 100.f)
     , _capture(false)
 {
     documentation::testSpecificationAndThrow(
@@ -187,8 +215,13 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_heightMapTexturePath);
     _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
 
+    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
+        _heightExaggeration = static_cast<float>(
+            dictionary.value<double>(HeightExaggerationInfo.identifier)
+        );
+    }
+
     addProperty(_heightExaggeration);
-    addProperty(_debugProjectionTextureRotation);
 
     addProperty(_shiftMeridianBy180);
 }

@@ -34,11 +34,32 @@
 
 namespace {
     const char* KeyBody = "Body";
-    const char* KeyObserver = "Observer";
-    const char* KeyFrame = "Frame";
     const char* KeyKernels = "Kernels";
 
     const char* DefaultReferenceFrame = "GALACTIC";
+
+    static const openspace::properties::Property::PropertyInfo TargetInfo = {
+        "Target",
+        "Target",
+        "This is the SPICE NAIF name for the body whose translation is to be computed by "
+        "the SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') "
+        "or a NAIF integer id code (such as '399')."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ObserverInfo = {
+        "Observer",
+        "Observer",
+        "This is the SPICE NAIF name for the parent of the body whose translation is to "
+        "be computed by the SpiceTranslation. It can either be a fully qualified name "
+        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FrameInfo = {
+        "Frame",
+        "Reference Frame",
+        "This is the SPICE NAIF name for the reference frame in which the position "
+        "should be retrieved. The default value is GALACTIC."
+    };
 } // namespace
 
 namespace openspace {
@@ -46,7 +67,7 @@ namespace openspace {
 documentation::Documentation SpiceTranslation::Documentation() {
     using namespace openspace::documentation;
 
-    return{
+    return {
         "Spice Translation",
         "space_translation_spicetranslation",
         {
@@ -57,7 +78,7 @@ documentation::Documentation SpiceTranslation::Documentation() {
                 Optional::No
             },
             {
-                KeyBody,
+                KeyBody, // @TODO Rename to TargetInfo.identifier
                 new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
                 "This is the SPICE NAIF name for the body whose translation is to be "
                 "computed by the SpiceTranslation. It can either be a fully qualified "
@@ -65,21 +86,17 @@ documentation::Documentation SpiceTranslation::Documentation() {
                 Optional::No
             },
             {
-                KeyObserver,
+                ObserverInfo.identifier,
                 new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
-                "This is the SPICE NAIF name for the parent of the body whose "
-                "translation is to be computed by the SpiceTranslation. It can either be "
-                "a fully qualified name (such as 'SOLAR SYSTEM BARYCENTER') or a NAIF "
-                "integer id code (such as '0').",
+                ObserverInfo.description,
                 Optional::No
             },
             {
-                KeyFrame,
+                FrameInfo.identifier,
                 new StringAnnotationVerifier(
                     "A valid SPICE NAIF name for a reference frame"
                 ),
-                "This is the SPICE NAIF name for the reference frame in which the "
-                "position should be retrieved. The default value is GALACTIC",
+                FrameInfo.description,
                 Optional::Yes
             },
             {
@@ -99,10 +116,9 @@ documentation::Documentation SpiceTranslation::Documentation() {
 }
 
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
-    : _target("target", "Target", "")
-    , _origin("origin", "Origin", "")
-    , _frame("frame", "Reference Frame", DefaultReferenceFrame)
-    , _kernelsLoadedSuccessfully(true)
+    : _target(TargetInfo)
+    , _observer(ObserverInfo)
+    , _frame(FrameInfo, DefaultReferenceFrame)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -111,10 +127,10 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     );
 
     _target = dictionary.value<std::string>(KeyBody);
-    _origin = dictionary.value<std::string>(KeyObserver);
+    _observer = dictionary.value<std::string>(ObserverInfo.identifier);
 
-    if (dictionary.hasKey(KeyFrame)) {
-        _frame = dictionary.value<std::string>(KeyFrame);
+    if (dictionary.hasKey(FrameInfo.identifier)) {
+        _frame = dictionary.value<std::string>(FrameInfo.identifier);
     }
 
     auto loadKernel = [](const std::string& kernel) {
@@ -152,8 +168,8 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     _target.onChange(update);
     addProperty(_target);
 
-    _origin.onChange(update);
-    addProperty(_origin);
+    _observer.onChange(update);
+    addProperty(_observer);
     
     _frame.onChange(update);
     addProperty(_frame);
@@ -166,7 +182,12 @@ glm::dvec3 SpiceTranslation::position() const {
 void SpiceTranslation::update(const UpdateData& data) {
     double lightTime = 0.0;
     _position = SpiceManager::ref().targetPosition(
-        _target, _origin, _frame, {}, data.time.j2000Seconds(), lightTime
+        _target,
+        _observer,
+        _frame,
+        {},
+        data.time.j2000Seconds(),
+        lightTime
     ) * glm::pow(10.0, 3.0);
 }
 

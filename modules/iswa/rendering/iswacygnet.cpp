@@ -35,14 +35,25 @@
 
 namespace {
     const char* _loggerCat = "IswaCygnet";
+
+    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+        "Delete",
+        "Delete",
+        "" // @TODO Missing documentation
+    };
+    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+        "Alpha",
+        "Alpha",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _delete("delete", "Delete")
-    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
+    , _delete(DeleteInfo)
+    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)

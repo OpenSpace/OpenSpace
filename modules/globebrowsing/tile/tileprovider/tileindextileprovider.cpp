@@ -30,7 +30,7 @@
 
 namespace openspace::globebrowsing::tileprovider {
 
-TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dict)
+TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
     : TextTileProvider(LayerManager::getTileTextureInitData(
         layergroupid::GroupID::ColorLayers
     ))

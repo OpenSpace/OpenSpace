@@ -68,9 +68,7 @@ private:
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
     properties::StringProperty _colorTexturePath;
-    properties::BoolProperty _performFade;
     properties::BoolProperty _performShading;
-    properties::FloatProperty _fading;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::Texture> _texture;

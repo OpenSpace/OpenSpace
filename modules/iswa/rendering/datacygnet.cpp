@@ -34,6 +34,49 @@
 
 namespace {
     const char* _loggerCat = "DataCygnet";
+
+    static const openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+        "DataOptions",
+        "Data Options",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UseLogInfo = {
+        "UseLog",
+        "Use Logarithm",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+        "UseHistogram",
+        "Auto Contrast",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+        "AutoFilter",
+        "Auto Filter",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo NormalizeValuesInfo = {
+        "NormValues",
+        "Normalize Values",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo BackgroundInfo = {
+        "BackgroundValues",
+        "Background Values",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransferFunctionsFile = {
+        "Transferfunctions",
+        "Transfer Functions",
+        "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 namespace openspace {
@@ -41,13 +84,13 @@ namespace openspace {
 DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     : IswaCygnet(dictionary)
     , _dataProcessor(nullptr)
-    , _dataOptions("dataOptions", "Data Options")
-    , _useLog("useLog","Use Logarithm", false)
-    , _useHistogram("useHistogram", "Auto Contrast", false)
-    , _autoFilter("autoFilter", "Auto Filter", true)
-    , _normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
-    , _backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    , _transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
+    , _dataOptions(DataOptionsInfo)
+    , _useLog(UseLogInfo, false)
+    , _useHistogram(UseHistogramInfo, false)
+    , _autoFilter(AutoFilterInfo, true)
+    , _normValues(NormalizeValuesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
+    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _transferFunctionsFile(TransferFunctionsFile, "${SCENE}/iswa/tfs/default.tf")
     //FOR TESTING
     , _numOfBenchmarks(0)
     , _avgBenchmarkTime(0.0f)

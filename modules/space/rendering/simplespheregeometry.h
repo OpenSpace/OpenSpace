@@ -35,6 +35,8 @@ namespace openspace {
     class PowerScaledSphere;
 } // namespace openspace
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace openspace::planetgeometry {
 
 class SimpleSphereGeometry : public PlanetGeometry {
@@ -45,6 +47,8 @@ public:
     bool initialize(Renderable* parent) override;
     void deinitialize() override;
     void render() override;
+
+    static documentation::Documentation Documentation();
 
 private:
     void createSphere();
