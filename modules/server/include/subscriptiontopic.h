@@ -41,7 +41,11 @@ public:
 
 private:
     bool _requestedResourceIsSubscribable;
-    void handleSpecialCase(std::string);
+    int _onChangeHandle;
+    properties::Property* _prop;
+
+    void handleSpecialCase(std::string key);
+    void startSubscription(const std::string& key);
 };
 
 }

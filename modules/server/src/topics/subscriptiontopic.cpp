@@ -22,37 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/query/query.h>
+#include <openspace/properties/property.h>
 #include "include/subscriptiontopic.h"
 
 namespace {
-std::string _loggerCat = "SubscriptionTopic";
+const std::string _loggerCat = "SubscriptionTopic";
+const int UNSET_ONCHANGE_HANDLE = -1;
 }
+
+using nlohmann::json;
 
 namespace openspace {
 
 SubscriptionTopic::SubscriptionTopic()
         : Topic()
-        , _requestedResourceIsSubscribable(false) {
+        , _requestedResourceIsSubscribable(false)
+        , _onChangeHandle(-1) {
     LDEBUG("Starting new subscription");
 }
 
 SubscriptionTopic::~SubscriptionTopic() {
     // TODO: remove post draw call
+
+    if (_onChangeHandle != UNSET_ONCHANGE_HANDLE) {
+        _prop->removeOnChange(_onChangeHandle);
+    }
 }
 
 bool SubscriptionTopic::isDone() {
     return !_requestedResourceIsSubscribable || !_connection->active;
 }
 
-void SubscriptionTopic::handleJson(nlohmann::json json) {
-    std::string requestedKey = json.at("subscriptionProperty").get<std::string>();
+void SubscriptionTopic::handleJson(json j) {
+    std::string requestedKey = j.at("subscriptionProperty").get<std::string>();
     std::string initial = requestedKey.substr(0, 8);
 
     if (initial == "special:") {
         std::string key = requestedKey.substr(8);
         handleSpecialCase(key);
     } else {
-        // trigger regular subscription
+        startSubscription(requestedKey);
     }
 }
 
@@ -60,13 +70,26 @@ void SubscriptionTopic::handleSpecialCase(std::string instruction) {
     if (instruction == "currentTime") {
         _requestedResourceIsSubscribable = true;
         _connection->addRefreshCall([this]() {
-            nlohmann::json timeJson = {{ "time", OsEng.timeManager().time().ISO8601() }};
+            json timeJson = {{ "time", OsEng.timeManager().time().ISO8601() }};
             return wrappedPayload(timeJson);
         });
     }
     else {
         LERROR("Unknown special case: " << instruction);
-        _requestedResourceIsSubscribable = false;
+    }
+}
+
+void SubscriptionTopic::startSubscription(const std::string &key) {
+    _prop = property(key);
+    if (_prop != nullptr) {
+        _requestedResourceIsSubscribable = true;
+        auto onChange = [this, key]() {
+            LDEBUG("Updating subscription '" + key + "'.");
+            json payload = json::parse(_prop->toJson());
+            _connection->sendJson(wrappedPayload(payload));
+        };
+        _onChangeHandle = _prop->onChange(onChange);
+        onChange();
     }
 }
 
