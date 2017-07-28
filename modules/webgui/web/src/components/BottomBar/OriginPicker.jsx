@@ -8,7 +8,7 @@ import DataManager from '../../api/DataManager';
 
 import styles from './OriginPicker.scss';
 
-const ORIGIN_KEY = 'NavigationHandler.origin';
+const ORIGIN_KEY = 'NavigationHandler.Origin';
 
 class OriginPicker extends Component {
   constructor(props) {

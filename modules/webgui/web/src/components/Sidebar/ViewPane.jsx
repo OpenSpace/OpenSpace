@@ -32,7 +32,7 @@ class ViewPane extends Component {
 
         { this.state.properties.map(prop => (
           <div key={prop.uri}>
-            { prop.name}: { prop.key } ({ prop.uri })
+            { prop.Description.Name}: "{ prop.Value }" ({ prop.Description.Identifier })
           </div>
         )) }
       </Pane>
