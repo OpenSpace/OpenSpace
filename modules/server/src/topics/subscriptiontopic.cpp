@@ -58,6 +58,8 @@ void SubscriptionTopic::handleJson(json j) {
     std::string requestedKey = j.at("subscriptionProperty").get<std::string>();
     std::string initial = requestedKey.substr(0, 8);
 
+    LDEBUG("Subscribing to property '" + requestedKey + "'...");
+
     if (initial == "special:") {
         std::string key = requestedKey.substr(8);
         handleSpecialCase(key);
@@ -90,6 +92,8 @@ void SubscriptionTopic::startSubscription(const std::string &key) {
         };
         _onChangeHandle = _prop->onChange(onChange);
         onChange();
+    } else {
+        LWARNING("Could not subscribe. Property '" + key + "' not found.");
     }
 }
 

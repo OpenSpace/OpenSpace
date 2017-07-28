@@ -93,7 +93,7 @@ properties::Property* property(const std::string& uri) {
             return property;
         }
 #endif
-        LERROR("Node or ScreenSpaceRenderable' " << nameUri << "' did not exist");
+        LERROR("Node or ScreenSpaceRenderable '" << nameUri << "' did not exist");
         return nullptr;
     }
 }

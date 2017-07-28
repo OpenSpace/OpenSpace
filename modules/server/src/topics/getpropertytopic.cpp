@@ -34,9 +34,7 @@ std::string _loggerCat = "GetPropertyTopic";
 namespace openspace {
 
 GetPropertyTopic::GetPropertyTopic()
-        : Topic() {
-    LDEBUG("Getting property...");
-}
+        : Topic() {}
 
 
 bool GetPropertyTopic::isDone() {
@@ -45,6 +43,7 @@ bool GetPropertyTopic::isDone() {
 
 void GetPropertyTopic::handleJson(json j) {
     std::string requestedKey = j.at("propertyUri").get<std::string>();
+    LDEBUG("Getting property '" + requestedKey + "'...");
     json response = (requestedKey == "__all") ? getAllKeys()
                                               : getPropertyFromKey(requestedKey);
     _connection->sendJson(response);
