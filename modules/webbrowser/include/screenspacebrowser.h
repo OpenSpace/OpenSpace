@@ -36,6 +36,19 @@
 #include "include/screenspacerenderhandler.h"
 #include "include/browserinstance.h"
 
+namespace {
+static const openspace::properties::Property::PropertyInfo BrowserDimensionsInfo = {
+    "Dimensions",
+    "Browser Dimensions",
+    "Set the dimensions of the web browser windows."
+};
+static const openspace::properties::Property::PropertyInfo UrlInfo = {
+    "URL",
+    "url",
+    "The URL to load"
+};
+}
+
 namespace openspace {
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {

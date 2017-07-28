@@ -38,9 +38,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         : ScreenSpaceRenderable(dictionary)
         , _urlIsDirty(false)
         , _dimensionsAreDirty(false)
-        , _url("url", "URL", "")
-        , _dimensions("dimensions",
-                     "Browser Dimensions",
+        , _url(UrlInfo)
+        , _dimensions(BrowserDimensionsInfo,
                      glm::vec2(0.0f),
                      glm::vec2(0.0f),
                      glm::vec2(3000.0f))
