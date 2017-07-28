@@ -339,7 +339,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool RenderablePlanet::initialize() {
+void RenderablePlanet::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     if (_programObject == nullptr && _shadowEnabled && _hasNightTexture) {
@@ -379,11 +379,9 @@ bool RenderablePlanet::initialize() {
     _programObject->deactivate();
 
     loadTexture();
-
-    return isReady();
 }
 
-bool RenderablePlanet::deinitialize() {
+void RenderablePlanet::deinitialize() {
     if (_geometry) {
         _geometry->deinitialize();
         _geometry = nullptr;
@@ -398,8 +396,6 @@ bool RenderablePlanet::deinitialize() {
     _geometry = nullptr;
     _texture = nullptr;
     _nightTexture = nullptr;
-
-    return true;
 }
 
 bool RenderablePlanet::isReady() const {

@@ -189,8 +189,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 }
 
-bool RenderableTrailTrajectory::initialize() {
-    bool res = RenderableTrail::initialize();
+void RenderableTrailTrajectory::initialize() {
+    RenderableTrail::initialize();
 
     // We don't need an index buffer, so we keep it at the default value of 0
     glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
@@ -201,18 +201,16 @@ bool RenderableTrailTrajectory::initialize() {
     glGenVertexArrays(1, &_floatingRenderInformation._vaoID);
     glGenBuffers(1, &_floatingRenderInformation._vBufferID);
     _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
-
-    return res;
 }
 
-bool RenderableTrailTrajectory::deinitialize() {
+void RenderableTrailTrajectory::deinitialize() {
     glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
     glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
 
     glDeleteVertexArrays(1, &_floatingRenderInformation._vaoID);
     glDeleteBuffers(1, &_floatingRenderInformation._vBufferID);
 
-    return RenderableTrail::deinitialize();
+    RenderableTrail::deinitialize();
 }
 
 void RenderableTrailTrajectory::update(const UpdateData& data) {

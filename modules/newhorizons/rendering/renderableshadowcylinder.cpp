@@ -260,7 +260,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     _aberration = static_cast<int>(aberration.type);
 }
 
-bool RenderableShadowCylinder::initialize() {
+void RenderableShadowCylinder::initialize() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
 
@@ -270,11 +270,9 @@ bool RenderableShadowCylinder::initialize() {
         "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
         "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl"
     );
-
-    return true;
 }
 
-bool RenderableShadowCylinder::deinitialize() {
+void RenderableShadowCylinder::deinitialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -285,8 +283,6 @@ bool RenderableShadowCylinder::deinitialize() {
     _vao = 0;
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
-
-    return true;
 }
 
 bool RenderableShadowCylinder::isReady() const {

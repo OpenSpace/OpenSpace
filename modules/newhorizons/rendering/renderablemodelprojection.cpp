@@ -182,9 +182,7 @@ bool RenderableModelProjection::isReady() const {
     return ready;
 }
 
-bool RenderableModelProjection::initialize() {
-    bool completeSuccess = true;
-        
+void RenderableModelProjection::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram("ModelShader",
         "${MODULE_NEWHORIZONS}/shaders/renderableModel_vs.glsl",
@@ -203,17 +201,15 @@ bool RenderableModelProjection::initialize() {
         "${MODULE_NEWHORIZONS}/shaders/renderableModelDepth_fs.glsl");
 
 
-    completeSuccess &= loadTextures();
-    completeSuccess &= _projectionComponent.initializeGL();
+    loadTextures();
+    _projectionComponent.initializeGL();
 
     float bs = boundingSphere();
-    completeSuccess &= _geometry->initialize(this);
+    _geometry->initialize(this);
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
-
-    return completeSuccess;
 }
 
-bool RenderableModelProjection::deinitialize() {
+void RenderableModelProjection::deinitialize() {
     if (_geometry) {
         _geometry->deinitialize();
     }
@@ -225,8 +221,6 @@ bool RenderableModelProjection::deinitialize() {
 
     OsEng.renderEngine().removeRenderProgram(_programObject);
     _programObject = nullptr;
-
-    return true;
 }
 
 ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {

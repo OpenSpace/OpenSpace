@@ -22,10 +22,7 @@ return {
                 GeometryFile = "obj/67P_rotated_5_130.obj",
                 Magnification = 0,
             }, 
-            Textures = {
-                Color = "textures/gray.jpg",
-                -- Color = "textures/may9_map.jpg",
-            },
+            ColorTexture = "textures/gray.jpg",
             Projection = {
                 Sequence   = "rosettaimages",
                 SequenceType = "image-sequence",

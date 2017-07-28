@@ -212,13 +212,10 @@ void Scene::sortTopologically() {
 void Scene::initialize() {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            bool success = node->initialize();
-            if (success)
-                LDEBUG(node->name() << " initialized successfully!");
-            else
-                LWARNING(node->name() << " not initialized.");
+            node->initialize();
         }
         catch (const ghoul::RuntimeError& e) {
+            LERROR(node->name() << " not initialized.");
             LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
         }
     }

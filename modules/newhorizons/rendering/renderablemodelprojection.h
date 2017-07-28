@@ -55,8 +55,8 @@ public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
     ~RenderableModelProjection();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

@@ -260,12 +260,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     //addPropertySubOwner(_pointGlobe.get());
 }
 
-bool RenderableGlobe::initialize() {
-    return _distanceSwitch.initialize();
+void RenderableGlobe::initialize() {
+    _distanceSwitch.initialize();
 }
 
-bool RenderableGlobe::deinitialize() {
-    return _distanceSwitch.deinitialize();
+void RenderableGlobe::deinitialize() {
+    _distanceSwitch.deinitialize();
 }
 
 bool RenderableGlobe::isReady() const {

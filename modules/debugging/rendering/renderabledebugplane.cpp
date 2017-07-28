@@ -190,7 +190,7 @@ bool RenderableDebugPlane::isReady() const {
     return ready;
 }
 
-bool RenderableDebugPlane::initialize() {
+void RenderableDebugPlane::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -202,11 +202,9 @@ bool RenderableDebugPlane::initialize() {
             "${MODULE_BASE}/shaders/plane_fs.glsl"
             );
     }
-
-    return isReady();
 }
 
-bool RenderableDebugPlane::deinitialize() {
+void RenderableDebugPlane::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -218,8 +216,6 @@ bool RenderableDebugPlane::deinitialize() {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-
-    return true;
 }
 
 void RenderableDebugPlane::render(const RenderData& data, RendererTasks&) {

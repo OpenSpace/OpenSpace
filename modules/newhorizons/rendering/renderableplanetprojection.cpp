@@ -203,9 +203,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
 
-bool RenderablePlanetProjection::initialize() {
-    bool completeSuccess = true;
-
+void RenderablePlanetProjection::initialize() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "projectiveProgram",
         "${MODULE_NEWHORIZONS}/shaders/renderablePlanet_vs.glsl",
@@ -218,41 +216,37 @@ bool RenderablePlanetProjection::initialize() {
         "${MODULE_NEWHORIZONS}/shaders/renderablePlanetProjection_fs.glsl"
     );
 
-    completeSuccess &= loadTextures();
-    completeSuccess &= _projectionComponent.initializeGL();
-    completeSuccess &= _geometry->initialize(this);
+    loadTextures();
+    _projectionComponent.initializeGL();
+    _geometry->initialize(this);
 
-    if (completeSuccess) {
-        //completeSuccess &= auxiliaryRendertarget();
-        // SCREEN-QUAD 
-        const GLfloat size = 1.f;
-        const GLfloat w = 1.f;
-        const GLfloat vertex_data[] = {
-            -size, -size, 0.f, w, 0.f, 0.f,
-            size, size, 0.f, w, 1.f, 1.f,
-            -size, size, 0.f, w, 0.f, 1.f,
-            -size, -size, 0.f, w, 0.f, 0.f,
-            size, -size, 0.f, w, 1.f, 0.f,
-            size, size, 0.f, w, 1.f, 1.f,
-        };
+    //completeSuccess &= auxiliaryRendertarget();
+    // SCREEN-QUAD 
+    const GLfloat size = 1.f;
+    const GLfloat w = 1.f;
+    const GLfloat vertex_data[] = {
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
+        -size, size, 0.f, w, 0.f, 1.f,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, -size, 0.f, w, 1.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
+    };
 
-        glGenVertexArrays(1, &_quad);
-        glBindVertexArray(_quad);
-        glGenBuffers(1, &_vertexPositionBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glGenVertexArrays(1, &_quad);
+    glBindVertexArray(_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
-        glBindVertexArray(0);
-    }
-
-    return completeSuccess;
+    glBindVertexArray(0);
 }
 
-bool RenderablePlanetProjection::deinitialize() {
+void RenderablePlanetProjection::deinitialize() {
     _projectionComponent.deinitialize();
     _baseTexture = nullptr;
     _geometry = nullptr;
@@ -264,9 +258,8 @@ bool RenderablePlanetProjection::deinitialize() {
     _programObject = nullptr;
 
     _fboProgramObject = nullptr;
-
-    return true;
 }
+
 bool RenderablePlanetProjection::isReady() const {
     return _geometry && _programObject && _baseTexture && _projectionComponent.isReady();
 }

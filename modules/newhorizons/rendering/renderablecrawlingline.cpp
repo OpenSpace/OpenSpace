@@ -135,7 +135,7 @@ bool RenderableCrawlingLine::isReady() const {
     return (_program != nullptr);
 }
 
-bool RenderableCrawlingLine::initialize() {
+void RenderableCrawlingLine::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram(
         "RenderableCrawlingLine",
@@ -164,11 +164,9 @@ bool RenderableCrawlingLine::initialize() {
     );
 
     glBindVertexArray(0);
-
-    return true;
 }
 
-bool RenderableCrawlingLine::deinitialize(){
+void RenderableCrawlingLine::deinitialize(){
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
     glDeleteBuffers(1, &_vbo);
@@ -179,8 +177,6 @@ bool RenderableCrawlingLine::deinitialize(){
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
     }
-
-    return true;
 }
 
 void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {

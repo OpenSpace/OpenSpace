@@ -49,8 +49,8 @@ public:
     RenderableDebugPlane(const ghoul::Dictionary& dictionary);
     ~RenderableDebugPlane();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

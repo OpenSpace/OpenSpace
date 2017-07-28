@@ -139,6 +139,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
 Renderable::~Renderable() {}
 
+void Renderable::initialize() {}
+
+void Renderable::deinitialize() {}
+
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;
 }

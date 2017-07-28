@@ -297,7 +297,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     addProperty(_colors.square);
 }
 
-bool RenderableFov::initialize() {
+void RenderableFov::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "FovProgram",
@@ -314,8 +314,10 @@ bool RenderableFov::initialize() {
         res.shape == SpiceManager::FieldOfViewResult::Shape::Polygon ||
         res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
     if (!supportedShape) {
-        LWARNINGC("RenderableFov", "'" << _instrument.name << "' has unsupported shape");
-        return false;
+        throw ghoul::RuntimeError(
+            "'" + _instrument.name + "' has unsupported shape",
+            "RenderableFov"
+        );
     }
 
     _instrument.bounds = std::move(res.bounds);
@@ -405,11 +407,9 @@ bool RenderableFov::initialize() {
     );
 
     glBindVertexArray(0);
-
-    return true;
 }
 
-bool RenderableFov::deinitialize() {
+void RenderableFov::deinitialize() {
     OsEng.renderEngine().removeRenderProgram(_programObject);
     _programObject = nullptr;
 
@@ -418,8 +418,6 @@ bool RenderableFov::deinitialize() {
 
     glDeleteBuffers(1, &_fieldOfViewBounds.vbo);
     glDeleteVertexArrays(1, &_fieldOfViewBounds.vao);
-
-    return true;
 }
 
 bool RenderableFov::isReady() const {

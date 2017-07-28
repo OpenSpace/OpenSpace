@@ -288,25 +288,20 @@ bool RenderableStars::isReady() const {
     return (_program != nullptr) && (!_fullData.empty());
 }
 
-bool RenderableStars::initialize() {
-    bool completeSuccess = true;
-
+void RenderableStars::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("Star",
         "${MODULE_SPACE}/shaders/star_vs.glsl",
         "${MODULE_SPACE}/shaders/star_fs.glsl",
         "${MODULE_SPACE}/shaders/star_ge.glsl");
 
-    if (!_program) {
-        return false;
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
     }
-    completeSuccess &= loadData();
-    completeSuccess &= (_pointSpreadFunctionTexture != nullptr);
-
-    return completeSuccess;
 }
 
-bool RenderableStars::deinitialize() {
+void RenderableStars::deinitialize() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
@@ -320,7 +315,6 @@ bool RenderableStars::deinitialize() {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
     }
-    return true;
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {

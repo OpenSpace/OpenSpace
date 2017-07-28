@@ -182,7 +182,7 @@ SceneGraphNode::~SceneGraphNode() {
     deinitialize();
 }
 
-bool SceneGraphNode::initialize() {
+void SceneGraphNode::initialize() {
     if (_renderable) {
         _renderable->initialize();
     }
@@ -197,11 +197,9 @@ bool SceneGraphNode::initialize() {
     if (_transform.scale) {
         _transform.scale->initialize();
     }
-
-    return true;
 }
 
-bool SceneGraphNode::deinitialize() {
+void SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
 
     if (_renderable) {
@@ -210,10 +208,7 @@ bool SceneGraphNode::deinitialize() {
     }
     _children.clear();
 
-    // reset variables
     _parent = nullptr;
-
-    return true;
 }
 
 void SceneGraphNode::traversePreOrder(std::function<void(SceneGraphNode*)> fn) {

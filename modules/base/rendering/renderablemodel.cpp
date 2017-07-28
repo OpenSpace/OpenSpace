@@ -156,7 +156,7 @@ bool RenderableModel::isReady() const {
     return _programObject && _texture;
 }
 
-bool RenderableModel::initialize() {
+void RenderableModel::initialize() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "ModelProgram",
         "${MODULE_BASE}/shaders/model_vs.glsl",
@@ -165,13 +165,10 @@ bool RenderableModel::initialize() {
 
     loadTexture();
 
-    bool completeSuccess = true;
-    completeSuccess &= (_texture != nullptr);
-    completeSuccess &= _geometry->initialize(this); 
-    return completeSuccess;
+    _geometry->initialize(this); 
 }
 
-bool RenderableModel::deinitialize() {
+void RenderableModel::deinitialize() {
     if (_geometry) {
         _geometry->deinitialize();
         _geometry = nullptr;
@@ -182,8 +179,6 @@ bool RenderableModel::deinitialize() {
         OsEng.renderEngine().removeRenderProgram(_programObject);
         _programObject = nullptr;
     }
-
-    return true;
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {

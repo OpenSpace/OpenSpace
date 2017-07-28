@@ -202,7 +202,7 @@ bool RenderableSphere::isReady() const {
     return _shader && _texture;
 }
 
-bool RenderableSphere::initialize() {
+void RenderableSphere::initialize() {
     _sphere = std::make_unique<PowerScaledSphere>(
         PowerScaledScalar::CreatePSS(_size), _segments
     );
@@ -214,19 +214,15 @@ bool RenderableSphere::initialize() {
         "${MODULE_BASE}/shaders/sphere_fs.glsl");
 
     loadTexture();
-
-    return isReady();
 }
 
-bool RenderableSphere::deinitialize() {
+void RenderableSphere::deinitialize() {
     _texture = nullptr;
 
     if (_shader) {
         OsEng.renderEngine().removeRenderProgram(_shader);
         _shader = nullptr;
     }
-
-    return true;
 }
 
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {

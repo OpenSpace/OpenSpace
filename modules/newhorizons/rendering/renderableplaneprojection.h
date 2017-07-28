@@ -55,8 +55,8 @@ public:
     RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlaneProjection();
     
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

@@ -70,7 +70,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     
 RenderableToyVolume::~RenderableToyVolume() {}
 
-bool RenderableToyVolume::initialize() {
+void RenderableToyVolume::initialize() {
     _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
     _raycaster->initialize();
 
@@ -93,25 +93,22 @@ bool RenderableToyVolume::initialize() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_color);
-    
-    return true;
 }
     
-bool RenderableToyVolume::deinitialize() {
+void RenderableToyVolume::deinitialize() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
-    return true;
 }
     
 bool RenderableToyVolume::isReady() const {
+    // @TODO isReady function needs to be filled
     return true;
 }
     
 void RenderableToyVolume::update(const UpdateData& data) {
     if (_raycaster) {
-
         glm::mat4 transform = glm::translate(glm::mat4(1.0), static_cast<glm::vec3>(_translation) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
         transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));

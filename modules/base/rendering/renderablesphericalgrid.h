@@ -48,8 +48,8 @@ public:
     RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
     ~RenderableSphericalGrid();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

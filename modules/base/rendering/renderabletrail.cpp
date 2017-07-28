@@ -217,7 +217,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addProperty(_renderingModes);
 }
 
-bool RenderableTrail::initialize() {
+void RenderableTrail::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "EphemerisProgram",
@@ -226,17 +226,14 @@ bool RenderableTrail::initialize() {
     );
 
     setRenderBin(Renderable::RenderBin::Overlay);
-
-    return true;
 }
 
-bool RenderableTrail::deinitialize() {
+void RenderableTrail::deinitialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_programObject) {
         renderEngine.removeRenderProgram(_programObject);
         _programObject = nullptr;
     }
-    return true;
 }
 
 bool RenderableTrail::isReady() const {

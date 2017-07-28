@@ -184,7 +184,7 @@ bool RenderableRings::isReady() const {
     return _shader && _texture;
 }
 
-bool RenderableRings::initialize() {
+void RenderableRings::initialize() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("RingProgram",
@@ -200,11 +200,9 @@ bool RenderableRings::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer);
     createPlane();
     loadTexture();
-
-    return isReady();
 }
 
-bool RenderableRings::deinitialize() {
+void RenderableRings::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -216,8 +214,6 @@ bool RenderableRings::deinitialize() {
 
     OsEng.renderEngine().removeRenderProgram(_shader);
     _shader = nullptr;
-
-    return true;
 }
 
 void RenderableRings::render(const RenderData& data, RendererTasks&) {

@@ -52,8 +52,6 @@ public:
         std::shared_ptr<LayerManager> layerManager);
     ~ChunkedLodGlobe();
     
-    bool initialize() override;
-    bool deinitialize() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;

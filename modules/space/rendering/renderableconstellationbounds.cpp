@@ -164,7 +164,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     );
 }
 
-bool RenderableConstellationBounds::initialize() {
+void RenderableConstellationBounds::initialize() {
     _program = OsEng.renderEngine().buildRenderProgram(
         "ConstellationBounds",
         "${MODULE_SPACE}/shaders/constellationbounds_vs.glsl",
@@ -189,11 +189,9 @@ bool RenderableConstellationBounds::initialize() {
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindVertexArray(0);
-
-    return true;
 }
 
-bool RenderableConstellationBounds::deinitialize() {
+void RenderableConstellationBounds::deinitialize() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
@@ -203,8 +201,6 @@ bool RenderableConstellationBounds::deinitialize() {
         OsEng.renderEngine().removeRenderProgram(_program);
         _program = nullptr;
     }
-
-    return true;
 }
 
 bool RenderableConstellationBounds::isReady() const {
