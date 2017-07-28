@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,65 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+#version __CONTEXT__
 
-#include <openspace/rendering/renderable.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+layout(location = 0) in vec3 in_position;
 
-#include <ghoul/opengl/ghoul_gl.h>
+out float vs_screenSpaceDepth;
 
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
-namespace openspace::documentation { class Documentation; }
+void main() {
+    const vec4 positionClipSpace = projectionTransform * modelViewTransform * vec4(in_position, 1.0);
+    const vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    vs_screenSpaceDepth = positionScreenSpace.w;
 
-namespace openspace {
-
-class RenderableSphericalGrid : public Renderable {
-public:
-    RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableSphericalGrid();
-
-    bool initialize() override;
-    bool deinitialize() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    struct Vertex {
-        float location[3];
-    };
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _gridProgram;
-
-    properties::DMat4Property _gridMatrix;
-    properties::Vec4Property _gridColor;
-    properties::IntProperty _segments;
-    properties::FloatProperty _lineWidth;
-    properties::FloatProperty _radius;
-
-    GLuint _vaoID;
-    GLuint _vBufferID;
-    GLuint _iBufferID;
-
-    GLenum _mode;
-    unsigned int _isize;
-    unsigned int _vsize;
-    std::vector<Vertex> _varray;
-    std::vector<int> _iarray;
-};
-
-}// namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+    gl_Position = positionScreenSpace;
+}

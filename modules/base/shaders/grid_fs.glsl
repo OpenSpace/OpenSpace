@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,65 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-#include <openspace/rendering/renderable.h>
+in float vs_screenSpaceDepth;
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+uniform vec4 gridColor;
 
-#include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
-
-namespace openspace::documentation { class Documentation; }
-
-namespace openspace {
-
-class RenderableSphericalGrid : public Renderable {
-public:
-    RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableSphericalGrid();
-
-    bool initialize() override;
-    bool deinitialize() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    struct Vertex {
-        float location[3];
-    };
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _gridProgram;
-
-    properties::DMat4Property _gridMatrix;
-    properties::Vec4Property _gridColor;
-    properties::IntProperty _segments;
-    properties::FloatProperty _lineWidth;
-    properties::FloatProperty _radius;
-
-    GLuint _vaoID;
-    GLuint _vBufferID;
-    GLuint _iBufferID;
-
-    GLenum _mode;
-    unsigned int _isize;
-    unsigned int _vsize;
-    std::vector<Vertex> _varray;
-    std::vector<int> _iarray;
-};
-
-}// namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+Fragment getFragment() {
+    Fragment frag;
+    frag.color = gridColor;
+    frag.depth = vs_screenSpaceDepth;
+    return frag;
+}

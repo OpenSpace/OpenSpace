@@ -1,0 +1,8 @@
+<GDAL_WMS>
+  <Service name="TiledWMS">
+    <ServerUrl>https://gibs.earthdata.nasa.gov/twms/twms.cgi?</ServerUrl>
+    <TiledGroupName>MODIS TERRA tileset</TiledGroupName>
+    <Change key="${time}">2016-04-12</Change>
+  </Service>
+  <MaxConnections>20</MaxConnections>
+</GDAL_WMS>

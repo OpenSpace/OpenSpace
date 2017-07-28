@@ -187,7 +187,7 @@ bool RenderablePlane::initialize() {
     _shader = OsEng.renderEngine().buildRenderProgram("PlaneProgram",
         "${MODULE_BASE}/shaders/plane_vs.glsl",
         "${MODULE_BASE}/shaders/plane_fs.glsl"
-        );
+    );
 
     loadTexture();
 

@@ -26,63 +26,152 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/programobject.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
 namespace {
-    static const char* _loggerCat = "RenderableSphericalGrid";
-    const char* KeyGridType = "GridType";
-    const char* KeyGridColor = "GridColor";
-    const char* KeyGridMatrix = "GridMatrix";
-    const char* KeyGridSegments = "GridSegments";
-    const char* KeyGridRadius = "GridRadius";
-    const char* KeyGridParentsRotation = "ParentsRotation";
-    const glm::vec2 GridRadius = { 1.f, 20.f };
+    static const openspace::properties::Property::PropertyInfo GridColorInfo = {
+        "GridColor",
+        "Grid Color",
+        "This value determines the color of the grid lines that are rendered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo GridMatrixInfo = {
+        "GridMatrix",
+        "Grid Matrix",
+        "This value specifies the local transformation matrix that defines the "
+        "orientation of this grid relative to the parent's rotation."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+        "Segments",
+        "Number of Segments",
+        "This value specifies the number of segments that are used to render the "
+        "surrounding sphere."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width of the spherical grid."
+    };
+
+    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+        "Radius",
+        "Radius",
+        "This value specifies the radius of the grid."
+    };
 } // namespace
 
 namespace openspace {
 
+documentation::Documentation RenderableSphericalGrid::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableSphericalGrid",
+        "base_renderable_sphericalgrid",
+        {
+            {
+                GridMatrixInfo.identifier,
+                new DoubleMatrix4x4Verifier,
+                Optional::No,
+                GridMatrixInfo.description
+            },
+            {
+                GridColorInfo.identifier,
+                new DoubleVector4Verifier,
+                Optional::Yes,
+                GridColorInfo.description
+            },
+            {
+                SegmentsInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                SegmentsInfo.description
+            },
+            {
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LineWidthInfo.description
+            },
+            {
+                RadiusInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                RadiusInfo.description
+            }
+        }
+    };
+}
+
+
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)  
     : Renderable(dictionary)
     , _gridProgram(nullptr)
+    , _gridMatrix(GridMatrixInfo, glm::mat4(1.f))
+    , _gridColor(
+        GridColorInfo,
+        glm::vec4(0.5f, 0.5, 0.5f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _segments(SegmentsInfo, 36, 4, 10000)
+    , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
+    , _radius(RadiusInfo, 1e20f, 1.f, 1e35f)
     , _vaoID(0)
     , _vBufferID(0)
     , _iBufferID(0)
     , _mode(GL_LINES)
 {
-    _gridMatrix = glm::mat4(1);
-    dictionary.getValue(KeyGridType, _gridType);
-    dictionary.getValue(KeyGridColor, _gridColor);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableSphericalGrid"
+    );
 
-    staticGrid = dictionary.getValue(KeyGridMatrix, _gridMatrix);
-    if (!staticGrid){
-        staticGrid = dictionary.getValue(KeyGridParentsRotation, _parentsRotation);
+    _gridMatrix = dictionary.value<glm::dmat4>(GridMatrixInfo.identifier);
+    addProperty(_gridMatrix);
+
+    if (dictionary.hasKey(GridColorInfo.identifier)) {
+        _gridColor = dictionary.value<glm::vec4>(GridColorInfo.identifier);
     }
-    
-    _segments = static_cast<int>(dictionary.value<double>(KeyGridSegments));
-    //dictionary.getValue(KeyGridSegments, _segments);
+    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_gridColor);
 
+    if (dictionary.hasKey(SegmentsInfo.identifier)) {
+        _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
+    }
+    //addProperty(_segments);
 
-    /*glm::vec2 radius;
-    dictionary.getValue(constants::renderablesphericalgrid::gridRadius, radius);
-    */
+    if (dictionary.hasKey(LineWidthInfo.identifier)) {
+        _lineWidth = static_cast<float>(
+            dictionary.value<double>(LineWidthInfo.identifier)
+        );
+    }
+    addProperty(_lineWidth);
+
+    if (dictionary.hasKey(RadiusInfo.identifier)) {
+        _radius = static_cast<float>(
+            dictionary.value<double>(RadiusInfo.identifier)
+        );
+    }
 
     _isize = int(6 * _segments * _segments);
     _vsize = int((_segments + 1) * (_segments + 1));
-    _varray = new Vertex[_vsize];
-    _iarray = new int[_isize];
-
-    static_assert(sizeof(Vertex) == 64, "The size of the Vertex needs to be 64 for performance");
+    _varray.resize(_vsize);
+    _iarray.resize(_isize);
 
     int nr = 0;
     const float fsegments = static_cast<float>(_segments);
-    const float r = static_cast<float>(GridRadius[0]);
-
-    //int nr2 = 0;
+    const float r = _radius;
 
     for (int nSegment = 0; nSegment <= _segments; ++nSegment) {
         // define an extra vertex around the y-axis due to texture mapping
@@ -107,19 +196,13 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
             //const float t1 = fj / fsegments;
             const float t2 = fi / fsegments;
 
-            // tex coord. not used, use to manip color 
-            if (round(y) == 0.0f) _varray[nr].tex[0] = -2;
-            _varray[nr].tex[1] = t2;
-
-            glm::vec4 tmp(x, y, z, 1);
+            glm::vec4 tmp (x, y, z, 1);
             glm::mat4 rot = glm::rotate(glm::mat4(1), static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-            tmp = _gridMatrix*rot*tmp;
+            tmp = glm::vec4(_gridMatrix.value() * glm::dmat4(rot) * glm::dvec4(tmp));
             
             for (int i = 0; i < 3; i++){
                 _varray[nr].location[i]  = tmp[i];
-                _varray[nr].normal[i] = normal[i];
             }
-            _varray[nr].location[3] = static_cast<GLfloat>(GridRadius[1]);
             ++nr;
         }
     }
@@ -137,13 +220,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     }
 }
 
-RenderableSphericalGrid::~RenderableSphericalGrid(){
-    deinitialize();
-
-    // Delete not done in deinitialize because new is done in constructor
-    delete[] _varray;
-    delete[] _iarray;
-}
+RenderableSphericalGrid::~RenderableSphericalGrid() {}
 
 bool RenderableSphericalGrid::isReady() const {
     bool ready = true;
@@ -151,7 +228,7 @@ bool RenderableSphericalGrid::isReady() const {
     return ready;
 }
 
-bool RenderableSphericalGrid::deinitialize(){
+bool RenderableSphericalGrid::deinitialize() {
     glDeleteVertexArrays(1,&_vaoID);
     _vaoID = 0;
 
@@ -164,10 +241,14 @@ bool RenderableSphericalGrid::deinitialize(){
     return true;
 }
 
-bool RenderableSphericalGrid::initialize(){
+bool RenderableSphericalGrid::initialize() {
     bool completeSuccess = true;
-    if (_gridProgram == nullptr)
-        completeSuccess &= OsEng.ref().configurationManager().getValue("GridProgram", _gridProgram);
+
+    _gridProgram = OsEng.renderEngine().buildRenderProgram(
+            "GridProgram",
+            "${MODULE_BASE}/shaders/grid_vs.glsl",
+            "${MODULE_BASE}/shaders/grid_fs.glsl"
+    );
 
     // Initialize and upload to graphics card
     glGenVertexArrays(1, &_vaoID);
@@ -177,20 +258,14 @@ bool RenderableSphericalGrid::initialize(){
     // First VAO setup
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 
@@ -200,39 +275,29 @@ bool RenderableSphericalGrid::initialize(){
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    glm::mat4 transform;
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            transform[i][j] = static_cast<float>(_parentMatrix[i][j]);
-        }
-    }
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    _gridProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _gridProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
 
-    // setup the data to the shader
-    _gridProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
-    _gridProgram->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _gridProgram->setUniform("ModelTransform", transform);
-    setPscUniforms(*_gridProgram, data.camera, data.position);
     _gridProgram->setUniform("gridColor", _gridColor);
 
-    glLineWidth(0.5f);
+    glLineWidth(_lineWidth);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glEnable(GL_LINE_SMOOTH);
 
-    glBindVertexArray(_vaoID);  // select first VAO
+    glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glDrawElements(_mode, _isize, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
-}
-
-void RenderableSphericalGrid::update(const UpdateData& data) {
-    _parentMatrix = SpiceManager::ref().positionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time.j2000Seconds());
-
 }
 
 } // namespace openspace

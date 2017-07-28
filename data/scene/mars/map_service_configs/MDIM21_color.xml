@@ -1,0 +1,22 @@
+<GDAL_WMS>
+    <Service name="WMS">
+        <Version>1.3.0</Version>
+        <ServerUrl>http://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_simp_cyl.map</ServerUrl>
+        <CRS>EPSG:4326</CRS>
+        <ImageFormat>image/png</ImageFormat>
+        <Layers>MDIM21_color</Layers>
+        <Transparent>TRUE</Transparent>
+    </Service>
+    <DataWindow>
+        <UpperLeftX>-180.0</UpperLeftX>
+        <UpperLeftY>90.0</UpperLeftY>
+        <LowerRightX>180.0</LowerRightX>
+        <LowerRightY>-90.0</LowerRightY>
+        <SizeX>2048</SizeX>
+        <SizeY>1024</SizeY>
+        <YOrigin>bottom</YOrigin>
+    </DataWindow>
+</GDAL_WMS>
+<!--
+http://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_simp_cyl.map&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.3.0&LAYERS=MDIM21_color&WIDTH=552&HEIGHT=701&CRS=EPSG:4326&BBOX=-44.04553530613228,-180,79.17712094386772,-82.96875
+-->
