@@ -48,15 +48,15 @@ class DataManager {
   }
 
   getValue(key, receivingCallback) {
-    const message = {
+    const message = this.wrapMessage({
       type: TOPIC_TYPES.get,
       payload: {
-        getProperty: key,
+        propertyUri: key,
       },
-    };
+    });
     const callback = (...args) => {
       this.connection.clearTopic(message.topic);
-      receivingCallback(args);
+      receivingCallback(...args);
     };
     this.send(message, callback);
   }
