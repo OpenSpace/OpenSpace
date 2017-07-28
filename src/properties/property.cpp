@@ -50,7 +50,10 @@ const char* Property::ViewOptions::LightPosition = "lightPosition";
 const char* Property::IdentifierKey = "Identifier";
 const char* Property::NameKey = "Name";
 const char* Property::TypeKey = "Type";
+const char* Property::DescriptionKey = "Description";
+const char* Property::JsonValueKey = "Value";
 const char* Property::MetaDataKey = "MetaData";
+const char* Property::AdditionalDataKey = "AdditionalData";
 
 Property::Property(std::string identifier, std::string guiName, Visibility visibility)
     : _owner(nullptr)
@@ -105,6 +108,15 @@ int Property::typeLua() const {
 
 bool Property::getStringValue(std::string&) const {
     return false;
+}
+
+std::string Property::getStringValue() const {
+    std::string value;
+    bool status = getStringValue(value);
+    if (!status) {
+        throw std::runtime_error("Could not get string value");
+    }
+    return value;
 }
 
 bool Property::setStringValue(std::string) {
@@ -166,6 +178,31 @@ const ghoul::Dictionary& Property::metaData() const {
     return _metaData;
 }
 
+std::string Property::toJson() const {
+    std::string result = "{";
+    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseDescription() + ", ";
+    result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue();
+    result += "}";
+    return result;
+}
+
+std::string Property::jsonValue() const {
+    std::string jsonString = "";
+    for (char c : getStringValue()) {
+        switch (c) {
+            case '\t':
+                jsonString += "\\t";
+                break;
+            case '\\':
+                jsonString += "\\\\";
+                break;
+            default:
+                jsonString += c;
+        }
+    }
+    return jsonString;
+}
+
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
     OnChangeHandle handle = _currentHandleValue++;
@@ -210,12 +247,14 @@ void Property::notifyListener() {
 }
 
 std::string Property::generateBaseDescription() const {
-    return
-        std::string(TypeKey) + " = \"" + className() + "\", " +
-        IdentifierKey + " = \"" + fullyQualifiedIdentifier() + "\", " +
-        NameKey + " = \"" + guiName() + "\", " +
-        generateMetaDataDescription() + ", " + 
-        generateAdditionalDescription();
+    std::string result = "{ ";
+    result += "\"" + std::string(TypeKey) + "\": \"" + className() + "\", ";
+    result += "\"" + std::string(IdentifierKey) + "\": \"" + fullyQualifiedIdentifier() + "\", ";
+    result += "\"" + std::string(NameKey) + "\": \"" + guiName() + "\", ";
+    result += "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataDescription() + ", ";
+    result += "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalDescription();
+    result += " }";
+    return result;
 }
 
 std::string Property::generateMetaDataDescription() const {
@@ -225,20 +264,25 @@ std::string Property::generateMetaDataDescription() const {
         { Visibility::User, "User" },
         { Visibility::Hidden, "Hidden" }
     };
-    Visibility visibility = _metaData.value<Visibility>(MetaDataKeyVisibility);
-    bool isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
-
+    Visibility visibility = static_cast<Visibility>(
+        _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility));
     std::string vis = VisibilityConverter.at(visibility);
 
-    return
-        std::string(MetaDataKey) + " = {" +
-        MetaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
-        MetaDataKeyVisibility + " = " + vis + "," +
-        MetaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
+    bool isReadOnly = false;
+    if (_metaData.hasKey(MetaDataKeyReadOnly)) {
+        isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
+    }
+
+    std::string result = "{ ";
+    result += "\"" + std::string(MetaDataKeyGroup) + "\": \"" + groupIdentifier() + "\", ";
+    result += "\"" + std::string(MetaDataKeyVisibility) + "\": \"" + vis + "\", ";
+    result += "\"" + std::string(MetaDataKeyReadOnly) + "\": " + (isReadOnly ? "true" : "false");
+    result += " }";
+    return result;
 }
 
 std::string Property::generateAdditionalDescription() const {
-    return "";
+    return "{}";
 }
 
 } // namespace openspace::properties

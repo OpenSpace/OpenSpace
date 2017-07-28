@@ -64,6 +64,8 @@ public:
      * \param value The ignored value
      */
     void set(ghoul::any value);
+
+    std::string toJson() const override;
 };
 
 } // namespace openspace::properties

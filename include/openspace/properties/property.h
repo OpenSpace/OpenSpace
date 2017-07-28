@@ -185,6 +185,14 @@ public:
     virtual bool getStringValue(std::string& value) const;
 
     /**
+     * This method encodes the encapsulated value of this Property as a
+     * <code>std::string</code>.
+     * \return the string value
+     * \throws an exception if value couldn't be fetched
+     */
+    virtual std::string getStringValue() const;
+
+    /**
      * This method sets the value encapsulated by this Property by deserializing the
      * passed <code>std::string</code>. The specific details of the deserialization are up
      * to the Property developer. The implementation has to be synchronized with the
@@ -358,16 +366,26 @@ public:
     const ghoul::Dictionary& metaData() const;
 
     /**
-     * Convert the Property into a string containing a JSON representation of the Property
+     * Convert the Property into a string containing a JSON representation of the Property.
+     * Includes description of the object.
      * @return the JSON string
      */
-    std::string toJson() const { return "{}"; }
+    virtual std::string toJson() const;
+
+    /**
+     * Get a valid JSON formatted representation of the Property's value.
+     * @return the value in a json compatible format
+     */
+    virtual std::string jsonValue() const;
 
 protected:
     static const char* IdentifierKey;
     static const char* NameKey;
     static const char* TypeKey;
+    static const char* DescriptionKey;
+    static const char* JsonValueKey;
     static const char* MetaDataKey;
+    static const char* AdditionalDataKey;
 
     /**
      * Creates the information that is general to every Property and adds the

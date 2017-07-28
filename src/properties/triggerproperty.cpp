@@ -44,4 +44,11 @@ void TriggerProperty::set(ghoul::any) {
     notifyListener();
 }
 
+std::string TriggerProperty::toJson() const {
+    std::string result = "{";
+    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseDescription();
+    result += "}";
+    return result;
+}
+
 } // namespace openspace::properties
