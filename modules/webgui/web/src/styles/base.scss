@@ -6,9 +6,31 @@
     margin: 0;
     padding: 0;
   }
+
   html, body, #root {
     height: 100%;
     width: 100%;
     font-size: 14px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    background-color: rgba(0,0,0,0);
+    -webkit-border-radius: 100px;
+  }
+  ::-webkit-scrollbar:hover {
+    background-color: rgba(0, 0, 0, 0.09);
+  }
+
+  ::-webkit-scrollbar-thumb:vertical {
+    background: rgba(0,0,0,0.5);
+    -webkit-border-radius: 100px;
+    background-clip: padding-box;
+    border: 2px solid rgba(0, 0, 0, 0);
+    min-height: 10px;
+  }
+  ::-webkit-scrollbar-thumb:vertical:active {
+    background: rgba(0,0,0,0.61); /* Some darker color when you click it */
+    -webkit-border-radius: 100px;
   }
 }
