@@ -1,16 +1,40 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Pane from './Pane';
+import LoadingString from '../common/LoadingString/LoadingString';
+import DataManager from '../../api/DataManager';
 
 class ViewPane extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { properties: [], hasData: false };
+
+    this.receiveData = this.receiveData.bind(this);
+  }
+
   componentDidMount() {
     // subscribe to data
+    DataManager.getValue('__all', this.receiveData)
+  }
+
+  receiveData({ value }) {
+    this.setState({ properties: value, hasData: true });
   }
 
   render() {
     return (
       <Pane title="View" closeCallback={this.props.closeCallback}>
-        hej
+        { !this.state.hasData && (
+          <LoadingString loading>
+            Loading...
+          </LoadingString>
+        )}
+
+        { this.state.properties.map(prop => (
+          <div key={prop.uri}>
+            { prop.name}: { prop.key } ({ prop.uri })
+          </div>
+        )) }
       </Pane>
     );
   }

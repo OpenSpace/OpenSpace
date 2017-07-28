@@ -9,6 +9,8 @@ $font-size: 1rem;
   flex-basis: 1px;
   flex-grow: 1;
   height: unquote("calc(100% - #{$sidebar-tab-height})");
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .Pane header {
