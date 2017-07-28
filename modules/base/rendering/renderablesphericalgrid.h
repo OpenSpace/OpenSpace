@@ -54,6 +54,7 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
 
@@ -69,6 +70,8 @@ protected:
     properties::IntProperty _segments;
     properties::FloatProperty _lineWidth;
     properties::FloatProperty _radius;
+
+    bool _gridIsDirty;
 
     GLuint _vaoID;
     GLuint _vBufferID;

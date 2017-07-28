@@ -81,7 +81,7 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
             {
                 GridMatrixInfo.identifier,
                 new DoubleMatrix4x4Verifier,
-                Optional::No,
+                Optional::Yes,
                 GridMatrixInfo.description
             },
             {
@@ -123,9 +123,10 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _segments(SegmentsInfo, 36, 4, 10000)
+    , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _radius(RadiusInfo, 1e20f, 1.f, 1e35f)
+    , _gridIsDirty(true)
     , _vaoID(0)
     , _vBufferID(0)
     , _iBufferID(0)
@@ -137,7 +138,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         "RenderableSphericalGrid"
     );
 
-    _gridMatrix = dictionary.value<glm::dmat4>(GridMatrixInfo.identifier);
+    if (dictionary.hasKey(GridMatrixInfo.identifier)) {
+        _gridMatrix = dictionary.value<glm::dmat4>(GridMatrixInfo.identifier);
+    }
     addProperty(_gridMatrix);
 
     if (dictionary.hasKey(GridColorInfo.identifier)) {
@@ -149,7 +152,8 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     if (dictionary.hasKey(SegmentsInfo.identifier)) {
         _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
     }
-    //addProperty(_segments);
+    _segments.onChange([&]() { _gridIsDirty = true; });
+    addProperty(_segments);
 
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(
@@ -163,61 +167,8 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
             dictionary.value<double>(RadiusInfo.identifier)
         );
     }
-
-    _isize = int(6 * _segments * _segments);
-    _vsize = int((_segments + 1) * (_segments + 1));
-    _varray.resize(_vsize);
-    _iarray.resize(_isize);
-
-    int nr = 0;
-    const float fsegments = static_cast<float>(_segments);
-    const float r = _radius;
-
-    for (int nSegment = 0; nSegment <= _segments; ++nSegment) {
-        // define an extra vertex around the y-axis due to texture mapping
-        for (int j = 0; j <= _segments; j++) {
-            const float fi = static_cast<float>(nSegment);
-            const float fj = static_cast<float>(j);
-
-            // inclination angle (north to south)
-            const float theta = fi * float(M_PI) / fsegments*2.f;  // 0 -> PI
-
-            // azimuth angle (east to west)
-            const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
-
-            const float x = r * sin(phi) * sin(theta);  //
-            const float y = r * cos(theta);             // up
-            const float z = r * cos(phi) * sin(theta);  //
-            
-            glm::vec3 normal = glm::vec3(x, y, z);
-            if (!(x == 0.f && y == 0.f && z == 0.f))
-                normal = glm::normalize(normal);
-
-            //const float t1 = fj / fsegments;
-            const float t2 = fi / fsegments;
-
-            glm::vec4 tmp (x, y, z, 1);
-            glm::mat4 rot = glm::rotate(glm::mat4(1), static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-            tmp = glm::vec4(_gridMatrix.value() * glm::dmat4(rot) * glm::dvec4(tmp));
-            
-            for (int i = 0; i < 3; i++){
-                _varray[nr].location[i]  = tmp[i];
-            }
-            ++nr;
-        }
-    }
-    nr = 0;
-    // define indices for all triangles
-    for (int i = 1; i <= _segments; ++i) {
-        for (int j = 0; j < _segments; ++j) {
-            const int t = _segments + 1;
-            _iarray[nr] = t * (i - 1) + j + 0; ++nr;
-            _iarray[nr] = t * (i + 0) + j + 0; ++nr;
-            _iarray[nr] = t * (i + 0) + j + 1; ++nr;
-            _iarray[nr] = t * (i - 1) + j + 1; ++nr;
-            _iarray[nr] = t * (i - 1) + j + 0; ++nr;
-        }
-    }
+    _radius.onChange([&]() { _gridIsDirty = true; });
+    addProperty(_radius);
 }
 
 RenderableSphericalGrid::~RenderableSphericalGrid() {}
@@ -242,34 +193,23 @@ bool RenderableSphericalGrid::deinitialize() {
 }
 
 bool RenderableSphericalGrid::initialize() {
-    bool completeSuccess = true;
-
     _gridProgram = OsEng.renderEngine().buildRenderProgram(
             "GridProgram",
             "${MODULE_BASE}/shaders/grid_vs.glsl",
             "${MODULE_BASE}/shaders/grid_fs.glsl"
     );
 
-    // Initialize and upload to graphics card
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vBufferID);
     glGenBuffers(1, &_iBufferID);
 
-    // First VAO setup
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray.data(), GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
-    
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
-
+    glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
-    return completeSuccess;
+    return true;
 }
 
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
@@ -298,6 +238,75 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
+}
+
+void RenderableSphericalGrid::update(const UpdateData& data) {
+    if (_gridIsDirty) {
+        _isize = int(6 * _segments * _segments);
+        _vsize = int((_segments + 1) * (_segments + 1));
+        _varray.resize(_vsize);
+        _iarray.resize(_isize);
+
+        int nr = 0;
+        const float fsegments = static_cast<float>(_segments);
+        const float r = _radius;
+
+        for (int nSegment = 0; nSegment <= _segments; ++nSegment) {
+            // define an extra vertex around the y-axis due to texture mapping
+            for (int j = 0; j <= _segments; j++) {
+                const float fi = static_cast<float>(nSegment);
+                const float fj = static_cast<float>(j);
+
+                // inclination angle (north to south)
+                const float theta = fi * float(M_PI) / fsegments*2.f;  // 0 -> PI
+
+                                                                       // azimuth angle (east to west)
+                const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
+
+                const float x = r * sin(phi) * sin(theta);  //
+                const float y = r * cos(theta);             // up
+                const float z = r * cos(phi) * sin(theta);  //
+
+                glm::vec3 normal = glm::vec3(x, y, z);
+                if (!(x == 0.f && y == 0.f && z == 0.f))
+                    normal = glm::normalize(normal);
+
+                //const float t1 = fj / fsegments;
+                const float t2 = fi / fsegments;
+
+                glm::vec4 tmp(x, y, z, 1);
+                glm::mat4 rot = glm::rotate(glm::mat4(1), static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+                tmp = glm::vec4(_gridMatrix.value() * glm::dmat4(rot) * glm::dvec4(tmp));
+
+                for (int i = 0; i < 3; i++) {
+                    _varray[nr].location[i] = tmp[i];
+                }
+                ++nr;
+            }
+        }
+        nr = 0;
+        // define indices for all triangles
+        for (int i = 1; i <= _segments; ++i) {
+            for (int j = 0; j < _segments; ++j) {
+                const int t = _segments + 1;
+                _iarray[nr] = t * (i - 1) + j + 0; ++nr;
+                _iarray[nr] = t * (i + 0) + j + 0; ++nr;
+                _iarray[nr] = t * (i + 0) + j + 1; ++nr;
+                _iarray[nr] = t * (i - 1) + j + 1; ++nr;
+                _iarray[nr] = t * (i - 1) + j + 0; ++nr;
+            }
+        }
+
+        glBindVertexArray(_vaoID);
+        glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
+        glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray.data(), GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+            reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
+    }
 }
 
 } // namespace openspace
