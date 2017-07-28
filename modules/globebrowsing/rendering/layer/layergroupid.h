@@ -29,8 +29,8 @@
 
 namespace openspace::globebrowsing::layergroupid {
 
-static const int NUM_LAYER_GROUPS = 5;
-static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+static constexpr int NUM_LAYER_GROUPS = 5;
+static constexpr const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
     "Overlays",
@@ -47,8 +47,8 @@ enum GroupID {
     Unknown,
 };
 
-static const int NUM_LAYER_TYPES = 8;
-static const std::string LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
+static constexpr int NUM_LAYER_TYPES = 8;
+static constexpr const char* LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
     "DefaultTileLayer",
     "SingleImageTileLayer",
     "SizeReferenceTileLayer",
@@ -74,8 +74,8 @@ enum class TypeID {
     SolidColor = 7,
 };
 
-static const int NUM_ADJUSTMENT_TYPES = 3;
-static const std::string ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
+static constexpr int NUM_ADJUSTMENT_TYPES = 3;
+static constexpr const char* ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
     "None",
     "ChromaKey",
     "TransferFunction",
@@ -90,8 +90,8 @@ enum class AdjustmentTypeID {
     TransferFunction = 2,
 };
 
-static const int NUM_BLEND_MODES = 5;
-static const std::string BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
+static constexpr int NUM_BLEND_MODES = 5;
+static constexpr const char* BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
     "Normal",
     "Multiply",
     "Add",
