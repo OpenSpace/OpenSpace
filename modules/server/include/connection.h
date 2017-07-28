@@ -63,7 +63,7 @@ public:
     std::map<size_t, std::unique_ptr<Topic>> _topics;
     std::shared_ptr<ghoul::io::Socket> socket;
     std::thread thread;
-    bool isAuthenticated();
+    bool needsToBeAuthenticated();
     bool active;
 
 private:

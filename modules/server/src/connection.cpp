@@ -42,6 +42,7 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
     _topicFactory.registerClass<SubscriptionTopic>("subscribe");
     _topicFactory.registerClass<BounceTopic>("bounce");
 
+    // see if the default config for requiring auth (on) is overwritten
     const bool hasAuthenticationConfiguration = OsEng.configurationManager().hasKeyAndValue<bool>(
             ConfigurationManager::KeyRequireSocketAuthentication);
     if (hasAuthenticationConfiguration) {
@@ -53,12 +54,24 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
 }
 
 void Connection::handleMessage(std::string message) {
+    // We want exceptions when debugging, but we don't want incoming messages
+    // to cause crashes on Release.
+#if (defined(NDEBUG) || !defined(DEBUG))
+    nlohmann::json j = nlohmann::json::parse(message.c_str());
+    handleJson(j);
+#else
     try {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
-        handleJson(j);
+        try {
+            handleJson(j);
+        }
+        catch (...) {
+            LERROR("JSON handling error from: " + message);
+        }
     } catch (...) {
-        LERROR("Json parse/handling error");
+        LERROR("Could not parse JSON: " + message);
     }
+#endif
 }
 
 void Connection::handleJson(nlohmann::json j) {
@@ -112,7 +125,7 @@ void Connection::sendJson(const nlohmann::json &j) {
     sendMessage(j.dump());
 }
 
-bool Connection::isAuthenticated() {
+bool Connection::needsToBeAuthenticated() {
     // require either auth to be disabled or client to be authenticated
     return !_requireAuthentication || _isAuthenticated;
 }
