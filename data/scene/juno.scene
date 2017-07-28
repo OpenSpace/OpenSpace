@@ -55,8 +55,10 @@ return {
         "saturn/saturn",
         "uranus",
         "neptune",
-        "stars",
-        "milkyway",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
         "missions/juno"
     }
 }

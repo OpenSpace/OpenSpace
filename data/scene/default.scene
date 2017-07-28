@@ -73,6 +73,10 @@ function postInitialization()
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
 
+    openspace.setPropertyValue("Ecliptic Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("Equatorial Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("Galactic Grid.renderable.Enabled", false)
+
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
     openspace.printInfo("Done setting default values")
@@ -98,12 +102,13 @@ return {
         "saturn",
         "uranus",
         "neptune",
-        "stars",
-        -- "stars-denver",
-        "milkyway",
-        --"milkyway-eso",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
         -- "satellites"
         "constellationbounds",
+        "grids"
     }
 }
 
