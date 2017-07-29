@@ -158,10 +158,47 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     addProperty(_distance);
 
     fillSelectionProperty();
+    _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
     addProperty(_constellationSelection);
-    _constellationSelection.onChange(
-        [this]() { selectionPropertyHasChanged(); }
-    );
+
+    if (dictionary.hasKey(SelectionInfo.identifier)) {
+        const ghoul::Dictionary selection = dictionary.value<ghoul::Dictionary>(
+            SelectionInfo.identifier
+        );
+
+        std::vector<properties::SelectionProperty::Option> options =
+            _constellationSelection.options();
+        std::vector<int> selectedIndices;
+
+        for (int i = 1; i <= selection.size(); ++i) {
+            const std::string s = selection.value<std::string>(std::to_string(i));
+
+            auto it = std::find_if(
+                options.begin(),
+                options.end(),
+                [&s](const properties::SelectionProperty::Option& o) {
+                    return o.description == s;
+                }
+            );
+            if (it == options.end()) {
+                // The user has specified a constellation name that doesn't exist
+                LWARNINGC(
+                    "RenderableConstellationBounds",
+                    "Option '" << s << "' not found in list of constellations"
+                );
+            }
+            else {
+                // If the found the option, we push the index of the found value into the
+                // array
+                selectedIndices.push_back(static_cast<int>(
+                    std::distance(options.begin(), it)
+                ));
+            }
+        }
+
+        _constellationSelection = selectedIndices;
+    }
+
 }
 
 void RenderableConstellationBounds::initialize() {
