@@ -39,7 +39,7 @@ namespace ghoul::opengl {
     class ProgramObject;
 } // namespace ghoul::opengl
 
-namespace openspace::documentation { class Documentation; }
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
