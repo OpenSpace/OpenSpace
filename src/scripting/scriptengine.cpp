@@ -513,9 +513,9 @@ LuaLibrary lib = {
             "directoryForPath",
             &luascriptfunctions::directoryForPath,
             "string",
-            "This function extracts the directory part of the passed path. For "
-            "example, if the parameter is 'C:\\OpenSpace\\foobar\\foo.txt', this "
-            "function returns 'C:\\OpenSpace\\foobar'."
+            "This function extracts the directory part of the passed path. For example, "
+            "if the parameter is 'C:/OpenSpace/foobar/foo.txt', this function returns "
+            "'C:/OpenSpace/foobar'."
             }
         }
     };

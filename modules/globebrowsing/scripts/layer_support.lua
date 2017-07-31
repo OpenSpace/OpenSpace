@@ -56,8 +56,8 @@ openspace.globebrowsing.documentation = {
             "contains the table for the color layer of a RenderableGlobe. The second " ..
             "return value contains the table for the height layer of a RenderableGlobe." ..
             "Usage: local color, height = openspace.globebrowsing.parseInfoFile(file)" ..
-            "openspace.globebrowsing.addLayer('Earth', 'ColorLayers', color)" ..
-            "openspace.globebrowsing.addLayer('Earth', 'HeightLayers', height)"
+            "openspace.globebrowsing.addLayer(\"Earth\", \"ColorLayers\", color)" ..
+            "openspace.globebrowsing.addLayer(\"Earth\", \"HeightLayers\", height)"
 
     },
     {
@@ -68,7 +68,7 @@ openspace.globebrowsing.documentation = {
             "argument to this function. The color and height tables retrieved from these " ..
             "info files are then added to the RenderableGlobe identified by name passed " ..
             "to the second argument." ..
-            "Usage: openspace.globebrowsing.addBlendingLayersFromDirectory(directory, 'Earth')"
+            "Usage: openspace.globebrowsing.addBlendingLayersFromDirectory(directory, \"Earth\")"
     }
 }
 
