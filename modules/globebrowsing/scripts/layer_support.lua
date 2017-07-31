@@ -1,15 +1,5 @@
 openspace.globebrowsing.documentation = {
     {
-        Name = "createTextureLayers",
-        Arguments = "table",
-        Documentation = "Creates a table used in the 'ColorLayers', 'GrayScaleLayers', or 'GrayScaleColorOverlays' of a RenderableGlobe."
-    },
-    {
-        Name = "createHeightLayers",
-        Arguments = "table",
-        Documentation = "Creates a table used in the 'HeightLayers' of a RenderableGlobe."
-    },
-    {
         Name = "createTemporalGibsGdalXml",
         Arguments = "string, string, string, string, string, string",
         Documentation =
@@ -57,33 +47,30 @@ openspace.globebrowsing.documentation = {
                     ")" ..
                 "}" ..
             ")"
+    },
+    {
+        Name = "parseInfoFile",
+        Arguments = "string",
+        Documentation =
+            "Parses the passed info file and returns two tables. The first return value " ..
+            "contains the table for the color layer of a RenderableGlobe. The second " ..
+            "return value contains the table for the height layer of a RenderableGlobe." ..
+            "Usage: local color, height = openspace.globebrowsing.parseInfoFile(file)" ..
+            "openspace.globebrowsing.addLayer('Earth', 'ColorLayers', color)" ..
+            "openspace.globebrowsing.addLayer('Earth', 'HeightLayers', height)"
+
+    },
+    {
+        Name = "addBlendingLayersFromDirectory",
+        Arguments = "string, string",
+        Documentation =
+            "Retrieves all info files recursively in the directory passed as the first " ..
+            "argument to this function. The color and height tables retrieved from these " ..
+            "info files are then added to the RenderableGlobe identified by name passed " ..
+            "to the second argument." ..
+            "Usage: openspace.globebrowsing.addBlendingLayersFromDirectory(directory, 'Earth')"
     }
 }
-
--- Creates a table used in the 'ColorLayers', 'GrayScaleLayers', or 'GrayScaleColorOverlays'
--- of a RenderableGlobe
--- Usage:
--- table.unpack(openspace.globebrowsing.createTextureLayers(p))
--- where p is an array that contains tables with 'Name' and 'Texture' values
-openspace.globebrowsing.createTextureLayers = function (patches)
-    result = {}
-    for k,v in pairs(patches) do
-        table.insert(result, { Name = v["Name"], FilePath = v["Texture"] })
-    end
-    return result
-end
-
--- Creates a table used in the 'HeightLayers' of a RenderableGlobe
--- Usage:
--- table.unpack(openspace.globebrowsing.openspace.globebrowsing.createHeightLayers(p))
--- where p is an array that contains tables with 'Name' and 'Height' values
-openspace.globebrowsing.createHeightLayers = function (patches)
-    result = {}
-    for k,v in pairs(patches) do
-        table.insert(result, { Name = v["Name"], FilePath = v["Height"], TilePixelSize = 90, PerformPreProcessing = true })
-    end
-    return result
-end
 
 openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format)
     temporalTemplate =
@@ -162,4 +149,36 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
     "</GDAL_WMS>"
 
     return gdalWmsTemplate
+end
+
+openspace.globebrowsing.parseInfoFile = function (file)
+    local dir = openspace.directoryForPath(file)
+    dofile(file)
+
+    local color = {
+        Name = Name,
+        FilePath = dir .. '/' .. ColorFile,
+        BlendMode = "Color"
+    }
+
+    local height = {
+        Name = Name,
+        FilePath = dir .. '/' .. HeightFile,
+        TilePixelSize = 90
+    }
+
+    return color, height
+end
+
+openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_name)
+    local files = openspace.walkDirectoryFiles(dir, true, true)
+
+    for _, file in pairs(files) do
+        if file:find('.info') then
+            c, h = openspace.globebrowsing.parseInfoFile(file)
+
+            openspace.globebrowsing.addLayer(node_name, "ColorLayers", c)
+            openspace.globebrowsing.addLayer(node_name, "HeightLayers", h)
+        end
+    end
 end

@@ -1,3 +1,8 @@
+-- Add folders to this list that contain .info files describing HiRISE patches
+local mars_folders = {
+    -- "C:/ab7512/Mars/map_datasets/HiRISE",
+}
+
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -80,6 +85,11 @@ function postInitialization()
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
     openspace.printInfo("Done setting default values")
+
+    -- Add the HiRISE patches described at the top of this file
+    for _, file in pairs(mars_folders) do
+        openspace.globebrowsing.addBlendingLayersFromDirectory(file, "Mars")
+    end
 end
 
 
