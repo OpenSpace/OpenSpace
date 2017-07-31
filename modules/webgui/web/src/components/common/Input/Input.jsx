@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import Icon from '../Icon/Icon';
+
 import styles from './Input.scss';
 
 class Input extends Component {
@@ -18,6 +20,7 @@ class Input extends Component {
     };
 
     this.onChange = this.onChange.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
   /**
@@ -34,6 +37,10 @@ class Input extends Component {
     this.props.onChange(event);
   }
 
+  clear() {
+    this.setState({ value: '' });
+  }
+
   get hasInput() {
     return this.state.value !== '';
   }
@@ -43,7 +50,7 @@ class Input extends Component {
    * @returns {*}
    */
   get inheritProps() {
-    const doNotInclude = 'wide onChange loading value'.split(' ');
+    const doNotInclude = 'wide onChange loading value clearable'.split(' ');
     return Object.keys(this.props)
       // actually filter out the keywords
       .filter(key => !doNotInclude.includes(key))
@@ -56,7 +63,7 @@ class Input extends Component {
   }
 
   render() {
-    const { placeholder, className, wide, loading } = this.props;
+    const { placeholder, className, wide, loading, clearable } = this.props;
     const { value, id } = this.state;
     return (
       <div className={styles.group}>
@@ -73,6 +80,15 @@ class Input extends Component {
         <label htmlFor={id} className={`${styles.label} ${this.hasInput && styles.hasinput}`}>
           {placeholder}
         </label>
+        { clearable && (
+          <Icon
+            icon="cancel"
+            className={`small ${styles.clearbutton} ${this.hasInput && styles.hasinput}`}
+            onClick={this.clear}
+            tabindex="0"
+            role="button"
+          />
+        )}
       </div>
     );
   }
@@ -83,6 +99,7 @@ Input.idCounter = 0;
 Input.propTypes = {
   onChange: PropTypes.func,
   className: PropTypes.string,
+  clearable: PropTypes.bool,
   id: PropTypes.string,
   loading: PropTypes.bool,
   placeholder: PropTypes.string.isRequired,
@@ -93,10 +110,11 @@ Input.propTypes = {
 Input.defaultProps = {
   onChange: () => {},
   className: '',
+  clearable: false,
   id: `input-${Input.nextId}`,
   loading: false,
   value: '',
-  wide: false,
+  wide: true,
 };
 
 export default Input;

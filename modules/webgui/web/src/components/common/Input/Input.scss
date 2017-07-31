@@ -11,16 +11,19 @@ $padding-top: $label-size + $label-margin;
 $padding-bottom: $padding-vertical - $padding-top;
 $padding-bottom-loading: $padding-vertical - $padding-top - $loading-border-width;
 
+// different states
 $padding: $padding-top $padding-horizontal $padding-bottom;
 $padding-empty: ($padding-vertical/2) $padding-horizontal;
 $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
 
 .group {
+  box-sizing: border-box;
   position: relative;
 }
 
 .input {
   border: 0;
+  box-sizing: border-box;
   color: $text-color-blur;
   padding: $padding-empty;
   transition: padding $animation-duration $animation-easing;
@@ -36,8 +39,12 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   color: $text-color-focus;
   outline: 0;
 
-  + .label {
+  ~ .label {
     color: $green;
+  }
+
+  ~ .clearbutton {
+    color: $text-color-focus;
   }
 }
 
@@ -68,6 +75,23 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   animation: label-animation $animation-duration $animation-easing;
   display: inline-block;
   user-select: none;
+}
+
+.clearbutton {
+  color: $text-color-blur;
+  cursor: pointer;
+  display: none;
+  opacity: 0;
+  position: absolute;
+  right: $padding-horizontal;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: opacity $animation-duration $animation-easing;
+}
+
+.clearbutton.hasinput {
+  opacity: 1;
+  display: inline-block;
 }
 
 
