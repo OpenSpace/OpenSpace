@@ -5,28 +5,28 @@ import styles from './Icon.scss';
 
 /**
  * Create a Material Design icon. https://material.io/icons/
- * @param icon      - the name of the icon
- * @param styling   - optional string of styling class names, see Icon.scss for options.
+ * @param props - the props
  * @returns {XML}
  * @constructor
  */
-const Icon = ({ icon, styling = [] }) => {
-  const classNames = styling.split(' ')
+const Icon = (props) => {
+  const { icon, className } = props;
+  const classNames = className.split(' ')
                             .map(s => styles[s] || s)
                             .concat(styles.base)
                             .join(' ');
   return (
-    <i className={classNames}>{ icon }</i>
+    <i {...props} className={classNames}>{ icon }</i>
   );
 };
 
 Icon.propTypes = {
   icon: PropTypes.string.isRequired,
-  styling: PropTypes.string,
+  className: PropTypes.string,
 };
 
 Icon.defaultProps = {
-  styling: '',
+  className: '',
 };
 
 export default Icon;

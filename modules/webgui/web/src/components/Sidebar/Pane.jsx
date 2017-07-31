@@ -13,7 +13,7 @@ const Pane = ({ children, title, closeCallback }) => (
 
       { closeCallback &&
         (<button onClick={closeCallback(false)} className={styles.close}>
-          <Icon icon="close" styling="small" />
+          <Icon icon="close" className="small" />
         </button>) }
     </header>
     { children }

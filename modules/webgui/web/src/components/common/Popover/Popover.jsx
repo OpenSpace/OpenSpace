@@ -28,7 +28,7 @@ class Popover extends Component {
 
             { this.props.closeCallback &&
               (<button onClick={this.props.closeCallback} className={styles.close}>
-                <Icon icon="close" styling="small" />
+                <Icon icon="close" className="small" />
               </button>) }
           </header>)}
         { this.props.children }

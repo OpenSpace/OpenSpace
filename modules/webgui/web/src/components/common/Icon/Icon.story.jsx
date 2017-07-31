@@ -7,8 +7,8 @@ import Icon from './Icon';
 
 storiesOf('Icon', module)
   .add('no options', () => (<Icon icon="language" />))
-  .add('styling=small', () => (<Icon icon="language" styling="small" />))
-  .add('styling=normal', () => (<Icon icon="language" styling="normal" />))
-  .add('styling=medium', () => (<Icon icon="language" styling="medium" />))
-  .add('styling=large', () => (<Icon icon="language" styling="large" />))
-  .add('styling=extralarge', () => (<Icon icon="language" styling="extralarge" />));
+  .add('className="" =small', () => (<Icon icon="language" className="small" />))
+  .add('className="" =normal', () => (<Icon icon="language" className="normal" />))
+  .add('className="" =medium', () => (<Icon icon="language" className="medium" />))
+  .add('className="" =large', () => (<Icon icon="language" className="large" />))
+  .add('className="" =extralarge', () => (<Icon icon="language" className="extralarge" />));
