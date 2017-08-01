@@ -36,7 +36,7 @@ public:
     Topic() {};
     virtual ~Topic() {};
     void initialize(Connection* connection, size_t topicId);
-    nlohmann::json wrappedPayload(nlohmann::json &payload);
+    nlohmann::json wrappedPayload(const nlohmann::json &payload) const;
     nlohmann::json wrappedError(std::string message = "Could not complete request.", int code = 500);
     virtual void handleJson(nlohmann::json json) = 0;
     virtual bool isDone() = 0;

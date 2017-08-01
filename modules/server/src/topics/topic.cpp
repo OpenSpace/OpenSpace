@@ -32,7 +32,7 @@ void Topic::initialize(Connection* connection, size_t topicId) {
     _topicId = topicId;
 };
 
-nlohmann::json Topic::wrappedPayload(nlohmann::json &payload) {
+nlohmann::json Topic::wrappedPayload(const nlohmann::json &payload) const {
     // TODO: add message time
     nlohmann::json j = {
         { "topic", _topicId },

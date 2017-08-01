@@ -39,7 +39,7 @@ public:
     bool isDone();
 
 private:
-    nlohmann::json getAllKeys();
+    nlohmann::json getAllProperties();
     nlohmann::json getPropertyFromKey(const std::string& key);
 };
 

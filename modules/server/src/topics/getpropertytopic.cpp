@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/server/include/jsonconverters.h>
 #include <openspace/properties/property.h>
+#include <openspace/scene/scene.h>
 #include <modules/server/include/getpropertytopic.h>
 
 using nlohmann::json;
@@ -44,12 +46,20 @@ bool GetPropertyTopic::isDone() {
 void GetPropertyTopic::handleJson(json j) {
     std::string requestedKey = j.at("propertyUri").get<std::string>();
     LDEBUG("Getting property '" + requestedKey + "'...");
-    json response = (requestedKey == "__all") ? getAllKeys()
-                                              : getPropertyFromKey(requestedKey);
+    json response;
+    if (requestedKey == "__allProperties") {
+        response = getAllProperties();
+    }
+    else if (requestedKey == "__allNodes") {
+        response = wrappedPayload(sceneGraph()->allSceneGraphNodes());
+    }
+    else {
+        response = getPropertyFromKey(requestedKey);
+    }
     _connection->sendJson(response);
 }
 
-json GetPropertyTopic::getAllKeys() {
+json GetPropertyTopic::getAllProperties() {
     json jsonProps = json::array();
     for (const auto &prop : allProperties()) {
         const std::string &jsonString = prop->toJson();
