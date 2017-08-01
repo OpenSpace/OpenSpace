@@ -28,6 +28,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(HEADER_FILES
     include/connectionpool.h
     include/connection.h
+    include/jsonconverters.h
     include/topic.h
     include/authenticationtopic.h
     include/subscriptiontopic.h
@@ -39,6 +40,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
     src/connectionpool.cpp
     src/connection.cpp
+    src/jsonconverters.cpp
     src/topics/topic.cpp
     src/topics/authenticationtopic.cpp
     src/topics/subscriptiontopic.cpp
