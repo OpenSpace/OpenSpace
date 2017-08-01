@@ -72,7 +72,7 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
 }
 
 Translation::Translation()
-    : properties::PropertyOwner("Translation")
+    : properties::PropertyOwner({ "Translation" })
 {}
 
 bool Translation::initialize() {

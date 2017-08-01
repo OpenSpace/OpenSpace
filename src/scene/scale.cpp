@@ -71,7 +71,7 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
 }
 
 Scale::Scale()
-    : properties::PropertyOwner("Scale")
+    : properties::PropertyOwner({ "Scale" })
 {}
 
 bool Scale::initialize() {

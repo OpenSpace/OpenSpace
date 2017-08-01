@@ -157,12 +157,14 @@ openspace.globebrowsing.parseInfoFile = function (file)
 
     local color = {
         Name = Name,
+        Description = Description or "",
         FilePath = dir .. '/' .. ColorFile,
         BlendMode = "Color"
     }
 
     local height = {
         Name = Name,
+        Description = Description or "",
         FilePath = dir .. '/' .. HeightFile,
         TilePixelSize = 90
     }

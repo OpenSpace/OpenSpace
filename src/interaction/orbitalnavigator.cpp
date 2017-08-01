@@ -91,7 +91,7 @@ namespace {
 namespace openspace::interaction {
 
 OrbitalNavigator::Friction::Friction() 
-    : properties::PropertyOwner("Friction")
+    : properties::PropertyOwner({ "Friction" })
     , roll(RollFrictionInfo, true)
     , rotational(RotationalFrictionInfo, true)
     , zoom(ZoomFrictionInfo, true)
@@ -102,7 +102,7 @@ OrbitalNavigator::Friction::Friction()
 }
 
 OrbitalNavigator::OrbitalNavigator()
-    : properties::PropertyOwner("OrbitalNavigator")
+    : properties::PropertyOwner({ "OrbitalNavigator" })
     , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 2.0f, 0.0f, 10.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)

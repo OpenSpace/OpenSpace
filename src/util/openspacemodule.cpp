@@ -39,7 +39,7 @@ namespace {
 namespace openspace {
 
 OpenSpaceModule::OpenSpaceModule(std::string name) 
-    : properties::PropertyOwner(std::move(name))
+    : properties::PropertyOwner({ std::move(name) })
 {}
 
 void OpenSpaceModule::initialize() {

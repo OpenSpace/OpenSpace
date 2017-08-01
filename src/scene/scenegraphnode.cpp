@@ -166,7 +166,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
 }
 
 SceneGraphNode::SceneGraphNode()
-    : properties::PropertyOwner("")
+    : properties::PropertyOwner({ "" })
     , _parent(nullptr)
     , _scene(nullptr)
     , _performanceRecord({0, 0, 0, 0, 0})

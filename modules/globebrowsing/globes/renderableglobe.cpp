@@ -179,7 +179,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
-    , _debugPropertyOwner("Debug")
+    , _debugPropertyOwner({ "Debug" })
 {
     setName("RenderableGlobe");
         

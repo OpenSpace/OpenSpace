@@ -85,7 +85,7 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("ModelGeometry")
+    : properties::PropertyOwner({ "ModelGeometry" })
     , _mode(GL_TRIANGLES)
 {
     documentation::testSpecificationAndThrow(

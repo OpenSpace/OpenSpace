@@ -52,7 +52,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 LayerAdjustment::LayerAdjustment()
-    : properties::PropertyOwner("adjustment")
+    : properties::PropertyOwner({ "adjustment" })
     , chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)

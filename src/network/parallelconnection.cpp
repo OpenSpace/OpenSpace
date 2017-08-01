@@ -150,7 +150,7 @@ namespace {
 namespace openspace {
 
 ParallelConnection::ParallelConnection()
-    : properties::PropertyOwner("ParallelConnection")
+    : properties::PropertyOwner({ "ParallelConnection" })
     , _password(PasswordInfo)
     , _hostPassword(HostPasswordInfo)
     , _port(PortInfo, "20501")

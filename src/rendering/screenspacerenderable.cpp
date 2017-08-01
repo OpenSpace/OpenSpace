@@ -155,7 +155,7 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("")
+    : properties::PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
     , _useFlatScreen(FlatScreenInfo, true)
     , _euclideanPosition(
