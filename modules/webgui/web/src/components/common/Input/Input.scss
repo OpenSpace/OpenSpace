@@ -1,13 +1,13 @@
 @import "../../../styles/all";
 
 $label-size: 0.7rem;
-$label-margin: 0.1rem;
+$label-margin: 0.3rem;
 $loading-border-width: 0.1rem;
 
 // calculate good padding for input field
-$padding-horizontal: $base-padding * 2/3;
-$padding-vertical: $base-padding;
-$padding-top: $label-size + $label-margin;
+$padding-horizontal: 0.5rem;
+$padding-vertical: $base-padding * 1.5;
+$padding-top: $label-size + (2 * $label-margin);
 $padding-bottom: $padding-vertical - $padding-top;
 $padding-bottom-loading: $padding-vertical - $padding-top - $loading-border-width;
 
@@ -22,6 +22,7 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
 }
 
 .input {
+  background: transparent;
   border: 0;
   box-sizing: border-box;
   color: $text-color-blur;
@@ -42,10 +43,6 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   ~ .label {
     color: $green;
   }
-
-  ~ .clearbutton {
-    color: $text-color-focus;
-  }
 }
 
 .input.hasinput {
@@ -65,9 +62,9 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   display: none;
   font-size: $label-size;
   left: $padding-horizontal;
-  line-height:1;
+  line-height: 1;
   position: absolute;
-  top: ($label-margin/2);
+  top: $label-margin;
   transition: color $animation-duration $animation-easing;
 }
 
@@ -87,6 +84,11 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   top: 50%;
   transform: translateY(-50%);
   transition: opacity $animation-duration $animation-easing;
+
+  &:focus,
+  &:hover {
+    color: $text-color-focus;
+  }
 }
 
 .clearbutton.hasinput {

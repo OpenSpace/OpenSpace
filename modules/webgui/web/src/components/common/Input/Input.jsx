@@ -87,6 +87,7 @@ class Input extends Component {
             onClick={this.clear}
             tabindex="0"
             role="button"
+            title="Clear input field"
           />
         )}
       </div>
