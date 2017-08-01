@@ -1,3 +1,4 @@
+// @flow
 import Subscription from './Subscription';
 import Connection from './Connection';
 
@@ -19,6 +20,10 @@ function UnknownTypeException(message, type = '') {
  * set, get and subscription to properties. Singleton.
  */
 class DataManager {
+  topicId: number;
+  subscriptions: Object;
+  privateConnection: Connection;
+
   constructor() {
     this.topicId = 1;
     this.subscriptions = {};
@@ -26,11 +31,11 @@ class DataManager {
   }
 
   /**
-   * Subscribe to a property
+   * Subscribe to a property.
    * @param key - the uri of the property
-   * @param callback - callback to handle the incoming subscription
+   * @param callback (function) - callback to handle the incoming subscription
    */
-  subscribe(key, callback) {
+  subscribe(key: string, callback: Function) {
     let subscription = this.subscriptions[key];
     if (!subscription) {
       subscription = this.createSubscription(key);
@@ -44,7 +49,7 @@ class DataManager {
    * @param key - the key to unsubscribe from
    * @param callback - the callback stored in the subscription
    */
-  unsubscribe(key, callback) {
+  unsubscribe(key: string, callback: Function) {
     const subscription = this.subscriptions[key];
     if (subscription) {
       subscription.removeCallback(callback);
@@ -62,7 +67,7 @@ class DataManager {
    * @param key - the URI/key to get
    * @param receivingCallback - the callback that takes care of the response
    */
-  getValue(key, receivingCallback) {
+  getValue(key: string, receivingCallback: Function) {
     const message = this.wrapMessage({
       type: TOPIC_TYPES.get,
       payload: {
@@ -81,7 +86,7 @@ class DataManager {
    * @param key - the URI of the property
    * @param value - the value
    */
-  setValue(key, value) {
+  setValue(key: string, value: mixed) {
     const message = this.wrapMessage({
       type: TOPIC_TYPES.get,
       payload: {
@@ -92,7 +97,7 @@ class DataManager {
     this.send(message);
   }
 
-  createSubscription(key) {
+  createSubscription(key: string) {
     const message = this.wrapMessage({
       type: TOPIC_TYPES.subscribe,
       payload: {
@@ -110,7 +115,7 @@ class DataManager {
    * @param message - the message to send
    * @param args - optional args to send Connection.send
    */
-  send(message, ...args) {
+  send(message: Object, ...args: Array<mixed>) {
     this.connection.send(message, ...args);
   }
 
@@ -131,18 +136,18 @@ class DataManager {
     return { payload, type, topic };
   }
 
-  get nextTopicId() {
+  get nextTopicId(): number {
     const { topicId } = this;
     this.topicId += 1;
     return topicId;
   }
 
-  get connection() {
+  get connection(): Connection {
     this.privateConnection = this.privateConnection || new Connection();
     return this.privateConnection;
   }
 
-  set connection(newConnection) {
+  set connection(newConnection: Connection) {
     if (this.privateConnection) {
       this.connection.close();
     }
