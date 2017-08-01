@@ -4,6 +4,7 @@ import SmallLabel from '../common/SmallLabel/SmallLabel';
 import Icon from '../common/Icon/Icon';
 import LoadingString from '../common/LoadingString/LoadingString';
 import Picker from './Picker';
+import Popover from '../common/Popover/Popover';
 import DataManager from '../../api/DataManager';
 
 import styles from './OriginPicker.scss';

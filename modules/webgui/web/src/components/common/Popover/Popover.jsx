@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import { excludeKeys } from '../../../utils/helpers';
 import Icon from '../Icon/Icon';
 import styles from './Popover.scss';
 
 const findStyles = arr => arr.split(' ')
-  .map(style => styles[style])
+  .map(style => styles[style] || style)
   .join(' ');
 
 class Popover extends Component {
@@ -14,12 +15,17 @@ class Popover extends Component {
   }
 
   get styles() {
-    return findStyles(this.props.styles);
+    return findStyles(this.props.className);
+  }
+
+  get inheritedProps() {
+    const doNotInclude = 'title arrow closeCallback';
+    return excludeKeys(this.props, doNotInclude);
   }
 
   render() {
     return (
-      <section className={`${styles.popover} ${this.arrowStyle} ${this.styles}`}>
+      <section {...this.inheritedProps} className={`${styles.popover} ${this.arrowStyle} ${this.styles}`}>
         { this.props.title &&
           (<header>
             <div className={styles.title}>
@@ -41,14 +47,14 @@ Popover.propTypes = {
   arrow: PropTypes.string,
   children: PropTypes.node.isRequired,
   closeCallback: PropTypes.func,
-  styles: PropTypes.string,
+  className: PropTypes.string,
   title: PropTypes.string,
 };
 
 Popover.defaultProps = {
   arrow: 'arrow bottom center',
   closeCallback: null,
-  styles: '',
+  className: '',
   title: null,
 };
 
