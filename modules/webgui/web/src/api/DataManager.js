@@ -25,6 +25,11 @@ class DataManager {
     this.privateConnection = undefined;
   }
 
+  /**
+   * Subscribe to a property
+   * @param key - the uri of the property
+   * @param callback - callback to handle the incoming subscription
+   */
   subscribe(key, callback) {
     let subscription = this.subscriptions[key];
     if (!subscription) {
@@ -34,6 +39,11 @@ class DataManager {
     subscription.addCallback(callback);
   }
 
+  /**
+   * Unsubscribe from a property
+   * @param key - the key to unsubscribe from
+   * @param callback - the callback stored in the subscription
+   */
   unsubscribe(key, callback) {
     const subscription = this.subscriptions[key];
     if (subscription) {
@@ -47,6 +57,11 @@ class DataManager {
     }
   }
 
+  /**
+   * Get a property from OpenSpace
+   * @param key - the URI/key to get
+   * @param receivingCallback - the callback that takes care of the response
+   */
   getValue(key, receivingCallback) {
     const message = this.wrapMessage({
       type: TOPIC_TYPES.get,
@@ -61,6 +76,11 @@ class DataManager {
     this.send(message, callback);
   }
 
+  /**
+   * Set the value of a property
+   * @param key - the URI of the property
+   * @param value - the value
+   */
   setValue(key, value) {
     const message = this.wrapMessage({
       type: TOPIC_TYPES.get,
