@@ -10,6 +10,7 @@ import DataManager from '../../api/DataManager';
 import styles from './OriginPicker.scss';
 
 const ORIGIN_KEY = 'NavigationHandler.Origin';
+const SCENEGRAPH_KEY = '__allNodes';
 
 class OriginPicker extends Component {
   constructor(props) {
@@ -18,13 +19,19 @@ class OriginPicker extends Component {
     this.state = {
       origin: 'Mercury',
       hasOrigin: false,
+      sceneGraphNodes: [],
+      showPopover: false,
     };
 
     this.updateOrigin = this.updateOrigin.bind(this);
+    this.togglePopover = this.togglePopover.bind(this);
   }
 
   componentDidMount() {
     DataManager.subscribe(ORIGIN_KEY, this.updateOrigin);
+    DataManager.getValue(SCENEGRAPH_KEY, (sceneGraphNodes) => {
+      this.setState({ sceneGraphNodes });
+    });
   }
 
   componentWillUnmount() {
@@ -34,6 +41,10 @@ class OriginPicker extends Component {
   updateOrigin(data) {
     const { Value } = data;
     this.setState({ origin: Value, hasOrigin: Value !== '' });
+  }
+
+  togglePopover() {
+    this.setState({ showPopover: !this.state.showPopover });
   }
 
   get icon() {
@@ -46,18 +57,26 @@ class OriginPicker extends Component {
   }
 
   render() {
+    const { hasOrigin, showPopover } = this.state;
     return (
-      <Picker>
-        { this.icon }
-        <div className={Picker.Title}>
-          <span className={Picker.Name}>
-            <LoadingString loading={!this.state.hasOrigin}>
-              { this.origin }
-            </LoadingString>
-          </span>
-          <SmallLabel>Focus</SmallLabel>
-        </div>
-      </Picker>
+      <div className={styles.OriginPicker}>
+        <Picker onClick={this.togglePopover} role="button" tabIndex={0} className={styles.button}>
+          { this.icon }
+          <div className={Picker.Title}>
+            <span className={Picker.Name}>
+              <LoadingString loading={!hasOrigin}>
+                { this.origin }
+              </LoadingString>
+            </span>
+            <SmallLabel>Focus</SmallLabel>
+          </div>
+        </Picker>
+        { showPopover && (
+          <Popover closeCallback={this.togglePopover} title="Select focus" className={styles.popover}>
+            Hello!
+          </Popover>
+        )}
+      </div>
     );
   }
 }
