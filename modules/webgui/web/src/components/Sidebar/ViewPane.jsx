@@ -4,6 +4,8 @@ import Pane from './Pane';
 import LoadingString from '../common/LoadingString/LoadingString';
 import DataManager from '../../api/DataManager';
 
+const PROPERTIES_KEY = '__allProperties';
+
 class ViewPane extends Component {
   constructor(props) {
     super(props);
@@ -14,7 +16,7 @@ class ViewPane extends Component {
 
   componentDidMount() {
     // subscribe to data
-    DataManager.getValue('__all', this.receiveData)
+    DataManager.getValue(PROPERTIES_KEY, this.receiveData);
   }
 
   receiveData({ value }) {
