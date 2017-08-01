@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import styles from './Picker.scss';
 
 const Picker = (props) => {
-  const { children } = props;
+  const { children, className } = props;
   return (
-    <div {...props} className={styles.Picker}>
+    <div {...props} className={`${styles.Picker} ${className}`}>
       { children }
     </div>
   );
@@ -14,7 +14,12 @@ const Picker = (props) => {
 
 Picker.propTypes = {
   children: PropTypes.node.isRequired,
+  className: PropTypes.string,
 };
+
+Picker.defaultProps = {
+  className: '',
+}
 
 Picker.Title = styles.Title;
 Picker.Name = styles.Name;
