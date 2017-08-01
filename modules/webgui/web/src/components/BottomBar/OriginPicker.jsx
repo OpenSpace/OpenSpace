@@ -5,12 +5,17 @@ import Icon from '../common/Icon/Icon';
 import LoadingString from '../common/LoadingString/LoadingString';
 import Picker from './Picker';
 import Popover from '../common/Popover/Popover';
+import FilterList from '../common/FilterList/FilterList';
 import DataManager from '../../api/DataManager';
 
 import styles from './OriginPicker.scss';
 
+// key to subscribe to the current focus/origin
 const ORIGIN_KEY = 'NavigationHandler.Origin';
+// key to get all scene graph nodes
 const SCENEGRAPH_KEY = '__allNodes';
+// tag that each focusable node must have
+const REQUIRED_TAG = "planet_solarSystem";
 
 class OriginPicker extends Component {
   constructor(props) {
@@ -56,6 +61,12 @@ class OriginPicker extends Component {
     return this.state.origin;
   }
 
+  get sceneGraphNodes() {
+    return this.state.sceneGraphNodes
+      .filter(node => (node.tags && node.tags.includes(REQUIRED_TAG)))
+      .map(node => Object.assign(node, { key: node.name }));
+  }
+
   render() {
     const { hasOrigin, showPopover } = this.state;
     return (
@@ -73,7 +84,7 @@ class OriginPicker extends Component {
         </Picker>
         { showPopover && (
           <Popover closeCallback={this.togglePopover} title="Select focus" className={styles.popover}>
-            Hello!
+            <FilterList data={this.sceneGraphNodes} className={styles.list} />
           </Popover>
         )}
       </div>

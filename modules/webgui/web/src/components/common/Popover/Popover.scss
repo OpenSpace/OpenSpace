@@ -38,6 +38,7 @@ $padding: $padding-horizontal $padding-vertical;
   border: 0;
   color: $text-color-blur;
   line-height: 1;
+  padding: 0 $padding-vertical;
 
   &:hover, &:focus {
     background: $ui-background-hover;

@@ -17,3 +17,9 @@
   width: 300px;
   z-index: 10;
 }
+
+.list ul {
+  max-height: 200px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
