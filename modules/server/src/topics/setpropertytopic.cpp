@@ -22,38 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__TOPIC_H
-#define OPENSPACE_MODULES_SERVER__TOPIC_H
+#include <openspace/query/query.h>
+#include <openspace/properties/property.h>
+#include <ghoul/logging/logmanager.h>
+#include <modules/server/include/setpropertytopic.h>
 
-#include <ext/json/json.hpp>
+namespace {
+const std::string PropertyKey = "property";
+const std::string ValueKey = "value";
+const std::string _loggerCat = "SetPropertyTopic";
+}
 
 namespace openspace {
 
-class Connection;
+void SetPropertyTopic::handleJson(nlohmann::json json) {
+    try {
+        auto propertyKey = json.at(PropertyKey).get<std::string>();
+        auto value = json.at(ValueKey).get<std::string>();
 
-class Topic {
-public:
-    Topic() {};
-    virtual ~Topic() {};
-    void initialize(Connection* connection, size_t topicId);
-    nlohmann::json wrappedPayload(const nlohmann::json &payload) const;
-    nlohmann::json wrappedError(std::string message = "Could not complete request.", int code = 500);
-    virtual void handleJson(nlohmann::json json) = 0;
-    virtual bool isDone() = 0;
-
-protected:
-    size_t _topicId;
-    Connection* _connection;
-};
-
-class BounceTopic : public Topic {
-public:
-    BounceTopic() : Topic() {};
-    ~BounceTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return false; }
-};
-
+        auto prop = property(propertyKey);
+        if (prop != nullptr) {
+            LDEBUG("Setting " + propertyKey + " to " + value + ".");
+            if (!prop->setStringValue("\"" + value + "\"")) {
+                LERROR("Failed!");
+            }
+        }
+    }
+    catch (...) {
+        LERROR("Could not set property -- key or value is missing.");
+    }
 }
 
-#endif //OPENSPACE_MODULES_SERVER__TOPIC_H
+}

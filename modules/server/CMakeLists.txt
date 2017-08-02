@@ -31,8 +31,9 @@ set(HEADER_FILES
     include/jsonconverters.h
     include/topic.h
     include/authenticationtopic.h
-    include/subscriptiontopic.h
     include/getpropertytopic.h
+    include/subscriptiontopic.h
+    include/setpropertytopic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -43,8 +44,9 @@ set(SOURCE_FILES
     src/jsonconverters.cpp
     src/topics/topic.cpp
     src/topics/authenticationtopic.cpp
-    src/topics/subscriptiontopic.cpp
     src/topics/getpropertytopic.cpp
+    src/topics/subscriptiontopic.cpp
+    src/topics/setpropertytopic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

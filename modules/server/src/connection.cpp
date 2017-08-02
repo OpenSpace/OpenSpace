@@ -22,7 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/connection.h"
+#include <modules/server/include/connection.h>
+#include <modules/server/include/authenticationtopic.h>
+#include <modules/server/include/getpropertytopic.h>
+#include <modules/server/include/setpropertytopic.h>
+#include <modules/server/include/subscriptiontopic.h>
 
 namespace {
 const char* _loggerCat = "ServerModule: Connection";

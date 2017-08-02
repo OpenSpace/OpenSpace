@@ -22,38 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__TOPIC_H
-#define OPENSPACE_MODULES_SERVER__TOPIC_H
+#ifndef OPENSPACE_MODULES_SERVER__SETPROPERTYTOPIC_H
+#define OPENSPACE_MODULES_SERVER__SETPROPERTYTOPIC_H
 
 #include <ext/json/json.hpp>
+#include <modules/server/include/topic.h>
 
 namespace openspace {
 
-class Connection;
-
-class Topic {
+class SetPropertyTopic : public Topic {
 public:
-    Topic() {};
-    virtual ~Topic() {};
-    void initialize(Connection* connection, size_t topicId);
-    nlohmann::json wrappedPayload(const nlohmann::json &payload) const;
-    nlohmann::json wrappedError(std::string message = "Could not complete request.", int code = 500);
-    virtual void handleJson(nlohmann::json json) = 0;
-    virtual bool isDone() = 0;
-
-protected:
-    size_t _topicId;
-    Connection* _connection;
-};
-
-class BounceTopic : public Topic {
-public:
-    BounceTopic() : Topic() {};
-    ~BounceTopic() {};
+    SetPropertyTopic() : Topic() {};
+    ~SetPropertyTopic() {};
     void handleJson(nlohmann::json json);
-    bool isDone() { return false; }
+    bool isDone() { return true; };
 };
 
 }
 
-#endif //OPENSPACE_MODULES_SERVER__TOPIC_H
+#endif //OPENSPACE_MODULES_SERVER__SETPROPERTYTOPIC_H
