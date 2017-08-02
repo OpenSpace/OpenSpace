@@ -30,6 +30,7 @@ class FilterList extends Component {
 
     const matcherFunc = (testObj) => {
       const valuesAsStrings = Object.values(testObj)
+        .filter(test => ['number', 'string'].includes(typeof test))
         .map(test => test.toString())
         .map(test => test.toLowerCase());
       return valuesAsStrings.some(test => matcher(test, search));
@@ -40,6 +41,7 @@ class FilterList extends Component {
   render() {
     const EntryComponent = this.props.viewComponent;
     const { search } = this.state;
+    const entries = this.filtered;
     return (
       <section className={this.props.className}>
         <Input
@@ -50,7 +52,8 @@ class FilterList extends Component {
         />
 
         <ul>
-          { this.filtered.map(entry => (
+          { entries.length === 0 && (<li>Nothing found</li>) }
+          { entries.map(entry => (
             <EntryComponent
               {...entry}
               key={entry.key}

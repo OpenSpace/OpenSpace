@@ -62,6 +62,10 @@ class OriginPicker extends Component {
     return this.state.origin;
   }
 
+  /**
+   * Get all the scene graph nodes that has one of REQUIRED_TAGS in them
+   * @returns {Array}
+   */
   get sceneGraphNodes() {
     return this.state.sceneGraphNodes
       .filter(node => node.tags.some(tag => REQUIRED_TAGS.includes(tag)))
