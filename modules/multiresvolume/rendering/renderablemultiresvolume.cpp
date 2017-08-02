@@ -45,6 +45,7 @@
 #include <modules/multiresvolume/rendering/sandtsp.h>
 #include <modules/multiresvolume/rendering/shentsp.h>
 #include <modules/multiresvolume/rendering/atlasmanager.h>
+#include <modules/multiresvolume/rendering/allatlasmanager.h>
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/localtfbrickselector.h>
@@ -221,8 +222,10 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     default:               _tsp = std::make_shared<TSP>(_filename);        break;
     }
 
-    _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
-
+    switch (1) {
+    case 0: _atlasManager = std::make_shared<AllAtlasManager>(_tsp.get()); break;
+    default: _atlasManager = std::make_shared<AtlasManager>(_tsp.get());   break;
+    }
     _selectorName = TYPE_TF;
     std::string brickSelectorType;
     if (dictionary.hasKey(KeyBrickSelector)) {

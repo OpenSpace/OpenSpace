@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 
+#include <modules/multiresvolume/rendering/atlasmanager.h>
+
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
@@ -39,60 +41,17 @@ namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-class AtlasManager {
+class AllAtlasManager : public AtlasManager {
 public:
     enum BUFFER_INDEX { EVEN = 0, ODD = 1 };
 
-    AtlasManager(TSP* tsp);
-    ~AtlasManager();
+    AllAtlasManager(TSP* tsp);
+    ~AllAtlasManager();
 
-    virtual void updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices);
-    void addToAtlas(int firstBrickIndex, int lastBrickIndex, float* mappedBuffer);
-    void removeFromAtlas(int brickIndex);
-    bool initialize();
-    std::vector<unsigned int> atlasMap();
-    unsigned int atlasMapBuffer();
-
-    void pboToAtlas(BUFFER_INDEX bufferIndex);
-    ghoul::opengl::Texture& textureAtlas();
-    glm::size3_t textureSize();
-
-    unsigned int getNumDiskReads();
-    unsigned int getNumUsedBricks();
-    unsigned int getNumStreamedBricks();
+    void updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices);
 
 private:
-    const unsigned int NOT_USED = UINT_MAX;
-    TSP* _tsp;
-    unsigned int _pboHandle[2];
-    unsigned int _atlasMapBuffer;
 
-    std::vector<unsigned int> _atlasMap;
-    std::map<unsigned int, unsigned int> _brickMap;
-    std::vector<unsigned int> _freeAtlasCoords;
-    std::set<unsigned int> _requiredBricks;
-    std::set<unsigned int> _prevRequiredBricks;
-
-    ghoul::opengl::Texture* _textureAtlas;
-
-    // Stats
-    unsigned int _nUsedBricks;
-    unsigned int _nStreamedBricks;
-    unsigned int _nDiskReads;
-
-    unsigned int _nBricksPerDim,
-                 _nOtLeaves,
-                 _nOtNodes,
-                 _nOtLevels,
-                 _brickSize,
-                 _nBrickVals,
-                 _volumeSize,
-                 _paddedBrickDim,
-                 _nBricksInAtlas,
-                 _nBricksInMap,
-                 _atlasDim;
-
-    void fillVolume(float* in, float* out, unsigned int linearAtlasCoords);
 };
 
 } // namespace openspace

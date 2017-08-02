@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atlasmanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/allatlasmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickcover.h
@@ -49,6 +50,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atlasmanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/allatlasmanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickmanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multiresvolumeraycaster.cpp
