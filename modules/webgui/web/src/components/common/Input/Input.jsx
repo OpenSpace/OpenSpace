@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
+import { excludeKeys } from '../../../utils/helpers';
 import Icon from '../Icon/Icon';
-
 import styles from './Input.scss';
 
 class Input extends Component {
@@ -50,16 +49,8 @@ class Input extends Component {
    * @returns {*}
    */
   get inheritProps() {
-    const doNotInclude = 'wide onChange loading value clearable'.split(' ');
-    return Object.keys(this.props)
-      // actually filter out the keywords
-      .filter(key => !doNotInclude.includes(key))
-      // create new props object to return
-      .reduce((newProps, key) => {
-        const prop = {};
-        prop[key] = this.props[key];
-        return Object.assign(newProps, prop);
-      }, {});
+    const doNotInclude = 'wide onChange loading value clearable';
+    return excludeKeys(this.props, doNotInclude);
   }
 
   render() {
@@ -85,7 +76,7 @@ class Input extends Component {
             icon="cancel"
             className={`small ${styles.clearbutton} ${this.hasInput && styles.hasinput}`}
             onClick={this.clear}
-            tabindex="0"
+            tabIndex="0"
             role="button"
             title="Clear input field"
           />

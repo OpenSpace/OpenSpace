@@ -1,0 +1,14 @@
+@import "../../../styles/all";
+
+.entry {
+  padding: $popover-horizontal-padding;
+
+  &:hover {
+    background: $ui-background-hover;
+  }
+
+  &.active {
+    background: $ui-background-active;
+  }
+}
+

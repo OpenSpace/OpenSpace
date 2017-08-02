@@ -35,6 +35,10 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   }
 }
 
+.input:hover {
+  background: $ui-background-active;
+}
+
 .input:focus {
   background: $ui-background-hover;
   color: $text-color-focus;

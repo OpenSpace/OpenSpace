@@ -1,6 +1,6 @@
 import React from 'react';
 
-import OriginPicker from './OriginPicker';
+import OriginPicker from './Origin/OriginPicker';
 import TimePicker from './TimePicker';
 import styles from './BottomBar.scss';
 

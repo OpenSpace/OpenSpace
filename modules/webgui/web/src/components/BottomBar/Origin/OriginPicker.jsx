@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 
-import SmallLabel from '../common/SmallLabel/SmallLabel';
-import Icon from '../common/Icon/Icon';
-import LoadingString from '../common/LoadingString/LoadingString';
-import Picker from './Picker';
-import Popover from '../common/Popover/Popover';
-import FilterList from '../common/FilterList/FilterList';
-import DataManager from '../../api/DataManager';
+import SmallLabel from '../../common/SmallLabel/SmallLabel';
+import Icon from '../../common/Icon/Icon';
+import LoadingString from '../../common/LoadingString/LoadingString';
+import Picker from '../Picker';
+import Popover from '../../common/Popover/Popover';
+import FilterList from '../../common/FilterList/FilterList';
+import DataManager from '../../../api/DataManager';
+import FocusEntry from './FocusEntry';
 
 import styles from './OriginPicker.scss';
 
@@ -15,7 +16,7 @@ const ORIGIN_KEY = 'NavigationHandler.Origin';
 // key to get all scene graph nodes
 const SCENEGRAPH_KEY = '__allNodes';
 // tag that each focusable node must have
-const REQUIRED_TAG = "planet_solarSystem";
+const REQUIRED_TAGS = ['planet_solarSystem'];
 
 class OriginPicker extends Component {
   constructor(props) {
@@ -63,7 +64,7 @@ class OriginPicker extends Component {
 
   get sceneGraphNodes() {
     return this.state.sceneGraphNodes
-      .filter(node => (node.tags && node.tags.includes(REQUIRED_TAG)))
+      .filter(node => node.tags.some(tag => REQUIRED_TAGS.includes(tag)))
       .map(node => Object.assign(node, { key: node.name }));
   }
 
@@ -84,7 +85,13 @@ class OriginPicker extends Component {
         </Picker>
         { showPopover && (
           <Popover closeCallback={this.togglePopover} title="Select focus" className={styles.popover}>
-            <FilterList data={this.sceneGraphNodes} className={styles.list} />
+            <FilterList
+              data={this.sceneGraphNodes}
+              className={styles.list}
+              searchText="Search the universe..."
+              viewComponent={FocusEntry}
+              active={this.origin}
+            />
           </Popover>
         )}
       </div>
