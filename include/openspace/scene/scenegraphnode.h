@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -65,6 +65,7 @@ public:
     };
 
     static const std::string RootNodeName;
+    static const std::string KeySphereOfInfluency;
     static const std::string KeyName;
     static const std::string KeyParentName;
     static const std::string KeyDependencies;
@@ -98,6 +99,9 @@ public:
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;
 
+    void setSphereOfInfluency(double sphInfluency);
+    const double& sphereOfInfluency() const;
+
     Scene* scene();
     void setScene(Scene* scene);
 
@@ -127,6 +131,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    // See DSG paper for a better understanding about the sphere of influency
+    double _sphereOfInfluency;
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;

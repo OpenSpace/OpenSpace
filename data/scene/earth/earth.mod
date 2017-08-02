@@ -3,6 +3,8 @@ return {
     {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
+        -- SphereOfInfluency unit is KM                
+		SphereOfInfluency = 4.0E+5, 
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
@@ -28,6 +30,8 @@ return {
     {   
         Name = "Earth",
         Parent = "EarthBarycenter",
+        -- SphereOfInfluency unit is KM
+		SphereOfInfluency = 1.0E+5,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_EARTH",

@@ -8,12 +8,16 @@ return {
     {
         Name = "SolarSystemBarycenter",
         Parent = "SolarSystem",
+        -- SphereOfInfluency unit is KM                
+		SphereOfInfluency = 6.0E+9, 
     },
 
     -- Sun module
     {
         Name = "Sun",
         Parent = "SolarSystemBarycenter",
+        -- SphereOfInfluency unit is KM                
+		SphereOfInfluency = 7.0E+6, 
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_SUN",

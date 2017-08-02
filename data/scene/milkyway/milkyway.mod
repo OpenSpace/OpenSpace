@@ -2,6 +2,8 @@ return {
     {
         Name = "MilkyWay",
         Parent = "SolarSystem",
+        -- SphereOfInfluency unit is KM                
+		SphereOfInfluency = 20.0E+19, 
         Renderable = {
             Type = "RenderableSphere",
             Size = 10E22,

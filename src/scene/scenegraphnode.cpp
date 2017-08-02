@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -66,6 +66,7 @@ namespace openspace {
 
 // Constants used outside of this file
 const std::string SceneGraphNode::RootNodeName = "Root";
+const std::string SceneGraphNode::KeySphereOfInfluency = "SphereOfInfluency";
 const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
@@ -82,6 +83,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
 
     std::string name = dictionary.value<std::string>(KeyName);
     result->setName(name);
+    
+    if (dictionary.hasKey(KeySphereOfInfluency)) {
+        double sphereOfInfluency;
+        dictionary.getValue(KeySphereOfInfluency, sphereOfInfluency);
+        std::cout << "== Sphere of Influency = " << sphereOfInfluency << " =====" << std::endl;
+        result->setSphereOfInfluency(sphereOfInfluency);
+    }    
 
     if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
         ghoul::Dictionary renderableDictionary;
@@ -167,6 +175,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner("")
+    , _sphereOfInfluency(0.0)
     , _parent(nullptr)
     , _scene(nullptr)
     , _performanceRecord({0, 0, 0, 0, 0})
@@ -203,6 +212,8 @@ bool SceneGraphNode::initialize() {
 
 bool SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
+    
+    _sphereOfInfluency = 0.0;
 
     if (_renderable) {
         _renderable->deinitialize();
@@ -574,6 +585,14 @@ double SceneGraphNode::calculateWorldScale() const {
 
 SceneGraphNode* SceneGraphNode::parent() const {
     return _parent;
+}
+
+void SceneGraphNode::setSphereOfInfluency(double sphInfluency) {
+    _sphereOfInfluency = std::move(sphInfluency);
+}
+
+const double& SceneGraphNode::sphereOfInfluency() const {
+    return _sphereOfInfluency;
 }
 
 Scene* SceneGraphNode::scene() {
