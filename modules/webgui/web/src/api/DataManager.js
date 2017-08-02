@@ -88,9 +88,9 @@ class DataManager {
    */
   setValue(key: string, value: mixed) {
     const message = this.wrapMessage({
-      type: TOPIC_TYPES.get,
+      type: TOPIC_TYPES.set,
       payload: {
-        setProperty: key,
+        property: key,
         value,
       },
     });
