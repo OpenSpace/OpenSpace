@@ -1,3 +1,5 @@
+@import "all";
+
 :global {
   * {
     -webkit-box-sizing: border-box;
@@ -19,7 +21,7 @@
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
+    width: $scrollbar-width;
     background-color: rgba(0,0,0,0);
     -webkit-border-radius: 100px;
   }
