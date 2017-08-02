@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Input from '../Input/Input';
+import ScrollOverlay from '../ScrollOverlay/ScrollOverlay';
 import { SimpleSubstring } from '../../../utils/StringMatchers';
 
 class FilterList extends Component {
@@ -51,16 +52,18 @@ class FilterList extends Component {
           clearable
         />
 
-        <ul>
-          { entries.length === 0 && (<li>Nothing found</li>) }
-          { entries.map(entry => (
-            <EntryComponent
-              {...entry}
-              key={entry.key}
-              onClick={this.props.onSelect}
-              active={this.props.active}
-            />)) }
-        </ul>
+        <ScrollOverlay>
+          <ul>
+            { entries.length === 0 && (<li>Nothing found</li>) }
+            { entries.map(entry => (
+              <EntryComponent
+                {...entry}
+                key={entry.key}
+                onClick={this.props.onSelect}
+                active={this.props.active}
+              />)) }
+          </ul>
+        </ScrollOverlay>
       </section>
     );
   }

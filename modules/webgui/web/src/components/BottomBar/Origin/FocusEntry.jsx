@@ -27,7 +27,7 @@ class FocusEntry extends Component {
   render() {
     const { name } = this.props;
     return (
-      <li className={`${styles.entry} `} onClick={this.select}>
+      <li className={`${styles.entry} ${this.isActive && styles.active}`} onClick={this.select}>
         <span className={styles.title}>
           { name }
         </span>
