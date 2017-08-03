@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Input from '../Input/Input';
+import CenteredLabel from '../CenteredLabel/CenteredLabel';
 import ScrollOverlay from '../ScrollOverlay/ScrollOverlay';
 import { SimpleSubstring } from '../../../utils/StringMatchers';
 
@@ -53,8 +54,8 @@ class FilterList extends Component {
         />
 
         <ScrollOverlay>
+          { entries.length === 0 && (<CenteredLabel>Nothing found. Try another search!</CenteredLabel>) }
           <ul>
-            { entries.length === 0 && (<li>Nothing found</li>) }
             { entries.map(entry => (
               <EntryComponent
                 {...entry}
