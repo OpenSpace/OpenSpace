@@ -12,3 +12,12 @@ export function excludeKeys(value: Object, keys: string): Object {
       return newObj;
     }, {});
 }
+
+/**
+ * Run a function `func` after current call stack has been finished
+ *
+ * @param func - the function to call
+ * @param args - the arguments to call with
+ */
+export const defer = (func: Function, ...args: Array<mixed>): number =>
+  setTimeout(() => func(...args), 0);
