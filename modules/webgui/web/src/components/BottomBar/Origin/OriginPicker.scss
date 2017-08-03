@@ -4,20 +4,6 @@
   margin-right: ($base-padding / 2);
 }
 
-.OriginPicker {
-  //overflow: auto;
-  position: relative;
-}
-
-.popover {
-  bottom: unquote("calc(#{$sidebar-tab-height} + #{$popover-arrow-size})");
-  left: 50%;
-  position: absolute;
-  transform: translateX(-50%);
-  width: 300px;
-  z-index: 10;
-}
-
 .list :global(.scroll-content) {
   height: 100%;
   margin-top: 1px;

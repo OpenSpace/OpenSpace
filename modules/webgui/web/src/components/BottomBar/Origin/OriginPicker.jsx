@@ -75,7 +75,7 @@ class OriginPicker extends Component {
   render() {
     const { hasOrigin, showPopover } = this.state;
     return (
-      <div className={styles.OriginPicker}>
+      <div className={Picker.Wrapper}>
         <Picker onClick={this.togglePopover} role="button" tabIndex={0} className={styles.button}>
           { this.icon }
           <div className={Picker.Title}>
@@ -88,7 +88,7 @@ class OriginPicker extends Component {
           </div>
         </Picker>
         { showPopover && (
-          <Popover closeCallback={this.togglePopover} title="Select focus" className={styles.popover}>
+          <Popover closeCallback={this.togglePopover} title="Select focus" className={Picker.Popover}>
             <FilterList
               data={this.sceneGraphNodes}
               className={styles.list}

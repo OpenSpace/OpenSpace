@@ -25,3 +25,16 @@
   height: 21px;
   line-height: 1;
 }
+
+.Wrapper {
+  position: relative;
+}
+
+.Popover {
+  bottom: unquote("calc(100% + #{$popover-arrow-size})");
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 300px;
+  z-index: 10;
+}

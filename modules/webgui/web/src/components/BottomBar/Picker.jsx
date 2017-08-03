@@ -19,10 +19,12 @@ Picker.propTypes = {
 
 Picker.defaultProps = {
   className: '',
-}
+};
 
 Picker.Title = styles.Title;
 Picker.Name = styles.Name;
+Picker.Wrapper = styles.Wrapper;
+Picker.Popover = styles.Popover;
 
 export default Picker;
 
