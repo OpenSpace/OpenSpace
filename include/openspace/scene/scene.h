@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -123,6 +123,35 @@ public:
     void removeNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
 
     /**
+    * Returns the name of the scene node referred as the current center of coordinates of the system,
+    * i.e., the camera's parent.
+    */
+    const std::string & dsgAttachedNodeName() const;
+
+    /**
+    * Sets the name of the scene node referred as the current center of coordinates of the system,
+    * i.e., the camera's parent.
+    */
+    void setDsgAttachedNodeName(const std::string & attachedNodeName);
+
+    void updateDsgAttachedNode(const Camera* camera);
+
+    /**
+    * Calculates the world position of target from the common node between camera's parent and target.
+    */
+    const glm::dvec3 currentDisplacementPosition(const std::string & cameraParent,
+        const SceneGraphNode* target) const;
+
+    SceneGraphNode* findCommonParentNode(const std::string & firstPath, const std::string & secondPath) const;
+
+    std::vector<SceneGraphNode*> pathTo(SceneGraphNode* node) const;
+
+    glm::dvec3 pathCollector(const std::vector<SceneGraphNode*> & path, const std::string & commonParentName,
+        const bool inverse) const;
+
+    std::string commonParent(const std::vector<SceneGraphNode*> & t1, const std::vector<SceneGraphNode*> & t2) const;
+
+    /**
      * Update dependencies.
      */
     void updateDependencies();
@@ -153,6 +182,14 @@ private:
     std::string generateJson() const override;
 
     void sortTopologically();
+
+    /**
+    * Finds out the current attached node (new camera's node parent) based on the camera's position
+    * and the former attached node name.
+    */
+    std::string currentDsgAttachedNode(const Camera* camera, std::string dsgAttachedNodeName) const;
+
+    std::string _dsgAttachedNodeName;
 
     std::unique_ptr<SceneGraphNode> _root;
     std::unique_ptr<Camera> _camera;

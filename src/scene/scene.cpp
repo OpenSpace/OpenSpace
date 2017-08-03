@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -42,6 +42,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
@@ -70,7 +71,8 @@ namespace {
     const char* KeyFocusObject = "Focus";
     const char* KeyPositionObject = "Position";
     const char* KeyViewOffset = "Offset";
-
+    const char* MostProbableAttachedNode = "SolarSystemBarycenter";
+    const char* ParentOfAllNodes = "Root";
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
     const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
     const char* PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
@@ -88,8 +90,9 @@ Scene::Scene()
             { "propertyOwnerTemplate", PropertyOwnerTemplateFilename },
             { "propertyTemplate", PropertyTemplateFilename }
         },
-        JsFilename
-    )
+        JsFilename        
+    ),
+    _dsgAttachedNodeName(MostProbableAttachedNode)
 {}
 
 Scene::~Scene(){
@@ -137,6 +140,189 @@ void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
     if (updateDeps) {
         updateDependencies();
     }
+}
+
+const std::string & Scene::dsgAttachedNodeName() const {
+    return _dsgAttachedNodeName;
+}
+
+void Scene::setDsgAttachedNodeName(const std::string & attachedNodeName) {
+    _dsgAttachedNodeName = attachedNodeName;
+}
+
+void Scene::updateDsgAttachedNode(const Camera* camera) {
+    _dsgAttachedNodeName = currentDsgAttachedNode(camera, _dsgAttachedNodeName);
+}
+
+std::string Scene::currentDsgAttachedNode(const Camera* camera, std::string dsgAttachedNodeName) const {
+    if (camera == nullptr || dsgAttachedNodeName.empty()) {
+        LERROR("Camera object not allocated or empty name scene passed to the method.");
+        return MostProbableAttachedNode; // This choice is controversal. Better to avoid a crash.
+    }
+    const SceneGraphNode* node = sceneGraphNode(dsgAttachedNodeName);
+
+    if (node == nullptr) {
+        LERROR("There is no scenegraph node with name: " << dsgAttachedNodeName);
+        return MostProbableAttachedNode;
+    }
+
+    // Starts in the last sphere of influency we know we were in, check if we are still inside it 
+    // if not, check its parent and continue until we are inside a scene
+    double distance = glm::length(camera->positionVec3() - node->dynamicWorldPosition());
+
+    // Traverses the scenetree to find a scene we are within. 
+    while (distance > node->sphereOfInfluency()) {
+        if (node->parent() != nullptr) {
+            node = node->parent();
+            distance = glm::length(camera->positionVec3() - node->dynamicWorldPosition());
+        }
+        else {
+            break;
+        }
+    }
+
+    dsgAttachedNodeName = node->name();
+    std::vector<SceneGraphNode*> childrenScene(node->children());
+    //size_t nrOfChildren = childrenScene.size();
+
+    //Check if we are inside a child scene of the current scene. 
+    bool outsideAllChildScenes = false;
+
+    while (!childrenScene.empty() && !outsideAllChildScenes) {
+        double lastChildDistanceValid = std::numeric_limits<double>::max();
+        bool changedChild = false;
+        //for (size_t i = 0; i < nrOfChildren; ++i) {
+        for (auto childNode: childrenScene) {
+            //SceneGraphNode * childNode = childrenScene.at(i);
+            double childDistance = glm::length(camera->positionVec3() - childNode->dynamicWorldPosition());
+                
+            // Set the new scene that we are inside the scene radius.
+            if ((childDistance < lastChildDistanceValid) && (childDistance < childNode->sphereOfInfluency())) {
+                lastChildDistanceValid = childDistance;
+                node = childNode;                
+                changedChild = true;
+            }
+        }
+
+        if (!changedChild) {
+            outsideAllChildScenes = true;
+        }
+        else {
+            childrenScene = node->children();
+            dsgAttachedNodeName = node->name();
+            //nrOfChildren = childrenScene.size();
+        }
+
+    }
+
+    return dsgAttachedNodeName;
+}
+
+const glm::dvec3 Scene::currentDisplacementPosition(const std::string & cameraParent,
+    const SceneGraphNode* target) const {
+    if (target != nullptr) {
+
+        std::vector<SceneGraphNode*> cameraPath;
+        std::vector<SceneGraphNode*> targetPath;
+
+        SceneGraphNode* cameraParentNode = sceneGraphNode(cameraParent);
+        SceneGraphNode* commonParentNode;
+        std::vector<SceneGraphNode*> commonParentPath;
+
+        //Find common parent for camera and object
+        std::string commonParentName(cameraParent);  // initiates to camera parent in case 
+                                                     // other path is not found
+        cameraPath = pathTo(cameraParentNode);
+        targetPath = pathTo(sceneGraphNode(target->name()));
+
+        commonParentNode = findCommonParentNode(cameraParent, target->name());
+        commonParentPath = pathTo(commonParentNode);
+
+        //Find the path from the camera to the common parent
+
+        glm::dvec3 collectorCamera(pathCollector(cameraPath, commonParentNode->name(), true));
+        glm::dvec3 collectorTarget(pathCollector(targetPath, commonParentNode->name(), false));
+
+        return collectorTarget + collectorCamera;
+    }
+    else {
+        LERROR("Target scenegraph node is null.");
+        return glm::dvec3(0.0);
+    }
+}
+
+SceneGraphNode* Scene::findCommonParentNode(const std::string & firstPath, const std::string & secondPath) const {
+    if (firstPath.empty() || secondPath.empty()) {
+        LERROR("Empty scenegraph node name passed to the method.");
+        return sceneGraphNode(ParentOfAllNodes); // This choice is controversal. Better to avoid a crash.
+    }
+
+    std::string strCommonParent = commonParent(pathTo(sceneGraphNode(firstPath)),
+        pathTo(sceneGraphNode(secondPath)));
+
+    return sceneGraphNode(strCommonParent);
+}
+
+std::vector<SceneGraphNode*> Scene::pathTo(SceneGraphNode* node) const {
+    std::vector<SceneGraphNode*> path;
+
+    if (node == nullptr) {
+        LERROR("Invalid (null) scenegraph node name passed to pathTo() method.");
+        return path;
+    }
+
+    while (node->parent() != nullptr) {
+        path.push_back(node);
+        node = node->parent();
+    }
+    path.push_back(node);
+
+    return path;
+}
+
+std::string Scene::commonParent(const std::vector<SceneGraphNode*> & t1, const std::vector<SceneGraphNode*> & t2) const {
+    if (t1.empty() && t2.empty()) {
+        LERROR("Empty paths passed to commonParent method.");
+        return ParentOfAllNodes;
+    }
+
+    std::string commonParentReturn(MostProbableAttachedNode);
+    int iterator = 0;
+    int min = std::min(t1.size(), t2.size());
+    int iteratorT1 = t1.size() - 1;
+    int iteratorT2 = t2.size() - 1;
+    while (iterator < min && t1[iteratorT1]->name() == t2[iteratorT2]->name()) {
+        commonParentReturn = t1[iteratorT1]->name();
+        --iteratorT1;
+        --iteratorT2;
+        iterator++;
+    }
+
+    return commonParentReturn;
+}
+
+glm::dvec3 Scene::pathCollector(const std::vector<SceneGraphNode*> & path, const std::string & commonParentName,
+    const bool inverse) const {
+    if (path.empty() || commonParentName.empty()) {
+        LERROR("Empty path or common parent name passed to pathCollector method.");
+        return glm::dvec3();
+    }
+
+    SceneGraphNode* firstElement = path.front();
+    glm::dvec3 collector(path.back()->position());
+
+    int depth = 0;
+    // adds all elements to the collector, continues untill commomParent is found.
+    while (firstElement->name() != commonParentName) {
+        if (inverse)
+            collector = collector - firstElement->position();
+        else
+            collector = collector + firstElement->position();
+
+        firstElement = path[++depth];
+    }
+
+    return collector;
 }
 
 void Scene::updateDependencies() {

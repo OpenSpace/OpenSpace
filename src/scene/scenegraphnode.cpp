@@ -295,6 +295,9 @@ void SceneGraphNode::update(const UpdateData& data) {
     _worldScaleCached = calculateWorldScale();
     // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
     _worldPositionCached = calculateWorldPosition();
+    // JCC: The previous line should change to the next
+    //_worldPositionCached = dynamicWorldPosition();
+
 
     newUpdateData.modelTransform.translation = worldPosition();
     newUpdateData.modelTransform.rotation = worldRotationMatrix();
@@ -328,6 +331,10 @@ void SceneGraphNode::update(const UpdateData& data) {
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
+    // JCC: The previous line should change to the next
+    // Implement a cache sytem to avoid calculate the same path while in the same camera parent.
+    // Just update the displacement vector to the sum.
+    //const psc thisPositionPSC = dynamicWorldPosition();
 
     RenderData newData = {
         data.camera,
@@ -547,6 +554,15 @@ glm::dmat4 SceneGraphNode::inverseModelTransform() const {
 double SceneGraphNode::worldScale() const
 {
     return _worldScaleCached;
+}
+
+glm::dvec3 SceneGraphNode::dynamicWorldPosition() const
+{
+    const Scene * scene = OsEng.renderEngine().scene();
+    glm::dvec3 currentDynamicPosition = scene->currentDisplacementPosition(scene->dsgAttachedNodeName(), this);
+    // The next line is not necessary, the position is measured from the parent's node.
+    //currentDynamicPosition -= camera.displacementVector();
+    return currentDynamicPosition;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {

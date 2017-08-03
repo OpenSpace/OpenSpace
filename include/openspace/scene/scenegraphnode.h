@@ -115,6 +115,8 @@ public:
     glm::dmat4 inverseModelTransform() const;
     double worldScale() const;
 
+    glm::dvec3 dynamicWorldPosition() const;
+
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
