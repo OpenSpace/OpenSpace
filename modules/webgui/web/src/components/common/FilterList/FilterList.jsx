@@ -15,8 +15,8 @@ class FilterList extends Component {
     this.changeSearch = this.changeSearch.bind(this);
   }
 
-  changeSearch(event) {
-    this.setState({ search: event.currentTarget.value });
+  changeSearch({ currentTarget }) {
+    this.setState({ search: currentTarget.value });
   }
 
   get filtered() {

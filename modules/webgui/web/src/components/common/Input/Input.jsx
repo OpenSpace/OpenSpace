@@ -20,6 +20,7 @@ class Input extends Component {
 
     this.onChange = this.onChange.bind(this);
     this.clear = this.clear.bind(this);
+    this.setInputRef = this.setInputRef.bind(this);
   }
 
   /**
@@ -27,7 +28,7 @@ class Input extends Component {
    * @param event InputEvent
    */
   onChange(event) {
-    const { value } = event.target;
+    const { value } = event.currentTarget;
 
     // update state so that input is re-rendered with new content
     this.setState(prev => Object.assign(prev, { value }));
@@ -36,8 +37,24 @@ class Input extends Component {
     this.props.onChange(event);
   }
 
+  /**
+   * callback to keep save a reference of the input field
+   * @param node
+   */
+  setInputRef(node) {
+    this.inputNode = node;
+  }
+
+  /**
+   * clear the input field
+   */
   clear() {
     this.setState({ value: '' });
+
+    // trigger onchange event on input
+    this.inputNode.value = '';
+    this.onChange({ currentTarget: this.inputNode });
+    this.inputNode.focus();
   }
 
   get hasInput() {
@@ -67,6 +84,7 @@ class Input extends Component {
           id={id}
           onChange={this.onChange}
           value={value}
+          ref={this.setInputRef}
         />
         <label htmlFor={id} className={`${styles.label} ${this.hasInput && styles.hasinput}`}>
           {placeholder}
