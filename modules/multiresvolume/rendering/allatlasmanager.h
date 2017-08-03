@@ -22,38 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
-#define __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
+#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ALLATLASMANAGER___H__
+#define __OPENSPACE_MODULE_MULTIRESVOLUME___ALLATLASMANAGER___H__
 
 #include <modules/multiresvolume/rendering/atlasmanager.h>
 
 #include <modules/multiresvolume/rendering/tsp.h>
-#include <ghoul/glm.h>
-#include <glm/gtx/std_based_type.hpp>
-
-#include <string>
-#include <vector>
-#include <climits>
-#include <map>
-#include <set>
-
-namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
 class AllAtlasManager : public AtlasManager {
 public:
-    enum BUFFER_INDEX { EVEN = 0, ODD = 1 };
 
     AllAtlasManager(TSP* tsp);
     ~AllAtlasManager();
 
     void updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices);
 
-private:
-
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
+#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___ALLATLASMANAGER___H__

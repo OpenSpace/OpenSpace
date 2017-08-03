@@ -44,7 +44,7 @@ AllAtlasManager::AllAtlasManager(TSP* tsp) : AtlasManager(tsp) {}
 
 AllAtlasManager::~AllAtlasManager() {}
 
-void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices) {
+void AllAtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices) {
     size_t nBrickIndices = brickIndices.size();
 
     _requiredBricks.clear();
@@ -104,4 +104,5 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-}
+} 
+} //namespace openspace

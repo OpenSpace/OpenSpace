@@ -67,7 +67,7 @@ public:
     };
 
     TSP(const std::string& filename);
-    ~TSP();
+    virtual ~TSP();
 
     bool openFile();
 

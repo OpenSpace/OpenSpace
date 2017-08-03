@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -38,7 +38,7 @@ public:
     static constexpr const char* NAME = "errorHistogram";
 
     ErrorHistogramManager(TSP* tsp);
-    ~ErrorHistogramManager();
+    virtual ~ErrorHistogramManager();
 
     bool buildHistograms(int numBins);
     const Histogram* getHistogram(unsigned int brickIndex) const;

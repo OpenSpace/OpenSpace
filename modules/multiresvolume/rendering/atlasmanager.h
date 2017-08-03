@@ -61,7 +61,7 @@ public:
     unsigned int getNumUsedBricks();
     unsigned int getNumStreamedBricks();
 
-private:
+protected:
     const unsigned int NOT_USED = UINT_MAX;
     TSP* _tsp;
     unsigned int _pboHandle[2];

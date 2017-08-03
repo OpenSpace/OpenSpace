@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,7 +34,7 @@ namespace openspace {
 class HistogramManager {
 public:
     HistogramManager(TSP * tsp);
-    ~HistogramManager();
+    virtual ~HistogramManager();
 
     virtual bool buildHistograms(int numBins);
     virtual const Histogram* getHistogram(unsigned int brickIndex) const;
