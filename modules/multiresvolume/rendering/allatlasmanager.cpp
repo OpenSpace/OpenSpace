@@ -50,6 +50,7 @@ void AllAtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& br
     for (unsigned int it : _prevRequiredBricks) {
         removeFromAtlas(it);
     }
+    _prevRequiredBricks.clear();
 
     // Use base update
     AtlasManager::updateAtlas(bufferIndex, brickIndices);
