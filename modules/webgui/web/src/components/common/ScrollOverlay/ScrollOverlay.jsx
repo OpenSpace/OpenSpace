@@ -38,6 +38,7 @@ class ScrollOverlay extends Component {
     if (node) {
       this.node = node;
       this.node.addEventListener('scroll', ({ target }) => this.updateScrollIndicators(target));
+      defer(this.updateScrollIndicators, this.node);
     }
   }
 
