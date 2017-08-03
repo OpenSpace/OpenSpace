@@ -44,7 +44,7 @@ public:
     enum BUFFER_INDEX { EVEN = 0, ODD = 1 };
 
     AtlasManager(TSP* tsp);
-    ~AtlasManager();
+    virtual ~AtlasManager();
 
     virtual void updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices);
     void addToAtlas(int firstBrickIndex, int lastBrickIndex, float* mappedBuffer);

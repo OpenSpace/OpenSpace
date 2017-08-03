@@ -76,6 +76,7 @@ namespace {
     const char* KeyHints = "Hints";
     const char* KeyTransferFunction = "TransferFunction";
     const char* KeyTspType = "TspType";
+    const char* KeyAtlasType = "AtlasType";
 
     const char* KeyVolumeName = "VolumeName";
     const char* KeyBrickSelector = "BrickSelector";
@@ -100,6 +101,9 @@ namespace openspace {
     const char* RenderableMultiresVolume::TSP_SAND    = "sand";
     const char* RenderableMultiresVolume::TSP_SHEN    = "shen";
 
+    const char* RenderableMultiresVolume::ATLAS_DEFAULT = "default";
+    const char* RenderableMultiresVolume::ATLAS_ALL = "all";
+
     const std::unordered_map<const char *, RenderableMultiresVolume::Selector> RenderableMultiresVolume::SelectorValues = {
         { RenderableMultiresVolume::TYPE_SIMPLE , RenderableMultiresVolume::Selector::SIMPLE},
         { RenderableMultiresVolume::TYPE_TF     , RenderableMultiresVolume::Selector::TF},
@@ -109,11 +113,15 @@ namespace openspace {
     };
 
     const std::unordered_map<const char *, RenderableMultiresVolume::TspType> RenderableMultiresVolume::TspTypes = {
-        { RenderableMultiresVolume::TSP_DEFAULT , RenderableMultiresVolume::TspType::DEFAULT },
-        { RenderableMultiresVolume::TSP_SAND    , RenderableMultiresVolume::TspType::SAND },
-        { RenderableMultiresVolume::TSP_SHEN    , RenderableMultiresVolume::TspType::SHEN }
+        { RenderableMultiresVolume::TSP_DEFAULT, RenderableMultiresVolume::TspType::DEFAULT },
+        { RenderableMultiresVolume::TSP_SAND   , RenderableMultiresVolume::TspType::SAND },
+        { RenderableMultiresVolume::TSP_SHEN   , RenderableMultiresVolume::TspType::SHEN }
     };
 
+    const std::unordered_map<const char *, RenderableMultiresVolume::AtlasType> RenderableMultiresVolume::AtlasTypes = {
+        { RenderableMultiresVolume::ATLAS_DEFAULT, RenderableMultiresVolume::AtlasType::DEFAULT },
+        { RenderableMultiresVolume::ATLAS_ALL    , RenderableMultiresVolume::AtlasType::ALL }
+    };
 RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dictionary)
     :  Renderable(dictionary)
     , _transferFunction(nullptr)
@@ -166,6 +174,10 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
 
     if (dictionary.getValue(KeyTspType, _tspType)) {
         std::transform(_tspType.begin(), _tspType.end(), _tspType.begin(), ::tolower);
+    }
+
+    if (dictionary.getValue(KeyAtlasType, _atlasType)) {
+        std::transform(_atlasType.begin(), _atlasType.end(), _atlasType.begin(), ::tolower);
     }
 
     float scalingExponent, stepSizeCoefficient;
@@ -222,9 +234,10 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     default:               _tsp = std::make_shared<TSP>(_filename);        break;
     }
 
-    switch (1) {
-    case 0: _atlasManager = std::make_shared<AllAtlasManager>(_tsp.get()); break;
-    default: _atlasManager = std::make_shared<AtlasManager>(_tsp.get());   break;
+    switch (getAtlasType()) {
+    case AtlasType::ALL:     _atlasManager = std::make_shared<AllAtlasManager>(_tsp.get()); break;
+    case AtlasType::DEFAULT: _atlasManager = std::make_shared<AtlasManager>(_tsp.get());    break;
+    default:                 _atlasManager = std::make_shared<AtlasManager>(_tsp.get());    break;
     }
     _selectorName = TYPE_TF;
     std::string brickSelectorType;
@@ -605,5 +618,13 @@ RenderableMultiresVolume::TspType RenderableMultiresVolume::getTspType() {
 
     return TspType::DEFAULT;
 }
+
+RenderableMultiresVolume::AtlasType RenderableMultiresVolume::getAtlasType() {
+    if (_atlasType == ATLAS_ALL)       return AtlasTypes.at(ATLAS_ALL);
+    if (_atlasType == ATLAS_DEFAULT)    return AtlasTypes.at(ATLAS_DEFAULT);
+
+    return AtlasType::DEFAULT;
+}
+
 
 } // namespace openspace

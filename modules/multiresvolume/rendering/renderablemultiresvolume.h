@@ -67,6 +67,7 @@ public:
     ~RenderableMultiresVolume();
 
     enum class TspType  {DEFAULT, SAND, SHEN};
+    enum class AtlasType {DEFAULT, ALL};
     enum Selector {TF, SIMPLE, LOCAL, SHEN, TIME};
 
     static const char* TYPE_SIMPLE;
@@ -79,8 +80,12 @@ public:
     static const char* TSP_SAND;
     static const char* TSP_SHEN;
 
+    static const char* ATLAS_DEFAULT;
+    static const char* ATLAS_ALL;
+
     static const std::unordered_map<const char *, Selector> SelectorValues;
     static const std::unordered_map<const char *, TspType> TspTypes;
+    static const std::unordered_map<const char *, AtlasType> AtlasTypes;
 
 
     bool setSelectorType(Selector selector);
@@ -97,6 +102,7 @@ public:
 
     Selector getSelector();
     TspType getTspType();
+    AtlasType getAtlasType();
 
 private:
     double _time;
@@ -137,6 +143,7 @@ private:
     std::string _errorHistogramsPath;
 
     std::string _tspType;
+    std::string _atlasType;
 
     std::shared_ptr<TransferFunction> _transferFunction;
 

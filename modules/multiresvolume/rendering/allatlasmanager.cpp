@@ -45,64 +45,13 @@ AllAtlasManager::AllAtlasManager(TSP* tsp) : AtlasManager(tsp) {}
 AllAtlasManager::~AllAtlasManager() {}
 
 void AllAtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices) {
-    size_t nBrickIndices = brickIndices.size();
 
-    _requiredBricks.clear();
-    for (size_t i = 0; i < nBrickIndices; i++) {
-        _requiredBricks.insert(brickIndices[i]);
-    }
-
+    // Remove all previous bricks from the atlas
     for (unsigned int it : _prevRequiredBricks) {
-        if (!_requiredBricks.count(it)) {
-            removeFromAtlas(it);
-        }
+        removeFromAtlas(it);
     }
 
-    // Stats
-    _nUsedBricks = static_cast<unsigned int>(_requiredBricks.size());
-    _nStreamedBricks = 0;
-    _nDiskReads = 0;
-
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[bufferIndex]);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, 0, GL_STREAM_DRAW);
-    float* mappedBuffer = reinterpret_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-
-    if (!mappedBuffer) {
-        LERROR("Failed to map PBO");
-        std::cout << glGetError() << std::endl;
-        return;
-    }
-
-    for (auto itStart = _requiredBricks.begin(); itStart != _requiredBricks.end();) {
-        int firstBrick = *itStart;
-        int lastBrick = firstBrick;
-
-        auto itEnd = itStart;
-        for (itEnd++; itEnd != _requiredBricks.end() && *itEnd == lastBrick + 1; itEnd++) {
-            lastBrick = *itEnd;
-        }
-
-        addToAtlas(firstBrick, lastBrick, mappedBuffer);
-
-        itStart = itEnd;
-    }
-
-    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-    for (int i = 0; i < nBrickIndices; i++) {
-        _atlasMap[i] = _brickMap[brickIndices[i]];
-    }
-
-    std::swap(_prevRequiredBricks, _requiredBricks);
-
-    pboToAtlas(bufferIndex);
-
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _atlasMapBuffer);
-    GLint *to = (GLint*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
-    memcpy(to, _atlasMap.data(), sizeof(GLint)*_atlasMap.size());
-    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
+    // Use base update
+    AtlasManager::updateAtlas(bufferIndex, brickIndices);
 } 
 } //namespace openspace
