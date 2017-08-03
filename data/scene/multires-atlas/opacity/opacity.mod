@@ -6,6 +6,7 @@ return {
         Renderable = {
             Type = "RenderableMultiresVolume",
             TspType = "sand",
+	    AtlasType = "all",
             ReferenceFrame = "HEEQ",
             Translation = {0, 0, 0},
             Rotation = {2.1, 0, 0},

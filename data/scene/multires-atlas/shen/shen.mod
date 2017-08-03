@@ -5,7 +5,8 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableMultiresVolume",
-            TspType = "sand",
+            TspType = "shen",
+	    AtlasType = "all",
             ReferenceFrame = "HEEQ",
             Translation = {0, 0, 0},
             Rotation = {2.1, 0, 0},
@@ -14,7 +15,7 @@ return {
             Source = "${OPENSPACE_DATA}/tsp/enlil_nh_128_128_16.tsp",
             ErrorHistogramsSource = "${OPENSPACE_DATA}/tsp/enlil_nh_128_128_16_50.errorHistograms",
             TransferFunction = "../transferfunctions/fire.txt",
-            BrickSelector = "simple"
+            BrickSelector = "shen"
         }
     }
 }
