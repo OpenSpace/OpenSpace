@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -93,6 +93,8 @@ public:
     void updateScreenSpaceRenderables();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
+
+    void updateDynamicOrigin();
 
     void renderScreenLog();
     void renderShutdownInformation(float timer, float fullTime);

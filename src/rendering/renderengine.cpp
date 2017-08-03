@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -546,6 +546,16 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         }
     }
     LTRACE("RenderEngine::render(end)");
+}
+
+void RenderEngine::updateDynamicOrigin() {
+    // JCC: There is no scene()->isUpdated anymore.
+    //if (_camera && scene()->isUpdated()) {
+    if (_camera) {
+        // New DynamicRootGraph system in action:
+        scene()->updateDsgAttachedNode(_camera);
+        _camera->setParent(_scene->sceneGraphNode(_scene->dsgAttachedNodeName()));
+    }
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
