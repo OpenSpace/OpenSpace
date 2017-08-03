@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { defer } from '../../../utils/helpers';
 import styles from './ScrollOverlay.scss';
 
 /**
@@ -23,21 +24,31 @@ class ScrollOverlay extends Component {
       atBottom: false,
     };
     this.setDomNode = this.setDomNode.bind(this);
-    this.onScroll = this.onScroll.bind(this);
+    this.updateScrollIndicators = this.updateScrollIndicators.bind(this);
   }
 
-  onScroll(event) {
-    const { target } = event;
-    const atTop = target.scrollTop === 0;
-    const atBottom = target.scrollTop + target.clientHeight === target.scrollHeight;
-    this.setState({ atTop, atBottom });
+  componentWillReceiveProps() {
+    // defer this call so that the dom actually renders and the
+    // properties in `this.node` used in `updateScrollIndicators` are
+    // updated with the new props.
+    defer(this.updateScrollIndicators, this.node);
   }
 
   setDomNode(node) {
     if (node) {
       this.node = node;
-      this.node.addEventListener('scroll', this.onScroll);
+      this.node.addEventListener('scroll', ({ target }) => this.updateScrollIndicators(target));
     }
+  }
+
+  /**
+   * decide if the scroll indicators should be shown or not
+   * @param target - the `.scroll-content` node
+   */
+  updateScrollIndicators(target) {
+    const atTop = target.scrollTop === 0;
+    const atBottom = target.scrollTop + target.clientHeight === target.scrollHeight;
+    this.setState({ atTop, atBottom });
   }
 
   get hasScrollBar() {
