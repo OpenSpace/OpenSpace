@@ -1,7 +1,7 @@
 @import '../../../styles/all';
 
 .ScrollOverlay {
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   position: relative;
 
