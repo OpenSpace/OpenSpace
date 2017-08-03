@@ -59,7 +59,7 @@ vec3 gatherNeighboringColors() {
         // the viewport such that pixels=texels, so we can use gl_FragCoord as an
         // integer texel coordinate
         // First offsetting them, then dividing by the texture size to get to [0,1]
-        const vec2 samplePosition = (gl_FragCoord.xy + offsets[i]) / texSize;
+        vec2 samplePosition = (gl_FragCoord.xy + offsets[i]) / texSize;
 
         // The stencelling determines the areas that we have to enlarge, such that we
         // do not enlarge a previously enlarged area

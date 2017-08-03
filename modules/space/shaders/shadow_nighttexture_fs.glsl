@@ -57,13 +57,11 @@ uniform sampler2D texture1;
 uniform sampler2D nightTex;
 
 
-vec4 butterworthFunc(const float d, const float r, const float n) {
+vec4 butterworthFunc(float d, float r, float n) {
     return vec4(vec3(sqrt(r/(r + pow(d, 2*n)))), 1.0);
 }
 
-vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows],
-                const vec3 position)
-{
+vec4 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], vec3 position) {
     if (shadowInfoArray[0].isShadowing) {
         vec3 pc = shadowInfoArray[0].casterPositionVec - position;
         // we can pass this normalized to the shader
@@ -102,16 +100,16 @@ Fragment getFragment() {
 
     Fragment frag;
     if (_performShading) {
-        const vec3 n = normalize(vs_normal.xyz);
-        const vec3 l_pos = vec3(sun_pos); // sun.
-        const vec3 l_dir = normalize(l_pos - objpos.xyz);
-        const float intensity = min(max(5.0 * dot(n, l_dir), 0.0), 1.0);
-        const float darkSide  = min(max(5.0 * dot(n, -l_dir), 0.0), 1.0);
+        vec3 n = normalize(vs_normal.xyz);
+        vec3 l_pos = vec3(sun_pos); // sun.
+        vec3 l_dir = normalize(l_pos - objpos.xyz);
+        float intensity = min(max(5.0 * dot(n, l_dir), 0.0), 1.0);
+        float darkSide  = min(max(5.0 * dot(n, -l_dir), 0.0), 1.0);
         
-        const vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
+        vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
         
-        const vec4 daytex = max(intensity * diffuse, ambient);
-        const vec4 mixtex = mix(diffuse, diffuse2, (1.0 + dot(n, -l_dir)) / 2.0);
+        vec4 daytex = max(intensity * diffuse, ambient);
+        vec4 mixtex = mix(diffuse, diffuse2, (1.0 + dot(n, -l_dir)) / 2.0);
         
         diffuse = ((daytex*2 + mixtex) / 3) * calcShadow(shadowDataArray, vs_posWorld.xyz);
     }

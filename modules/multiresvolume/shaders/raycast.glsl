@@ -39,32 +39,32 @@ uniform float stepSizeCoefficient_#{id} = 1.0;
 void atlasMapDataFunction_#{id}(ivec3 brickCoords, inout uint atlasIntCoord,
                                 inout uint level)
 {
-    const int linearBrickCoord = multires_intCoord(
+    int linearBrickCoord = multires_intCoord(
         brickCoords,
         ivec3(maxNumBricksPerAxis_#{id})
     );
-    const uint mapData = atlasMap_#{id}[linearBrickCoord];
+    uint mapData = atlasMap_#{id}[linearBrickCoord];
     level = mapData >> 28;
     atlasIntCoord = mapData & 0x0FFFFFFF;
 }
 
 vec3 atlasCoordsFunction_#{id}(vec3 position) {
-    const uint maxNumBricksPerAxis = maxNumBricksPerAxis_#{id};
-    const uint paddedBrickDim = paddedBrickDim_#{id};
+    uint maxNumBricksPerAxis = maxNumBricksPerAxis_#{id};
+    uint paddedBrickDim = paddedBrickDim_#{id};
 
-    const ivec3 brickCoords = ivec3(position * maxNumBricksPerAxis);
+    ivec3 brickCoords = ivec3(position * maxNumBricksPerAxis);
     uint atlasIntCoord;
     uint level;
     atlasMapDataFunction_#{id}(brickCoords, atlasIntCoord, level);
 
-    const float levelDim = float(maxNumBricksPerAxis) / pow(2.0, level);
-    const vec3 inBrickCoords = mod(position * levelDim, 1.0);
+    float levelDim = float(maxNumBricksPerAxis) / pow(2.0, level);
+    vec3 inBrickCoords = mod(position * levelDim, 1.0);
 
-    const float scale = float(paddedBrickDim) - 2.0;
-    const vec3 paddedInBrickCoords = (1.0 + inBrickCoords * scale) / paddedBrickDim;
+    float scale = float(paddedBrickDim) - 2.0;
+    vec3 paddedInBrickCoords = (1.0 + inBrickCoords * scale) / paddedBrickDim;
 
-    const ivec3 numBricksInAtlas = ivec3(vec3(atlasSize_#{id}) / paddedBrickDim);
-    const vec3 atlasOffset = multires_vec3Coords(atlasIntCoord, numBricksInAtlas);
+    ivec3 numBricksInAtlas = ivec3(vec3(atlasSize_#{id}) / paddedBrickDim);
+    vec3 atlasOffset = multires_vec3Coords(atlasIntCoord, numBricksInAtlas);
     return (atlasOffset + paddedInBrickCoords) / vec3(numBricksInAtlas);
 }
 
@@ -88,10 +88,10 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
         if (gridType_#{id} == 1) {
             samplePos = multires_cartesianToSpherical(samplePos);
         }
-        const vec3 sampleCoords = atlasCoordsFunction_#{id}(samplePos);
+        vec3 sampleCoords = atlasCoordsFunction_#{id}(samplePos);
         //return vec4(sampleCoords, 1.0);
         //sampleCoords = vec3(1.0,0.0, 0.0);
-        const float intensity = texture(textureAtlas_#{id}, sampleCoords).x;
+        float intensity = texture(textureAtlas_#{id}, sampleCoords).x;
         //intensity = sampleCoords;
         maxStepSize = stepSizeCoefficient_#{id}/float(maxNumBricksPerAxis_#{id})/float(paddedBrickDim_#{id});
         //return vec4(vec3(intensity), 1.0);
@@ -107,7 +107,7 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 
         //maxStepSize = 0.01;
 
-        const vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
         accumulatedColor += oneMinusFrontAlpha * contribution.rgb * contribution.a;
         accumulatedAlpha += oneMinusFrontAlpha * vec3(contribution.a);
     } else {

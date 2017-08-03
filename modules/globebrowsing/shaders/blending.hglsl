@@ -75,10 +75,10 @@ vec3 hsl2rgb(in vec3 c) {
 }
 
 vec3 HueShift(in vec3 color, in float shift) {
-    const vec3 P = vec3(0.55735) * dot(vec3(0.55735), color);
-    const vec3 U = color - P;
-    const vec3 V = cross(vec3(0.55735), U);
-    const vec3 c = U*cos(shift*6.2832) + V*sin(shift*6.2832) + P;
+    vec3 P = vec3(0.55735) * dot(vec3(0.55735), color);
+    vec3 U = color - P;
+    vec3 V = cross(vec3(0.55735), U);
+    vec3 c = U*cos(shift*6.2832) + V*sin(shift*6.2832) + P;
     return c;
 }
 

@@ -36,7 +36,7 @@ uniform sampler2D texture1;
 const vec3 SpecularAlbedo = vec3(1.0);
 
 Fragment getFragment() {
-    const vec3 diffuseAlbedo = texture(texture1, vs_st).rgb;
+    vec3 diffuseAlbedo = texture(texture1, vs_st).rgb;
 
     Fragment frag;
 
@@ -45,22 +45,22 @@ Fragment getFragment() {
         const vec3 lightColorAmbient = vec3(1.0);
         const vec3 lightColor = vec3(1.0);
         
-        const vec3 n = normalize(vs_normalViewSpace);
-        const vec3 l = directionToSunViewSpace;
-        const vec3 c = normalize(vs_positionCameraSpace.xyz);
-        const vec3 r = reflect(l, n);
+        vec3 n = normalize(vs_normalViewSpace);
+        vec3 l = directionToSunViewSpace;
+        vec3 c = normalize(vs_positionCameraSpace.xyz);
+        vec3 r = reflect(l, n);
 
         const float ambientIntensity = 0.2;
         const float diffuseIntensity = 1;
         const float specularIntensity = 1;
 
-        const float diffuseCosineFactor = dot(n,l);
-        const float specularCosineFactor = dot(c,r);
+        float diffuseCosineFactor = dot(n,l);
+        float specularCosineFactor = dot(c,r);
         const float specularPower = 100.0;
 
-        const vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-        const vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
-        const vec3 specularColor = specularIntensity * lightColor * SpecularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
+        vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
+        vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
+        vec3 specularColor = specularIntensity * lightColor * SpecularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
 
         frag.color.rgb = ambientColor + diffuseColor + specularColor;
     }

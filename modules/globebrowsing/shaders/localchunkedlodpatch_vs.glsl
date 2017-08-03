@@ -70,9 +70,9 @@ void main() {
     
     // Calculate desired level based on distance to the vertex on the ellipsoid
     // Before any heightmapping is done
-    const float distToVertexOnEllipsoid =
+    float distToVertexOnEllipsoid =
         length(p + patchNormalCameraSpace * chunkMinHeight);
-    const float levelInterpolationParameter =
+    float levelInterpolationParameter =
         getLevelInterpolationParameter(
             chunkLevel,
             distanceScaleFactor,
@@ -82,13 +82,13 @@ void main() {
     levelWeights = getLevelWeights(levelInterpolationParameter);
 
     // Get the height value and apply skirts
-    const float height =
+    float height =
         getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength();
     
     // Translate the point along normal
     p += patchNormalCameraSpace * height;
 
-    const vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
+    vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
     
     #if USE_ACCURATE_NORMALS
     // Calculate tangents

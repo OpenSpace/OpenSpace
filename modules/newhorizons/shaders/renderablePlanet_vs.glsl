@@ -52,9 +52,9 @@ void main() {
     
 
     if (_hasHeightMap) {
-        const float height = texture(heightTexture, in_st).s;
-        const vec3 displacementDirection = (normalize(tmp.xyz));
-        const float displacementFactor = height * _heightExaggeration / 750.0;
+        float height = texture(heightTexture, in_st).s;
+        vec3 displacementDirection = (normalize(tmp.xyz));
+        float displacementFactor = height * _heightExaggeration / 750.0;
         tmp.xyz += displacementDirection * displacementFactor;
     }
 

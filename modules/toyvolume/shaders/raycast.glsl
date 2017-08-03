@@ -33,18 +33,18 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
     // In real situations, the sample function would sample a
     // 3D texture to retrieve the color contribution of a given point.
 
-    const vec3 fromCenter = vec3(0.5, 0.5, 0.5) - samplePos;
+    vec3 fromCenter = vec3(0.5, 0.5, 0.5) - samplePos;
 
-    const float theta = atan(fromCenter.x, fromCenter.z);
+    float theta = atan(fromCenter.x, fromCenter.z);
     float angularRatio = (theta + 3.1415) / 6.283;
     angularRatio = mod(angularRatio + time#{id}*0.01, 1.0);
 
 
-    const float timeWave = sin(mod(time#{id}*0.05, 2.0 * 3.1415));
-    const float rDisplacement = 0.1 * timeWave;
+    float timeWave = sin(mod(time#{id}*0.05, 2.0 * 3.1415));
+    float rDisplacement = 0.1 * timeWave;
 
     vec4 c = color#{id};
-    const float r = length(fromCenter);
+    float r = length(fromCenter);
     c.a *= (1.0 - smoothstep(0.35 + rDisplacement, 0.40 + rDisplacement, r));
     c.a *= (1.0 - smoothstep(0.30 + rDisplacement, 0.25 + rDisplacement, r));
     c.a *= (1.0 - smoothstep(0.1, 0.2, abs(fromCenter.y) / angularRatio * 0.5));
@@ -61,7 +61,7 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
     backColor = clamp(backColor, 0.0, 1.0);
     backAlpha = clamp(backAlpha, 0.0, 1.0);
     
-    const vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+    vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
     accumulatedColor += oneMinusFrontAlpha * backColor;
     accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
 
