@@ -51,7 +51,7 @@ namespace {
 namespace openspace {
 
 SettingsEngine::SettingsEngine()
-    : properties::PropertyOwner("Global Properties")
+    : properties::PropertyOwner({ "Global Properties" })
     , _scenes(SceneInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     addProperty(_scenes);

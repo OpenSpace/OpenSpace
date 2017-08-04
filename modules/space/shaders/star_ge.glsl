@@ -67,8 +67,8 @@ void main() {
     ge_velocity = vs_velocity[0];
     ge_speed = vs_speed[0];
 
-    const float absoluteMagnitude = vs_brightness[0].z;
-    const float modifiedSpriteSize =
+    float absoluteMagnitude = vs_brightness[0].z;
+    float modifiedSpriteSize =
         exp((-30.623 - absoluteMagnitude) * 0.462) * scaleFactor * 2000;
 
     vec4 projPos[4];
@@ -80,8 +80,8 @@ void main() {
 
     // Calculate the positions of the lower left and upper right corners of the
     // billboard in screen-space
-    const vec2 ll = (((projPos[1].xy / projPos[1].w) + 1.0) / 2.0) * screenSize;
-    const vec2 ur = (((projPos[2].xy / projPos[2].w) + 1.0) / 2.0) * screenSize;
+    vec2 ll = (((projPos[1].xy / projPos[1].w) + 1.0) / 2.0) * screenSize;
+    vec2 ur = (((projPos[2].xy / projPos[2].w) + 1.0) / 2.0) * screenSize;
 
     // The billboard is smaller than one pixel, we can discard it
     float sizeInPixels = length(ll - ur);

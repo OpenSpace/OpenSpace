@@ -250,7 +250,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
 
-bool RenderableKameleonVolume::initialize() {
+void RenderableKameleonVolume::initialize() {
     load();
     
     _volumeTexture->uploadTexture();
@@ -305,7 +305,6 @@ bool RenderableKameleonVolume::initialize() {
     addProperty(_gridType);
     addProperty(_cache);
     addPropertySubOwner(_clipPlanes.get());
-    return true;
 }
 
 void RenderableKameleonVolume::updateRaycasterModelTransform() {
@@ -443,12 +442,11 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
     writer.write(*_rawVolume);
 }
     
-bool RenderableKameleonVolume::deinitialize() {
+void RenderableKameleonVolume::deinitialize() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
-    return true;
 }
     
 bool RenderableKameleonVolume::isReady() const {

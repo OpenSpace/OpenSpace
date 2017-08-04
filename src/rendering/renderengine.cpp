@@ -188,7 +188,7 @@ namespace {
 namespace openspace {
 
 RenderEngine::RenderEngine()
-    : properties::PropertyOwner("RenderEngine")
+    : properties::PropertyOwner({ "RenderEngine" })
     , _camera(nullptr)
     , _scene(nullptr)
     , _raycasterManager(nullptr)

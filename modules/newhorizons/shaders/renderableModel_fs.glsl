@@ -40,7 +40,7 @@ uniform vec3 directionToSunViewSpace;
 
 Fragment getFragment() {
     vec4 textureColor = texture(baseTexture, vs_st);
-    const vec4 projectionColor = texture(projectionTexture, vs_st);
+    vec4 projectionColor = texture(projectionTexture, vs_st);
     if (projectionColor.a > 0.0) {
         textureColor.rgb = mix(
             textureColor.rgb,
@@ -49,8 +49,8 @@ Fragment getFragment() {
         );
     }
     
-    const vec3 diffuseAlbedo = textureColor.rgb;
-    const vec3 specularAlbedo = vec3(1.0);
+    vec3 diffuseAlbedo = textureColor.rgb;
+    vec3 specularAlbedo = vec3(1.0);
 
     Fragment frag;
     if (_performShading) {
@@ -58,23 +58,23 @@ Fragment getFragment() {
         const vec3 lightColorAmbient = vec3(1.0);
         const vec3 lightColor = vec3(1.0);
         
-        const vec3 n = normalize(vs_normalViewSpace);
-        const vec3 l = directionToSunViewSpace;
-        const vec3 c = normalize(vs_positionCameraSpace.xyz);
-        const vec3 r = reflect(l, n);
+        vec3 n = normalize(vs_normalViewSpace);
+        vec3 l = directionToSunViewSpace;
+        vec3 c = normalize(vs_positionCameraSpace.xyz);
+        vec3 r = reflect(l, n);
 
         const float ambientIntensity = 0.15;
         const float diffuseIntensity = 1.0;
         const float specularIntensity = 0.0;
 
-        const float diffuseCosineFactor = dot(n,l);
-        const float specularCosineFactor = dot(c,r);
-        const float specularPower = 100;
+        float diffuseCosineFactor = dot(n,l);
+        float specularCosineFactor = dot(c,r);
+        const float specularPower = 100.0;
 
-        const vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-        const vec3 diffuseColor = 
+        vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
+        vec3 diffuseColor = 
             diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0.0);
-        const vec3 specularColor = specularIntensity * lightColor * specularAlbedo *
+        vec3 specularColor = specularIntensity * lightColor * specularAlbedo *
             pow(max(specularCosineFactor, 0.0), specularPower);
 
         frag.color.rgb = ambientColor + diffuseColor + specularColor;

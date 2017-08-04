@@ -45,15 +45,15 @@ uniform vec3 boresight;
 #define M_PI 3.14159265358979323846
 
 vec4 uvToModel(vec2 uv, vec3 radius, float segments){
-    const float fj = uv.x * segments;
-    const float fi = (1.0 - uv.y) * segments;
+    float fj = uv.x * segments;
+    float fi = (1.0 - uv.y) * segments;
 
-    const float theta = fi * float(M_PI) / segments;  // 0 -> PI
-    const float phi   = fj * float(M_PI) * 2.0f / segments;
+    float theta = fi * float(M_PI) / segments;  // 0 -> PI
+    float phi   = fj * float(M_PI) * 2.0f / segments;
 
-    const float x = radius[0] * sin(phi) * sin(theta);  //
-    const float y = radius[1] * cos(theta);             // up 
-    const float z = radius[2] * cos(phi) * sin(theta);  //
+    float x = radius[0] * sin(phi) * sin(theta);  //
+    float y = radius[1] * cos(theta);             // up 
+    float z = radius[2] * cos(phi) * sin(theta);  //
     
     return vec4(x, y, z, 0.0);
 }

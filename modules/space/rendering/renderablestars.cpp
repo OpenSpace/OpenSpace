@@ -132,53 +132,52 @@ documentation::Documentation RenderableStars::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableStars"),
-                "",
                 Optional::No
             },
             {
                 KeyFile,
                 new StringVerifier,
+                Optional::No,
                 "The path to the SPECK file that contains information about the stars "
-                "being rendered.",
-                Optional::No
+                "being rendered."
             },
             {
                 PsfTextureInfo.identifier,
                 new StringVerifier,
-                PsfTextureInfo.description,
-                Optional::No
+                Optional::No,
+                PsfTextureInfo.description
             },
             {
                 ColorTextureInfo.identifier,
                 new StringVerifier,
-                ColorTextureInfo.description,
-                Optional::No
+                Optional::No,
+                ColorTextureInfo.description
             },
             {
                 ColorOptionInfo.identifier,
                 new StringInListVerifier({
                     "Color", "Velocity", "Speed"
                 }),
-                ColorOptionInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ColorOptionInfo.description
             },
             {
                 TransparencyInfo.identifier,
                 new DoubleVerifier,
-                TransparencyInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TransparencyInfo.description
             },
             {
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
-                ScaleFactorInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ScaleFactorInfo.description
             },
             {
                 MinBillboardSizeInfo.identifier,
                 new DoubleVerifier,
-                MinBillboardSizeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                MinBillboardSizeInfo.description
             }
         }
     };
@@ -289,25 +288,20 @@ bool RenderableStars::isReady() const {
     return (_program != nullptr) && (!_fullData.empty());
 }
 
-bool RenderableStars::initialize() {
-    bool completeSuccess = true;
-
+void RenderableStars::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("Star",
         "${MODULE_SPACE}/shaders/star_vs.glsl",
         "${MODULE_SPACE}/shaders/star_fs.glsl",
         "${MODULE_SPACE}/shaders/star_ge.glsl");
 
-    if (!_program) {
-        return false;
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
     }
-    completeSuccess &= loadData();
-    completeSuccess &= (_pointSpreadFunctionTexture != nullptr);
-
-    return completeSuccess;
 }
 
-bool RenderableStars::deinitialize() {
+void RenderableStars::deinitialize() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
@@ -321,7 +315,6 @@ bool RenderableStars::deinitialize() {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
     }
-    return true;
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {

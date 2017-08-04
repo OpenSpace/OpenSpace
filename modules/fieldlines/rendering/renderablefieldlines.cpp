@@ -232,12 +232,9 @@ bool RenderableFieldlines::isReady() const {
     return programReady && vectorFieldReady && fieldlineReady && seedPointsReady;
 }
 
-bool RenderableFieldlines::initialize() {
-    if (_vectorFieldInfo.empty() ||
-        _fieldlineInfo.empty() ||
-        _seedPointsInfo.empty())
-    {
-        return false;
+void RenderableFieldlines::initialize() {
+    if (_vectorFieldInfo.empty() || _fieldlineInfo.empty() || _seedPointsInfo.empty()) {
+        throw ghoul::RuntimeError("Error initializing");
     }
 
     _program = OsEng.renderEngine().buildRenderProgram(
@@ -246,14 +243,9 @@ bool RenderableFieldlines::initialize() {
         "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
         "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
     );
-
-    if (!_program)
-        return false;
-
-    return true;
 }
 
-bool RenderableFieldlines::deinitialize() {
+void RenderableFieldlines::deinitialize() {
     glDeleteVertexArrays(1, &_fieldlineVAO);
     _fieldlineVAO = 0;
     glDeleteBuffers(1, &_vertexPositionBuffer);
@@ -264,8 +256,6 @@ bool RenderableFieldlines::deinitialize() {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
     }
-
-    return true;
 }
 
 void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {

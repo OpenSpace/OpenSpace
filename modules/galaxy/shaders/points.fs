@@ -34,7 +34,7 @@ uniform float emittanceFactor;
 Fragment getFragment() {
     Fragment frag;
 
-    const float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
+    float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
     frag.color = vec4(vsColor.rgb * coefficient, 1.0);
 
     frag.depth = pscDepth(vec4(vsPosition, 0.0));

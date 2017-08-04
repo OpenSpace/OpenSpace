@@ -47,14 +47,13 @@ documentation::Documentation Translation::Documentation() {
             {
                 KeyType,
                 new StringAnnotationVerifier("Must name a valid Translation type"),
+                Optional::No,
                 "The type of translation that is described in this element. "
                 "The available types of translations depend on the "
                 "configuration of the application and can be written to disk "
-                "on application startup into the FactoryDocumentation.",
-                Optional::No
+                "on application startup into the FactoryDocumentation."
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 
@@ -73,7 +72,7 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
 }
 
 Translation::Translation()
-    : properties::PropertyOwner("Translation")
+    : properties::PropertyOwner({ "Translation" })
 {}
 
 bool Translation::initialize() {

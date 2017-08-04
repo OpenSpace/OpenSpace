@@ -64,12 +64,12 @@ void GuiOriginComponent::render() {
         // only then it would be a real error
         ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
     }
-    int currentPosition = static_cast<int>(std::distance(iCurrentFocus, nodes.begin()));
+    int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
 
     bool hasChanged = ImGui::Combo("Origin", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('NavigationHandler.origin', '" +
+            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
             nodes[currentPosition]->name() + "');",
             scripting::ScriptEngine::RemoteScripting::Yes
         );

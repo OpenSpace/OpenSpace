@@ -94,14 +94,6 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
 // with a forward declaration
 ChunkedLodGlobe::~ChunkedLodGlobe() {}
     
-bool ChunkedLodGlobe::initialize() {
-    return true;
-}
-
-bool ChunkedLodGlobe::deinitialize() {
-    return true;
-}
-
 bool ChunkedLodGlobe::isReady() const {
     return true;
 }

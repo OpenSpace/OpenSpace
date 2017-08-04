@@ -30,7 +30,7 @@ in vec4 positionCameraSpace;
 
 Fragment getFragment() {
     vec4 position = positionCameraSpace;
-    const float depth = pscDepth(position);
+    float depth = pscDepth(position);
 
     Fragment frag;
     frag.color = vec4(positionLocalSpace.xyz + 0.5, 1.0);

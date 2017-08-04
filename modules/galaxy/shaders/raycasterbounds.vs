@@ -40,7 +40,7 @@ void main() {
 
     worldPosition = modelTransform * vec4(vertPosition.xyz, 1.0);
     worldPosition.w = 0.0;
-    const vec4 position = pscTransform(worldPosition, mat4(1.0));
+    vec4 position = pscTransform(worldPosition, mat4(1.0));
 
     gl_Position =  z_normalization(viewProjection * position);
 }

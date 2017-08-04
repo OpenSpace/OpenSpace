@@ -43,20 +43,20 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
 DataPlane::~DataPlane(){}
 
-bool DataPlane::initialize(){
+void DataPlane::initialize() {
     IswaCygnet::initialize();
 
-    if(_group){
+    if (_group) {
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
-    }else{
+    } else {
         _dataProcessor = std::make_shared<DataProcessorText>();
 
         //If autofiler is on, background values property should be hidden
-        _autoFilter.onChange([this](){
+        _autoFilter.onChange([this]() {
             // If autofiler is selected, use _dataProcessor to set backgroundValues 
             // and unregister backgroundvalues property.
-            if(_autoFilter.value()){
+            if (_autoFilter.value()) {
                 _backgroundValues.setValue(_dataProcessor->filterValues());
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
@@ -73,8 +73,6 @@ bool DataPlane::initialize(){
     setPropertyCallbacks();
 
     _autoFilter.setValue(true);
-
-    return true;
 }
 
 bool DataPlane::createGeometry() {

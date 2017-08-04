@@ -46,8 +46,8 @@ class RenderableRings : public Renderable {
 public:
     RenderableRings(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

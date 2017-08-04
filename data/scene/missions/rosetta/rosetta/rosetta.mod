@@ -48,7 +48,7 @@ RosettaKernels = {
     "${OPENSPACE_DATA}/spice/Rosetta/PCK/ROS_CGS_RSOC_V03.TPC",
 }
 
-RotationMatrix = {
+local RotationMatrix = {
     0, 1, 0,
     0, 0, 1,
     1, 0, 0
@@ -63,7 +63,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "ROSETTA",
+                Target = "ROSETTA",
                 Observer = "SUN",
                 Kernels = RosettaKernels
             },  
@@ -95,11 +95,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/black_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -112,11 +109,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/black_parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -129,20 +123,9 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/dish.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/dish_AO.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/dish_AO.png",
+            ModelTransform = RotationMatrix
         },
-        -- Transform = {
-        --     Rotation = {
-        --         Type = "SpiceRotation",
-        --         SourceFrame = "-226071", -- ROS_HGA
-        --         DestinationFrame = "ROS_SPACECRAFT",
-        --     }
-        -- }
     },
     {
         Name = "Rosetta_parts",
@@ -154,12 +137,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/parts2_AO.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/parts2_AO.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -172,12 +151,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/silver_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -190,12 +165,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/vents.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/tex_01.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -208,20 +179,9 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/wingA.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/tex_01.png",
+            ModelTransform = RotationMatrix
         },
-        -- Transform = {
-        --     Rotation = {
-        --         Type = "SpiceRotation",
-        --         SourceFrame = "-226015", -- ROS_SA
-        --         DestinationFrame = "ROS_SPACECRAFT",
-        --     }
-        -- }
     },
     {
         Name = "Rosetta_wing_b",
@@ -233,12 +193,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/wingB.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/tex_01.png",
+            ModelTransform = RotationMatrix
         },
         -- Transform = {
         --     Rotation = {
@@ -258,12 +214,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/yellow_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_gold_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/foil_gold_ramp.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -274,7 +226,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PHILAE",
+                Target = "PHILAE",
                 Observer = "CHURYUMOV-GERASIMENKO",
                 Kernels = RosettaKernels
             },
@@ -300,12 +252,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -318,12 +266,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_lids.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/parts2_AO.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/parts2_AO.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -336,12 +280,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -354,11 +294,8 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_solarp.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
+            ColorTexture = "textures/tex_01.png",
+            ModelTransform = RotationMatrix
         }
     },
     {
@@ -368,7 +305,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "ROSETTA",
+                Target = "ROSETTA",
                 Observer = "CHURYUMOV-GERASIMENKO",
             },
             Color = { 0.288, 0.375, 0.934 },
@@ -384,7 +321,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PHILAE",
+                Target = "PHILAE",
                 Observer = "CHURYUMOV-GERASIMENKO",
             },
             Color = { 0.8, 0.5, 1.0 },

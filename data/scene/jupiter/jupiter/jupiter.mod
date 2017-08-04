@@ -1,58 +1,45 @@
 return {
-    -- Jupiter barycenter module
+    -- Barycenter module
     {
         Name = "JupiterBarycenter",
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "JUPITER BARYCENTER",
+                Target = "JUPITER BARYCENTER",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
-        },
+            }
+        }
     },
-    -- Jupiter module
-    {   
+    -- RenderableGlobe module
+    {
         Name = "Jupiter",
         Parent = "JupiterBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_JUPITER",
-            Body = "JUPITER BARYCENTER",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.71492E8,
-                Segments = 200
-            },
-            Textures = {
-                Type = "simple",
-                Color = "textures/jupiter.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
-        },
-        Tag = "planet_solarSystem",
         Transform = {
-            Translation = {
-                Type = "StaticTranslation",
-                Position = {0, 0, 0}, -- jupiter is at its barycenter
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_JUPITER",
-                DestinationFrame = "ECLIPJ2000",
+                DestinationFrame = "GALACTIC"
             },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
-        }
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = { 71492000, 71492000, 66854000 },
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Jupiter Texture",
+                        FilePath = "textures/jupiter.jpg",
+                        Enabled = true
+                    }
+                }
+            }
+        },
+        Tag = { "planet_solarSystem", "planet_giants" },
     },
-    -- JupiterTrail module
+    -- Trail module
     {   
         Name = "JupiterTrail",
         Parent = "SolarSystemBarycenter",
@@ -60,13 +47,13 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "JUPITER BARYCENTER",
-                Observer = "SUN",
+                Target = "JUPITER BARYCENTER",
+                Observer = "SUN"
             },
             Color = { 0.8, 0.7, 0.7 },
             Period = 4330.595,
-            Resolution = 1000,
+            Resolution = 1000
         },
-        Tag = "planetTrail_solarSystem"
+        Tag = { "planetTrail_solarSystem", "planetTrail_giants" }
     }
 }

@@ -15,9 +15,9 @@ return {
                 Radius = callisto_radius,
                 Segments = 100
             },
+            ColorTexture = "textures/callisto.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/callisto.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },
@@ -45,7 +45,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CALLISTO",
+                Target = "CALLISTO",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -88,7 +88,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CALLISTO",
+                Target = "CALLISTO",
                 Observer = "JUPITER BARYCENTER",
             },
             Color = { 0.4, 0.3, 0.01 },

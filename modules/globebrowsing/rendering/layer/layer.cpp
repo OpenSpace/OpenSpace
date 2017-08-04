@@ -32,6 +32,7 @@ namespace {
     const char* _loggerCat = "Layer";
 
     const char* keyName = "Name";
+    const char* keyDescription = "Description";
     const char* keyEnabled = "Enabled";
     const char* keyLayerGroupID = "LayerGroupID";
     const char* keySettings = "Settings";
@@ -73,11 +74,13 @@ namespace {
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is."
     };
-
 } // namespace
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
-    : properties::PropertyOwner(layerDict.value<std::string>(keyName))
+    : properties::PropertyOwner({
+        layerDict.value<std::string>(keyName),
+        layerDict.hasKey(keyDescription) ? layerDict.value<std::string>(keyDescription) : ""
+    })
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _blendModeOption(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _enabled(EnabledInfo, false)

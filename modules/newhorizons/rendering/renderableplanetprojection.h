@@ -44,8 +44,8 @@ public:
     RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlanetProjection();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -67,15 +67,11 @@ private:
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _heightMapTexturePath;
 
-    properties::IntProperty _rotation;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-
-    properties::BoolProperty _shiftMeridianBy180;
 
     properties::FloatProperty _heightExaggeration;
 

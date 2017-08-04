@@ -50,8 +50,8 @@ class RenderableShadowCylinder : public Renderable {
 public:
     RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -75,7 +75,6 @@ private:
     properties::StringProperty _observer;
     properties::StringProperty _body;
     properties::StringProperty _bodyFrame;
-    properties::StringProperty _mainFrame;
     properties::OptionProperty _aberration;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

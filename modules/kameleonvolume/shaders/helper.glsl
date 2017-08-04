@@ -27,9 +27,9 @@
 
 vec3 kameleon_cartesianToSpherical(vec3 zeroToOneCoords) {
     // Put cartesian in [-1..1] range first
-    const vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
+    vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
 
-    const float r = length(cartesian);
+    float r = length(cartesian);
     float theta = 0.0;
     float phi = 0.0;
 

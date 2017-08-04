@@ -29,25 +29,25 @@ float orenNayarDiffuse(vec3 lightDirection, vec3 viewDirection, vec3 surfaceNorm
                        float roughness)
 {
     // calculate intermediary values
-    const float NdotL = dot(surfaceNormal, lightDirection);
-    const float NdotV = dot(surfaceNormal, viewDirection); 
+    float NdotL = dot(surfaceNormal, lightDirection);
+    float NdotV = dot(surfaceNormal, viewDirection); 
 
-    const float angleVN = acos(NdotV);
-    const float angleLN = acos(NdotL);
+    float angleVN = acos(NdotV);
+    float angleLN = acos(NdotL);
     
-    const float alpha = max(angleVN, angleLN);
-    const float beta = min(angleVN, angleLN);
-    const float gamma = dot(
+    float alpha = max(angleVN, angleLN);
+    float beta = min(angleVN, angleLN);
+    float gamma = dot(
         viewDirection - surfaceNormal * dot(viewDirection, surfaceNormal),
         lightDirection - surfaceNormal * dot(lightDirection, surfaceNormal)
     );
     
-    const float roughnessSquared = roughness * roughness;
+    float roughnessSquared = roughness * roughness;
     
     // calculate A and B
-    const float A = 1.0 - 0.5 * (roughnessSquared / (roughnessSquared + 0.57));
-    const float B = 0.45 * (roughnessSquared / (roughnessSquared + 0.09));
-    const float C = sin(alpha) * tan(beta);
+    float A = 1.0 - 0.5 * (roughnessSquared / (roughnessSquared + 0.57));
+    float B = 0.45 * (roughnessSquared / (roughnessSquared + 0.09));
+    float C = sin(alpha) * tan(beta);
     
     // put it all together
     return max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);

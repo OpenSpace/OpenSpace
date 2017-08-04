@@ -49,6 +49,15 @@ namespace {
             }
         ));
     }
+
+    void renderTooltip(openspace::properties::PropertyOwner* propOwner) {
+        const bool shouldDisplay =
+            ImGui::IsItemHovered() && (!propOwner->description().empty());
+
+        if (shouldDisplay) {
+            ImGui::SetTooltip(propOwner->description().c_str());
+        }
+    }
 } // namespace
 
 namespace openspace::gui {
@@ -87,7 +96,9 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
             renderPropertyOwner(subOwner);
         }
         else {
-            if (ImGui::TreeNode(subOwner->name().c_str())) {
+            bool opened = ImGui::TreeNode(subOwner->name().c_str());
+            renderTooltip(subOwner);
+            if (opened) {
                 renderPropertyOwner(subOwner);
                 ImGui::TreePop();
             }

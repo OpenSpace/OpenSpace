@@ -125,17 +125,10 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
         std::to_string(OPENSPACE_VERSION_PATCH) +
         "]";
     
-        std::string generationTime;
-        try {
-            generationTime = Time::now().ISO8601();
-        }
-        catch (...) {}
-
     file
          << "\t"   << "<script>"                                                  << '\n'
          << "\t\t" << "var " << _jsonName << " = JSON.parse('" << json << "');"   << '\n'
          << "\t\t" << "var version = " << Version << ";"                          << '\n'
-         << "\t\t" << "var generationTime = '" << generationTime << "';"          << '\n'
          << "\t\t" << handlebarsContent                                           << '\n'
          << "\t\t" << jsContent                                                   << '\n'
          << "\t"   << "</script>"                                                 << '\n'

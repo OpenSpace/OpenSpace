@@ -24,16 +24,13 @@ return {
                 Radius = 6.957E8,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/sun.jpg",
-            },
+            ColorTexture = "textures/sun.jpg",
             PerformShading = false,
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "SUN",
+                Target = "SUN",
                 Observer = "SSB",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -59,7 +56,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "SUN",
+                Target = "SUN",
                 Observer = "SSB",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }

@@ -48,14 +48,13 @@ documentation::Documentation Scale::Documentation() {
             {
                 KeyType,
                 new StringAnnotationVerifier("Must name a valid Scale type"),
+                Optional::No,
                 "The type of the scaling that is described in this element. "
                 "The available types of scaling depend on the configuration "
                 "of the application and can be written to disk on "
-                "application startup into the FactoryDocumentation.",
-                Optional::No
+                "application startup into the FactoryDocumentation."
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 
@@ -72,7 +71,7 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
 }
 
 Scale::Scale()
-    : properties::PropertyOwner("Scale")
+    : properties::PropertyOwner({ "Scale" })
 {}
 
 bool Scale::initialize() {

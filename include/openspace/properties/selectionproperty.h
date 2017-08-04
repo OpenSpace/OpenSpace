@@ -44,6 +44,11 @@ public:
     void removeOptions();
     const std::vector<Option>& options() const;
 
+    using TemplateProperty<std::vector<int>>::operator std::vector<int>;
+
+    using TemplateProperty<std::vector<int>>::operator=;
+
+
 private:
     static const std::string OptionsKey;
     std::string generateAdditionalDescription() const;

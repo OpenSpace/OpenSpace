@@ -52,7 +52,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
 }
 
 TileProvider::TileProvider()
-    : properties::PropertyOwner("tileProvider")
+    : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
 {
@@ -60,7 +60,7 @@ TileProvider::TileProvider()
 }
 
 TileProvider::TileProvider(const ghoul::Dictionary&)
-    : properties::PropertyOwner("tileProvider")
+    : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
 {

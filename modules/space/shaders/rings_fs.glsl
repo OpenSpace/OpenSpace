@@ -52,13 +52,13 @@ Fragment getFragment() {
     // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
     // textureOffset.x -> 0
     // textureOffset.y -> 1
-    const float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+    float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
     if (texCoord < 0.f || texCoord > 1.f) {
         discard;
     }
         
     vec4 diffuse = texture(texture1, texCoord);
-    const float colorValue = length(diffuse.rgb);
+    float colorValue = length(diffuse.rgb);
     // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
     // to normalize the transparency value to [0,1]
     if (colorValue < 3.0 * transparency) {

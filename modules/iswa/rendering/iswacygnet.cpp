@@ -116,13 +116,13 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 
 IswaCygnet::~IswaCygnet(){}
 
-bool IswaCygnet::initialize(){
+void IswaCygnet::initialize() {
     _textures.push_back(nullptr);
     
-    if(!_data->groupName.empty()){
+    if (!_data->groupName.empty()) {
         initializeGroup();
-    }else{
-        _delete.onChange([this](){
+    } else {
+        _delete.onChange([this]() {
             deinitialize();
             OsEng.scriptEngine().queueScript(
                 "openspace.removeSceneGraphNode('" + name() + "')",
@@ -135,19 +135,16 @@ bool IswaCygnet::initialize(){
     createGeometry();
     createShader();
     downloadTextureResource();
-
-    return true;
 }
 
-bool IswaCygnet::deinitialize(){
-     if(!_data->groupName.empty())
+void IswaCygnet::deinitialize() {
+    if (!_data->groupName.empty()) {
         _group->groupEvent()->unsubscribe(name());
+    }
 
     unregisterProperties();
     destroyGeometry();
     destroyShader();
-
-    return true;
 }
 
 bool IswaCygnet::isReady() const{

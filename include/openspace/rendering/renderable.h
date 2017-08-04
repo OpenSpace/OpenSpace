@@ -64,8 +64,8 @@ public:
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();
 
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
+    virtual void initialize();
+    virtual void deinitialize();
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;

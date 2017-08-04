@@ -40,15 +40,15 @@ uniform mat4 directionToSunViewSpace;
 void main() {
     vs_positionModelSpace = in_position;
 
-    const float totalIntensity = lightIntensityClamped;
+    float totalIntensity = lightIntensityClamped;
 
-    const vec4 positionCameraSpace = modelViewTransform * vec4(
+    vec4 positionCameraSpace = modelViewTransform * vec4(
         in_position * totalIntensity,
         0.0,
         1.0
     );
     
-    const vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
     vs_positionClipSpace = z_normalization(positionClipSpace);
     gl_Position = z_normalization(positionClipSpace);
 }

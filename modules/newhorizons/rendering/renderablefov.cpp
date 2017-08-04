@@ -143,16 +143,16 @@ documentation::Documentation RenderableFov::Documentation() {
             {
                 KeyBody,
                 new StringVerifier,
+                Optional::No,
                 "The SPICE name of the source body for which the field of view should be "
-                "rendered.",
-                Optional::No
+                "rendered."
             },
             {
                 KeyFrame,
                 new StringVerifier,
+                Optional::No,
                 "The SPICE name of the source body's frame in which the field of view "
-                "should be rendered.",
-                Optional::No
+                "should be rendered."
             },
             {
                 KeyInstrument,
@@ -160,8 +160,8 @@ documentation::Documentation RenderableFov::Documentation() {
                     {
                         KeyInstrumentName,
                         new StringVerifier,
-                        "The SPICE name of the instrument that is rendered",
-                        Optional::No
+                        Optional::No,
+                        "The SPICE name of the instrument that is rendered"
                     },
                     {
                         KeyInstrumentAberration,
@@ -173,45 +173,46 @@ documentation::Documentation RenderableFov::Documentation() {
                                 "XLT", "XLT+S",
                                 "XCN", "XCN+S"
                         }),
+                        Optional::Yes,
                         "The aberration correction that is used for this field of view. "
-                        "The default is 'NONE'.",
-                        Optional::Yes
+                        "The default is 'NONE'."
                     }
                 }),
+                Optional::No,
                 "A table describing the instrument whose field of view should be "
-                "rendered.",
-                Optional::No
+                "rendered."
             },
             {
                 KeyPotentialTargets,
                 new StringListVerifier,
+                Optional::No,
                 "A list of potential targets (specified as SPICE names) that the field "
-                "of view should be tested against.",
-                Optional::No
+                "of view should be tested against."
             },
             {
                 KeyFrameConversions,
                 new TableVerifier({
                     {
                         DocumentationEntry::Wildcard,
-                        new StringVerifier
+                        new StringVerifier,
+                        Optional::No
                     }
                 }),
+                Optional::Yes,
                 "A list of frame conversions that should be registered with the "
-                "SpiceManager.",
-                Optional::Yes
+                "SpiceManager."
             },
             {
                 LineWidthInfo.identifier,
                 new DoubleVerifier,
-                LineWidthInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                LineWidthInfo.description
             },
             {
                 StandoffDistanceInfo.identifier,
                 new DoubleVerifier,
-                StandoffDistanceInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                StandoffDistanceInfo.description
             }
         }
     };
@@ -296,7 +297,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     addProperty(_colors.square);
 }
 
-bool RenderableFov::initialize() {
+void RenderableFov::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "FovProgram",
@@ -313,8 +314,10 @@ bool RenderableFov::initialize() {
         res.shape == SpiceManager::FieldOfViewResult::Shape::Polygon ||
         res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
     if (!supportedShape) {
-        LWARNINGC("RenderableFov", "'" << _instrument.name << "' has unsupported shape");
-        return false;
+        throw ghoul::RuntimeError(
+            "'" + _instrument.name + "' has unsupported shape",
+            "RenderableFov"
+        );
     }
 
     _instrument.bounds = std::move(res.bounds);
@@ -404,11 +407,9 @@ bool RenderableFov::initialize() {
     );
 
     glBindVertexArray(0);
-
-    return true;
 }
 
-bool RenderableFov::deinitialize() {
+void RenderableFov::deinitialize() {
     OsEng.renderEngine().removeRenderProgram(_programObject);
     _programObject = nullptr;
 
@@ -417,8 +418,6 @@ bool RenderableFov::deinitialize() {
 
     glDeleteBuffers(1, &_fieldOfViewBounds.vbo);
     glDeleteVertexArrays(1, &_fieldOfViewBounds.vao);
-
-    return true;
 }
 
 bool RenderableFov::isReady() const {

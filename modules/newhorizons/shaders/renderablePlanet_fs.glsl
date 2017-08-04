@@ -47,10 +47,10 @@ Fragment getFragment() {
 
     vec3 n = normalize(vs_normal.xyz);
 
-    const vec3 l_pos = sun_pos; // sun
-    const vec3 l_dir = normalize(l_pos - objpos.xyz);
+    vec3 l_pos = sun_pos; // sun
+    vec3 l_dir = normalize(l_pos - objpos.xyz);
     const float terminatorBrightness = 0.4;
-    const float intensity = min(max(5 * dot(n,l_dir), terminatorBrightness), 1);
+    float intensity = min(max(5 * dot(n,l_dir), terminatorBrightness), 1);
     // float shine = 0.0001;
 
     vec4 ambient = vec4(0.0, 0.0, 0.0, 1.0);

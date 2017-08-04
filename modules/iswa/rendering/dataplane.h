@@ -40,7 +40,7 @@ public:
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane();
 
-     bool initialize() override;
+     void initialize() override;
 
 private:
 

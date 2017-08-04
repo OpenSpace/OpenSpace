@@ -3,22 +3,23 @@ return {
         Name = "Iapetus",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_IAPETUS",
-            Body = "IAPETUS",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.746E3,
-                Segments = 50
-            },
-            Textures = {
-                Color = "textures/iapetus.jpg"
+            Type = "RenderableGlobe",
+            Radii = 734000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Iapetus Texture",
+                        FilePath = "textures/iapetus.jpg",
+                        Enabled = true
+                    }
+                }
             }
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "IAPETUS",
+                Target = "IAPETUS",
                 Observer = "SATURN BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/sat375.bsp"
             },
@@ -36,7 +37,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "IAPETUS",
+                Target = "IAPETUS",
                 Observer = "SATURN BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

@@ -39,8 +39,8 @@ void main() {
     positionLocalSpace = vec4(vertPosition, 1.0);
     positionCameraSpace = modelViewTransform * positionLocalSpace;
 
-    const vec4 positionClipSpace = projectionTransform * positionCameraSpace;
-    const vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    vec4 positionScreenSpace = z_normalization(positionClipSpace);
     
     gl_Position = positionScreenSpace;
 }
