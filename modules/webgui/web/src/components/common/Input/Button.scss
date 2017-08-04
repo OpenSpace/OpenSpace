@@ -1,0 +1,50 @@
+@import "../../../styles/all";
+
+$small-padding: ($vertical-padding / 2) ($base-padding / 2);
+
+.button {
+  background: $ui-background-selected;
+  color: $text-color-focus;
+  padding: $button-padding;
+}
+
+.block {
+  width: 100%;
+}
+
+.uppercase {
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.transparent {
+  background: transparent;
+}
+
+.small {
+  padding: $small-padding;
+}
+
+.small {
+  font-size: 0.8em;
+}
+
+.button {
+  border: 0;
+
+  &:focus,
+  &:hover {
+    background: $ui-background-hover;
+    outline: 0;
+  }
+
+  &:active {
+    background: $ui-background-active;
+  }
+
+  &:disabled {
+    color: $text-color-blur;
+    cursor: not-allowed;
+  }
+}
