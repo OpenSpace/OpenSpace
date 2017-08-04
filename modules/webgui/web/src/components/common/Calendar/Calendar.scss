@@ -9,23 +9,6 @@ $selected-border-width: 2px;
   align-items: center;
 }
 
-.header button {
-  border: none;
-  background: transparent;
-  color: inherit;
-  padding: $button-padding;
-
-  &:focus,
-  &:hover {
-    background: $ui-background-hover;
-    outline: 0;
-  }
-
-  &:active {
-    background: $ui-background-active;
-  }
-}
-
 .weekdays {
   display: flex;
   font-size: 0.8rem;

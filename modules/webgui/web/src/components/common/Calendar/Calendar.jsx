@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { rotate } from '../../../utils/helpers';
 import Icon from '../Icon/Icon';
+import Button from '../Input/Button';
 
 import styles from './Calendar.scss';
 
@@ -143,15 +144,15 @@ class Calendar extends Component {
     return (
       <section>
         <header className={styles.header}>
-          <button onClick={this.changeMonth(-1)}>
+          <Button transparent small onClick={this.changeMonth(-1)}>
             <Icon icon="chevron_left" />
-          </button>
+          </Button>
           <div>
             { this.monthString() } { this.month().getFullYear() }
           </div>
-          <button onClick={this.changeMonth(1)}>
+          <Button transparent small onClick={this.changeMonth(1)}>
             <Icon icon="chevron_right" />
-          </button>
+          </Button>
         </header>
 
         <section className={styles.calendar}>
