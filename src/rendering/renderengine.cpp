@@ -554,7 +554,7 @@ void RenderEngine::updateDynamicOrigin() {
     if (_camera) {
         // New DynamicRootGraph system in action:
         scene()->updateDsgAttachedNode(_camera);
-        _camera->setParent(_scene->sceneGraphNode(_scene->dsgAttachedNodeName()));
+        _camera->setParent(_scene->sceneGraphNode(_scene->dsgAttachedNodeName()));        
     }
 }
 

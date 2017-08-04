@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
+#include <modules/onscreengui/include/guicoordsystemcomponent.h>
 #include <modules/onscreengui/include/guifilepathcomponent.h>
 #include <modules/onscreengui/include/guihelpcomponent.h>
 #include <modules/onscreengui/include/guiperformancecomponent.h>
@@ -67,6 +68,7 @@ public:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
     GuiOriginComponent _origin;
+    GuiCoordSystemComponent _coordSystem;
     GuiPerformanceComponent _performance;
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _property;

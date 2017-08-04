@@ -1128,7 +1128,7 @@ void OpenSpaceEngine::preSynchronization() {
         _renderEngine->camera()->invalidateCache();
 
         // JCC: enables the DSG
-        //_renderEngine->updateDynamicOrigin();
+        _renderEngine->updateDynamicOrigin();
 
 
         _parallelConnection->preSynchronization();

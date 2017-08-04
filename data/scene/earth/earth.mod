@@ -31,7 +31,7 @@ return {
         Name = "Earth",
         Parent = "EarthBarycenter",
         -- SphereOfInfluency unit is meters
-		SphereOfInfluency = 1.0E+8,
+		SphereOfInfluency = 1.0E+7,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_EARTH",

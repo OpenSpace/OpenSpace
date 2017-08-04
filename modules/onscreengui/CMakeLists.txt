@@ -1,4 +1,4 @@
-##########################################################################################
+﻿##########################################################################################
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
@@ -27,6 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/gui.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guicomponent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/guicoordsystemcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guifilepathcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guihelpcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiorigincomponent.h
@@ -43,6 +44,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gui.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gui_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guicomponent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/guicoordsystemcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guifilepathcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guihelpcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiorigincomponent.cpp
@@ -57,8 +59,8 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_fs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

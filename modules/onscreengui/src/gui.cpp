@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -229,6 +229,7 @@ GUI::GUI()
 {
     addPropertySubOwner(_help);
     addPropertySubOwner(_origin);
+    addPropertySubOwner(_coordSystem);
     addPropertySubOwner(_performance);
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
@@ -598,6 +599,7 @@ void GUI::render() {
 
     _origin.render();
     _time.render();
+    _coordSystem.render();
 
     bool help = _help.isEnabled();
     ImGui::Checkbox("Help", &help);
