@@ -3,6 +3,8 @@ return {
     {   
         Name = "Europa",
         Parent = "JupiterBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 2.0E+7,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_EUROPA", -- should exist. 

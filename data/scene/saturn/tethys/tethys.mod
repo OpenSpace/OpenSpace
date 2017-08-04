@@ -2,6 +2,8 @@ return {
     {
         Name = "Tethys",
         Parent = "SaturnBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 5.0E+6,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_TETHYS",

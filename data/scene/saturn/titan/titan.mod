@@ -2,6 +2,8 @@ return {
     {
         Name = "Titan",
         Parent = "SaturnBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 2.5E+7,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_TITAN",

@@ -87,7 +87,6 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
     if (dictionary.hasKey(KeySphereOfInfluency)) {
         double sphereOfInfluency;
         dictionary.getValue(KeySphereOfInfluency, sphereOfInfluency);
-        std::cout << "== Sphere of Influency = " << sphereOfInfluency << " =====" << std::endl;
         result->setSphereOfInfluency(sphereOfInfluency);
     }    
 

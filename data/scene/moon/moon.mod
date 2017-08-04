@@ -3,6 +3,8 @@ return {
     {   
         Name = "Moon",
         Parent = "EarthBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 2.0E+7,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_MOON",

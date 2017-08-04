@@ -2,6 +2,8 @@ return {
     {
         Name = "Iapetus",
         Parent = "SaturnBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 7.0E+6,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_IAPETUS",

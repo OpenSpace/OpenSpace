@@ -2,6 +2,8 @@ return {
     {
         Name = "Dione",
         Parent = "SaturnBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 5.5E+6,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_DIONE",

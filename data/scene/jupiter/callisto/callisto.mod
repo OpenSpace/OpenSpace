@@ -3,6 +3,8 @@ return {
     {   
         Name = "Callisto",
         Parent = "JupiterBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 2.0E+7,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_CALLISTO", -- should exist. 

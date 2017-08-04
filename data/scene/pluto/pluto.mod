@@ -3,6 +3,8 @@ return {
     {
         Name = "PlutoBarycenter",
         Parent = "SolarSystemBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 1.0E+9,
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
@@ -19,6 +21,8 @@ return {
     {   
         Name = "Pluto",
         Parent = "PlutoBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 1.0E+7,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_PLUTO",
@@ -55,6 +59,8 @@ return {
     {
         Name = "Charon",
         Parent = "PlutoBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 6.0E+6,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_CHARON",

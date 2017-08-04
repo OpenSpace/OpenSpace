@@ -3,6 +3,8 @@ return {
     {
         Name = "VenusBarycenter",
         Parent = "SolarSystemBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 1.0E+8,
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
@@ -17,6 +19,8 @@ return {
     {   
         Name = "Venus",
         Parent = "VenusBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 5.0E+7,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_VENUS",

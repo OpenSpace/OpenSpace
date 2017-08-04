@@ -2,6 +2,8 @@ return {
     {
         Name = "Enceladus",
         Parent = "SaturnBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 2.5E+6,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_ENCELADUS",

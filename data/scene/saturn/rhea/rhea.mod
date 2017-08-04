@@ -2,6 +2,8 @@ return {
     {
         Name = "Rhea",
         Parent = "SaturnBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 8.0E+6,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_RHEA",

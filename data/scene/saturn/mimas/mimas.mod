@@ -2,6 +2,8 @@ return {
     {
         Name = "Mimas",
         Parent = "SaturnBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 2.0E+6,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_MIMAS",

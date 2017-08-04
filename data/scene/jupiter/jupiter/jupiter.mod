@@ -3,6 +3,8 @@ return {
     {
         Name = "JupiterBarycenter",
         Parent = "SolarSystemBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 2.0E+9,
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
@@ -16,6 +18,8 @@ return {
     {   
         Name = "Jupiter",
         Parent = "JupiterBarycenter",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 4.0E+8,
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_JUPITER",
