@@ -4,7 +4,8 @@ $sidebar-tab-height: 60px;
 
 // padding
 $base-padding: 1rem;
-$button-padding: ($base-padding / 2) $base-padding;
+$vertical-padding: $base-padding / 2;
+$button-padding: $vertical-padding $base-padding;
 $sidebar-padding: ($base-padding / 2);
 $popover-horizontal-padding: $base-padding / 2;
 
