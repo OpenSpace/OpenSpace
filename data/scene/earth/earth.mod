@@ -10,8 +10,8 @@ return {
                 Target = "EARTH",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
-        },
+            }
+        }
     },
     {
     -- The default reference frame for Earth-orbiting satellites
@@ -21,12 +21,12 @@ return {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "J2000",
-                DestinationFrame = "GALACTIC",
+                DestinationFrame = "GALACTIC"
             }
-        },
-    },    
+        }
+    },
     -- EarthTrail module
-    {   
+    {
         Name = "EarthTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
@@ -55,7 +55,7 @@ return {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_EARTH",
                 DestinationFrame = "GALACTIC",
-            },
+            }
         },
         Tag = { "planet_solarSystem", "planet_terrestrial" },
         Renderable = {

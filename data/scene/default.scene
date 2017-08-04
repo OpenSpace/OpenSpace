@@ -1,6 +1,6 @@
 -- Add folders to this list that contain .info files describing HiRISE patches
 local mars_folders = {
-    -- "C:/ab7512/Mars/map_datasets/HiRISE",
+    -- Add a folder here whose contents will be automatically added to the Mars globe
 }
 
 function preInitialization()
@@ -13,10 +13,6 @@ function preInitialization()
 
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
-
-    -- For unit test
-    --openspace.time.setTime("2016 SEP 8 23:00:00.500")
-    --openspace.time.togglePause()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))

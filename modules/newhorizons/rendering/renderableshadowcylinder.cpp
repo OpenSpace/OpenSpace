@@ -34,7 +34,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* MainFrame   = "GALACTIC";
+    const char* MainFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "AmountOfPoints",
