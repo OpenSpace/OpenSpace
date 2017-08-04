@@ -294,9 +294,9 @@ void SceneGraphNode::update(const UpdateData& data) {
     _worldRotationCached = calculateWorldRotation();
     _worldScaleCached = calculateWorldScale();
     // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
-    _worldPositionCached = calculateWorldPosition();
+    //_worldPositionCached = calculateWorldPosition();
     // JCC: The previous line should change to the next
-    //_worldPositionCached = dynamicWorldPosition();
+    _worldPositionCached = dynamicWorldPosition();
 
 
     newUpdateData.modelTransform.translation = worldPosition();
@@ -330,11 +330,12 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
+    //const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
     // JCC: The previous line should change to the next
     // Implement a cache sytem to avoid calculate the same path while in the same camera parent.
     // Just update the displacement vector to the sum.
-    //const psc thisPositionPSC = dynamicWorldPosition();
+    glm::dvec3 tmpPos = dynamicWorldPosition();
+    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(tmpPos.x, tmpPos.y, tmpPos.z);
 
     RenderData newData = {
         data.camera,
