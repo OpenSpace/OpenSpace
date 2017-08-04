@@ -3,6 +3,7 @@ import DataManager from '../../api/DataManager';
 import LoadingString from '../common/LoadingString/LoadingString';
 import Popover from '../common/Popover/Popover';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
+import Button from '../common/Input/Button';
 import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
 
@@ -69,6 +70,12 @@ class TimePicker extends Component {
         { this.state.showPopover && (
           <Popover className={Picker.Popover} title="Select time" closeCallback={this.togglePopover}>
             <Calendar selected={this.state.time} />
+            <hr className={Popover.styles.delimiter} />
+            <p>
+              <Button block disabled onClick={this.togglePause}>
+                Pause simulation
+              </Button>
+            </p>
           </Popover>
         )}
       </div>

@@ -33,6 +33,15 @@ $padding: $padding-horizontal $padding-vertical;
   }
 }
 
+.popover p {
+  padding: $padding;
+}
+
+.delimiter {
+  margin: ($base-padding / 3) 0;
+  border: 1px solid $ui-background-hover;
+}
+
 .close {
   background: none;
   border: 0;
