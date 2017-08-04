@@ -34,7 +34,7 @@
 
 namespace {
     const std::string _loggerCat = "GuiCoordSystemComponent";
-    const std::string _commonTextCoordSystem = "Coordinate System Origin Node: ";
+    const std::string _commonTextCoordSystem = "DSG Attached Node: ";
 }
 
 namespace openspace::gui {
