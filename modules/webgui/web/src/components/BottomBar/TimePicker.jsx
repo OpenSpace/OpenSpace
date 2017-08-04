@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import DataManager from '../../api/DataManager';
-import SmallLabel from '../common/SmallLabel/SmallLabel';
 import LoadingString from '../common/LoadingString/LoadingString';
+import Popover from '../common/Popover/Popover';
+import SmallLabel from '../common/SmallLabel/SmallLabel';
+import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
 
 const TIME_KEY = 'special:currentTime';
@@ -13,9 +15,11 @@ class TimePicker extends Component {
     this.state = {
       time: new Date(),
       hasTime: false,
+      showPopover: false,
     };
 
     this.subscriptionCallback = this.subscriptionCallback.bind(this);
+    this.togglePopover = this.togglePopover.bind(this);
   }
 
   componentDidMount() {
@@ -25,6 +29,10 @@ class TimePicker extends Component {
 
   componentWillUnmount() {
     DataManager.unsubscribe(TIME_KEY, this.subscriptionCallback);
+  }
+
+  togglePopover() {
+    this.setState({ showPopover: !this.state.showPopover });
   }
 
   /**
@@ -47,16 +55,23 @@ class TimePicker extends Component {
 
   render() {
     return (
-      <Picker>
-        <div className={Picker.Title}>
-          <span className={Picker.Name}>
-            <LoadingString loading={!this.state.hasTime}>
-              { this.time }
-            </LoadingString>
-          </span>
-          <SmallLabel>Date</SmallLabel>
-        </div>
-      </Picker>
+      <div className={Picker.Wrapper}>
+        <Picker onClick={this.togglePopover}>
+          <div className={Picker.Title}>
+            <span className={Picker.Name}>
+              <LoadingString loading={!this.state.hasTime}>
+                { this.time }
+              </LoadingString>
+            </span>
+            <SmallLabel>Date</SmallLabel>
+          </div>
+        </Picker>
+        { this.state.showPopover && (
+          <Popover className={Picker.Popover} title="Select time" closeCallback={this.togglePopover}>
+            <Calendar selected={this.state.time} />
+          </Popover>
+        )}
+      </div>
     );
   }
 }
