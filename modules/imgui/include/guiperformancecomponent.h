@@ -22,39 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guicomponent.h>
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__
 
-namespace {
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Is Enabled",
-        "This setting determines whether this object will be visible or not."
-    };
-} // namespace
+#include <modules/imgui/include/guicomponent.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+
+#include <ghoul/misc/sharedmemory.h>
+
+#include <memory>
+
+namespace ghoul { class SharedMemory; }
 
 namespace openspace::gui {
 
-GuiComponent::GuiComponent(std::string name)
-    : properties::PropertyOwner({ std::move(name) })
-    , _isEnabled(EnabledInfo, false)
-{
-    addProperty(_isEnabled);
-}
+class GuiPerformanceComponent : public GuiComponent {
+public:
+    GuiPerformanceComponent();
 
-bool GuiComponent::isEnabled() const {
-    return _isEnabled;
-}
+    void render() override;
 
-void GuiComponent::setEnabled(bool enabled) {
-    _isEnabled = enabled;
-}
+protected:
+    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
 
-void GuiComponent::initialize() {}
+    properties::IntProperty _sortingSelection;
 
-void GuiComponent::initializeGL() {}
-
-void GuiComponent::deinitialize() {}
-
-void GuiComponent::deinitializeGL() {}
+    properties::BoolProperty _sceneGraphIsEnabled;
+    properties::BoolProperty _functionsIsEnabled;
+    properties::BoolProperty _outputLogs;
+};
 
 } // namespace openspace::gui
+
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__

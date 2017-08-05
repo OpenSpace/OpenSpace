@@ -57,15 +57,15 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_fs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "OnScreenGUI"
-    onscreengui_module
+    "ImGUI"
+    imgui_module
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-include_external_library(${onscreengui_module} Imgui ${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui)
+include_external_library(${imgui_module} Imgui ${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui)

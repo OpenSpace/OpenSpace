@@ -22,20 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
 
-#include <modules/onscreengui/include/guicomponent.h>
+#include <openspace/util/openspacemodule.h>
 
-namespace openspace::gui {
+#include <modules/imgui/include/gui.h>
 
-class GuiFilePathComponent : public GuiComponent {
-public:
-    GuiFilePathComponent();
+namespace openspace {
 
-    void render() override;
+struct Touch {
+    bool active;
+    glm::vec2 pos;
+    uint32_t action;
 };
 
-} // namespace openspace::gui
+class ImGUIModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "ImGUI";
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
+    ImGUIModule();
+    
+    gui::GUI gui;
+    Touch touchInput = { false, glm::vec2(0), 0 };
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__

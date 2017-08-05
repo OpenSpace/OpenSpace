@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guipropertycomponent.h>
+#include <modules/imgui/include/guipropertycomponent.h>
 
-#include <modules/onscreengui/include/renderproperties.h>
+#include <modules/imgui/include/renderproperties.h>
 
 #include <openspace/properties/propertyowner.h>
 

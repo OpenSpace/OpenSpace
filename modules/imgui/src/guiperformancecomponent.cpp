@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guiperformancecomponent.h>
+#include <modules/imgui/include/guiperformancecomponent.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/performance/performancelayout.h>

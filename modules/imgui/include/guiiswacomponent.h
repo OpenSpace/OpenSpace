@@ -22,58 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guiorigincomponent.h>
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIISWACOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIISWACOMPONENT___H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
+#include <modules/imgui/include/guipropertycomponent.h>
 
-#include <ghoul/misc/assert.h>
-
-#include "imgui.h"
+#include <map>
 
 namespace openspace::gui {
 
-GuiOriginComponent::GuiOriginComponent()
-    : GuiComponent("Origin")
-{}
+class GuiIswaComponent : public GuiPropertyComponent {
+public:
+    GuiIswaComponent();
+    void render() override;
 
-void GuiOriginComponent::render() {
-    SceneGraphNode* currentFocus = OsEng.navigationHandler().focusNode();
+private:
+    bool _gmData;
+    bool _gmImage;
+    bool _ionData;
 
-    std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
-
-    std::sort(
-        nodes.begin(),
-        nodes.end(),
-        [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
-            return lhs->name() < rhs->name();
-        }
-    );
-    std::string nodeNames = "";
-    for (SceneGraphNode* n : nodes) {
-        nodeNames += n->name() + '\0';
-    }
-
-    auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
-    if (!nodes.empty()) {
-        // Only check if we found the current focus node if we have any nodes at all
-        // only then it would be a real error
-        ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
-    }
-    int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
-
-    bool hasChanged = ImGui::Combo("Origin", &currentPosition, nodeNames.c_str());
-    if (hasChanged) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
-            nodes[currentPosition]->name() + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-}
+    std::vector<int> _cdfOptions;
+    std::map<std::string, int> _cdfOptionsMap;
+};
 
 } // namespace openspace::gui
+
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIISWACOMPONENT___H__

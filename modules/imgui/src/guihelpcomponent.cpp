@@ -22,20 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__
+#include <modules/imgui/include/guihelpcomponent.h>
 
-#include <modules/onscreengui/include/guicomponent.h>
+#include "imgui.h"
+
+namespace {
+    const ImVec2 size = ImVec2(350, 500);
+} // namespace
 
 namespace openspace::gui {
 
-class GuiHelpComponent : public GuiComponent {
-public:
-    GuiHelpComponent();
+GuiHelpComponent::GuiHelpComponent()
+    : GuiComponent("Help")
+{}
 
-    void render() override;
-};
+void GuiHelpComponent::render() {
+    bool v = _isEnabled;
+    ImGui::Begin("Help", &v, size, 0.5f);
+    _isEnabled = v;
+    ImGui::ShowUserGuide();
+    ImGui::End();
+}
 
 } // namespace openspace::gui
-
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__

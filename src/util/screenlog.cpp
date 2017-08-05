@@ -41,14 +41,13 @@ void ScreenLog::removeExpiredEntries() {
     auto t = std::chrono::steady_clock::now();
     auto ttl = _timeToLive;
     
-    _entries.erase(
-        std::remove_if(
-            _entries.begin(),
-            _entries.end(),
-            [&t, &ttl](const LogEntry& e) { return (t - e.timeStamp) > ttl; }
-        ),
-        _entries.end()
+    auto rit = std::remove_if(
+        _entries.begin(),
+        _entries.end(),
+        [&t, &ttl](const LogEntry& e) { return (t - e.timeStamp) > ttl; }
     );
+
+    _entries.erase(rit, _entries.end() );
 }
 
 void ScreenLog::log(LogLevel level, const string& category, const string& message) {

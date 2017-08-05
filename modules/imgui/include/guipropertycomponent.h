@@ -22,38 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
 
-#include <modules/onscreengui/include/guicomponent.h>
+#include <modules/imgui/include/guicomponent.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/property.h>
 
-#include <ghoul/misc/sharedmemory.h>
+#include <functional>
+#include <string>
+#include <vector>
 
-#include <memory>
-
-namespace ghoul { class SharedMemory; }
+namespace openspace::properties {
+    class Property;
+    class PropertyOwner;
+} // namespace openspace::properties
 
 namespace openspace::gui {
 
-class GuiPerformanceComponent : public GuiComponent {
+class GuiPropertyComponent : public GuiComponent {
 public:
-    GuiPerformanceComponent();
+    using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
 
-    void render() override;
+    GuiPropertyComponent(std::string name);
+
+    // This is the function that evaluates to the list of Propertyowners that this
+    // component should render
+    void setSource(SourceFunction func);
+
+    void setVisibility(properties::Property::Visibility visibility);
+    void setHasRegularProperties(bool hasOnlyRegularProperties);
+
+    void render();
 
 protected:
-    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
+    void renderPropertyOwner(properties::PropertyOwner* owner);
+    void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
-    properties::IntProperty _sortingSelection;
+    properties::Property::Visibility _visibility;
 
-    properties::BoolProperty _sceneGraphIsEnabled;
-    properties::BoolProperty _functionsIsEnabled;
-    properties::BoolProperty _outputLogs;
+    SourceFunction _function;
+    /// This is set to \c true if all properties contained in this GUIPropertyComponent
+    /// are regular, i.e., not containing wildcards, regex, or groups
+    /// This variable only has an impact on which \c setPropertyValue function is called
+    bool _hasOnlyRegularProperties = false;
 };
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__

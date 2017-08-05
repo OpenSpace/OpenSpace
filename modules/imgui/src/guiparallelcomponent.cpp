@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guiparallelcomponent.h>
+#include <modules/imgui/include/guiparallelcomponent.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>

@@ -22,28 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guitimecomponent.h>
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/util/time.h>
+#include <modules/imgui/include/guicomponent.h>
+#include <modules/imgui/include/guipropertycomponent.h>
 
-#include "imgui.h"
+#include <string>
 
 namespace openspace::gui {
 
-GuiTimeComponent::GuiTimeComponent() : GuiComponent("Time") {}
+class GuiParallelComponent : public GuiPropertyComponent {
+public:
+    GuiParallelComponent();
+    void render() override;
+private:
+    void renderDisconnected();
+    void renderClientWithHost();
+    void renderClientWithoutHost();
+    void renderClientCommon();
+    void renderHost();
+};
 
-void GuiTimeComponent::render() {
-    float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-    
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -50000.f, 50000.f);
-    if (changed) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-}
+} // namespace openspace::gui
 
-} // namespace openspace gui
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__

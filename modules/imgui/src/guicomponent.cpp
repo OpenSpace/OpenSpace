@@ -22,31 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+#include <modules/imgui/include/guicomponent.h>
 
-#include <openspace/util/openspacemodule.h>
+namespace {
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "This setting determines whether this object will be visible or not."
+    };
+} // namespace
 
-#include <modules/onscreengui/include/gui.h>
+namespace openspace::gui {
 
-namespace openspace {
+GuiComponent::GuiComponent(std::string name)
+    : properties::PropertyOwner({ std::move(name) })
+    , _isEnabled(EnabledInfo, false)
+{
+    addProperty(_isEnabled);
+}
 
-struct Touch {
-    bool active;
-    glm::vec2 pos;
-    uint32_t action;
-};
+bool GuiComponent::isEnabled() const {
+    return _isEnabled;
+}
 
-class OnScreenGUIModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "OnScreenGUI";
+void GuiComponent::setEnabled(bool enabled) {
+    _isEnabled = enabled;
+}
 
-    OnScreenGUIModule();
-    
-    gui::GUI gui;
-    Touch touchInput = { false, glm::vec2(0), 0 };
-};
+void GuiComponent::initialize() {}
 
-} // namespace openspace
+void GuiComponent::initializeGL() {}
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+void GuiComponent::deinitialize() {}
+
+void GuiComponent::deinitializeGL() {}
+
+} // namespace openspace::gui

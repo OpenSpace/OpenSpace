@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guiiswacomponent.h>
+#include <modules/imgui/include/guiiswacomponent.h>
 
 #include <modules/iswa/util/iswamanager.h>
 

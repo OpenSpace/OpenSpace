@@ -22,28 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
+#include <openspace/engine/moduleengine.h>
 
-#include <modules/onscreengui/include/guicomponent.h>
-#include <modules/onscreengui/include/guipropertycomponent.h>
+namespace openspace::gui::luascriptfunctions {
+   
+/**
+ * \ingroup LuaScripts
+ * show():
+ * Shows the GUI
+ */
+int show(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
-#include <string>
+    OsEng.moduleEngine().module<ImGUIModule>()->gui.setEnabled(true);
+    return 0;
+}
 
-namespace openspace::gui {
+/**
+ * \ingroup LuaScripts
+ * hide():
+ * Hides the console
+ */
+int hide(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
-class GuiParallelComponent : public GuiPropertyComponent {
-public:
-    GuiParallelComponent();
-    void render() override;
-private:
-    void renderDisconnected();
-    void renderClientWithHost();
-    void renderClientWithoutHost();
-    void renderClientCommon();
-    void renderHost();
-};
+    OsEng.moduleEngine().module<ImGUIModule>()->gui.setEnabled(false);
+    return 0;
+}
 
-} // namespace openspace::gui
+/**
+ * \ingroup LuaScripts
+ * toggle():
+ * Toggles the console
+ */
+int toggle(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
+    OsEng.moduleEngine().module<ImGUIModule>()->gui.setEnabled(
+        !OsEng.moduleEngine().module<ImGUIModule>()->gui.isEnabled()
+    );
+    return 0;
+}
+
+} // namespace openspace::gui::luascriptfunctions

@@ -22,39 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guifilepathcomponent.h>
+#include <modules/imgui/include/guitimecomponent.h>
 
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/util/time.h>
 
 #include "imgui.h"
 
 namespace openspace::gui {
 
-GuiFilePathComponent::GuiFilePathComponent()
-    : GuiComponent("File Path")
-{}
+GuiTimeComponent::GuiTimeComponent() : GuiComponent("Time") {}
 
-void GuiFilePathComponent::render() {
-    bool v = _isEnabled;
-    ImGui::Begin("File Path", &v);
-
-    ImGui::Text(
-        "%s",
-        "These are file paths registered in the current OpenSpace instance."
-    );
-    ImGui::Separator();
-
-    ImGui::Columns(2);
-    ImGui::Separator();
-    std::vector<std::string> tokens = FileSys.tokens();
-    for (const std::string& t : tokens) {
-        ImGui::Text("%s", t.c_str());
-        ImGui::NextColumn();
-        ImGui::Text("%s", absPath(t).c_str());
-        ImGui::NextColumn();
-        ImGui::Separator();
+void GuiTimeComponent::render() {
+    float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
+    
+    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -50000.f, 50000.f);
+    if (changed) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
-    ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace gui

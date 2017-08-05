@@ -22,29 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIISWACOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIISWACOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__
 
-#include <modules/onscreengui/include/guipropertycomponent.h>
-
-#include <map>
+#include <modules/imgui/include/guicomponent.h>
 
 namespace openspace::gui {
 
-class GuiIswaComponent : public GuiPropertyComponent {
+class GuiOriginComponent : public GuiComponent {
 public:
-    GuiIswaComponent();
+    GuiOriginComponent();
+
     void render() override;
-
-private:
-    bool _gmData;
-    bool _gmImage;
-    bool _ionData;
-
-    std::vector<int> _cdfOptions;
-    std::map<std::string, int> _cdfOptionsMap;
 };
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIISWACOMPONENT___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__

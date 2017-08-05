@@ -22,52 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
 
-#include <modules/onscreengui/include/guicomponent.h>
-
+#include <modules/imgui/include/guicomponent.h>
+#include <modules/imgui/include/guifilepathcomponent.h>
+#include <modules/imgui/include/guihelpcomponent.h>
+#include <modules/imgui/include/guiperformancecomponent.h>
+#include <modules/imgui/include/guipropertycomponent.h>
+#include <modules/imgui/include/guiorigincomponent.h>
+#include <modules/imgui/include/guitimecomponent.h>
+#include <modules/imgui/include/guiiswacomponent.h>
+#include <modules/imgui/include/guiparallelcomponent.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/properties/property.h>
 
-#include <functional>
-#include <string>
-#include <vector>
-
-namespace openspace::properties {
-    class Property;
-    class PropertyOwner;
-} // namespace openspace::properties
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
 
 namespace openspace::gui {
 
-class GuiPropertyComponent : public GuiComponent {
+class GUI : public GuiComponent {
 public:
-    using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
+    GUI();
 
-    GuiPropertyComponent(std::string name);
+    void initialize();
+    void deinitialize();
 
-    // This is the function that evaluates to the list of Propertyowners that this
-    // component should render
-    void setSource(SourceFunction func);
+    void initializeGL();
+    void deinitializeGL();
 
-    void setVisibility(properties::Property::Visibility visibility);
-    void setHasRegularProperties(bool hasOnlyRegularProperties);
+    bool mouseButtonCallback(MouseButton button, MouseAction action);
+    bool mouseWheelCallback(double position);
+    bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
+    bool charCallback(unsigned int character, KeyModifier modifier);
+
+    void startFrame(float deltaTime, const glm::vec2& windowSize,
+        const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
+    void endFrame();
 
     void render();
 
-protected:
-    void renderPropertyOwner(properties::PropertyOwner* owner);
-    void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
+//protected:
+    GuiHelpComponent _help;
+    GuiFilePathComponent _filePath;
+    GuiOriginComponent _origin;
+    GuiPerformanceComponent _performance;
+    GuiPropertyComponent _globalProperty;
+    GuiPropertyComponent _property;
+    GuiPropertyComponent _screenSpaceProperty;
+    GuiPropertyComponent _virtualProperty;
+    GuiTimeComponent _time;
+    GuiIswaComponent _iswa;
+    GuiParallelComponent _parallel;
 
-    properties::Property::Visibility _visibility;
+private:
+    void renderAndUpdatePropertyVisibility();
 
-    SourceFunction _function;
-    /// This is set to \c true if all properties contained in this GUIPropertyComponent
-    /// are regular, i.e., not containing wildcards, regex, or groups
-    /// This variable only has an impact on which \c setPropertyValue function is called
-    bool _hasOnlyRegularProperties = false;
+    properties::Property::Visibility _currentVisibility;
+
 };
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__

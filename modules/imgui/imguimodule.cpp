@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/onscreenguimodule.h>
+#include <modules/imgui/imguimodule.h>
 
-#include <modules/onscreengui/include/gui.h>
+#include <modules/imgui/include/gui.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>
@@ -42,7 +42,7 @@
 
 namespace openspace {
 
-OnScreenGUIModule::OnScreenGUIModule() : OpenSpaceModule(Name) {
+    ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
     // TODO: Remove dependency on OsEng.
@@ -57,7 +57,7 @@ OnScreenGUIModule::OnScreenGUIModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Initialize,
         [&](){
-            LDEBUGC("OnScreenGUIModule", "Initializing GUI");
+            LDEBUGC("ImGUIModule", "Initializing GUI");
             gui.initialize();
             
             gui._globalProperty.setSource(

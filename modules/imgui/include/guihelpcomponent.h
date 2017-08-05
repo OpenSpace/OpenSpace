@@ -22,20 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__
 
-#include <modules/onscreengui/include/guicomponent.h>
+#include <modules/imgui/include/guicomponent.h>
 
 namespace openspace::gui {
 
-class GuiOriginComponent : public GuiComponent {
+class GuiHelpComponent : public GuiComponent {
 public:
-    GuiOriginComponent();
+    GuiHelpComponent();
 
     void render() override;
 };
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__
