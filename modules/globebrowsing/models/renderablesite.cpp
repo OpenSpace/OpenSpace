@@ -60,6 +60,12 @@ static std::vector<std::string> split(const std::string &s, char delim) {
 
 namespace {
 	static const std::string _loggerCat = "RenderableSite";
+
+    static const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
+        "modelscale",
+        "Model Scale",
+        "" // @TODO Missing documentation
+    };
 }
 
 namespace openspace {
@@ -71,7 +77,7 @@ namespace openspace {
 			: Renderable(dictionary)
 			, _textureTxtPath("textureTxtpath", "Texture txt Path")
 			, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
-			, _debugModelScale(properties::FloatProperty("modelscale", "Model Scale", 1.f, 0.5f, 100.f))
+			, _debugModelScale(properties::FloatProperty(SaveOrThrowInfo, 1.f, 0.5f, 100.f))
 			, _debugModelCullface(properties::BoolProperty("modelcullface", "Model Cullfacing", false))
 			, _debugModelMastCamColor(properties::BoolProperty("modelmastcam", "Mastcam coloring", false))
 			, _debugUseUVCoord(properties::BoolProperty("useuvcoord", "Model UV coord texturing", false))
@@ -262,7 +268,7 @@ namespace openspace {
 			addProperty(_debugUseMultipleTextures);
 		}
 
-		bool RenderableSite::initialize() {
+		void RenderableSite::initialize() {
 
 
 			//TODO: Check if _renderableExplorationPath has been created before calling initialize.
@@ -275,7 +281,7 @@ namespace openspace {
 					(*it)._programObject = renderEngine.buildRenderProgram("RenderableSite",
 						"${MODULE_GLOBEBROWSING}/shaders/fullsubsite_vs.glsl", "${MODULE_GLOBEBROWSING}/shaders/fullsubsite_fs.glsl");
 
-					if (!(*it)._programObject) return false;
+					if (!(*it)._programObject) return;
 				}
 			}
 
@@ -323,11 +329,9 @@ namespace openspace {
 			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-			return completeSuccess;
 		}
 
-		bool RenderableSite::deinitialize() {
+		void RenderableSite::deinitialize() {
 			//TODO: Check if _renderableExplorationPath has been created before calling deinitialize.
 			//_renderableExplorationPath->deinitialize();
 
@@ -338,7 +342,6 @@ namespace openspace {
 					(*it)._programObject = nullptr;
 				}
 			}
-			return true;
 		}
 
 		bool RenderableSite::isReady() const {
@@ -351,7 +354,7 @@ namespace openspace {
 			return completeSuccess;
 		}
 
-		void RenderableSite::render(const RenderData& data) {
+		void RenderableSite::render(const RenderData& data, RendererTasks& rendererTask) {
 			//TODO: Check if _renderableExplorationPath has been created before calling render.
 			//_renderableExplorationPath->render(data);
 

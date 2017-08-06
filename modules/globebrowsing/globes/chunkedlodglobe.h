@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -100,9 +100,9 @@ public:
      * \returns the height from the reference ellipsoid to the globe surface.
      */
 
-	void ChunkedLodGlobe::addSites(const std::vector<std::shared_ptr<Subsite>> subsites);
+	void addSites(const std::vector<std::shared_ptr<Subsite>> subsites);
 
-	std::vector<std::vector<std::shared_ptr<Subsite>>> ChunkedLodGlobe::subsites();
+	std::vector<std::vector<std::shared_ptr<Subsite>>> subsites();
 
     float getHeight(glm::dvec3 position) const;
 
