@@ -181,9 +181,5 @@ int restoreCameraStateFromFile(lua_State* L) {
     return 0;
 }*/
 
-} // namespace luascriptfunctions
-
-} // namespace openspace
-=======
 } // namespace openspace::luascriptfunctions
->>>>>>> master
+
