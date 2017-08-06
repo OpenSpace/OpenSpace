@@ -51,18 +51,48 @@ namespace {
     const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
     const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
     const std::string _loggerCat       = "Renderable Galaxy";
-}
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
+        "PointStepSize",
+        "Point Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+        "Translation",
+        "Translation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+        "Rotation",
+        "Euler rotation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
+        "NEnabledPointsRatio",
+        "Enabled points",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize("stepSize", "Step Size", 0.012, 0.0005, 0.05)
-    , _pointStepSize("pointStepSize", "Point Step Size", 0.01, 0.01, 0.1)
-    , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
-    , _enabledPointsRatio("nEnabledPointsRatio", "Enabled points", 0.2, 0, 1) {
-
+    , _stepSize(StepSizeInfo, 0.012f, 0.0005f, 0.05f)
+    , _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
+    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
+{
     float stepSize;
     glm::vec3 scaling, translation, rotation;
     glm::vec4 color;
@@ -123,7 +153,7 @@ namespace openspace {
     
 RenderableGalaxy::~RenderableGalaxy() {}
 
-bool RenderableGalaxy::initialize() {
+void RenderableGalaxy::initialize() {
     // Aspect is currently hardcoded to cubic voxels.
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
     _aspect = _aspect / std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
@@ -148,7 +178,7 @@ bool RenderableGalaxy::initialize() {
 
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
 
-    std::function<void(bool)> onChange = [&](bool enabled) {
+    auto onChange = [&](bool enabled) {
         if (enabled) {
             OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
         }
@@ -186,8 +216,6 @@ bool RenderableGalaxy::initialize() {
 
     float maxdist = 0;
     
-
-    float x, y, z, r, g, b, a;
     for (size_t i = 0; i < _nPoints; ++i) {
         float x = pointData[i * 7 + 0];
         float y = pointData[i * 7 + 1];
@@ -245,16 +273,13 @@ bool RenderableGalaxy::initialize() {
         
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    return true;
 }
     
-bool RenderableGalaxy::deinitialize() {
+void RenderableGalaxy::deinitialize() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
-    return true;
 }
     
 bool RenderableGalaxy::isReady() const {

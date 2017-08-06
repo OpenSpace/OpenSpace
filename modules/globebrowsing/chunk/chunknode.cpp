@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,12 +29,7 @@
 #include <stack>
 #include <queue>
 
-namespace {
-	const std::string _loggerCat = "ChunkNode";
-}
-
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
     : _parent(parent)
@@ -214,5 +209,5 @@ const std::vector<std::shared_ptr<Subsite>> ChunkNode::getSubsites() const {
 	return _subsites;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
+

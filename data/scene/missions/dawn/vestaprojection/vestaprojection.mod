@@ -11,9 +11,9 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/vestaprojection_2/obj/VestaComet_5000.obj",
             },
+            ColorTexture = "textures/dummy.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/dummy.jpg",
                 Project = "textures/projectMe.png",
                 Default = "textures/defaultProj_backup.png"
             },
@@ -103,7 +103,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "VESTA",
+                Target = "VESTA",
                 Observer = "SUN",
             },
             Color = { 0.7, 0.8, 0.7 },

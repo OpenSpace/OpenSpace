@@ -32,8 +32,7 @@
 
 using std::numeric_limits;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(__TYPE__, __CONVFUNC__, __TESTFUNC__)                    \
     [](lua_State * state, bool& success) -> __TYPE__ {                                   \
@@ -114,5 +113,4 @@ REGISTER_NUMERICALPROPERTY_SOURCE(IVec4Property, glm::ivec4, glm::ivec4(0),
                                   DEFAULT_TO_STRING_LAMBDA(glm::ivec4),
                                   LUA_TTABLE);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

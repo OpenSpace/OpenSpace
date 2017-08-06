@@ -37,33 +37,33 @@ documentation::Documentation SceneGraphNode::Documentation() {
         {
             "Name",
             new StringVerifier,
+            Optional::No,
             "The name of this scenegraph node. This name must be unique among all scene "
             "graph nodes that are loaded in a specific scene. If a duplicate is detected "
             "the loading of the node will fail, as will all childing that depend on the "
-            "node.",
-            Optional::No
+            "node."
         },
         {
             "Parent",
             new StringAnnotationVerifier(
                 "Must be a name for another scenegraph node, or 'Root'"
             ),
+            Optional::No,
             "This names the parent of the currently specified scenegraph node. The "
             "parent must not have been defined earlier, but must exist at loading time, "
             "or the scenegraph node creation will fail. A special parent 'Root' is "
-            "available that denotes the root of the scenegraph.",
-            Optional::No
+            "available that denotes the root of the scenegraph."
         },
         {
             "Renderable",
             new ReferencingVerifier("renderable"),
+            Optional::Yes,
             "The renderable that is to be created for this scenegraph node. A renderable "
             "is a component of a scenegraph node that will lead to some visual result on "
             "the screen. The specifics heavily depend on the 'Type' of the renderable. "
             "If no Renderable is specified, this scenegraph node is an internal node and "
             "can be used for either group children, or apply common transformations to a "
-            "group of children.",
-            Optional::Yes
+            "group of children."
         },
         {
             "Transform",
@@ -71,33 +71,33 @@ documentation::Documentation SceneGraphNode::Documentation() {
                 {
                     "Translation",
                     new ReferencingVerifier("core_transform_translation"),
+                    Optional::Yes,
                     "This node describes a translation that is applied to the scenegraph "
                     "node and all its children. Depending on the 'Type' of the "
                     "translation, this can either be a static translation or a "
-                    "time-varying one.",
-                    Optional::Yes
+                    "time-varying one."
                 },
                 {
                     "Rotation",
                     new ReferencingVerifier("core_transform_rotation"),
+                    Optional::Yes,
                     "This nodes describes a rotation that is applied to the scenegraph "
                     "node and all its children. Depending on the 'Type' of the rotation, "
-                    "this can either be a static rotation or a time-varying one.",
-                    Optional::Yes
+                    "this can either be a static rotation or a time-varying one."
                 },
                 {
                     "Scale",
                     new ReferencingVerifier("core_transform_scaling"),
+                    Optional::Yes,
                     "This node describes a scaling that is applied to the scenegraph "
                     "node and all its children. Depending on the 'Type' of the scaling, "
-                    "this can either be a static scaling or a time-varying one.",
-                    Optional::Yes
+                    "this can either be a static scaling or a time-varying one."
                 }
             }),
+            Optional::Yes,
             "This describes a set of transformations that are applied to this scenegraph "
             "node and all of its children. There are only three possible values "
-            "corresponding to a 'Translation', a 'Rotation', and a 'Scale'.",
-            Optional::Yes
+            "corresponding to a 'Translation', a 'Rotation', and a 'Scale'."
         },
         }
     };

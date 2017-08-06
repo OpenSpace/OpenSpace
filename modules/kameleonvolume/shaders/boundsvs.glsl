@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,25 +24,23 @@
  
 #version __CONTEXT__
 
-layout(location = 0) in vec3 vertPosition;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
+layout(location = 0) in vec3 vertPosition;
 
 out vec4 positionLocalSpace;
 out vec4 positionCameraSpace;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
+
 
 void main() {
-
     positionLocalSpace = vec4(vertPosition, 1.0);
     positionCameraSpace = modelViewTransform * positionLocalSpace;
 
     vec4 positionClipSpace = projectionTransform * positionCameraSpace;
     vec4 positionScreenSpace = z_normalization(positionClipSpace);
     
-    //positionScreenSpace.z = 1.0;
-    // project the position to view space
     gl_Position = positionScreenSpace;
 }

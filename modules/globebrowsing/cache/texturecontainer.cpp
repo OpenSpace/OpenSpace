@@ -25,9 +25,7 @@
 #include <modules/globebrowsing/cache/texturecontainer.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace openspace::globebrowsing::cache {
 
 TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
     : _initData(initData)
@@ -86,6 +84,4 @@ size_t TextureContainer::size() const {
     return _textures.size();
 };
 
-}
-}
-}
+} // namespace openspace::globebrowsing::cache

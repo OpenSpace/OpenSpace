@@ -1,5 +1,5 @@
 return {
     FileRequest = {
-        { Identifier = "sun_textures", Destination = "textures", Version = 1 }
+        { Identifier = "sun_textures", Destination = "textures", Version = 3 }
     },
 }

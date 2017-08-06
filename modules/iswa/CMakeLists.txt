@@ -25,48 +25,49 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.h
-	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.h
-	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.h
-	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.h
-	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorkameleon.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonplane.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswabasegroup.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswadatagroup.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswakameleongroup.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturecygnet.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datacygnet.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/json.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorkameleon.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonplane.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswabasegroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswadatagroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswakameleongroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturecygnet.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/datacygnet.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorkameleon.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonplane.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswabasegroup.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswadatagroup.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswakameleongroup.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturecygnet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datacygnet.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorkameleon.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonplane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswabasegroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswadatagroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswakameleongroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturecygnet.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/datacygnet.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_fs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/textureplane_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/textureplane_vs.glsl
 )

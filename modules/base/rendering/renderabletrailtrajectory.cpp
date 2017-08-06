@@ -44,12 +44,46 @@
 
 namespace {
     const char* KeyTranslation = "Translation";
-    const char* KeyStartTime = "StartTime";
-    const char* KeyEndTime = "EndTime";
-    const char* KeySampleInterval = "SampleInterval";
-    const char* KeyTimeStampSubsample = "TimeStampSubsampleFactor";
-    const char* KeyShowFullTrail = "ShowFullTrail";
-}
+
+    static const openspace::properties::Property::PropertyInfo StartTimeInfo = {
+        "StartTime",
+        "Start Time",
+        "The start time for the range of this trajectory. The date must be in ISO 8601 "
+        "format: YYYY MM DD HH:mm:ss.xxx."
+    };
+
+    static const openspace::properties::Property::PropertyInfo EndTimeInfo = {
+        "EndTime",
+        "End Time",
+        "The end time for the range of this trajectory. The date must be in ISO 8601 "
+        "format: YYYY MM DD HH:mm:ss.xxx."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SampleIntervalInfo = {
+        "SampleInterval",
+        "Sample Interval",
+        "The interval between samples of the trajectory. This value (together with "
+        "'TimeStampSubsampleFactor') determines how far apart (in time) the samples are "
+        "spaced along the trajectory. The time interval between 'StartTime' and "
+        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeSubSampleInfo = {
+        "TimeStampSubsampleFactor",
+        "Time Stamp Subsampling Factor",
+        "The factor that is used to create subsamples along the trajectory. This value "
+        "(together with 'SampleInterval') determines how far apart (in time) the samples "
+        "are spaced along the trajectory. The time interval between 'StartTime' and "
+        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments."
+    };
+
+    static const openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
+        "ShowFullTrail",
+        "Render Full Trail",
+        "If this value is set to 'true', the entire trail will be rendered; if it is "
+        "'false', only the trail until the current time in the application will be shown."
+    };
+} // namespace
 
 namespace openspace {
 
@@ -61,56 +95,39 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
         "base_renderable_renderabletrailtrajectory",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableTrailTrajectory"),
-                "",
-                Optional::No
+                StartTimeInfo.identifier,
+                new StringAnnotationVerifier("A valid date in ISO 8601 format"),
+                Optional::No,
+                StartTimeInfo.description
             },
             {
-                KeyStartTime,
-                new StringAnnotationVerifier("A valid date"),
-                "The start time for the range of this trajectory. The date must be in "
-                "ISO 8601 format: YYYY MM DD HH:mm:ss.xxx",
-                Optional::No
+                EndTimeInfo.identifier,
+                new StringAnnotationVerifier("A valid date in ISO 8601 format"),
+                Optional::No,
+                EndTimeInfo.description
             },
             {
-                KeyEndTime,
-                new StringAnnotationVerifier("A valid date"),
-                "The end time for the range of this trajectory. The date must be in "
-                "ISO 8601 format: YYYY MM DD HH:mm:ss.xxx",
-                Optional::No
-            },
-            {
-                KeySampleInterval,
+                SampleIntervalInfo.identifier,
                 new DoubleVerifier,
-                "The interval between samples of the trajectory. This value (together "
-                "with 'TimeStampSubsampleFactor') determines how far apart (in time) the "
-                "samples are spaced along the trajectory. The time interval between "
-                "'StartTime' and 'EndTime' is split into 'SampleInterval' * "
-                "'TimeStampSubsampleFactor' segments.",
-                Optional::No
+                Optional::No,
+                SampleIntervalInfo.description
             },
             {
-                KeyTimeStampSubsample,
+                TimeSubSampleInfo.identifier,
                 new IntVerifier,
-                "The factor that is used to create subsamples along the trajectory. This "
-                "value (together with 'SampleInterval') determines how far apart (in "
-                "time) the samples are spaced along the trajectory. The time interval "
-                "between 'StartTime' and 'EndTime' is split into 'SampleInterval' * "
-                "'TimeStampSubsampleFactor' segments. The default value for this is 1",
-                Optional::Yes
+                Optional::Yes,
+                TimeSubSampleInfo.description
             },
             {
-                KeyShowFullTrail,
+                RenderFullPathInfo.identifier,
                 new BoolVerifier,
-                "If this value is set to 'true', the entire trail will be rendered; if "
-                "it is 'false', only the trail until the current time in the application "
-                "will be shown. The default value for this setting is 'false'.",
-                Optional::Yes
+                Optional::Yes,
+                RenderFullPathInfo.description
             }
         }
     };
 
+    // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy
     documentation::Documentation parentDoc = RenderableTrail::Documentation();
@@ -125,15 +142,11 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
 
 RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _startTime("startTime", "Start Time")
-    , _endTime("endTime", "End Time")
-    , _sampleInterval("sampleInterval", "Sample Interval", 2.0, 2.0, 1e6)
-    , _timeStampSubsamplingFactor(
-        "subSample",
-        "Time Stamp Subsampling Factor",
-        1, 1, 1000000000
-    )
-    , _renderFullTrail("renderFullTrail", "Render Full Trail", false)
+    , _startTime(StartTimeInfo)
+    , _endTime(EndTimeInfo)
+    , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
+    , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
+    , _renderFullTrail(RenderFullPathInfo, false)
     , _needsFullSweep(true)
     , _subsamplingIsDirty(true)
 {
@@ -147,28 +160,28 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
         _needsFullSweep = true;
     });
 
-    _startTime = dictionary.value<std::string>(KeyStartTime);
+    _startTime = dictionary.value<std::string>(StartTimeInfo.identifier);
     _startTime.onChange([this] { _needsFullSweep = true; });
     addProperty(_startTime);
 
-    _endTime = dictionary.value<std::string>(KeyEndTime);
+    _endTime = dictionary.value<std::string>(EndTimeInfo.identifier);
     _endTime.onChange([this] { _needsFullSweep = true; });
     addProperty(_endTime);
 
-    _sampleInterval = dictionary.value<double>(KeySampleInterval);
+    _sampleInterval = dictionary.value<double>(SampleIntervalInfo.identifier);
     _sampleInterval.onChange([this] { _needsFullSweep = true; });
     addProperty(_sampleInterval);
 
-    if (dictionary.hasKeyAndValue<double>(KeyTimeStampSubsample)) {
+    if (dictionary.hasKeyAndValue<double>(TimeSubSampleInfo.identifier)) {
         _timeStampSubsamplingFactor = static_cast<int>(
-            dictionary.value<double>(KeyTimeStampSubsample)
+            dictionary.value<double>(TimeSubSampleInfo.identifier)
         );
     }
     _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
 
-    if (dictionary.hasKeyAndValue<bool>(KeyShowFullTrail)) {
-        _renderFullTrail = dictionary.value<bool>(KeyShowFullTrail);
+    if (dictionary.hasKeyAndValue<bool>(RenderFullPathInfo.identifier)) {
+        _renderFullTrail = dictionary.value<bool>(RenderFullPathInfo.identifier);
     }
     addProperty(_renderFullTrail);
 
@@ -176,8 +189,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 }
 
-bool RenderableTrailTrajectory::initialize() {
-    bool res = RenderableTrail::initialize();
+void RenderableTrailTrajectory::initialize() {
+    RenderableTrail::initialize();
 
     // We don't need an index buffer, so we keep it at the default value of 0
     glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
@@ -188,18 +201,16 @@ bool RenderableTrailTrajectory::initialize() {
     glGenVertexArrays(1, &_floatingRenderInformation._vaoID);
     glGenBuffers(1, &_floatingRenderInformation._vBufferID);
     _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
-
-    return res;
 }
 
-bool RenderableTrailTrajectory::deinitialize() {
+void RenderableTrailTrajectory::deinitialize() {
     glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
     glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
 
     glDeleteVertexArrays(1, &_floatingRenderInformation._vaoID);
     glDeleteBuffers(1, &_floatingRenderInformation._vBufferID);
 
-    return RenderableTrail::deinitialize();
+    RenderableTrail::deinitialize();
 }
 
 void RenderableTrailTrajectory::update(const UpdateData& data) {
@@ -255,7 +266,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // If only trail so far should be rendered, we need to find the corresponding time
         // in the array and only render it until then
         _primaryRenderInformation.first = 0;
-        double t = (data.time.j2000Seconds() - _start) / (_end - _start);
+        double t = std::max(0.0, (data.time.j2000Seconds() - _start) / (_end - _start));
         _primaryRenderInformation.count = std::min(
             static_cast<GLsizei>(ceil(_vertexArray.size() * t)),
             static_cast<GLsizei>(_vertexArray.size() - 1)

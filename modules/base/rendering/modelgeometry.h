@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,24 +31,22 @@
 
 #include <memory>
 
-namespace ghoul {
-    class Dictionary;
+namespace ghoul { class Dictionary; }
+namespace ghoul::opengl { class ProgramObject; }
 
-    namespace opengl { class ProgramObject; }
-} // namespace ghoul
+namespace openspace { class Renderable; }
+namespace openspace::documentation { struct Documentation; }
+
 
 namespace openspace {
+    struct Vertex {
+        GLfloat location[4];
+        GLfloat tex[2];
+        GLfloat normal[3];
+    };
+}
 
-struct Vertex {
-	GLfloat location[4];
-	GLfloat tex[2];
-	GLfloat normal[3];
-};
-
-class Renderable;
-
-namespace documentation {  struct Documentation; }
-namespace modelgeometry {
+namespace openspace::modelgeometry {
 
 class ModelGeometry : public properties::PropertyOwner {
 public:
@@ -90,7 +88,6 @@ protected:
     std::string _file;
 };
 
-}  // namespace modelgeometry
-}  // namespace openspace
+}  // namespace openspace::modelgeometry
 
 #endif // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__

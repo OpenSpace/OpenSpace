@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DEFAULT_TILE_PROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___DEFAULT_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
@@ -31,16 +31,14 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
+namespace openspace { class PixelBuffer; }
 
-class PixelBuffer;
-
-namespace globebrowsing {
-
-class AsyncTileDataProvider;
-struct RawTile;
+namespace openspace::globebrowsing {
+    class AsyncTileDataProvider;
+    struct RawTile;
+} // namespace openspace::globebrowsing
     
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 /**
 * Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
@@ -90,8 +88,6 @@ private:
     bool _performPreProcessing;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DEFAULT_TILE_PROVIDER___H__

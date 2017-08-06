@@ -32,8 +32,7 @@
 #include <functional>
 #include <type_traits>
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 /**
  * The base class of all Verifier%s. Each object must have an Verifier::operator()
@@ -171,12 +170,8 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
      * \param documentationEntries The DocumentationEntry%s that are used to recursively
      * test the ghoul::Dictionary that is contained inside. If this list is empty, only a
      * type check is performed
-     * \param exhaustive Whether the DocumentationEntry%s contained in
-     * \p documentationEntries completely describe the contained table or whether
-     * additional keys are allowed
      */
-    TableVerifier(std::vector<DocumentationEntry> documentationEntries = {},
-        Exhaustive exhaustive = Exhaustive::No);
+    TableVerifier(std::vector<DocumentationEntry> documentationEntries = {});
 
     /**
      * Checks whether the \p key%'s value is a table (= ghoul::Dictionary) and (if
@@ -198,9 +193,6 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
 
     /// The documentations passed in the constructor
     std::vector<DocumentationEntry> documentations;
-    /// Flag that specifies whether the TableVerifier::documentation exhaustively
-    /// describes the table or whether additional keys are allowed
-    Exhaustive exhaustive;
 };
 
 /**
@@ -1153,8 +1145,7 @@ extern template struct DeprecatedVerifier<BoolVector4Verifier>;
 extern template struct DeprecatedVerifier<IntVector4Verifier>;
 extern template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation
 
 #include "verifier.inl"
 

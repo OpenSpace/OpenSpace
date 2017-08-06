@@ -33,21 +33,27 @@
 
 #include <ghoul/opengl/programobject.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace {
+    static const openspace::properties::Property::PropertyInfo IntensityClampInfo = {
+        "IntensityClamp",
+        "Intensity clamp",
+        "" 
+    };
+
+    static const openspace::properties::Property::PropertyInfo LightIntensityInfo = {
+        "LightIntensity",
+        "Light intensity",
+        "" // @TODO Missing documentation
+    };
+} // namespace
+
+namespace openspace::globebrowsing {
 
 PointGlobe::PointGlobe(const RenderableGlobe& owner)
-    : _owner(owner)
-    , _intensityClamp(
-        "intensityClamp",
-        "Intensity clamp",
-        1, 0, 1
-    )
-    , _lightIntensity(
-        "lightIntensity",
-        "Light intensity",
-        1, 0, 50
-    )
+    : Renderable({ { "Name", owner.name() } })
+    , _owner(owner)
+    , _intensityClamp(IntensityClampInfo, 1.f, 0.f, 1.f)
+    , _lightIntensity(LightIntensityInfo, 1.f, 0.f, 50.f)
 {
     addProperty(_intensityClamp);
     addProperty(_lightIntensity);
@@ -58,7 +64,7 @@ PointGlobe::~PointGlobe() {
     glDeleteVertexArrays(1, &_vaoID);
 }
 
-bool PointGlobe::initialize() {
+void PointGlobe::initialize() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "PointGlobe",
         "${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl",
@@ -69,7 +75,7 @@ bool PointGlobe::initialize() {
 
     glBindVertexArray(_vaoID);
 
-	std::array<glm::vec2, 6> quadVertexData = {{
+    std::array<glm::vec2, 6> quadVertexData = {{
       glm::vec2(-1.0f, -1.0f),
       glm::vec2(1.0f, -1.0f),
       glm::vec2(-1.0f, 1.0f),
@@ -92,19 +98,18 @@ bool PointGlobe::initialize() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), 0);
 
     glBindVertexArray(0);
-
-    return isReady();
 }
 
-bool PointGlobe::deinitialize() {
-    return true;
+void PointGlobe::deinitialize() {
+    glDeleteVertexArrays(1, &_vaoID);
+    glDeleteBuffers(1, &_vertexBufferID);
 }
 
 bool PointGlobe::isReady() const {
     return (_vaoID != 0) && (_vertexBufferID != 0);
 }
     
-void PointGlobe::render(const RenderData& data) {
+void PointGlobe::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
     // Calculate variables to be used as uniform variables in shader
@@ -116,10 +121,12 @@ void PointGlobe::render(const RenderData& data) {
         glm::normalize(glm::dvec3(1000000.0f) - bodyPosition));
   
     glm::dvec3 camToBody = bodyPosition - data.camera.positionVec3();
-    float distanceToBody = glm::length(camToBody);
+    float distanceToBody = static_cast<float>(glm::length(camToBody));
 
-    float avgRadius = _owner.ellipsoid().averageRadius();
-    float lightIntensity = _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody;
+    float avgRadius = static_cast<float>(_owner.ellipsoid().averageRadius());
+    float lightIntensity = static_cast<float>(
+        _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody
+    );
     float lightIntensityClamped = glm::min(lightIntensity, _intensityClamp.value());
     //float lightOverflow = glm::max(lightIntensity - lightIntensityClamped, 0.0f);
 
@@ -162,5 +169,4 @@ void PointGlobe::render(const RenderData& data) {
     _programObject->deactivate();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

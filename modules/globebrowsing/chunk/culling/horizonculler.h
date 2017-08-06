@@ -29,9 +29,7 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace culling {
+namespace openspace::globebrowsing::culling {
 
 /**
  * In this implementation of the horizon culling, the closer the ellipsoid is to a
@@ -50,8 +48,6 @@ private:
         double minimumGlobeRadius);
 };
 
-} // namespace culling
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::culling
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___HORIZONCULLER___H__

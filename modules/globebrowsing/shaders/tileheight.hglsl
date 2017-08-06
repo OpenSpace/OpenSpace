@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 
-
 #ifndef USE_HEIGHTMAP
 #define USE_HEIGHTMAP #{useAccurateNormals}
 #endif //USE_HEIGHTMAP
@@ -52,7 +51,7 @@ uniform float deltaPhi1;
 uniform float tileDelta;
 #endif //USE_ACCURATE_NORMALS
 
-float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights){
+float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights) {
     float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -60,15 +59,15 @@ float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights){
     // Before any heightmapping is done
     height = calculateUntransformedHeight(
         uv,
-        levelWeights,                           // Variable to determine which texture to sample from
-        HeightLayers);  // Three textures to sample from
-
+        levelWeights, // Variable to determine which texture to sample from
+        HeightLayers  // Three textures to sample from
+    );
 #endif // USE_HEIGHTMAP
 
     return height;
 }
 
-float getTileHeight(vec2 uv, LevelWeights levelWeights){
+float getTileHeight(vec2 uv, LevelWeights levelWeights) {
     float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -76,14 +75,15 @@ float getTileHeight(vec2 uv, LevelWeights levelWeights){
     // Before any heightmapping is done
     height = calculateHeight(
         uv,
-        levelWeights,   // Variable to determine which texture to sample from
-        HeightLayers);  // Three textures to sample from
+        levelWeights, // Variable to determine which texture to sample from
+        HeightLayers  // Three textures to sample from
+    );
 #endif // USE_HEIGHTMAP
 
     return height;
 }
 
-float getTileHeightScaled(vec2 uv, LevelWeights levelWeights){
+float getTileHeightScaled(vec2 uv, LevelWeights levelWeights) {
     float height = getTileHeight(uv, levelWeights);
     
 #if USE_HEIGHTMAP
@@ -93,14 +93,11 @@ float getTileHeightScaled(vec2 uv, LevelWeights levelWeights){
     return height;
 }
 
-vec3 getTileNormal(
-    vec2 uv,
-    LevelWeights levelWeights,
-    vec3 ellipsoidNormalCameraSpace,
-    vec3 ellipsoidTangentThetaCameraSpace,
-    vec3 ellipsoidTangentPhiCameraSpace)
+vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCameraSpace,
+                   vec3 ellipsoidTangentThetaCameraSpace,
+                   vec3 ellipsoidTangentPhiCameraSpace)
 {
-    vec3 normal = ellipsoidNormalCameraSpace;
+    return ellipsoidNormalCameraSpace;
 
 #if USE_ACCURATE_NORMALS
     float deltaPhi = mix(deltaPhi0, deltaPhi1, uv.x);
@@ -116,10 +113,8 @@ vec3 getTileNormal(
     vec3 diffTheta = deltaThetaVec + ellipsoidNormalCameraSpace * (height10 - height00);
     vec3 diffPhi = deltaPhiVec + ellipsoidNormalCameraSpace * (height01 - height00);
 
-    normal = normalize(cross(diffTheta, diffPhi));
+    return normalize(cross(diffTheta, diffPhi));
 #endif // USE_ACCURATE_NORMALS
-    return normal;
 }
-
 
 #endif // TILE_HEIGHT_HGLSL

@@ -32,8 +32,8 @@
 #include <fstream>
 
 namespace {
-    const std::string _loggerCat = "BrickManager";
-}
+    const char* _loggerCat = "BrickManager";
+} // namespace
 
 namespace openspace {
 

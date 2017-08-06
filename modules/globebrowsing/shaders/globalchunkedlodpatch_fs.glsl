@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@ Fragment getFragment() {
     frag.color = getTileFragColor();
 
 #if SHOW_CHUNK_EDGES
-    frag.color += patchBorderOverlay(fs_uv, vec3(0,1,0), 0.02);
+    frag.color += patchBorderOverlay(fs_uv, vec3(0.0, 1.0, 0.0), 0.02);
 #endif // SHOW_CHUNK_EDGES
 
     frag.depth = fs_position.w;

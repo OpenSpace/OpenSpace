@@ -81,9 +81,25 @@
 // items in memory as was shown to be much slower than the current system.   ---abock
 
 namespace {
-    const char* KeyPeriod = "Period";
-    const char* KeyResolution = "Resolution";
-}
+    static const openspace::properties::Property::PropertyInfo PeriodInfo = {
+        "Period",
+        "Period (in days)",
+        "The objects period, i.e. the length of its orbit around the parent object given "
+        "in (Earth) days. In the case of Earth, this would be a sidereal year "
+        "(=365.242 days). If this values is specified as multiples of the period, it is "
+        "possible to show the effects of precession."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Number of samples along the orbit",
+        "The number of samples along the orbit. This determines the resolution of the "
+        "trail; the tradeoff being that a higher resolution is able to resolve more "
+        "detail, but will take more resources while rendering, too. The higher, the "
+        "smoother the trail, but also more memory will be used."
+    };
+
+} // namespace
 
 namespace openspace {
 
@@ -94,28 +110,16 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
         "base_renderable_renderabletrailorbit",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableTrailOrbit"),
-                "",
-                Optional::No
-            },
-            {
-                KeyPeriod,
+                PeriodInfo.identifier,
                 new DoubleVerifier,
-                "The objects period, i.e. the length of its orbit around the parent "
-                "object given in (Earth) days. In the case of Earth, this would be a "
-                "sidereal year (=365.242 days). If this values is specified as multiples "
-                "of the period, it is possible to show the effects of precession.",
-                Optional::No
+                Optional::No,
+                PeriodInfo.description
             },
             {
-                KeyResolution,
+                ResolutionInfo.identifier,
                 new IntVerifier,
-                "The number of samples along the orbit. This determines the resolution "
-                "of the trail; the tradeoff being that a higher resolution is able to "
-                "resolve more detail, but will take more resources while rendering, too. "
-                "The higher, the smoother the trail, but also more memory will be used.",
-                Optional::No
+                Optional::No,
+                ResolutionInfo.description
             }
         }
     };
@@ -134,8 +138,8 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
 
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _period("period", "Period in days", 0.0, 0.0, 1e9)
-    , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1000000)
+    , _period(PeriodInfo, 0.0, 0.0, 1e9)
+    , _resolution(ResolutionInfo, 10000, 1, 1000000)
     , _needsFullSweep(true)
     , _indexBufferDirty(true)
     , _previousTime(0)
@@ -152,12 +156,12 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 
     // Period is in days
     using namespace std::chrono;
-    long long factor = duration_cast<seconds>(hours(24)).count();
-    _period = dictionary.value<double>(KeyPeriod) * factor;
+    const long long sph = duration_cast<seconds>(hours(24)).count();
+    _period = dictionary.value<double>(PeriodInfo.identifier) * sph;
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
     addProperty(_period);
 
-    _resolution = static_cast<int>(dictionary.value<double>(KeyResolution));
+    _resolution = static_cast<int>(dictionary.value<double>(ResolutionInfo.identifier));
     _resolution.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
     addProperty(_resolution);
 
@@ -165,22 +169,20 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 }
 
-bool RenderableTrailOrbit::initialize() {
-    bool res = RenderableTrail::initialize();
+void RenderableTrailOrbit::initialize() {
+    RenderableTrail::initialize();
 
     glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
     glGenBuffers(1, &_primaryRenderInformation._vBufferID);
     glGenBuffers(1, &_primaryRenderInformation._iBufferID);
-
-    return res;
 }
 
-bool RenderableTrailOrbit::deinitialize() {
+void RenderableTrailOrbit::deinitialize() {
     glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
     glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
     glDeleteBuffers(1, &_primaryRenderInformation._iBufferID);
 
-    return RenderableTrail::deinitialize();
+    RenderableTrail::deinitialize();
 }
 
 void RenderableTrailOrbit::update(const UpdateData& data) {

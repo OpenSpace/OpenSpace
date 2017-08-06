@@ -225,7 +225,7 @@ namespace {
         // We need the semi major axis in km instead of m
         return semiMajorAxis / 1000.0;
     }
-}
+} // namespace
 
 
 namespace openspace {
@@ -239,23 +239,22 @@ documentation::Documentation TLETranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("TLETranslation"),
-                "",
                Optional::No
             },
             {
                 KeyFile,
                 new StringVerifier,
-                "Specifies the filename of the Two-Line-Element file",
-                Optional::No
+                Optional::No,
+                "Specifies the filename of the Two-Line-Element file"
             },
             {
                 KeyLineNum,
                 new DoubleGreaterVerifier(0),
-                "Specifies the line number within the file where the group of 3 TLE lines begins (1-based)",
-                Optional::No
+                Optional::No,
+                "Specifies the line number within the file where the group of 3 TLE "
+                "lines begins (1-based)."
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 
@@ -270,7 +269,7 @@ TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary)
     );
     
     std::string file = dictionary.value<std::string>(KeyFile);
-    int lineNum = dictionary.value<double>(KeyLineNum);
+    int lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
     readTLEFile(file, lineNum);
 }
 
@@ -294,12 +293,13 @@ void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
     } keplerElements;
     
     std::string line;
-    //Loop through and throw out lines until getting to the linNum of interest
-    for (unsigned int i = 1; i < lineNum; ++i)
+    // Loop through and throw out lines until getting to the linNum of interest
+    for (int i = 1; i < lineNum; ++i) {
         std::getline(file, line);
-    std::getline(file, line); //Throw out the TLE title line (1st)
+    }
+    std::getline(file, line); // Throw out the TLE title line (1st)
 
-    std::getline(file, line); //Get line 1 of TLE format
+    std::getline(file, line); // Get line 1 of TLE format
     if (line[0] == '1') {
         // First line
         // Field Columns Content
@@ -323,7 +323,7 @@ void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
                   + std::to_string(lineNum + 1) + " doesn't have '1' header");
     }
 
-    std::getline(file, line); //Get line 2 of TLE format
+    std::getline(file, line); // Get line 2 of TLE format
     if (line[0] == '2') {
         // Second line
         //Field    Columns    Content

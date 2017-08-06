@@ -25,8 +25,7 @@
 #include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
 #include <modules/globebrowsing/rendering/layer/layeradjustment.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPULayerAdjustment::setValue(ghoul::opengl::ProgramObject* programObject,
                                       const LayerAdjustment& layerAdjustment)
@@ -44,8 +43,9 @@ void GPULayerAdjustment::setValue(ghoul::opengl::ProgramObject* programObject,
     }
 }
 
-void GPULayerAdjustment::bind(const LayerAdjustment& layerAdjustment, ghoul::opengl::ProgramObject* programObject,
-                                  const std::string& nameBase)
+void GPULayerAdjustment::bind(const LayerAdjustment& layerAdjustment,
+                              ghoul::opengl::ProgramObject* programObject,
+                              const std::string& nameBase)
 {
     switch (layerAdjustment.type()) {
         case layergroupid::AdjustmentTypeID::None:
@@ -60,5 +60,4 @@ void GPULayerAdjustment::bind(const LayerAdjustment& layerAdjustment, ghoul::ope
     }
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

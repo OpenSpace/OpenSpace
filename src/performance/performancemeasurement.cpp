@@ -30,8 +30,7 @@
 
 #include <iostream>
 
-namespace openspace {
-namespace performance {
+namespace openspace::performance {
 
 PerformanceMeasurement::PerformanceMeasurement(std::string identifier,
                                      performance::PerformanceManager* manager)
@@ -56,6 +55,4 @@ PerformanceMeasurement::~PerformanceMeasurement() {
     }
 }
 
-
-} // namespace performance
-} // namespace openspace
+} // namespace openspace::performance

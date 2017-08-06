@@ -1,46 +1,37 @@
 return {
-    -- Ganymede module
-    {   
+    -- RenderableGlobe module
+    {
         Name = "Ganymede",
         Parent = "JupiterBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_GANYMEDE", -- should exist. 
-            Body = "JUPITER BARYCENTER",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 2.631E6,
-                Segments = 100
-            },
-            Textures = {
-                Type = "simple",
-                Color = "textures/ganymede.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
-        },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "GANYMEDE",
-                Observer = "JUPITER BARYCENTER",
-                Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_GANYMEDE",
-                DestinationFrame = "IAU_JUPITER",
+                DestinationFrame = "GALACTIC"
             },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
+            Translation = {
+                Type = "SpiceTranslation",
+                Target = "GANYMEDE",
+                Observer = "JUPITER BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
+            }
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = 2631000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Ganymede Texture",
+                        FilePath = "textures/ganymede.jpg",
+                        Enabled = true
+                    }
+                }
+            }
         }
     },
-    -- GanymedeTrail module
+    -- Trail module
     {   
         Name = "GanymedeTrail",
         Parent = "JupiterBarycenter",
@@ -48,8 +39,8 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "GANYMEDE",
-                Observer = "JUPITER BARYCENTER",
+                Target = "GANYMEDE",
+                Observer = "JUPITER BARYCENTER"
             },
             Color = { 0.4, 0.3, 0.3 },
             Period =  172 / 24,

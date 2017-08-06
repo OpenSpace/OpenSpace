@@ -1,46 +1,36 @@
 if UseAccurateNewHorizonsKernels then
     NewHorizonsKernels = {
-        -- SCLK
-        "${SPICE}/nh_kernels/sclk/new-horizons_0976.tsc",
-        -- "${SPICE}/NewHorizonsKernels/new_horizons_413.tsc",
+        "${SPICE}/nh_20170126/spk/nh_pred_20141201_20190301_od122.bsp",
+        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp",
+        "${SPICE}/nh_20170126/spk/NavPE_de433_od122.bsp",
 
-        -- SPK
-        "${SPICE}/nh_kernels/spk/nh_pred_20141201_20190301_od122.bsp",
-        -- "${SPICE}/nh_kernels/spk/nh_pred_20120501_20160913_od093.bsp",
-        "${SPICE}/nh_kernels/spk/plu_all_mvi.spk",
         "${SPICE}/jup260.bsp",
-        -- "${SPICE}/NewHorizonsKernels/de413.bsp",
 
-        -- CK
-        "${SPICE}/nh_kernels/ck/nh_scispi_2015_pred.bc",
-        "${SPICE}/nh_kernels/ck/nh_scispi_2015_recon.bc",
-        "${SPICE}/nh_kernels/ck/nh_lorri_wcs.bc",
-        "${SPICE}/nh_kernels/ck/plutonet_PS104.bc",
+        "${SPICE}/nh_20170126/ck/nh_scispi_2015_pred.bc",
+        "${SPICE}/nh_20170126/ck/nh_scispi_2015_recon.bc",
+        "${SPICE}/nh_20170126/ck/nh_lorri_wcs.bc",
+        
+        "${SPICE}/nh_20170126/smithed_pc_and_sp/PLU_LORRI_ALL_161216.bc",
 
-        -- FK
-        "${SPICE}/nh_kernels/fk/nh_soc_misc_v001.tf",
-        "${SPICE}/nh_kernels/fk/nh_v220.tf",
+        "${SPICE}/nh_20170126/sclk/new-horizons_1121.tsc",
 
-        -- IK
-        "${SPICE}/nh_kernels/ik/nh_alice_v120.ti",
-        "${SPICE}/nh_kernels/ik/nh_allinstruments_v002.ti",
-        "${SPICE}/nh_kernels/ik/nh_astr_v000.ti",
-        "${SPICE}/nh_kernels/ik/nh_fss_v000.ti",
-        "${SPICE}/nh_kernels/ik/nh_lorri_v100.ti",
-        "${SPICE}/nh_kernels/ik/nh_pepssi_v110.ti",
-        "${SPICE}/nh_kernels/ik/nh_ralph_v100.ti",
-        "${SPICE}/nh_kernels/ik/nh_rex_v100.ti",
-        "${SPICE}/nh_kernels/ik/nh_sdc_v101.ti",
-        "${SPICE}/nh_kernels/ik/nh_swap_v100.ti",
+        "${SPICE}/nh_20170126/pck/nh_targets_v001.tpc",
+        "${SPICE}/nh_20170126/pck/nh_pcnh_005.tpc",
 
-        -- LSK
-        "${SPICE}/nh_kernels/lsk/naif0011.tls",
-
-        -- PCK
-        "${SPICE}/nh_kernels/pck/nh_targets_v001.tpc",
-        "${SPICE}/nh_kernels/pck/pck00010.tpc",
-        "${SPICE}/nh_kernels/pck/nh_pcnh_002.tpc"
-    };
+        "${SPICE}/nh_20170126/fk/nh_v220.tf",
+        "${SPICE}/nh_20170126/ik/nh_allinstruments_v002.ti",
+        "${SPICE}/nh_20170126/ik/nh_alice_v200.ti",
+        "${SPICE}/nh_20170126/ik/nh_lorri_v201.ti",
+        "${SPICE}/nh_20170126/ik/nh_pepssi_v110.ti",
+        "${SPICE}/nh_20170126/ik/nh_ralph_v100.ti",
+        "${SPICE}/nh_20170126/ik/nh_rex_v100.ti",
+        "${SPICE}/nh_20170126/ik/nh_sdc_v101.ti",
+        "${SPICE}/nh_20170126/ik/nh_swap_v100.ti",
+        "${SPICE}/nh_20170126/ik/nh_astr_v000.ti",
+        "${SPICE}/nh_20170126/ik/nh_fss_v000.ti",
+        "${SPICE}/nh_20170126/fk/nh_soc_misc_v001.tf",
+        "${SPICE}/nh_20170126/spk/nh_stars.bsp",
+    }
 else
     NewHorizonsKernels = {
         --SCLK
@@ -84,7 +74,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NEW HORIZONS",
+                Target = "NEW HORIZONS",
                 Observer = "SUN",
                 Kernels = NewHorizonsKernels
             },
@@ -108,21 +98,12 @@ return {
                 GeometryFile = "models/NewHorizonsCleanModel.obj",
                 -- Magnification = 4,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/NHTexture.jpg",
-            },
+            ColorTexture = "textures/NHTexture.jpg",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
                 Ghosting = false,
             },
-        },
-        Transform = {
-            Scale = {
-                Type = "StaticScale",
-                Scale = 100
-            }
         },
     },
     --NewHorizonsTrail module
@@ -161,9 +142,9 @@ return {
                 GeometryFile = "models/Labels.obj",
                 -- Magnification = 4,
             }, 
+            ColorTexture =  "textures/labels.png",
             Textures = {
                 Type = "simple",
-                Color =  "textures/labels.png",
                 BumpMap = "textures/goldfoilbump.tif"
             },
             Rotation = {
@@ -184,7 +165,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NEW HORIZONS",
+                Target = "NEW HORIZONS",
                 Observer = "PLUTO BARYCENTER"
             },
             Color = { 1.0, 0.8, 0.4 },

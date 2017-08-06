@@ -27,20 +27,17 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace {
-    const std::string _loggerCat = "SelectionProperty";
+    const char* _loggerCat = "SelectionProperty";
 
-    const std::string Delimiter = ",";
-}
+    const char Delimiter = ',';
+} // namespace
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 const std::string SelectionProperty::OptionsKey = "Options";
 
-SelectionProperty::SelectionProperty(std::string identifier, std::string guiName,
-                                     Property::Visibility visibility)
-    : TemplateProperty(std::move(identifier), std::move(guiName), std::vector<int>(),
-                       visibility)
+SelectionProperty::SelectionProperty(Property::PropertyInfo info)
+    : TemplateProperty(std::move(info), std::vector<int>())
 {}
 
 void SelectionProperty::addOption(Option option) {
@@ -136,7 +133,7 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromStrin
     while ((pos = value.find(Delimiter)) != std::string::npos) {
         std::string token = value.substr(0, pos);
         result.push_back(std::stoi(token));
-        value.erase(0, pos + Delimiter.length());
+        value.erase(0, pos + 1); // 1: Delimiter.length()
     }
     success = true;
     return result;
@@ -170,5 +167,4 @@ std::string SelectionProperty::generateAdditionalDescription() const {
     return result;
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

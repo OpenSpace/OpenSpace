@@ -29,6 +29,7 @@
 
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <ghoul/opengl/programobject.h>
 #include <array>
 
@@ -49,12 +50,12 @@ class RenderableConstellationBounds : public Renderable {
 public:
     RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     static documentation::Documentation Documentation();
 
@@ -93,8 +94,11 @@ private:
      */
     void selectionPropertyHasChanged();
 
-    std::string _vertexFilename; ///< The filename containing the constellation bounds
-    std::string _constellationFilename; ///< The file containing constellation names
+    /// The filename containing the constellation bounds
+    properties::StringProperty _vertexFilename;
+
+    /// The file containing constellation names
+    properties::StringProperty _constellationFilename; 
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 

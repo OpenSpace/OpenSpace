@@ -29,9 +29,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace openspace::globebrowsing::cache {
 
 /**
  * Templated class implementing a Least-Recently-Used Cache.
@@ -89,9 +87,7 @@ private:
     size_t _maximumCacheSize;
 };
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::cache
 
 #include <modules/globebrowsing/cache/lrucache.inl>
 

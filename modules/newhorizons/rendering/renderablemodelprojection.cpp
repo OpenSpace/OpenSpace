@@ -44,16 +44,28 @@
 
 namespace {
     const char* _loggerCat = "RenderableModelProjection";
-    const char* keySource = "Rotation.Source";
-    const char* keyDestination = "Rotation.Destination";
+
     const char* keyGeometry = "Geometry";
     const char* keyProjection = "Projection";
     const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
-    const char* keyTextureColor = "Textures.Color";
+    const char* DestinationFrame = "GALACTIC";
 
-    const char* _destination = "GALACTIC";
-}
+    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+        "ColorTexture",
+        "Color Base Texture",
+        "This is the path to a local image file that is used as the base texture for the "
+        "model on which the image projections are layered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "If this value is enabled, the model will be shaded based on the relative "
+        "location to the Sun. If this value is disabled, shading is disabled and the "
+        "entire model is rendered brightly."
+    };
+} // namespace
 
 namespace openspace {
 
@@ -67,36 +79,40 @@ documentation::Documentation RenderableModelProjection::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableModelProjection"),
-                "",
                 Optional::No
             },
             {
                 keyGeometry,
                 new ReferencingVerifier("base_geometry_model"),
-                "The geometry that is used for rendering this model.",
-                Optional::No
+                Optional::No,
+                "The geometry that is used for rendering this model."
             },
             {
                 keyProjection,
                 new ReferencingVerifier("newhorizons_projectioncomponent"),
-                "Contains information about projecting onto this planet.",
-                Optional::No
+                Optional::No,
+                "Contains information about projecting onto this planet."
             },
             {
-                keyTextureColor,
+                ColorTextureInfo.identifier,
                 new StringVerifier,
-                "The base texture for the model that is shown before any projection "
-                "occurred.",
-                Optional::No
+                Optional::No,
+                ColorTextureInfo.description
+            },
+            {
+                PerformShadingInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                PerformShadingInfo.description
             },
             {
                 keyBoundingSphereRadius,
                 new DoubleVerifier,
+                Optional::Yes,
                 "The radius of the bounding sphere of this object. This has to be a "
                 "radius that is larger than anything that is rendered by it. It has to "
                 "be at least as big as the convex hull of the object. The default value "
-                "is 10e9 meters.",
-                Optional::Yes
+                "is 10e9 meters."
             }
         }
     };
@@ -104,13 +120,12 @@ documentation::Documentation RenderableModelProjection::Documentation() {
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath("colorTexture", "Color Texture")
-    , _rotation("rotation", "Rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f))
+    , _colorTexturePath(ColorTextureInfo)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _geometry(nullptr)
-    , _performShading("performShading", "Perform Shading", true)
+    , _performShading(PerformShadingInfo, true)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -119,7 +134,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     );
 
     std::string name;
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+    [[ maybe_unused ]] bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModelProjection");
 
     using ghoul::Dictionary;
@@ -130,7 +145,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         ModelGeometry::createFromDictionary(geometryDictionary)
     );
 
-    _colorTexturePath = absPath(dictionary.value<std::string>(keyTextureColor));
+    _colorTexturePath = absPath(dictionary.value<std::string>(
+        ColorTextureInfo.identifier
+    ));
         
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
@@ -146,15 +163,16 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
     setBoundingSphere(boundingSphereRadius);
 
+    if (dictionary.hasKey(PerformShadingInfo.identifier)) {
+        _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
+    }
+
     Renderable::addProperty(_performShading);
-    Renderable::addProperty(_rotation);
 }
 
-RenderableModelProjection::~RenderableModelProjection() {
-    // This empty method needs to be here in order to use forward declaration with 
-    // std::unique_ptr
-}
-
+// This empty method needs to be here in order to use forward declaration with
+// std::unique_ptr
+RenderableModelProjection::~RenderableModelProjection() {}
 
 bool RenderableModelProjection::isReady() const {
     bool ready = true;
@@ -164,9 +182,7 @@ bool RenderableModelProjection::isReady() const {
     return ready;
 }
 
-bool RenderableModelProjection::initialize() {
-    bool completeSuccess = true;
-        
+void RenderableModelProjection::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram("ModelShader",
         "${MODULE_NEWHORIZONS}/shaders/renderableModel_vs.glsl",
@@ -185,19 +201,18 @@ bool RenderableModelProjection::initialize() {
         "${MODULE_NEWHORIZONS}/shaders/renderableModelDepth_fs.glsl");
 
 
-    completeSuccess &= loadTextures();
-    completeSuccess &= _projectionComponent.initializeGL();
+    loadTextures();
+    _projectionComponent.initializeGL();
 
     float bs = boundingSphere();
-    completeSuccess &= _geometry->initialize(this);
+    _geometry->initialize(this);
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
-
-    return completeSuccess;
 }
 
-bool RenderableModelProjection::deinitialize() {
-    if (_geometry)
+void RenderableModelProjection::deinitialize() {
+    if (_geometry) {
         _geometry->deinitialize();
+    }
 
     _geometry = nullptr;
     _baseTexture = nullptr;
@@ -206,22 +221,22 @@ bool RenderableModelProjection::deinitialize() {
 
     OsEng.renderEngine().removeRenderProgram(_programObject);
     _programObject = nullptr;
-
-    return true;
 }
 
 ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
     return _projectionComponent.projectionTexture();
 }
 
-void RenderableModelProjection::render(const RenderData& data) {
-    if (_projectionComponent.needsClearProjection())
+void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
+    if (_projectionComponent.needsClearProjection()) {
         _projectionComponent.clearAllProjections();
+    }
 
     _up = data.camera.lookUpVectorCameraSpace();
 
-    if (_capture && _projectionComponent.doesPerformProjection())
+    if (_capture && _projectionComponent.doesPerformProjection()) {
         project();
+    }
 
     _programObject->activate();
 
@@ -274,8 +289,9 @@ void RenderableModelProjection::update(const UpdateData& data) {
 
     _projectionComponent.update();
         
-    if (_depthFboProgramObject->isDirty())
+    if (_depthFboProgramObject->isDirty()) {
         _depthFboProgramObject->rebuildFromFile();
+    }
 
     _time = data.time.j2000Seconds();
 
@@ -346,52 +362,40 @@ void RenderableModelProjection::imageProjectGPU(
 
 void RenderableModelProjection::attitudeParameters(double time) {
     try {
-        _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_projectionComponent.instrumentId(), _destination, time);
+        _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
+            _projectionComponent.instrumentId(),
+            DestinationFrame,
+            time
+        );
     }
     catch (const SpiceManager::SpiceException&) {
         return;
     }
 
-    _transform = glm::mat4(1);
-    glm::mat4 rotPropX = glm::rotate(
-        _transform,
-        glm::radians(static_cast<float>(_rotation.value().x)),
-        glm::vec3(1, 0, 0)
-    );
-    glm::mat4 rotPropY = glm::rotate(
-        _transform,
-        glm::radians(static_cast<float>(_rotation.value().y)),
-        glm::vec3(0, 1, 0)
-    );
-    glm::mat4 rotPropZ = glm::rotate(
-        _transform, 
-        glm::radians(static_cast<float>(_rotation.value().z)),
-        glm::vec3(0, 0, 1)
-    );
-        
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             _transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
         }
     }
-    _transform = _transform * rotPropX * rotPropY * rotPropZ;
-
     glm::dvec3 boresight;
     try {
-        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_projectionComponent.instrumentId());
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
+            _projectionComponent.instrumentId()
+        );
         boresight = std::move(res.boresightVector);
     } catch (const SpiceManager::SpiceException&) {
         return;
     }
 
     double lightTime;
-    glm::dvec3 p =
-        SpiceManager::ref().targetPosition(
-            _projectionComponent.projectorId(),
-            _projectionComponent.projecteeId(),
-            _destination,
-            _projectionComponent.aberration(),
-            time, lightTime);
+    glm::dvec3 p = SpiceManager::ref().targetPosition(
+        _projectionComponent.projectorId(),
+        _projectionComponent.projecteeId(),
+        DestinationFrame,
+        _projectionComponent.aberration(),
+        time, lightTime
+    );
+
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
     position[3] += 4;
@@ -410,12 +414,13 @@ void RenderableModelProjection::attitudeParameters(double time) {
     );
 }
 
-
-
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
         attitudeParameters(img.timeRange.start);
-        auto projTexture = _projectionComponent.loadProjectionTexture(img.path, img.isPlaceholder);
+        auto projTexture = _projectionComponent.loadProjectionTexture(
+            img.path,
+            img.isPlaceholder
+        );
         imageProjectGPU(projTexture);
     }
     _capture = false;
@@ -424,8 +429,9 @@ void RenderableModelProjection::project() {
 bool RenderableModelProjection::loadTextures() {
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
-        ;
+        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
         if (_baseTexture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _baseTexture->uploadTexture();

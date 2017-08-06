@@ -34,12 +34,12 @@
 namespace {
     const char* _loggerCat = "OpenSpaceModule";
     const char* ModuleBaseToken = "MODULE_";
-}
+} // namespace
 
 namespace openspace {
 
 OpenSpaceModule::OpenSpaceModule(std::string name) 
-    : properties::PropertyOwner(std::move(name))
+    : properties::PropertyOwner({ std::move(name) })
 {}
 
 void OpenSpaceModule::initialize() {

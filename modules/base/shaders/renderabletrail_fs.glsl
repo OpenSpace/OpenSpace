@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,11 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
-#define RenderPhaseLines 0
-#define RenderPhasePoints 1
-
-#define Delta 0.25
+#include "fragment.glsl"
 
 in vec4 vs_positionScreenSpace;
 in float fade;
@@ -34,7 +30,12 @@ in float fade;
 uniform vec3 color;
 uniform int renderPhase;
 
-#include "fragment.glsl"
+// Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
+#define RenderPhaseLines 0
+#define RenderPhasePoints 1
+
+#define Delta 0.25
+
 
 Fragment getFragment() {
     Fragment frag;
@@ -47,21 +48,7 @@ Fragment getFragment() {
         // smoothstep to gradually decrease the alpha on the edges of the point
         vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
         frag.color.a *= 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
-
-
-
-        // if (dot(circCoord, circCoord) > 1.0) {
-
-        // }
-        // frag.color.a *= smoothstep();
-
-        // // Check for length > 1.0 without a square root
-        // frag.color.a *= smoothstep(dot(circCoord, circCoord), 1.0, 1.0 - 1.0 / pointSize);
-        // if (dot(circCoord, circCoord) > 1.0) {
-        //     discard;
-        // }
     }
-
 
     return frag;
 }

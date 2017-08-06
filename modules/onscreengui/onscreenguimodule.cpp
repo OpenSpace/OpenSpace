@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -42,12 +42,7 @@
 
 namespace openspace {
 
-gui::GUI OnScreenGUIModule::gui;
-Touch OnScreenGUIModule::touchInput;
-    
-OnScreenGUIModule::OnScreenGUIModule() 
-    : OpenSpaceModule(Name)
-{
+OnScreenGUIModule::OnScreenGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
     // TODO: Remove dependency on OsEng.
@@ -61,7 +56,7 @@ OnScreenGUIModule::OnScreenGUIModule()
 
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Initialize,
-        [](){
+        [&](){
             LDEBUGC("OnScreenGUIModule", "Initializing GUI");
             gui.initialize();
             
@@ -109,7 +104,7 @@ OnScreenGUIModule::OnScreenGUIModule()
     
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Deinitialize,
-        [](){
+        [&](){
             LDEBUGC("OnScreenGui", "Deinitialize GUI");
             gui.deinitialize();
         }
@@ -117,7 +112,7 @@ OnScreenGUIModule::OnScreenGUIModule()
     
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::InitializeGL,
-        [](){
+        [&](){
             LDEBUGC("OnScreenGui", "Initializing GUI OpenGL");
             gui.initializeGL();
         }
@@ -125,7 +120,7 @@ OnScreenGUIModule::OnScreenGUIModule()
     
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::DeinitializeGL,
-        [](){
+        [&](){
             LDEBUGC("OnScreenGui", "Deinitialize GUI OpenGL");
             gui.deinitializeGL();
         }
@@ -136,7 +131,7 @@ OnScreenGUIModule::OnScreenGUIModule()
         // everything else in the case of fisheyes. With this being in the Render callback
         // the GUI would be rendered on top of each of the cube faces
         OpenSpaceEngine::CallbackOption::PostDraw,
-        [](){
+        [&](){
             WindowWrapper& wrapper = OsEng.windowWrapper();
             bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
             if (wrapper.isMaster() && showGui ) {
@@ -166,7 +161,7 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
     
     OsEng.registerModuleKeyboardCallback(
-        [](Key key, KeyModifier mod, KeyAction action) -> bool {
+        [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             if (gui.isEnabled()) {
                 return gui.keyCallback(key, mod, action);
             }
@@ -177,7 +172,7 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
     
     OsEng.registerModuleCharCallback(
-        [](unsigned int codepoint, KeyModifier modifier) -> bool {
+        [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             if (gui.isEnabled()) {
                 return gui.charCallback(codepoint, modifier);
             }
@@ -188,7 +183,7 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
     
     OsEng.registerModuleMouseButtonCallback(
-        [](MouseButton button, MouseAction action) -> bool {
+        [&](MouseButton button, MouseAction action) -> bool {
             if (gui.isEnabled()) {
                 return gui.mouseButtonCallback(button, action);
             }
@@ -199,7 +194,7 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
     
     OsEng.registerModuleMouseScrollWheelCallback(
-        [](double, double posY) -> bool {
+        [&](double, double posY) -> bool {
             if (gui.isEnabled()) {
                 return gui.mouseWheelCallback(posY);
             }

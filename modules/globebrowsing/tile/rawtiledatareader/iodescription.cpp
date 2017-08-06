@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/tile/pixelregion.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 IODescription IODescription::cut(PixelRegion::Side side, int pos) {
     PixelRegion readPreCut = read.region;
@@ -62,5 +61,4 @@ IODescription IODescription::cut(PixelRegion::Side side, int pos) {
     return whatCameOff;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

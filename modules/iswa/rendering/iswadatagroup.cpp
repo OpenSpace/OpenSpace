@@ -25,7 +25,7 @@
 #include <modules/iswa/rendering/iswadatagroup.h>
 
 #include <fstream>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
@@ -36,20 +36,63 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
-    const std::string _loggerCat = "IswaDataGroup";
+    const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
-}
+
+    static const openspace::properties::Property::PropertyInfo UseLogInfo = {
+        "UseLog",
+        "Use Logarithm",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+        "UseHistogram",
+        "Auto Contrast",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+        "AutoFilter",
+        "Auto Filter",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo NormalizeValues = {
+        "NormValues",
+        "Normalize Values",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo BackgroundInfo = {
+        "BackgroundValues",
+        "Background Values",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+        "Transferfunctions",
+        "Transfer Functions",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+        "DataOptions",
+        "Data Options",
+        "" // @TODO Missing documentation
+    };
+
+} // namespace
 
 namespace openspace{
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     : IswaBaseGroup(name, type)    
-    , _useLog("useLog","Use Logarithm", false)
-    , _useHistogram("useHistogram", "Auto Contrast", false)
-    , _autoFilter("autoFilter", "Auto Filter", true)
-    , _normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
-    , _backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    , _transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
-    , _dataOptions("dataOptions", "Data Options")
+    , _useLog(UseLogInfo, false)
+    , _useHistogram(UseHistogramInfo, false)
+    , _autoFilter(AutoFilterInfo, true)
+    , _normValues(NormalizeValues, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
+    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _transferFunctionsFile(TransferFunctionInfo, "${SCENE}/iswa/tfs/default.tf")
+    , _dataOptions(DataOptionsInfo)
 {
     addProperty(_useLog);
     addProperty(_useHistogram);

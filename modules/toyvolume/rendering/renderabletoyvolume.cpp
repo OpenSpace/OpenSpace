@@ -37,14 +37,15 @@ namespace openspace {
 
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scalingExponent("scalingExponent", "Scaling Exponent", 1, -10, 20)
-    , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
-    , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _rotation("rotation", "Euler rotation", glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
-    , _color("color", "Color", glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f)) {
-
-    float scalingExponent, stepSize;
+    , _scalingExponent({ "ScalingExponent", "Scaling Exponent", "" }, 1, -10, 20)
+    , _stepSize({ "StepSize", "Step Size", "" }, 0.02f, 0.01f, 1.f) // @TODO Missing documentation
+    , _scaling({ "Scaling", "Scaling", "" }, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
+    , _translation({ "Translation", "Translation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
+    , _rotation({ "Rotation", "Euler rotation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f)) // @TODO Missing documentation
+    , _color({ "Color", "Color", "" }, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f)) // @TODO Missing documentation
+{
+    float stepSize;
+    int scalingExponent;
     glm::vec3 scaling, translation, rotation;
     glm::vec4 color;
     if (dictionary.getValue("ScalingExponent", scalingExponent)) {
@@ -69,7 +70,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     
 RenderableToyVolume::~RenderableToyVolume() {}
 
-bool RenderableToyVolume::initialize() {
+void RenderableToyVolume::initialize() {
     _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
     _raycaster->initialize();
 
@@ -92,25 +93,22 @@ bool RenderableToyVolume::initialize() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_color);
-    
-    return true;
 }
     
-bool RenderableToyVolume::deinitialize() {
+void RenderableToyVolume::deinitialize() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
-    return true;
 }
     
 bool RenderableToyVolume::isReady() const {
+    // @TODO isReady function needs to be filled
     return true;
 }
     
 void RenderableToyVolume::update(const UpdateData& data) {
     if (_raycaster) {
-
         glm::mat4 transform = glm::translate(glm::mat4(1.0), static_cast<glm::vec3>(_translation) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
         transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));

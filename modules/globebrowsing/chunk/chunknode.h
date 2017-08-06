@@ -32,8 +32,7 @@
 #include <functional>
 #include <memory>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class ChunkedLodGlobe;
 struct Subsite;
@@ -86,7 +85,6 @@ private:
     Chunk _chunk;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKNODE___H__
