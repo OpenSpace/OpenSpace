@@ -38,8 +38,8 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-	TextureArray::TextureArray(glm::uvec3 dimensions, int size, GLint format, 
-				GLint internalFormat, GLenum dataType, bool allocateData)
+	TextureArray::TextureArray(glm::uvec3 dimensions, int size, GLenum format, 
+        GLenum internalFormat, GLenum dataType, bool allocateData)
 		: _dimensions(std::move(dimensions)),
 		_size(size),
 		_internalFormat(internalFormat),
@@ -93,7 +93,7 @@ GLuint TextureArray::id() {
 
 void TextureArray::allocateMemory() {
 	bind();
-	glTexStorage3D(_type, 1, _internalFormat, _dimensions.x, _dimensions.y, _size);
+	glTexStorage3D(_type, 1, static_cast<gl::GLenum>(_internalFormat), _dimensions.x, _dimensions.y, _size);
 }
 
 void TextureArray::generateId() {
@@ -109,14 +109,14 @@ void TextureArray::uploadTexture(const void* pixels) {
 	bind();
 	switch (_type) {
 	case GL_TEXTURE_2D:
-		glTexImage2D(
-			_type,
-			0,
-			_internalFormat,
-			GLsizei(_dimensions.x),
-			GLsizei(_dimensions.y),
-			0,
-			GLint(_format),
+        glTexImage2D(
+            _type,
+            0,
+            _internalFormat,
+            GLsizei(_dimensions.x),
+            GLsizei(_dimensions.y),
+            0,
+            static_cast<gl::GLenum>(_format),
 			_dataType,
 			pixels
 		);
@@ -131,7 +131,7 @@ void TextureArray::uploadTexture(const void* pixels) {
 			_dimensions.x,
 			_dimensions.y,
 			_dimensions.z,
-			_format,
+            static_cast<gl::GLenum>(_format),
 			_dataType,
 			pixels);
 

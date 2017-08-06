@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -87,20 +87,20 @@ bool RenderableExplorationPath::initialize(RenderableGlobe* globe, const std::ve
 	
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaPathID);
-	ghoul_assert(_vaPathID != 0, "Could not generate vertex arrays");
+	//ghoul_assert(_vaPathID != 0, "Could not generate vertex arrays");
 
 	glGenBuffers(1, &_vbPathID);
-	ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
+	//ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
 
 	bufferData(_vaPathID, _vbPathID, _stationPointsModelCoordinates);
 
 	// Stations with models
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaModelsID);
-	ghoul_assert(_vaioID2 != 0, "Could not generate vertex arrays");
+	//ghoul_assert(_vaioID2 != 0, "Could not generate vertex arrays");
 
 	glGenBuffers(1, &_vbModelsID);
-	ghoul_assert(_vertexBufferID2 != 0, "Could not create vertex buffer");
+	//ghoul_assert(_vertexBufferID2 != 0, "Could not create vertex buffer");
 	
 	bufferData(_vaModelsID, _vbModelsID, _stationPointsModelCoordinatesWithModel);
 

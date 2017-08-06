@@ -28,7 +28,7 @@
 
 #include <fstream>
 #include <gdal_priv.h>
-//#include "ogrsf_frmts.h"
+#include "ogrsf_frmts.h"
 #include "ogr_feature.h"
 
 template<typename Out>

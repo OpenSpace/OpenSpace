@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -28,7 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <modules/globebrowsing/tasks/imgreader.h>
 #include <openspace/scene/scene.h>
-#include <GL/GL.h>
+//#include <GL/GL.h>
 #include <fstream>
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"

@@ -36,7 +36,7 @@ namespace globebrowsing {
 class TextureArray {
 public:
 	TextureArray(glm::uvec3 dimensions, int size, 
-		GLint format = (GLint)GL_RGBA, GLint internalFormat = (GLint)GL_RGBA8, GLenum dataType = GL_UNSIGNED_BYTE, 
+        GLenum format = (GLenum)GL_RGBA, GLenum internalFormat = (GLenum)GL_RGBA8, GLenum dataType = GL_UNSIGNED_BYTE,
 		bool allocateData = true);
 
 	//~TextureArray();
@@ -54,8 +54,8 @@ private:
 	glm::uvec3 _dimensions;
 	int _counter;
 	int _size;
-	GLuint _id, _format, _internalFormat;
-	GLenum _type, _dataType;
+	GLuint _id;
+	GLenum _type, _dataType, _format, _internalFormat;
 
 	void generateId();
 	void initialize(bool allocateData);

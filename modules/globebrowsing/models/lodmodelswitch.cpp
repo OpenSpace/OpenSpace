@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -42,7 +42,7 @@ void LodModelSwitch::initialize(RenderableGlobe * owner) {
 	_owner = owner;
 	std::string planetName = _owner->owner()->name();
 	_parent = OsEng.renderEngine().scene()->sceneGraphNode(planetName)->parent();
-	_ellipsoidShrinkTerm = _owner->interactionDepthBelowEllipsoid();
+    _ellipsoidShrinkTerm = 100.0;// _owner->interactionDepthBelowEllipsoid();
 }
 
 LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {

@@ -71,13 +71,6 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul\filesystem\filesystem.h>
 
-<<<<<<< HEAD
-#include <openspace/util/progressbar.h>
-
-namespace {
-	std::string _loggerCat = "GlobebrowsingModule";
-}
-
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
@@ -85,17 +78,6 @@ namespace {
 }
 
 namespace openspace {
-
-=======
-#include "globebrowsingmodule_lua.inl"
-
-namespace {
-    const char* _loggerCat = "GlobeBrowsingModule";
-}
-
-namespace openspace {
-
->>>>>>> master
 GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
 
 void GlobeBrowsingModule::internalInitialize() {
