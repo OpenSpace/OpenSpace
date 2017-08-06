@@ -44,8 +44,9 @@ std::unique_ptr<ModelProvider> ModelProvider::createFromDictionary(const ghoul::
 	return mp;
 }
 
-ModelProvider::ModelProvider(const ghoul::Dictionary& dictionary) {
-
+ModelProvider::ModelProvider(const ghoul::Dictionary& dictionary) 
+    : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "modelProvider", "modelProvider" })
+{
 }
 
 void ModelProvider::initialize() {

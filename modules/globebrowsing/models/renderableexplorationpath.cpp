@@ -141,6 +141,7 @@ bool RenderableExplorationPath::isReady() const {
 void RenderableExplorationPath::render(const RenderData& data) {
 	glm::dmat4 globeModelTransform;
 	glm::dmat4 modelViewTransform;
+    LERROR("HEEEEEEEJ");
 	//if(_currentLevel >= 1) {
 		// Only show the path when camera is close enough
 		if (_currentLevel > 0 && _fading < 1.0f)

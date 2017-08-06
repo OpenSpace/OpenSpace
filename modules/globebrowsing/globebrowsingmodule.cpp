@@ -41,7 +41,6 @@
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
 
-#include <modules/globebrowsing/models/renderablesite.h>
 //#include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
 #include <modules/globebrowsing/models/renderableroversurface.h>
 #include <modules/globebrowsing/models/modelprovider.h>
@@ -118,7 +117,6 @@ void GlobeBrowsingModule::internalInitialize() {
   
     // Register renderable class
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
-	fRenderable->registerClass<globebrowsing::RenderableSite>("RenderableSite");
 	fRenderable->registerClass<globebrowsing::RenderableRoverSurface>("RenderableRoverSurface");
 
     // Register TileProvider classes

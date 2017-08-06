@@ -135,7 +135,6 @@ int clearKeys(lua_State* L) {
     return 0;
 }
 
-<<<<<<< HEAD
 /*int goToChunk(lua_State* L) {
     using ghoul::lua::luaTypeToString;
     

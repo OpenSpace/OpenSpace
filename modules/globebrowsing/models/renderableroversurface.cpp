@@ -102,6 +102,7 @@ namespace {
         "Model Rotation",
         "" // @TODO Missing documentation
     };
+
 }
 
 namespace openspace {

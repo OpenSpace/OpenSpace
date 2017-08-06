@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
