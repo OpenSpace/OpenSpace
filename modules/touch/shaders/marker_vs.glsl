@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,12 @@
 
 #version __CONTEXT__
 
-// Vertex attributes
 layout(location = 0) in vec2 in_position;
 
-// Uniforms
+out vec2 out_position;
+
 uniform float radius;
 
-// Outputs
-out vec2 out_position;
-//out float pointRadius;
 
 void main() {
     out_position = in_position;

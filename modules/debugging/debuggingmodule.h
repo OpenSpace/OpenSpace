@@ -35,6 +35,8 @@ public:
 
     DebuggingModule();
     
+    std::vector<documentation::Documentation> documentations() const override;
+
 protected:
     void internalInitialize() override;
 };

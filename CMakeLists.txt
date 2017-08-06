@@ -28,9 +28,9 @@ project (OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 8)
+set(OPENSPACE_VERSION_MINOR 9)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "prerelease-13 (Earth Day)")
+set(OPENSPACE_VERSION_STRING "prerelease-14 (Astronomy Live)")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")

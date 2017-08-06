@@ -1,3 +1,5 @@
+local europa_radius = 1.8213E6
+
 return {
     -- Europa module
     {   
@@ -7,14 +9,15 @@ return {
             Type = "RenderablePlanetProjection",
             Frame = "IAU_EUROPA", 
             Body = "EUROPA",
+            Radius = europa_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 1.8213E6,
+                Radius = europa_radius,
                 Segments = 100
             },
+            ColorTexture = "textures/europa.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/europa.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },
@@ -42,7 +45,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "EUROPA",
+                Target = "EUROPA",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -85,7 +88,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "EUROPA",
+                Target = "EUROPA",
                 Observer = "JUPITER BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

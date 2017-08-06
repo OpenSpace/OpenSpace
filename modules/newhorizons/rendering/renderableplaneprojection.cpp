@@ -94,27 +94,23 @@ bool RenderablePlaneProjection::isReady() const {
     return _shader && _texture;
 }
 
-bool RenderablePlaneProjection::initialize() {
+void RenderablePlaneProjection::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     
-    // Plane program
-    if (_shader == nullptr) {
-        // Image Plane Program
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("Image Plane",
-            "${MODULE_BASE}/shaders/imageplane_vs.glsl",
-            "${MODULE_BASE}/shaders/imageplane_fs.glsl");
-        if (!_shader)
-            return false;
-    }
+    // Image Plane Program
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram(
+        "Image Plane",
+        "${MODULE_BASE}/shaders/imageplane_vs.glsl",
+        "${MODULE_BASE}/shaders/imageplane_fs.glsl"
+    );
 
     setTarget(_defaultTarget);
     loadTexture();
-    return isReady();
 }
 
-bool RenderablePlaneProjection::deinitialize() {
+void RenderablePlaneProjection::deinitialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -126,10 +122,9 @@ bool RenderablePlaneProjection::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
     _texture = nullptr;
-    return true;
 }
 
-void RenderablePlaneProjection::render(const RenderData& data) {
+void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
     bool active = ImageSequencer::ref().instrumentActive(_instrument);
     if (!_hasImage || (_moving && !active))
         return;

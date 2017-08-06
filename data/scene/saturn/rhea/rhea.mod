@@ -3,22 +3,23 @@ return {
         Name = "Rhea",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_RHEA",
-            Body = "RHEA",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.765E3,
-                Segments = 50
-            },
-            Textures = {
-                Color = "textures/rhea.jpg"
+            Type = "RenderableGlobe",
+            Radii = 765000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Rhea Texture",
+                        FilePath = "textures/rhea.jpg",
+                        Enabled = true
+                    }
+                }
             }
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "RHEA",
+                Target = "RHEA",
                 Observer = "SATURN BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/sat375.bsp"
             },
@@ -36,7 +37,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "RHEA",
+                Target = "RHEA",
                 Observer = "SATURN BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

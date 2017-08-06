@@ -25,7 +25,7 @@
 #include <modules/iswa/rendering/iswabasegroup.h>
 
 #include <fstream>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
@@ -36,17 +36,36 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
-    const std::string _loggerCat = "IswaBaseGroup";
+    const char* _loggerCat = "IswaBaseGroup";
     using json = nlohmann::json;
-}
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+        "Alpha",
+        "Alpha",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+        "Delete",
+        "Delete",
+        "" // @TODO Missing documentation
+    };
+
+} // namespace
 
 namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
-    : properties::PropertyOwner(std::move(name))
-    , _enabled("enabled", "Enabled", true)
-    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
-    , _delete("delete", "Delete")
+    : properties::PropertyOwner({ std::move(name) })
+    , _enabled(EnabledInfo, true) 
+    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
+    , _delete(DeleteInfo)
     , _registered(false)
     , _type(type)
     , _dataProcessor(nullptr)
@@ -55,7 +74,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     addProperty(_alpha);
     addProperty(_delete);
 
-    _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary> >();
+    _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary>>();
     registerProperties();
 }
 

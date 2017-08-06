@@ -29,12 +29,13 @@
 #include <vector>
 
 namespace openspace {
+    class Renderable;
+    struct RenderData;
+    struct RendererTasks;
+    struct UpdateData;
+} // namespace openspace
 
-class Renderable;
-struct RenderData;
-struct UpdateData;
-
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Selects a specific Renderable to be used for rendering, based on distance to the 
@@ -51,7 +52,7 @@ public:
      * Picks the first Renderable with the associated maxDistance greater than the 
      * current distance to the camera
      */
-    void render(const RenderData& data);
+    void render(const RenderData& data, RendererTasks& rendererTask);
     void update(const UpdateData& data);
 
     /**
@@ -63,7 +64,6 @@ private:
     std::vector<std::shared_ptr<Renderable>> _renderables;
 };
 
-} // namespace globebrowsing
-} // openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__

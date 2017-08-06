@@ -31,10 +31,6 @@
 
 namespace openspace {
 
-VolumeModule::VolumeModule()  : OpenSpaceModule(Name) {}
-
-void VolumeModule::internalInitialize() {
-
-}
+VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
 
 } // namespace openspace

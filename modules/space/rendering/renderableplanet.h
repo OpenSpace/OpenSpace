@@ -39,20 +39,15 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
 }
 
 namespace openspace {
 
-namespace planetgeometry {
-class PlanetGeometry;
-}
-
 namespace documentation { struct Documentation; }
+namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanet : public Renderable {
 public:
@@ -73,17 +68,18 @@ public:
 public:
     RenderablePlanet(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 protected:
     void loadTexture();
+
 private:
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _nightTexturePath;

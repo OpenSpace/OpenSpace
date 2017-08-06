@@ -30,12 +30,9 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-} }
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class RenderableGlobe;
 
@@ -44,11 +41,11 @@ public:
     PointGlobe(const RenderableGlobe& owner);
     virtual ~PointGlobe();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     
 private:
     const RenderableGlobe& _owner;
@@ -61,7 +58,6 @@ private:
     properties::FloatProperty _lightIntensity;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__

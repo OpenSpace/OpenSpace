@@ -52,9 +52,7 @@ namespace {
     // A high number is chosen since we didn't have a version number before
     // any small number might also be equal to the console history length
 
-    // @CPP17
-    //const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
-    const uint64_t CurrentVersion = 0xFEEEFEEE00000001;
+    const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
     const openspace::Key CommandInputButton = openspace::Key::GraveAccent;
 
@@ -72,50 +70,95 @@ namespace {
      // when horizontal scrolling is required.
      const int NVisibleCharsAfterCursor = 5;
 
+     const static openspace::properties::Property::PropertyInfo VisibleInfo = {
+         "IsVisible",
+         "Is Visible",
+         "Determines whether the Lua console is shown on the screen or not. Toggling it "
+         "will fade the console in and out."
+     };
+
+     const static openspace::properties::Property::PropertyInfo RemoveScriptingInfo = {
+         "RemoteScripting",
+         "Remote scripting",
+         "Determines whether the entered commands will only be executed locally (if this "
+         "is disabled), or whether they will be send to connected remove instances."
+     };
+
+     const static openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
+         "BackgroundColor",
+         "Background Color",
+         "Sets the background color of the console."
+     };
+
+     const static openspace::properties::Property::PropertyInfo HighlightColorInfo = {
+         "HighlightColor",
+         "Highlight Color",
+         "Sets the color of the lines below the console."
+     };
+
+     const static openspace::properties::Property::PropertyInfo SeparatorColorInfo = {
+         "SeparatorColor",
+         "Separator Color",
+         "Sets the color of the separator between the history part and the entry part of "
+         "the console."
+     };
+
+     const static openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
+         "EntryTextColor",
+         "Entry Text Color",
+         "Sets the text color of the entry area of the console."
+     };
+
+     const static openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
+         "HistoryTextColor",
+         "History Text Color",
+         "Sets the text color of the history area of the console."
+     };
+
+     const static openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
+         "HistoryLength",
+         "History Length",
+         "Determines the length of the history in number of lines."
+     };
 } // namespace
 
 namespace openspace {
 
 LuaConsole::LuaConsole()
-    : properties::PropertyOwner("LuaConsole")
-    , _isVisible("isVisible", "Is Visible", false)
-    , _remoteScripting("remoteScripting", "Remote scripting", false)
+    : properties::PropertyOwner({ "LuaConsole" })
+    , _isVisible(VisibleInfo, false)
+    , _remoteScripting(RemoveScriptingInfo, false)
     , _backgroundColor(
-        "backgroundColor",
-        "Background Color",
+        BackgroundColorInfo,
         glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _highlightColor(
-        "highlightColor",
-        "Highlight Color",
+        HighlightColorInfo,
         glm::vec4(1.f, 1.f, 1.f, 0.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _separatorColor(
-        "separatorColor",
-        "Separator Color",
+        SeparatorColorInfo,
         glm::vec4(0.4f, 0.4f, 0.4f, 0.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _entryTextColor(
-        "entryTextColor",
-        "Entry Text Color",
+        EntryTextColorInfo,
         glm::vec4(1.f, 1.f, 1.f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _historyTextColor(
-        "historyTextColor",
-        "History Text Color",
+        HistoryTextColorInfo,
         glm::vec4(1.0f, 1.0f, 1.0f, 0.65f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _historyLength("historyLength", "History Length", 13, 0, 100)
+    , _historyLength(HistoryLengthInfo, 13, 0, 100)
     , _inputPosition(0)
     , _activeCommand(0)
     , _autoCompleteInfo({NoAutoComplete, false, ""})
@@ -125,7 +168,6 @@ LuaConsole::LuaConsole()
 {
     addProperty(_isVisible);
     addProperty(_remoteScripting);
-
     addProperty(_historyLength);
 
     _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -226,7 +268,6 @@ void LuaConsole::initialize() {
         HistoryFontSize,
         ghoul::fontrendering::Font::Outline::No
     );
-
 
     OsEng.parallelConnection().connectionEvent()->subscribe(
         "luaConsole",
@@ -548,9 +589,12 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     default:
         return true;
     }
+
 }
 
-void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
+void LuaConsole::charCallback(unsigned int codepoint,
+                              [[maybe_unused]] KeyModifier modifier)
+{
     if (!_isVisible) {
         return;
     }
@@ -581,7 +625,10 @@ void LuaConsole::update() {
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
     using namespace ghoul::fontrendering;
-    size_t nLines = std::min(static_cast<size_t>(_historyLength), _commandsHistory.size());
+    const size_t nLines = std::min(
+        static_cast<size_t>(_historyLength),
+        _commandsHistory.size()
+    );
     const auto bbox = FontRenderer::defaultRenderer().boundingBox(
         *_historyFont,
         std::string(nLines, '\n').c_str()
@@ -600,12 +647,11 @@ void LuaConsole::update() {
     const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     _currentHeight += (_targetHeight - _currentHeight) *
-        std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
+        std::pow(0.98f, 1.f / (ConsoleOpenSpeed / dpiScaling.y * frametime));
 
     _currentHeight = std::max(0.0f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
 }
-
 
 void LuaConsole::render() {
     using namespace ghoul::fontrendering;
@@ -668,16 +714,17 @@ void LuaConsole::render() {
 
     // Render the current command
     std::string currentCommand = _commands.at(_activeCommand);
-    // We chop off the beginning and end of the string until it fits on the screen (with a margin)
-    // this should be replaced as soon as the mono-spaced fonts work properly. Right now,
-    // every third character is a bit wider than the others
+    // We chop off the beginning and end of the string until it fits on the screen (with
+    // a margin) this should be replaced as soon as the mono-spaced fonts work properly.
+    // Right now, every third character is a bit wider than the others
 
     size_t nChoppedCharsBeginning = 0, nChoppedCharsEnd = 0;
 
     const size_t inputPositionFromEnd = currentCommand.size() - _inputPosition;
     while (true) {
+        using namespace ghoul::fontrendering;
         // Compute the current width of the string and console prefix.
-        const float currentWidth = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        const float currentWidth = FontRenderer::defaultRenderer().boundingBox(
             *_font,
             "> %s",
             currentCommand.c_str()
@@ -690,12 +737,12 @@ void LuaConsole::render() {
         }
 
         // Since the overflow is positive, at least one character needs to be removed.
-        const size_t nCharsOverflow = std::min(
+        const size_t nCharsOverflow = static_cast<size_t>(std::min(
             std::max(1.f, overflow / _font->glyph('m')->width()),
             static_cast<float>(currentCommand.size())
-        );
+        ));
 
-        // Do not hide the cursor and `NVisibleCharsAfterCursor` more characters in the end.
+        // Do not hide the cursor and `NVisibleCharsAfterCursor` characters in the end.
         const size_t maxAdditionalCharsToChopEnd = std::max(
             0,
             static_cast<int>(inputPositionFromEnd) -
@@ -706,11 +753,15 @@ void LuaConsole::render() {
         // Do not hide the cursor in the beginning.
         const size_t maxAdditionalCharsToChopBeginning = std::max(
             0,
-            static_cast<int>(_inputPosition) - 1 - static_cast<int>(nChoppedCharsBeginning)
+            static_cast<int>(_inputPosition) - 1 -
+            static_cast<int>(nChoppedCharsBeginning)
         );
 
         // Prioritize chopping in the end of the string.
-        const size_t nCharsToChopEnd = std::min(nCharsOverflow, maxAdditionalCharsToChopEnd);
+        const size_t nCharsToChopEnd = std::min(
+            nCharsOverflow,
+            maxAdditionalCharsToChopEnd
+        );
         const size_t nCharsToChopBeginning = std::min(
             nCharsOverflow - nCharsToChopEnd,
             maxAdditionalCharsToChopBeginning
@@ -723,7 +774,10 @@ void LuaConsole::render() {
             _commands.at(_activeCommand).size() -
             nChoppedCharsBeginning - nChoppedCharsEnd;
 
-        currentCommand = _commands.at(_activeCommand).substr(nChoppedCharsBeginning, displayLength);
+        currentCommand = _commands.at(_activeCommand).substr(
+            nChoppedCharsBeginning,
+            displayLength
+        );
     }
 
     RenderFontCr(
@@ -750,7 +804,7 @@ void LuaConsole::render() {
         res.y - HistoryFontSize * 1.5f + _fullHeight - _currentHeight
     );
 
-    // @CPP17: Replace with array_view
+    // @CPP: Replace with array_view
     std::vector<std::string> commandSubset;
     if (_commandsHistory.size() < static_cast<size_t>(_historyLength)) {
         commandSubset = _commandsHistory;

@@ -32,22 +32,18 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
-
 namespace ghoul {
-namespace fontrendering {
-    class Font;
+    class Dictionary;
+    class SharedMemory;
 }
-namespace opengl {
-    class ProgramObject;
-}
-class Dictionary;
-class SharedMemory;
-} // namespace ghoul
+namespace ghoul::fontrendering { class Font; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace performance { class PerformanceManager; }
 namespace scripting { struct LuaLibrary; }
+
 class Camera;
 class RaycasterManager;
 class Renderer;

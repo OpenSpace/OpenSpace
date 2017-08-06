@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
 #define __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
 
-// open space includes
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>

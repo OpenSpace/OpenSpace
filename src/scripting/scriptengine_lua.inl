@@ -24,22 +24,13 @@
 
 #include <ghoul/filesystem/directory.h>
 
-namespace openspace {
-
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 namespace {
 
-using walkFunc = std::vector<std::string>(ghoul::filesystem::Directory::*)(
-    ghoul::filesystem::Directory::Recursive, ghoul::filesystem::Directory::Sort) const;
-
-// Defining a common walk function that works off a pointer-to-member function (defined
-// above) allows us to easily reuse this code
-int walkCommon(lua_State* L, walkFunc func) {
-    // @CPP17 Replace with std::invoke
-#define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
-
-    using namespace ghoul::filesystem;
+// Defining a common walk function that works off a pointer-to-member function
+template <typename Func>
+int walkCommon(lua_State* L, Func func) {
     const int nArguments = lua_gettop(L);
     if (nArguments < 1 || nArguments > 3) {
         return luaL_error(L, "Expected %i-%i arguments, got %i", 1, 3, nArguments);
@@ -49,29 +40,35 @@ int walkCommon(lua_State* L, walkFunc func) {
     if (nArguments == 1) {
         // Only the path was passed
         const std::string path = luaL_checkstring(L, -1);
-        result = CALL_MEMBER_FN(Directory(path), func)(
+        result = std::invoke(
+            func,
+            ghoul::filesystem::Directory(path),
             ghoul::filesystem::Directory::Recursive::No,
             ghoul::filesystem::Directory::Sort::No
-            );
+        );
     }
     else if (nArguments == 2) {
         // The path and the recursive value were passed
         const std::string path = luaL_checkstring(L, -2);
         const bool recursive = lua_toboolean(L, -1) != 0;
-        result = CALL_MEMBER_FN(Directory(path), func)(
+        result = std::invoke(
+            func,
+            ghoul::filesystem::Directory(path),
             ghoul::filesystem::Directory::Recursive(recursive),
             ghoul::filesystem::Directory::Sort::No
-            );
+        );
     }
     else if (nArguments == 3) {
         // All three arguments were passed
         const std::string path = luaL_checkstring(L, -3);
         const bool recursive = lua_toboolean(L, -2) != 0;
         const bool sorted = lua_toboolean(L, -1) != 0;
-        result = CALL_MEMBER_FN(Directory(path), func)(
+        result = std::invoke(
+            func,
+            ghoul::filesystem::Directory(path),
             ghoul::filesystem::Directory::Recursive(recursive),
             ghoul::filesystem::Directory::Sort(sorted)
-            );
+        );
     }
 
     // Copy values into the lua_State
@@ -229,12 +226,8 @@ int setPathToken(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
- * walkDirectory(string, bool, bool):
- * Walks a directory and returns the contents of the directory as absolute paths. The
- * first argument is the path of the directory that should be walked, the second argument
- * determines if the walk is recursive and will continue in contained directories. The
- * default value for this parameter is "false". The third argument determines whether the
- * table that is returned is sorted. The default value for this parameter is "false".
+ * fileExists(string):
+ * Checks whether the provided file exists
  */
 int fileExists(lua_State* L) {
     const int nArguments = lua_gettop(L);
@@ -244,10 +237,24 @@ int fileExists(lua_State* L) {
 
     const std::string file = luaL_checkstring(L, -1);
     const bool e = FileSys.fileExists(absPath(file));
-    lua_pushboolean(
-        L,
-        e ? 1 : 0
-    );
+    lua_pushboolean(L, (e ? 1 : 0));
+    return 1;
+}
+
+/**
+* \ingroup LuaScripts
+* directoryExists(string):
+* Checks whether the provided file exists
+*/
+int directoryExists(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    const std::string file = luaL_checkstring(L, -1);
+    const bool e = FileSys.directoryExists(absPath(file));
+    lua_pushboolean(L, (e ? 1 : 0));
     return 1;
 }
 
@@ -289,9 +296,26 @@ int walkDirectoryFiles(lua_State* L) {
 */
 int walkDirectoryFolder(lua_State* L) {
     return walkCommon(L, &ghoul::filesystem::Directory::readDirectories);
-
 }
 
-} // namespace luascriptfunctions
 
-} // namespace openspace
+/**
+ * \ingroup LuaScripts
+ * directoryForPath(string):
+ * This function extracts the directory part of the passed path. For example, if the 
+ * parameter is 'C:\\OpenSpace\\foobar\\foo.txt', this function returns 
+ * 'C:\\OpenSpace\\foobar'."
+ */
+int directoryForPath(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    const std::string file = luaL_checkstring(L, -1);
+    const std::string path = ghoul::filesystem::File(file).directoryName();
+    lua_pushstring(L, path.c_str());
+    return 1;
+}
+
+} // namespace openspace::luascriptfunctions

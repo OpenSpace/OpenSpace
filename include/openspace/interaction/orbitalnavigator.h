@@ -34,16 +34,16 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace openspace {
+    class SceneGraphNode;
+    class Camera;
+    struct SurfacePositionHandle;
+} // namespace
 
-class SceneGraphNode;
-class Camera;
-class SurfacePositionHandle;
-
-namespace interaction {
+namespace openspace::interaction {
 
 class OrbitalNavigator : public properties::PropertyOwner  {
 public:
@@ -64,10 +64,16 @@ private:
         glm::dquat globalRotation;
     };
 
-    // Properties
-    properties::BoolProperty _rotationalFriction;
-    properties::BoolProperty _horizontalFriction;
-    properties::BoolProperty _verticalFriction;
+    struct Friction : public properties::PropertyOwner {
+        Friction();
+
+        properties::BoolProperty roll;
+        properties::BoolProperty rotational;
+        properties::BoolProperty zoom;
+    };
+
+    Friction _friction;
+
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _sensitivity;
@@ -191,7 +197,6 @@ private:
         const glm::dvec3 cameraPositionWorldSpace);
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___ORBITALNAVIGATOR___H__

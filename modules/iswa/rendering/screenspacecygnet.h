@@ -33,7 +33,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <modules/iswa/util/iswamanager.h>
 
-namespace openspace{
+namespace openspace {
 
 class ScreenSpaceCygnet : public ScreenSpaceImage {
 public:

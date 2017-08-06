@@ -41,7 +41,7 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const std::string _loggerCat = "ScriptEngine";
+    const char* _loggerCat = "ScriptEngine";
 
     const char* LuaGlobalNamespace = "_G";
     const char* PrintFunctionName = "print";
@@ -54,8 +54,7 @@ namespace {
     const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
 } // namespace
 
-namespace openspace {
-namespace scripting {
+namespace openspace::scripting {
 
 std::string ScriptEngine::OpenSpaceLibraryName = "openspace";
 
@@ -76,8 +75,6 @@ void ScriptEngine::initialize() {
     addBaseLibrary();
     LDEBUG("Initializing Lua state");
     initializeLuaState(_state);
-    //LDEBUG("Remapping Print functions");
-    //remapPrintFunction();
 }
 
 void ScriptEngine::deinitialize() {}
@@ -411,100 +408,114 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library, bo
 }
     
 void ScriptEngine::addBaseLibrary() {
-    LuaLibrary lib = {
-        "",
+LuaLibrary lib = {
+    "",
+    {
         {
-            {
-                "printTrace",
-                &luascriptfunctions::printTrace,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Trace'"
-            },
-            {
-                "printDebug",
-                &luascriptfunctions::printDebug,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Debug'"
-            },
-            {
-                "printInfo",
-                &luascriptfunctions::printInfo,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Info'"
-            },
-            {
-                "printWarning",
-                &luascriptfunctions::printWarning,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Warning'"
-            },
-            {
-                "printError",
-                &luascriptfunctions::printError,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Error'"
-            },
-            {
-                "printFatal",
-                &luascriptfunctions::printFatal,
-                "*",
-                "Logs the passed value to the installed LogManager with a LogLevel of "
-                "'Fatal'"
-            },
-            {
-                "absPath",
-                &luascriptfunctions::absolutePath,
-                "string",
-                "Returns the absolute path to the passed path, resolving path tokens as "
-                "well as resolving relative paths"
-            },
-            {
-                "fileExists",
-                &luascriptfunctions::fileExists,
-                "string",
-                "Checks whether the provided file exists."
-            },
-            {
-                "setPathToken",
-                &luascriptfunctions::setPathToken,
-                "string, string",
-                "Registers a new path token provided by the first argument to the path "
-                "provided in the second argument"
-            },
-            {
-                "walkDirectory",
-                &luascriptfunctions::walkDirectory,
-                "string [bool, bool]",
-                "Walks a directory and returns all contents (files and directories) of "
-                "the directory as absolute paths. The first argument is the path of the "
-                "directory that should be walked, the second argument determines if the "
-                "walk is recursive and will continue in contained directories. The third "
-                "argument determines whether the table that is returned is sorted."
-            },
-            {
-                "walkDirectoryFiles",
-                &luascriptfunctions::walkDirectoryFiles,
-                "string [bool, bool]",
-                "Walks a directory and returns the files of the directory as absolute "
-                "paths. The first argument is the path of the directory that should be "
-                "walked, the second argument determines if the walk is recursive and "
-                "will continue in contained directories. The third argument determines "
-                "whether the table that is returned is sorted."
-            },
-            {
-                "walkDirectoryFolder",
-                &luascriptfunctions::walkDirectoryFolder,
-                "string [bool, bool]",
-                "Walks a directory and returns the subfolders of the directory as "
-                "absolute paths. The first argument is the path of the directory that "
-                "should be walked, the second argument determines if the walk is "
-                "recursive and will continue in contained directories. The third "
-                "argument determines whether the table that is returned is sorted."
+            "printTrace",
+            &luascriptfunctions::printTrace,
+            "*",
+            "Logs the passed value to the installed LogManager with a LogLevel of "
+            "'Trace'"
+        },
+        {
+            "printDebug",
+            &luascriptfunctions::printDebug,
+            "*",
+            "Logs the passed value to the installed LogManager with a LogLevel of "
+            "'Debug'"
+        },
+        {
+            "printInfo",
+            &luascriptfunctions::printInfo,
+            "*",
+            "Logs the passed value to the installed LogManager with a LogLevel of "
+            "'Info'"
+        },
+        {
+            "printWarning",
+            &luascriptfunctions::printWarning,
+            "*",
+            "Logs the passed value to the installed LogManager with a LogLevel of "
+            "'Warning'"
+        },
+        {
+            "printError",
+            &luascriptfunctions::printError,
+            "*",
+            "Logs the passed value to the installed LogManager with a LogLevel of "
+            "'Error'"
+        },
+        {
+            "printFatal",
+            &luascriptfunctions::printFatal,
+            "*",
+            "Logs the passed value to the installed LogManager with a LogLevel of "
+            "'Fatal'"
+        },
+        {
+            "absPath",
+            &luascriptfunctions::absolutePath,
+            "string",
+            "Returns the absolute path to the passed path, resolving path tokens as "
+            "well as resolving relative paths"
+        },
+        {
+            "fileExists",
+            &luascriptfunctions::fileExists,
+            "string",
+            "Checks whether the provided file exists."
+        },
+        {
+            "directoryExists",
+            &luascriptfunctions::directoryExists,
+            "string",
+            "Chckes whether the provided directory exists."
+        },
+        {
+            "setPathToken",
+            &luascriptfunctions::setPathToken,
+            "string, string",
+            "Registers a new path token provided by the first argument to the path "
+            "provided in the second argument"
+        },
+        {
+            "walkDirectory",
+            &luascriptfunctions::walkDirectory,
+            "string [bool, bool]",
+            "Walks a directory and returns all contents (files and directories) of "
+            "the directory as absolute paths. The first argument is the path of the "
+            "directory that should be walked, the second argument determines if the "
+            "walk is recursive and will continue in contained directories. The third "
+            "argument determines whether the table that is returned is sorted."
+        },
+        {
+            "walkDirectoryFiles",
+            &luascriptfunctions::walkDirectoryFiles,
+            "string [bool, bool]",
+            "Walks a directory and returns the files of the directory as absolute "
+            "paths. The first argument is the path of the directory that should be "
+            "walked, the second argument determines if the walk is recursive and "
+            "will continue in contained directories. The third argument determines "
+            "whether the table that is returned is sorted."
+        },
+        {
+            "walkDirectoryFolder",
+            &luascriptfunctions::walkDirectoryFolder,
+            "string [bool, bool]",
+            "Walks a directory and returns the subfolders of the directory as "
+            "absolute paths. The first argument is the path of the directory that "
+            "should be walked, the second argument determines if the walk is "
+            "recursive and will continue in contained directories. The third "
+            "argument determines whether the table that is returned is sorted."
+        },
+        {
+            "directoryForPath",
+            &luascriptfunctions::directoryForPath,
+            "string",
+            "This function extracts the directory part of the passed path. For example, "
+            "if the parameter is 'C:/OpenSpace/foobar/foo.txt', this function returns "
+            "'C:/OpenSpace/foobar'."
             }
         }
     };
@@ -603,8 +614,8 @@ std::string ScriptEngine::generateJson() const {
         for (const LuaLibrary::Function& f : l.functions) {
             json << "{";
             json << "\"name\": \"" << f.name << "\", ";
-            json << "\"arguments\": \"" << f.argumentText << "\", ";
-            json << "\"help\": \"" << f.helpText << "\"";
+            json << "\"arguments\": \"" << escapedJson(f.argumentText) << "\", ";
+            json << "\"help\": \"" << escapedJson(f.helpText) << "\"";
             json << "}";
             if (&f != &l.functions.back() || !l.documentations.empty()) {
                 json << ",";
@@ -614,8 +625,8 @@ std::string ScriptEngine::generateJson() const {
         for (const LuaLibrary::Documentation& doc : l.documentations) {
             json << "{";
             json << "\"name\": \"" << doc.name << "\", ";
-            json << "\"arguments\": \"" << doc.parameter<< "\", ";
-            json << "\"help\": \"" << doc.description<< "\"";
+            json << "\"arguments\": \"" << escapedJson(doc.parameter) << "\", ";
+            json << "\"help\": \"" << escapedJson(doc.description) << "\"";
             json << "}";
             if (&doc != &l.documentations.back()) {
                 json << ",";
@@ -753,5 +764,4 @@ void ScriptEngine::queueScript(const std::string &script, ScriptEngine::RemoteSc
     _mutex.unlock();
 }
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting

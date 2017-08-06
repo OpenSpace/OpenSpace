@@ -50,7 +50,7 @@ namespace {
     const char* BootstrapPath = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
     const char* CssPath = "${OPENSPACE_DATA}/web/log/style.css";
     const char* JsPath = "${OPENSPACE_DATA}/web/log/script.js";
-}
+} // namespace
 
 namespace openspace {
 
@@ -67,50 +67,51 @@ documentation::Documentation LogFactoryDocumentation() {
                     // List from createLog
                     valueTextLog, valueHtmlLog
                 }),
+                Optional::No,
                 "The type of the new log to be generated."
             },
             {
                 keyFilename,
                 new StringVerifier,
+                Optional::No,
                 "The filename to which the log will be written."
             },
             {
                 keyAppend,
                 new BoolVerifier,
+                Optional::Yes,
                 "Determines whether the file will be cleared at startup or if the "
-                "contents will be appended to previous runs.",
-                Optional::Yes
+                "contents will be appended to previous runs."
             },
             {
                 keyTimeStamping,
                 new BoolVerifier,
+                Optional::Yes,
                 "Determines whether the log entires should be stamped with the time at "
-                "which the message was logged.",
-                Optional::Yes
+                "which the message was logged."
             },
             {
                 keyDateStamping,
                 new BoolVerifier,
+                Optional::Yes,
                 "Determines whether the log entries should be stamped with the date at "
-                "which the message was logged.",
-                Optional::Yes
+                "which the message was logged."
             },
             {
                 keyCategoryStamping,
                 new BoolVerifier,
+                Optional::Yes,
                 "Determines whether the log entries should be stamped with the "
-                "category that creates the log message.",
-                Optional::Yes
+                "category that creates the log message."
             },
             {
                 keyLogLevelStamping,
                 new BoolVerifier,
+                Optional::Yes,
                 "Determines whether the log entries should be stamped with the log level "
-                "that was used to create the log message.",
-                Optional::Yes
+                "that was used to create the log message."
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 

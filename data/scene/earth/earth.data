@@ -1,5 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "earth_textures", Destination = "textures", Version = 2 }
-    },
-}

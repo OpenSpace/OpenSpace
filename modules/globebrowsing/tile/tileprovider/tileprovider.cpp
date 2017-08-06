@@ -34,9 +34,7 @@
 
 #include <climits>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 unsigned int TileProvider::_numTileProviders = 0;
 
@@ -54,7 +52,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
 }
 
 TileProvider::TileProvider()
-    : properties::PropertyOwner("tileProvider")
+    : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
 {
@@ -62,7 +60,7 @@ TileProvider::TileProvider()
 }
 
 TileProvider::TileProvider(const ghoul::Dictionary&)
-    : properties::PropertyOwner("tileProvider")
+    : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
 {
@@ -189,6 +187,4 @@ Tile TileProvider::getDefaultTile() const {
     return _defaultTile;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

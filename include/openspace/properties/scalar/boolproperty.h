@@ -40,14 +40,12 @@
  * @} @}
  */
 
-#include <openspace/properties/numericalproperty.h>
+#include <openspace/properties/templateproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 REGISTER_TEMPLATEPROPERTY_HEADER(BoolProperty, bool);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___BOOLPROPERTY___H__

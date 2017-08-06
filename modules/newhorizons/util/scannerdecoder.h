@@ -36,6 +36,7 @@ public:
     virtual std::vector<std::string> getSpiceIDs();
     std::string getStopCommand();
     void setStopCommand(std::string stopCommand);
+
 private:
     std::string _type;
     std::string _abort;

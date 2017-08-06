@@ -34,6 +34,7 @@
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
 namespace documentation {  struct Documentation; }
 
 /**

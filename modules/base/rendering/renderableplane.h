@@ -27,20 +27,19 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul {
-namespace filesystem { class File; }
+namespace ghoul::filesystem { class File; }
 
-namespace opengl {
+namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -55,34 +54,28 @@ class RenderablePlane : public Renderable {
 public:
     RenderablePlane(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    enum class BlendMode : int {
-        Normal = 0,
-        Additive
-    };
-
     void loadTexture();
     void createPlane();
 
     properties::StringProperty _texturePath;
     properties::BoolProperty _billboard;
     properties::FloatProperty _size;
+    properties::OptionProperty _blendMode;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
-
-    BlendMode _blendMode;
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;

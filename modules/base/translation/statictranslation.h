@@ -38,7 +38,6 @@ public:
     StaticTranslation();
     StaticTranslation(const ghoul::Dictionary& dictionary);
     virtual glm::dvec3 position() const;
-    virtual void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 

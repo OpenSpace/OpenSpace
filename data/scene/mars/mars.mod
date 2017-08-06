@@ -1,54 +1,81 @@
+local marsEllipsoid = {3396190.0, 3396190.0, 3376200.0}
+
 return {
-    -- Mars barycenter module
+    -- Barycenter module
     {
         Name = "MarsBarycenter",
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MARS BARYCENTER",
+                Target = "MARS BARYCENTER",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
         }
     },
-    -- Mars module
+    -- RenderableGlobe module
     {   
         Name = "Mars",
         Parent = "MarsBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_MARS",
-            Body = "MARS BARYCENTER",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 6.390E6,
-                Segments = 100
-            },
-            Textures = {
-                Type = "simple",
-                Color = "textures/mars.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
-        },
-        Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MARS",
-                DestinationFrame = "GALACTIC",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
-        }
+                DestinationFrame = "GALACTIC"
+            }
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = marsEllipsoid,
+            SegmentsPerPatch = 90,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Viking",
+                        FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                        Enabled = true,
+                    },
+                    {
+                        Name = "MOLA Pseudo Color",
+                        FilePath = "map_service_configs/Utah/MolaPseudoColor.xml"
+                    },
+                    {
+                        Name = "CTX Mosaic [Europe]",
+                        FilePath = "map_service_configs/CTX_Mosaic.xml",
+                        BlendMode = "Color"
+                    },
+                    {
+                        Name = "CTX Mosaic [Utah]",
+                        FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
+                        BlendMode = "Color"
+                    }
+                },
+                Overlays = {
+                    {
+                        Type = "TileIndexTileLayer",
+                        Name = "Indices"
+                    },
+                    {
+                        Type = "SizeReferenceTileLayer",
+                        Name = "Size Reference",
+                        Radii = marsEllipsoid
+                    }
+                },
+                HeightLayers = {
+                    {
+                        Name = "Mola Elevation [Europe]",
+                        FilePath = "map_service_configs/Mola_Elevation.xml",
+                        Enabled = true,
+                        TilePixelSize = 90
+                    }
+                }
+            }
+        },
+        Tag = { "planet_solarSystem", "planet_terrestrial" },
     },
-    -- MarsTrail module
+
+    -- Trail module
     {   
         Name = "MarsTrail",
         Parent = "SolarSystemBarycenter",
@@ -56,13 +83,13 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MARS BARYCENTER",
-                Observer = "SUN",
+                Target = "MARS BARYCENTER",
+                Observer = "SUN"
             },
             Color = { 0.814, 0.305, 0.220 },
             Period = 686.973,
-            Resolution = 1000,
-            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
-        }
+            Resolution = 1000
+        },
+        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" }
     }
 }

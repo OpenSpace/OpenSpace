@@ -25,7 +25,7 @@
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
 #include <fstream>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/ext/json.h>
 
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
@@ -36,17 +36,30 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
-    const std::string _loggerCat = "IswaDataGroup";
+    const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
-}
+
+    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Resolution%",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
+        "FieldlineSeedsIndexFile",
+        "Fieldline Seedpoints",
+        "" // @TODO Missing documentation
+    };
+
+} // namespace
 
 namespace openspace{
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
-    :IswaDataGroup(name, type)
-    ,_resolution("resolution", "Resolution%", 100.0f, 10.0f, 200.0f)
-    ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    ,_fieldlineIndexFile("")
-    ,_kameleonPath("")
+    : IswaDataGroup(name, type)
+    , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
+    , _fieldlines(FieldlineSeedInfo)
+    , _fieldlineIndexFile("")
+    , _kameleonPath("")
 {
     addProperty(_resolution);
     addProperty(_fieldlines);
@@ -113,7 +126,11 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){
 
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
                 _fieldlines.addOption({i, it.key()});
-                _fieldlineState[i] = std::make_tuple(name()+"/"+it.key(), it.value(), false);
+                _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
+                    name() + "/" + it.key(),
+                    it.value(),
+                    false
+                );
                 i++;
             }
 

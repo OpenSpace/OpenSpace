@@ -37,16 +37,16 @@ documentation::Documentation Scene::Documentation() {
         {
             "ScenePath",
             new StringVerifier,
+            Optional::Yes,
             "The path to the base directory of the scene. The path is considered "
-            "relative to the location of the scene description file.",
-            Optional::Yes
+            "relative to the location of the scene description file."
         },
         {
             "CommonFolder",
             new StringAnnotationVerifier("A valid scene module folder"),
+            Optional::Yes,
             "The path to the common folder that is loaded and will be bound to the "
-            "${COMMON_MODULE} path token so that assets can be reused easily.",
-            Optional::Yes
+            "${COMMON_MODULE} path token so that assets can be reused easily."
         },
         {
             "Camera",
@@ -54,37 +54,42 @@ documentation::Documentation Scene::Documentation() {
                 {
                     "Focus",
                     new StringAnnotationVerifier("A valid object in the scene"),
+                    Optional::No,
                     "The initial focus node of the camera, i.e., the node around which "
                     "the interaction will be performed."
                 },
                 {
                     "Position",
                     new DoubleVector3Verifier,
-                    "The initial camera positive relative to the focus object.",
-                    Optional::Yes
+                    Optional::Yes,
+                    "The initial camera positive relative to the focus object."
                 },
                 {
                     "Rotation",
                     new DoubleVector4Verifier,
-                    "The initial camera rotation expressed as a quaternion.",
-                    Optional::Yes
+                    Optional::Yes,
+                    "The initial camera rotation expressed as a quaternion."
                 }
             }),
+            Optional::Yes,
             "Definitions of the camera starting parameters, such as focus, location, and "
-            "orientation.",
-            Optional::Yes
+            "orientation."
         },
         {
             "Modules",
             new TableVerifier({
-                { "*", new StringAnnotationVerifier(
+                { 
+                    "*",
+                    new StringVerifier,
+                    Optional::No,
                     "Loadable module folders. This means that they either have to point "
                     "to a folder that contains a ModuleFile or a folder which contains "
                     "other folders that eventually contain ModuleFile. This second "
                     "recursive approach is useful for grouping modules into logical "
                     "units."
-                )}
+                }
             }),
+            Optional::No,
             "This is the list of modules that will be loaded into the initial scene. The "
             "values in this table have to correspond to folders relative to the "
             "ScenePath key. The order in which the modules are loaded is the same as the "

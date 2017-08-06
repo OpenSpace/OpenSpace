@@ -42,20 +42,34 @@ using namespace properties;
 
 void renderTooltip(Property* prop) {
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+        ImGui::BeginTooltip();
+        if (!prop->description().empty()) {
+            ImGui::TextWrapped(prop->description().c_str());
+            ImGui::Spacing();
+        }
+        ImGui::Text(
+            (std::string("Identifier: ") + prop->fullyQualifiedIdentifier()).c_str()
+        );
+        ImGui::EndTooltip();
     }
 }
 
 void executeScriptSingle(const std::string& id, const std::string& value) {
     std::string script =
         "openspace.setPropertyValueSingle('" + id + "', " + value + ");";
-    OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
+    OsEng.scriptEngine().queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void executeScriptGroup(const std::string& id, const std::string& value) {
     std::string script =
         "openspace.setPropertyValue('" + id + "', " + value + ");";
-    OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
+    OsEng.scriptEngine().queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void executeScript(const std::string& id, const std::string& value,

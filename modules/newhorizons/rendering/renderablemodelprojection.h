@@ -36,34 +36,31 @@
 
 #include <openspace/util/powerscaledcoordinate.h>
 
-namespace ghoul {
-namespace opengl {
-class ProgramObject;
-class Texture;
-}
-}
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
+
 namespace documentation { struct Documentation; } 
 
 struct RenderData;
 struct UpdateData;
 
-namespace modelgeometry {
-    class ModelGeometry;
-}
+namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModelProjection : public Renderable {
 public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
     ~RenderableModelProjection();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     virtual void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;
@@ -80,8 +77,6 @@ private:
     ProjectionComponent _projectionComponent;
 
     properties::StringProperty _colorTexturePath;
-
-    properties::Vec3Property _rotation;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;

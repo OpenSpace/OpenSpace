@@ -49,8 +49,7 @@
 
 #include <math.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 const TileIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX = TileIndex(0, 0, 1);
 const TileIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = TileIndex(1, 0, 1);
@@ -58,7 +57,8 @@ const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
 
 ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
                                  std::shared_ptr<LayerManager> layerManager)
-    : minSplitDepth(2)
+    : Renderable({ { "Name", owner.name() } })
+    , minSplitDepth(2)
     , maxSplitDepth(22)
     , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
     , _owner(owner)
@@ -94,14 +94,6 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
 // with a forward declaration
 ChunkedLodGlobe::~ChunkedLodGlobe() {}
     
-bool ChunkedLodGlobe::initialize() {
-    return true;
-}
-
-bool ChunkedLodGlobe::deinitialize() {
-    return true;
-}
-
 bool ChunkedLodGlobe::isReady() const {
     return true;
 }
@@ -190,8 +182,8 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             return 0;
         }
 
-		ghoul::opengl::Texture* tileTexture = tile.texture();
-		if (!tileTexture) {
+        ghoul::opengl::Texture* tileTexture = tile.texture();
+        if (!tileTexture) {
             return 0;
         }
 
@@ -252,10 +244,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             continue;
         }
 
-        float sample0 = sample00 * (1.0 - samplePosFract.x) + sample10 * samplePosFract.x;
-        float sample1 = sample01 * (1.0 - samplePosFract.x) + sample11 * samplePosFract.x;
+        float sample0 = sample00 * (1.f - samplePosFract.x) + sample10 * samplePosFract.x;
+        float sample1 = sample01 * (1.f - samplePosFract.x) + sample11 * samplePosFract.x;
 
-        float sample = sample0 * (1.0 - samplePosFract.y) + sample1 * samplePosFract.y;
+        float sample = sample0 * (1.f - samplePosFract.y) + sample1 * samplePosFract.y;
 
         // Same as is used in the shader. This is not a perfect solution but
         // if the sample is actually a no-data-value (min_float) the interpolated
@@ -279,7 +271,7 @@ void ChunkedLodGlobe::notifyShaderRecompilation() {
     _shadersNeedRecompilation = true;
 }
 
-void ChunkedLodGlobe::render(const RenderData& data) {
+void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     stats.startNewRecord();
     if (_shadersNeedRecompilation) {
         _renderer->recompileShaders(_owner);
@@ -357,9 +349,10 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 }
 
 void ChunkedLodGlobe::update(const UpdateData& data) {
-    setBoundingSphere(_owner.ellipsoid().maximumRadius() * data.modelTransform.scale);
+    setBoundingSphere(static_cast<float>(
+        _owner.ellipsoid().maximumRadius() * data.modelTransform.scale
+    ));
     _renderer->update();
 }
     
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

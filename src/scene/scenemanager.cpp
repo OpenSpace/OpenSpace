@@ -50,4 +50,5 @@ void SceneManager::unloadScene(Scene& scene) {
 void SceneManager::unloadAll() {
     _scenes.clear();
 }
-}
+
+} // namespace

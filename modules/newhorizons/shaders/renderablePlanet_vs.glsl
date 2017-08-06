@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,22 +37,12 @@ out vec4 vs_positionScreenSpace;
 uniform mat4 modelTransform;
 uniform mat4 modelViewProjectionTransform;
 
-//uniform mat4 ModelTransform;
-//uniform mat4 ViewProjection;
-//uniform mat4 ProjectorMatrix;
-
 uniform bool _hasHeightMap;
 uniform float _heightExaggeration;
 uniform sampler2D heightTexture;
-uniform bool shiftMeridian;
 
 void main() {
     vs_st = in_st;
-
-    vec2 st = in_st;
-    if (shiftMeridian) {
-        st.s += 0.5;
-    }
 
     vec4 tmp = in_position;
     
@@ -62,19 +52,16 @@ void main() {
     
 
     if (_hasHeightMap) {
-        float height = texture(heightTexture, st).s;
+        float height = texture(heightTexture, in_st).s;
         vec3 displacementDirection = (normalize(tmp.xyz));
         float displacementFactor = height * _heightExaggeration / 750.0;
-        tmp.xyz = tmp.xyz + displacementDirection * displacementFactor;
+        tmp.xyz += displacementDirection * displacementFactor;
     }
 
     // convert from psc to homogeneous coordinates
     vec4 position = vec4(tmp.xyz * pow(10, tmp.w), 1);
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
-
-    //vec4 position = pscTransform(tmp, ModelTransform);
-    //vs_position = tmp;
 
     gl_Position = vs_positionScreenSpace;
 }

@@ -36,13 +36,14 @@ namespace {
     const char* GlslRaycastPath = "${MODULES}/toyvolume/shaders/raycast.glsl";
     const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsvs.glsl";
     const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsfs.glsl";
-}
+} // namespace
 
 namespace openspace {
 
 ToyVolumeRaycaster::ToyVolumeRaycaster(glm::vec4 color)
     : _boundingBox(glm::vec3(1.0))
-    , _color(color) {}
+    , _color(color)
+{}
     
 ToyVolumeRaycaster::~ToyVolumeRaycaster() {}
 
@@ -92,7 +93,7 @@ void ToyVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::Prog
     program.setUniform(timeUniformName, static_cast<float>(std::fmod(_time, 3600.0)));
 }
     
-void ToyVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+void ToyVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
     // For example: release texture units
 }
     
