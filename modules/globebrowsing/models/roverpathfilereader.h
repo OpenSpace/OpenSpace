@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -43,8 +43,8 @@ public:
 	static std::vector<std::shared_ptr<Subsite>> extractSubsitesWithModels(const ghoul::Dictionary dictionary);
 	
 private:
-	static std::string RoverPathFileReader::convertString(const std::string sitenr, const std::string type);
-	static std::shared_ptr<TextureInformation> RoverPathFileReader::extractTextureInfo(const std::string absoluteFilePath);
+	static std::string convertString(const std::string sitenr, const std::string type);
+	static std::shared_ptr<TextureInformation> extractTextureInfo(const std::string absoluteFilePath);
 	static glm::dmat4 extractRotationMatrix(std::string filename);
 };
 } // namespace globebrowsing

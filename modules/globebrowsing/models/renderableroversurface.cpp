@@ -48,6 +48,60 @@ namespace {
 	const char* keyAbsPathToTextures	= "AbsPathToTextures";
 	const char* keyAbsPathToModels		= "AbsPathToModels";
 	const std::string marsRoverModels	= "MarsRoverModels";
+
+    static const openspace::properties::Property::PropertyInfo Enable = {
+        "enable",
+        "Enabled",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnablePath = {
+        "enablePath",
+        "Enable path",
+        "" // @TODO Missing documentation
+    };
+    
+    static const openspace::properties::Property::PropertyInfo LockSubsite = {
+        "lockSubsite",
+        "Lock subsite",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UseMastCam = {
+        "useMastCam",
+        "Show mastcam coloring",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnableDepth = {
+        "enableDepth",
+        "Enable depth",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnableCulling = {
+        "enableCulling",
+        "Enable culling",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightProp = {
+        "heightProp",
+        "Site height",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MaxLod = {
+        "maxLod",
+        "Max LOD",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo Modelrotation = {
+        "modelrotation",
+        "Model Rotation",
+        "" // @TODO Missing documentation
+    };
 }
 
 namespace openspace {
@@ -58,23 +112,22 @@ namespace globebrowsing {
 	RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & dictionary)
 		: Renderable(dictionary)
 		, _generalProperties({
-				BoolProperty("enable", "Enabled", true),
-				BoolProperty("enablePath", "Enable path", true),
-				BoolProperty("lockSubsite", "Lock subsite", false),
-				BoolProperty("useMastCam", "Show mastcam coloring", false),
-				BoolProperty("enableDepth", "Enable depth", true),
-				BoolProperty("enableCulling", "Enable culling", true),
-				FloatProperty("heightProp", "Site height", 0.7f, 0.0f, 3.0f),
-				IntProperty("maxLod", "Max LOD", 3, 1, 3)
-
+            BoolProperty(Enable, true),
+            BoolProperty(EnablePath, true),
+			BoolProperty(LockSubsite, false),
+			BoolProperty(UseMastCam, false),
+			BoolProperty(EnableDepth, true),
+			BoolProperty(EnableCulling, true),
+			FloatProperty(HeightProp, 0.7f, 0.0f, 3.0f),
+			IntProperty(MaxLod, 3, 1, 3)
 		})
-		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
+		, _debugModelRotation(Modelrotation, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 		, _modelSwitch()
 		, _prevLevel(3)
 		, _isFirst(true)
 		, _isFirstLow(true)
 		, _isFirstHigh(true)
-		, _renderableSitePropertyOwner("LayersOfThis")
+		, _renderableSitePropertyOwner({ "LayersOfThis" })
 {
 	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -121,7 +174,7 @@ namespace globebrowsing {
 	_renderableExplorationPath = std::make_shared<RenderableExplorationPath>();
 }
 
-bool RenderableRoverSurface::initialize() {
+void RenderableRoverSurface::initialize() {
 	std::vector<Geodetic2> allCoordinates;
 	std::vector<Geodetic2> coordinatesWithModel;
 
@@ -149,19 +202,15 @@ bool RenderableRoverSurface::initialize() {
 	_programObject = renderEngine.buildRenderProgram("RenderableRoverSurface",
 		"${MODULE_GLOBEBROWSING}/shaders/fullsubsite_vs.glsl",
 		"${MODULE_GLOBEBROWSING}/shaders/fullsubsite_fs.glsl");
-
-	return true;
 }
 
-bool RenderableRoverSurface::deinitialize() {
-	return false;
-}
+void RenderableRoverSurface::deinitialize() {}
 
 bool RenderableRoverSurface::isReady() const {
 	return true;
 }
 
-void RenderableRoverSurface::render(const RenderData& data) {
+void RenderableRoverSurface::render(const RenderData& data, RendererTasks& tasks) {
 	std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _chunkedLodGlobe->subsites();
 
 	if (subSitesVector.size() < 1) {
