@@ -36,6 +36,11 @@
 
 namespace {
 	static const std::string _loggerCat = "RenderableExplorationPath";
+    static const openspace::properties::Property::PropertyInfo enabledPropertyInfo = {
+        "enabled",
+        "enabled",
+        "" // @TODO Missing documentation
+    };
 }
 
 namespace openspace {
@@ -46,7 +51,7 @@ RenderableExplorationPath::RenderableExplorationPath()
 	, _siteShader(nullptr)
 	, _fading(0.0)
 	, _fading2(0.0)
-	, _isEnabled(properties::BoolProperty("enabled", "enabled", false))
+	, _isEnabled(properties::BoolProperty(enabledPropertyInfo, false))
 {}
 
 RenderableExplorationPath::~RenderableExplorationPath() {}

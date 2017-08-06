@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -40,7 +40,7 @@ public:
 	virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
 		const RenderData& data, const SceneGraphNode* parent) = 0;
 
-	virtual bool initialize() = 0;
+	virtual void initialize() = 0;
 };
 
 } // namespace globebrowsing

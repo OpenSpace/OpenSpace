@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -48,8 +48,8 @@ ModelProvider::ModelProvider(const ghoul::Dictionary& dictionary) {
 
 }
 
-bool ModelProvider::initialize() {
-	return true;
+void ModelProvider::initialize() {
+	return;
 }
 
 } // namespace globebrowsing

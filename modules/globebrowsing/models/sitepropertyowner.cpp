@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -27,13 +27,18 @@
 
 namespace {
 	const std::string _loggerCat = "SitePropertyOwner";
+    static const openspace::properties::Property::PropertyInfo enabledPropertyInfo = {
+        "siteEnabled",
+        "Site Enabled",
+        "" // @TODO Missing documentation
+    };
 }
 
 namespace openspace {
 namespace globebrowsing {
 SitePropertyOwner::SitePropertyOwner(SiteWithDrives swd) 
-	: properties::PropertyOwner("Site" + swd._site)
-	, _enabled(properties::BoolProperty("siteEnabled", "Site enabled", false))
+	: properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "siteEnabled", "Site" + swd._site })
+	, _enabled(properties::BoolProperty(enabledPropertyInfo, false))
 {
 	_site = swd._site;
 	int i = 0;

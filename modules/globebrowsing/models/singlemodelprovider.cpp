@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -74,8 +74,8 @@ std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::
 	return mostModelsInsideRadius;
 }
 
-bool SingleModelProvider::initialize() {
-	return true;
+void SingleModelProvider::initialize() {
+	return;
 }
 
 } // namespace globebrowsing

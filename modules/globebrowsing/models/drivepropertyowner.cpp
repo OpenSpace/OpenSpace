@@ -32,14 +32,24 @@
 
 namespace {
 	const std::string _loggerCat = "DrivePropertyOwner";
+    static const openspace::properties::Property::PropertyInfo enabledPropertyInfo = {
+        "driveEnabled",
+        "Drive enabled",
+        "" // @TODO Missing documentation
+    };
+    static const openspace::properties::Property::PropertyInfo triggerPropertyInfo = {
+        "driveEnabled",
+        "Drive enabled",
+        "" // @TODO Missing documentation
+    };
 }
 
 namespace openspace {
 namespace globebrowsing {
 	DrivePropertyOwner::DrivePropertyOwner(std::string drive, std::string sol, glm::dvec2 driveCoords)
-		: properties::PropertyOwner("Drive" + drive + " (Sol: " + sol + ")")
-	, _enabled(properties::BoolProperty("driveEnabled", "Drive enabled", false))
-	, _goToSubSite(properties::TriggerProperty("goToSubSite", "Go to subsite"))
+		: properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "driveEnabled", "Drive" + drive + " (Sol: " + sol + ")" })
+	, _enabled(properties::BoolProperty(enabledPropertyInfo, false))
+	, _goToSubSite(properties::TriggerProperty(triggerPropertyInfo))
 	, _drive(drive)
 	, _driveCoords(driveCoords)
 {

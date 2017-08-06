@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -66,8 +66,8 @@ std::vector<std::shared_ptr<Subsite>> MultiModelProvider::calculate(const std::v
 	return subsitesInsideRadius;
 }
 
-bool MultiModelProvider::initialize() {
-	return true;
+void MultiModelProvider::initialize() {
+	return;
 }
 
 } // namespace globebrowsing
