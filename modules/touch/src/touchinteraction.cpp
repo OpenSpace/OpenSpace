@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/touch/include/touchinteraction.h>
-#include <modules/onscreengui/onscreenguimodule.h>
+#include <modules/imgui/imguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/moduleengine.h>
@@ -251,7 +251,7 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
     glm::ivec2 res = wrapper.currentWindowSize();
     glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
 
-    OnScreenGUIModule& module = *(OsEng.moduleEngine().module<OnScreenGUIModule>());
+    ImGUIModule& module = *(OsEng.moduleEngine().module<ImGUIModule>());
     _guiON = module.gui.isEnabled();
 
     if (_tap && list.size() == 1 && std::abs(pos.x) < _guiButton.value().x && std::abs(pos.y) < _guiButton.value().y) { // pressed invisible button
@@ -455,7 +455,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         _vel.pan = glm::dvec2(0.0, 0.0);
     }
     else { // prevents touch to infinitely be active (due to windows bridge case where event doesnt get consumed sometimes when LMA fails to converge)
-        OsEng.moduleEngine().module<OnScreenGUIModule>()->touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
+        OsEng.moduleEngine().module<ImGUIModule>()->touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
         resetAfterInput();
     }
 }
@@ -814,7 +814,7 @@ void TouchInteraction::resetAfterInput() {
         }
     }
     // Reset emulated mouse values
-    OnScreenGUIModule& module = *(OsEng.moduleEngine().module<OnScreenGUIModule>());
+    ImGUIModule& module = *(OsEng.moduleEngine().module<ImGUIModule>());
     if (_guiON) {
         bool activeLastFrame = module.touchInput.action;
         module.touchInput.active = false;
