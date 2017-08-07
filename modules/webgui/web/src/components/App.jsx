@@ -5,6 +5,7 @@ import styles from './App.scss';
 import Sidebar from './Sidebar/Sidebar';
 import BottomBar from './BottomBar/BottomBar';
 import Error from './common/Error/Error';
+import DisruptiveMessage from './common/DisruptiveMessage/DisruptiveMessage';
 import Connection from '../api/Connection';
 import DataManager from '../api/DataManager';
 
@@ -73,12 +74,14 @@ class App extends Component {
   render() {
     return (
       <div className={styles.app}>
-        <section className={styles.Grid__Left}>
-          { this.state.connectionLost && (
+        { this.state.connectionLost && (
+          <DisruptiveMessage>
             <Error>
               Connection lost. Trying to reconnect again soon.
             </Error>
-          )}
+          </DisruptiveMessage>
+        )}
+        <section className={styles.Grid__Left}>
           <Sidebar />
         </section>
         <section className={styles.Grid__Right}>
