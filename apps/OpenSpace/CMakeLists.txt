@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${GHOUL_BASE_DIR}/support/cmake/CopySharedLibraries.cmake) 
+include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake) 
 include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
 
 set(APPLICATION_NAME OpenSpace)
@@ -131,5 +131,3 @@ if (MSVC)
         "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
     )
 endif()
-
-set_compile_settings(${APPLICATION_NAME})

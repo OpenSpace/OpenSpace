@@ -1,56 +1,30 @@
-#########################################################################################
-#                                                                                       #
-# OpenSpace                                                                             #
-#                                                                                       #
-# Copyright (c) 2014-2017                                                               #
-#                                                                                       #
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
-# software and associated documentation files (the "Software"), to deal in the Software #
-# without restriction, including without limitation the rights to use, copy, modify,    #
-# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    #
-# permit persons to whom the Software is furnished to do so, subject to the following   #
-# conditions:                                                                           #
-#                                                                                       #
-# The above copyright notice and this permission notice shall be included in all copies #
-# or substantial portions of the Software.                                              #
-#                                                                                       #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   #
-# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         #
-# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    #
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  #
-# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  #
-# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
-#########################################################################################
+##########################################################################################
+#                                                                                        #
+# OpenSpace                                                                              #
+#                                                                                        #
+# Copyright (c) 2014-2017                                                                #
+#                                                                                        #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
+# software and associated documentation files (the "Software"), to deal in the Software  #
+# without restriction, including without limitation the rights to use, copy, modify,     #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to     #
+# permit persons to whom the Software is furnished to do so, subject to the following    #
+# conditions:                                                                            #
+#                                                                                        #
+# The above copyright notice and this permission notice shall be included in all copies  #
+# or substantial portions of the Software.                                               #
+#                                                                                        #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   #
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
+##########################################################################################
 
-function (test_compiler_compatibility)
-    if (MSVC)
-        if (MSVC_VERSION LESS 1900)
-            message(FATAL_ERROR "OpenSpace requires at least Visual Studio 2015")
-        endif ()
-    endif ()
-endfunction ()
-
-
-
-macro (cleanup_project)
-    # Remove MinSizeRel build option
-    set(CMAKE_CONFIGURATION_TYPES Debug Release RelWithDebInfo CACHE TYPE INTERNAL FORCE)
-    mark_as_advanced(CMAKE_CONFIGURATION_TYPES)
-    mark_as_advanced(CMAKE_INSTALL_PREFIX)
-
-    set_property(GLOBAL PROPERTY USE_FOLDERS On)
-    set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
-endmacro ()
-
-
-macro (set_build_output_directories)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin/lib)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin/lib)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin/openspace)
-endmacro ()
-
-
+include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/handle_applications.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/handle_modules.cmake)
 
 function (create_openspace_target)
     add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
@@ -64,72 +38,14 @@ function (create_openspace_target)
         @ONLY IMMEDIATE
     )
 
-    set_compile_settings(libOpenSpace)
+    set_openspace_compile_settings(libOpenSpace)
 endfunction ()
 
 
 
-function (set_compile_settings project)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD 17)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
-
-    if (MSVC)
-        target_compile_options(${project} PRIVATE
-        "/ZI"       # Edit and continue support
-        "/MP"       # Multi-threading support
-        "/W4"       # Highest warning level
-        "/w44062"   # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
-        "/wd4127"   # conditional expression is constant
-        "/wd4201"   # nonstandard extension used : nameless struct/union
-        "/w44255"   # 'function': no function prototype given: converting '()' to '(void)'
-        "/w44263"   # 'function': member function does not override any base class virtual member function
-        "/w44264"   # 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
-        "/w44265"   # 'class': class has virtual functions, but destructor is not virtual
-        "/w44266"   # 'function': no override available for virtual member function from base 'type'; function is hidden
-        "/w44289"   # nonstandard extension used : 'var' : loop control variable declared in the for-loop is used outside the for-loop scope
-        "/w44296"   # 'operator': expression is always false
-        "/w44311"   # 'variable' : pointer truncation from 'type' to 'type'
-        "/w44339"   # 'type' : use of undefined type detected in CLR meta-data - use of this type may lead to a runtime exception
-        "/w44342"   # behavior change: 'function' called, but a member operator was called in previous versions
-        "/w44350"   # behavior change: 'member1' called instead of 'member2'
-        "/w44431"   # missing type specifier - int assumed. Note: C no longer supports default-int
-        "/w44471"   # a forward declaration of an unscoped enumeration must have an underlying type (int assumed)
-        "/wd4505"   # unreferenced local function has been removed
-        "/w44545"   # expression before comma evaluates to a function which is missing an argument list
-        "/w44546"   # function call before comma missing argument list
-        "/w44547"   # 'operator': operator before comma has no effect; expected operator with side-effect
-        "/w44548"   # expression before comma has no effect; expected expression with side-effect
-        "/w44549"   # 'operator': operator before comma has no effect; did you intend 'operator'?
-        "/w44555"   # expression has no effect; expected expression with side-effect
-        "/w44574"   # 'identifier' is defined to be '0': did you mean to use '#if identifier'?
-        "/w44608"   # 'symbol1' has already been initialized by another union member in the initializer list, 'symbol2'
-        "/w44619"   # #pragma warning: there is no warning number 'number'
-        "/w44628"   # digraphs not supported with -Ze. Character sequence 'digraph' not interpreted as alternate token for 'char'
-        "/w44640"   # 'instance': construction of local static object is not thread-safe
-        "/w44905"   # wide string literal cast to 'LPSTR'
-        "/w44906"   # string literal cast to 'LPWSTR'
-        "/w44946"   # reinterpret_cast used between related classes: 'class1' and 'class2'
-        "/w44986"   # 'symbol': exception specification does not match previous declaration
-        "/w44988"   # 'symbol': variable declared outside class/function scope
-        "/std:c++latest"
-        "/permissive-"
-        "/Zc:strictStrings-"    # Windows header don't adhere to this
-        )
-        if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${project} PRIVATE "/WX")
-        endif ()
-
-        # Boost as of 1.64 still uses unary_function unless we define this
-        target_compile_definitions(${project} PRIVATE "_HAS_AUTO_PTR_ETC")
-    elseif (APPLE)
-        target_compile_definitions(${project} PRIVATE "__APPLE__")
-
-        if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${project} PRIVATE "-Werror")
-        endif ()
-
-        target_compile_options(${project} PRIVATE "-stdlib=libc++")
-
+function (add_external_dependencies)
+    # System libraries
+    if (APPLE)
         target_include_directories(${project} PUBLIC "/Developer/Headers/FlatCarbon")
         find_library(COREFOUNDATION_LIBRARY CoreFoundation)
         find_library(CARBON_LIBRARY Carbon)
@@ -142,18 +58,8 @@ function (set_compile_settings project)
             ${COCOA_LIBRARY}
             ${APP_SERVICES_LIBRARY}
         )
-    elseif (UNIX)
-        target_compile_options(${project} PRIVATE "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
+    endif()
 
-        if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${project} PRIVATE "-Werror")
-        endif ()
-    endif ()
-endfunction ()
-
-
-
-function (add_external_dependencies)
     # Ghoul
     add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
     target_link_libraries(libOpenSpace Ghoul)
@@ -251,102 +157,6 @@ endfunction ()
 
 
 
-function (handle_applications)
-    set(applications "")
-    set(applications_link_to_openspace "")
-
-    file(GLOB appDirs RELATIVE ${OPENSPACE_APPS_DIR} ${OPENSPACE_APPS_DIR}/*)
-    list(REMOVE_ITEM appDirs ".DS_Store") # Removing the .DS_Store present on Mac
-
-    set(DEFAULT_APPLICATIONS
-        "OpenSpace"
-        "Launcher"
-    )
-    mark_as_advanced(DEFAULT_APPLICATIONS)
-
-    foreach (app ${appDirs})
-        string(TOUPPER ${app} upper_app)
-        list (FIND DEFAULT_APPLICATIONS "${app}" _index)
-        if (${_index} GREATER -1)
-            # App is a default application
-            option(OPENSPACE_APPLICATION_${upper_app} "${app} Application" ON)
-        else ()
-            option(OPENSPACE_APPLICATION_${upper_app} "${app} Application" OFF)
-        endif()
-        if (OPENSPACE_APPLICATION_${upper_app})
-            unset(APPLICATION_NAME)
-            unset(APPLICATION_LINK_TO_OPENSPACE)
-            include(${OPENSPACE_APPS_DIR}/${app}/CMakeLists.txt)
-            set_compile_settings(${APPLICATION_NAME})
-
-            if (APPLICATION_LINK_TO_OPENSPACE)
-                    get_property(
-                        OPENSPACE_INCLUDE_DIR
-                        TARGET libOpenSpace
-                        PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-                    )
-                    target_include_directories(${APPLICATION_NAME} PUBLIC 
-                        "${OPENSPACE_BASE_DIR}"
-                        ${OPENSPACE_INCLUDE_DIR}
-                    )
-
-                    get_property(
-                        OPENSPACE_DEFINES
-                        TARGET libOpenSpace
-                        PROPERTY INTERFACE_COMPILE_DEFINITIONS
-                    )
-                    target_compile_definitions(${APPLICATION_NAME} PUBLIC ${OPENSPACE_DEFINES})
-
-                    target_link_libraries(${APPLICATION_NAME} Ghoul)
-                    target_link_libraries(${APPLICATION_NAME} libOpenSpace)
-
-                    if (MSVC)
-                        set_target_properties(${APPLICATION_NAME} PROPERTIES LINK_FLAGS
-                            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-                        )
-                    endif ()
-
-
-                    if (WIN32)
-                        ghl_copy_files(
-                            ${APPLICATION_NAME}
-                            "${CURL_ROOT_DIR}/lib/libcurl.dll"
-                            "${CURL_ROOT_DIR}/lib/libeay32.dll"
-                            "${CURL_ROOT_DIR}/lib/ssleay32.dll"
-
-                        )
-                        ghl_copy_shared_libraries(${APPLICATION_NAME} ${OPENSPACE_EXT_DIR}/ghoul)
-                    endif ()
-            endif ()
-
-            list(APPEND applications ${APPLICATION_NAME})
-            list(APPEND applications_link_to_openspace ${APPLICATION_LINK_TO_OPENSPACE})
-            unset(APPLICATION_NAME)
-            unset(APPLICATION_LINK_TO_OPENSPACE)
-        endif ()
-    endforeach ()
-
-
-    # option(OPENSPACE_APPLICATION_OPENSPACE "Main OpenSpace Application" ON)
-    # if (OPENSPACE_APPLICATION_OPENSPACE)
-    #     include(${OPENSPACE_APPS_DIR}/OpenSpace/CMakeLists.txt)
-    #     list(APPEND applications "OpenSpace")
-    # endif ()
-    set(OPENSPACE_APPLICATIONS ${applications} PARENT_SCOPE)
-    set(OPENSPACE_APPLICATIONS_LINK_REQUEST ${applications_link_to_openspace} PARENT_SCOPE)
-
-    message(STATUS "Applications:")
-    list(LENGTH applications len1)
-    math(EXPR len2 "${len1} - 1")
-
-    foreach(val RANGE ${len2})
-      list(GET applications ${val} val1)
-      list(GET applications_link_to_openspace ${val} val2)
-      message(STATUS "\t${val1} (Link: ${val2})")
-    endforeach()
-endfunction()
-
-
 function (handle_option_vld)
     if (OPENSPACE_ENABLE_VLD)
         target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_ENABLE_VLD")
@@ -396,7 +206,7 @@ function (handle_option_tests)
                 "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
             )
         endif ()
-        set_compile_settings(OpenSpaceTest)
+        set_openspace_compile_settings(OpenSpaceTest)
     endif (OPENSPACE_HAVE_TESTS)
     if (TARGET GhoulTest)
         if (NOT TARGET gtest)
@@ -416,161 +226,6 @@ endfunction ()
 
 
 
-function (handle_internal_modules)
-# Get all modules in the correct order based on their dependencies
-    file(GLOB moduleDirs RELATIVE ${OPENSPACE_MODULE_DIR} ${OPENSPACE_MODULE_DIR}/*)
-    set(sortedModules ${moduleDirs})
-    foreach (dir ${moduleDirs})
-        if (IS_DIRECTORY ${OPENSPACE_MODULE_DIR}/${dir})
-            set(defaultModule OFF)
-            if (EXISTS "${OPENSPACE_MODULE_DIR}/${dir}/include.cmake")
-                unset(OPENSPACE_DEPENDENCIES)
-                unset(EXTERNAL_LIBRAY)
-                unset(DEFAULT_MODULE)
-                include(${OPENSPACE_MODULE_DIR}/${dir}/include.cmake)
-
-                if (DEFINED DEFAULT_MODULE)
-                    set(defaultModule ${DEFAULT_MODULE})
-                endif ()
-                if (OPENSPACE_DEPENDENCIES)
-                    foreach (dependency ${OPENSPACE_DEPENDENCIES})
-                        create_library_name(${dependency} library)
-                        if (TARGET ${library})
-                            # already registered
-                            list(REMOVE_ITEM OPENSPACE_DEPENDENCIES ${dependency})
-                        endif ()
-                    endforeach ()
-
-                    list(APPEND OPENSPACE_DEPENDENCIES ${dir})
-                    list(FIND sortedModules ${dir} dir_index)
-                    # if (NOT dir STREQUAL "base")
-                    #     list(INSERT OPENSPACE_DEPENDENCIES 0 "base")
-                    # endif ()
-                    list(INSERT sortedModules ${dir_index} ${OPENSPACE_DEPENDENCIES})
-                    list(REMOVE_DUPLICATES sortedModules)
-                endif ()
-            endif ()
-            create_option_name(${dir} optionName)
-            option(${optionName} "Build ${dir} Module" ${defaultModule})
-            # create_library_name(${module} ${library})
-        else ()
-            list(REMOVE_ITEM sortedModules ${dir})
-        endif ()
-    endforeach ()
-
-    # Automatically set dependent modules to ON
-    set(dir_list ${sortedModules})
-    set(dll_list "")
-    list(REVERSE dir_list)
-    foreach (dir ${dir_list})
-        create_option_name(${dir} optionName)
-        if (${optionName})
-            if (EXISTS "${OPENSPACE_MODULE_DIR}/${dir}/include.cmake")
-                unset(OPENSPACE_DEPENDENCIES)
-                unset(EXTERNAL_LIBRAY)
-                unset(DEFAULT_MODULE)
-                include(${OPENSPACE_MODULE_DIR}/${dir}/include.cmake)
-
-                if (OPENSPACE_DEPENDENCIES)
-                    foreach (dependency ${OPENSPACE_DEPENDENCIES})
-                        create_option_name(${dependency} dependencyOptionName)
-                        if (NOT ${dependencyOptionName})
-                            set(${dependencyOptionName} ON CACHE BOOL "ff" FORCE)
-                            message(STATUS "${dependencyOptionName} was set to build, due to dependency towards ${optionName}")
-                        endif ()
-                    endforeach ()
-                endif ()
-            endif ()
-        endif ()
-    endforeach ()
-
-    set(MODULE_HEADERS "")
-    set(MODULE_CLASSES "")
-
-    message(STATUS "Included modules:")
-    foreach (module ${sortedModules})
-        create_option_name(${module} optionName)
-        if (${optionName})
-            message(STATUS "\t${module}")
-        endif ()
-    endforeach ()
-
-    # Add subdirectories in the correct order
-    foreach (module ${sortedModules})
-        create_option_name(${module} optionName)
-        if (${optionName})
-            create_library_name(${module} libraryName)
-            add_subdirectory(${OPENSPACE_MODULE_DIR}/${module})
-
-            list(LENGTH OPENSPACE_APPLICATIONS len1)
-            math(EXPR len2 "${len1} - 1")
-
-            foreach(val RANGE ${len2})
-                list(GET OPENSPACE_APPLICATIONS ${val} val1)
-                list(GET OPENSPACE_APPLICATIONS_LINK_REQUEST ${val} val2)
-                if (${val2})
-                    target_link_libraries(${app} ${libraryName})
-                endif ()
-            endforeach()
-
-            # Only link libOpenSpace against the library if it has been set STATIC
-            get_target_property(libType ${libraryName} TYPE)
-            if (NOT ${libType} STREQUAL  "SHARED_LIBRARY")
-                target_link_libraries(libOpenSpace ${libraryName})
-            endif()
-
-            create_define_name(${module} defineName)
-            target_compile_definitions(libOpenSpace PUBLIC "${defineName}")
-
-            # Create registration file
-            string(TOUPPER ${module} module_upper)
-            string(TOLOWER ${module} module_lower)
-            unset(MODULE_NAME)
-            unset(MODULE_PATH)
-            include(${CMAKE_BINARY_DIR}/modules/${module_lower}/modulename.cmake)
-
-            list(APPEND MODULE_HEADERS
-                #"#ifdef REGISTRATION_OPENSPACE${module_upper}MODULE\n"
-                "#include <${MODULE_PATH}>\n"
-                #"#endif\n\n"
-            )
-            list(APPEND MODULE_CLASSES "        new ${MODULE_NAME},\n")
-
-            if (EXTERNAL_LIBRARY)
-                foreach (library ${EXTERNAL_LIBRARY})
-                    get_filename_component(lib ${library} ABSOLUTE)
-                    list(APPEND dll_list ${lib})
-                endforeach()
-            endif ()
-        endif ()
-    endforeach ()
-
-    if (NOT "${MODULE_HEADERS}" STREQUAL "")
-        string(REPLACE ";" "" MODULE_HEADERS ${MODULE_HEADERS})
-    endif ()
-
-    if (NOT "${MODULE_CLASSES}" STREQUAL "")
-        string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
-    endif ()
-
-    configure_file(
-        ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
-        ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
-    )
-
-    list(REMOVE_DUPLICATES dll_list)
-
-    if (WIN32)
-    foreach (application ${OPENSPACE_APPLICATIONS})
-        foreach (dll ${dll_list})
-            ghl_copy_files(${application} ${dll})
-        endforeach ()
-    endforeach ()
-    endif ()
-endfunction ()
-
-
-
 function (copy_dynamic_libraries)
     if (WIN32)
         ghl_copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
@@ -580,6 +235,7 @@ function (copy_dynamic_libraries)
 
         if (TARGET OpenSpaceTest)
             ghl_copy_shared_libraries(OpenSpaceTest ${OPENSPACE_EXT_DIR}/ghoul)
+            ghl_copy_files(OpenSpaceTest "${CURL_ROOT_DIR}/lib/libcurl.dll")
         endif ()
     endif ()
 endfunction ()

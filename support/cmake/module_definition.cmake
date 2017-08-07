@@ -22,8 +22,9 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-include (${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 # Creates a new project and a library for the module with name <module_name>. The name of
 # the library is returned in <output_library_name> for outside configuration
@@ -51,7 +52,7 @@ function (create_new_module module_name output_library_name)
     add_library(${library_name} ${library_mode} ${sources})
 
     # Set compile settings that are common to all modules
-    set_common_compile_settings(${library_name})
+    set_openspace_compile_settings(${library_name})
 
     # Propagate the includes and compiler definitions that are set in the libOpenSpace target
     set_openspace_settings(${library_name})
@@ -77,89 +78,6 @@ macro (add_module_files)
     source_group("Module Files" FILES ${module_files})
     list(APPEND sources ${module_files})
 endmacro ()
-
-
-
-# Set the compiler settings that are common to all modules
-function (set_common_compile_settings target_name)
-    set_property(TARGET ${target_name} PROPERTY CXX_STANDARD 17)
-    set_property(TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED On)
-
-    if (MSVC)
-        target_compile_options(${target_name} PRIVATE
-        "/ZI"       # Edit and continue support
-        "/MP"       # Multi-threading support
-        "/W4"       # Highest warning level
-        "/w44062"   # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
-        "/wd4127"   # conditional expression is constant
-        "/wd4201"   # nonstandard extension used : nameless struct/union
-        "/w44255"   # 'function': no function prototype given: converting '()' to '(void)'
-        "/w44263"   # 'function': member function does not override any base class virtual member function
-        "/w44264"   # 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
-        "/w44265"   # 'class': class has virtual functions, but destructor is not virtual
-        "/w44266"   # 'function': no override available for virtual member function from base 'type'; function is hidden
-        "/w44289"   # nonstandard extension used : 'var' : loop control variable declared in the for-loop is used outside the for-loop scope
-        "/w44296"   # 'operator': expression is always false
-        "/w44311"   # 'variable' : pointer truncation from 'type' to 'type'
-        "/w44339"   # 'type' : use of undefined type detected in CLR meta-data - use of this type may lead to a runtime exception
-        "/w44342"   # behavior change: 'function' called, but a member operator was called in previous versions
-        "/w44350"   # behavior change: 'member1' called instead of 'member2'
-        "/w44431"   # missing type specifier - int assumed. Note: C no longer supports default-int
-        "/w44471"   # a forward declaration of an unscoped enumeration must have an underlying type (int assumed)
-        "/wd4505"   # unreferenced local function has been removed
-        "/w44545"   # expression before comma evaluates to a function which is missing an argument list
-        "/w44546"   # function call before comma missing argument list
-        "/w44547"   # 'operator': operator before comma has no effect; expected operator with side-effect
-        "/w44548"   # expression before comma has no effect; expected expression with side-effect
-        "/w44549"   # 'operator': operator before comma has no effect; did you intend 'operator'?
-        "/w44555"   # expression has no effect; expected expression with side-effect
-        "/w44574"   # 'identifier' is defined to be '0': did you mean to use '#if identifier'?
-        "/w44608"   # 'symbol1' has already been initialized by another union member in the initializer list, 'symbol2'
-        "/w44619"   # #pragma warning: there is no warning number 'number'
-        "/w44628"   # digraphs not supported with -Ze. Character sequence 'digraph' not interpreted as alternate token for 'char'
-        "/w44640"   # 'instance': construction of local static object is not thread-safe
-        "/w44905"   # wide string literal cast to 'LPSTR'
-        "/w44906"   # string literal cast to 'LPWSTR'
-        "/w44946"   # reinterpret_cast used between related classes: 'class1' and 'class2'
-        "/w44986"   # 'symbol': exception specification does not match previous declaration
-        "/w44988"   # 'symbol': variable declared outside class/function scope
-        "/std:c++latest"
-        "/permissive-"
-        "/Zc:strictStrings-"    # Windows header don't adhere to this
-        )
-
-        target_compile_definitions(${target_name} PUBLIC "NOMINMAX")
-        if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${target_name} PUBLIC "/Wx")
-        endif ()
-
-        # Boost as of 1.64 still uses unary_function unless we define this
-        target_compile_definitions(${target_name} PRIVATE "_HAS_AUTO_PTR_ETC")
-    elseif (APPLE)
-        target_compile_definitions(${target_name} PUBLIC "__APPLE__")
-        target_compile_options(${target_name} PUBLIC "-stdlib=libc++")
-        if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${target_name} PUBLIC "-Werror")
-        endif ()
-    elseif (UNIX)
-          include (CheckCXXCompilerFlag)
-          CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-          CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-          mark_as_advanced(COMPILER_SUPPORTS_CXX11, COMPILER_SUPPORTS_CXX0X)
-          if (COMPILER_SUPPORTS_CXX11)
-            target_compile_options(${target_name} PUBLIC "-std=c++11")
-          elseif (COMPILER_SUPPORTS_CXX0X)
-            target_compile_options(${target_name} PUBLIC "-std=c++0x")
-          else ()
-            message(FATAL_ERROR "Compiler does not have C++11 support")
-          endif ()
-
-        target_compile_options(${target_name} PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
-        if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${target_name} PUBLIC "-Werror")
-        endif ()
-    endif ()
-endfunction ()
 
 
 

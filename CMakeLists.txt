@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2016                                                                #
+# Copyright (c) 2014-2017                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,9 +22,9 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required (VERSION 3.4 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.8 FATAL_ERROR)
 
-project (OpenSpace)
+project(OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
@@ -41,15 +41,25 @@ set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/CopySharedLibraries.cmake) 
+include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake) 
 
-test_compiler_compatibility()
-cleanup_project()
-set_build_output_directories()
+# Cleanup project
+set_property(GLOBAL PROPERTY USE_FOLDERS On)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
+
+# Test compiler
+if (MSVC AND (MSVC_VERSION LESS 1910))
+    message(FATAL_ERROR "OpenSpace requires at least Visual Studio 2017.2")
+endif ()
+
+# Set build output directories
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin)
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 
 include(src/CMakeLists.txt)
+
 create_openspace_target()
 add_external_dependencies()
 handle_applications()

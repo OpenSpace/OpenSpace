@@ -1,26 +1,26 @@
-#########################################################################################
-#                                                                                       #
-# OpenSpace                                                                             #
-#                                                                                       #
-# Copyright (c) 2014-2015                                                               #
-#                                                                                       #
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
-# software and associated documentation files (the "Software"), to deal in the Software #
-# without restriction, including without limitation the rights to use, copy, modify,    #
-# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    #
-# permit persons to whom the Software is furnished to do so, subject to the following   #
-# conditions:                                                                           #
-#                                                                                       #
-# The above copyright notice and this permission notice shall be included in all copies #
-# or substantial portions of the Software.                                              #
-#                                                                                       #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   #
-# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         #
-# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    #
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  #
-# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  #
-# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
-#########################################################################################
+##########################################################################################
+#                                                                                        #
+# OpenSpace                                                                              #
+#                                                                                        #
+# Copyright (c) 2014-2017                                                                #
+#                                                                                        #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
+# software and associated documentation files (the "Software"), to deal in the Software  #
+# without restriction, including without limitation the rights to use, copy, modify,     #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to     #
+# permit persons to whom the Software is furnished to do so, subject to the following    #
+# conditions:                                                                            #
+#                                                                                        #
+# The above copyright notice and this permission notice shall be included in all copies  #
+# or substantial portions of the Software.                                               #
+#                                                                                        #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   #
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
+##########################################################################################
 
 set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/openspace.cpp
@@ -54,7 +54,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
-    # ${OPENSPACE_BASE_DIR}/src/mission/missionphasesequencer.cpp
     ${OPENSPACE_BASE_DIR}/src/network/networkengine.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection_lua.inl
@@ -329,12 +328,17 @@ foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
     string(REPLACE "${OPENSPACE_BASE_DIR}/include/openspace/" "" file ${file})
     get_filename_component(directory ${file} DIRECTORY)
     if (NOT directory STREQUAL "")
+        # Visual Studio wants '\' for the path separator
         string(REPLACE "/" "\\" directory ${directory})
+
+        # It looks nicer if the directory starts with a capital letter
+        # First extract the first letter, make it upper case and then reassemble the name
         string(SUBSTRING ${directory} 0 1 FIRST_LETTER)
         string(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
         string(REGEX REPLACE "^.(.*)" "${FIRST_LETTER}\\1" directory "${directory}")
+
         source_group("${directory}" FILES ${original_file})
     else ()
         source_group("" FILES ${original_file})
     endif ()
-endforeach () 
+endforeach ()

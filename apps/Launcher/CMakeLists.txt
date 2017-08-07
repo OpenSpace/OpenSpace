@@ -66,8 +66,6 @@ add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
     ${RESOURCE_FILES}
 )
 
-set_compile_settings(${APPLICATION_NAME})
-
 target_link_libraries(${APPLICATION_NAME}
     Qt5::Widgets
     Qt5::Network

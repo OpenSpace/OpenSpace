@@ -42,7 +42,7 @@ set(CPACK_PACKAGE_FILE_NAME
 set(CPACK_STRIP_FILES 1)
 
 install(DIRECTORY
-    ${OPENSPACE_BASE_DIR}/bin/openspace/${CMAKE_BUILD_TYPE}/
+    ${OPENSPACE_BASE_DIR}/bin/${CMAKE_BUILD_TYPE}/
     DESTINATION bin
     USE_SOURCE_PERMISSIONS
 )
@@ -70,22 +70,22 @@ install(FILES
     DESTINATION .
 )
 
-if(WIN32)
+if (WIN32)
     set(CPACK_GENERATOR ZIP)
     # Need backslash for correct subdirectory paths
     set(CPACK_PACKAGE_ICON "${OPENSPACE_BASE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.png")
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}\\\\${OPENSPACE_VERSION_NUMBER} ${OPENSPACE_VERSION_STRING}")
-else()
+else ()
     set(CPACK_GENERATOR TGZ)
     set(CPACK_PACKAGE_ICON "${OPENSPACE_BASE_DIR}/apps/OpenSpace/openspace.png")
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}/${OPENSPACE_VERSION_NUMBER} ${OPENSPACE_VERSION_STRING}")
-endif()
+endif ()
 
 option(OPENSPACE_CREATE_INSTALLER "Create an OpenSpace installer from the package" OFF)
 
-if(OPENSPACE_CREATE_INSTALLER)
+if (OPENSPACE_CREATE_INSTALLER)
     set(CPACK_PACKAGE_EXECUTABLES "openspace;OpenSpace")
-    if(WIN32)
+    if (WIN32)
         set(CPACK_GENERATOR "ZIP;NSIS")
         # OpenSpace does NOT seem to handle C:/Program Files/ without crashing
         set(CPACK_NSIS_INSTALL_ROOT "C:")
@@ -108,7 +108,7 @@ if(OPENSPACE_CREATE_INSTALLER)
         set(CPACK_NSIS_URL_INFO_ABOUT "http://openspaceproject.com/")
         # Help URL
         set(CPACK_NSIS_HELP_LINK "http://openspaceproject.com/")
-    endif()
-endif()
+    endif ()
+endif ()
 
-include(CPack)
+include (CPack)
