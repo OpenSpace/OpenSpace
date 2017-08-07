@@ -1,46 +1,46 @@
-#########################################################################################
-#                                                                                       #
-# OpenSpace                                                                             #
-#                                                                                       #
-# Copyright (c) 2014-2017                                                               #
-#                                                                                       #
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
-# software and associated documentation files (the "Software"), to deal in the Software #
-# without restriction, including without limitation the rights to use, copy, modify,    #
-# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    #
-# permit persons to whom the Software is furnished to do so, subject to the following   #
-# conditions:                                                                           #
-#                                                                                       #
-# The above copyright notice and this permission notice shall be included in all copies #
-# or substantial portions of the Software.                                              #
-#                                                                                       #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   #
-# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         #
-# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    #
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  #
-# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  #
-# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
-#########################################################################################
+##########################################################################################
+#                                                                                        #
+# OpenSpace                                                                              #
+#                                                                                        #
+# Copyright (c) 2014-2017                                                                #
+#                                                                                        #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
+# software and associated documentation files (the "Software"), to deal in the Software  #
+# without restriction, including without limitation the rights to use, copy, modify,     #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to     #
+# permit persons to whom the Software is furnished to do so, subject to the following    #
+# conditions:                                                                            #
+#                                                                                        #
+# The above copyright notice and this permission notice shall be included in all copies  #
+# or substantial portions of the Software.                                               #
+#                                                                                        #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   #
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
+##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
-# Creates a new project and a library for the module with name <module_name>. The name of
-# the library is returned in <output_library_name> for outside configuration
+# Creates a library for the module with name <module_name>. The name of the library is
+# returned in <output_library_name> for outside configuration
 # The library will have the name openspace-module-<name> and has all of their
 # dependencies set correctly.
 # Dependencies will have to be set in a file called "include.cmake" 
 function (create_new_module module_name output_library_name)
     set(sources ${ARGN})
-    project(${module_name})
+
     # Create a library name of the style: openspace-module-${name}
     create_library_name(${module_name} library_name)
 
     message(STATUS "Configuring module ${module_name}: ${library_name}")
 
     # Add the module files to the list of sources
-    add_module_files()
+    get_module_files(${module_name} module_files)
 
     set(library_mode STATIC)
     if (${library_name}_LIBRARY_MODE)
@@ -49,66 +49,41 @@ function (create_new_module module_name output_library_name)
     endif ()
 
     # Create the library
-    add_library(${library_name} ${library_mode} ${sources})
+    add_library(${library_name} ${library_mode} ${module_files} ${sources})
 
     # Set compile settings that are common to all modules
     set_openspace_compile_settings(${library_name})
 
-    # Propagate the includes and compiler definitions that are set in the libOpenSpace target
-    set_openspace_settings(${library_name})
+    handle_module_dependencies(${library_name} ${module_name})
 
-    handle_dependencies(${library_name} ${module_name})
-
-    write_module_name(${module_name})
+    write_module_information(${module_name})
 
     set(${output_library_name} ${library_name} PARENT_SCOPE)
 endfunction ()
 
 
 
-# I couldn't make adding the module files to the ${sources} variable to work with a function ---abock
-# Adds the <name>module.h and <name>module.cpp files to the list of sources and provides
-# Them with a source group
-macro (add_module_files)
+# Gets and returns the <name>module.h and <name>module.cpp files and provides them with a source group
+function (get_module_files module_name module_files)
     string(TOLOWER ${module_name} module_name_lower)
     set(module_files
         ${CMAKE_CURRENT_SOURCE_DIR}/${module_name_lower}module.h
         ${CMAKE_CURRENT_SOURCE_DIR}/${module_name_lower}module.cpp
+        PARENT_SCOPE
     )
     source_group("Module Files" FILES ${module_files})
-    list(APPEND sources ${module_files})
-endmacro ()
-
-
-
-# Propagate the include directives from the libOpenSpace target into this module
-function (set_openspace_settings target_name)
-    # Get the include directories from the OpenSpace library
-    get_property(
-        OPENSPACE_INCLUDE_DIR
-        TARGET libOpenSpace
-        PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-    )
-    target_include_directories(${target_name} PUBLIC 
-        "${OPENSPACE_BASE_DIR}"
-        ${OPENSPACE_INCLUDE_DIR}
-    )
-
-    get_property(
-        OPENSPACE_DEFINES
-        TARGET libOpenSpace
-        PROPERTY INTERFACE_COMPILE_DEFINITIONS
-    )
-    target_compile_definitions(${target_name} PUBLIC ${OPENSPACE_DEFINES})
-
-    target_link_libraries(${target_name} Ghoul)
-    target_link_libraries(${target_name} libOpenSpace)
 endfunction ()
 
 
 
 # Loads the dependencies from 'include.cmake' and deals with them
-function (handle_dependencies target_name module_name)
+# OpenSpace dependencies are added using target_link_libraries as the handle_modules
+# function takes care that they are added to the project
+# External dependencies are found using the find_package function and then linked
+function (handle_module_dependencies target_name module_name)
+    # We always want to link against Ghoul and the core library
+    target_link_libraries(${library_name} Ghoul libOpenSpace)
+
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include.cmake")
         include(${CMAKE_CURRENT_SOURCE_DIR}/include.cmake)
 
@@ -117,16 +92,9 @@ function (handle_dependencies target_name module_name)
             create_library_name(${dep} dep_library)
             message(STATUS "Link: ${target_name} <- ${dep_library}")
             target_link_libraries(${target_name} ${dep_library})
-
-            get_property(
-                DEP_INCLUDE_DIR
-                TARGET ${dep_library}
-                PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-            )
-            target_include_directories(${target_name} PUBLIC ${DEP_INCLUDE_DIR})
         endforeach ()
 
-        # Handle extenal dependencies
+        # Handle external dependencies
         foreach (dep ${EXTERNAL_DEPENDENCIES})
             string(TOUPPER ${dep} dep_upper)
             find_package(${dep} REQUIRED)
@@ -141,15 +109,16 @@ endfunction ()
 
 
 
-# Writes the modulename.cmake containing the MODULE_NAME and MODULE_PATH
-function (write_module_name module_name)
+# Writes a module information file that contains information about the created module
+function (write_module_information module_name)
     string(TOLOWER ${module_name} module_name_lower)
 
     set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module_name_lower}module.h)
     string(REPLACE "${OPENSPACE_BASE_DIR}/" "" MODULE_PATH ${MODULE_PATH})
 
-    file(WRITE ${CMAKE_BINARY_DIR}/modules/${module_name_lower}/modulename.cmake
+    file(WRITE ${CMAKE_BINARY_DIR}/_generated/modules/${module_name_lower}.cmake
         "set(MODULE_NAME ${module_name}Module)\n"
-        "set(MODULE_PATH ${MODULE_PATH})"
+        "set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})\n"
+        "set(MODULE_HEADER_PATH ${MODULE_PATH})\n"
     )
 endfunction ()
