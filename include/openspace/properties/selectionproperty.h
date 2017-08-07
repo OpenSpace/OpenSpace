@@ -29,8 +29,7 @@
 
 #include <vector>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 class SelectionProperty : public TemplateProperty<std::vector<int>> {
 public:
@@ -39,12 +38,16 @@ public:
         std::string description;
     };
 
-    SelectionProperty(std::string identifier, std::string guiName,
-        Property::Visibility visibility = Property::Visibility::User);
+    SelectionProperty(Property::PropertyInfo info);
     
     void addOption(Option option);
     void removeOptions();
     const std::vector<Option>& options() const;
+
+    using TemplateProperty<std::vector<int>>::operator std::vector<int>;
+
+    using TemplateProperty<std::vector<int>>::operator=;
+
 
 private:
     static const std::string OptionsKey;
@@ -77,7 +80,6 @@ template <>
 template <>
 bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string& outValue, std::vector<int> inValue);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___SELECTIONPROPERTY___H__

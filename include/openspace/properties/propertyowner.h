@@ -29,8 +29,7 @@
 #include <string>
 #include <vector>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 class Property;
 
@@ -52,9 +51,14 @@ class PropertyOwner {
 public:
     /// The separator that is used while accessing the properties and/or sub-owners
     static const char URISeparator = '.';
+
+    struct PropertyOwnerInfo {
+        std::string name;
+        std::string description;
+    };
     
     /// The constructor initializing the PropertyOwner's name to <code>""</code>
-    PropertyOwner(std::string name = "");
+    PropertyOwner(PropertyOwnerInfo info);
 
     /**
      * The destructor will remove all Propertys and PropertyOwners it owns along with
@@ -76,7 +80,12 @@ public:
      * Returns the name of this PropertyOwner.
      * \return The name of this PropertyOwner
      */
-    const std::string& name() const;
+    std::string name() const;
+
+    void setDescription(std::string description);
+
+    std::string description() const;
+    
 
     /**
      * Returns a list of all Propertys directly owned by this PropertyOwner. This list not
@@ -224,6 +233,8 @@ public:
 private:
     /// The name of this PropertyOwner
     std::string _name;
+    /// The description for this PropertyOwner
+    std::string _description;
     /// The owner of this PropertyOwner
     PropertyOwner* _owner;
     /// A list of all registered Property's
@@ -236,7 +247,6 @@ private:
     std::vector<std::string> _tags;
 };
 
-}  // namespace properties
-}  // namespace openspace
+}  // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___PROPERTYOWNER___H__

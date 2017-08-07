@@ -30,8 +30,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct LayerRenderSettings : public properties::PropertyOwner {
     LayerRenderSettings();
@@ -43,10 +42,6 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     properties::FloatProperty multiplier;
     properties::FloatProperty offset;
 
-    // Optional properties
-    properties::FloatProperty valueBlending;
-    bool useValueBlending = false;
-
     void setValuesFromDictionary(const ghoul::Dictionary& renderSettingsDict);
 
     /// This function matches the function with the same name in the
@@ -55,12 +50,8 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     /// This function matches the function with the same name in the
     /// shader code
     glm::vec4 performLayerSettings(glm::vec4 currentValue) const;
-
-private:
-    void setDefaultValues();
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__

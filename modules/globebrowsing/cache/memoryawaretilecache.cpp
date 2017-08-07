@@ -35,38 +35,61 @@
 #include <numeric>
 #include <algorithm>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
-
 namespace {
     const char* _loggerCat = "MemoryAwareTileCache";
-}
+
+    static const openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
+        "CpuAllocatedTileData",
+        "CPU allocated tile data (MB)",
+        "This value denotes the amount of RAM memory (in MB) that this tile cache is "
+        "utilizing."
+    };
+
+    static const openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
+        "GpuAllocatedTileData",
+        "GPU allocated tile data (MB)",
+        "This value denotes the amount of GPU memory (in MB) that this tile cache is "
+        "utilizing."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+        "TileCacheSize",
+        "Tile cache size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
+        "ApplyTileCacheSize",
+        "Apply tile cache size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
+        "ClearTileCache",
+        "Clear tile cache",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UsePboInfo = {
+        "UsePbo",
+        "Use PBO",
+        "If this value is enabled, pixel buffer objects are used to upload the texture "
+        "data asynchronously. If this value is disabled, the upload is synchronously."
+    };
+
+} // namespace
+
+namespace openspace::globebrowsing::cache {
 
 MemoryAwareTileCache::MemoryAwareTileCache()
-    : PropertyOwner("TileCache")
+    : PropertyOwner({ "TileCache" })
     , _numTextureBytesAllocatedOnCPU(0)
-    , _cpuAllocatedTileData(
-        "cpuAllocatedTileData", "CPU allocated tile data (MB)",
-        1024,   // Default
-        128,    // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _gpuAllocatedTileData(
-        "gpuAllocatedTileData", "GPU allocated tile data (MB)",
-        1024,   // Default
-        128,    // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _tileCacheSize(
-        "tileCacheSize", "Tile cache size",
-        1024,   // Default
-        128,    // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _applyTileCacheSize("applyTileCacheSize", "Apply tile cache size")
-    , _clearTileCache("clearTileCache", "Clear tile cache")
-    , _usePbo("usePbo", "Use PBO", false)
+    , _cpuAllocatedTileData(CpuAllocatedDataInfo, 1024, 128, 2048, 1)
+    , _gpuAllocatedTileData(GpuAllocatedDataInfo, 1024, 128, 2048, 1)
+    , _tileCacheSize(TileCacheSizeInfo, 1024, 128, 2048, 1)
+    , _applyTileCacheSize(ApplyTileCacheInfo)
+    , _clearTileCache(ClearTileCacheInfo)
+    , _usePbo(UsePboInfo, false)
 {
     createDefaultTextureContainers();
 
@@ -80,11 +103,14 @@ MemoryAwareTileCache::MemoryAwareTileCache()
         setSizeEstimated(_tileCacheSize * 1024 * 1024);
     });
     _cpuAllocatedTileData.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
     _gpuAllocatedTileData.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
     _tileCacheSize.setMaxValue(
-        CpuCap.installedMainMemory() * 0.25);
+        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+    );
   
     setSizeEstimated(_tileCacheSize * 1024 * 1024);
   
@@ -143,7 +169,8 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
   
     size_t sumTextureTypeSize = std::accumulate(
         _textureContainerMap.cbegin(),
-        _textureContainerMap.cend(), 0,
+        _textureContainerMap.cend(),
+        size_t(0),
         [](size_t s, const std::pair<const TileTextureInitData::HashKey,
         TextureContainerTileCache>& p)
         {
@@ -262,10 +289,13 @@ void MemoryAwareTileCache::put(const ProviderTileKey& key,
 }
 
 void MemoryAwareTileCache::update() {
-    size_t dataSizeCPU = getCPUAllocatedDataSize();
-    size_t dataSizeGPU = getGPUAllocatedDataSize();
-    _cpuAllocatedTileData.setValue(dataSizeCPU / 1024 / 1024);
-    _gpuAllocatedTileData.setValue(dataSizeGPU / 1024 / 1024);
+    const size_t dataSizeCPU = getCPUAllocatedDataSize();
+    const size_t dataSizeGPU = getGPUAllocatedDataSize();
+
+    const size_t ByteToMegaByte = 1024 * 1024;
+
+    _cpuAllocatedTileData.setValue(dataSizeCPU / ByteToMegaByte);
+    _gpuAllocatedTileData.setValue(dataSizeGPU / ByteToMegaByte);
 }
 
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
@@ -306,7 +336,4 @@ bool MemoryAwareTileCache::shouldUsePbo() const {
     return _usePbo;
 }
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
-
+} // namespace openspace::globebrowsing::cache

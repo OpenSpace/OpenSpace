@@ -36,28 +36,28 @@
 #include <unordered_set>
 
 namespace {
-    const std::string _loggerCat = "SceneLoader";
-    const std::string KeyPathScene = "ScenePath";
-    const std::string KeyModules = "Modules";
-    const std::string ModuleExtension = ".mod";
-    const std::string KeyPathModule = "ModulePath";
+    const char* _loggerCat = "SceneLoader";
+    const char* KeyPathScene = "ScenePath";
+    const char* KeyModules = "Modules";
+    const char* ModuleExtension = ".mod";
+    const char* KeyPathModule = "ModulePath";
 
-    const std::string RootNodeName = "Root";
-    const std::string KeyName = "Name";
-    const std::string KeyParentName = "Parent";
-    const std::string KeyDependencies = "Dependencies";
-    const std::string KeyCamera = "Camera";
-    const std::string KeyCameraFocus = "Focus";
-    const std::string KeyCameraPosition = "Position";
-    const std::string KeyCameraRotation = "Rotation";
-}
+    const char* RootNodeName = "Root";
+    const char* KeyName = "Name";
+    const char* KeyParentName = "Parent";
+    const char* KeyDependencies = "Dependencies";
+    const char* KeyCamera = "Camera";
+    const char* KeyCameraFocus = "Focus";
+    const char* KeyCameraPosition = "Position";
+    const char* KeyCameraRotation = "Rotation";
 
-struct ModuleInformation {
-    ghoul::Dictionary dictionary;
-    std::string moduleFile;
-    std::string modulePath;
-    std::string moduleName;
-};
+    struct ModuleInformation {
+        ghoul::Dictionary dictionary;
+        std::string moduleFile;
+        std::string modulePath;
+        std::string moduleName;
+    };
+} // namespace
 
 namespace openspace {
 
@@ -276,7 +276,24 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& 
         }
         try {
             loadedNodes.push_back(loadNode(nodeDictionary));
-        } catch (ghoul::RuntimeError& e) {
+        }
+        catch (documentation::SpecificationError& e) {
+            LERROR("Specification error in node from " << path);
+            LERRORC(e.component, e.message);
+            for (const documentation::TestResult::Offense& offense : e.result.offenses) {
+                LERRORC(
+                    e.component,
+                    offense.offender + ": " + std::to_string(offense.reason)
+                );
+            }
+            for (const documentation::TestResult::Warning& warning : e.result.warnings) {
+                LWARNINGC(
+                    e.component,
+                    warning.offender + ": " + std::to_string(warning.reason)
+                );
+            }
+        }
+        catch (ghoul::RuntimeError& e) {
             LERROR("Failed loading node from " << path << ": " << e.message << ", " << e.component);
         }
     }

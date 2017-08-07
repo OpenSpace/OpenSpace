@@ -36,17 +36,22 @@
 #include <fstream>
 
 namespace {
-    const std::string _loggerCat = "TemporalTileProvider";
+    const char* _loggerCat = "TemporalTileProvider";
 
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
     const char* KeyPreCacheStartTime = "PreCacheStartTime";
     const char* KeyPreCacheEndTime = "PreCacheEndTime";
-}
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+        "FilePath",
+        "File Path",
+        "This is the path to the XML configuration file that describes the temporal tile "
+        "information."
+    };
+} // namespace
+
+namespace openspace::globebrowsing::tileprovider {
     
 const char* TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
@@ -58,7 +63,7 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeI
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
     : _initDict(dictionary)
-    , _filePath("filePath", "File Path", "")
+    , _filePath(FilePathInfo)
     , _successfulInitialization(false)
 {
     std::string filePath;
@@ -66,7 +71,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     try {
         filePath = absPath(filePath);
     }
-    catch (const std::runtime_error& e) {
+    catch (const std::runtime_error&) {
         // File path was not a path to a file but a GDAL config or empty
     }
   
@@ -118,7 +123,7 @@ bool TemporalTileProvider::readFilePath() {
             ghoul::filesystem::File(_filePath.value()).directoryName()
         );
     }
-    catch (const std::runtime_error& e) {
+    catch (const std::runtime_error&) {
         // File path was not a path to a file but a GDAL config or empty
     }
 
@@ -284,7 +289,7 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(const Time& 
 std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(
     const TimeKey& timekey)
 {
-	std::unordered_map<TimeKey, std::shared_ptr<TileProvider>>::iterator it = _tileProviderMap.find(timekey);
+    std::unordered_map<TimeKey, std::shared_ptr<TileProvider>>::iterator it = _tileProviderMap.find(timekey);
     if (it != _tileProviderMap.end()) {
         return it->second;
     }
@@ -481,8 +486,6 @@ std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) c
     return result;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // GLOBEBROWSING_USE_GDAL

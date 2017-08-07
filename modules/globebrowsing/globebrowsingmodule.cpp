@@ -73,7 +73,7 @@ void GlobeBrowsingModule::internalInitialize() {
         // Convert from MB to Bytes
         GdalWrapper::create(
             16ULL * 1024ULL * 1024ULL, // 16 MB
-            CpuCap.installedMainMemory() * 0.25 * 1024 * 1024); // 25% of total RAM
+            static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)); // 25% of total RAM
         addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
     });
@@ -345,12 +345,12 @@ std::string GlobeBrowsingModule::layerGroupNamesList() {
 }
 
 std::string GlobeBrowsingModule::layerTypeNamesList() {
-    std::string listLayerTypes("");
+    std::string listLayerTypes;
     for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += globebrowsing::layergroupid::LAYER_TYPE_NAMES[i] + ", ";
+        listLayerTypes += std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) + ", ";
     }
     listLayerTypes +=
-        " and " + globebrowsing::layergroupid::LAYER_TYPE_NAMES[globebrowsing::layergroupid::NUM_LAYER_TYPES - 1];
+        " and " + std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[globebrowsing::layergroupid::NUM_LAYER_TYPES - 1]);
     return listLayerTypes;
 }
 

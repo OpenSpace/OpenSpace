@@ -30,8 +30,7 @@
 
 #include <mutex>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 // Templated abstract base class representing a job to be done.
 // Client code derive from this class and implement the virtual execute() method
@@ -67,8 +66,7 @@ private:
     ThreadPool threadPool;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "concurrentjobmanager.inl"
 

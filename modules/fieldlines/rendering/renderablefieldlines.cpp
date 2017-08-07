@@ -70,23 +70,52 @@ namespace {
 
     const int SeedPointSourceFile = 0;
     const int SeedPointSourceTable = 1;
-}
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Fieldline Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo Classification = {
+        "Classification",
+        "Fieldline Classification",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
+        "FieldlineColor",
+        "Fieldline Color",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
+        "Source",
+        "SeedPoint Source",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
+        "SourceFile",
+        "SeedPoint File",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
 
 RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
     : Renderable(dictionary)
-    , _stepSize("stepSize", "Fieldline Step Size", defaultFieldlineStepSize, 0.f, 10.f)
-    , _classification("classification", "Fieldline Classification", true)
+    , _stepSize(StepSizeInfo, defaultFieldlineStepSize, 0.f, 10.f)
+    , _classification(Classification, true)
     , _fieldlineColor(
-        "fieldlineColor",
-        "Fieldline Color",
+        FieldlineColorInfo,
         defaultFieldlineColor,
         glm::vec4(0.f),
         glm::vec4(1.f)
       )
-    , _seedPointSource("source", "SeedPoint Source")
-    , _seedPointSourceFile("sourceFile", "SeedPoint File")
+    , _seedPointSource(SeedPointSourceInfo)
+    , _seedPointSourceFile(SeedPointFileInfo)
     , _program(nullptr)
     , _seedPointsAreDirty(true)
     , _fieldLinesAreDirty(true)
@@ -203,12 +232,9 @@ bool RenderableFieldlines::isReady() const {
     return programReady && vectorFieldReady && fieldlineReady && seedPointsReady;
 }
 
-bool RenderableFieldlines::initialize() {
-    if (_vectorFieldInfo.empty() ||
-        _fieldlineInfo.empty() ||
-        _seedPointsInfo.empty())
-    {
-        return false;
+void RenderableFieldlines::initialize() {
+    if (_vectorFieldInfo.empty() || _fieldlineInfo.empty() || _seedPointsInfo.empty()) {
+        throw ghoul::RuntimeError("Error initializing");
     }
 
     _program = OsEng.renderEngine().buildRenderProgram(
@@ -217,14 +243,9 @@ bool RenderableFieldlines::initialize() {
         "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
         "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
     );
-
-    if (!_program)
-        return false;
-
-    return true;
 }
 
-bool RenderableFieldlines::deinitialize() {
+void RenderableFieldlines::deinitialize() {
     glDeleteVertexArrays(1, &_fieldlineVAO);
     _fieldlineVAO = 0;
     glDeleteBuffers(1, &_vertexPositionBuffer);
@@ -235,11 +256,9 @@ bool RenderableFieldlines::deinitialize() {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
     }
-
-    return true;
 }
 
-void RenderableFieldlines::render(const RenderData& data) {
+void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
     _program->activate();
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));

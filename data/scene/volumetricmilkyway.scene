@@ -20,8 +20,8 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
+    openspace.setPropertyValue("Sun.renderable.Enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", true)
     -- openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
     -- openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 

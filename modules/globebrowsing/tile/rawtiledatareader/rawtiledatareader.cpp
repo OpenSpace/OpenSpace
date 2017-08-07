@@ -53,8 +53,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 const PixelRegion RawTileDataReader::padding = PixelRegion(
     TileTextureInitData::tilePixelStartOffset,
@@ -572,5 +571,4 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
     return RawTile::ReadError::None;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -70,7 +70,7 @@ void applyRegularExpression(lua_State* L, std::regex regex,
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
     bool isGroupMode = !groupName.empty();
-    
+
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
         std::string id = prop->fullyQualifiedIdentifier();
@@ -125,10 +125,10 @@ std::string extractUriWithoutGroupName(std::string uri) {
     return uri.substr(pos);
 }
 
-}
+} // namespace
+} // namespace openspace
 
-
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 int setPropertyCall_single(properties::Property* prop, std::string uri, lua_State* L,
                            const int type)
@@ -390,6 +390,4 @@ int removeSceneGraphNode(lua_State* L) {
     return 1;
 }
 
-} // namespace luascriptfunctions
-
-}  // namespace openspace
+}  // namespace openspace::luascriptfunctions

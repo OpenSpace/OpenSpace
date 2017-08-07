@@ -51,6 +51,85 @@ namespace {
     const char* KeyFrameConversions     = "FrameConversions";
 
     const int InterpolationSteps = 5;
+
+    static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value determines width of the lines connecting the instrument to the "
+        "corners of the field of view."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DrawSolidInfo = {
+        "SolidDraw",
+        "Solid Draw",
+        "This value determines whether the field of view should be rendered as a solid "
+        "or as lines only."
+    };
+
+    static const openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
+        "StandOffDistance",
+        "Standoff Distance Factor",
+        "This value determines the standoff distance factor which influences the "
+        "distance of the plane to the focus object. If this value is '1', the field of "
+        "view will be rendered exactly on the surface of, for example, a planet. With a "
+        "value of smaller than 1, the field of view will hover of ther surface, thus "
+        "making it more visible."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
+        "Colors.DefaultStart",
+        "Start of default color",
+        "This value determines the color of the field of view frustum close to the "
+        "instrument. The final colors are interpolated between this value and the end "
+        "color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DefaultEndColorInfo = {
+        "Colors.DefaultEnd",
+        "End of default color",
+        "This value determines the color of the field of view frustum close to the "
+        "target. The final colors are interpolated between this value and the start "
+        "color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ActiveColorInfo = {
+        "Colors.Active",
+        "Active Color",
+        "This value determines the color that is used when the instrument's field of "
+        "view is active."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TargetInFovInfo = {
+        "Colors.TargetInFieldOfView",
+        "Target in field-of-view Color",
+        "This value determines the color that is used if the target is inside the field "
+        "of view of the instrument but the instrument is not yet active."
+    };
+
+    static const openspace::properties::Property::PropertyInfo IntersectionStartInfo = {
+        "Colors.IntersectionStart",
+        "Start of the intersection",
+        "This value determines the color that is used close to the instrument if one of "
+        "the field of view corners is intersecting the target object. The final color is "
+        "retrieved by interpolating between this color and the intersection end color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo IntersectionEndInfo = {
+        "Colors.IntersectionEnd",
+        "End of the intersection",
+        "This value determines the color that is used close to the target if one of the "
+        "field of view corners is intersecting the target object. The final color is "
+        "retrieved by interpolating between this color and the intersection begin color."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SquareColorInfo = {
+        "Colors.Square",
+        "Orthogonal Square",
+        "This value determines the color that is used for the field of view square in "
+        "the case that there is no intersection and that the instrument is not currently "
+        "active."
+    };
+
 } // namespace
 
 namespace openspace {
@@ -64,16 +143,16 @@ documentation::Documentation RenderableFov::Documentation() {
             {
                 KeyBody,
                 new StringVerifier,
+                Optional::No,
                 "The SPICE name of the source body for which the field of view should be "
-                "rendered.",
-                Optional::No
+                "rendered."
             },
             {
                 KeyFrame,
                 new StringVerifier,
+                Optional::No,
                 "The SPICE name of the source body's frame in which the field of view "
-                "should be rendered.",
-                Optional::No
+                "should be rendered."
             },
             {
                 KeyInstrument,
@@ -81,8 +160,8 @@ documentation::Documentation RenderableFov::Documentation() {
                     {
                         KeyInstrumentName,
                         new StringVerifier,
-                        "The SPICE name of the instrument that is rendered",
-                        Optional::No
+                        Optional::No,
+                        "The SPICE name of the instrument that is rendered"
                     },
                     {
                         KeyInstrumentAberration,
@@ -94,33 +173,46 @@ documentation::Documentation RenderableFov::Documentation() {
                                 "XLT", "XLT+S",
                                 "XCN", "XCN+S"
                         }),
+                        Optional::Yes,
                         "The aberration correction that is used for this field of view. "
-                        "The default is 'NONE'.",
-                        Optional::Yes
+                        "The default is 'NONE'."
                     }
                 }),
+                Optional::No,
                 "A table describing the instrument whose field of view should be "
-                "rendered.",
-                Optional::No
+                "rendered."
             },
             {
                 KeyPotentialTargets,
                 new StringListVerifier,
+                Optional::No,
                 "A list of potential targets (specified as SPICE names) that the field "
-                "of view should be tested against.",
-                Optional::No
+                "of view should be tested against."
             },
             {
                 KeyFrameConversions,
                 new TableVerifier({
                     {
                         DocumentationEntry::Wildcard,
-                        new StringVerifier
+                        new StringVerifier,
+                        Optional::No
                     }
                 }),
+                Optional::Yes,
                 "A list of frame conversions that should be registered with the "
-                "SpiceManager.",
-                Optional::Yes
+                "SpiceManager."
+            },
+            {
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LineWidthInfo.description
+            },
+            {
+                StandoffDistanceInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                StandoffDistanceInfo.description
             }
         }
     };
@@ -129,47 +221,19 @@ documentation::Documentation RenderableFov::Documentation() {
 
 RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
-    , _drawSolid("solidDraw", "Draw as Quads", false)
-    , _standOffDistance("standOffDistance", "Standoff Distance", 0.9999, 0.99, 1.0, 0.000001)
+    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+    , _drawSolid(DrawSolidInfo, false)
+    , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
     , _programObject(nullptr)
     , _drawFOV(false)
     , _colors({
-        {
-            "colors.defaultStart",
-            "Start of default color",
-            glm::vec4(0.4f)
-        },
-        {
-            "colors.defaultEnd",
-            "End of default color",
-            glm::vec4(0.85f, 0.85f, 0.85f, 1.f)
-        },
-        {
-            "colors.active",
-            "Active Color",
-            glm::vec4(0.f, 1.f, 0.f, 1.f)
-        },
-        {
-            "colors.targetInFieldOfView",
-            "Target-in-field-of-view Color",
-            glm::vec4(0.f, 0.5f, 0.7f, 1.f)
-        },
-        {
-            "colors.intersectionStart",
-            "Start of the intersection",
-            glm::vec4(1.f, 0.89f, 0.f, 1.f)
-        },
-        {
-            "colors.intersectionEnd",
-            "End of the intersection",
-            glm::vec4(1.f, 0.29f, 0.f, 1.f)
-        },
-        {
-            "colors.square",
-            "Orthogonal Square",
-            glm::vec4(0.85f, 0.85f, 0.85f, 1.f)
-        }
+        { DefaultStartColorInfo, glm::vec4(0.4f) },
+        { DefaultEndColorInfo, glm::vec4(0.85f, 0.85f, 0.85f, 1.f) },
+        { ActiveColorInfo, glm::vec4(0.f, 1.f, 0.f, 1.f) },
+        { TargetInFovInfo, glm::vec4(0.f, 0.5f, 0.7f, 1.f) },
+        { IntersectionStartInfo, glm::vec4(1.f, 0.89f, 0.f, 1.f) },
+        { IntersectionEndInfo, glm::vec4(1.f, 0.29f, 0.f, 1.f) },
+        { SquareColorInfo, glm::vec4(0.85f, 0.85f, 0.85f, 1.f) }
     })
 {
     documentation::testSpecificationAndThrow(
@@ -208,6 +272,18 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (dictionary.hasKey(LineWidthInfo.identifier)) {
+        _lineWidth = static_cast<float>(dictionary.value<double>(
+            LineWidthInfo.identifier
+        ));
+    }
+
+    if (dictionary.hasKey(StandoffDistanceInfo.identifier)) {
+        _standOffDistance = static_cast<float>(dictionary.value<double>(
+            StandoffDistanceInfo.identifier
+        ));
+    }
+
     addProperty(_lineWidth);
     addProperty(_drawSolid);
     addProperty(_standOffDistance);
@@ -221,7 +297,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     addProperty(_colors.square);
 }
 
-bool RenderableFov::initialize() {
+void RenderableFov::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "FovProgram",
@@ -238,8 +314,10 @@ bool RenderableFov::initialize() {
         res.shape == SpiceManager::FieldOfViewResult::Shape::Polygon ||
         res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
     if (!supportedShape) {
-        LWARNINGC("RenderableFov", "'" << _instrument.name << "' has unsupported shape");
-        return false;
+        throw ghoul::RuntimeError(
+            "'" + _instrument.name + "' has unsupported shape",
+            "RenderableFov"
+        );
     }
 
     _instrument.bounds = std::move(res.bounds);
@@ -329,11 +407,9 @@ bool RenderableFov::initialize() {
     );
 
     glBindVertexArray(0);
-
-    return true;
 }
 
-bool RenderableFov::deinitialize() {
+void RenderableFov::deinitialize() {
     OsEng.renderEngine().removeRenderProgram(_programObject);
     _programObject = nullptr;
 
@@ -342,8 +418,6 @@ bool RenderableFov::deinitialize() {
 
     glDeleteBuffers(1, &_fieldOfViewBounds.vbo);
     glDeleteVertexArrays(1, &_fieldOfViewBounds.vao);
-
-    return true;
 }
 
 bool RenderableFov::isReady() const {
@@ -947,7 +1021,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 }
 #endif
 
-void RenderableFov::render(const RenderData& data) {
+void RenderableFov::render(const RenderData& data, RendererTasks&) {
     if (_drawFOV) {
         _programObject->activate();
 

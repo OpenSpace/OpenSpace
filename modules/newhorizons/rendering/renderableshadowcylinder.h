@@ -27,6 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
@@ -35,9 +37,9 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul {
-namespace opengl { class ProgramObject; }
-}
+namespace ghoul::opengl { class ProgramObject; }
+
+namespace documentation { struct Documentation; }
 
 namespace openspace {
 
@@ -48,12 +50,14 @@ class RenderableShadowCylinder : public Renderable {
 public:
     RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
 
 private:
     struct CylinderVBOLayout {
@@ -61,9 +65,17 @@ private:
     };
 
     void createCylinder(double time);
+
+
     properties::IntProperty _numberOfPoints;
     properties::FloatProperty _shadowLength;
     properties::Vec4Property _shadowColor;
+    properties::OptionProperty _terminatorType;
+    properties::StringProperty _lightSource;
+    properties::StringProperty _observer;
+    properties::StringProperty _body;
+    properties::StringProperty _bodyFrame;
+    properties::OptionProperty _aberration;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     
@@ -73,14 +85,7 @@ private:
     GLuint _vbo;
 
     std::vector<CylinderVBOLayout> _vertices;
-
-    std::string _terminatorType;
-    std::string _lightSource;
-    std::string _observer;
-    std::string _body;
-    std::string _bodyFrame;
-    std::string _mainFrame;
-    SpiceManager::AberrationCorrection _aberration;
+    // SpiceManager::AberrationCorrection
 };
 
 } // namespace openspace

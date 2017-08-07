@@ -30,8 +30,19 @@
 namespace openspace {
 
 VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
-    : _normal("normal", "Normal", glm::vec3(1.0, 0.0, 0.0), glm::vec3(-1.0), glm::vec3(1.0))
-    , _offsets("offsets", "Offsets", glm::vec2(-2.0, 0.0), glm::vec2(-2.0, 0.0), glm::vec2(2.0, 1.0))
+    : properties::PropertyOwner({ "" }) // @TODO Missing name
+    , _normal(
+        { "Normal", "Normal", "" }, // @TODO Missing documentation
+        glm::vec3(1.f, 0.f, 0.f),
+        glm::vec3(-1.f),
+        glm::vec3(1.f)
+    )
+    , _offsets(
+        { "Offsets", "Offsets", "" }, // @TODO Missing documentation
+        glm::vec2(-2.f, 0.f),
+        glm::vec2(-2.f, 0.f),
+        glm::vec2(2.f, 1.f)
+    )
 {
     glm::vec3 normal;
     glm::vec2 offsets;
@@ -42,8 +53,7 @@ VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
     _offsets = offsets;
 }
 
-void VolumeClipPlane::initialize()
-{
+void VolumeClipPlane::initialize() {
     addProperty(_normal);
     addProperty(_offsets);
 }

@@ -35,25 +35,22 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
-}
-}
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
-    struct LinePoint;
+    
+struct LinePoint;
 
 class RenderableFieldlines : public Renderable {
 public:
     RenderableFieldlines(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
 private:

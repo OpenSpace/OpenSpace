@@ -40,8 +40,7 @@
 
 #include <string>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class GeodeticPatch;
 
@@ -174,7 +173,6 @@ private:
     bool _hasBeenInitialized;    
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__

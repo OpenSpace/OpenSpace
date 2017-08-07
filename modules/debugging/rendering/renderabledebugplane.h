@@ -27,40 +27,37 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/updatestructures.h>
 
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-}
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
+
+namespace documentation { struct Documentation; }
 
 namespace openspace {
-    struct LinePoint;
 
-class RenderableDebugPlane: public Renderable {
+struct LinePoint;
 
-    enum class Origin {
-        LowerLeft, LowerRight, UpperLeft, UpperRight, Center
-    };
-
+class RenderableDebugPlane : public Renderable {
 public:
     RenderableDebugPlane(const ghoul::Dictionary& dictionary);
     ~RenderableDebugPlane();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
 
 private:
     void createPlane();
@@ -68,9 +65,7 @@ private:
     properties::IntProperty _texture;
     properties::BoolProperty _billboard;
     properties::FloatProperty _size;
-
-    Origin _origin;
-    std::string _nodeName;
+    properties::OptionProperty _origin;
 
     bool _planeIsDirty;
 

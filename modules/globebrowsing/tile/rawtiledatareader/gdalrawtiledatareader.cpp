@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #ifdef GLOBEBROWSING_USE_GDAL
 
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
@@ -45,11 +46,10 @@
 #include <algorithm>
 
 namespace {
-    const std::string _loggerCat = "GdalRawTileDataReader";
+    const char* _loggerCat = "GdalRawTileDataReader";
 }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
     return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x <<
@@ -181,8 +181,8 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     dataDest += io.write.region.start.x * _initData.bytesPerPixel();
   
     GDALRasterBand* gdalRasterBand = _dataset->GetRasterBand(rasterBand);
-	CPLErr readError = CE_Failure;
-	readError = gdalRasterBand->RasterIO(
+    CPLErr readError = CE_Failure;
+    readError = gdalRasterBand->RasterIO(
         GF_Read,
         io.read.region.start.x,         // Begin read x
         io.read.region.start.y,         // Begin read y
@@ -241,7 +241,6 @@ int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) co
     return diff;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // GLOBEBROWSING_USE_GDAL

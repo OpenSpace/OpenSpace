@@ -32,24 +32,23 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
+
 namespace documentation { struct Documentation; }
 
 struct Image;
 
-namespace planetgeometry {
-    class PlanetGeometry;
-}
+namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanetProjection : public Renderable {
 public:
     RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlanetProjection();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture& baseTexture() const;
 
@@ -68,18 +67,13 @@ private:
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _heightMapTexturePath;
 
-    properties::IntProperty _rotation;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
-    properties::BoolProperty _shiftMeridianBy180;
-
     properties::FloatProperty _heightExaggeration;
-    properties::FloatProperty _debugProjectionTextureRotation;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     

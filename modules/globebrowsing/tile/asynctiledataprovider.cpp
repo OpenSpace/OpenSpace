@@ -37,8 +37,7 @@
 
 #include <ghoul/logging/logmanager.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 namespace {
     const char* _loggerCat = "AsyncTileDataProvider";
@@ -270,5 +269,4 @@ float AsyncTileDataProvider::noDataValueAsFloat() const {
     return _rawTileDataReader->noDataValueAsFloat();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

@@ -28,8 +28,7 @@
 #include <sstream>
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct TileMetaData {
     std::vector<float> maxValues;
@@ -40,8 +39,6 @@ struct TileMetaData {
     static TileMetaData deserialize(std::istream& s);
 };
 
-} // namespace globebrowsing
-} // namespace openspace
-
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEMETADATA___H__

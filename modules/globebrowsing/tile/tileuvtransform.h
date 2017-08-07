@@ -27,15 +27,13 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct TileUvTransform {
     glm::vec2 uvOffset;
     glm::vec2 uvScale;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEUVTRANSFORM___H__

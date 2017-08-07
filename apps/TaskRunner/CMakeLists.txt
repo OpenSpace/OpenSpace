@@ -26,6 +26,7 @@ set(APPLICATION_NAME TaskRunner)
 set(APPLICATION_LINK_TO_OPENSPACE ON)
 
 include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
 
 set(application_path ${OPENSPACE_APPS_DIR}/TaskRunner)
 
@@ -37,3 +38,4 @@ add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
     ${SOURCE_FILES}
 )
 
+set_compile_settings(${APPLICATION_NAME})

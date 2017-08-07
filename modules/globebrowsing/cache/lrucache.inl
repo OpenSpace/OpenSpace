@@ -24,9 +24,7 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace openspace::globebrowsing::cache {
     
 template<typename KeyType, typename ValueType, typename HasherType>
 LRUCache<KeyType, ValueType, HasherType>::LRUCache(size_t size)
@@ -163,6 +161,4 @@ LRUCache<KeyType, ValueType, HasherType>::cleanAndFetchPopped()
     return toReturn;
 }
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::cache

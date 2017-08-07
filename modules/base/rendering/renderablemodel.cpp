@@ -42,16 +42,29 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-namespace { 
+namespace {
     const char* KeyGeometry = "Geometry";
-    const char* KeyTexture = "Textures.Color";
-    const char* KeyModelTransform = "Rotation.ModelTransform";
-    const char* KeyFading = "Shading.Fadeable";
 
-    const char* keyBody        = "Body";
-    const char* keyStart       = "StartTime";
-    const char* keyEnd         = "EndTime";
-    
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "ColorTexture",
+        "Color Texture",
+        "This value points to a color texture file that is applied to the geometry "
+        "rendered in this object."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShadingInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "This value determines whether this model should be shaded by using the position "
+        "of the Sun."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ModelTransformInfo = {
+        "ModelTransform",
+        "Model Transform",
+        "This value specifies the model transform that is applied to the model before "
+        "all other transformations are applied."
+    };
 } // namespace
 
 namespace openspace {
@@ -65,29 +78,26 @@ documentation::Documentation RenderableModel::Documentation() {
             {
                 KeyGeometry,
                 new ReferencingVerifier("base_geometry_model"),
-                "This specifies the model that is rendered by the Renderable.",
-                Optional::No
+                Optional::No,
+                "This specifies the model that is rendered by the Renderable."
             },
             {
-                KeyTexture,
+                TextureInfo.identifier,
                 new StringVerifier,
-                "A color texture that can be applied to the model specified by the "
-                "Geometry.",
-                Optional::Yes
+                Optional::Yes,
+                TextureInfo.description
             },
             {
-                KeyModelTransform,
-                new DoubleMatrix3Verifier,
-                "Specifies a distinct transformation matrix that is applied to the "
-                "model. If it is not specified, it is equal to the Identity matrix.",
-                Optional::Yes
-            },
-            {
-                KeyFading,
+                ShadingInfo.identifier,
                 new BoolVerifier,
-                "Specifies whether the model should be periodically fading in and out. "
-                "If this value is not specified, it will not fade.",
-                Optional::Yes
+                Optional::Yes,
+                ShadingInfo.description
+            },
+            {
+                ModelTransformInfo.identifier,
+                new DoubleMatrix3Verifier,
+                Optional::Yes,
+                ModelTransformInfo.description
             }
         }
     };
@@ -96,13 +106,11 @@ documentation::Documentation RenderableModel::Documentation() {
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _geometry(nullptr)
-    , _colorTexturePath("colorTexture", "Color Texture")
-    , _performFade("performFading", "Perform Fading", false)
-    , _performShading("performShading", "Perform Shading", true)
-    , _fading("fading", "Fade", 0)
+    , _colorTexturePath(TextureInfo)
+    , _performShading(ShadingInfo, true)
+    , _modelTransform(ModelTransformInfo, glm::mat3(1.0))
     , _programObject(nullptr)
     , _texture(nullptr)
-    , _modelTransform(1.0)
 {
     ghoul_precondition(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
@@ -122,16 +130,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _geometry = modelgeometry::ModelGeometry::createFromDictionary(dict);
     }
 
-    if (dictionary.hasKey(KeyTexture)) {
-        _colorTexturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    if (dictionary.hasKey(TextureInfo.identifier)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(
+            TextureInfo.identifier
+        ));
     }
 
-    if (dictionary.hasKey(KeyModelTransform)) {
-        _modelTransform = dictionary.value<glm::dmat3>(KeyModelTransform);
+    if (dictionary.hasKey(ModelTransformInfo.identifier)) {
+        _modelTransform = dictionary.value<glm::dmat3>(ModelTransformInfo.identifier);
     }
 
-    if (dictionary.hasKey(KeyFading)) {
-        _performFade = dictionary.value<bool>(KeyFading);
+    if (dictionary.hasKey(ShadingInfo.identifier)) {
+        _performShading = dictionary.value<bool>(ShadingInfo.identifier);
     }
 
     addPropertySubOwner(_geometry.get());
@@ -140,14 +150,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
     addProperty(_performShading);
-    addProperty(_performFade);
 }
 
 bool RenderableModel::isReady() const {
     return _programObject && _texture;
 }
 
-bool RenderableModel::initialize() {
+void RenderableModel::initialize() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "ModelProgram",
         "${MODULE_BASE}/shaders/model_vs.glsl",
@@ -156,13 +165,10 @@ bool RenderableModel::initialize() {
 
     loadTexture();
 
-    bool completeSuccess = true;
-    completeSuccess &= (_texture != nullptr);
-    completeSuccess &= _geometry->initialize(this); 
-    return completeSuccess;
+    _geometry->initialize(this); 
 }
 
-bool RenderableModel::deinitialize() {
+void RenderableModel::deinitialize() {
     if (_geometry) {
         _geometry->deinitialize();
         _geometry = nullptr;
@@ -173,26 +179,16 @@ bool RenderableModel::deinitialize() {
         OsEng.renderEngine().removeRenderProgram(_programObject);
         _programObject = nullptr;
     }
-
-    return true;
 }
 
-void RenderableModel::render(const RenderData& data) {
+void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
     
-    // Fading
-    if (_performFade && _fading > 0.f) {
-        _fading = _fading - 0.01f;
-    }
-    else if (!_performFade && _fading < 1.f) {
-        _fading = _fading + 0.01f;
-    }
-
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(_modelTransform), glm::dvec3(data.modelTransform.scale)));
+        glm::dmat4(glm::scale(glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale)));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
@@ -202,7 +198,6 @@ void RenderableModel::render(const RenderData& data) {
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
     _programObject->setUniform("performShading", _performShading);
-    _programObject->setUniform("fading", _fading);
 
     _geometry->setUniforms(*_programObject);
 

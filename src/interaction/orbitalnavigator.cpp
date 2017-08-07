@@ -35,23 +35,79 @@
 
 namespace {
     const char* _loggerCat = "OrbitalNavigator";
+
+    static const openspace::properties::Property::PropertyInfo RollFrictionInfo = {
+        "RollFriction",
+        "Roll Friction",
+        "If this is enabled, a small friction is applied to the rolling part of the "
+        "camera motion, thus slowing it down within a small time period. If this value "
+        "is disabled, the camera will roll forever."
+    };
+
+    static const openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
+        "RotationalFriction",
+        "Rotational Friction",
+        "If this is enabled, a small friction is applied to the rotational part of the "
+        "camera motion, thus slowing it down within a small time period. If this value "
+        "is disabled, the camera will rotate forever."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
+        "ZoomFriction",
+        "Zoom Friction",
+        "If this is enabled, a small friction is applied to the zoom part of the camera "
+        "motion, thus slowing it down within a small time period. If this value is "
+        "disabled, the camera will zoom in or out forever."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SensitivityInfo = {
+        "Sensitivity",
+        "Sensitivity",
+        "Determines the sensitivity of the camera motion. The lower the sensitivity is "
+        "the less impact a mouse mothion will have."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FrictionInfo = {
+        "Friction",
+        "Friction Factor",
+        "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
+        "Friction', and 'Zoom Friction' values are enabled. The lower this value is, the "
+        "faster the camera movements will stop."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FollowFocusNodeInfo = {
+        "FollowFocusNodeRotationDistance",
+        "Follow focus node rotation distance",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
+        "MinimumAllowedDistance",
+        "Minimum allowed distance",
+        "" // @TODO Missing documentation
+    };
+} // namespace
+
+namespace openspace::interaction {
+
+OrbitalNavigator::Friction::Friction() 
+    : properties::PropertyOwner({ "Friction" })
+    , roll(RollFrictionInfo, true)
+    , rotational(RotationalFrictionInfo, true)
+    , zoom(ZoomFrictionInfo, true)
+{
+    addProperty(roll);
+    addProperty(rotational);
+    addProperty(zoom);
 }
 
-namespace openspace {
-namespace interaction {
-
 OrbitalNavigator::OrbitalNavigator()
-    : properties::PropertyOwner("OrbitalNavigator")
-    , _rotationalFriction("rotationalFriction", "Rotational friction", true)
-    , _horizontalFriction("horizontalFriction", "Horizontal friction", true)
-    , _verticalFriction("verticalFriction", "Vertical friction", true)
-    , _followFocusNodeRotationDistance("followFocusNodeRotationDistance",
-        "Follow focus node rotation distance", 2.0f, 0.0f, 10.f)
-    , _minimumAllowedDistance("minimumAllowedDistance",
-        "Minimum allowed distance", 10.0f, 0.0f, 10000.f)
-    , _sensitivity("sensitivity", "Sensitivity", 20.0f, 1.0f, 50.f)
-    , _motionLag("motionLag", "Motion lag", 0.5f, 0.f, 1.f)
-    , _mouseStates(_sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001))
+    : properties::PropertyOwner({ "OrbitalNavigator" })
+    , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 2.0f, 0.0f, 10.f)
+    , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
+    , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
+    , _motionLag(FrictionInfo, 0.5f, 0.f, 1.f)
+    , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_motionLag + 0.0000001))
 {
     auto smoothStep = 
         [](double t) {
@@ -75,21 +131,20 @@ OrbitalNavigator::OrbitalNavigator()
     // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear
     // interpolation from 1 to 0.
 
-    auto smoothStepDerivedTranferFunction = 
-        [](double t) {
-            return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
-        };
+    auto smoothStepDerivedTranferFunction = [](double t) {
+        return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
+    };
     _rotateToFocusNodeInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
 
     // Define callback functions for changed properties
-    _rotationalFriction.onChange([&]() {
-        _mouseStates.setRotationalFriction(_rotationalFriction);
+    _friction.roll.onChange([&]() {
+        _mouseStates.setRotationalFriction(_friction.roll);
     });
-    _horizontalFriction.onChange([&]() {
-        _mouseStates.setHorizontalFriction(_horizontalFriction);
+    _friction.rotational.onChange([&]() {
+        _mouseStates.setHorizontalFriction(_friction.rotational);
     });
-    _verticalFriction.onChange([&]() {
-        _mouseStates.setVerticalFriction(_verticalFriction);
+    _friction.zoom.onChange([&]() {
+        _mouseStates.setVerticalFriction(_friction.zoom);
     });
     _sensitivity.onChange([&]() {
         _mouseStates.setSensitivity(_sensitivity * pow(10.0,-4));
@@ -98,18 +153,15 @@ OrbitalNavigator::OrbitalNavigator()
         _mouseStates.setVelocityScaleFactor(1 / (_motionLag + 0.0000001));
     });
 
-    // Add the properties
-    addProperty(_rotationalFriction);
-    addProperty(_horizontalFriction);
-    addProperty(_verticalFriction);
+    addPropertySubOwner(_friction);
+
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);
     addProperty(_motionLag);
 }
 
-OrbitalNavigator::~OrbitalNavigator()
-{ }
+OrbitalNavigator::~OrbitalNavigator() {}
 
 void OrbitalNavigator::updateMouseStatesFromInput(const InputState& inputState,
                                                   double deltaTime)
@@ -117,9 +169,7 @@ void OrbitalNavigator::updateMouseStatesFromInput(const InputState& inputState,
     _mouseStates.updateMouseStatesFromInput(inputState, deltaTime);
 }
 
-void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera,
-                                                        double deltaTime)
-{
+void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double deltaTime){
     if (_focusNode) {
         // Read the current state of the camera
         glm::dvec3 camPos = camera.positionVec3();
@@ -237,7 +287,9 @@ void OrbitalNavigator::startInterpolateCameraDirection(const Camera& camera) {
     double angle = glm::angle(camDir, directionToCenter);
 
     // Minimum is two second. Otherwise proportional to angle
-    _rotateToFocusNodeInterpolator.setInterpolationTime(glm::max(angle * 2.0, 2.0));
+    _rotateToFocusNodeInterpolator.setInterpolationTime(static_cast<float>(
+        glm::max(angle * 2.0, 2.0)
+    ));
     _rotateToFocusNodeInterpolator.start();
 }
 
@@ -282,7 +334,7 @@ OrbitalNavigator::CameraRotationDecomposition
 }
 
 glm::dquat OrbitalNavigator::roll(double deltaTime,
-                            const glm::dquat& localCameraRotation) const
+                                  const glm::dquat& localCameraRotation) const
 {
     glm::dquat rollQuat = glm::angleAxis(
         _mouseStates.localRollMouseVelocity().x * deltaTime,
@@ -303,13 +355,12 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
     return localCameraRotation * rotationDiff;
 }
 
-glm::dquat OrbitalNavigator::interpolateLocalRotation(
-    double deltaTime,
-    const glm::dquat& localCameraRotation)
+glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
+                                                    const glm::dquat& localCameraRotation)
 {
     if (_rotateToFocusNodeInterpolator.isInterpolating()) {
         double t = _rotateToFocusNodeInterpolator.value();
-        _rotateToFocusNodeInterpolator.setDeltaTime(deltaTime);
+        _rotateToFocusNodeInterpolator.setDeltaTime(static_cast<float>(deltaTime));
         _rotateToFocusNodeInterpolator.step();
         glm::dquat result = glm::slerp(
             localCameraRotation,
@@ -325,13 +376,12 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(
     }
 }
 
-glm::dvec3 OrbitalNavigator::translateHorizontally(
-    double deltaTime,
-    const glm::dvec3& cameraPosition,
-    const glm::dvec3& objectPosition,
-    const glm::dquat& focusNodeRotationDiff,
-    const glm::dquat& globalCameraRotation,
-    const SurfacePositionHandle& positionHandle) const
+glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
+                                                   const glm::dvec3& cameraPosition,
+                                                   const glm::dvec3& objectPosition,
+                                              const glm::dquat& /*focusNodeRotationDiff*/,
+                                                   const glm::dquat& globalCameraRotation,
+                                        const SurfacePositionHandle& positionHandle) const
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
 
@@ -397,9 +447,9 @@ glm::dvec3 OrbitalNavigator::followFocusNodeRotation(
 
 glm::dquat OrbitalNavigator::rotateGlobally(
     const glm::dquat& globalCameraRotation,
-    const glm::dvec3& objectPosition,
+    const glm::dvec3& /*objectPosition*/,
     const glm::dquat& focusNodeRotationDiff,
-    const glm::dvec3& cameraPosition,
+    const glm::dvec3& /*cameraPosition*/,
     const SurfacePositionHandle& positionHandle) const
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
@@ -443,7 +493,7 @@ glm::dvec3 OrbitalNavigator::translateVertically(
 glm::dquat OrbitalNavigator::rotateHorizontally(
     double deltaTime,
     const glm::dquat& globalCameraRotation,
-    const glm::dvec3& cameraPosition, 
+    const glm::dvec3& /*cameraPosition*/, 
     const SurfacePositionHandle& positionHandle) const
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
@@ -506,8 +556,12 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(
     // Interpolate with a negative delta time if distance is too large to follow
     double interpolationSign = glm::sign(maximumDistanceForRotation - distanceToCamera);
 
-    _followRotationInterpolator.setInterpolationTime(interpolationTime);
-    _followRotationInterpolator.setDeltaTime(interpolationSign * deltaTime);
+    _followRotationInterpolator.setInterpolationTime(static_cast<float>(
+        interpolationTime
+    ));
+    _followRotationInterpolator.setDeltaTime(static_cast<float>(
+        interpolationSign * deltaTime
+    ));
     _followRotationInterpolator.step();
 
     return glm::slerp(
@@ -528,5 +582,4 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
     return posHandle;
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

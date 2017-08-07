@@ -1,3 +1,5 @@
+local ganymede_local = 1.8213E6
+
 return {
     -- Ganymede module
     {   
@@ -7,14 +9,15 @@ return {
             Type = "RenderablePlanetProjection",
             Frame = "IAU_GANYMEDE", 
             Body = "GANYMEDE",
+            Radius = ganymede_local,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 1.8213E6,
+                Radius = ganymede_local,
                 Segments = 100
             },
+            ColorTexture = "textures/ganymede.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/ganymede.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },
@@ -42,7 +45,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "GANYMEDE",
+                Target = "GANYMEDE",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -79,7 +82,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "GANYMEDE",
+                Target = "GANYMEDE",
                 Observer = "JUPITER BARYCENTER",
             },
             Color = { 0.4, 0.3, 0.3 },

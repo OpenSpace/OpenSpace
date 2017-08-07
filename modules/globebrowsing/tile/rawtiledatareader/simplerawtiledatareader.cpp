@@ -38,11 +38,10 @@
 #include <ghoul/io/texture/texturereader.h>
 
 namespace {
-    const std::string _loggerCat = "SimpleRawTileDataReader";
-}
+    const char* _loggerCat = "SimpleRawTileDataReader";
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 SimpleRawTileDataReader::SimpleRawTileDataReader(const std::string& filePath,
         const TileTextureInitData& initData,
@@ -203,5 +202,4 @@ IODescription SimpleRawTileDataReader::adjustIODescription(const IODescription& 
     return modifiedIO;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

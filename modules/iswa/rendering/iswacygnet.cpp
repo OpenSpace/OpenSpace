@@ -34,15 +34,26 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const std::string _loggerCat = "IswaCygnet";
-}
+    const char* _loggerCat = "IswaCygnet";
+
+    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+        "Delete",
+        "Delete",
+        "" // @TODO Missing documentation
+    };
+    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+        "Alpha",
+        "Alpha",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
 
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _delete("delete", "Delete")
-    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
+    , _delete(DeleteInfo)
+    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)
@@ -104,13 +115,14 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 }
 
 IswaCygnet::~IswaCygnet(){}
-bool IswaCygnet::initialize(){
+
+void IswaCygnet::initialize() {
     _textures.push_back(nullptr);
     
-    if(!_data->groupName.empty()){
+    if (!_data->groupName.empty()) {
         initializeGroup();
-    }else{
-        _delete.onChange([this](){
+    } else {
+        _delete.onChange([this]() {
             deinitialize();
             OsEng.scriptEngine().queueScript(
                 "openspace.removeSceneGraphNode('" + name() + "')",
@@ -123,19 +135,16 @@ bool IswaCygnet::initialize(){
     createGeometry();
     createShader();
     downloadTextureResource();
-
-    return true;
 }
 
-bool IswaCygnet::deinitialize(){
-     if(!_data->groupName.empty())
+void IswaCygnet::deinitialize() {
+    if (!_data->groupName.empty()) {
         _group->groupEvent()->unsubscribe(name());
+    }
 
     unregisterProperties();
     destroyGeometry();
     destroyShader();
-
-    return true;
 }
 
 bool IswaCygnet::isReady() const{
@@ -145,7 +154,7 @@ bool IswaCygnet::isReady() const{
     return ready;
 }
 
-void IswaCygnet::render(const RenderData& data){
+void IswaCygnet::render(const RenderData& data, RendererTasks&){
     if(!readyToRender()) return;
     
     psc position = data.position;
@@ -178,10 +187,10 @@ void IswaCygnet::render(const RenderData& data){
     _shader->deactivate();
 }
 
-void IswaCygnet::update(const UpdateData& data){
-
-    if (!_enabled)
+void IswaCygnet::update(const UpdateData&) {
+    if (!_enabled) {
         return;
+    }
 
     // the texture resource is downloaded ahead of time, so we need to
     // now if we are going backwards or forwards
@@ -193,13 +202,14 @@ void IswaCygnet::update(const UpdateData& data){
     bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
+    if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         bool success = updateTextureResource();
-        if(success)
+        if (success) {
             _textureDirty = true;
+        }
     }
 
-    if(_textureDirty && _data->updateTime != 0 && timeToUpdate) {
+    if (_textureDirty && _data->updateTime != 0 && timeToUpdate) {
         updateTexture();
         _textureDirty = false;
 
@@ -208,13 +218,14 @@ void IswaCygnet::update(const UpdateData& data){
         _lastUpdateOpenSpaceTime =_openSpaceTime;
     }
 
-    if(!_transferFunctions.empty())
-        for(auto tf : _transferFunctions)
+    if (!_transferFunctions.empty()) {
+        for (const std::shared_ptr<TransferFunction>& tf : _transferFunctions) {
             tf->update();
+        }
+    }
 }
 
-
-bool IswaCygnet::destroyShader(){
+bool IswaCygnet::destroyShader() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -223,13 +234,11 @@ bool IswaCygnet::destroyShader(){
     return true;
 }
 
-void IswaCygnet::registerProperties(){
-}
+void IswaCygnet::registerProperties() {}
 
-void IswaCygnet::unregisterProperties(){
-}
+void IswaCygnet::unregisterProperties() {}
 
-void IswaCygnet::initializeTime(){
+void IswaCygnet::initializeTime() {
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
     _lastUpdateOpenSpaceTime = 0.0;
 
@@ -239,19 +248,21 @@ void IswaCygnet::initializeTime(){
     _minRealTimeUpdateInterval = 100;
 }
 
-bool IswaCygnet::createShader(){
+bool IswaCygnet::createShader() {
     if (_shader == nullptr) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram(_programName,
             _vsPath,
             _fsPath
-            );
-        if (!_shader) return false;
+        );
+        if (!_shader) {
+            return false;
+        }
     }
     return true;
 }
 
-void IswaCygnet::initializeGroup(){
+void IswaCygnet::initializeGroup() {
     _group = IswaManager::ref().iswaGroup(_data->groupName);
 
     //Subscribe to enable and delete property

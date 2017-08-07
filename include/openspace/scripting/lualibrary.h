@@ -30,8 +30,7 @@
 #include <string>
 #include <vector>
 
-namespace openspace {
-namespace scripting {
+namespace openspace::scripting {
 
 /**
 * This structure represents a Lua library, itself consisting of a unique #name and
@@ -78,7 +77,6 @@ struct LuaLibrary {
     bool operator<(const LuaLibrary& rhs) const;
 };
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting
 
 #endif // __OPENSPACE_CORE___LUALIBRARY___H__

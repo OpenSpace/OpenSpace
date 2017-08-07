@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPUTileDepthTransform::setValue(ghoul::opengl::ProgramObject* programObject,
                                      const TileDepthTransform& depthTransform)
@@ -43,5 +42,4 @@ void GPUTileDepthTransform::bind(ghoul::opengl::ProgramObject* programObject,
     _gpuDepthScale.bind(programObject, nameBase + "depthScale");
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

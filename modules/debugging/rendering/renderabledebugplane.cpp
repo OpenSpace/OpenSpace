@@ -39,62 +39,137 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+
 namespace {
-    const std::string _loggerCat = "RenderablePlaneTexture";
-}
+    enum Origin {
+        LowerLeft = 0,
+        LowerRight,
+        UpperLeft,
+        UpperRight,
+        Center
+    };
+    
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "Texture",
+        "Texture",
+        "The OpenGL name of the texture that is displayed on this plane."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BillboardInfo = {
+        "Billboard",
+        "Billboard mode",
+        "This value specifies whether the plane is a billboard, which means that it is "
+        "always facing the camera. If this is false, it can be oriented using other "
+        "transformations."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size (in meters)",
+        "This value specifies the size of the plane in meters."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OriginInfo = {
+        "Origin",
+        "Texture Coordinate Origin",
+        "The origin of the texture coorinate system."
+    };
+} // namespace
 
 namespace openspace {
 
+documentation::Documentation RenderableDebugPlane::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableDebugPlane",
+        "debugging_renderable_debugplane",
+        {
+            {
+                TextureInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                TextureInfo.description
+            },
+            {
+                BillboardInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                BillboardInfo.description
+            },
+            {
+                SizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                SizeInfo.description
+            },
+            {
+                OriginInfo.identifier,
+                new StringInListVerifier(
+                    { "LowerLeft", "LowerRight", "UpperLeft", "UpperRight", "Center" }
+                ),
+                Optional::Yes,
+                OriginInfo.description
+            }
+        }
+    };
+}
+
+
 RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texture("texture", "Texture", -1, -1, 255)
-    , _billboard("billboard", "Billboard", false)
-    , _size("size", "Size", 10, 0, std::pow(10, 25))
-    , _origin(Origin::Center)
+    , _texture(TextureInfo, -1, -1, 512)
+    , _billboard(BillboardInfo, false)
+    , _size(SizeInfo, 10.f, 0.f, 1e25f)
+    , _origin(OriginInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _shader(nullptr)
     , _quad(0)
     , _vertexPositionBuffer(0)
 {
-    dictionary.getValue("Size", _size);
-
-    if (dictionary.hasKey("Name")){
-        dictionary.getValue("Name", _nodeName);
+    if (dictionary.hasKey(TextureInfo.identifier)) {
+        _texture = static_cast<int>(dictionary.value<double>(TextureInfo.identifier));
     }
 
-    if (dictionary.hasKey("Texture")) {
-        int t;
-        dictionary.getValue("Texture", t);
-        _texture = t;
+    if (dictionary.hasKey(SizeInfo.identifier)) {
+        _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
     }
 
-    std::string origin;
-    if (dictionary.getValue("Origin", origin)) {
+    if (dictionary.hasKey(BillboardInfo.identifier)) {
+        _billboard = dictionary.value<bool>(BillboardInfo.identifier);
+    }
+
+    _origin.addOptions({
+        { LowerLeft, "LowerLeft" },
+        { LowerRight, "LowerRight" },
+        { UpperLeft, "UpperLeft" },
+        { UpperRight, "UpperRight" },
+        { Center, "Center" }
+    });
+    _origin.setValue(Center);
+
+    if (dictionary.hasKey(OriginInfo.identifier)) {
+        const std::string origin = dictionary.value<std::string>(OriginInfo.identifier);
         if (origin == "LowerLeft") {
-            _origin = Origin::LowerLeft;
+            _origin = LowerLeft;
         }
         else if (origin == "LowerRight") {
-            _origin = Origin::LowerRight;
+            _origin = LowerRight;
         }
         else if (origin == "UpperLeft") {
-            _origin = Origin::UpperLeft;
+            _origin = UpperLeft;
         }
         else if (origin == "UpperRight") {
-            _origin = Origin::UpperRight;
+            _origin = UpperRight;
         }
         else if (origin == "Center") {
-            _origin = Origin::Center;
+            _origin = Center;
         }
     }
-
-    // Attempt to get the billboard value
-    bool billboard = false;
-    if (dictionary.getValue("Billboard", billboard)) {
-        _billboard = billboard;
+    else {
+        _origin = Center;
     }
 
-    int texture;
-    if (dictionary.getValue("Texture", texture))
-        _texture = texture;
     addProperty(_texture);
 
     addProperty(_billboard);
@@ -105,38 +180,31 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     setBoundingSphere(_size);
 }
 
-RenderableDebugPlane::~RenderableDebugPlane() {
-}
+RenderableDebugPlane::~RenderableDebugPlane() {}
 
 bool RenderableDebugPlane::isReady() const {
     bool ready = true;
-    if (!_shader)
+    if (!_shader) {
         ready &= false;
+    }
     return ready;
 }
 
-bool RenderableDebugPlane::initialize() {
+void RenderableDebugPlane::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-    if (_shader == nullptr) {
-        // Plane Program
-
+    if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("PlaneProgram",
             "${MODULE_BASE}/shaders/plane_vs.glsl",
             "${MODULE_BASE}/shaders/plane_fs.glsl"
             );
-        if (!_shader)
-            return false;
     }
-
-
-    return isReady();
 }
 
-bool RenderableDebugPlane::deinitialize() {
+void RenderableDebugPlane::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -148,14 +216,13 @@ bool RenderableDebugPlane::deinitialize() {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-
-    return true;
 }
 
-void RenderableDebugPlane::render(const RenderData& data) {
+void RenderableDebugPlane::render(const RenderData& data, RendererTasks&) {
     glm::mat4 transform = glm::mat4(1.0);
-    if (_billboard)
+    if (_billboard) {
         transform = glm::inverse(glm::mat4(data.camera.viewRotationMatrix()));
+    }
 
     // Activate shader
     _shader->activate();
@@ -175,12 +242,14 @@ void RenderableDebugPlane::render(const RenderData& data) {
     _shader->deactivate();
 }
 
-void RenderableDebugPlane::update(const UpdateData& data) {
-    if (_shader->isDirty())
+void RenderableDebugPlane::update(const UpdateData&) {
+    if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+    }
 
-    if (_planeIsDirty)
+    if (_planeIsDirty) {
         createPlane();
+    }
 }
 
 void RenderableDebugPlane::createPlane() {

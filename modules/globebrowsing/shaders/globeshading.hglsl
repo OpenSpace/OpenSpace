@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,8 @@
 #ifndef GLOBESHADING_HGLSL
 #define GLOBESHADING_HGLSL
 
-float orenNayarDiffuse(
-    vec3 lightDirection,
-    vec3 viewDirection,
-    vec3 surfaceNormal,
-    float roughness)
+float orenNayarDiffuse(vec3 lightDirection, vec3 viewDirection, vec3 surfaceNormal,
+                       float roughness)
 {
     // calculate intermediary values
     float NdotL = dot(surfaceNormal, lightDirection);
@@ -53,9 +50,7 @@ float orenNayarDiffuse(
     float C = sin(alpha) * tan(beta);
     
     // put it all together
-    float L1 = max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
-
-    return L1;
+    return max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
 }
 
 #endif // GLOBESHADING_HGLSL
