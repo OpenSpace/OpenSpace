@@ -42,10 +42,11 @@ function (create_new_module module_name output_library_name)
     # Add the module files to the list of sources
     get_module_files(${module_name} module_files)
 
-    set(library_mode STATIC)
     if (${library_name}_LIBRARY_MODE)
         set(library_mode ${${library_name}_LIBRARY_MODE})
         message(STATUS "\t Overwritten library mode: ${library_mode}")
+    else ()
+        set(library_mode STATIC)
     endif ()
 
     # Create the library
@@ -63,7 +64,8 @@ endfunction ()
 
 
 
-# Gets and returns the <name>module.h and <name>module.cpp files and provides them with a source group
+# Gets and returns the <name>module.h and <name>module.cpp files and provides them with a
+# source group
 function (get_module_files module_name module_files)
     string(TOLOWER ${module_name} module_name_lower)
     set(module_files

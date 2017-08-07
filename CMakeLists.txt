@@ -72,7 +72,9 @@ endif ()
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 handle_option_tests()
 
-handle_internal_modules()
+set(OPENSPACE_MODULES_PATHS "${OPENSPACE_MODULE_DIR}" CACHE STRING "List of external modules")
+handle_modules(${OPENSPACE_MODULES_PATHS})
+
 copy_dynamic_libraries()
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)
