@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -59,6 +59,9 @@ void SurfaceModelLoadJob::execute() {
 	dictionary.setValue(keyType, roverSurfaceModelGeometry);
 
 	_subsiteModels->model = std::make_shared<modelgeometry::AsyncMultiModelGeometry>(dictionary);
+
+    glbinding::Binding::useCurrentContext();
+    glbinding::Binding::initialize();
 
 	for (auto fileName : _subsite->fileNames) {
 		// Load all textures
