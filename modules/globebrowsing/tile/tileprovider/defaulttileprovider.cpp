@@ -49,6 +49,7 @@ namespace {
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
     const char* KeyPreCacheLevel = "PreCacheLevel";
+    const char* KeyPadTiles = "PadTiles";
 
     static const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
@@ -98,8 +99,12 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
         LDEBUG("Default pixel size overridden: " << pixelSize);
         tilePixelSize = static_cast<int>(pixelSize); 
     }
+
+    _padTiles = true;
+    dictionary.getValue<bool>(KeyPadTiles, _padTiles);
+    
     TileTextureInitData initData(LayerManager::getTileTextureInitData(
-        _layerGroupID, tilePixelSize));
+        _layerGroupID, _padTiles, tilePixelSize));
     _tilePixelSize.setValue(initData.dimensionsWithoutPadding().x);
 
     _performPreProcessing =
@@ -136,7 +141,7 @@ void DefaultTileProvider::update() {
         if (_asyncTextureDataProvider->shouldBeDeleted()) {
             _asyncTextureDataProvider = nullptr;
             TileTextureInitData initData(LayerManager::getTileTextureInitData(
-                _layerGroupID, _tilePixelSize));
+                _layerGroupID, _padTiles, _tilePixelSize));
             initAsyncTileDataReader(initData);
         }
     }
@@ -149,7 +154,7 @@ void DefaultTileProvider::reset() {
     }
     else {
         TileTextureInitData initData(LayerManager::getTileTextureInitData(
-            _layerGroupID, _tilePixelSize));
+            _layerGroupID, _padTiles, _tilePixelSize));
         initAsyncTileDataReader(initData);
     }
 }

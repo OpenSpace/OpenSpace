@@ -28,13 +28,14 @@
 
 namespace openspace::globebrowsing {
 
-const glm::ivec2 TileTextureInitData::TilePixelStartOffset = glm::ivec2(-2);
-const glm::ivec2 TileTextureInitData::TilePixelSizeDifference = glm::ivec2(4);
+const glm::ivec2 TileTextureInitData::TilePixelStartOffset = glm::ivec2(-1);
+const glm::ivec2 TileTextureInitData::TilePixelSizeDifference = glm::ivec2(2);
 
 TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum glType,
     Format textureFormat, bool padTiles, ShouldAllocateDataOnCPU shouldAllocateDataOnCPU)
     : _glType(glType)
     , _ghoulTextureFormat(textureFormat)
+    , _padTiles(padTiles)
     , _shouldAllocateDataOnCPU(shouldAllocateDataOnCPU)
 {
     _tilePixelStartOffset = padTiles ? TilePixelStartOffset : glm::ivec2(0);
@@ -59,6 +60,7 @@ TileTextureInitData::TileTextureInitData(const TileTextureInitData& original)
         original.dimensionsWithoutPadding().y,
         original.glType(),
         original.ghoulTextureFormat(),
+        original._padTiles,
         original.shouldAllocateDataOnCPU() ? ShouldAllocateDataOnCPU::Yes : ShouldAllocateDataOnCPU::No)
 { };
 

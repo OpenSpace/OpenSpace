@@ -87,6 +87,7 @@ private:
     size_t _bytesPerLine;
     size_t _totalNumBytes;
     bool _shouldAllocateDataOnCPU;
+    bool _padTiles;
 };
 
 } // namespace openspace::globebrowsing

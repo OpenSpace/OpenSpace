@@ -43,7 +43,8 @@ namespace {
 namespace openspace::globebrowsing::tileprovider {
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers))
+    : TextTileProvider(
+        LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
     , _backgroundTile(Tile::TileUnavailable)
 {
     _fontSize = 50;

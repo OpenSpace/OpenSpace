@@ -40,6 +40,7 @@ namespace {
     const char* keySettings = "Settings";
     const char* keyAdjustment = "Adjustment";
     const char* KeyBlendMode = "BlendMode";
+    const char* KeyPadTiles = "PadTiles";
 
     static const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -104,7 +105,11 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     layerDict.getValue(keyEnabled, enabled);
     _enabled.setValue(enabled);
 
-    TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId);
+    bool padTiles = true;
+    layerDict.getValue<bool>(KeyPadTiles, padTiles);
+    
+    TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId,
+                                                                        padTiles);
     _padTilePixelStartOffset = initData.tilePixelStartOffset();
     _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
 

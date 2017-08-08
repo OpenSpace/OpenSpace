@@ -59,7 +59,7 @@ public:
     void reset(bool includingDisabled = false);
 
     static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
-        size_t preferredTileSize = 0);
+        bool padTiles, size_t preferredTileSize = 0);
 
     static bool shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id);
     void onChange(std::function<void(void)> callback);
