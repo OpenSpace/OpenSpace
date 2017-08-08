@@ -72,8 +72,8 @@ endif ()
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 handle_option_tests()
 
-set(OPENSPACE_MODULES_PATHS "${OPENSPACE_MODULE_DIR}" CACHE STRING "List of external modules")
-handle_modules(${OPENSPACE_MODULES_PATHS})
+set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
+handle_modules(${OPENSPACE_MODULE_DIR} "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
 
 copy_dynamic_libraries()
 

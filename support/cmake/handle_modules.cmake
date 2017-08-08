@@ -30,17 +30,22 @@
 # 5. Create module_registration.h file
 
 
-function (handle_modules paths)
+function (handle_modules internal_module_path external_modules_paths)
     # Remove all of the module information files that were created the last time
     file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/_generated/modules")
 
-    foreach (path ${paths})
-        message(STATUS "Adding modules from path ${path}")
+    # First handle the internal module
+    handle_individual_module(${internal_module_path})
+
+    # Then handle all the external modules)
+    foreach (path ${external_modules_paths})
+        message(STATUS "Adding modules from external path ${path}")
 
         # Get the parent directory
         get_filename_component(parent "${path}/.." ABSOLUTE)
         get_filename_component(parent "${parent}" NAME)
 
+        message(STATUS "Registering ${parent} as an include path")
         target_include_directories(libOpenSpace PUBLIC ${parent})
 
         handle_individual_module(${path})
