@@ -33,7 +33,12 @@ function (handle_modules internal_module_path external_modules_paths)
     foreach (path ${external_modules_paths})
         get_individual_modules(${path} names paths)
 
-        # @TODO: Check for duplicates here; modules in different ext folders with the same name ---abock
+        foreach (n ${names})
+            if (${n} IN_LIST all_module_names)
+                message(FATAL_ERROR "Module name ${n} is not unique among the external directories")
+            endif ()
+        endforeach ()
+
         set(all_module_names ${all_module_names} ${names})
         set(all_module_paths ${all_module_paths} ${paths})
     endforeach ()
