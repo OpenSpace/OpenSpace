@@ -46,13 +46,13 @@ endfunction ()
 function (add_external_dependencies)
     # System libraries
     if (APPLE)
-        target_include_directories(${project} PUBLIC "/Developer/Headers/FlatCarbon")
+        target_include_directories(libOpenSpace PUBLIC "/Developer/Headers/FlatCarbon")
         find_library(COREFOUNDATION_LIBRARY CoreFoundation)
         find_library(CARBON_LIBRARY Carbon)
         find_library(COCOA_LIBRARY Carbon)
         find_library(APP_SERVICES_LIBRARY ApplicationServices)
         mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-        target_link_libraries(${project}
+        target_link_libraries(libOpenSpace
             ${CARBON_LIBRARY}
             ${COREFOUNDATION_LIBRARY}
             ${COCOA_LIBRARY}

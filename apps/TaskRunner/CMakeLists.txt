@@ -38,4 +38,4 @@ add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
     ${SOURCE_FILES}
 )
 
-set_compile_settings(${APPLICATION_NAME})
+set_openspace_compile_settings(${APPLICATION_NAME})
