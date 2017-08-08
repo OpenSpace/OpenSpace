@@ -8,12 +8,12 @@
 @MODULE_HEADERS@
 namespace openspace {
 
-auto AllModules = []() -> std::vector<OpenSpaceModule*> {
+constexpr auto AllModules = []() -> std::vector<OpenSpaceModule*> {
     return {
 @MODULE_CLASSES@    };
 };
 
-std::vector<std::string> ModulePaths = {
+constexpr const char* ModulePaths[] = {
 @MODULE_PATHS@
 };
 

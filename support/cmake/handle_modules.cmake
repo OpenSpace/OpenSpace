@@ -188,7 +188,9 @@ function (handle_modules internal_module_path external_modules_paths)
     )
 
     foreach (path ${module_paths})
-        list(APPEND MODULE_PATHS "    \"${path}\",\n")
+        # The module path should include the 'modules' directory, which is removed for the
+        # include path to make all of the includes look the same
+        list(APPEND MODULE_PATHS "    \"${path}/modules\",\n")
         target_include_directories(libOpenSpace PUBLIC ${path})
     endforeach ()
 
