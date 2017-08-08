@@ -6,12 +6,17 @@ import Button from './Button';
 
 /* globals module */
 
+// eslint-disable-next-line
+const W = ({ children }) => (<div style={{ background: '#252525', padding: '20px' }}>{ children }</div>);
+
 storiesOf('Input.Button', module)
-  .add('default', () => (<Button>button!</Button>))
-  .add('with callback', () => (<Button onClick={action('clickety!')}>clicky button!</Button>))
-  .add('block', () => (<Button block>blocky wide button!</Button>))
-  .add('transparent', () => (<Button transparent>transparent button!</Button>))
-  .add('small', () => (<Button small>small button!</Button>))
-  .add('smalltext', () => (<Button smalltext>smalltext button!</Button>))
-  .add('disabled', () => (<Button disabled>disabled button!</Button>))
-  .add('uppercase', () => (<Button uppercase>uppercase button!</Button>));
+  .add('default', () => (<W><Button>button!</Button></W>))
+  .add('with callback', () => (<W><Button onClick={action('clickety!')}>clicky button!</Button></W>))
+  .add('block', () => (<W><Button block>blocky wide button!</Button></W>))
+  .add('transparent', () => (<W><Button transparent>transparent button!</Button></W>))
+  .add('small', () => (<W><Button small>small button!</Button></W>))
+  .add('smalltext', () => (<W><Button smalltext>smalltext button!</Button></W>))
+  .add('disabled', () => (<W><Button disabled>disabled button!</Button></W>))
+  .add('uppercase', () => (<W><Button uppercase>uppercase button!</Button></W>))
+  .add('ALL the variations', () =>
+    (<W><Button small smalltext block uppercase transparent>crazy button!</Button></W>));
