@@ -79,8 +79,8 @@ void to_json(json &j, const SceneGraphNode* pN) {
 
 void to_json(json &j, const Renderable &r) {
     j = {
-        { "enabled", r.isEnabled() },
-        { "properties", r.properties() }
+//        { "properties", r.properties() },
+        { "enabled", r.isEnabled() }
     };
 }
 
