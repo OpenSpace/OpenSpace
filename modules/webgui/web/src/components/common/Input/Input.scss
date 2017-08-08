@@ -1,33 +1,35 @@
 @import "../../../styles/all";
 
-$label-size: 0.7rem;
-$label-margin: 0.3rem;
-$loading-border-width: 0.1rem;
+// rename some vars to make this less cluttered than it already is
+$label-size: $input-label-size;
+$label-margin: $input-label-margin;
+$loading-border-width: $input-loading-border-width;
+$padding-horizontal: $input-padding-horizontal;
+$padding-vertical: $input-padding-vertical;
 
 // calculate good padding for input field
-$padding-horizontal: 0.5rem;
-$padding-vertical: $base-padding * 1.5;
 $padding-top: $label-size + (2 * $label-margin);
 $padding-bottom: $padding-vertical - $padding-top;
 $padding-bottom-loading: $padding-vertical - $padding-top - $loading-border-width;
 
 // different states
 $padding: $padding-top $padding-horizontal $padding-bottom;
-$padding-empty: ($padding-vertical/2) $padding-horizontal;
+$padding-empty: ($padding-vertical / 2) $padding-horizontal;
 $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
 
 .group {
-  box-sizing: border-box;
   position: relative;
 }
 
 .input {
   background: transparent;
-  border: 0;
+  border: none;
   box-sizing: border-box;
   color: $text-color-blur;
+  font-size: $input-font-size;
+  height: $input-total-height;
+  line-height: $input-font-size;
   padding: $padding-empty;
-  transition: padding $animation-duration $animation-easing;
 
   &:disabled {
     color: lighten(black, 40%);
@@ -63,6 +65,7 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
 }
 
 .label {
+  color: $text-color-blur;
   display: none;
   font-size: $label-size;
   left: $padding-horizontal;
@@ -82,6 +85,7 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   color: $text-color-blur;
   cursor: pointer;
   display: none;
+  font-size: 18px;
   opacity: 0;
   position: absolute;
   right: $padding-horizontal;

@@ -47,8 +47,10 @@ class ScrollOverlay extends Component {
    * @param target - the `.scroll-content` node
    */
   updateScrollIndicators(target) {
+    // compare using `< 1` instead of `=== 0` because floating point precision
+    const bottomHeight = target.scrollTop + target.clientHeight;
+    const atBottom = Math.abs(bottomHeight - target.scrollHeight) < 1;
     const atTop = target.scrollTop === 0;
-    const atBottom = target.scrollTop + target.clientHeight === target.scrollHeight;
     this.setState({ atTop, atBottom });
   }
 
@@ -77,7 +79,7 @@ class ScrollOverlay extends Component {
   render() {
     return (
       <div
-        className={`scroll-content ${styles.ScrollOverlay} ${this.stateClasses}`}
+        className={`scroll-content ${this.props.className} ${styles.ScrollOverlay} ${this.stateClasses}`}
         id={this.state.id}
         ref={this.setDomNode}
       >
@@ -91,6 +93,11 @@ ScrollOverlay.elementCount = 0;
 
 ScrollOverlay.propTypes = {
   children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+};
+
+ScrollOverlay.defaultProps = {
+  className: '',
 };
 
 export default ScrollOverlay;

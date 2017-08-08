@@ -3,27 +3,35 @@ import PropTypes from 'prop-types';
 import Pane from './Pane';
 import LoadingString from '../common/LoadingString/LoadingString';
 import DataManager from '../../api/DataManager';
+import FilterList from '../common/FilterList/FilterList';
+import SceneGraphNode from './SceneGraphNode';
 
-const PROPERTIES_KEY = '__allProperties';
+const NODES_KEY = '__allNodes';
 
 class ViewPane extends Component {
   constructor(props) {
     super(props);
-    this.state = { properties: [], hasData: false };
+    this.state = { nodes: [], hasData: false };
 
     this.receiveData = this.receiveData.bind(this);
   }
 
   componentDidMount() {
     // subscribe to data
-    DataManager.getValue(PROPERTIES_KEY, this.receiveData);
+    DataManager.getValue(NODES_KEY, this.receiveData);
   }
 
-  receiveData({ value }) {
-    this.setState({ properties: value, hasData: true });
+  receiveData(data) {
+    this.setState({ nodes: data, hasData: true });
+  }
+
+  get nodes() {
+    return this.state.nodes
+      .map(node => Object.assign({ key: node.name }, node));
   }
 
   render() {
+    const { nodes } = this;
     return (
       <Pane title="View" closeCallback={this.props.closeCallback}>
         { !this.state.hasData && (
@@ -32,11 +40,9 @@ class ViewPane extends Component {
           </LoadingString>
         )}
 
-        { this.state.properties.map(prop => (
-          <div key={prop.uri}>
-            { prop.Description.Name}: "{ prop.Value }" ({ prop.Description.Identifier })
-          </div>
-        )) }
+        { nodes.length > 0 && (
+          <FilterList data={nodes} viewComponent={SceneGraphNode} />
+        )}
       </Pane>
     );
   }

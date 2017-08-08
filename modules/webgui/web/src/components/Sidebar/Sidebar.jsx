@@ -6,10 +6,12 @@ import TabMenuItem from './TabMenu/TabMenuItem';
 import Icon from '../common/Icon/Icon';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
 import ViewPane from './ViewPane';
+import SettingsPane from './SettingsPane';
 
 import styles from './Sidebar.scss';
 
 const views = {
+  settings: SettingsPane,
   view: ViewPane,
 };
 

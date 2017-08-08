@@ -4,6 +4,7 @@ import Input from '../Input/Input';
 import CenteredLabel from '../CenteredLabel/CenteredLabel';
 import ScrollOverlay from '../ScrollOverlay/ScrollOverlay';
 import { SimpleSubstring } from '../../../utils/StringMatchers';
+import styles from './FilterList.scss';
 
 class FilterList extends Component {
   constructor(props) {
@@ -45,7 +46,7 @@ class FilterList extends Component {
     const { search } = this.state;
     const entries = this.filtered;
     return (
-      <section className={this.props.className}>
+      <section className={`${this.props.className} ${styles.filterList}`}>
         <Input
           value={search}
           placeholder={this.props.searchText}
@@ -54,7 +55,11 @@ class FilterList extends Component {
         />
 
         <ScrollOverlay>
-          { entries.length === 0 && (<CenteredLabel>Nothing found. Try another search!</CenteredLabel>) }
+          { entries.length === 0 && (
+            <CenteredLabel>
+              Nothing found. Try another search!
+            </CenteredLabel>
+          ) }
           <ul>
             { entries.map(entry => (
               <EntryComponent

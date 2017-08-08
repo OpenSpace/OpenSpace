@@ -11,12 +11,15 @@ const Pane = ({ children, title, closeCallback }) => (
         { title }
       </div>
 
-      { closeCallback &&
-        (<button onClick={closeCallback(false)} className={styles.close}>
+      { closeCallback && (
+        <button onClick={closeCallback(false)} className={styles.close}>
           <Icon icon="close" className="small" />
-        </button>) }
+        </button>
+      ) }
     </header>
-    { children }
+    <div className={styles.content}>
+      { children }
+    </div>
   </section>
 );
 

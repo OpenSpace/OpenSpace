@@ -3,7 +3,7 @@ $bottom-bar-height: 60px;
 $sidebar-tab-height: 60px;
 
 // padding
-$base-padding: 1rem;
+$base-padding: 14px;
 $vertical-padding: $base-padding / 2;
 $button-padding: $vertical-padding $base-padding;
 $sidebar-padding: ($base-padding / 2);
@@ -12,3 +12,17 @@ $popover-horizontal-padding: $base-padding / 2;
 // element-specific config
 $scrollbar-width: 10px;
 $popover-arrow-size: 0.5rem;
+
+// Input
+$input-font-size: 14px;
+// the font size of the label
+$input-label-size: 10px;
+// total margin above and below input label
+$input-label-margin: 3px;
+// thickness of the loading indicating border
+$input-loading-border-width: 2px;
+// padding
+$input-padding-horizontal: 7px;
+$input-padding-vertical: $base-padding * 1.5;
+
+$input-total-height: $input-padding-vertical + $input-font-size;

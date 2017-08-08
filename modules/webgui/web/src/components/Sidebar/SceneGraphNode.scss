@@ -1,0 +1,24 @@
+@import "../../styles/all";
+
+.sceneGraphNode > header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: $sidebar-padding;
+
+  &:hover {
+    background: $ui-background-hover;
+  }
+
+  &:focus {
+    outline: 0;
+  }
+}
+
+.title {
+}
+
+.expandIcon {
+  color: $text-color-blur;
+  font-size: 18px;
+}

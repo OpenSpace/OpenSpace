@@ -78,9 +78,9 @@ class Input extends Component {
         <input
           {...this.inheritProps}
           className={`${className} ${styles.input}
-                      ${this.hasInput && styles.hasinput}
-                      ${loading && styles.loading}
-                      ${wide && styles.wide}`}
+                      ${this.hasInput ? styles.hasinput : ''}
+                      ${loading ? styles.loading : ''}
+                      ${wide ? styles.wide : ''}`}
           id={id}
           onChange={this.onChange}
           value={value}
@@ -92,7 +92,7 @@ class Input extends Component {
         { clearable && (
           <Icon
             icon="cancel"
-            className={`small ${styles.clearbutton} ${this.hasInput && styles.hasinput}`}
+            className={`${styles.clearbutton} ${this.hasInput && styles.hasinput}`}
             onClick={this.clear}
             tabIndex="0"
             role="button"

@@ -3,14 +3,17 @@ import PropTypes from 'prop-types';
 import { excludeKeys } from '../../../utils/helpers';
 import styles from './Button.scss';
 
+/* eslint-disable react/no-unused-prop-types */
+
 const Button = (props) => {
   const specialClasses = 'block small transparent uppercase smalltext';
   const inheritProps = excludeKeys(props, specialClasses);
 
-  let extraClass = '';
-  specialClasses.split(' ')
+  // let extraClass = '';
+  const extraClass = specialClasses.split(' ')
     .filter(c => props[c])
-    .forEach(c => extraClass += `${styles[c]} `);
+    .map(c => styles[c])
+    .join(' ');
 
   return (
     <button {...inheritProps} className={`${props.className} ${extraClass} ${styles.button}`}>
