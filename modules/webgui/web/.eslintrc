@@ -9,6 +9,7 @@
     }
   },
   "rules": {
-    "linebreak-style": ["error", "unix"]
+    "linebreak-style": ["error", "unix"],
+    "no-plusplus": "off"
   }
 }
