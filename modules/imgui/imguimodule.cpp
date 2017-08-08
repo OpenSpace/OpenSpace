@@ -42,7 +42,7 @@
 
 namespace openspace {
 
-    ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
+ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
     // TODO: Remove dependency on OsEng.
