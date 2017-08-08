@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,9 +34,9 @@ public:
     ShenTSP(const std::string& filename);
     ~ShenTSP();
 
-    bool construct();
-    bool calculateSpatialError();
-    bool calculateTemporalError();
+    bool construct() override;
+    bool calculateSpatialError() override;
+    bool calculateTemporalError() override;
 
 protected:
     // Returns vector of standard deviations for each brick

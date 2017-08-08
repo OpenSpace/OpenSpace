@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -33,6 +33,23 @@
 
 namespace {
     const std::string _loggerCat = "Research Kit Timing";
+
+    static const openspace::properties::PropertyOwner::PropertyOwnerInfo TimerInfo = {
+        "Timer",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeoutInfo = {
+        "_timeout",
+        "Timeout",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeoutCyclesInfo = {
+        "_timeoutCycles",
+        "Timeout Cycles",
+        "" // @TODO Missing documentation
+    };
 }
 
 namespace openspace {
@@ -44,7 +61,7 @@ void printFrame() {
 }
 
 Timer::Timer()
-    : properties::PropertyOwner("Timer")
+    : properties::PropertyOwner(TimerInfo)
     ,_tick(0)
     , _cycles(0) { }
 
@@ -68,8 +85,8 @@ size_t Timer::getCycles() {
 
 TimeoutTimer::TimeoutTimer()
     : Timer()
-    , _timeout("_timeout", "Timeout", 0, 0, std::numeric_limits<unsigned long long>::max())
-    , _timeoutCycles("_timeoutCycles", "Timeout Cycles", 0, 0, std::numeric_limits<unsigned long long>::max()) {
+    , _timeout(TimeoutInfo, 0, 0, std::numeric_limits<unsigned long long>::max())
+    , _timeoutCycles(TimeoutCyclesInfo, 0, 0, std::numeric_limits<unsigned long long>::max()) {
 
     addProperty(_timeout);
     addProperty(_timeoutCycles);
