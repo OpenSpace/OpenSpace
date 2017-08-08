@@ -14,6 +14,9 @@ constexpr auto AllModules = []() -> std::vector<OpenSpaceModule*> {
 };
 
 constexpr const char* ModulePaths[] = {
+    // We need the empty string here or otherwise ModulePaths might be empty and thus
+    // cause a compiler error
+    "",
 @MODULE_PATHS@
 };
 

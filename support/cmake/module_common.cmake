@@ -48,7 +48,4 @@ function (create_module_class_name module_name module_class_name)
     string(SUBSTRING ${module_name} 0 1 FIRST_LETTER)
     string(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
     string(REGEX REPLACE "^.(.*)" "${FIRST_LETTER}\\1" module_name "${module_name}")
-
-
-
 endfunction ()
