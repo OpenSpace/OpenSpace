@@ -47,8 +47,8 @@ documentation::Documentation StaticScale::Documentation() {
             {
                 ScaleInfo.identifier,
                 new DoubleVerifier,
-                ScaleInfo.description,
-                Optional::No
+                Optional::No,
+                ScaleInfo.description
             }
         }
     };

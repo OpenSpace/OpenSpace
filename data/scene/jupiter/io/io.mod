@@ -1,46 +1,37 @@
 return {
-    -- Io module
-    {   
+    -- RenderableGlobe module
+    {
         Name = "Io",
         Parent = "JupiterBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_IO", -- should exist. 
-            Body = "IO",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 1.8213E6,
-                Segments = 100
-            },
-            Textures = {
-                Type = "simple",
-                Color = "textures/io.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
-        },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "IO",
-                Observer = "JUPITER BARYCENTER",
-                Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_IO",
-                DestinationFrame = "IAU_JUPITER",
+                DestinationFrame = "GALACTIC"
             },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
+            Translation = {
+                Type = "SpiceTranslation",
+                Target = "IO",
+                Observer = "JUPITER BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
             },
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = 1821600,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Io Texture",
+                        FilePath = "textures/io.jpg",
+                        Enabled = true
+                    }
+                }
+            }
         }
     },
-    -- IoTrail module
+    -- Trail module
     {   
         Name = "IoTrail",
         Parent = "JupiterBarycenter",
@@ -48,8 +39,8 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "IO",
-                Observer = "JUPITER BARYCENTER",
+                Target = "IO",
+                Observer = "JUPITER BARYCENTER"
             },
             Color = { 0.4, 0.4, 0.2 },
             Period =  42 / 24,

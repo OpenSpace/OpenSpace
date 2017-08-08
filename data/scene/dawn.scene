@@ -51,8 +51,10 @@ return {
         "uranus",
         "neptune",
         "pluto",
-        "stars",
-        "milkyway",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
         "missions/dawn"
     }
 }

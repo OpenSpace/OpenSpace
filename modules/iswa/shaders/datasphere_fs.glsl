@@ -43,11 +43,11 @@ const vec4 Transparent = vec4(0.0);
 
 Fragment getFragment() {
     vec4 position = vs_position;
-    const float depth = pscDepth(position);
+    float depth = pscDepth(position);
     vec4 diffuse = Transparent;
 
-    const float x = backgroundValues.x;
-    const float y = backgroundValues.y;
+    float x = backgroundValues.x;
+    float y = backgroundValues.y;
     
     if ((numTransferFunctions == 1) || (numTextures > numTransferFunctions)) {
         float v = 0;

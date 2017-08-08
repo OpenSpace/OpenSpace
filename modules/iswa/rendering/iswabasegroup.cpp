@@ -62,7 +62,7 @@ namespace {
 namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
-    : properties::PropertyOwner(std::move(name))
+    : properties::PropertyOwner({ std::move(name) })
     , _enabled(EnabledInfo, true) 
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)

@@ -35,7 +35,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
-    : properties::PropertyOwner("Layers")
+    : properties::PropertyOwner({ "Layers" })
 {
     // First create empty layer groups in case not all are specified
     _layerGroups.resize(layergroupid::NUM_LAYER_GROUPS);

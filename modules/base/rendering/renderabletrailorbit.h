@@ -48,8 +48,8 @@ class RenderableTrailOrbit : public RenderableTrail {
 public:
     explicit RenderableTrailOrbit(const ghoul::Dictionary& dictionary);
     
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     void update(const UpdateData& data) override;
     

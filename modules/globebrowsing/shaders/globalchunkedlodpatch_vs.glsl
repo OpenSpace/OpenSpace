@@ -71,10 +71,10 @@ PositionNormalPair globalInterpolation(vec2 uv) {
 
 void main() {
     PositionNormalPair pair = globalInterpolation(in_uv);
-    const float distToVertexOnEllipsoid =
+    float distToVertexOnEllipsoid =
         length(pair.position + pair.normal * chunkMinHeight - cameraPosition);
 
-    const float levelInterpolationParameter =
+    float levelInterpolationParameter =
         getLevelInterpolationParameter(
             chunkLevel,
             distanceScaleFactor,
@@ -94,21 +94,21 @@ void main() {
     // tileDelta is a step length (epsilon). Should be small enough for accuracy but not
     // Too small for precision. 1 / 512 is good.
     const float tileDelta = 1.0 / 512.0;
-    const PositionNormalPair pair10 = globalInterpolation(
+    PositionNormalPair pair10 = globalInterpolation(
         in_uv + vec2(1.0, 0.0) * tileDelta
     );
-    const PositionNormalPair pair01 = globalInterpolation(
+    PositionNormalPair pair01 = globalInterpolation(
         in_uv + vec2(0.0, 1.0) * tileDelta
     );
-    const vec3 ellipsoidTangentTheta = normalize(pair10.position - pair.position);
-    const vec3 ellipsoidTangentPhi = normalize(pair01.position - pair.position);
+    vec3 ellipsoidTangentTheta = normalize(pair10.position - pair.position);
+    vec3 ellipsoidTangentPhi = normalize(pair01.position - pair.position);
     ellipsoidTangentThetaCameraSpace = mat3(modelViewTransform) * ellipsoidTangentTheta;
     ellipsoidTangentPhiCameraSpace = mat3(modelViewTransform) * ellipsoidTangentPhi;
 #endif // USE_ACCURATE_NORMALS
 
     // Add the height in the direction of the normal
     pair.position += pair.normal * height;
-    const vec4 positionClippingSpace =
+    vec4 positionClippingSpace =
         modelViewProjectionTransform * vec4(pair.position, 1);
 
     // Write output

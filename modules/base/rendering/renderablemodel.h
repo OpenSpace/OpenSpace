@@ -28,9 +28,9 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
 
 #include <memory>
 
@@ -51,8 +51,8 @@ class RenderableModel : public Renderable {
 public:
     RenderableModel(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 
@@ -69,11 +69,11 @@ private:
 
     properties::StringProperty _colorTexturePath;
     properties::BoolProperty _performShading;
+    properties::Mat3Property _modelTransform;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    glm::dmat3 _modelTransform;
     glm::dvec3 _sunPos;
 };
 

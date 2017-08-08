@@ -70,7 +70,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 LayerRenderSettings::LayerRenderSettings()
-    : properties::PropertyOwner("Settings")
+    : properties::PropertyOwner({ "Settings" })
     , setDefault(SetDefaultInfo)
     , opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , gamma(GammaInfo, 1.f, 0.f, 5.f)

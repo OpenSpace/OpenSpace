@@ -179,17 +179,23 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
-    , _debugPropertyOwner("Debug")
+    , _debugPropertyOwner({ "Debug" })
 {
     setName("RenderableGlobe");
         
     dictionary.getValue(keyFrame, _frame);
 
     // Read the radii in to its own dictionary
-    glm::dvec3 radii;
-    dictionary.getValue(keyRadii, radii);
-    _ellipsoid = Ellipsoid(radii);
-    setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    if (dictionary.hasKeyAndValue<glm::dvec3>(keyRadii)) {
+        const glm::dvec3 radii = dictionary.value<glm::vec3>(keyRadii);
+        _ellipsoid = Ellipsoid(radii);
+        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    }
+    else if (dictionary.hasKeyAndValue<double>(keyRadii)) {
+        const double radius = dictionary.value<double>(keyRadii);
+        _ellipsoid = Ellipsoid({ radius, radius, radius });
+        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    }
 
     // Ghoul can't read ints from lua dictionaries...
     double patchSegmentsd;
@@ -199,8 +205,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // Init layer manager
     ghoul::Dictionary layersDictionary;
     if (!dictionary.getValue(keyLayers, layersDictionary)) {
-        throw ghoul::RuntimeError(
-            std::string(keyLayers) + " must be specified specified!");
+        throw ghoul::RuntimeError(std::string(keyLayers) + " must be specified");
     }
 
     _layerManager = std::make_shared<LayerManager>(layersDictionary);
@@ -255,12 +260,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     //addPropertySubOwner(_pointGlobe.get());
 }
 
-bool RenderableGlobe::initialize() {
-    return _distanceSwitch.initialize();
+void RenderableGlobe::initialize() {
+    _distanceSwitch.initialize();
 }
 
-bool RenderableGlobe::deinitialize() {
-    return _distanceSwitch.deinitialize();
+void RenderableGlobe::deinitialize() {
+    _distanceSwitch.deinitialize();
 }
 
 bool RenderableGlobe::isReady() const {

@@ -40,15 +40,9 @@ uniform mat4 modelViewProjectionTransform;
 uniform bool _hasHeightMap;
 uniform float _heightExaggeration;
 uniform sampler2D heightTexture;
-uniform bool shiftMeridian;
 
 void main() {
     vs_st = in_st;
-
-    vec2 st = in_st;
-    if (shiftMeridian) {
-        st.s += 0.5;
-    }
 
     vec4 tmp = in_position;
     
@@ -58,9 +52,9 @@ void main() {
     
 
     if (_hasHeightMap) {
-        const float height = texture(heightTexture, st).s;
-        const vec3 displacementDirection = (normalize(tmp.xyz));
-        const float displacementFactor = height * _heightExaggeration / 750.0;
+        float height = texture(heightTexture, in_st).s;
+        vec3 displacementDirection = (normalize(tmp.xyz));
+        float displacementFactor = height * _heightExaggeration / 750.0;
         tmp.xyz += displacementDirection * displacementFactor;
     }
 

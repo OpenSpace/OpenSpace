@@ -59,14 +59,14 @@ documentation::Documentation SimpleSphereGeometry::Documentation() {
                     new DoubleVerifier,
                     new DoubleVector3Verifier
                 ),
-                RadiusInfo.description,
-                Optional::No
+                Optional::No,
+                RadiusInfo.description
             },
             {
                 SegmentsInfo.identifier,
                 new IntVerifier,
-                SegmentsInfo.description,
-                Optional::No
+                Optional::No,
+                SegmentsInfo.description
             }
         }
     };

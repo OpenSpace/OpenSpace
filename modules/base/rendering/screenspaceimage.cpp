@@ -61,15 +61,15 @@ documentation::Documentation ScreenSpaceImage::Documentation() {
             {
                 KeyName,
                 new StringVerifier,
-                "Specifies the GUI name of the ScreenspaceImage",
-                Optional::Yes
+                Optional::Yes,
+                "Specifies the GUI name of the ScreenspaceImage"
             },
             {
                 KeyTexturePath,
                 new StringVerifier,
+                Optional::Yes,
                 "Specifies the image that is shown on the screenspace-aligned plane. If "
-                "this value is set and the URL is not, the disk image is used.",
-                Optional::Yes
+                "this value is set and the URL is not, the disk image is used."
             }
         }
     };

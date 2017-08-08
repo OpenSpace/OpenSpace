@@ -111,39 +111,39 @@ documentation::Documentation RenderableTrail::Documentation() {
             {
                 KeyTranslation,
                 new ReferencingVerifier("core_transform_translation"),
+                Optional::No,
                 "This object is used to compute locations along the path. Any "
-                "Translation object can be used here.",
-                Optional::No
+                "Translation object can be used here."
             },
             {
                 LineColorInfo.identifier,
                 new DoubleVector3Verifier,
-                LineColorInfo.description,
-                Optional::No
+                Optional::No,
+                LineColorInfo.description
             },
             {
                 EnableFadeInfo.identifier,
                 new BoolVerifier,
-                EnableFadeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                EnableFadeInfo.description
             },
             {
                 FadeInfo.identifier,
                 new DoubleVerifier,
-                FadeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                FadeInfo.description
             },
             {
                 LineWidthInfo.identifier,
                 new DoubleVerifier,
-                LineWidthInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                LineWidthInfo.description
             },
             {
                 PointSizeInfo.identifier,
                 new DoubleVerifier,
-                PointSizeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                PointSizeInfo.description
             },
             {
                 RenderingModeInfo.identifier,
@@ -151,11 +151,10 @@ documentation::Documentation RenderableTrail::Documentation() {
                     // Taken from the RenderingModeConversion map above
                     { "Lines", "Points", "Lines+Points", "Points+Lines" }
                 ),
-                RenderingModeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                RenderingModeInfo.description
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 
@@ -218,7 +217,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addProperty(_renderingModes);
 }
 
-bool RenderableTrail::initialize() {
+void RenderableTrail::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "EphemerisProgram",
@@ -227,17 +226,14 @@ bool RenderableTrail::initialize() {
     );
 
     setRenderBin(Renderable::RenderBin::Overlay);
-
-    return true;
 }
 
-bool RenderableTrail::deinitialize() {
+void RenderableTrail::deinitialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_programObject) {
         renderEngine.removeRenderProgram(_programObject);
         _programObject = nullptr;
     }
-    return true;
 }
 
 bool RenderableTrail::isReady() const {

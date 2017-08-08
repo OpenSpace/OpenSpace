@@ -345,12 +345,12 @@ std::string GlobeBrowsingModule::layerGroupNamesList() {
 }
 
 std::string GlobeBrowsingModule::layerTypeNamesList() {
-    std::string listLayerTypes("");
+    std::string listLayerTypes;
     for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += globebrowsing::layergroupid::LAYER_TYPE_NAMES[i] + ", ";
+        listLayerTypes += std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) + ", ";
     }
     listLayerTypes +=
-        " and " + globebrowsing::layergroupid::LAYER_TYPE_NAMES[globebrowsing::layergroupid::NUM_LAYER_TYPES - 1];
+        " and " + std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[globebrowsing::layergroupid::NUM_LAYER_TYPES - 1]);
     return listLayerTypes;
 }
 

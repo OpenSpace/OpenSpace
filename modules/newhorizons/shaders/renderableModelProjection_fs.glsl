@@ -47,13 +47,13 @@ bool inRange(float x, float a, float b) {
 } 
 
 void main() {
-    const vec3 n = normalize(vs_normal.xyz);
-    const vec4 projected = vs_ndc;
-    const vec2 uv = vec2(0.5) * projected.xy + vec2(0.5);
+    vec3 n = normalize(vs_normal.xyz);
+    vec4 projected = vs_ndc;
+    vec2 uv = vec2(0.5) * projected.xy + vec2(0.5);
 
     if (needShadowMap) {
-        const float thisDepth = projected.z * 0.5 + 0.5;
-        const float closestDepth = texture(depthTexture, uv).r;
+        float thisDepth = projected.z * 0.5 + 0.5;
+        float closestDepth = texture(depthTexture, uv).r;
         const float epsilon = 0.001;
 
         if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) &&

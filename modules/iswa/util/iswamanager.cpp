@@ -57,7 +57,7 @@ namespace {
 namespace openspace {
 
 IswaManager::IswaManager()
-    : properties::PropertyOwner("IswaManager")
+    : properties::PropertyOwner({ "IswaManager" })
     , _iswaEvent()
     , _baseUrl("https://iswa-demo-server.herokuapp.com/")
 {

@@ -37,7 +37,6 @@ namespace ghoul { class Dictionary; }
 namespace openspace::documentation {
 
 using Optional = ghoul::Boolean;
-using Exhaustive = ghoul::Boolean;
 
 /**
  * The TestResult structure returns the information from the #testSpecification method. It
@@ -162,7 +161,7 @@ struct DocumentationEntry {
      * \pre \p verifier must not be nullptr
      */
     DocumentationEntry(std::string key, std::shared_ptr<Verifier> verifier,
-                       std::string doc = "", Optional optional = Optional::No);
+        Optional optional, std::string doc = "");
 
     /**
     * The constructor for a DocumentationEntry describing a \p key in a Documentation.
@@ -185,8 +184,8 @@ struct DocumentationEntry {
     * \pre \p key must not be empty
     * \pre \p verifier must not be nullptr
     */
-    DocumentationEntry(std::string key, Verifier* verifier, std::string doc = "",
-        Optional optional = Optional::No);
+    DocumentationEntry(std::string key, Verifier* verifier, Optional optional,
+        std::string doc = "");
 
     /// The key that is described by this DocumentationEntry
     std::string key;
@@ -204,11 +203,8 @@ struct DocumentationEntry {
  * used to impose restrictions on keys and values and determine whether a given
  * ghoul::Dictionary adheres to these specifications (see #testSpecification and
  * #testSpecificationAndThrow methods). Each Documentation consists of a human-readable
- * \c name, a list of DocumentationEntry%s that each describe a single key value, and a
- * flag whether these entries are Exhaustive or not. If a Documentation is Exhaustive, a
- * ghoul::Dictionary that contains additional keys will fail the specification, whereas a
- * non-exhaustive Documentation allow for other (potentially non used) keys. The most
- * convenient way of creating a Documentation is by using nested initializer lists:
+ * \c name, and a list of DocumentationEntry%s that each describe a single key value. The
+ * most convenient way of creating a Documentation is by using nested initializer lists:
  *\verbatim
 Documentation doc = {
     "Documentation for an arbitrary dictionary",
@@ -216,9 +212,8 @@ Documentation doc = {
         { "key1", new IntVerifier, "Documentation key1", Optional::Yes },
         { "key2", new FloatVerifier, "Documentation key2" },
         { "key3", new StringVerifier } 
-    },
-    Exhaustive::Yes
-+;
+    }
+};
 \endverbatim
  *
  * If multiple DocumentationEntries cover the same key, they are all evaluated for that
@@ -236,31 +231,23 @@ struct Documentation {
      * Documentation%s to reference this entry
      * \param entries A list of DocumentationEntry%s that describe the individual keys for
      * this entrie Documentation
-     * \param exhaustive Determines whether the \p entries are an exhaustive specification
-     * of the object or whether additional, potentially unused, keys are allowed
      */
-    Documentation(std::string name, std::string id, DocumentationEntries entries = {},
-        Exhaustive exhaustive = Exhaustive::No);
+    Documentation(std::string name, std::string id, DocumentationEntries entries = {});
 
     /**
     * Creates a Documentation with a human-readable \p name.
     * \param name The human-readable name of this Documentation
     * \param entries A list of DocumentationEntry%s that describe the individual keys for
     * this entrie Documentation
-    * \param exhaustive Determines whether the \p entries are an exhaustive specification
-    * of the object or whether additional, potentially unused, keys are allowed
     */
-    Documentation(std::string name, DocumentationEntries entries = {},
-        Exhaustive exhaustive = Exhaustive::No);
+    Documentation(std::string name, DocumentationEntries entries = {});
 
     /**
     * Creates a Documentation.
     * \param entries A list of DocumentationEntry%s that describe the individual keys for
     * this entrie Documentation
-    * \param exhaustive Determines whether the \p entries are an exhaustive specification
-    * of the object or whether additional, potentially unused, keys are allowed
     */
-    Documentation(DocumentationEntries entries = {}, Exhaustive exhaustive = Exhaustive::No);
+    Documentation(DocumentationEntries entries = {});
 
     /// The human-readable name of the Documentation
     std::string name;
@@ -268,8 +255,6 @@ struct Documentation {
     std::string id;
     /// A list of specifications that are describing this Documentation
     DocumentationEntries entries;
-    /// A flag to say wheter the DocumentationEntries are an exhaustive description
-    Exhaustive exhaustive;
 };
 
 /**

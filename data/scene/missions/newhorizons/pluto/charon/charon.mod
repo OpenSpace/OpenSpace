@@ -31,10 +31,8 @@ return {
                 Radius = charon_radius,
                 Segments = 100
             },
-            Textures = {
-                Color = ColorTexture,
-                Height = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
-            },
+            ColorTexture = ColorTexture,
+            HeightTexture = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
             Projection = {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",
@@ -60,7 +58,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHARON",
+                Target = "CHARON",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -99,7 +97,6 @@ return {
             Observer = "NEW HORIZONS",
             Body = "CHARON",
             BodyFrame = "IAU_CHARON",
-            MainFrame = "GALACTIC",
             Aberration = "NONE",
         },
     },    
@@ -111,7 +108,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHARON",
+                Target = "CHARON",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},

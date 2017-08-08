@@ -15,9 +15,9 @@ return {
                 Radius = io_radius,
                 Segments = 100
             },
+            ColorTexture = "textures/io.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/io.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },
@@ -45,7 +45,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "IO",
+                Target = "IO",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -98,7 +98,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "IO",
+                Target = "IO",
                 Observer = "JUPITER BARYCENTER",
             },
             Color = { 0.4, 0.4, 0.2 },
