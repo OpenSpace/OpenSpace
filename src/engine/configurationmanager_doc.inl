@@ -203,21 +203,21 @@ documentation::Documentation ConfigurationManager::Documentation() {
         {
             ConfigurationManager::KeyRequireSocketAuthentication,
             new BoolVerifier,
+            Optional::Yes,
             "If socket connections should be authenticated or not before they are allowed to "
-            "get or set information. Defaults to `true`.",
-            Optional::Yes
+            "get or set information. Defaults to `true`."
         },
         {
             ConfigurationManager::KeyWebHelperLocation,
             new StringVerifier,
-            "The location of the CEF Web helper executable. No extension should be added.",
-            Optional::No
+            Optional::No,
+            "The location of the CEF Web helper executable. No extension should be added."
         },
         {
             ConfigurationManager::KeyWebGuiUrl,
             new StringVerifier,
-            "The web URL for the GUI.",
-            Optional::No
+            Optional::No,
+            "The web URL for the GUI."
         },
         {
             ConfigurationManager::KeyLauncher,
