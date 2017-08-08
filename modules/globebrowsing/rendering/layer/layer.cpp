@@ -281,7 +281,7 @@ glm::ivec2 Layer::tilePixelSizeDifference() const {
 }
 
 glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
-                                                glm::uvec2 resolution, glm::vec2 tileUV)
+                                                 glm::uvec2 resolution, glm::vec2 tileUV)
 {
     glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
     glm::vec2 currentSize = glm::vec2(resolution);
@@ -291,7 +291,7 @@ glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec
 }
 
 glm::vec2 Layer::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                              glm::vec2 tileUV, glm::uvec2 resolution)
+                                               glm::vec2 tileUV, glm::uvec2 resolution)
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     uv = compensateSourceTextureSampling(

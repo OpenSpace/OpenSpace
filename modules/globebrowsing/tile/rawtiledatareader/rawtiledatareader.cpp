@@ -56,11 +56,11 @@
 namespace openspace::globebrowsing {
   
 RawTileDataReader::RawTileDataReader(const TileTextureInitData& initData,
-        PerformPreprocessing preprocess)
+                                     PerformPreprocessing preprocess)
     : _initData(initData)
     , _preprocess(preprocess)
     , _hasBeenInitialized(false)
-{}
+{ }
 
 std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
     return std::make_shared<RawTile>(RawTile::createDefault(_initData));
@@ -110,9 +110,9 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
     return rawTile;
 }
 
-void RawTileDataReader::readImageData(
-    IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const {
-  
+void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& worstError,
+                                      char* imageDataDest) const
+{
     io = adjustIODescription(io);
 
     // Only read the minimum number of rasters

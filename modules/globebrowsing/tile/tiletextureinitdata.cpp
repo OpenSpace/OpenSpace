@@ -32,7 +32,8 @@ const glm::ivec2 TileTextureInitData::TilePixelStartOffset = glm::ivec2(-2);
 const glm::ivec2 TileTextureInitData::TilePixelSizeDifference = glm::ivec2(4);
 
 TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum glType,
-    Format textureFormat, bool padTiles, ShouldAllocateDataOnCPU shouldAllocateDataOnCPU)
+                                         Format textureFormat, bool padTiles,
+                                         ShouldAllocateDataOnCPU shouldAllocateDataOnCPU)
     : _glType(glType)
     , _ghoulTextureFormat(textureFormat)
     , _padTiles(padTiles)

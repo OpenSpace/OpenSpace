@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/rendering/gpu/gpulayer.h>
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
-#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace::globebrowsing {
 

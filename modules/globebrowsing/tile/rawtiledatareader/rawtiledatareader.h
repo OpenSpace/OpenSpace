@@ -49,7 +49,7 @@ public:
     using PerformPreprocessing = ghoul::Boolean;
 
     RawTileDataReader(const TileTextureInitData& initData,
-        PerformPreprocessing preprocess = PerformPreprocessing::No);
+                      PerformPreprocessing preprocess = PerformPreprocessing::No);
     virtual ~RawTileDataReader() = default;
 
     /**

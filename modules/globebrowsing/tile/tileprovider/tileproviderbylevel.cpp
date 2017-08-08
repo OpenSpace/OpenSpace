@@ -95,7 +95,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         addPropertySubOwner(_levelTileProviders.back().get());
         
         // Ensure we can represent the max level
-        if(static_cast<int>(_providerIndices.size()) < maxLevel){
+        if (static_cast<int>(_providerIndices.size()) < maxLevel) {
             _providerIndices.resize(maxLevel+1, -1);
         }
             
@@ -104,7 +104,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     }
 
     // Fill in the gaps (value -1) in provider indices, from back to end
-    for(int i = _providerIndices.size() - 2; i >= 0; --i){
+    for (int i = _providerIndices.size() - 2; i >= 0; --i) {
         if(_providerIndices[i] == -1){
             _providerIndices[i] = _providerIndices[i+1];
         }

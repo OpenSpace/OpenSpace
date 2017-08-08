@@ -43,8 +43,8 @@ public:
     using Format = ghoul::opengl::Texture::Format;
 
     TileTextureInitData(size_t width, size_t height, GLenum glType, Format textureFormat,
-        bool padTiles,
-        ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
+           bool padTiles,
+           ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original);
 

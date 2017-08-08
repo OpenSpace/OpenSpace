@@ -140,8 +140,10 @@ void DefaultTileProvider::update() {
         initTexturesFromLoadedData();
         if (_asyncTextureDataProvider->shouldBeDeleted()) {
             _asyncTextureDataProvider = nullptr;
-            TileTextureInitData initData(LayerManager::getTileTextureInitData(
-                _layerGroupID, _padTiles, _tilePixelSize));
+            TileTextureInitData initData(
+                LayerManager::getTileTextureInitData(_layerGroupID, _padTiles,
+                                                     _tilePixelSize)
+            );
             initAsyncTileDataReader(initData);
         }
     }
@@ -153,8 +155,10 @@ void DefaultTileProvider::reset() {
         _asyncTextureDataProvider->prepairToBeDeleted();
     }
     else {
-        TileTextureInitData initData(LayerManager::getTileTextureInitData(
-            _layerGroupID, _padTiles, _tilePixelSize));
+        TileTextureInitData initData(
+            LayerManager::getTileTextureInitData(_layerGroupID, _padTiles,
+                                                 _tilePixelSize)
+        );
         initAsyncTileDataReader(initData);
     }
 }
