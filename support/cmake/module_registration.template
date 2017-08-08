@@ -13,6 +13,10 @@ auto AllModules = []() -> std::vector<OpenSpaceModule*> {
 @MODULE_CLASSES@    };
 };
 
+std::vector<std::string> ModulePaths = {
+@MODULE_PATHS@
+};
+
 } // namespace openspace
 
 #endif // __MODULE_REGISTRATION_H__

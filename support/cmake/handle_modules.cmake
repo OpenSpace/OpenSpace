@@ -22,14 +22,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-# TODO:
-# 1. Get a recursive list of all modules and store in list
-# 2. Create a list of default modules + manually selected modules
-# 3. Go through list and select dependencies
-# 4. add_subdirectory selected dependencies
-# 5. Create module_registration.h file
-
-
 function (handle_modules internal_module_path external_modules_paths)
     #
     # Step 1:  Get a list of all modules
@@ -157,7 +149,6 @@ function (handle_modules internal_module_path external_modules_paths)
     endforeach ()
     list(REMOVE_DUPLICATES module_external_libraries)
 
-
     #         list(LENGTH OPENSPACE_APPLICATIONS len1)
     #         math(EXPR len2 "${len1} - 1")
 
@@ -169,20 +160,13 @@ function (handle_modules internal_module_path external_modules_paths)
     #             endif ()
     #         endforeach()
 
-    #         if (EXTERNAL_LIBRARY)
-    #             foreach (library ${EXTERNAL_LIBRARY})
-    #                 get_filename_component(lib ${library} ABSOLUTE)
-    #                 list(APPEND dll_list ${lib})
-    #             endforeach()
-    #         endif ()
-    #     endif ()
-    # endforeach ()
-
     #
-    # Step 6:  Create the moduleregistration.h file
+    # Step 6:  Create the moduleregistration.h file with the header file paths, class
+    #          names and the external module paths
     #
     set(MODULE_HEADERS "")
     set(MODULE_CLASSES "")
+    set(MODULE_PATHS "")
     foreach (val RANGE ${len2})
         list(GET enabled_module_names ${val} name)
         list(GET enabled_module_paths ${val} path)
@@ -197,6 +181,17 @@ function (handle_modules internal_module_path external_modules_paths)
         list(APPEND MODULE_CLASSES "        new ${class_name},\n")
     endforeach ()
 
+    get_unique_include_paths(
+        "${enabled_module_paths}"
+        "${internal_module_path}"
+        module_paths
+    )
+
+    foreach (path ${module_paths})
+        list(APPEND MODULE_PATHS "    \"${path}\",\n")
+        target_include_directories(libOpenSpace PUBLIC ${path})
+    endforeach ()
+
     if (NOT "${MODULE_HEADERS}" STREQUAL "")
         string(REPLACE ";" "" MODULE_HEADERS ${MODULE_HEADERS})
     endif ()
@@ -205,7 +200,12 @@ function (handle_modules internal_module_path external_modules_paths)
         string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
     endif ()
 
+    if (NOT "${MODULE_PATHS}" STREQUAL "")
+        string(REPLACE ";" "" MODULE_PATHS ${MODULE_PATHS})
+        string(REPLACE "\\" "/" MODULE_PATHS ${MODULE_PATHS})
+    endif ()
 
+    
     configure_file(
         ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
         ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
@@ -229,8 +229,24 @@ function (handle_modules internal_module_path external_modules_paths)
 endfunction()
 
 
+# This function takes a list of module paths and returns the list of include paths that
+# need to be added to the moduleregistration file. Each module files parent directory is
+# considered, but with the internal module path ignored
+function (get_unique_include_paths module_paths internal_module_path result)
+    set(res "")
+    foreach (p ${all_module_paths})
+        get_filename_component(base_dir "${p}/../.." ABSOLUTE)
+        get_filename_component(int_dir "${internal_module_path}/.." ABSOLUTE)
+        if (NOT ${base_dir} STREQUAL ${int_dir})
+            list(APPEND res ${base_dir})
+        endif ()
+    endforeach ()
+    set(${result} ${res} PARENT_SCOPE)
+endfunction ()
+
+
 # Returns whether the module located at 'path' is a default module or not
-function(get_module_attribute_default path result)
+function (get_module_attribute_default path result)
     set(${result} OFF PARENT_SCOPE)
     if (EXISTS "${path}/include.cmake")
         unset(DEFAULT_MODULE)
@@ -243,7 +259,7 @@ endfunction()
 
 
 # Returns the list of dependencies of the module located at 'path'
-function(get_module_attribute_dependencies path result)
+function (get_module_attribute_dependencies path result)
     set(${result} "" PARENT_SCOPE)
     if (EXISTS "${path}/include.cmake")
         unset(OPENSPACE_DEPENDENCIES)
@@ -257,7 +273,7 @@ endfunction()
 
 # Returns the path for the 'module_name'. If the module has not been seen before by 
 # get_individual_modules, an empty string is returned
-function(find_path_for_module module_name module_names module_paths result)
+function (find_path_for_module module_name module_names module_paths result)
     list(FIND module_names ${module_name} i)
     if (i EQUAL -1)
         # Did not find the name in the list
@@ -273,7 +289,7 @@ endfunction ()
 # Gets the names of the dependencies of 'module_name' recursively and returns them in
 # 'result'.  For a dependency chain of a -> b -> c   get_recursive_depdencies(a) will
 # return "b,c"
-function(get_recursive_dependencies module_name module_path module_names module_paths result)
+function (get_recursive_dependencies module_name module_path module_names module_paths result)
     set(result_aggregate "")
     get_module_attribute_dependencies(${module_path} deps)
     if (deps)
@@ -300,7 +316,7 @@ endfunction()
 
 
 # Returns a list of all modules contained in the folder 'path'
-function(get_individual_modules path module_names module_paths)
+function (get_individual_modules path module_names module_paths)
     file(GLOB moduleDirs RELATIVE ${path} ${path}/*)
 
     set(names "")
@@ -316,160 +332,4 @@ function(get_individual_modules path module_names module_paths)
 
     set(${module_names} ${names} PARENT_SCOPE)
     set(${module_paths} ${paths} PARENT_SCOPE)
-endfunction ()
-
-
-function (handle_individual_module_old path)
-    # Get all modules in the correct order based on their dependencies
-    file(GLOB moduleDirs RELATIVE ${path} ${path}/*)
-    set(sortedModules ${moduleDirs})
-    foreach (dir ${moduleDirs})
-        if (IS_DIRECTORY ${path}/${dir})
-            set(defaultModule OFF)
-            if (EXISTS "${path}/${dir}/include.cmake")
-                unset(OPENSPACE_DEPENDENCIES)
-                unset(EXTERNAL_LIBRARY)
-                unset(DEFAULT_MODULE)
-                include(${path}/${dir}/include.cmake)
-
-                if (DEFINED DEFAULT_MODULE)
-                    set(defaultModule ${DEFAULT_MODULE})
-                endif ()
-                if (OPENSPACE_DEPENDENCIES)
-                    foreach (dependency ${OPENSPACE_DEPENDENCIES})
-                        create_library_name(${dependency} library)
-                        if (TARGET ${library})
-                            # already registered
-                            list(REMOVE_ITEM OPENSPACE_DEPENDENCIES ${dependency})
-                        endif ()
-                    endforeach ()
-
-                    list(APPEND OPENSPACE_DEPENDENCIES ${dir})
-                    list(FIND sortedModules ${dir} dir_index)
-                    list(INSERT sortedModules ${dir_index} ${OPENSPACE_DEPENDENCIES})
-                    list(REMOVE_DUPLICATES sortedModules)
-                endif ()
-            endif ()
-            create_option_name(${dir} optionName)
-            option(${optionName} "Build ${dir} Module" ${defaultModule})
-            # create_library_name(${module} ${library})
-        else ()
-            list(REMOVE_ITEM sortedModules ${dir})
-        endif ()
-    endforeach ()
-
-    # Automatically set dependent modules to ON
-    set(dir_list ${sortedModules})
-    set(dll_list "")
-    list(REVERSE dir_list)
-    foreach (dir ${dir_list})
-        create_option_name(${dir} optionName)
-        if (${optionName})
-            if (EXISTS "${path}/${dir}/include.cmake")
-                unset(OPENSPACE_DEPENDENCIES)
-                unset(EXTERNAL_LIBRAY)
-                unset(DEFAULT_MODULE)
-                include(${path}/${dir}/include.cmake)
-
-                if (OPENSPACE_DEPENDENCIES)
-                    foreach (dependency ${OPENSPACE_DEPENDENCIES})
-                        create_option_name(${dependency} dependencyOptionName)
-                        if (NOT ${dependencyOptionName})
-                            set(${dependencyOptionName} ON CACHE BOOL "ff" FORCE)
-                            message(STATUS "${dependencyOptionName} was set to build, due to dependency towards ${optionName}")
-                        endif ()
-                    endforeach ()
-                endif ()
-            endif ()
-        endif ()
-    endforeach ()
-
-    set(MODULE_HEADERS "")
-    set(MODULE_CLASSES "")
-
-    message(STATUS "Included modules:")
-    foreach (module ${sortedModules})
-        create_option_name(${module} optionName)
-        if (${optionName})
-            message(STATUS "\t${module}")
-        endif ()
-    endforeach ()
-
-    # Add subdirectories in the correct order
-    foreach (module ${sortedModules})
-        create_option_name(${module} optionName)
-        if (${optionName})
-            create_library_name(${module} libraryName)
-            add_subdirectory(${path}/${module})
-
-            list(LENGTH OPENSPACE_APPLICATIONS len1)
-            math(EXPR len2 "${len1} - 1")
-
-            foreach(val RANGE ${len2})
-                list(GET OPENSPACE_APPLICATIONS ${val} val1)
-                list(GET OPENSPACE_APPLICATIONS_LINK_REQUEST ${val} val2)
-                if (${val2})
-                    target_link_libraries(${app} ${libraryName})
-                endif ()
-            endforeach()
-
-            # Only link libOpenSpace against the library if it has been set STATIC
-            get_target_property(libType ${libraryName} TYPE)
-            if (NOT ${libType} STREQUAL "SHARED_LIBRARY")
-                target_link_libraries(libOpenSpace ${libraryName})
-            endif()
-
-            create_define_name(${module} defineName)
-            target_compile_definitions(libOpenSpace PUBLIC "${defineName}")
-
-            # Create registration file
-            string(TOUPPER ${module} module_upper)
-            string(TOLOWER ${module} module_lower)
-            unset(MODULE_NAME)
-            unset(MODULE_PATH)
-            unset(MODULE_HEADER_PATH)
-            include(${CMAKE_BINARY_DIR}/_generated/modules/${module_lower}.cmake)
-
-            list(APPEND MODULE_HEADERS "#include <${MODULE_HEADER_PATH}>\n")
-            list(APPEND MODULE_CLASSES "        new ${MODULE_NAME},\n")
-
-            if (EXTERNAL_LIBRARY)
-                foreach (library ${EXTERNAL_LIBRARY})
-                    get_filename_component(lib ${library} ABSOLUTE)
-                    list(APPEND dll_list ${lib})
-                endforeach()
-            endif ()
-        endif ()
-    endforeach ()
-
-    if (NOT "${MODULE_HEADERS}" STREQUAL "")
-        string(REPLACE ";" "" MODULE_HEADERS ${MODULE_HEADERS})
-    endif ()
-
-    if (NOT "${MODULE_CLASSES}" STREQUAL "")
-        string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
-    endif ()
-
-    configure_file(
-        ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
-        ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
-    )
-
-            if (EXTERNAL_LIBRARY)
-                foreach (library ${EXTERNAL_LIBRARY})
-                    get_filename_component(lib ${library} ABSOLUTE)
-                    list(APPEND dll_list ${lib})
-                endforeach()
-            endif ()
-
-
-    list(REMOVE_DUPLICATES dll_list)
-
-    if (WIN32)
-    foreach (application ${OPENSPACE_APPLICATIONS})
-        foreach (dll ${dll_list})
-            ghl_copy_files(${application} ${dll})
-        endforeach ()
-    endforeach ()
-    endif ()
 endfunction ()
