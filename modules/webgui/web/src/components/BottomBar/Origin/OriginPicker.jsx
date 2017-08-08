@@ -55,7 +55,7 @@ class OriginPicker extends Component {
 
   get icon() {
     // return this.state.origin ? null : (<Icon icon="language" className="extralarge" />);
-    return (<Icon icon="language" className={`extralarge ${styles.Icon}`} />);
+    return (<Icon icon="language" className={styles.Icon} />);
   }
 
   get origin() {

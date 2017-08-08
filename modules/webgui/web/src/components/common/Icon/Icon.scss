@@ -10,7 +10,7 @@
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
-  font-size: 22px;  /* Preferred icon size */
+  //font-size: 22px;  /* Preferred icon size */
   display: inline-block;
   line-height: 1;
   text-transform: none;
@@ -31,11 +31,11 @@
   font-feature-settings: 'liga';
 
   /* Rules for sizing the icon. */
-  &.md-18, &.small { font-size: 18px; }
-  &.md-22, &.normal { font-size: 22px; }
-  &.md-28, &.medium{ font-size: 28px; }
-  &.md-36, &.large { font-size: 36px; }
-  &.md-48, &.extralarge { font-size: 48px; }
+  &.md-18, &.small { font-size: 0.8em; }
+  &.md-22, &.normal { font-size: 1em; }
+  &.md-28, &.medium{ font-size: 1.2em; }
+  &.md-36, &.large { font-size: 1.5em; }
+  &.md-48, &.extralarge { font-size: 2em; }
 }
 
 

@@ -46,15 +46,15 @@ class Sidebar extends React.Component {
           <SystemMenu />
 
           <TabMenuItem active={this.isActive('play')} onClick={this.selectView('play')}>
-            <Icon icon="playlist_play" />
+            <Icon className={styles.icon} icon="playlist_play" />
             <SmallLabel>Playlist</SmallLabel>
           </TabMenuItem>
           <TabMenuItem active={this.isActive('view')} onClick={this.selectView('view')}>
-            <Icon icon="layers" />
+            <Icon className={styles.icon} icon="layers" />
             <SmallLabel>View</SmallLabel>
           </TabMenuItem>
           <TabMenuItem active={this.isActive('settings')} onClick={this.selectView('settings')}>
-            <Icon icon="settings" />
+            <Icon className={styles.icon} icon="settings" />
             <SmallLabel>Settings</SmallLabel>
           </TabMenuItem>
         </TabMenu>
