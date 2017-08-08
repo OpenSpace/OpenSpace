@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__
 
 #include <modules/imgui/include/guicomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
@@ -46,4 +46,4 @@ private:
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__

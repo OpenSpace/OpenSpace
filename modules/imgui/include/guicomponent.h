@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUICOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUICOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUICOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUICOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -76,4 +76,4 @@ protected:
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUICOMPONENT___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUICOMPONENT___H__

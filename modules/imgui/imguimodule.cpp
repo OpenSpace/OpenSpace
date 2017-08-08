@@ -105,7 +105,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Deinitialize,
         [&](){
-            LDEBUGC("OnScreenGui", "Deinitialize GUI");
+            LDEBUGC("ImGui", "Deinitialize GUI");
             gui.deinitialize();
         }
     );
@@ -113,7 +113,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::InitializeGL,
         [&](){
-            LDEBUGC("OnScreenGui", "Initializing GUI OpenGL");
+            LDEBUGC("ImGui", "Initializing GUI OpenGL");
             gui.initializeGL();
         }
     );
@@ -121,7 +121,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::DeinitializeGL,
         [&](){
-            LDEBUGC("OnScreenGui", "Deinitialize GUI OpenGL");
+            LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
             gui.deinitializeGL();
         }
     );
