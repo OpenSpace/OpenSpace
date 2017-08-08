@@ -36,6 +36,7 @@ using json = nlohmann::json;
 namespace openspace::properties {
 
 void to_json(json &j, const Property &p);
+void to_json(json &j, const Property* pP);
 
 } // namespace openspace::properties
 

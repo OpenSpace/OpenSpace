@@ -37,6 +37,10 @@ void to_json(json &j, const Property &p) {
     j = json::parse(p.toJson());
 }
 
+void to_json(json &j, const Property* pP) {
+    j = *pP;
+}
+
 } // namespace openspace::properties
 
 namespace openspace {
@@ -49,7 +53,10 @@ void to_json(json &j, const SceneGraphNode &n) {
         { "tags", n.tags() },
 
         { "childrenCount", n.children().size() },
-        { "children", n.children() }
+        { "children", n.children() },
+
+        { "propertiesCount", n.properties().size() },
+        { "properties", n.properties() }
     };
 
     auto renderable = n.renderable();
@@ -71,9 +78,9 @@ void to_json(json &j, const SceneGraphNode* pN) {
 }
 
 void to_json(json &j, const Renderable &r) {
-    // Use reference converter instead of pointer
     j = {
-        { "enabled", r.isEnabled() }
+        { "enabled", r.isEnabled() },
+        { "properties", r.properties() }
     };
 }
 
