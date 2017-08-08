@@ -35,14 +35,25 @@
 
 namespace {
     const char* _loggerCat = "IswaCygnet";
+
+    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+        "Delete",
+        "Delete",
+        "" // @TODO Missing documentation
+    };
+    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+        "Alpha",
+        "Alpha",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _delete("delete", "Delete")
-    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
+    , _delete(DeleteInfo)
+    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)
@@ -105,13 +116,13 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 
 IswaCygnet::~IswaCygnet(){}
 
-bool IswaCygnet::initialize(){
+void IswaCygnet::initialize() {
     _textures.push_back(nullptr);
     
-    if(!_data->groupName.empty()){
+    if (!_data->groupName.empty()) {
         initializeGroup();
-    }else{
-        _delete.onChange([this](){
+    } else {
+        _delete.onChange([this]() {
             deinitialize();
             OsEng.scriptEngine().queueScript(
                 "openspace.removeSceneGraphNode('" + name() + "')",
@@ -124,19 +135,16 @@ bool IswaCygnet::initialize(){
     createGeometry();
     createShader();
     downloadTextureResource();
-
-    return true;
 }
 
-bool IswaCygnet::deinitialize(){
-     if(!_data->groupName.empty())
+void IswaCygnet::deinitialize() {
+    if (!_data->groupName.empty()) {
         _group->groupEvent()->unsubscribe(name());
+    }
 
     unregisterProperties();
     destroyGeometry();
     destroyShader();
-
-    return true;
 }
 
 bool IswaCygnet::isReady() const{

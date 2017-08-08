@@ -144,7 +144,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
-    , _globalPropertyNamespace(new properties::PropertyOwner(""))
+    , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
     , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
@@ -1354,7 +1354,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
-                "type, name, identifier, [value, minimumValue, maximumValue]",
+                "type, name, identifier, description,"
+                "[value, minimumValue, maximumValue]",
                 "Adds a virtual property that will set a group of properties"
             },
             {

@@ -41,7 +41,7 @@ public:
     DataSphere(const ghoul::Dictionary& dictionary);
     ~DataSphere();
 
-     bool initialize() override;
+     void initialize() override;
 
 protected:
     /**

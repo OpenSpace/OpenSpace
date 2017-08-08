@@ -43,8 +43,8 @@ public:
     KameleonPlane(const ghoul::Dictionary& dictionary);
     ~KameleonPlane();
 
-     bool initialize() override;
-     bool deinitialize() override;
+     void initialize() override;
+     void deinitialize() override;
 
 private:
 

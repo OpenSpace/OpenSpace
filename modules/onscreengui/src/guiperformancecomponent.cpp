@@ -51,16 +51,43 @@ namespace {
         UpdateSceneGraphNode = 6,
         TotalTime = 7
     };
+
+    static const openspace::properties::Property::PropertyInfo SortingSelectionInfo = {
+        "SortingSelection",
+        "Sorting",
+        "This value determines the sorting order of the performance measurements."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SceneGraphEnabledInfo = {
+        "ShowSceneGraph",
+        "Show Scene Graph Measurements",
+        "If this value is enabled, the window showing the measurements for the scene "
+        "graph values is visible."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FunctionsEnabledInfo = {
+        "ShowFunctions",
+        "Show Function Measurements",
+        "If this value is enabled, the window showing the measurements for the "
+        "individual functions is visible."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OutputLogsInfo = {
+        "OutputLogs",
+        "Output Logs",
+        "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 namespace openspace::gui {
 
 GuiPerformanceComponent::GuiPerformanceComponent()
     : GuiComponent("PerformanceComponent")
-    , _sortingSelection("sortingSelection", "Sorting", -1, -1, 7)
-    , _sceneGraphIsEnabled("showSceneGraph", "Show Scene Graph Measurements", false)
-    , _functionsIsEnabled("showFunctions", "Show Function Measurements", false)
-    , _outputLogs("outputLogs", "Output Logs", false)
+    , _sortingSelection(SortingSelectionInfo, -1, -1, 6)
+    , _sceneGraphIsEnabled(SceneGraphEnabledInfo, false)
+    , _functionsIsEnabled(FunctionsEnabledInfo, false)
+    , _outputLogs(OutputLogsInfo, false)
 {
     addProperty(_sortingSelection);
 

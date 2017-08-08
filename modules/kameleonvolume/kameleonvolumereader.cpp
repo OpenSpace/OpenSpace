@@ -28,7 +28,6 @@
 
 #ifdef WIN32
 #pragma warning (push)
-#pragma warning (disable : 4345) // #pragma warning: there is no warning number '4345'
 #pragma warning (disable : 4619) // #pragma warning: there is no warning number '4619'
 #pragma warning (disable : 4675) // #pragma warning: there is no warning number '4675'
 #pragma warning (disable : 4800) // #pragma warning: there is no warning number '4800'

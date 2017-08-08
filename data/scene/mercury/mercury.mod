@@ -1,54 +1,52 @@
 return {
-    -- Mercury barycenter module
+    -- Barycenter module
     {
         Name = "MercuryBarycenter",
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MERCURY BARYCENTER",
+                Target = "MERCURY",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
+            }
         }
     },
-    -- Mercury module
+    -- RenderableGlobe module
     {   
         Name = "Mercury",
         Parent = "MercuryBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_MERCURY",
-            Body = "MERCURY",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 2.4397E6,
-                Segments = 100
-            },
-            Textures = {
-                Type = "simple",
-                Color = "textures/mercury.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
-        },
-        Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MERCURY",
-                DestinationFrame = "ECLIPJ2000",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
-        }
+                DestinationFrame = "GALACTIC"
+            }
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = 2439700,
+            Frame = "IAU_MERCURY",
+            Body = "MERCURY",
+            CameraMinHeight = 300,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Messenger_MDIS",
+                        FilePath = "map_service_configs/Utah/MessengerMDIS.wms",
+                        Enabled = true
+                    },
+                    {
+                        Name = "Messenger_Mosaic",
+                        FilePath = "map_service_configs/Utah/MessengerMosaic.wms"
+                    }
+                }
+            }
+        },
+        Tag = { "planet_solarSystem", "planet_terrestrial" },
     },
-    -- MercuryTrail module
+    -- Trail module
     {   
         Name = "MercuryTrail",
         Parent = "SolarSystemBarycenter",
@@ -56,13 +54,13 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MERCURY",
+                Target = "MERCURY",
                 Observer = "SUN",
             },
             Color = {0.6, 0.5, 0.5 },
             Period = 87.968,
-            Resolution = 100,
-            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
-        }
+            Resolution = 100
+        },
+        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" }
     }
 }

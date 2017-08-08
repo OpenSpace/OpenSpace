@@ -61,12 +61,11 @@ public:
     static std::unique_ptr<Renderable> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
-    Renderable();
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();
 
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
+    virtual void initialize();
+    virtual void deinitialize();
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;

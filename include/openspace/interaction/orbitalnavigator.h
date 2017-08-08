@@ -64,10 +64,16 @@ private:
         glm::dquat globalRotation;
     };
 
-    // Properties
-    properties::BoolProperty _rotationalFriction;
-    properties::BoolProperty _horizontalFriction;
-    properties::BoolProperty _verticalFriction;
+    struct Friction : public properties::PropertyOwner {
+        Friction();
+
+        properties::BoolProperty roll;
+        properties::BoolProperty rotational;
+        properties::BoolProperty zoom;
+    };
+
+    Friction _friction;
+
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _sensitivity;

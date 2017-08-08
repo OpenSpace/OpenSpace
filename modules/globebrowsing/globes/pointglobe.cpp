@@ -33,20 +33,27 @@
 
 #include <ghoul/opengl/programobject.h>
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo IntensityClampInfo = {
+        "IntensityClamp",
+        "Intensity clamp",
+        "" 
+    };
+
+    static const openspace::properties::Property::PropertyInfo LightIntensityInfo = {
+        "LightIntensity",
+        "Light intensity",
+        "" // @TODO Missing documentation
+    };
+} // namespace
+
 namespace openspace::globebrowsing {
 
 PointGlobe::PointGlobe(const RenderableGlobe& owner)
-    : _owner(owner)
-    , _intensityClamp(
-        "intensityClamp",
-        "Intensity clamp",
-        1, 0, 1
-    )
-    , _lightIntensity(
-        "lightIntensity",
-        "Light intensity",
-        1, 0, 50
-    )
+    : Renderable({ { "Name", owner.name() } })
+    , _owner(owner)
+    , _intensityClamp(IntensityClampInfo, 1.f, 0.f, 1.f)
+    , _lightIntensity(LightIntensityInfo, 1.f, 0.f, 50.f)
 {
     addProperty(_intensityClamp);
     addProperty(_lightIntensity);
@@ -57,7 +64,7 @@ PointGlobe::~PointGlobe() {
     glDeleteVertexArrays(1, &_vaoID);
 }
 
-bool PointGlobe::initialize() {
+void PointGlobe::initialize() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "PointGlobe",
         "${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl",
@@ -91,12 +98,11 @@ bool PointGlobe::initialize() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), 0);
 
     glBindVertexArray(0);
-
-    return isReady();
 }
 
-bool PointGlobe::deinitialize() {
-    return true;
+void PointGlobe::deinitialize() {
+    glDeleteVertexArrays(1, &_vaoID);
+    glDeleteBuffers(1, &_vertexBufferID);
 }
 
 bool PointGlobe::isReady() const {

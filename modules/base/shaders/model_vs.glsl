@@ -41,8 +41,8 @@ uniform mat4 projectionTransform;
 
 void main() {
     vs_positionCameraSpace = modelViewTransform * in_position;
-    const vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    const vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
+    vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
     gl_Position = positionScreenSpace;
     vs_st = in_st;

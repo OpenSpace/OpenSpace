@@ -45,8 +45,8 @@ documentation::Documentation PlanetGeometry::Documentation() {
             {
                 KeyType,
                 new StringVerifier,
-                "The type of the PlanetGeometry that will can be constructed.",
-                Optional::No
+                Optional::No,
+                "The type of the PlanetGeometry that will can be constructed."
             }
         }
     };
@@ -74,7 +74,7 @@ std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
 }
 
 PlanetGeometry::PlanetGeometry()
-    : properties::PropertyOwner("PlanetGeometry")
+    : properties::PropertyOwner({ "PlanetGeometry" })
     , _parent(nullptr)
 {}
 

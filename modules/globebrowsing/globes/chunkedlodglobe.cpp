@@ -57,7 +57,8 @@ const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
 
 ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
                                  std::shared_ptr<LayerManager> layerManager)
-    : minSplitDepth(2)
+    : Renderable({ { "Name", owner.name() } })
+    , minSplitDepth(2)
     , maxSplitDepth(22)
     , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
     , _owner(owner)
@@ -93,14 +94,6 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
 // with a forward declaration
 ChunkedLodGlobe::~ChunkedLodGlobe() {}
     
-bool ChunkedLodGlobe::initialize() {
-    return true;
-}
-
-bool ChunkedLodGlobe::deinitialize() {
-    return true;
-}
-
 bool ChunkedLodGlobe::isReady() const {
     return true;
 }

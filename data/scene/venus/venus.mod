@@ -1,70 +1,65 @@
 return {
-    -- Venus barycenter module
+    -- Barycenter module
     {
         Name = "VenusBarycenter",
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "VENUS BARYCENTER",
+                Target = "VENUS BARYCENTER",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
+            }
         }
     },
-
-    -- Venus module
+    -- RenderableGlobe module
     {   
         Name = "Venus",
         Parent = "VenusBarycenter",
-        Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_VENUS",
-            Body = "VENUS",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 3.760E6,
-                Segments = 100
-            },
-            Textures = {
-                Type = "simple",
-                Color = "textures/venus.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
-        },
-        Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_VENUS",
                 DestinationFrame = "GALACTIC"
             },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
+            Translation = {
+                Type = "SpiceTranslation",
+                Target = "VENUS",
+                Observer = "VENUS BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
         },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = { 6051900, 6051900, 6051800 },
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Venus Texture",
+                        FilePath = "textures/venus.jpg",
+                        Enabled = true
+                    }
+                }
+            }
+        },
+        Tag = { "planet_solarSystem", "planet_terrestrial" },
     },
-
-    -- VenusTrail module
-    {
+    -- Trail module
+    {   
         Name = "VenusTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "VENUS BARYCENTER",
-                Observer = "SUN",
+                Target = "VENUS BARYCENTER",
+                Observer = "SUN"
             },
             Color = { 1.0, 0.5, 0.2 },
             Period = 224.695,
-            Resolution = 1000,
-            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
-        }
+            Resolution = 1000
+        },
+        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" }
     }
 }

@@ -25,15 +25,12 @@ return {
                 Radius = kerberos_radius,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.jpg",
-            }
+            ColorTexture = "textures/gray.jpg",
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "KERBEROS",
+                Target = "KERBEROS",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -69,7 +66,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "KERBEROS",
+                Target = "KERBEROS",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},

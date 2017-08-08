@@ -45,9 +45,9 @@ Fragment getFragment() {
     n.z = sqrt(1.0 - mag);
     
     // calculate lighting
-    const vec3 light_dir = vec3(0.0, 0.0, 1.0);
-    const float diffuse = max(0.0, dot(light_dir, n));
-    const float alpha = min(pow(sqrt(mag), thickness), transparency);
+    vec3 light_dir = vec3(0.0, 0.0, 1.0);
+    float diffuse = max(0.0, dot(light_dir, n));
+    float alpha = min(pow(sqrt(mag), thickness), transparency);
 
     Fragment frag;
     frag.color = vec4(color * diffuse, alpha);

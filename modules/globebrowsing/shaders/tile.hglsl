@@ -49,11 +49,11 @@ struct TileDepthTransform {
     float depthOffset;
 };
 
-float getTransformedTexVal(const TileDepthTransform transform, const float val) {
+float getTransformedTexVal(TileDepthTransform transform, float val) {
     return transform.depthOffset + transform.depthScale * val;
 }
 
-vec4 getTransformedTexVal(const TileDepthTransform transform, const vec4 val) {
+vec4 getTransformedTexVal(TileDepthTransform transform, vec4 val) {
     return transform.depthOffset + transform.depthScale * val;
 }
 
@@ -77,18 +77,18 @@ struct ChunkTile {
     TileUvTransform uvTransform;
 };
 
-vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff,
-                                     const ChunkTile chunkTile, vec2 tileUV)
+vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, ChunkTile chunkTile,
+                                     vec2 tileUV)
 {
-    const ivec2 resolution = textureSize(chunkTile.textureSampler, 0);
+    ivec2 resolution = textureSize(chunkTile.textureSampler, 0);
 
-    const vec2 sourceSize = vec2(resolution) + sizeDiff;
-    const vec2 currentSize = vec2(resolution);
-    const vec2 sourceToCurrentSize = currentSize / sourceSize;
+    vec2 sourceSize = vec2(resolution) + sizeDiff;
+    vec2 currentSize = vec2(resolution);
+    vec2 sourceToCurrentSize = currentSize / sourceSize;
     return sourceToCurrentSize * (tileUV - startOffset / sourceSize);
 }
 
-vec2 TileUVToTextureSamplePosition(const ChunkTile chunkTile, vec2 tileUV) {
+vec2 TileUVToTextureSamplePosition(ChunkTile chunkTile, vec2 tileUV) {
     vec2 uv = chunkTile.uvTransform.uvOffset + chunkTile.uvTransform.uvScale * tileUV;
     return compensateSourceTextureSampling(
         TILE_PIXEL_START_OFFSET,
@@ -98,7 +98,7 @@ vec2 TileUVToTextureSamplePosition(const ChunkTile chunkTile, vec2 tileUV) {
     );
 }
 
-vec4 getTexVal(const ChunkTile chunkTile, vec2 tileUV) {
+vec4 getTexVal(ChunkTile chunkTile, vec2 tileUV) {
     return texture(
         chunkTile.textureSampler,
         TileUVToTextureSamplePosition(chunkTile, tileUV)
@@ -148,8 +148,8 @@ struct LevelWeights {
 float getLevelInterpolationParameter(int chunkLevel, float distanceScaleFactor,
                                      float distToVertexOnEllipsoid)
 {
-    const float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
-    const float desiredLevel = log2(projectedScaleFactor);
+    float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
+    float desiredLevel = log2(projectedScaleFactor);
     return chunkLevel - desiredLevel;
 }
 
@@ -172,7 +172,7 @@ LevelWeights getDefaultLevelWeights() {
     return levelWeights;
 }
 
-vec4 getTexVal(const ChunkTilePile chunkTilePile, const LevelWeights w, const vec2 uv) {
+vec4 getTexVal(ChunkTilePile chunkTilePile, LevelWeights w, vec2 uv) {
     return w.w1 * getTexVal(chunkTilePile.chunkTile0, uv) + 
         w.w2 * getTexVal(chunkTilePile.chunkTile1, uv) + 
         w.w3 * getTexVal(chunkTilePile.chunkTile2, uv);

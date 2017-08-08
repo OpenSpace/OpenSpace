@@ -33,15 +33,33 @@
 namespace {
     using json = nlohmann::json;
     const char* _loggerCat = "KameleonPlane";
+
+    static const openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
+        "FieldlineSeedsIndexFile",
+        "Fieldline Seedpoints",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Resolution%",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SliceInfo = {
+        "Slice",
+        "Slice",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     : DataCygnet(dictionary)
-    , _fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    , _resolution("resolution", "Resolution%", 100.0f, 10.0f, 200.0f)
-    , _slice("slice", "Slice", 0.0, 0.0, 1.0)
+    , _fieldlines(FieldLineSeedsInfo) 
+    , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
+    , _slice(SliceInfo, 0.f, 0.f, 1.f)
 {
     addProperty(_resolution);
     addProperty(_slice);
@@ -82,15 +100,13 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
 KameleonPlane::~KameleonPlane() {}
 
-bool KameleonPlane::deinitialize() {
+void KameleonPlane::deinitialize() {
     IswaCygnet::deinitialize();
     _fieldlines.set(std::vector<int>());
-    return true;
 }
 
-bool KameleonPlane::initialize(){
-
-    if(!_data->groupName.empty()){
+void KameleonPlane::initialize() {
+    if (!_data->groupName.empty()) {
         initializeGroup();
     }
     
@@ -156,8 +172,6 @@ bool KameleonPlane::initialize(){
         _group->updateGroup();
     }
     updateTextureResource();
-
-    return true;
 }
 
 bool KameleonPlane::createGeometry() {

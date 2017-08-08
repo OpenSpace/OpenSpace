@@ -31,8 +31,8 @@ uniform int xSegments;
 uniform float skirtLength;
 
 bool tileVertexIsSkirtVertex() {
-    const int vertexIDx = gl_VertexID % (xSegments + 3);
-    const int vertexIDy = gl_VertexID / (xSegments + 3);
+    int vertexIDx = gl_VertexID % (xSegments + 3);
+    int vertexIDy = gl_VertexID / (xSegments + 3);
     return vertexIDx == 0 || vertexIDy == 0 ||
         vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
 }

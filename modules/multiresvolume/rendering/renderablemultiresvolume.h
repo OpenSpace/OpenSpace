@@ -92,8 +92,8 @@ public:
     bool initializeShenSelector();
     bool initializeSelector();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

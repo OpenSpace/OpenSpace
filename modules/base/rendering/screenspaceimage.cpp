@@ -39,6 +39,15 @@ namespace {
     const char* KeyName = "Name";
     const char* KeyTexturePath = "TexturePath";
     const char* KeyUrl = "URL";
+
+    static const openspace::properties::Property::PropertyInfo TexturePathInfo = {
+        "TexturePath",
+        "Texture path",
+        "Sets the path of the texture that is displayed on this screen space plane. If "
+        "this value is changed, the image at the new path will automatically be loaded "
+        "and displayed. The size of the image will also automatically set the default "
+        "size of this plane."
+    };
 } // namespace
 
 namespace openspace {
@@ -52,15 +61,15 @@ documentation::Documentation ScreenSpaceImage::Documentation() {
             {
                 KeyName,
                 new StringVerifier,
-                "Specifies the GUI name of the ScreenspaceImage",
-                Optional::Yes
+                Optional::Yes,
+                "Specifies the GUI name of the ScreenspaceImage"
             },
             {
                 KeyTexturePath,
                 new StringVerifier,
+                Optional::Yes,
                 "Specifies the image that is shown on the screenspace-aligned plane. If "
-                "this value is set and the URL is not, the disk image is used.",
-                Optional::Yes
+                "this value is set and the URL is not, the disk image is used."
             }
         }
     };
@@ -70,7 +79,7 @@ ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _downloadImage(false)
     , _textureIsDirty(false)
-    , _texturePath("texturePath", "Texture path", "")
+    , _texturePath(TexturePathInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),

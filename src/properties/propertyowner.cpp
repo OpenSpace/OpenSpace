@@ -45,8 +45,9 @@ namespace {
 } // namespace
 
 
-PropertyOwner::PropertyOwner(std::string name)
-    : _name(std::move(name))
+PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
+    : _name(std::move(info.name))
+    , _description(std::move(info.description))
     , _owner(nullptr)
 {}
 
@@ -269,8 +270,16 @@ void PropertyOwner::setName(std::string name) {
     _name = std::move(name);
 }
 
-const std::string& PropertyOwner::name() const {
+std::string PropertyOwner::name() const {
     return _name;
+}
+
+void PropertyOwner::setDescription(std::string description) {
+    _description = std::move(description);
+}
+
+std::string PropertyOwner::description() const {
+    return _description;
 }
 
 std::vector<std::string> PropertyOwner::tags() const {

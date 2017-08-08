@@ -55,8 +55,8 @@ public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
     ~RenderableModelProjection();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 
@@ -77,8 +77,6 @@ private:
     ProjectionComponent _projectionComponent;
 
     properties::StringProperty _colorTexturePath;
-
-    properties::Vec3Property _rotation;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;

@@ -38,8 +38,8 @@ uniform int pointSteps;
 
 
 void main() {
-    const vec4 positionCameraSpace = modelViewTransform * in_point_position;
-    const vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    vec4 positionCameraSpace = modelViewTransform * in_point_position;
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
 
     gl_Position = vs_positionScreenSpace;

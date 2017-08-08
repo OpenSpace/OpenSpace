@@ -73,8 +73,8 @@ class RenderableTrail : public Renderable {
 public:
     ~RenderableTrail() = default;
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

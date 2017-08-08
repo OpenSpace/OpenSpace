@@ -64,14 +64,12 @@ public:
         properties::BoolProperty performHorizonCulling;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
-        properties::BoolProperty toggleEnabledEveryFrame;
         properties::BoolProperty collectStats;
         properties::BoolProperty limitLevelByAvailableData;
         properties::IntProperty modelSpaceRenderingCutoffLevel;
     };
     
     struct GeneralProperties {
-        properties::BoolProperty isEnabled;
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty useAccurateNormals;
@@ -83,8 +81,8 @@ public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;

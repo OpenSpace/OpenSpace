@@ -276,7 +276,24 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& 
         }
         try {
             loadedNodes.push_back(loadNode(nodeDictionary));
-        } catch (ghoul::RuntimeError& e) {
+        }
+        catch (documentation::SpecificationError& e) {
+            LERROR("Specification error in node from " << path);
+            LERRORC(e.component, e.message);
+            for (const documentation::TestResult::Offense& offense : e.result.offenses) {
+                LERRORC(
+                    e.component,
+                    offense.offender + ": " + std::to_string(offense.reason)
+                );
+            }
+            for (const documentation::TestResult::Warning& warning : e.result.warnings) {
+                LWARNINGC(
+                    e.component,
+                    warning.offender + ": " + std::to_string(warning.reason)
+                );
+            }
+        }
+        catch (ghoul::RuntimeError& e) {
             LERROR("Failed loading node from " << path << ": " << e.message << ", " << e.component);
         }
     }
