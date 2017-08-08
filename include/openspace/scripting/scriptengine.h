@@ -78,10 +78,10 @@ public:
 
     bool writeLog(const std::string& script);
 
-    virtual void presync(bool isMaster);
-    virtual void encode(SyncBuffer* syncBuffer);
-    virtual void decode(SyncBuffer* syncBuffer);
-    virtual void postsync(bool isMaster);
+    virtual void presync(bool isMaster) override;
+    virtual void encode(SyncBuffer* syncBuffer) override;
+    virtual void decode(SyncBuffer* syncBuffer) override;
+    virtual void postsync(bool isMaster) override;
 
     void queueScript(const std::string &script, RemoteScripting remoteScripting);
 

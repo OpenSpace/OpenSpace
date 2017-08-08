@@ -26,16 +26,16 @@
 
 namespace openspace::properties {
 
-// The following macros can be used to quickly generate the necessary PropertyDelegate
-// specializations required by the TemplateProperty class. Use the
-// REGISTER_TEMPLATEPROPERTY_HEADER    macro in the header file and the
-// REGISTER_TEMPLATEPROPERTY_SOURCE macro in the source file of your new specialization of
-// a TemplateProperty
+    // The following macros can be used to quickly generate the necessary PropertyDelegate
+    // specializations required by the TemplateProperty class. Use the
+    // REGISTER_TEMPLATEPROPERTY_HEADER    macro in the header file and the
+    // REGISTER_TEMPLATEPROPERTY_SOURCE macro in the source file of your new specialization of
+    // a TemplateProperty
 
 
-// CLASS_NAME = The string that the Property::className() should return as well as the
-//              C++ class name for which a typedef will be created
-// TYPE       = The template parameter T for which the TemplateProperty is specialized
+    // CLASS_NAME = The string that the Property::className() should return as well as the
+    //              C++ class name for which a typedef will be created
+    // TYPE       = The template parameter T for which the TemplateProperty is specialized
 #define REGISTER_TEMPLATEPROPERTY_HEADER(CLASS_NAME, TYPE)                               \
     using CLASS_NAME = TemplateProperty<TYPE>;                                           \
                                                                                          \

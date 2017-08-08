@@ -53,7 +53,7 @@ public:
     void setVisibility(properties::Property::Visibility visibility);
     void setHasRegularProperties(bool hasOnlyRegularProperties);
 
-    void render();
+    void render() override;
 
 protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);

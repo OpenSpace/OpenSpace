@@ -46,11 +46,11 @@ class GUI : public GuiComponent {
 public:
     GUI();
 
-    void initialize();
-    void deinitialize();
+    void initialize() override;
+    void deinitialize() override;
 
-    void initializeGL();
-    void deinitializeGL();
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool mouseButtonCallback(MouseButton button, MouseAction action);
     bool mouseWheelCallback(double position);

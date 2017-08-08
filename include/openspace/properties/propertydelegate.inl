@@ -30,6 +30,7 @@ template <typename T>
 std::string PropertyDelegate<T>::className() {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::className specialization");
+    return "";
 }
 
 template <typename T>
@@ -72,12 +73,14 @@ template <typename U>
 bool PropertyDelegate<T>::toLuaValue(lua_State* state, U value) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::toLuaValue specialization");
+    return false;
 }
 
 template <typename T>
 int PropertyDelegate<T>::typeLua() {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::luaType specialization");
+    return 0;
 }
 
 template <typename T>
@@ -85,6 +88,7 @@ template <typename U>
 bool PropertyDelegate<T>::toString(std::string& outValue, U inValue) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::toString specialization");
+    return false;
 }
 
 template <typename T>

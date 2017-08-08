@@ -60,7 +60,7 @@ protected:
     static const std::string MaximumValueKey;
     static const std::string SteppingValueKey;
 
-    std::string generateAdditionalDescription() const;
+    std::string generateAdditionalDescription() const override;
 
     T _minimumValue;
     T _maximumValue;
