@@ -87,6 +87,7 @@ return {
                             },
                         },
                         Enabled = true,
+                        PadTiles = false,
                         Fallback = {
                             Name = "Blue Marble",
                             FilePath = "textures/earth_bluemarble.jpg",
