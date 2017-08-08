@@ -63,14 +63,14 @@ U PropertyDelegate<T>::defaultSteppingValue() {
 
 template <typename T>
 template <typename U>
-U PropertyDelegate<T>::fromLuaValue(lua_State* state, bool& success) {
+U PropertyDelegate<T>::fromLuaValue(lua_State*, bool&) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::fromLuaValue specialization");
 }
 
 template <typename T>
 template <typename U>
-bool PropertyDelegate<T>::toLuaValue(lua_State* state, U value) {
+bool PropertyDelegate<T>::toLuaValue(lua_State*, U) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::toLuaValue specialization");
     return false;
@@ -85,7 +85,7 @@ int PropertyDelegate<T>::typeLua() {
 
 template <typename T>
 template <typename U>
-bool PropertyDelegate<T>::toString(std::string& outValue, U inValue) {
+bool PropertyDelegate<T>::toString(std::string&, U) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::toString specialization");
     return false;
@@ -93,7 +93,7 @@ bool PropertyDelegate<T>::toString(std::string& outValue, U inValue) {
 
 template <typename T>
 template <typename U>
-U PropertyDelegate<T>::fromString(std::string value, bool& success) {
+U PropertyDelegate<T>::fromString(std::string, bool&) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::fromString specialization");
 }

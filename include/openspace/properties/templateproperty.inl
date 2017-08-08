@@ -170,16 +170,13 @@ TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
 }
 
 template <typename T>
-T openspace::properties::TemplateProperty<T>::value() const
-{
+T openspace::properties::TemplateProperty<T>::value() const {
     return _value;
 }
 
 template <typename T>
-void openspace::properties::TemplateProperty<T>::setValue(T val)
-{
-    const bool changed = (val != _value);
-    if (changed) {
+void openspace::properties::TemplateProperty<T>::setValue(T val) {
+    if (val != _value) {
         _value = std::move(val);
         notifyListener();
     }
