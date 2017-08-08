@@ -50,8 +50,7 @@ public:
 
     ~TileTextureInitData() = default;
 
-    glm::ivec3 dimensionsWithPadding() const;
-    glm::ivec3 dimensionsWithoutPadding() const;
+    glm::ivec3 dimensions() const;
     glm::ivec2 tilePixelStartOffset() const;
     glm::ivec2 tilePixelSizeDifference() const;
     size_t nRasters() const;
@@ -74,8 +73,7 @@ private:
     unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
 
     HashKey _hashKey;
-    glm::ivec3 _dimensionsWithPadding;
-    glm::ivec3 _dimensionsWithoutPadding;
+    glm::ivec3 _dimensions;
     glm::ivec2 _tilePixelStartOffset;
     glm::ivec2 _tilePixelSizeDifference;
     GLenum _glType;

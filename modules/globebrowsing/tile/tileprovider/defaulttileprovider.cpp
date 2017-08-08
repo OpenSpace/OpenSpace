@@ -105,7 +105,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     
     TileTextureInitData initData(LayerManager::getTileTextureInitData(
         _layerGroupID, _padTiles, tilePixelSize));
-    _tilePixelSize.setValue(initData.dimensionsWithoutPadding().x);
+    _tilePixelSize.setValue(initData.dimensions().x);
 
     _performPreProcessing =
         LayerManager::shouldPerformPreProcessingOnLayergroup(_layerGroupID);

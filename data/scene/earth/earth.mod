@@ -74,13 +74,15 @@ return {
                                     Name = "Temporal VIIRS SNPP",
                                     Type = "TemporalTileLayer",
                                     FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
+                                    PadTiles = false,
                                 }
                             },
                             {
                                 MaxLevel = 22,
                                 TileProvider = {
                                     Name = "ESRI Imagery World 2D",
-                                    FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms"
+                                    FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
+                                    PadTiles = false,
                                 }
                             },
                         },

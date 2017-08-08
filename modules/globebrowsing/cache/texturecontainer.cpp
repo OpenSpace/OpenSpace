@@ -45,7 +45,7 @@ void TextureContainer::reset() {
     for (size_t i = 0; i < _numTextures; ++i)
     {
         auto tex = std::make_unique<ghoul::opengl::Texture>(
-            _initData.dimensionsWithPadding(),
+            _initData.dimensions(),
             _initData.ghoulTextureFormat(),
             _initData.glTextureFormat(),
             _initData.glType(),

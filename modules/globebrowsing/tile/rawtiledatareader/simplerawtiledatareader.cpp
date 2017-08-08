@@ -57,7 +57,7 @@ void SimpleRawTileDataReader::reset() {
 }
 
 int SimpleRawTileDataReader::maxChunkLevel() const {
-    float ratio = static_cast<float>(rasterYSize()) / _initData.dimensionsWithoutPadding().y;
+    float ratio = static_cast<float>(rasterYSize()) / _initData.dimensions().y;
     return glm::max(2, 1 + static_cast<int>(glm::log2(ratio)));
 }
 

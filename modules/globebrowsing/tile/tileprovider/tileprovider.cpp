@@ -168,7 +168,7 @@ void TileProvider::initializeDefaultTile() {
     memset(pixels, 0, numBytes);
 
     // Create ghoul texture
-    _defaultTileTexture = std::make_unique<Texture>(initData.dimensionsWithPadding());
+    _defaultTileTexture = std::make_unique<Texture>(initData.dimensions());
     _defaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
     _defaultTileTexture->setPixelData(pixels);
     _defaultTileTexture->uploadTexture();

@@ -245,7 +245,7 @@ IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) co
     // write region starts in origin
     io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
     io.write.region.numPixels = PixelRegion::PixelCoordinate(
-        _initData.dimensionsWithoutPadding().x, _initData.dimensionsWithoutPadding().y);
+        _initData.dimensions().x, _initData.dimensions().y);
     
     io.read.overview = 0;
     io.read.fullRegion = fullPixelRegion();
@@ -263,15 +263,15 @@ IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) co
     scaledPadding.start *= scale;
 
     io.read.region.pad(scaledPadding);
-    io.write.region.pad(padding);
-    io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
+    //io.write.region.pad(padding);
+    //io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
     
     io.write.bytesPerLine = _initData.bytesPerLine();
     io.write.totalNumBytes = _initData.totalNumBytes();
 
     ghoul_assert(io.write.region.numPixels.x == io.write.region.numPixels.y,
         "Write region must be square");
-    ghoul_assert(io.write.region.numPixels.x == _initData.dimensionsWithPadding().x,
+    ghoul_assert(io.write.region.numPixels.x == _initData.dimensions().x,
         "Write region must match tile it writes to.");
 
     return io;

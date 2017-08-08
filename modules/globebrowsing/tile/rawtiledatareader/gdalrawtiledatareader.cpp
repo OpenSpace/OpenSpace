@@ -144,7 +144,7 @@ void GdalRawTileDataReader::initialize() {
 
     _depthTransform = calculateTileDepthTransform();
     _cached._tileLevelDifference =
-        calculateTileLevelDifference(_initData.dimensionsWithoutPadding().x);
+        calculateTileLevelDifference(_initData.dimensions().x);
 
     int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
     _cached._maxLevel = -_cached._tileLevelDifference;

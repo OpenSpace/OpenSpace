@@ -74,7 +74,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
     textPosition.x = 0;
     textPosition.y = aboveEquator ?
         _fontSize / 2.f :
-        _initData.dimensionsWithPadding().y - 3.f * _fontSize / 2.f;
+        _initData.dimensions().y - 3.f * _fontSize / 2.f;
     glm::vec4 color(1.0, 1.0, 1.0, 1.0);
 
     fontRenderer.render(
