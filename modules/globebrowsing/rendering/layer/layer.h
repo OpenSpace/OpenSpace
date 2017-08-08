@@ -69,6 +69,13 @@ public:
     
     void update();
 
+    glm::ivec2 tilePixelStartOffset() const;
+    glm::ivec2 tilePixelSizeDifference() const;
+    glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
+                                              glm::uvec2 resolution, glm::vec2 tileUV);
+    glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
+                                            glm::vec2 tileUV, glm::uvec2 resolution);
+
 private:
     layergroupid::TypeID parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const;
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
@@ -85,6 +92,9 @@ private:
     OtherTypesProperties _otherTypesProperties;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
+
+    glm::ivec2 _padTilePixelStartOffset;
+    glm::ivec2 _padTilePixelSizeDifference;
 
     const layergroupid::GroupID _layerGroupId;
   

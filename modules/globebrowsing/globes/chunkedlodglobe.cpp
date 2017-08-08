@@ -187,7 +187,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             return 0;
         }
 
-        glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
+        glm::vec2 transformedUv = layer->TileUvToTextureSamplePosition(
             uvTransform,
             patchUV,
             glm::uvec2(tileTexture->dimensions())

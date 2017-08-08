@@ -42,26 +42,4 @@ Tile::Tile(ghoul::opengl::Texture* texture,
     , _status(status)
 { }
 
-glm::vec2 Tile::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
-                                                glm::uvec2 resolution, glm::vec2 tileUV)
-{
-    glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
-    glm::vec2 currentSize = glm::vec2(resolution);
-    glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
-    tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
-    return tileUV;
-}
-
-glm::vec2 Tile::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                              glm::vec2 tileUV, glm::uvec2 resolution)
-{
-    glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
-    uv = compensateSourceTextureSampling(
-        TileTextureInitData::tilePixelStartOffset,
-        TileTextureInitData::tilePixelSizeDifference,
-        resolution,
-        uv);
-    return uv;
-}
-
 } // namespace openspace::globebrowsing

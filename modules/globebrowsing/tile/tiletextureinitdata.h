@@ -43,6 +43,7 @@ public:
     using Format = ghoul::opengl::Texture::Format;
 
     TileTextureInitData(size_t width, size_t height, GLenum glType, Format textureFormat,
+        bool padTiles,
         ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original);
@@ -51,6 +52,8 @@ public:
 
     glm::ivec3 dimensionsWithPadding() const;
     glm::ivec3 dimensionsWithoutPadding() const;
+    glm::ivec2 tilePixelStartOffset() const;
+    glm::ivec2 tilePixelSizeDifference() const;
     size_t nRasters() const;
     size_t bytesPerDatum() const;
     size_t bytesPerPixel() const;
@@ -62,16 +65,19 @@ public:
     bool shouldAllocateDataOnCPU() const;
     HashKey hashKey() const;
 
-    const static glm::ivec2 tilePixelStartOffset;
-    const static glm::ivec2 tilePixelSizeDifference;
+    const static glm::ivec2 TilePixelStartOffset;
+    const static glm::ivec2 TilePixelSizeDifference;
 
 private:
+
     void calculateHashKey();
     unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
 
     HashKey _hashKey;
     glm::ivec3 _dimensionsWithPadding;
     glm::ivec3 _dimensionsWithoutPadding;
+    glm::ivec2 _tilePixelStartOffset;
+    glm::ivec2 _tilePixelSizeDifference;
     GLenum _glType;
     Format _ghoulTextureFormat;
     GLenum _glTextureFormat;

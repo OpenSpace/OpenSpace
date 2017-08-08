@@ -161,7 +161,7 @@ void TileProvider::initializeDefaultTile() {
     using namespace ghoul::opengl;
         
     // Create pixel data
-    TileTextureInitData initData(8, 8, GL_UNSIGNED_BYTE, Texture::Format::RGBA,
+    TileTextureInitData initData(8, 8, GL_UNSIGNED_BYTE, Texture::Format::RGBA, false,
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
     int numBytes = initData.totalNumBytes();
     char* pixels = new char[numBytes];

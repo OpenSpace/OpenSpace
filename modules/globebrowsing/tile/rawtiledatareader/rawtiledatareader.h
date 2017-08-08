@@ -84,9 +84,6 @@ public:
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
     std::shared_ptr<RawTile> defaultTileData() const;
-    
-    /// Padding around all tiles to read to make sure edge blending works.
-    const static PixelRegion padding; // same as the two above
 
 protected:
 

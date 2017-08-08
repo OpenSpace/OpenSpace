@@ -124,33 +124,34 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
             size_t tileSize = preferredTileSize ? preferredTileSize : 64;
             return TileTextureInitData(tileSize, tileSize, GL_FLOAT,
                 ghoul::opengl::Texture::Format::Red,
+                true,
                 TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
         }
         case layergroupid::GroupID::ColorLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA);
+                ghoul::opengl::Texture::Format::BGRA, false);
         }
         case layergroupid::GroupID::Overlays: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA);
+                ghoul::opengl::Texture::Format::BGRA, false);
         }
         case layergroupid::GroupID::NightLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA);
+                ghoul::opengl::Texture::Format::BGRA, false);
         }
         case layergroupid::GroupID::WaterMasks: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA);
+                ghoul::opengl::Texture::Format::BGRA, false);
         }
         default: {
             ghoul_assert(false, "Unknown layer group ID");
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA);
+                ghoul::opengl::Texture::Format::BGRA, false);
         }
     }
 }

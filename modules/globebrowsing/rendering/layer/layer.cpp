@@ -24,7 +24,9 @@
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace::globebrowsing {
 
@@ -101,6 +103,10 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     bool enabled = false; // defaults to false if unspecified
     layerDict.getValue(keyEnabled, enabled);
     _enabled.setValue(enabled);
+
+    TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId);
+    _padTilePixelStartOffset = initData.tilePixelStartOffset();
+    _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
 
     // Initialize settings
     ghoul::Dictionary settingsDict;
@@ -259,6 +265,36 @@ void Layer::update() {
     if (_tileProvider) {
         _tileProvider->update();
     }
+}
+
+glm::ivec2 Layer::tilePixelStartOffset() const {
+    return _padTilePixelStartOffset;
+}
+
+glm::ivec2 Layer::tilePixelSizeDifference() const {
+    return _padTilePixelSizeDifference;
+}
+
+glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
+                                                glm::uvec2 resolution, glm::vec2 tileUV)
+{
+    glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
+    glm::vec2 currentSize = glm::vec2(resolution);
+    glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
+    tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
+    return tileUV;
+}
+
+glm::vec2 Layer::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
+                                              glm::vec2 tileUV, glm::uvec2 resolution)
+{
+    glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
+    uv = compensateSourceTextureSampling(
+        tilePixelStartOffset(),
+        tilePixelSizeDifference(),
+        resolution,
+        uv);
+    return uv;
 }
 
 layergroupid::TypeID Layer::parseTypeIdFromDictionary(

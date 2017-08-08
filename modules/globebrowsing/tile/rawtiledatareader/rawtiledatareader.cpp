@@ -54,12 +54,7 @@
 #include <math.h>
 
 namespace openspace::globebrowsing {
-
-const PixelRegion RawTileDataReader::padding = PixelRegion(
-    TileTextureInitData::tilePixelStartOffset,
-    TileTextureInitData::tilePixelSizeDifference
-);
-    
+  
 RawTileDataReader::RawTileDataReader(const TileTextureInitData& initData,
         PerformPreprocessing preprocess)
     : _initData(initData)
@@ -256,6 +251,11 @@ IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) co
     io.read.fullRegion = fullPixelRegion();
     // For correct sampling in dataset, we need to pad the texture tile
     
+    PixelRegion padding = PixelRegion(
+        _initData.tilePixelStartOffset(),
+        _initData.tilePixelSizeDifference()
+    );
+      
     PixelRegion scaledPadding = padding;
     double scale =
         io.read.region.numPixels.x / static_cast<double>(io.write.region.numPixels.x);
