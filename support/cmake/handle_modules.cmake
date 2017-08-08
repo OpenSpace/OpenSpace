@@ -154,17 +154,6 @@ function (handle_modules internal_module_path external_modules_paths)
     endforeach ()
     list(REMOVE_DUPLICATES module_external_libraries)
 
-    #         list(LENGTH OPENSPACE_APPLICATIONS len1)
-    #         math(EXPR len2 "${len1} - 1")
-
-    #         foreach(val RANGE ${len2})
-    #             list(GET OPENSPACE_APPLICATIONS ${val} val1)
-    #             list(GET OPENSPACE_APPLICATIONS_LINK_REQUEST ${val} val2)
-    #             if (${val2})
-    #                 target_link_libraries(${app} ${libraryName})
-    #             endif ()
-    #         endforeach()
-
     #
     # Step 6:  Create the moduleregistration.h file with the header file paths, class
     #          names and the external module paths
@@ -218,10 +207,8 @@ function (handle_modules internal_module_path external_modules_paths)
         ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
     )
 
-
-    # @TODO Add external paths for use in modulePath() function
-
-    #
+ 
+   #
     # Step 7:  On Windows, copy the DLLs into the application folders
     #
     if (WIN32)
