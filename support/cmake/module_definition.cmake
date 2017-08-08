@@ -57,11 +57,28 @@ function (create_new_module module_name output_library_name)
 
     handle_module_dependencies(${library_name} ${module_name})
 
-    write_module_information(${module_name})
-
     set(${output_library_name} ${library_name} PARENT_SCOPE)
+
+    # This is an ugly hack as we can't inject a variable into a scope two parents above
+    # would love to: set(${module_class_name} "${module_name}Module" PARENT_PARENT_SCOPE)
+    # instead
+    set_property(GLOBAL PROPERTY CurrentModuleClassName "${module_name}Module")
 endfunction ()
 
+
+
+function (register_external_libraries libraries)
+    # This is an ugly hack as we can't inject a variable into a scope two parents above
+    # would love to: set(${module_external_librarys} "${libraries}" PARENT_PARENT_SCOPE)
+    # instead
+    set(libs "")
+    foreach (library ${libraries})
+        get_filename_component(lib ${library} ABSOLUTE)
+        list(APPEND libs ${lib})
+    endforeach()
+
+    set_property(GLOBAL PROPERTY CurrentModuleExternalLibraries ${libs})
+endfunction ()
 
 
 # Gets and returns the <name>module.h and <name>module.cpp files and provides them with a
@@ -75,7 +92,6 @@ function (get_module_files module_name module_files)
     )
     source_group("Module Files" FILES ${module_files})
 endfunction ()
-
 
 
 # Loads the dependencies from 'include.cmake' and deals with them
@@ -107,20 +123,4 @@ function (handle_module_dependencies target_name module_name)
             target_link_libraries(${target_name}  ${${dep_upper}_LIBRARIES})
         endforeach ()
     endif ()
-endfunction ()
-
-
-
-# Writes a module information file that contains information about the created module
-function (write_module_information module_name)
-    string(TOLOWER ${module_name} module_name_lower)
-
-    set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module_name_lower}module.h)
-    string(REPLACE "${OPENSPACE_BASE_DIR}/" "" MODULE_PATH ${MODULE_PATH})
-
-    file(WRITE ${CMAKE_BINARY_DIR}/_generated/modules/${module_name_lower}.cmake
-        "set(MODULE_NAME ${module_name}Module)\n"
-        "set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})\n"
-        "set(MODULE_HEADER_PATH ${MODULE_PATH})\n"
-    )
 endfunction ()
