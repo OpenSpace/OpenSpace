@@ -14,15 +14,15 @@ $scrollbar-width: 10px;
 $popover-arrow-size: 0.5rem;
 
 // Input
-$input-font-size: 14px;
+$input-font-size: 13px;
 // the font size of the label
 $input-label-size: 10px;
 // total margin above and below input label
-$input-label-margin: 3px;
+$input-label-margin: 6px;
 // thickness of the loading indicating border
 $input-loading-border-width: 2px;
 // padding
 $input-padding-horizontal: 7px;
-$input-padding-vertical: $base-padding * 1.5;
+$input-padding-vertical: $base-padding * 2;
 
 $input-total-height: $input-padding-vertical + $input-font-size;

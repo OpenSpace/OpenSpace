@@ -25,7 +25,7 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   background: transparent;
   border: none;
   box-sizing: border-box;
-  color: $text-color-blur;
+  color: $text-color-focus;
   font-size: $input-font-size;
   height: $input-total-height;
   line-height: $input-font-size;
@@ -39,6 +39,10 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
 
 .input:hover {
   background: $ui-background-active;
+
+   ~ .label {
+     color: $text-color-focus;
+   }
 }
 
 .input:focus {

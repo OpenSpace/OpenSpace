@@ -6,7 +6,6 @@ import styles from './Input.scss';
 
 class Input extends Component {
   static get nextId() {
-    // eslint-disable-next-line no-plusplus
     return Input.idCounter++;
   }
 
@@ -113,7 +112,7 @@ Input.propTypes = {
   id: PropTypes.string,
   loading: PropTypes.bool,
   placeholder: PropTypes.string.isRequired,
-  value: PropTypes.string,
+  value: PropTypes.oneOf(PropTypes.string, PropTypes.number),
   wide: PropTypes.bool,
 };
 
