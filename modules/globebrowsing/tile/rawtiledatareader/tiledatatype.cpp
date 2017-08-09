@@ -503,7 +503,6 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                     LERROR("glType data type unknown: " << glType);
                     return GLenum(0);
             }
-            break;
         case ghoul::opengl::Texture::Format::RG:
             switch (glType) {
                 case GL_BYTE:
@@ -523,7 +522,6 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                     LERROR("glType data type unknown: " << glType);
                     return GLenum(0);
             }
-            break;
         case ghoul::opengl::Texture::Format::RGB:
             switch (glType) {
                 case GL_BYTE:
@@ -543,7 +541,6 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                     LERROR("glType data type unknown: " << glType);
                     return GLenum(0);
             }
-            break;
         case ghoul::opengl::Texture::Format::RGBA:
             switch (glType) {
                 case GL_BYTE:
@@ -563,7 +560,6 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                     LERROR("glType data type unknown: " << glType);
                     return GLenum(0);
             }
-            break;
         case ghoul::opengl::Texture::Format::BGR:
             switch (glType) {
                 case GL_BYTE:
@@ -583,7 +579,6 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                     LERROR("glType data type unknown: " << glType);
                     return GLenum(0);
             }
-            break;
         case ghoul::opengl::Texture::Format::BGRA:
             switch (glType) {
                 case GL_BYTE:
@@ -603,7 +598,6 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                     LERROR("glType data type unknown: " << glType);
                     return GLenum(0);
             }
-            break;
         default:
             LERROR(
                 "Unknown format for OpenGL texture: " <<
@@ -612,7 +606,6 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                 >(format)
             );
             return GLenum(0);
-            break;
     }
 }
 

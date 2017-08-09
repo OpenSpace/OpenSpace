@@ -43,8 +43,6 @@
 // _endTime. This buffer is updated every frame.
 
 namespace {
-    const char* KeyTranslation = "Translation";
-
     static const openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start Time",

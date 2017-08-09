@@ -38,7 +38,6 @@
 namespace {
     const char* _loggerCat = "ModelGeometry";
 
-    const char* KeyName = "Name";
     const char* KeyType = "Type";
     const char* KeyGeomModelFile = "GeometryFile";
     const int8_t CurrentCacheVersion = 3;

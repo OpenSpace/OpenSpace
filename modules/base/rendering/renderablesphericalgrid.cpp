@@ -30,11 +30,9 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
+
 #include <ghoul/glm.h>
 #include <ghoul/opengl/programobject.h>
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 namespace {
     static const openspace::properties::Property::PropertyInfo GridColorInfo = {
@@ -254,10 +252,10 @@ void RenderableSphericalGrid::update(const UpdateData& data) {
                 const float fj = static_cast<float>(j);
 
                 // inclination angle (north to south)
-                const float theta = fi * float(M_PI) / fsegments*2.f;  // 0 -> PI
+                const float theta = fi * glm::pi<float>() / fsegments * 2.f;  // 0 -> PI
 
                                                                        // azimuth angle (east to west)
-                const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
+                const float phi = fj * glm::pi<float>() * 2.0f / fsegments;  // 0 -> 2*PI
 
                 const float x = r * sin(phi) * sin(theta);  //
                 const float y = r * cos(theta);             // up
@@ -267,11 +265,8 @@ void RenderableSphericalGrid::update(const UpdateData& data) {
                 if (!(x == 0.f && y == 0.f && z == 0.f))
                     normal = glm::normalize(normal);
 
-                //const float t1 = fj / fsegments;
-                const float t2 = fi / fsegments;
-
                 glm::vec4 tmp(x, y, z, 1);
-                glm::mat4 rot = glm::rotate(glm::mat4(1), static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+                glm::mat4 rot = glm::rotate(glm::mat4(1), glm::half_pi<float>(), glm::vec3(1, 0, 0));
                 tmp = glm::vec4(_gridMatrix.value() * glm::dmat4(rot) * glm::dvec4(tmp));
 
                 for (int i = 0; i < 3; i++) {

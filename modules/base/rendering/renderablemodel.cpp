@@ -212,7 +212,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->deactivate();
 }
 
-void RenderableModel::update(const UpdateData& data) {
+void RenderableModel::update(const UpdateData&) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
     }
