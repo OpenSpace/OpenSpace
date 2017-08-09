@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,6 +31,9 @@
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing {
@@ -128,10 +131,16 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading)
     {
-        glm::vec3 directionToSunWorldSpace =
+        /*glm::vec3 directionToSunWorldSpace =
             glm::normalize(-data.modelTransform.translation);
         glm::vec3 directionToSunCameraSpace =
+            (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));*/
+        // JCC: Change the method call and the viewTransform for the new wrapper.
+
+        glm::dvec3 directionToSunWorldSpace = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->dynamicWorldPosition();
+        glm::vec3 directionToSunCameraSpace =
             (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+
         programObject.setUniform(
             "lightDirectionCameraSpace", -directionToSunCameraSpace);
     }

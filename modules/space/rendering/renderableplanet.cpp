@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,6 +30,9 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+
 #include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -448,6 +451,11 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform("_hasHeightMap", _hasHeightTexture);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
+
+    // JCC: Dynamic Sun position (to add new wrapper)
+    // Sun pos
+    _programObject->setUniform("sun_pos",
+        glm::vec3(OsEng.renderEngine().scene()->sceneGraphNode("Sun")->dynamicWorldPosition()));
 
     // Bind texture
     ghoul::opengl::TextureUnit dayUnit;
