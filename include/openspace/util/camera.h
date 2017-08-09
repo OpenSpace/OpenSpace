@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -112,6 +112,31 @@ public:
     float maxFov() const;
     float sinMaxFov() const;
     SceneGraphNode* parent() const;
+
+    // DSG Access
+    /*
+    * Transforms object from its scenegraph node space to camera space.
+    * Includes SGCT eye space.
+    */
+    glm::mat4 viewMatrix(const SceneGraphNode & node);
+    
+    /*
+    * Transforms object from its scenegraph node space to projection space.
+    * Includes SGCT eye and projection spaces.
+    */
+    glm::mat4 viewProjectionMatrix(const SceneGraphNode & node);
+    
+    /*
+    * Transforms object from its scenegraph node space to camera rig space.
+    */
+    glm::mat4 cameraRigMatrix(const SceneGraphNode & node);
+    
+    /*
+    * Transforms object from camera rig space to camera space.
+    * Includes SGCT eye space.
+    */
+    glm::mat4 cameraMatrix();
+    
 
     // @TODO this should simply be called viewMatrix!
     // Or it needs to be changed so that it actually is combined. Right now it is

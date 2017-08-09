@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -173,6 +173,54 @@ namespace openspace {
     SceneGraphNode * Camera::parent() const {
         return _parent;
     }
+
+  
+    glm::mat4 Camera::viewMatrix(const SceneGraphNode & node) {
+        // Traverses the given node to the attached node
+        // through the common acestor in order to avoid the 
+        // catastrophic cancellation scenario (see DSG paper).
+        // Multiplies the result by the camera rig matrix 
+        // and then by the SGCT eye matrix.
+
+        // JCC: Add common ancestor tranformation matrices.
+        if (_cachedCombinedViewMatrix.isDirty) {
+            Mat4 cameraTranslation =
+                glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)));
+            _cachedCombinedViewMatrix.datum =
+                Mat4(sgctInternal.viewMatrix()) *
+                Mat4(viewRotationMatrix()) *
+                cameraTranslation;
+            _cachedCombinedViewMatrix.isDirty = true;
+        }
+        return _cachedCombinedViewMatrix.datum;
+    }
+
+    glm::mat4 Camera::viewProjectionMatrix(const SceneGraphNode & node) {
+        // Traverses the given node to the attached node
+        // through the common acestor in order to avoid the 
+        // catastrophic cancellation scenario (see DSG paper).
+        // Multiplies the result by the camera rig matrix ,
+        // by the SGCT eye matrix and then my the SGCT projection
+        // matrix.
+        
+        return sgctInternal.projectionMatrix() * viewMatrix(node);
+    }
+
+    glm::mat4 Camera::cameraRigMatrix(const SceneGraphNode & node) {
+        // Traverses the given node to the attached node
+        // through the common acestor in order to avoid the 
+        // catastrophic cancellation scenario (see DSG paper).
+        // Multiplies the result by the camera rig matrix.
+
+        // JCC: Add common ancestor tranformation matrices.
+        return Mat4(viewRotationMatrix()) * 
+            glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)));        
+    }
+
+    glm::mat4 Camera::cameraMatrix() {
+        return sgctInternal.viewMatrix();
+    }
+
 
     const Camera::Mat4& Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
