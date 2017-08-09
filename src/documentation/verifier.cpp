@@ -114,10 +114,10 @@ template struct DeprecatedVerifier<BoolVector4Verifier>;
 template struct DeprecatedVerifier<IntVector4Verifier>;
 template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
-Verifier::~Verifier() {
-    // Specifying the destructor here (instead of using =default) pins the vtable
-    // generation to this cpp file and thus prevents a weak-template-vtables warning on
-    // clang
+std::string Verifier::type() const {
+    // Specifying this function here (instead of using = 0) pins the vtable generation to
+    // this cpp file and thus prevents a weak-template-vtables warning on clang
+    return "";
 }
 
 std::string BoolVerifier::type() const {

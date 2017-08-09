@@ -43,7 +43,7 @@ namespace openspace::documentation {
  * description of the Verifier subclass and what it tests for.
  */
 struct Verifier {
-    virtual ~Verifier();
+    virtual ~Verifier() = default;
 
     /**
      * This method tests whether the \p key contained in the \p dictionary adheres to
@@ -71,7 +71,7 @@ struct Verifier {
      * \return A human-readable string describing the type of object for the Verifier
      * \post The return value is not empty
      */
-    virtual std::string type() const = 0;
+    virtual std::string type() const;
 
     /**
      * This method returns a human-readable string describing the tests that the concrete
