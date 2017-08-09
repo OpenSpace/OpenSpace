@@ -254,7 +254,9 @@ GUI::GUI()
     addPropertySubOwner(_virtualProperty);
     addPropertySubOwner(_filePath);
     addPropertySubOwner(_time);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     addPropertySubOwner(_iswa);
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
 }
 
 void GUI::initialize() {
@@ -340,13 +342,17 @@ void GUI::initialize() {
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initialize(); 
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
 }
 
 void GUI::deinitialize() {
     ImGui::Shutdown();
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitialize();
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
     _parallel.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();
@@ -430,7 +436,10 @@ void GUI::initializeGL() {
     _performance.initializeGL();
     _help.initializeGL();
     _parallel.initializeGL();
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initializeGL();
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+
 }
 
 void GUI::deinitializeGL() {
@@ -447,7 +456,9 @@ void GUI::deinitializeGL() {
         glDeleteBuffers(1, &vboElements);
     }
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitializeGL();
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
     _parallel.deinitializeGL();
     _help.deinitializeGL();
     _performance.deinitializeGL();
@@ -503,9 +514,11 @@ void GUI::endFrame() {
         if (_parallel.isEnabled()) {
             _parallel.render();
         }
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
         if (_iswa.isEnabled()) {
             _iswa.render();
         }
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
         if (_filePath.isEnabled()) {
             _filePath.render();
         }
@@ -612,7 +625,7 @@ void GUI::render() {
     bool iswa = _iswa.isEnabled();
     ImGui::Checkbox("iSWA", &iswa);
     _iswa.setEnabled(iswa);
-#endif
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
 
     _origin.render();
     _time.render();

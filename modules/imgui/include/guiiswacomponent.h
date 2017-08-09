@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_IMGUI___GUIISWACOMPONENT___H__
 #define __OPENSPACE_MODULE_IMGUI___GUIISWACOMPONENT___H__
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+
 #include <modules/imgui/include/guipropertycomponent.h>
 
 #include <map>
@@ -37,10 +39,16 @@ public:
     void render() override;
 
 private:
+    bool _gmData;
+    bool _gmImage;
+    bool _ionData;
     std::vector<int> _cdfOptions;
     std::map<std::string, int> _cdfOptionsMap;
 };
 
 } // namespace openspace::gui
+
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUIISWACOMPONENT___H__

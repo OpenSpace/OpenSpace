@@ -31,15 +31,15 @@
 
 #include <ghoul/misc/sharedmemory.h>
 
-#ifdef __GNUC__
+#if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-WWold-style-cast
+#pragma GCC diagnostic ignored "-WWold-style-cast"
 #endif // __GNUC__
 
 #include <imgui.h>
 
-#ifdef __GNUC__
+#if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic pop
 #endif // __GNUC__
 

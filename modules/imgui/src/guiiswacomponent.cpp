@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+
 #include <modules/imgui/include/guiiswacomponent.h>
 
 #include <modules/iswa/util/iswamanager.h>
@@ -220,3 +222,6 @@ void GuiIswaComponent::render() {
 }
 
 } // namespace openspace::gui
+
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+#

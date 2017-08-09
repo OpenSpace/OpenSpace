@@ -43,6 +43,7 @@ class DataCygnet : public IswaCygnet {
 public:
     DataCygnet(const ghoul::Dictionary& dictionary);
     ~DataCygnet();
+
 protected:
     bool updateTexture() override;
     void fillOptions(std::string& source);

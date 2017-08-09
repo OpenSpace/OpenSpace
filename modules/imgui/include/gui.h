@@ -73,7 +73,9 @@ public:
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _virtualProperty;
     GuiTimeComponent _time;
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     GuiIswaComponent _iswa;
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
     GuiParallelComponent _parallel;
 
 private:
