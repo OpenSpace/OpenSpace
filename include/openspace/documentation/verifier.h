@@ -71,7 +71,7 @@ struct Verifier {
      * \return A human-readable string describing the type of object for the Verifier
      * \post The return value is not empty
      */
-    virtual std::string type() const;
+    virtual std::string type() const = 0;
 
     /**
      * This method returns a human-readable string describing the tests that the concrete
@@ -238,7 +238,7 @@ struct VectorVerifier {};
  */
 template <typename T>
 struct Vector2Verifier : public TemplateVerifier<glm::tvec2<T>>, public VectorVerifier {
-    virtual std::string type() const override;
+    std::string type() const override;
 };
 
 /**

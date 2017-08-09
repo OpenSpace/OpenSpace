@@ -400,11 +400,11 @@ void RenderableShadowCylinder::createCylinder(double time) {
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(CylinderVBOLayout), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(CylinderVBOLayout), nullptr, GL_DYNAMIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _vertices.size() * sizeof(CylinderVBOLayout), &_vertices[0]);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glBindVertexArray(0);
 }
 

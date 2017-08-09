@@ -32,7 +32,8 @@ namespace openspace {
 class ScannerDecoder : public Decoder {
 public:
     ScannerDecoder(const ghoul::Dictionary& dictionary);
-    virtual std::string getDecoderType();
+
+    virtual std::string getDecoderType() override;
     virtual std::vector<std::string> getSpiceIDs();
     std::string getStopCommand();
     void setStopCommand(std::string stopCommand);

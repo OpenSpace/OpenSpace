@@ -30,7 +30,18 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/messagestructures.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif // __GNUC__
+
 #include <imgui.h>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif // __GNUC__
+
+
 #include <fmt/format.h>
 
 #include <algorithm>

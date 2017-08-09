@@ -355,7 +355,7 @@ void RenderableFov::initialize() {
     glBufferData(
         GL_ARRAY_BUFFER,
         _fieldOfViewBounds.data.size() * sizeof(RenderInformation::VBOData),
-        NULL,
+        nullptr,
         GL_STREAM_DRAW
     );
     glEnableVertexAttribArray(0);
@@ -365,7 +365,7 @@ void RenderableFov::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, position))
+        nullptr // = reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, position))
     );
     glEnableVertexAttribArray(1);
     glVertexAttribIPointer(
@@ -384,7 +384,7 @@ void RenderableFov::initialize() {
     glBufferData(
         GL_ARRAY_BUFFER,
         _orthogonalPlane.data.size() * sizeof(RenderInformation::VBOData),
-        NULL,
+        nullptr,
         GL_STREAM_DRAW
     );
 
@@ -395,7 +395,7 @@ void RenderableFov::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, position))
+        nullptr // = reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, position))
     );
     glEnableVertexAttribArray(1);
     glVertexAttribIPointer(

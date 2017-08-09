@@ -162,7 +162,6 @@ function (set_openspace_compile_settings project)
             "-Wused-but-marked-unused"
             "-Wvariadic-macros"
             "-Wvla"
-            "-Wweak-template-vtables"
             "-Wzero-length-array"
             "-Wno-missing-braces"
         )
