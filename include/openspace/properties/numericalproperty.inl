@@ -141,35 +141,34 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* state,  \
-                                                                      bool& success)     \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* l,      \
+                                                                      bool& s)           \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(state, success);                               \
+        return FROM_LUA_LAMBDA_EXPRESSION(l, s);                                         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromLuaValue<TYPE>(                  \
-          lua_State* state, bool& success)                                               \
+          lua_State* l, bool& s)                                                         \
     {                                                                                    \
-        return PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(state,       \
-                                                                            success);    \
+        return PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(l, s);       \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State * state,   \
-                                                                    TYPE value)          \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l,        \
+                                                                    TYPE v)              \
     {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(state, value);                                   \
+        return TO_LUA_LAMBDA_EXPRESSION(l, v);                                           \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<NumericalProperty<TYPE>>::toLuaValue<TYPE>(lua_State * state,  \
-                                                                     TYPE value)         \
+    bool PropertyDelegate<NumericalProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l,       \
+                                                                     TYPE v)             \
     {                                                                                    \
-        return PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(state, value); \
+        return PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(l, v);         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -186,35 +185,31 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
-                                                              bool& success)             \
-    {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(value, success);                            \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string v, bool& s) {  \
+        return FROM_STRING_LAMBDA_EXPRESSION(v, s);                                      \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromString(std::string value,        \
-                                                              bool& success)             \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromString(std::string v, bool& s)   \
     {                                                                                    \
-        return PropertyDelegate<TemplateProperty<TYPE>>::fromString<TYPE>(value,         \
-                                                                          success);      \
+        return PropertyDelegate<TemplateProperty<TYPE>>::fromString<TYPE>(v, s);         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
-                                                            TYPE inValue)                \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outVal,         \
+                                                            TYPE inVal)                  \
     {                                                                                    \
-        return TO_STRING_LAMBDA_EXPRESSION(outValue, inValue);                           \
+        return TO_STRING_LAMBDA_EXPRESSION(outVal, inVal);                               \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<NumericalProperty<TYPE>>::toString(std::string& outValue,      \
-                                                             TYPE inValue)               \
+    bool PropertyDelegate<NumericalProperty<TYPE>>::toString(std::string& outVal,        \
+                                                             TYPE inVal)                 \
     {                                                                                    \
-        return PropertyDelegate<TemplateProperty<TYPE>>::toString(outValue, inValue);    \
+        return PropertyDelegate<TemplateProperty<TYPE>>::toString(outVal, inVal);        \
     }
 
 

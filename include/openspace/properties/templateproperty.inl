@@ -105,40 +105,38 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State * state, \
-                                                                      bool& success)     \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* l,      \
+                                                                      bool& s)           \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(state, success);                               \
+        return FROM_LUA_LAMBDA_EXPRESSION(l, s);                                         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State * state,   \
-                                                                    TYPE value)          \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l, TYPE v)\
     {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(state, value);                                   \
+        return TO_LUA_LAMBDA_EXPRESSION(l, v);                                           \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
-    int PropertyDelegate<TemplateProperty<TYPE>>::typeLua()                              \
-    {                                                                                    \
+    int PropertyDelegate<TemplateProperty<TYPE>>::typeLua() {                            \
         return LUA_TYPE;                                                                 \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
-                                                              bool& success)             \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string v,             \
+                                                              bool& s)                   \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(value, success);                            \
+        return FROM_STRING_LAMBDA_EXPRESSION(v, s);                                      \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
-                                                            TYPE inValue)                \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outVal,         \
+                                                            TYPE inVal)                  \
     {                                                                                    \
-        return TO_STRING_LAMBDA_EXPRESSION(outValue, inValue);                           \
+        return TO_STRING_LAMBDA_EXPRESSION(outVal, inVal);                               \
     }                                                                                    \
 
 

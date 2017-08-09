@@ -38,14 +38,15 @@
 #include <ghoul/opengl/textureunit.h>
 
 
-#ifdef __GNUC__
+#if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-WWold-style-cast
 #endif // __GNUC__
 
 #include <imgui.h>
 
-#ifdef __GNUC__
+#if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic pop
 #endif // __GNUC__
 
@@ -385,7 +386,7 @@ void GUI::initializeGL() {
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, nullptr, GL_DYNAMIC_DRAW);
     
     glGenBuffers(1, &vboElements);
     
@@ -402,7 +403,7 @@ void GUI::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, pos))
+        nullptr // = reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, pos))
     );
     glVertexAttribPointer(
         _program->attributeLocation("in_uv"),

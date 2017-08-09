@@ -415,7 +415,7 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix) {
         }
     }
 
-#ifdef __GNUC__
+#if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif // __GNUC__
@@ -423,7 +423,7 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix) {
     // transform reference position into new frame
     mxvg_c(referenceMatrix, state, 3, 3, state_t);
 
-#ifdef __GNUC__
+#if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic pop
 #endif // __GNUC__
 

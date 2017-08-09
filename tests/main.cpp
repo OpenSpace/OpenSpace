@@ -27,7 +27,7 @@
 #pragma warning (disable : 4619) // #pragma warning: there is no warning number '4800'
 #endif // WIN32
 
-#ifdef __GNUC__
+#if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundef"
 #pragma GCC diagnostic ignored "-Wmissing-noreturn" 
@@ -40,7 +40,7 @@
 
 #include "gtest/gtest.h"
 
-#ifdef __GNUC__
+#if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic pop
 #endif // __GNUC__
 

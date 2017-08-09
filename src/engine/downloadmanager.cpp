@@ -310,8 +310,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 std::vector<std::shared_ptr<DownloadManager::FileFuture>>
 DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,
-    int version, bool overrideFiles, DownloadFinishedCallback finishedCallback,
-    DownloadProgressCallback progressCallback)
+    int version, bool overrideFiles, DownloadFinishedCallback, DownloadProgressCallback)
 {
     std::vector<std::shared_ptr<FileFuture>> futures;
     FileSys.createDirectory(destination, ghoul::filesystem::FileSystem::Recursive::Yes);

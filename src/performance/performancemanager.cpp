@@ -213,7 +213,7 @@ void PerformanceManager::outputLogs() {
     const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _tick;
 
     // Log function performance
-    for (size_t n = 0; n < layout->nFunctionEntries; n++) {
+    for (int16_t n = 0; n < layout->nFunctionEntries; n++) {
         const auto function = layout->functionEntries[n];
         const std::string filename = formatLogName(function.name);
         std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
@@ -227,7 +227,7 @@ void PerformanceManager::outputLogs() {
     }
 
     // Log scene object performance
-    for (size_t n = 0; n < layout->nScaleGraphEntries; n++) {
+    for (int16_t n = 0; n < layout->nScaleGraphEntries; n++) {
         const auto node = layout->sceneGraphEntries[n];
 
         // Open file
