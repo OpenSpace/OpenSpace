@@ -48,6 +48,7 @@ namespace documentation { struct Documentation; }
 
 class Camera;
 class PowerScaledCoordinate;
+class SceneGraphNode;
 
 class Renderable : public properties::PropertyOwner {
 public:
@@ -69,6 +70,9 @@ public:
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;
+
+    void setSceneGraphNode(SceneGraphNode * node);
+    SceneGraphNode * sceneGraphNode() const;
 
     void setBoundingSphere(float boundingSphere);
     float boundingSphere() const;
@@ -97,6 +101,8 @@ protected:
     properties::BoolProperty _enabled;
     
 private:
+    // JCC: Talk with Alex and Emil about ScneGraphNodes as unique_ptr to shared_ptr 
+    SceneGraphNode * _node;
     RenderBin _renderBin;
     float _boundingSphere;
     std::string _startTime;

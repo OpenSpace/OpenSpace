@@ -102,6 +102,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
                    << result->name() << "'");
             return nullptr;
         }
+        // Following the discussion about the new DSG wrapper, 
+        // Renderables should have a pointer to its scenegraph node.
+        result->_renderable->setSceneGraphNode(result.get());
         result->addPropertySubOwner(result->_renderable.get());
         LDEBUG("Successfully created renderable for '" << result->name() << "'");
     }

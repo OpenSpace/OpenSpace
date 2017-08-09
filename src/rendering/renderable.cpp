@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -143,6 +143,22 @@ void Renderable::initialize() {}
 
 void Renderable::deinitialize() {}
 
+bool Renderable::isReady() const {
+    return true;
+}
+
+bool Renderable::isEnabled() const {
+    return _enabled;
+}
+
+void Renderable::setSceneGraphNode(SceneGraphNode * node) {
+    _node = node;
+}
+
+SceneGraphNode * Renderable::sceneGraphNode() const{
+    return _node;
+}
+
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;
 }
@@ -205,14 +221,6 @@ bool Renderable::getInterval(double& start, double& end) {
     else {
         return false;
     }
-}
-
-bool Renderable::isReady() const {
-    return true;
-}
-
-bool Renderable::isEnabled() const {
-    return _enabled;
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
