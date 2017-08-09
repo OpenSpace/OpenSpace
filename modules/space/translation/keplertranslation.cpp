@@ -277,9 +277,8 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
         double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
 
         auto solver = [this, &meanAnomaly, &sign](double x) -> double {
-            double e = _eccentricity;
-            double s = e * sin(x);
-            double c = e * cos(x);
+            double s = _eccentricity * sin(x);
+            double c = _eccentricity * cos(x);
             double f = x - s - meanAnomaly;
             double f1 = 1 - c;
             double f2 = s;

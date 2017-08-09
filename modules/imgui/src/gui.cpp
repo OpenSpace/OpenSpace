@@ -126,7 +126,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
                 pcmd->UserCallback(cmdList, pcmd);
             }
             else {
-                glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
+                glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(pcmd->TextureId));
                 glScissor(
                     static_cast<int>(pcmd->ClipRect.x),
                     static_cast<int>(fb_height - pcmd->ClipRect.w),
