@@ -207,7 +207,11 @@ function (handle_modules internal_module_path external_modules_paths)
         ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
     )
 
- 
+    configure_file(
+        ${OPENSPACE_CMAKE_EXT_DIR}/module_path.template
+        ${CMAKE_BINARY_DIR}/_generated/include/openspace/modulepath.h
+    )
+
    #
     # Step 7:  On Windows, copy the DLLs into the application folders
     #
