@@ -452,7 +452,8 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform("_hasHeightMap", _hasHeightTexture);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
 
-    // JCC: Dynamic Sun position (to add new wrapper)
+    // JCC: Dynamic Sun position (to add new wrapper, i.e., dynamicWorldPosition will change to 
+    // vectorTo(SceneGraphNode &target)
     // Sun pos
     _programObject->setUniform("sun_pos",
         glm::vec3(OsEng.renderEngine().scene()->sceneGraphNode("Sun")->dynamicWorldPosition()));
