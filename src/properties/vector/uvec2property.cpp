@@ -69,9 +69,9 @@ namespace openspace::properties {
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(__TYPE__)                                             \
-    [](std::string value, bool& success) -> __TYPE__ {                                   \
+    [](std::string val, bool& success) -> __TYPE__ {                                     \
         __TYPE__ result;                                                                 \
-        std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');             \
+        std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');               \
         if (tokens.size() != static_cast<size_t>(result.length())) {                     \
             success = false;                                                             \
             return result;                                                               \

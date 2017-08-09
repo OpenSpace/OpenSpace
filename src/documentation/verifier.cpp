@@ -114,6 +114,12 @@ template struct DeprecatedVerifier<BoolVector4Verifier>;
 template struct DeprecatedVerifier<IntVector4Verifier>;
 template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
+Verifier::~Verifier() {
+    // Specifying the destructor here (instead of using =default) pins the vtable
+    // generation to this cpp file and thus prevents a weak-template-vtables warning on
+    // clang
+}
+
 std::string BoolVerifier::type() const {
     return "Boolean";
 }
@@ -280,9 +286,9 @@ std::string ReferencingVerifier::documentation() const {
     return "Referencing Documentation: '"s + identifier + "'";
 }
 
-AndVerifier::AndVerifier(Verifier* lhs, Verifier* rhs)
-    : lhs(lhs)
-    , rhs(rhs)
+AndVerifier::AndVerifier(Verifier* l, Verifier* r)
+    : lhs(l)
+    , rhs(r)
 {
     ghoul_assert(lhs, "lhs must not be nullptr");
     ghoul_assert(rhs, "rhs must not be nullptr");
@@ -315,9 +321,9 @@ std::string AndVerifier::documentation() const {
     return lhs->documentation() + " and " + rhs->documentation();
 }
 
-OrVerifier::OrVerifier(Verifier* lhs, Verifier* rhs)
-    : lhs(lhs)
-    , rhs(rhs)
+OrVerifier::OrVerifier(Verifier* l, Verifier* r)
+    : lhs(l)
+    , rhs(r)
 {
     ghoul_assert(lhs, "lhs must not be nullptr");
     ghoul_assert(rhs, "rhs must not be nullptr");

@@ -34,8 +34,6 @@
 #include <glm/gtx/vector_angle.hpp>
 
 namespace {
-    const char* _loggerCat = "OrbitalNavigator";
-
     static const openspace::properties::Property::PropertyInfo RollFrictionInfo = {
         "RollFriction",
         "Roll Friction",

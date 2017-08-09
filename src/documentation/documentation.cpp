@@ -131,9 +131,9 @@ DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
                          std::move(doc))
 {}
 
-Documentation::Documentation(std::string n, std::string id, DocumentationEntries ents)
+Documentation::Documentation(std::string n, std::string i, DocumentationEntries ents)
     : name(std::move(n))
-    , id(std::move(id))
+    , id(std::move(i))
     , entries(std::move(ents))
 {}
 
