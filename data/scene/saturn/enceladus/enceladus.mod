@@ -5,22 +5,23 @@ return {
         -- SphereOfInfluency unit is meters                
 		SphereOfInfluency = 2.5E+6,
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_ENCELADUS",
-            Body = "ENCELADUS",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.257E3,
-                Segments = 50
-            },
-            Textures = {
-                Color = "textures/enceladus.jpg"
+            Type = "RenderableGlobe",
+            Radii = 252000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Enceladus Texture",
+                        FilePath = "textures/enceladus.jpg",
+                        Enabled = true
+                    }
+                }
             }
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "ENCELADUS",
+                Target = "ENCELADUS",
                 Observer = "SATURN BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/sat375.bsp"
             },
@@ -38,7 +39,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "ENCELADUS",
+                Target = "ENCELADUS",
                 Observer = "SATURN BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

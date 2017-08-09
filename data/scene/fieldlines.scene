@@ -49,11 +49,11 @@ return {
         "saturn",
         "uranus",
         "neptune",
-        "stars",
         "fieldlines",
-        -- "stars-denver",
-        "milkyway",
-        -- "milkyway-eso",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
         "constellationbounds",
     }
 }

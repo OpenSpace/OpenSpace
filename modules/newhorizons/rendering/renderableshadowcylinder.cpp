@@ -34,7 +34,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* KeyMainFrame   = "MainFrame";
+    const char* MainFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "AmountOfPoints",
@@ -112,26 +112,26 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableShadowCylinder"),
-                "",
-                Optional::No
+                Optional::No,
+                ""
             },
             {
                 NumberPointsInfo.identifier,
                 new IntVerifier,
-                NumberPointsInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                NumberPointsInfo.description
             },
             {
                 ShadowLengthInfo.identifier,
                 new DoubleVerifier,
-                ShadowLengthInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ShadowLengthInfo.description
             },
             {
                 ShadowColorInfo.identifier,
                 new DoubleVector4Verifier,
-                ShadowColorInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                ShadowColorInfo.description
             },
             {
                 TerminatorTypeInfo.identifier,
@@ -139,32 +139,32 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
                     // Synchronized with SpiceManager::terminatorTypeFromString
                     "UMBRAL", "PENUMBRAL"
                 }),
-                TerminatorTypeInfo.description,
-                Optional::No
+                Optional::No,
+                TerminatorTypeInfo.description
             },
             {
                 LightSourceInfo.identifier,
                 new StringVerifier,
-                LightSourceInfo.description,
-                Optional::No
+                Optional::No,
+                LightSourceInfo.description
             },
             {
                 ObserverInfo.identifier,
                 new StringVerifier,
-                ObserverInfo.description,
-                Optional::No
+                Optional::No,
+                ObserverInfo.description
             },
             {
                 BodyInfo.identifier,
                 new StringVerifier,
-                BodyInfo.description,
-                Optional::No
+                Optional::No,
+                BodyInfo.description
             },
             {
                 BodyFrameInfo.identifier,
                 new StringVerifier,
-                BodyFrameInfo.description,
-                Optional::No
+                Optional::No,
+                BodyFrameInfo.description
             },
             {
                 AberrationInfo.identifier,
@@ -172,11 +172,10 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
                     // SpiceManager::AberrationCorrection::AberrationCorrection
                     "NONE", "LT", "LT+S", "CN", "CN+S"
                 }),
-        AberrationInfo.description,
-                Optional::No
+                Optional::No,
+                AberrationInfo.description
             },
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -197,7 +196,6 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _observer(ObserverInfo)
     , _body(BodyInfo)
     , _bodyFrame(BodyFrameInfo)
-    , _mainFrame({"mainFrame", "Main Frame", ""}) // @TODO Remove this
     , _aberration(AberrationInfo)
     , _shader(nullptr)
     , _vao(0)
@@ -246,8 +244,6 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     _observer = dictionary.value<std::string>(ObserverInfo.identifier);
     _body = dictionary.value<std::string>(BodyInfo.identifier);
     _bodyFrame = dictionary.value<std::string>(BodyFrameInfo.identifier);
-    _mainFrame = dictionary.value<std::string>(KeyMainFrame);
-    
 
     using T = SpiceManager::AberrationCorrection::Type;
     _aberration.addOptions({
@@ -264,7 +260,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     _aberration = static_cast<int>(aberration.type);
 }
 
-bool RenderableShadowCylinder::initialize() {
+void RenderableShadowCylinder::initialize() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
 
@@ -274,11 +270,9 @@ bool RenderableShadowCylinder::initialize() {
         "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
         "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl"
     );
-
-    return true;
 }
 
-bool RenderableShadowCylinder::deinitialize() {
+void RenderableShadowCylinder::deinitialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -289,8 +283,6 @@ bool RenderableShadowCylinder::deinitialize() {
     _vao = 0;
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
-
-    return true;
 }
 
 bool RenderableShadowCylinder::isReady() const {
@@ -330,7 +322,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 void RenderableShadowCylinder::update(const UpdateData& data) {
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(
         _bodyFrame,
-        _mainFrame,
+        MainFrame,
         data.time.j2000Seconds()
     );
     if (_shader->isDirty()) {
@@ -383,7 +375,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
     glm::dvec3 vecLightSource = SpiceManager::ref().targetPosition(
         _body,
         _lightSource,
-        _mainFrame,
+        MainFrame,
         {
             SpiceManager::AberrationCorrection::Type(_aberration.value()),
             SpiceManager::AberrationCorrection::Direction::Reception

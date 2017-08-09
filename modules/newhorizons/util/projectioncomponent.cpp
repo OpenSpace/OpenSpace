@@ -125,34 +125,34 @@ documentation::Documentation ProjectionComponent::Documentation() {
             {
                 keyInstrument,
                 new StringAnnotationVerifier("A SPICE name of an instrument"),
-                "The instrument that is used to perform the projections",
-                Optional::No
+                Optional::No,
+                "The instrument that is used to perform the projections"
             },
             {
                 keyInstrumentFovy,
                 new DoubleVerifier,
-                "The field of view in degrees along the y axis",
-                Optional::No
+                Optional::No,
+                "The field of view in degrees along the y axis"
             },
             {
                 keyInstrumentAspect,
                 new DoubleVerifier,
-                "The aspect ratio of the instrument in relation between x and y axis",
-                Optional::No
+                Optional::No,
+                "The aspect ratio of the instrument in relation between x and y axis"
             },
             {
                 keyProjObserver,
                 new StringAnnotationVerifier("A SPICE name of the observing object"),
+                Optional::No,
                 "The observer that is doing the projection. This has to be a valid SPICE "
-                "name or SPICE integer.",
-                Optional::No
+                "name or SPICE integer."
             },
             {
                 keyProjTarget,
                 new StringAnnotationVerifier("A SPICE name of the observed object"),
+                Optional::No,
                 "The observed object that is projected on. This has to be a valid SPICE "
-                "name or SPICE integer.",
-                Optional::No
+                "name or SPICE integer."
             },
             {
                 keyProjAberration,
@@ -160,52 +160,51 @@ documentation::Documentation ProjectionComponent::Documentation() {
                     // from SpiceManager::AberrationCorrection::AberrationCorrection
                     "NONE", "LT", "LT+S", "CN", "CN+S", "XLT", "XLT+S", "XCN", "XCN+S"
                 }),
+                Optional::No,
                 "The aberration correction that is supposed to be used for the "
                 "projection. The values for the correction correspond to the SPICE "
                 "definition as described in "
-                "ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html",
-                Optional::No
+                "ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html"
             },
             {
                 keyPotentialTargets,
                 new StringListVerifier,
+                Optional::Yes,
                 "The list of potential targets that are involved with the image "
-                "projection",
-                Optional::Yes
+                "projection"
             },
             {
                 keyNeedsTextureMapDilation,
                 new BoolVerifier,
+                Optional::Yes,
                 "Determines whether a dilation step of the texture map has to be "
                 "performed after each projection. This is necessary if the texture of "
                 "the projected object is a texture map where the borders are not "
-                "touching. The default value is 'false'.",
-                Optional::Yes
+                "touching. The default value is 'false'."
             },
             {
                 keyNeedsShadowing,
                 new BoolVerifier,
+                Optional::Yes,
                 "Determines whether the object requires a self-shadowing algorithm. This "
                 "is necessary if the object is concave and might cast a shadow on itself "
-                "during presentation. The default value is 'false'.",
-                Optional::Yes
+                "during presentation. The default value is 'false'."
             },
             {
                 keyTextureMapAspectRatio,
                 new DoubleVerifier,
+                Optional::Yes,
                 "Sets the desired aspect ratio of the projected texture. This might be "
                 "necessary as planets usually have 2x1 aspect ratios, whereas this does "
                 "not hold for non-planet objects (comets, asteroids, etc). The default "
-                "value is '1.0'.",
-                Optional::Yes
+                "value is '1.0'."
             }
-
         }
     };
 }
 
 ProjectionComponent::ProjectionComponent()
-    : properties::PropertyOwner("ProjectionComponent")
+    : properties::PropertyOwner({ "ProjectionComponent" })
     , _performProjection(ProjectionInfo, true)
     , _clearAllProjections(ClearProjectionInfo, false)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)

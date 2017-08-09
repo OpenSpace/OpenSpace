@@ -125,7 +125,7 @@ namespace {
 namespace openspace {
 
 LuaConsole::LuaConsole()
-    : properties::PropertyOwner("LuaConsole")
+    : properties::PropertyOwner({ "LuaConsole" })
     , _isVisible(VisibleInfo, false)
     , _remoteScripting(RemoveScriptingInfo, false)
     , _backgroundColor(

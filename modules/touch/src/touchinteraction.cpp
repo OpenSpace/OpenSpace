@@ -74,7 +74,7 @@ using namespace TUIO;
 namespace openspace {
 
 TouchInteraction::TouchInteraction()
-    : properties::PropertyOwner("TouchInteraction")
+    : properties::PropertyOwner({ "TouchInteraction" })
     , _origin({ "Origin", "Origin", "" }) // @TODO Missing documentation
     , _unitTest(
         { "Click to take a unit test", "Take a unit test saving the LM data into file", "" }, // @TODO Missing documentation

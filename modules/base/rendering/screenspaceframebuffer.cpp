@@ -50,8 +50,7 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     return {
         "ScreenSpace Framebuffer",
         "base_screenspace_framebuffer",
-        {},
-        Exhaustive::Yes
+        {}
     };
 }
 

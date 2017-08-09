@@ -68,7 +68,7 @@ namespace {
 namespace openspace::interaction {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner("NavigationHandler")
+    : properties::PropertyOwner({ "NavigationHandler" })
     , _origin(OriginInfo)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {

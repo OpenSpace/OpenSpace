@@ -53,9 +53,9 @@ void main() {
     vec4 position = vec4(tmp.xyz * pow(10, tmp. w), 1.0);
 
     if (_hasHeightMap) {
-        const float height = texture(heightTex, in_st).r;
-        const vec3 displacementDirection = abs(normalize(in_normal.xyz));
-        const float displacementFactor = height * _heightExaggeration;
+        float height = texture(heightTex, in_st).r;
+        vec3 displacementDirection = abs(normalize(in_normal.xyz));
+        float displacementFactor = height * _heightExaggeration;
         position.xyz = position.xyz + displacementDirection * displacementFactor;
     }
     

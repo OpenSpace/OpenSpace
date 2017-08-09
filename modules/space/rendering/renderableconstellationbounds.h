@@ -50,8 +50,8 @@ class RenderableConstellationBounds : public Renderable {
 public:
     RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

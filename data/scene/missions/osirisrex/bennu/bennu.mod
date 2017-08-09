@@ -10,7 +10,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = BENNU_BODY,
+                Target = BENNU_BODY,
                 Observer = "SUN",
             },
         },
@@ -100,7 +100,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = BENNU_BODY,
+                Target = BENNU_BODY,
                 Observer = "SUN",
             },
             Color = { 0.4, 0.0, 0.7},

@@ -5,22 +5,23 @@ return {
         -- SphereOfInfluency unit is meters                
 		SphereOfInfluency = 2.5E+7,
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_TITAN",
-            Body = "TITAN",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.2575E4,
-                Segments = 50
-            },
-            Textures = {
-                Color = "textures/titan.jpg"
+            Type = "RenderableGlobe",
+            Radii = 2576000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Titan Texture",
+                        FilePath = "textures/titan.jpg",
+                        Enabled = true
+                    }
+                }
             }
-        },
+        },        
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "TITAN",
+                Target = "TITAN",
                 Observer = "SATURN BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/sat375.bsp"
             },
@@ -38,7 +39,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "TITAN",
+                Target = "TITAN",
                 Observer = "SATURN BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

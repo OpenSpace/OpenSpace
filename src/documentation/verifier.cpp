@@ -165,16 +165,15 @@ std::string StringVerifier::type() const {
     return "String";
 }
 
-TableVerifier::TableVerifier(std::vector<DocumentationEntry> d, Exhaustive exhaustive)
+TableVerifier::TableVerifier(std::vector<DocumentationEntry> d)
     : documentations(std::move(d))
-    , exhaustive(std::move(exhaustive))
 {}
 
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
                                      const std::string& key) const {
     if (dict.hasKeyAndValue<Type>(key)) {
         ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
-        TestResult res = testSpecification({documentations, exhaustive}, d);
+        TestResult res = testSpecification({documentations}, d);
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
         for (TestResult::Offense& s : res.offenses) {
@@ -204,7 +203,9 @@ std::string TableVerifier::type() const {
 }
 
 StringListVerifier::StringListVerifier(std::string elementDocumentation)
-    : TableVerifier({{ "*", new StringVerifier, std::move(elementDocumentation) }})
+    : TableVerifier({
+        { "*", new StringVerifier, Optional::No, std::move(elementDocumentation) }
+    })
 {}
 
 std::string StringListVerifier::type() const {
@@ -212,7 +213,9 @@ std::string StringListVerifier::type() const {
 }
 
 IntListVerifier::IntListVerifier(std::string elementDocumentation)
-    : TableVerifier({ { "*", new IntVerifier, std::move(elementDocumentation) } })
+    : TableVerifier({
+        { "*", new IntVerifier, Optional::No, std::move(elementDocumentation) }
+    })
 {}
 
 std::string IntListVerifier::type() const {

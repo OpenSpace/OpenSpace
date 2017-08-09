@@ -82,7 +82,7 @@ namespace {
 namespace openspace::globebrowsing::cache {
 
 MemoryAwareTileCache::MemoryAwareTileCache()
-    : PropertyOwner("TileCache")
+    : PropertyOwner({ "TileCache" })
     , _numTextureBytesAllocatedOnCPU(0)
     , _cpuAllocatedTileData(CpuAllocatedDataInfo, 1024, 128, 2048, 1)
     , _gpuAllocatedTileData(GpuAllocatedDataInfo, 1024, 128, 2048, 1)

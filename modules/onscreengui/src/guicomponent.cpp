@@ -35,7 +35,7 @@ namespace {
 namespace openspace::gui {
 
 GuiComponent::GuiComponent(std::string name)
-    : properties::PropertyOwner(std::move(name))
+    : properties::PropertyOwner({ std::move(name) })
     , _isEnabled(EnabledInfo, false)
 {
     addProperty(_isEnabled);

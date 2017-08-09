@@ -27,7 +27,7 @@
 namespace openspace::properties {
 
 #define REGISTER_NUMERICALPROPERTY_HEADER(CLASS_NAME, TYPE)                              \
-    typedef NumericalProperty<TYPE> CLASS_NAME;                                          \
+    using CLASS_NAME = NumericalProperty<TYPE>;                                          \
                                                                                          \
     template <>                                                                          \
     std::string PropertyDelegate<NumericalProperty<TYPE>>::className();                  \

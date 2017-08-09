@@ -46,15 +46,15 @@ Fragment getFragment() {
 
     Fragment frag;
     if (_performShading) {
-        const vec3 n = normalize(vs_normal.xyz);
-        const vec3 l_pos = vec3(sun_pos); // sun.
-        const vec3 l_dir = normalize(l_pos - objpos.xyz);
-        const float intensity = min(max(5 * dot(n,l_dir), 0.0), 1);
+        vec3 n = normalize(vs_normal.xyz);
+        vec3 l_pos = vec3(sun_pos); // sun.
+        vec3 l_dir = normalize(l_pos - objpos.xyz);
+        float intensity = min(max(5 * dot(n,l_dir), 0.0), 1);
         
         // float shine = 0.0001;
 
         const vec4 specular = vec4(0.5);
-        const vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
+        vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
         /*
         if(intensity > 0.f){
             // halfway vector

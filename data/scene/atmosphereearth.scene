@@ -42,14 +42,14 @@ return {
     Camera = {
         Focus = "Earth",
         Position = {1, 0, 0},
-		Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
+        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
     Modules = {
         "sun",
         "earth",
-        "stars",
-        --"stars-denver",
-        "milkyway",
-        -- "milkyway-eso",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
     }
 }

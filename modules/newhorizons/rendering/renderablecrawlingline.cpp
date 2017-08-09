@@ -61,46 +61,43 @@ documentation::Documentation RenderableCrawlingLine::Documentation() {
             {
                 KeySource,
                 new StringVerifier,
+                Optional::No,
                 "Denotes the SPICE name of the source of the renderable crawling line, "
-                "for example, the space craft",
-                Optional::No
+                "for example, the space craft"
             },
             {
                 KeyTarget,
                 new StringVerifier,
-                "Denotes the SPICE name of the target of the crawling line",
-                Optional::Yes
+                Optional::Yes,
+                "Denotes the SPICE name of the target of the crawling line"
             },
             {
                 KeyInstrument,
                 new StringVerifier,
+                Optional::No,
                 "Denotes the SPICE name of the instrument that is used to render the "
-                "crawling line",
-                Optional::No
+                "crawling line"
             },
             {
                 KeyColor,
                 new TableVerifier({
                     {
-                        {
-                            KeyColorStart,
-                            new DoubleVector4Verifier,
-                            "The color at the start of the line",
-                            Optional::No
-                        },
-                        {
-                            KeyColorEnd,
-                            new DoubleVector4Verifier,
-                            "The color at the end of the line",
-                            Optional::No
-                        }
+                        KeyColorStart,
+                        new DoubleVector4Verifier,
+                        Optional::No,
+                        "The color at the start of the line",
                     },
-                    Exhaustive::Yes
+                    {
+                        KeyColorEnd,
+                        new DoubleVector4Verifier,
+                        Optional::No,
+                        "The color at the end of the line"
+                    }
                 }),
+                Optional::No,
                 "Specifies the colors that are used for the crawling line. One value "
                 "determines the starting color of the line, the second value is the "
-                "color at the end of the line.",
-                Optional::No
+                "color at the end of the line."
             }
         }
     };
@@ -138,7 +135,7 @@ bool RenderableCrawlingLine::isReady() const {
     return (_program != nullptr);
 }
 
-bool RenderableCrawlingLine::initialize() {
+void RenderableCrawlingLine::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram(
         "RenderableCrawlingLine",
@@ -167,11 +164,9 @@ bool RenderableCrawlingLine::initialize() {
     );
 
     glBindVertexArray(0);
-
-    return true;
 }
 
-bool RenderableCrawlingLine::deinitialize(){
+void RenderableCrawlingLine::deinitialize(){
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
     glDeleteBuffers(1, &_vbo);
@@ -182,8 +177,6 @@ bool RenderableCrawlingLine::deinitialize(){
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
     }
-
-    return true;
 }
 
 void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {

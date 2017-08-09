@@ -94,28 +94,28 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
             {
                 VertexInfo.identifier,
                 new StringVerifier,
-                VertexInfo.description,
-                Optional::No
+                Optional::No,
+                VertexInfo.description
             },
             {
                 ConstellationInfo.identifier,
                 new StringVerifier,
+                Optional::Yes,
                 "Specifies the file that contains the mapping between constellation "
                 "abbreviations and full name of the constellation. If the file is "
-                "omitted, the abbreviations are used as the full names.",
-                Optional::Yes
+                "omitted, the abbreviations are used as the full names."
             },
             {
                 DistanceInfo.identifier,
                 new DoubleVerifier,
-                DistanceInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                DistanceInfo.description
             },
             {
                 SelectionInfo.identifier,
                 new StringListVerifier,
-                SelectionInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                SelectionInfo.description
             }
         }
     };
@@ -158,13 +158,50 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     addProperty(_distance);
 
     fillSelectionProperty();
+    _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
     addProperty(_constellationSelection);
-    _constellationSelection.onChange(
-        [this]() { selectionPropertyHasChanged(); }
-    );
+
+    if (dictionary.hasKey(SelectionInfo.identifier)) {
+        const ghoul::Dictionary selection = dictionary.value<ghoul::Dictionary>(
+            SelectionInfo.identifier
+        );
+
+        std::vector<properties::SelectionProperty::Option> options =
+            _constellationSelection.options();
+        std::vector<int> selectedIndices;
+
+        for (int i = 1; i <= selection.size(); ++i) {
+            const std::string s = selection.value<std::string>(std::to_string(i));
+
+            auto it = std::find_if(
+                options.begin(),
+                options.end(),
+                [&s](const properties::SelectionProperty::Option& o) {
+                    return o.description == s;
+                }
+            );
+            if (it == options.end()) {
+                // The user has specified a constellation name that doesn't exist
+                LWARNINGC(
+                    "RenderableConstellationBounds",
+                    "Option '" << s << "' not found in list of constellations"
+                );
+            }
+            else {
+                // If the found the option, we push the index of the found value into the
+                // array
+                selectedIndices.push_back(static_cast<int>(
+                    std::distance(options.begin(), it)
+                ));
+            }
+        }
+
+        _constellationSelection = selectedIndices;
+    }
+
 }
 
-bool RenderableConstellationBounds::initialize() {
+void RenderableConstellationBounds::initialize() {
     _program = OsEng.renderEngine().buildRenderProgram(
         "ConstellationBounds",
         "${MODULE_SPACE}/shaders/constellationbounds_vs.glsl",
@@ -189,11 +226,9 @@ bool RenderableConstellationBounds::initialize() {
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindVertexArray(0);
-
-    return true;
 }
 
-bool RenderableConstellationBounds::deinitialize() {
+void RenderableConstellationBounds::deinitialize() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
@@ -203,8 +238,6 @@ bool RenderableConstellationBounds::deinitialize() {
         OsEng.renderEngine().removeRenderProgram(_program);
         _program = nullptr;
     }
-
-    return true;
 }
 
 bool RenderableConstellationBounds::isReady() const {

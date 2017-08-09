@@ -5,22 +5,23 @@ return {
         -- SphereOfInfluency unit is meters                
 		SphereOfInfluency = 2.0E+6,
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_MIMAS",
-            Body = "MIMAS",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.28E3,
-                Segments = 50
-            },
-            Textures = {
-                Color = "textures/mimas.jpg"
+            Type = "RenderableGlobe",
+            Radii = 198000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Mimas Texture",
+                        FilePath = "textures/mimas.jpg",
+                        Enabled = true
+                    }
+                }
             }
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MIMAS",
+                Target = "MIMAS",
                 Observer = "SATURN BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/sat375.bsp"
             },
@@ -38,7 +39,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MIMAS",
+                Target = "MIMAS",
                 Observer = "SATURN BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

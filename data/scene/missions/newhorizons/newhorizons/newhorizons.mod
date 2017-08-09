@@ -74,7 +74,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NEW HORIZONS",
+                Target = "NEW HORIZONS",
                 Observer = "SUN",
                 Kernels = NewHorizonsKernels
             },
@@ -98,10 +98,7 @@ return {
                 GeometryFile = "models/NewHorizonsCleanModel.obj",
                 -- Magnification = 4,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/NHTexture.jpg",
-            },
+            ColorTexture = "textures/NHTexture.jpg",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -145,9 +142,9 @@ return {
                 GeometryFile = "models/Labels.obj",
                 -- Magnification = 4,
             }, 
+            ColorTexture =  "textures/labels.png",
             Textures = {
                 Type = "simple",
-                Color =  "textures/labels.png",
                 BumpMap = "textures/goldfoilbump.tif"
             },
             Rotation = {
@@ -168,7 +165,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NEW HORIZONS",
+                Target = "NEW HORIZONS",
                 Observer = "PLUTO BARYCENTER"
             },
             Color = { 1.0, 0.8, 0.4 },

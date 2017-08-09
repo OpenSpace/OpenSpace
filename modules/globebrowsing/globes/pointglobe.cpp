@@ -64,7 +64,7 @@ PointGlobe::~PointGlobe() {
     glDeleteVertexArrays(1, &_vaoID);
 }
 
-bool PointGlobe::initialize() {
+void PointGlobe::initialize() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "PointGlobe",
         "${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl",
@@ -98,12 +98,11 @@ bool PointGlobe::initialize() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), 0);
 
     glBindVertexArray(0);
-
-    return isReady();
 }
 
-bool PointGlobe::deinitialize() {
-    return true;
+void PointGlobe::deinitialize() {
+    glDeleteVertexArrays(1, &_vaoID);
+    glDeleteBuffers(1, &_vertexBufferID);
 }
 
 bool PointGlobe::isReady() const {

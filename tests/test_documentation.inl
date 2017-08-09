@@ -40,62 +40,62 @@ TEST_F(DocumentationTest, Constructor) {
     Documentation doc;
 
     // Basic Verifiers
-    doc.entries.emplace_back("BoolVerifier", new BoolVerifier);
-    doc.entries.emplace_back("DoubleVerifier", new DoubleVerifier);
-    doc.entries.emplace_back("IntVerifier", new IntVerifier);
-    doc.entries.emplace_back("StringVerifier", new StringVerifier);
-    doc.entries.emplace_back("TableVerifier", new TableVerifier);
+    doc.entries.emplace_back("BoolVerifier", new BoolVerifier, Optional::No);
+    doc.entries.emplace_back("DoubleVerifier", new DoubleVerifier, Optional::No);
+    doc.entries.emplace_back("IntVerifier", new IntVerifier, Optional::No);
+    doc.entries.emplace_back("StringVerifier", new StringVerifier, Optional::No);
+    doc.entries.emplace_back("TableVerifier", new TableVerifier, Optional::No);
 
     // Operator Verifiers
-    doc.entries.emplace_back("LessDouble", new DoubleLessVerifier(0.0));
-    doc.entries.emplace_back("LessInt", new IntLessVerifier(0));
+    doc.entries.emplace_back("LessDouble", new DoubleLessVerifier(0.0), Optional::No);
+    doc.entries.emplace_back("LessInt", new IntLessVerifier(0), Optional::No);
 
-    doc.entries.emplace_back("LessEqualDouble", new DoubleLessEqualVerifier(0.0));
-    doc.entries.emplace_back("LessEqualInt", new IntLessEqualVerifier(0));
+    doc.entries.emplace_back("LessEqualDouble", new DoubleLessEqualVerifier(0.0), Optional::No);
+    doc.entries.emplace_back("LessEqualInt", new IntLessEqualVerifier(0), Optional::No);
 
-    doc.entries.emplace_back("GreaterDouble", new DoubleGreaterVerifier(0.0));
-    doc.entries.emplace_back("GreaterInt", new IntGreaterVerifier(0));
+    doc.entries.emplace_back("GreaterDouble", new DoubleGreaterVerifier(0.0), Optional::No);
+    doc.entries.emplace_back("GreaterInt", new IntGreaterVerifier(0), Optional::No);
 
-    doc.entries.emplace_back("GreaterEqualDouble", new DoubleGreaterEqualVerifier(0.0));
-    doc.entries.emplace_back("GreaterEqualInt", new IntGreaterEqualVerifier(0));
+    doc.entries.emplace_back("GreaterEqualDouble", new DoubleGreaterEqualVerifier(0.0), Optional::No);
+    doc.entries.emplace_back("GreaterEqualInt", new IntGreaterEqualVerifier(0), Optional::No);
 
-    doc.entries.emplace_back("EqualBool", new BoolEqualVerifier(false));
-    doc.entries.emplace_back("EqualDouble", new DoubleEqualVerifier(0.0));
-    doc.entries.emplace_back("EqualInt", new IntEqualVerifier(0));
-    doc.entries.emplace_back("EqualString", new StringEqualVerifier(""));
+    doc.entries.emplace_back("EqualBool", new BoolEqualVerifier(false), Optional::No);
+    doc.entries.emplace_back("EqualDouble", new DoubleEqualVerifier(0.0), Optional::No);
+    doc.entries.emplace_back("EqualInt", new IntEqualVerifier(0), Optional::No);
+    doc.entries.emplace_back("EqualString", new StringEqualVerifier(""), Optional::No);
 
-    doc.entries.emplace_back("UnequalBool", new BoolUnequalVerifier(false));
-    doc.entries.emplace_back("UnequalDouble", new DoubleUnequalVerifier(0.0));
-    doc.entries.emplace_back("UnequalInt", new IntUnequalVerifier(0));
-    doc.entries.emplace_back("UnequalString", new StringUnequalVerifier(""));
+    doc.entries.emplace_back("UnequalBool", new BoolUnequalVerifier(false), Optional::No);
+    doc.entries.emplace_back("UnequalDouble", new DoubleUnequalVerifier(0.0), Optional::No);
+    doc.entries.emplace_back("UnequalInt", new IntUnequalVerifier(0), Optional::No);
+    doc.entries.emplace_back("UnequalString", new StringUnequalVerifier(""), Optional::No);
 
     // List Verifiers
-    doc.entries.emplace_back("InListBool", new BoolInListVerifier({ true, false }));
-    doc.entries.emplace_back("InListDouble", new DoubleInListVerifier({ 0.0, 1.0}));
-    doc.entries.emplace_back("InListInt", new IntInListVerifier({ 0, 1 }));
-    doc.entries.emplace_back("InListString", new StringInListVerifier({ "", "a" }));
+    doc.entries.emplace_back("InListBool", new BoolInListVerifier({ true, false }), Optional::No);
+    doc.entries.emplace_back("InListDouble", new DoubleInListVerifier({ 0.0, 1.0}), Optional::No);
+    doc.entries.emplace_back("InListInt", new IntInListVerifier({ 0, 1 }), Optional::No);
+    doc.entries.emplace_back("InListString", new StringInListVerifier({ "", "a" }), Optional::No);
 
-    doc.entries.emplace_back("NotInListBool", new BoolNotInListVerifier({ true, false }));
-    doc.entries.emplace_back("NotInListDouble", new DoubleNotInListVerifier({ 0.0, 1.0 }));
-    doc.entries.emplace_back("NotInListInt", new IntNotInListVerifier({ 0, 1 }));
-    doc.entries.emplace_back("NotInListString", new StringNotInListVerifier({ "", "a" }));
+    doc.entries.emplace_back("NotInListBool", new BoolNotInListVerifier({ true, false }), Optional::No);
+    doc.entries.emplace_back("NotInListDouble", new DoubleNotInListVerifier({ 0.0, 1.0 }), Optional::No);
+    doc.entries.emplace_back("NotInListInt", new IntNotInListVerifier({ 0, 1 }), Optional::No);
+    doc.entries.emplace_back("NotInListString", new StringNotInListVerifier({ "", "a" }), Optional::No);
 
-    doc.entries.emplace_back("StringListVerifier", new StringListVerifier);
-    doc.entries.emplace_back("IntListVerifier", new IntListVerifier);
+    doc.entries.emplace_back("StringListVerifier", new StringListVerifier, Optional::No);
+    doc.entries.emplace_back("IntListVerifier", new IntListVerifier, Optional::No);
 
     // Range Verifiers
-    doc.entries.emplace_back("InListDouble", new DoubleInRangeVerifier({ 0.0, 1.0 }));
-    doc.entries.emplace_back("InListInt", new IntInRangeVerifier({ 0, 1 }));
+    doc.entries.emplace_back("InListDouble", new DoubleInRangeVerifier({ 0.0, 1.0 }), Optional::No);
+    doc.entries.emplace_back("InListInt", new IntInRangeVerifier({ 0, 1 }), Optional::No);
 
-    doc.entries.emplace_back("NotInListDouble", new DoubleNotInRangeVerifier({ 0.0, 1.0 }));
-    doc.entries.emplace_back("NotInListInt", new IntNotInRangeVerifier({ 0, 1 }));
+    doc.entries.emplace_back("NotInListDouble", new DoubleNotInRangeVerifier({ 0.0, 1.0 }), Optional::No);
+    doc.entries.emplace_back("NotInListInt", new IntNotInRangeVerifier({ 0, 1 }), Optional::No);
 
     // Misc Verifiers
-    doc.entries.emplace_back("AnnotationBool", new BoolAnnotationVerifier("Bool"));
-    doc.entries.emplace_back("AnnotationDouble", new DoubleAnnotationVerifier("Double"));
-    doc.entries.emplace_back("AnnotationInt", new IntAnnotationVerifier("Int"));
-    doc.entries.emplace_back("AnnotationString", new StringAnnotationVerifier("String"));
-    doc.entries.emplace_back("AnnotationTable", new TableAnnotationVerifier("Table"));
+    doc.entries.emplace_back("AnnotationBool", new BoolAnnotationVerifier("Bool"), Optional::No);
+    doc.entries.emplace_back("AnnotationDouble", new DoubleAnnotationVerifier("Double"), Optional::No);
+    doc.entries.emplace_back("AnnotationInt", new IntAnnotationVerifier("Int"), Optional::No);
+    doc.entries.emplace_back("AnnotationString", new StringAnnotationVerifier("String"), Optional::No);
+    doc.entries.emplace_back("AnnotationTable", new TableAnnotationVerifier("Table"), Optional::No);
 }
 
 TEST_F(DocumentationTest, InitializerConstructor) {
@@ -104,59 +104,59 @@ TEST_F(DocumentationTest, InitializerConstructor) {
     Documentation doc {
         {
             // Basic Verifiers
-            {"BoolVerifier", new BoolVerifier },
-            {"DoubleVerifier", new DoubleVerifier},
-            {"IntVerifier", new IntVerifier},
-            {"StringVerifier", new StringVerifier},
-            {"TableVerifier", new TableVerifier},
+            {"BoolVerifier", new BoolVerifier, Optional::No },
+            {"DoubleVerifier", new DoubleVerifier, Optional::No },
+            {"IntVerifier", new IntVerifier, Optional::No },
+            {"StringVerifier", new StringVerifier, Optional::No },
+            {"TableVerifier", new TableVerifier, Optional::No },
 
             // Operator Verifiers
-            { "LessDouble", new DoubleLessVerifier(0.0)},
-            { "LessInt", new IntLessVerifier(0)},
+            { "LessDouble", new DoubleLessVerifier(0.0), Optional::No },
+            { "LessInt", new IntLessVerifier(0), Optional::No },
 
-            {"LessEqualDouble", new DoubleLessEqualVerifier(0.0)},
-            {"LessEqualInt", new IntLessEqualVerifier(0)},
+            {"LessEqualDouble", new DoubleLessEqualVerifier(0.0), Optional::No },
+            {"LessEqualInt", new IntLessEqualVerifier(0), Optional::No },
 
-            {"GreaterDouble", new DoubleGreaterVerifier(0.0)},
-            {"GreaterInt", new IntGreaterVerifier(0)},
+            {"GreaterDouble", new DoubleGreaterVerifier(0.0), Optional::No },
+            {"GreaterInt", new IntGreaterVerifier(0), Optional::No },
 
-            {"GreaterEqualDouble", new DoubleGreaterEqualVerifier(0.0)},
-            {"GreaterEqualInt", new IntGreaterEqualVerifier(0)},
+            {"GreaterEqualDouble", new DoubleGreaterEqualVerifier(0.0), Optional::No },
+            {"GreaterEqualInt", new IntGreaterEqualVerifier(0), Optional::No },
 
-            {"EqualBool", new BoolEqualVerifier(false)},
-            {"EqualDouble", new DoubleEqualVerifier(0.0)},
-            {"EqualInt", new IntEqualVerifier(0)},
-            {"EqualString", new StringEqualVerifier("")},
+            {"EqualBool", new BoolEqualVerifier(false), Optional::No },
+            {"EqualDouble", new DoubleEqualVerifier(0.0), Optional::No },
+            {"EqualInt", new IntEqualVerifier(0), Optional::No },
+            {"EqualString", new StringEqualVerifier(""), Optional::No },
 
-            {"UnequalBool", new BoolUnequalVerifier(false)},
-            {"UnequalDouble", new DoubleUnequalVerifier(0.0)},
-            {"UnequalInt", new IntUnequalVerifier(0)},
-            {"UnequalString", new StringUnequalVerifier("")},
+            {"UnequalBool", new BoolUnequalVerifier(false), Optional::No },
+            {"UnequalDouble", new DoubleUnequalVerifier(0.0), Optional::No },
+            {"UnequalInt", new IntUnequalVerifier(0), Optional::No },
+            {"UnequalString", new StringUnequalVerifier(""), Optional::No },
 
             // List Verifiers
-            {"InListBool", new BoolInListVerifier({ true, false })},
-            {"InListDouble", new DoubleInListVerifier({ 0.0, 1.0 })},
-            {"InListInt", new IntInListVerifier({ 0, 1 })},
-            {"InListString", new StringInListVerifier({ "", "a" })},
+            {"InListBool", new BoolInListVerifier({ true, false }), Optional::No },
+            {"InListDouble", new DoubleInListVerifier({ 0.0, 1.0 }), Optional::No },
+            {"InListInt", new IntInListVerifier({ 0, 1 }), Optional::No },
+            {"InListString", new StringInListVerifier({ "", "a" }), Optional::No },
 
-            {"NotInListBool", new BoolNotInListVerifier({ true, false })},
-            {"NotInListDouble", new DoubleNotInListVerifier({ 0.0, 1.0 })},
-            {"NotInListInt", new IntNotInListVerifier({ 0, 1 })},
-            {"NotInListString", new StringNotInListVerifier({ "", "a" })},
+            {"NotInListBool", new BoolNotInListVerifier({ true, false }), Optional::No },
+            {"NotInListDouble", new DoubleNotInListVerifier({ 0.0, 1.0 }), Optional::No },
+            {"NotInListInt", new IntNotInListVerifier({ 0, 1 }), Optional::No },
+            {"NotInListString", new StringNotInListVerifier({ "", "a" }), Optional::No },
 
             // Range Verifiers
-            {"InRangeDouble", new DoubleInRangeVerifier(0.0, 1.0)},
-            {"InRangeInt", new IntInRangeVerifier(0, 1)},
+            {"InRangeDouble", new DoubleInRangeVerifier(0.0, 1.0), Optional::No },
+            {"InRangeInt", new IntInRangeVerifier(0, 1), Optional::No },
 
-            {"InRangeDouble", new DoubleNotInRangeVerifier(0.0, 1.0)},
-            {"InRangeInt", new IntNotInRangeVerifier(0, 1)},
+            {"InRangeDouble", new DoubleNotInRangeVerifier(0.0, 1.0), Optional::No },
+            {"InRangeInt", new IntNotInRangeVerifier(0, 1), Optional::No },
 
             // Misc Verifiers
-            {"AnnotationBool", new BoolAnnotationVerifier("Bool")},
-            {"AnnotationDouble", new DoubleAnnotationVerifier("Double")},
-            {"AnnotationInt", new IntAnnotationVerifier("Int")},
-            {"AnnotationString", new StringAnnotationVerifier("String")},
-            {"AnnotationTable", new TableAnnotationVerifier("Table")}
+            {"AnnotationBool", new BoolAnnotationVerifier("Bool"), Optional::No },
+            {"AnnotationDouble", new DoubleAnnotationVerifier("Double"), Optional::No },
+            {"AnnotationInt", new IntAnnotationVerifier("Int"), Optional::No },
+            {"AnnotationString", new StringAnnotationVerifier("String"), Optional::No },
+            {"AnnotationTable", new TableAnnotationVerifier("Table"), Optional::No }
         }
     };
 }
@@ -165,7 +165,7 @@ TEST_F(DocumentationTest, BoolVerifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Bool", new BoolVerifier }}
+        {{ "Bool", new BoolVerifier, Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -200,7 +200,7 @@ TEST_F(DocumentationTest, DoubleVerifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new DoubleVerifier }}
+        {{ "Double", new DoubleVerifier, Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -235,7 +235,7 @@ TEST_F(DocumentationTest, IntVerifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntVerifier }}
+        {{ "Int", new IntVerifier, Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -277,7 +277,7 @@ TEST_F(DocumentationTest, StringVerifier) {
     using namespace std::string_literals;
 
     Documentation doc {
-        {{ "String", new StringVerifier }}
+        {{ "String", new StringVerifier, Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -310,7 +310,7 @@ TEST_F(DocumentationTest, TableVerifierType) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Table", new TableVerifier }}
+        {{ "Table", new TableVerifier, Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -344,7 +344,7 @@ TEST_F(DocumentationTest, StringListVerifierType) {
     using namespace std::string_literals;
 
     Documentation doc {
-        { { "StringList", new StringListVerifier } }
+        { { "StringList", new StringListVerifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -401,7 +401,7 @@ TEST_F(DocumentationTest, IntListVerifierType) {
     using namespace std::string_literals;
 
     Documentation doc {
-        { { "IntList", new IntListVerifier } }
+        { { "IntList", new IntListVerifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -459,11 +459,11 @@ TEST_F(DocumentationTest, MixedVerifiers) {
 
     Documentation doc {
         {
-            { "Bool", new BoolVerifier },
-            { "Double", new DoubleVerifier },
-            { "Int", new IntVerifier },
-            { "String", new StringVerifier },
-            { "Table", new TableVerifier }
+            { "Bool", new BoolVerifier, Optional::No },
+            { "Double", new DoubleVerifier, Optional::No },
+            { "Int", new IntVerifier, Optional::No },
+            { "String", new StringVerifier, Optional::No },
+            { "Table", new TableVerifier, Optional::No }
         }
     };
 
@@ -513,19 +513,19 @@ TEST_F(DocumentationTest, NestedTables) {
 
     Documentation doc {
         {
-            { "Outer_Int", new IntVerifier },
+            { "Outer_Int", new IntVerifier, Optional::No },
             { "Outer_Table", new TableVerifier({
-                { "Inner_Double", new DoubleVerifier },
-                { "Inner_String", new StringVerifier }
-            })},
-            { "Outer_Double", new DoubleVerifier },
+                { "Inner_Double", new DoubleVerifier, Optional::No },
+                { "Inner_String", new StringVerifier, Optional::No }
+            }), Optional::No },
+            { "Outer_Double", new DoubleVerifier, Optional::No },
             { "Outer_Table2" , new TableVerifier({
-                { "Inner_Double2", new DoubleVerifier },
-                { "Inner_String2", new StringVerifier },
+                { "Inner_Double2", new DoubleVerifier, Optional::No },
+                { "Inner_String2", new StringVerifier, Optional::No },
                 { "Inner_Table" , new TableVerifier({
-                    { "Inner_Inner_Int", new IntVerifier }
-                })}
-            })}
+                    { "Inner_Inner_Int", new IntVerifier, Optional::No }
+                }), Optional::No }
+            }), Optional::No}
         }
     };
 
@@ -664,8 +664,8 @@ TEST_F(DocumentationTest, Optional) {
 
     Documentation doc {
         {
-            { "Bool_Force", new BoolVerifier, "", Optional::No },
-            { "Bool_Optional", new BoolVerifier, "", Optional::Yes }
+            { "Bool_Force", new BoolVerifier, Optional::No },
+            { "Bool_Optional", new BoolVerifier, Optional::Yes }
         }
     };
 
@@ -721,16 +721,15 @@ TEST_F(DocumentationTest, RequiredInOptional) {
             new TableVerifier({
                 {
                     "b",
-                    new IntVerifier
+                    new IntVerifier,
+                    Optional::No
                 },
                 {
                     "c",
                     new IntVerifier,
-                    "",
                     Optional::Yes
                 }
             }),
-            "",
             Optional::Yes
         }}
     };
@@ -777,8 +776,7 @@ TEST_F(DocumentationTest, Exhaustive) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntVerifier }},
-        Exhaustive::Yes
+        {{ "Int", new IntVerifier, Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -816,9 +814,8 @@ TEST_F(DocumentationTest, NestedExhaustive) {
 
     Documentation doc {
         {{ "Table", new TableVerifier(
-            { { "a", new IntVerifier } },
-            Exhaustive::Yes
-        )
+            { { "a", new IntVerifier, Optional::No } }
+        ), Optional::No
         }}
     };
 
@@ -859,40 +856,14 @@ TEST_F(DocumentationTest, EmptyEntriesNonExhaustive) {
     EXPECT_EQ(0, positiveRes.offenses.size());
 }
 
-TEST_F(DocumentationTest, EmptyEntriesExhaustive) {
-    using namespace openspace::documentation;
-
-    Documentation doc {
-        {},
-        Exhaustive::Yes
-    };
-
-    ghoul::Dictionary positive {};
-    TestResult positiveRes = testSpecification(doc, positive);
-    EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenses.size());
-
-    ghoul::Dictionary negative {
-        { "a", 1 }
-    };
-    TestResult negativeRes = testSpecification(doc, negative);
-    EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenses.size());
-    EXPECT_EQ("a", negativeRes.offenses[0].offender);
-    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[0].reason);
-}
-
 TEST_F(DocumentationTest, EmptyNestedExhaustive) {
     using namespace openspace::documentation;
 
     Documentation doc {
         {{
             "Table",
-            new TableVerifier(
-            {
-            },
-            Exhaustive::Yes
-            )
+            new TableVerifier(),
+            Optional::No,
         }}
     };
 
@@ -919,7 +890,7 @@ TEST_F(DocumentationTest, LessInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntLessVerifier(5) }}
+        {{ "Int", new IntLessVerifier(5), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -943,7 +914,7 @@ TEST_F(DocumentationTest, LessDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new DoubleLessVerifier(5.0) }}
+        {{ "Double", new DoubleLessVerifier(5.0), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -967,7 +938,7 @@ TEST_F(DocumentationTest, LessEqualInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntLessEqualVerifier(5) }}
+        {{ "Int", new IntLessEqualVerifier(5), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -998,7 +969,7 @@ TEST_F(DocumentationTest, LessEqualDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new DoubleLessEqualVerifier(5.0) }}
+        {{ "Double", new DoubleLessEqualVerifier(5.0), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1029,7 +1000,7 @@ TEST_F(DocumentationTest, GreaterInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntGreaterVerifier(5) }}
+        {{ "Int", new IntGreaterVerifier(5), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1053,7 +1024,7 @@ TEST_F(DocumentationTest, GreaterDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new DoubleGreaterVerifier(5.0) }}
+        {{ "Double", new DoubleGreaterVerifier(5.0), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1077,7 +1048,7 @@ TEST_F(DocumentationTest, GreaterEqualInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntGreaterEqualVerifier(5) }}
+        {{ "Int", new IntGreaterEqualVerifier(5), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1108,7 +1079,7 @@ TEST_F(DocumentationTest, GreaterEqualDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new DoubleGreaterEqualVerifier(5.0) }}
+        {{ "Double", new DoubleGreaterEqualVerifier(5.0), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1139,7 +1110,7 @@ TEST_F(DocumentationTest, EqualBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Bool", new BoolEqualVerifier(true) }}
+        {{ "Bool", new BoolEqualVerifier(true), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1163,7 +1134,7 @@ TEST_F(DocumentationTest, EqualInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntEqualVerifier(1) }}
+        {{ "Int", new IntEqualVerifier(1), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1187,7 +1158,7 @@ TEST_F(DocumentationTest, EqualDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new DoubleEqualVerifier(1.0) }}
+        {{ "Double", new DoubleEqualVerifier(1.0), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1212,7 +1183,7 @@ TEST_F(DocumentationTest, EqualString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        {{ "String", new StringEqualVerifier("string"s) }}
+        {{ "String", new StringEqualVerifier("string"s), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1236,7 +1207,7 @@ TEST_F(DocumentationTest, UnequalBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Bool", new BoolUnequalVerifier(true) }}
+        {{ "Bool", new BoolUnequalVerifier(true), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1260,7 +1231,7 @@ TEST_F(DocumentationTest, UnequalInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntUnequalVerifier(1) }}
+        {{ "Int", new IntUnequalVerifier(1), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1284,7 +1255,7 @@ TEST_F(DocumentationTest, UnequalDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new DoubleUnequalVerifier(1.0) }}
+        {{ "Double", new DoubleUnequalVerifier(1.0), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1309,7 +1280,7 @@ TEST_F(DocumentationTest, UnequalString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        {{ "String", new StringUnequalVerifier("string"s) }}
+        {{ "String", new StringUnequalVerifier("string"s), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1333,7 +1304,7 @@ TEST_F(DocumentationTest, ListBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Bool" , new BoolInListVerifier({ true }) }}
+        {{ "Bool" , new BoolInListVerifier({ true }), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1357,7 +1328,7 @@ TEST_F(DocumentationTest, ListInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int" , new IntInListVerifier({ 0, 1, 2 }) }}
+        {{ "Int" , new IntInListVerifier({ 0, 1, 2 }), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1388,7 +1359,7 @@ TEST_F(DocumentationTest, ListDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double" , new DoubleInListVerifier({ 0.0, 1.0, 2.0 }) }}
+        {{ "Double" , new DoubleInListVerifier({ 0.0, 1.0, 2.0 }), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1420,7 +1391,7 @@ TEST_F(DocumentationTest, ListString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        {{ "String" , new StringInListVerifier({ "0"s, "1"s, "2"s }) }}
+        {{ "String" , new StringInListVerifier({ "0"s, "1"s, "2"s }), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1451,7 +1422,7 @@ TEST_F(DocumentationTest, NotListBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Bool" , new BoolNotInListVerifier({ true }) }}
+        {{ "Bool" , new BoolNotInListVerifier({ true }), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1475,7 +1446,7 @@ TEST_F(DocumentationTest, NotListInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int" , new IntNotInListVerifier({ 0, 1, 2 }) }}
+        {{ "Int" , new IntNotInListVerifier({ 0, 1, 2 }), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1506,7 +1477,7 @@ TEST_F(DocumentationTest, NotListDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double" , new DoubleNotInListVerifier({ 0.0, 1.0, 2.0 }) }}
+        {{ "Double" , new DoubleNotInListVerifier({ 0.0, 1.0, 2.0 }), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1538,7 +1509,7 @@ TEST_F(DocumentationTest, NotListString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        {{ "String" , new StringNotInListVerifier({ "0"s, "1"s, "2"s }) }}
+        {{ "String" , new StringNotInListVerifier({ "0"s, "1"s, "2"s }), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1569,7 +1540,7 @@ TEST_F(DocumentationTest, AnnotationBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Bool", new BoolAnnotationVerifier("Bool") }}
+        {{ "Bool", new BoolAnnotationVerifier("Bool"), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1593,7 +1564,7 @@ TEST_F(DocumentationTest, AnnotationInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new IntAnnotationVerifier("Int") }}
+        {{ "Int", new IntAnnotationVerifier("Int"), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1617,7 +1588,7 @@ TEST_F(DocumentationTest, AnnotationDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new DoubleAnnotationVerifier("Double") }}
+        {{ "Double", new DoubleAnnotationVerifier("Double"), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1642,7 +1613,7 @@ TEST_F(DocumentationTest, AnnotationString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        {{ "String", new StringAnnotationVerifier("String") }}
+        {{ "String", new StringAnnotationVerifier("String"), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1666,7 +1637,7 @@ TEST_F(DocumentationTest, AnnotationTable) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Table", new TableAnnotationVerifier("Table") }}
+        {{ "Table", new TableAnnotationVerifier("Table"), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1690,7 +1661,7 @@ TEST_F(DocumentationTest, InRangeInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new InRangeVerifier<IntVerifier>(0, 5) }}
+        {{ "Int", new InRangeVerifier<IntVerifier>(0, 5), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1728,7 +1699,7 @@ TEST_F(DocumentationTest, InRangeDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new InRangeVerifier<DoubleVerifier>(0.0, 5.0) }}
+        {{ "Double", new InRangeVerifier<DoubleVerifier>(0.0, 5.0), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1773,7 +1744,7 @@ TEST_F(DocumentationTest, NotInRangeInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Int", new NotInRangeVerifier<IntVerifier>(0, 5) }}
+        {{ "Int", new NotInRangeVerifier<IntVerifier>(0, 5), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1822,7 +1793,7 @@ TEST_F(DocumentationTest, NotInRangeDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "Double", new NotInRangeVerifier<DoubleVerifier>(0.0, 5.0) }}
+        {{ "Double", new NotInRangeVerifier<DoubleVerifier>(0.0, 5.0), Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1871,7 +1842,7 @@ TEST_F(DocumentationTest, Wildcard) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ DocumentationEntry::Wildcard, new IntVerifier }}
+        {{ DocumentationEntry::Wildcard, new IntVerifier, Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -1928,8 +1899,8 @@ TEST_F(DocumentationTest, WildcardMixed) {
 
     Documentation doc {
         {
-            { DocumentationEntry::Wildcard, new IntVerifier },
-            { "b", new IntGreaterVerifier(5) }
+            { DocumentationEntry::Wildcard, new IntVerifier , Optional::No},
+            { "b", new IntGreaterVerifier(5), Optional::No }
         }
     };
 
@@ -2004,14 +1975,14 @@ TEST_F(DocumentationTest, Referencing) {
         "Referenced Name",
         "referenced_id",
         {
-            { "a", new IntVerifier },
-            { "b", new DoubleVerifier }
+            { "a", new IntVerifier, Optional::No },
+            { "b", new DoubleVerifier, Optional::No }
         },
     };
     DocEng.addDocumentation(referenced);
 
     Documentation doc {{
-        { "Table", new ReferencingVerifier("referenced_id") }
+        { "Table", new ReferencingVerifier("referenced_id"), Optional::No }
     }};
 
     ghoul::Dictionary positive {
@@ -2042,7 +2013,7 @@ TEST_F(DocumentationTest, Referencing) {
 
 
     Documentation wrongDoc {{
-        { "Table", new ReferencingVerifier("WRONG") }
+        { "Table", new ReferencingVerifier("WRONG"), Optional::No }
     } };
     ghoul::Dictionary wrongNegative {
         { "Table", ghoul::Dictionary{ { "a", 1 },{ "b", 2.0 } } }
@@ -2065,7 +2036,7 @@ TEST_F(DocumentationTest, AndOperator) {
         {
             { "a", new AndVerifier(
                 new IntGreaterEqualVerifier(2), new IntLessEqualVerifier(5)
-                )
+                ), Optional::No
             }
         }
     };
@@ -2101,7 +2072,7 @@ TEST_F(DocumentationTest, OrOperator) {
     using namespace std::string_literals;
 
     Documentation doc {
-        {{ "a", new OrVerifier(new StringVerifier, new IntVerifier)}}
+        {{ "a", new OrVerifier(new StringVerifier, new IntVerifier), Optional::No}}
     };
 
     ghoul::Dictionary positive {
@@ -2132,7 +2103,7 @@ TEST_F(DocumentationTest, BoolVector2Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        {{ "a", new BoolVector2Verifier }}
+        {{ "a", new BoolVector2Verifier, Optional::No }}
     };
 
     ghoul::Dictionary positive {
@@ -2165,7 +2136,7 @@ TEST_F(DocumentationTest, IntVector2Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new IntVector2Verifier } }
+        { { "a", new IntVector2Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2198,7 +2169,7 @@ TEST_F(DocumentationTest, DoubleVector2Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleVector2Verifier } }
+        { { "a", new DoubleVector2Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2231,7 +2202,7 @@ TEST_F(DocumentationTest, BoolVector3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new BoolVector3Verifier } }
+        { { "a", new BoolVector3Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2264,7 +2235,7 @@ TEST_F(DocumentationTest, IntVector3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new IntVector3Verifier } }
+        { { "a", new IntVector3Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2297,7 +2268,7 @@ TEST_F(DocumentationTest, DoubleVector3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleVector3Verifier } }
+        { { "a", new DoubleVector3Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2330,7 +2301,7 @@ TEST_F(DocumentationTest, BoolVector4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new BoolVector4Verifier } }
+        { { "a", new BoolVector4Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2363,7 +2334,7 @@ TEST_F(DocumentationTest, IntVector4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new IntVector4Verifier } }
+        { { "a", new IntVector4Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2396,7 +2367,7 @@ TEST_F(DocumentationTest, DoubleVector4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleVector4Verifier } }
+        { { "a", new DoubleVector4Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2429,7 +2400,7 @@ TEST_F(DocumentationTest, DoubleMatrix2x2Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix2x2Verifier } }
+        { { "a", new DoubleMatrix2x2Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2462,7 +2433,7 @@ TEST_F(DocumentationTest, DoubleMatrix2x3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix2x3Verifier } }
+        { { "a", new DoubleMatrix2x3Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2495,7 +2466,7 @@ TEST_F(DocumentationTest, DoubleMatrix2x4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix2x4Verifier } }
+        { { "a", new DoubleMatrix2x4Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2528,7 +2499,7 @@ TEST_F(DocumentationTest, DoubleMatrix3x2Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix3x2Verifier } }
+        { { "a", new DoubleMatrix3x2Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2561,7 +2532,7 @@ TEST_F(DocumentationTest, DoubleMatrix3x3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix3x3Verifier } }
+        { { "a", new DoubleMatrix3x3Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2594,7 +2565,7 @@ TEST_F(DocumentationTest, DoubleMatrix3x4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix3x4Verifier } }
+        { { "a", new DoubleMatrix3x4Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2627,7 +2598,7 @@ TEST_F(DocumentationTest, DoubleMatrix4x2Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix4x2Verifier } }
+        { { "a", new DoubleMatrix4x2Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2660,7 +2631,7 @@ TEST_F(DocumentationTest, DoubleMatrix4x3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix4x3Verifier } }
+        { { "a", new DoubleMatrix4x3Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2693,7 +2664,7 @@ TEST_F(DocumentationTest, DoubleMatrix4x4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { { "a", new DoubleMatrix4x4Verifier } }
+        { { "a", new DoubleMatrix4x4Verifier, Optional::No } }
     };
 
     ghoul::Dictionary positive {
@@ -2727,19 +2698,19 @@ TEST_F(DocumentationTest, DeprecatedVerifier) {
     using namespace std::string_literals;
 
     Documentation doc { {
-        { "bool", new BoolDeprecatedVerifier },
-        { "int" , new IntDeprecatedVerifier },
-        { "double", new DoubleDeprecatedVerifier },
-        { "string" , new StringDeprecatedVerifier },
-        { "boolvec2", new DeprecatedVerifier<BoolVector2Verifier> },
-        { "intvec2", new DeprecatedVerifier<IntVector2Verifier> },
-        { "doublevec2", new DeprecatedVerifier<DoubleVector2Verifier> },
-        { "boolvec3", new DeprecatedVerifier<BoolVector3Verifier> },
-        { "intvec3", new DeprecatedVerifier<IntVector3Verifier> },
-        { "doublevec3", new DeprecatedVerifier<DoubleVector3Verifier> },
-        { "boolvec4", new DeprecatedVerifier<BoolVector4Verifier> },
-        { "intvec4", new DeprecatedVerifier<IntVector4Verifier> },
-        { "doublevec4", new DeprecatedVerifier<DoubleVector4Verifier> }
+        { "bool", new BoolDeprecatedVerifier, Optional::No },
+        { "int" , new IntDeprecatedVerifier, Optional::No },
+        { "double", new DoubleDeprecatedVerifier, Optional::No },
+        { "string" , new StringDeprecatedVerifier, Optional::No },
+        { "boolvec2", new DeprecatedVerifier<BoolVector2Verifier>, Optional::No },
+        { "intvec2", new DeprecatedVerifier<IntVector2Verifier>, Optional::No },
+        { "doublevec2", new DeprecatedVerifier<DoubleVector2Verifier>, Optional::No },
+        { "boolvec3", new DeprecatedVerifier<BoolVector3Verifier>, Optional::No },
+        { "intvec3", new DeprecatedVerifier<IntVector3Verifier>, Optional::No },
+        { "doublevec3", new DeprecatedVerifier<DoubleVector3Verifier>, Optional::No },
+        { "boolvec4", new DeprecatedVerifier<BoolVector4Verifier>, Optional::No },
+        { "intvec4", new DeprecatedVerifier<IntVector4Verifier>, Optional::No },
+        { "doublevec4", new DeprecatedVerifier<DoubleVector4Verifier>, Optional::No }
     }};
 
     ghoul::Dictionary positive {
