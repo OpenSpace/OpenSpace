@@ -238,7 +238,7 @@ struct VectorVerifier {};
  */
 template <typename T>
 struct Vector2Verifier : public TemplateVerifier<glm::tvec2<T>>, public VectorVerifier {
-    std::string type() const override;
+    virtual std::string type() const override;
 };
 
 /**

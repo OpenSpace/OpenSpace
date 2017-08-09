@@ -30,6 +30,9 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundef"
+#pragma GCC diagnostic ignored "-Wmissing-noreturn" 
+#pragma GCC diagnostic ignored "-Wused-but-marked-unused"
+#pragma GCC diagnostic ignored "-Wsign-compare" 
 #endif // __GNUC__
 
 #include "gtest/gtest.h"
