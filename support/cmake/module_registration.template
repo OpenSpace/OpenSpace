@@ -13,13 +13,6 @@ auto AllModules = []() -> std::vector<OpenSpaceModule*> {
 @MODULE_CLASSES@    };
 };
 
-constexpr const char* ModulePaths[] = {
-    // We need the empty string here or otherwise ModulePaths might be empty and thus
-    // cause a compiler error
-    "",
-@MODULE_PATHS@
-};
-
 } // namespace openspace
 
 #endif // __MODULE_REGISTRATION_H__

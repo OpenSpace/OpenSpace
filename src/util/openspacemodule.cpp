@@ -29,7 +29,7 @@
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
 
-#include <openspace/moduleregistration.h>
+#include <openspace/modulepath.h>
 
 #include <algorithm>
 
