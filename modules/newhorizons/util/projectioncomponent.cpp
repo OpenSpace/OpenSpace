@@ -408,7 +408,7 @@ bool ProjectionComponent::initializeGL() {
             GL_FLOAT,
             GL_FALSE,
             sizeof(GLfloat) * 2,
-            reinterpret_cast<void*>(0)
+            nullptr
         );
 
         glBindVertexArray(0);

@@ -64,8 +64,12 @@ static void RenderDrawLists(ImDrawData* drawData) {
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
     ImGuiIO& io = ImGui::GetIO();
-    int fb_width = static_cast<int>(io.DisplaySize.x * io.DisplayFramebufferScale.x);
-    int fb_height = static_cast<int>(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+    GLsizei fb_width = static_cast<GLsizei>(
+        io.DisplaySize.x * io.DisplayFramebufferScale.x
+    );
+    GLsizei fb_height = static_cast<GLsizei>(
+        io.DisplaySize.y * io.DisplayFramebufferScale.y
+    );
     if (fb_width == 0 || fb_height == 0) {
         return;
     }
@@ -87,7 +91,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
-    glViewport(0, 0, static_cast<GLsizei>(fb_width), static_cast<GLsizei>(fb_height));
+    glViewport(0, 0, fb_width, fb_height);
     const glm::mat4 ortho(
         2.f / width, 0.0f, 0.0f, 0.f,
         0.0f, 2.0f / -height, 0.0f, 0.f,
@@ -103,7 +107,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
 
     for (int i = 0; i < drawData->CmdListsCount; ++i) {
         const ImDrawList* cmdList = drawData->CmdLists[i];
-        const ImDrawIdx* indexBufferOffset = 0;
+        const ImDrawIdx* indexBufferOffset = nullptr;
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
@@ -126,7 +130,10 @@ static void RenderDrawLists(ImDrawData* drawData) {
                 pcmd->UserCallback(cmdList, pcmd);
             }
             else {
-                glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLuint>(pcmd->TextureId));
+                glBindTexture(
+                    GL_TEXTURE_2D,
+                    static_cast<GLuint>(reinterpret_cast<intptr_t>(pcmd->TextureId))
+                );
                 glScissor(
                     static_cast<int>(pcmd->ClipRect.x),
                     static_cast<int>(fb_height - pcmd->ClipRect.w),

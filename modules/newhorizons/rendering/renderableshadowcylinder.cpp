@@ -297,7 +297,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->setUniform("modelViewProjectionTransform",
@@ -365,9 +365,9 @@ void RenderableShadowCylinder::createCylinder(double time) {
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
         [](const glm::dvec3& p) {
-            PowerScaledCoordinate psc = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-            psc[3] += 3;
-            return psc;
+            PowerScaledCoordinate coord = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+            coord[3] += 3;
+            return coord;
         }
     );
     

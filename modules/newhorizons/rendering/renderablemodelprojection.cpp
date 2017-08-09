@@ -141,9 +141,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     Dictionary geometryDictionary = dictionary.value<Dictionary>(keyGeometry);
     using modelgeometry::ModelGeometry;
     geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-    _geometry = std::unique_ptr<ModelGeometry>(
-        ModelGeometry::createFromDictionary(geometryDictionary)
-    );
+    _geometry = ModelGeometry::createFromDictionary(geometryDictionary);
 
     _colorTexturePath = absPath(dictionary.value<std::string>(
         ColorTextureInfo.identifier

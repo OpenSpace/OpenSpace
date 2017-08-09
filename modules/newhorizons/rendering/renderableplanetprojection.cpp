@@ -158,9 +158,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     if (success) {
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
         using planetgeometry::PlanetGeometry;
-        _geometry = std::unique_ptr<PlanetGeometry>(
-            PlanetGeometry::createFromDictionary(geometryDictionary)
-        );
+        _geometry = PlanetGeometry::createFromDictionary(geometryDictionary);
     }
 
     _projectionComponent.initialize(dictionary.value<ghoul::Dictionary>(KeyProjection));
@@ -239,9 +237,16 @@ void RenderablePlanetProjection::initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 
     glBindVertexArray(0);
 }
@@ -404,7 +409,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     // This is apparently the transform needed to get the model in the coordinate system
     // Used by SPICE. Don't ask me why, it was defined in the function attitudeParameters.

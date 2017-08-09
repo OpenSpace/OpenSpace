@@ -189,7 +189,6 @@ function (set_openspace_compile_settings project)
             "-Wdate-time"
             "-Wuseless-cast"
             "-Wlogical-op"
-            "-Wmissing-declarations"
             "-Wint-in-bool-context"
 
             "-Wno-write-strings"
