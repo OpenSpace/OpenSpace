@@ -228,16 +228,16 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glDrawElements(_mode, _isize, GL_UNSIGNED_INT, 0);
+    glDrawElements(_mode, _isize, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
 }
 
-void RenderableSphericalGrid::update(const UpdateData& data) {
+void RenderableSphericalGrid::update(const UpdateData&) {
     if (_gridIsDirty) {
-        _isize = int(6 * _segments * _segments);
-        _vsize = int((_segments + 1) * (_segments + 1));
+        _isize = 6 * _segments * _segments;
+        _vsize = (_segments + 1) * (_segments + 1);
         _varray.resize(_vsize);
         _iarray.resize(_isize);
 
@@ -292,8 +292,14 @@ void RenderableSphericalGrid::update(const UpdateData& data) {
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
         glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray.data(), GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-            reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
+        glVertexAttribPointer(
+            0,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(Vertex),
+            nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
+        );
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);

@@ -168,9 +168,9 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _renderingModes(RenderingModeInfo, properties::OptionProperty::DisplayType::Dropdown
     )
 {
-    _translation = std::unique_ptr<Translation>(Translation::createFromDictionary(
+    _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
-    ));
+    );
     addPropertySubOwner(_translation.get());
 
     _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);

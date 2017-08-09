@@ -101,8 +101,8 @@ namespace documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
-SpecificationError::SpecificationError(TestResult res, std::string component)
-    : ghoul::RuntimeError("Error in specification", std::move(component))
+SpecificationError::SpecificationError(TestResult res, std::string comp)
+    : ghoul::RuntimeError("Error in specification", std::move(comp))
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");

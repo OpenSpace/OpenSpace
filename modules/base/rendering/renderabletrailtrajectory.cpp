@@ -243,7 +243,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         );
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         
         // We clear the indexArray just in case. The base class will take care not to use
         // it if it is empty
@@ -310,7 +310,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         );
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
     else {
         // if we are outside of the valid range, we don't render anything

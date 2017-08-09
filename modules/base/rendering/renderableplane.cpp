@@ -231,7 +231,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         rotationTransform *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
         glm::dmat4(1.0);
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -328,7 +328,7 @@ void RenderablePlane::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     
     glEnableVertexAttribArray(1);

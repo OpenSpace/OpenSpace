@@ -326,7 +326,7 @@ void RenderableRings::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VertexData),
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
