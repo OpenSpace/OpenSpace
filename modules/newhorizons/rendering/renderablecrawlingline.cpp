@@ -106,11 +106,11 @@ documentation::Documentation RenderableCrawlingLine::Documentation() {
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
+    , _frameCounter(0)
+    , _drawLine(false)
     , _imageSequenceTime(-1.f)
     , _vao(0)
-    , _frameCounter(0)
     , _vbo(0)
-    , _drawLine(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),

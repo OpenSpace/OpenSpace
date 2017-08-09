@@ -26,15 +26,11 @@
 
 #include <ghoul/misc/dictionary.h>
 
-namespace {
-    const char* _loggerCat = "TargetDecoder";
-} // namespace
-
 namespace openspace {
 
 TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) : _type("TARGET") {
     _names.resize(dictionary.size());
-    for (int i = 0; i < _names.size(); ++i) {
+    for (size_t i = 0; i < _names.size(); ++i) {
         std::string readMe;
         dictionary.getValue(std::to_string(i + 1), readMe);
         _names[i] = readMe;

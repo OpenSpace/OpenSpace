@@ -61,7 +61,7 @@ public:
         const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
     void endFrame();
 
-    void render();
+    void render() override;
 
 //protected:
     GuiHelpComponent _help;

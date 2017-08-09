@@ -81,9 +81,6 @@ InstrumentTimesParser::InstrumentTimesParser(const std::string& name,
 }
 
 bool InstrumentTimesParser::create() {
-    auto imageComparer = [](const Image& a, const Image& b) -> bool{
-        return a.timeRange.start < b.timeRange.start;
-    };
     auto targetComparer = [](const std::pair<double, std::string> &a,
         const std::pair<double, std::string> &b)->bool{
         return a.first < b.first;

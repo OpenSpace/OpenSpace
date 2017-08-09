@@ -45,9 +45,6 @@ namespace openspace::gui {
 
 GuiIswaComponent::GuiIswaComponent()
     : GuiPropertyComponent("iSWA")
-    , _gmData(false)
-    , _gmImage(false)
-    , _ionData(false)
 {}
 
 void GuiIswaComponent::render() {

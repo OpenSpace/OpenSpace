@@ -38,8 +38,6 @@
 #include <numeric>
 
 namespace {
-    const char* _loggerCat = "GuiPerformanceComponent";
-
     enum class Sorting {
         NoSorting = -1,
         UpdateTranslation = 0,

@@ -115,9 +115,9 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
 
 namespace openspace {
     
-KeplerTranslation::RangeError::RangeError(std::string offender)
-    : ghoul::RuntimeError("Value '" + offender + "' out of range", "KeplerTranslation")
-    , offender(std::move(offender))
+KeplerTranslation::RangeError::RangeError(std::string off)
+    : ghoul::RuntimeError("Value '" + off + "' out of range", "KeplerTranslation")
+    , offender(std::move(off))
 {}
 
 documentation::Documentation KeplerTranslation::Documentation() {

@@ -37,10 +37,6 @@ public:
     void render() override;
 
 private:
-    bool _gmData;
-    bool _gmImage;
-    bool _ionData;
-
     std::vector<int> _cdfOptions;
     std::map<std::string, int> _cdfOptionsMap;
 };

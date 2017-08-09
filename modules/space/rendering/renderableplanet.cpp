@@ -46,21 +46,15 @@
 #include <memory>
 #include <fstream>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-
 namespace {
     const char* KeyGeometry = "Geometry";
     const char* KeyRadius = "Radius";
 
     static const char* _loggerCat = "RenderablePlanet";
 
-    const char* keyFrame                         = "Frame";
     const char* keyShadowGroup                   = "Shadow_Group";
     const char* keyShadowSource                  = "Source";
     const char* keyShadowCaster                  = "Caster";
-    const char* keyBody                          = "Body";
     
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
@@ -419,8 +413,8 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     //glm::mat4 transform = glm::mat4(1);
     
     //earth needs to be rotated for that to work.
-    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
-    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
+    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), glm::half_pi<double>(), glm::dvec3(1, 0, 0));
+    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), glm::half_pi<double>(), glm::dvec3(0, -1, 0));
     //glm::dmat4 rotProp = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0));
     modelTransform = modelTransform * rot * roty /** rotProp*/;
 

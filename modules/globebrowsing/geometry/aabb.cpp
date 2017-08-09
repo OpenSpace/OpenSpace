@@ -32,9 +32,9 @@ AABB1::AABB1()
     : AABB1(std::numeric_limits<float>::max(), -std::numeric_limits<float>::max())
 {}
 
-AABB1::AABB1(float min, float max)
-    : min(min)
-    , max(max)
+AABB1::AABB1(float minValue, float maxValue)
+    : min(minValue)
+    , max(maxValue)
 {}
 
 void AABB1::expand(float p) {
@@ -82,9 +82,9 @@ AABB2::AABB2()
     )
 {}
 
-AABB2::AABB2(glm::vec2 min, glm::vec2 max)
-    : min(std::move(min))
-    , max(std::move(max))
+AABB2::AABB2(glm::vec2 minValue, glm::vec2 maxValue)
+    : min(std::move(minValue))
+    , max(std::move(maxValue))
 {}
 
 void AABB2::expand(const glm::vec2& p) {
@@ -135,12 +135,12 @@ AABB3::AABB3()
     )
 {}
 
-AABB3::AABB3(glm::vec3 min, glm::vec3 max)
-    : min(std::move(min))
-    , max(std::move(max))
+AABB3::AABB3(glm::vec3 minValue, glm::vec3 maxValue)
+    : min(std::move(minValue))
+    , max(std::move(maxValue))
 {}
 
-void AABB3::expand(const glm::vec3 p) {
+void AABB3::expand(glm::vec3 p) {
     min = glm::min(min, p);
     max = glm::max(max, p);
 }

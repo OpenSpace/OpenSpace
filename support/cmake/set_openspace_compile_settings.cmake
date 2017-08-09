@@ -126,7 +126,6 @@ function (set_openspace_compile_settings project)
             "-Wmismatched-tags"
             "-Wmissing-field-initializers"
             "-Wmissing-noreturn"
-            "-Wmissing-prototypes"
             "-Wnewline-eof"
             "-Wnon-virtual-dtor"
             "-Wold-style-cast"

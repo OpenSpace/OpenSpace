@@ -247,7 +247,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             );
 
         _potentialTargets.reserve(potentialTargets.size());
-        for (int i = 1; i <= potentialTargets.size(); ++i) {
+        for (size_t i = 1; i <= potentialTargets.size(); ++i) {
             _potentialTargets.emplace_back(
                 potentialTargets.value<std::string>(std::to_string(i))
             );

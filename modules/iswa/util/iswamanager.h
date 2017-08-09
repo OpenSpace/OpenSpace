@@ -41,11 +41,13 @@
 #endif // WIN32
 
 #include <ccmc/Kameleon.h>
-#endif
 
 #ifdef WIN32
 #pragma warning (pop)
 #endif
+
+#endif
+
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/downloadmanager.h>

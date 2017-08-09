@@ -36,10 +36,6 @@
 #include <algorithm>
 #include <numeric>
 
-namespace {
-    const char* _loggerCat = "GuiParallelComponent";
-} // namespace
-
 namespace openspace::gui {
 
 GuiParallelComponent::GuiParallelComponent()
