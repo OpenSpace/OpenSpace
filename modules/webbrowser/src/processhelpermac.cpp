@@ -31,11 +31,11 @@
 
 // Entry point function for sub-processes.
 int main(int argc, char* argv[]) {
-  // Provide CEF with command-line arguments.
-  CefMainArgs main_args(argc, argv);
+    // Provide CEF with command-line arguments.
+    CefMainArgs main_args(argc, argv);
 
-  CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
+    CefRefPtr<openspace::WebBrowserApp> app(new openspace::WebBrowserApp);
 
-  // Execute the sub-process.
-  return CefExecuteProcess(main_args, app.get(), NULL);
+    // Execute the sub-process.
+    return CefExecuteProcess(main_args, app.get(), NULL);
 }
