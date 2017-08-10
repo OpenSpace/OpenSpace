@@ -33,10 +33,12 @@ $small-padding: ($vertical-padding / 2) ($base-padding / 2);
 .button {
   border: 0;
 
-  &:focus,
-  &:hover {
-    background: $ui-background-hover;
-    outline: 0;
+  &:not(:disabled) {
+    &:focus,
+    &:hover {
+      background: $ui-background-hover;
+      outline: 0;
+    }
   }
 
   &:active {
