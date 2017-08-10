@@ -194,7 +194,7 @@ namespace openspace {
         }
         return _cachedCombinedViewMatrix.datum;
     }
-
+    
     glm::mat4 Camera::viewProjectionMatrix(const SceneGraphNode & node) {
         // Traverses the given node to the attached node
         // through the common acestor in order to avoid the 

@@ -2,7 +2,9 @@ return {
     -- Solar system module
     {
         Name = "SolarSystem",
-        Parent = "Root"
+        Parent = "Root",
+        -- SphereOfInfluency unit is meters                
+		SphereOfInfluency = 7.5E+15,                         
     },
     -- Sun barycenter module
     {

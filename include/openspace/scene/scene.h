@@ -142,14 +142,14 @@ public:
     const glm::dvec3 currentDisplacementPosition(const std::string & cameraParent,
         const SceneGraphNode* target) const;
 
-    SceneGraphNode* findCommonParentNode(const std::string & firstPath, const std::string & secondPath) const;
+    SceneGraphNode* findCommonParentNode(const SceneGraphNode * firstNode, const SceneGraphNode * secondNode) const;
 
-    std::vector<SceneGraphNode*> pathTo(SceneGraphNode* node) const;
+    std::vector<const SceneGraphNode*> pathTo(const SceneGraphNode* node) const;
 
-    glm::dvec3 pathCollector(const std::vector<SceneGraphNode*> & path, const std::string & commonParentName,
+    glm::dvec3 pathCollector(const std::vector<const SceneGraphNode*> & path, const std::string & commonParentName,
         const bool inverse) const;
 
-    std::string commonParent(const std::vector<SceneGraphNode*> & t1, const std::vector<SceneGraphNode*> & t2) const;
+    std::string commonParent(const std::vector<const SceneGraphNode*> & t1, const std::vector<const SceneGraphNode*> & t2) const;
 
     /**
      * Update dependencies.
@@ -187,7 +187,7 @@ private:
     * Finds out the current attached node (new camera's node parent) based on the camera's position
     * and the former attached node name.
     */
-    std::string currentDsgAttachedNode(const Camera* camera, std::string dsgAttachedNodeName) const;
+    std::string currentDsgAttachedNode(const Camera* camera, const std::string & dsgAttachedNodeName) const;
 
     std::string _dsgAttachedNodeName;
 

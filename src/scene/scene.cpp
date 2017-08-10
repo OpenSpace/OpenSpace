@@ -154,7 +154,7 @@ void Scene::updateDsgAttachedNode(const Camera* camera) {
     _dsgAttachedNodeName = currentDsgAttachedNode(camera, _dsgAttachedNodeName);
 }
 
-std::string Scene::currentDsgAttachedNode(const Camera* camera, std::string dsgAttachedNodeName) const {
+std::string Scene::currentDsgAttachedNode(const Camera* camera, const std::string & dsgAttachedNodeName) const {
     if (camera == nullptr || dsgAttachedNodeName.empty()) {
         LERROR("Camera object not allocated or empty name scene passed to the method.");
         return MostProbableAttachedNode; // This choice is controversal. Better to avoid a crash.
@@ -181,19 +181,16 @@ std::string Scene::currentDsgAttachedNode(const Camera* camera, std::string dsgA
         }
     }
 
-    dsgAttachedNodeName = node->name();
+    std::string attachedNodeName(node->name());
     std::vector<SceneGraphNode*> childrenScene(node->children());
-    //size_t nrOfChildren = childrenScene.size();
-
+    
     //Check if we are inside a child scene of the current scene. 
     bool outsideAllChildScenes = false;
 
     while (!childrenScene.empty() && !outsideAllChildScenes) {
         double lastChildDistanceValid = std::numeric_limits<double>::max();
         bool changedChild = false;
-        //for (size_t i = 0; i < nrOfChildren; ++i) {
         for (auto childNode: childrenScene) {
-            //SceneGraphNode * childNode = childrenScene.at(i);
             double childDistance = glm::length(camera->positionVec3() - childNode->dynamicWorldPosition());
                 
             // Set the new scene that we are inside the scene radius.
@@ -209,33 +206,31 @@ std::string Scene::currentDsgAttachedNode(const Camera* camera, std::string dsgA
         }
         else {
             childrenScene = node->children();
-            dsgAttachedNodeName = node->name();
-            //nrOfChildren = childrenScene.size();
         }
 
     }
 
-    return dsgAttachedNodeName;
+    return node->name();
 }
 
 const glm::dvec3 Scene::currentDisplacementPosition(const std::string & cameraParent,
     const SceneGraphNode* target) const {
     if (target != nullptr) {
 
-        std::vector<SceneGraphNode*> cameraPath;
-        std::vector<SceneGraphNode*> targetPath;
+        std::vector<const SceneGraphNode*> cameraPath;
+        std::vector<const SceneGraphNode*> targetPath;
+        std::vector<const SceneGraphNode*> commonParentPath;
 
-        SceneGraphNode* cameraParentNode = sceneGraphNode(cameraParent);
-        SceneGraphNode* commonParentNode;
-        std::vector<SceneGraphNode*> commonParentPath;
+        const SceneGraphNode* cameraParentNode = sceneGraphNode(cameraParent);             
 
         //Find common parent for camera and object
         std::string commonParentName(cameraParent);  // initiates to camera parent in case 
                                                      // other path is not found
+        const SceneGraphNode * targetNode = sceneGraphNode(target->name());
         cameraPath = pathTo(cameraParentNode);
-        targetPath = pathTo(sceneGraphNode(target->name()));
+        targetPath = pathTo(targetNode);
 
-        commonParentNode = findCommonParentNode(cameraParent, target->name());
+        const SceneGraphNode* commonParentNode = findCommonParentNode(cameraParentNode, targetNode);
         commonParentPath = pathTo(commonParentNode);
 
         //Find the path from the camera to the common parent
@@ -251,36 +246,36 @@ const glm::dvec3 Scene::currentDisplacementPosition(const std::string & cameraPa
     }
 }
 
-SceneGraphNode* Scene::findCommonParentNode(const std::string & firstPath, const std::string & secondPath) const {
-    if (firstPath.empty() || secondPath.empty()) {
-        LERROR("Empty scenegraph node name passed to the method.");
+SceneGraphNode* Scene::findCommonParentNode(const SceneGraphNode * firstNode, const SceneGraphNode * secondNode) const {
+    if (!firstNode || !secondNode) {
+        LERROR("Empty scenegraph node pointer passed to the method.");
         return sceneGraphNode(ParentOfAllNodes); // This choice is controversal. Better to avoid a crash.
     }
 
-    std::string strCommonParent = commonParent(pathTo(sceneGraphNode(firstPath)),
-        pathTo(sceneGraphNode(secondPath)));
+    std::string strCommonParent = commonParent(pathTo(firstNode), pathTo(secondNode));
 
     return sceneGraphNode(strCommonParent);
 }
 
-std::vector<SceneGraphNode*> Scene::pathTo(SceneGraphNode* node) const {
-    std::vector<SceneGraphNode*> path;
+std::vector<const SceneGraphNode*> Scene::pathTo(const SceneGraphNode* node) const {
+    std::vector<const SceneGraphNode*> path;
 
     if (node == nullptr) {
         LERROR("Invalid (null) scenegraph node name passed to pathTo() method.");
         return path;
     }
-
-    while (node->parent() != nullptr) {
-        path.push_back(node);
-        node = node->parent();
+    const SceneGraphNode *tmpNode = node;
+    while (tmpNode->parent() != nullptr) {
+        path.push_back(tmpNode);
+        tmpNode = tmpNode->parent();
     }
-    path.push_back(node);
+    // JCC: Is this necessary??
+    path.push_back(tmpNode);
 
     return path;
 }
 
-std::string Scene::commonParent(const std::vector<SceneGraphNode*> & t1, const std::vector<SceneGraphNode*> & t2) const {
+std::string Scene::commonParent(const std::vector<const SceneGraphNode*> & t1, const std::vector<const SceneGraphNode*> & t2) const {
     if (t1.empty() && t2.empty()) {
         LERROR("Empty paths passed to commonParent method.");
         return ParentOfAllNodes;
@@ -301,14 +296,14 @@ std::string Scene::commonParent(const std::vector<SceneGraphNode*> & t1, const s
     return commonParentReturn;
 }
 
-glm::dvec3 Scene::pathCollector(const std::vector<SceneGraphNode*> & path, const std::string & commonParentName,
+glm::dvec3 Scene::pathCollector(const std::vector<const SceneGraphNode*> & path, const std::string & commonParentName,
     const bool inverse) const {
     if (path.empty() || commonParentName.empty()) {
         LERROR("Empty path or common parent name passed to pathCollector method.");
         return glm::dvec3();
     }
 
-    SceneGraphNode* firstElement = path.front();
+    const SceneGraphNode* firstElement = path.front();
     glm::dvec3 collector(path.back()->position());
 
     int depth = 0;
