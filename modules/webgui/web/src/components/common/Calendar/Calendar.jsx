@@ -32,7 +32,7 @@ class Calendar extends Component {
     const days = [];
 
     while (iterator.getMonth() === month.getMonth()) {
-      days.push(new Date(iterator.getTime()));
+      days.push(Calendar.copy(iterator));
       iterator.setDate(iterator.getDate() + 1);
     }
 
@@ -45,27 +45,80 @@ class Calendar extends Component {
       a.getDate() === b.getDate();
   }
 
-  static get Days() {
+  /**
+   * Expose the days object, so that it may be used as Calendar.Days.Sunday, for instance
+   */
+  static get Days(): Days {
     return Days;
+  }
+
+  /**
+   * set the date component to 1
+   * @param day - remains unchanged
+   * @returns {Date}
+   */
+  static toStartOfMonth(day: Date): Date {
+    const newDay = Calendar.copy(day);
+    newDay.setDate(1);
+    return newDay;
+  }
+
+  /**
+   * copy date
+   * @param date
+   */
+  static copy(date: Date): Date {
+    return new Date(date.getTime());
   }
 
   constructor(props) {
     super(props);
 
     this.state = {
-      activeMonth: props.activeMonth,
+      activeMonth: Calendar.toStartOfMonth(props.activeMonth),
     };
   }
 
   state: { activeMonth: Date };
 
-  daysToGet(day: number): number {
-    const rotatedDays = rotate(DaysInWeekBefore, 7 - this.props.weekStartsOn);
-    return rotatedDays[day];
+  componentWillReceiveProps({ activeMonth }) {
+    // update calendar focus (unless user has moved away from previously given active month)
+    if (Calendar.isSameDay(Calendar.toStartOfMonth(this.props.activeMonth),
+                           Calendar.toStartOfMonth(this.state.activeMonth))) {
+      this.setState({ activeMonth: Calendar.toStartOfMonth(activeMonth) });
+    }
+  }
+
+  onSelect(day: Date): Function {
+    return () => {
+      this.props.onChange(day);
+    };
   }
 
   get dayHeader(): Array<{ day: Date, index: number }> {
     return this.props.dayHeaders.map((day, index) => ({ day, index }));
+  }
+
+  get days(): Array<Date> {
+    const prevMonth: Date = this.month(-1);
+    const thisMonth: Date = this.month();
+    const nextMonth: Date = this.month(1);
+
+    const days = Calendar.daysOfMonth(thisMonth);
+    const prev = Calendar.daysOfMonth(prevMonth);
+    const next = Calendar.daysOfMonth(nextMonth);
+
+    const daysFromPrevMonth: number = this.daysToGet(thisMonth.getDay());
+    days.unshift(...prev.slice(-1 * daysFromPrevMonth));
+    const daysFromNextMonth: number = expectedDaysInCalendar - days.length;
+    days.push(...next.slice(0, daysFromNextMonth));
+
+    return days;
+  }
+
+  daysToGet(day: number): number {
+    const rotatedDays = rotate(DaysInWeekBefore, 7 - this.props.weekStartsOn);
+    return rotatedDays[day];
   }
 
   month(add: number = 0): Date {
@@ -99,12 +152,6 @@ class Calendar extends Component {
     return () => this.setState({ activeMonth: this.month(dir) });
   }
 
-  onSelect(day: Date): Function {
-    return () => {
-      this.props.onChange(day);
-    };
-  }
-
   extraClasses(day: Date): string {
     let classes = '';
 
@@ -121,23 +168,6 @@ class Calendar extends Component {
     }
 
     return classes;
-  }
-
-  get days(): Array<Date> {
-    const prevMonth: Date = this.month(-1);
-    const thisMonth: Date = this.month();
-    const nextMonth: Date = this.month(1);
-
-    const days = Calendar.daysOfMonth(thisMonth);
-    const prev = Calendar.daysOfMonth(prevMonth);
-    const next = Calendar.daysOfMonth(nextMonth);
-
-    const daysFromPrevMonth: number = this.daysToGet(thisMonth.getDay());
-    days.unshift(...prev.slice(-1 * daysFromPrevMonth));
-    const daysFromNextMonth: number = expectedDaysInCalendar - days.length;
-    days.push(...next.slice(0, daysFromNextMonth));
-
-    return days;
   }
 
   render() {
@@ -191,11 +221,8 @@ Calendar.propTypes = {
   weekStartsOn: PropTypes.number,
 };
 
-const thisMonth = new Date();
-thisMonth.setDate(1);
-
 Calendar.defaultProps = {
-  activeMonth: thisMonth,
+  activeMonth: new Date(),
   dayHeaders: 'M T W T F S S'.split(' '),
   months: Months,
   onChange: () => {},

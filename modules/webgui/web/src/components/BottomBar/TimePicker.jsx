@@ -55,7 +55,7 @@ class TimePicker extends Component {
   }
 
   render() {
-    const { showPopover } = this.state;
+    const { showPopover, time } = this.state;
     return (
       <div className={Picker.Wrapper}>
         <Picker onClick={this.togglePopover} className={(showPopover && Picker.Active)}>
@@ -70,7 +70,7 @@ class TimePicker extends Component {
         </Picker>
         { showPopover && (
           <Popover className={Picker.Popover} title="Select time" closeCallback={this.togglePopover}>
-            <Calendar selected={this.state.time} />
+            <Calendar selected={time} activeMonth={time} />
             <hr className={Popover.styles.delimiter} />
             <p>
               <Button block disabled onClick={this.togglePause}>
