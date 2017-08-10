@@ -61,6 +61,7 @@ TSP::TSP(const std::string& filename)
     , medianTemporalError_(0.0f)
     , _spatialErrorReady(false)
     , _temporalErrorReady(false)
+    , _readCached(false)
 {
     openFile();
     openMemoryMap();
@@ -105,6 +106,28 @@ bool TSP::closeMemoryMap() {
     return !_memoryMap.is_open();
 }
 
+bool TSP::initializeErrors() {
+    if (!_readCached) {
+        if (!_spatialErrorReady) {
+            if (!calculateSpatialError()) {
+                LERROR("Could not calculate spatial error");
+                return false;
+            }
+        }
+        if (!_temporalErrorReady){
+            if (!calculateTemporalError()) {
+                LERROR("Could not calculate temporal error");
+                return false;
+            }
+        }
+        if (!writeCache()) {
+            LERROR("Could not write cache");
+            return false;
+        }
+    }
+    return true;
+}
+
 bool TSP::load() {
     openFile();
     if (!readHeader()) {
@@ -116,22 +139,15 @@ bool TSP::load() {
         LINFO("Using cache");
     }
     else {
+        _readCached = false;
         if (!construct()) {
             LERROR("Could not construct");
             return false;
         }
 
         if (false) {
-            if (!calculateSpatialError()) {
-                LERROR("Could not calculate spatial error");
-                return false;
-            }
-            if (!calculateTemporalError()) {
-                LERROR("Could not calculate temporal error");
-                return false;
-            }
-            if (!writeCache()) {
-                LERROR("Could not write cache");
+            if (!initializeErrors()) {
+                LERROR("Could not initialize errors");
                 return false;
             }
         }
@@ -581,7 +597,7 @@ bool TSP::readCache() {
     LDEBUG("Min temporal error: " << minTemporalError_);
     LDEBUG("Max temporal error: " << maxTemporalError_);
     LDEBUG("Median temporal error: " << medianTemporalError_);
-
+    _readCached = true;
     return true;
 }
 

@@ -75,11 +75,11 @@ bool Timer::tick() {
     return false;
 }
 
-size_t Timer::getTick() {
+unsigned long long Timer::getTick() {
     return _tick;
 }
 
-size_t Timer::getCycles() {
+unsigned long long Timer::getCycles() {
     return _cycles;
 }
 

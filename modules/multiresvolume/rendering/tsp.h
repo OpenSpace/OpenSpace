@@ -101,6 +101,7 @@ public:
     unsigned int numBricksPerAxis() const;
     GLuint ssbo() const;
 
+    bool initializeErrors();
     virtual bool calculateSpatialError();
     virtual bool calculateTemporalError();
 
@@ -116,6 +117,7 @@ public:
 
     bool _spatialErrorReady;
     bool _temporalErrorReady;
+    bool _readCached;
 
     float getMaxError(NodeType type);
     float getMinError(NodeType type);

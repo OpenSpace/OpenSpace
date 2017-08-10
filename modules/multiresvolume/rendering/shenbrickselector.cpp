@@ -43,11 +43,7 @@ ShenBrickSelector::~ShenBrickSelector() {
 
 
 bool ShenBrickSelector::initialize() {
-    if(!_tsp->_spatialErrorReady)
-        _tsp->_spatialErrorReady = _tsp->calculateSpatialError();
-    if(!_tsp->_temporalErrorReady)
-        _tsp->_temporalErrorReady = _tsp->calculateTemporalError();
-    return (_tsp->_spatialErrorReady && _tsp->_temporalErrorReady);
+    return _tsp->initializeErrors();
 }
 
 void ShenBrickSelector::setSpatialTolerance(float spatialTolerance) { _spatialTolerance = spatialTolerance; }
