@@ -22,9 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef WIN32
-#endif // WIN32
-
 #if defined(WIN32)
 #pragma warning (push)
 #pragma warning (disable : 4619) // #pragma warning: there is no warning number '4800'
@@ -33,7 +30,6 @@
 #pragma clang diagnostic ignored "-Wundef"
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma clang diagnostic ignored "-Wsuggest-override"
-
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundef"

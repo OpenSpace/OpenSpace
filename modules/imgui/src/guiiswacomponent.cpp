@@ -26,6 +26,7 @@
 
 #include <modules/imgui/include/guiiswacomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
 #include <modules/iswa/util/iswamanager.h>
 
 #include <openspace/engine/downloadmanager.h>
@@ -35,8 +36,6 @@
 #include <ghoul/filesystem/filesystem>
 
 #include <modules/iswa/ext/json.h>
-
-#include "imgui.h"
 
 namespace {
     using json = nlohmann::json;

@@ -24,12 +24,12 @@
 
 #include <modules/imgui/include/guipropertycomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
 #include <modules/imgui/include/renderproperties.h>
 
 #include <openspace/properties/propertyowner.h>
 
 #include <algorithm>
-#include "imgui.h"
 
 namespace {
     const ImVec2 size = ImVec2(350, 500);

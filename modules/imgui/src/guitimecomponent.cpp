@@ -24,11 +24,11 @@
 
 #include <modules/imgui/include/guitimecomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
-
-#include "imgui.h"
 
 namespace openspace::gui {
 

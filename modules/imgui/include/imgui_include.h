@@ -22,62 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scenegraphnode.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/globes/chunknode.h>
+#ifndef __OPENSPACE_MODULE_IMGUI___IMGUI_INCLUDE___H__
+#define __OPENSPACE_MODULE_IMGUI___IMGUI_INCLUDE___H__
 
-#include <fstream>
-#include <glm/glm.hpp>
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif (defined __GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif // __clang__
 
-using namespace openspace;
-
-class ChunkNodeTest : public testing::Test {};
-
-/*
-TEST_F(ChunkNodeTest, Split) {
-	
-	ghoul::Dictionary dict;
-	ChunkLodGlobe chunkLodNode(dict);
-	chunkLodNode.initialize();
-
-	BoundingRect bounds(Vec2(2, 2), Vec2(2, 2));
-	ChunkNode cn(chunkLodNode,bounds);
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
-
-	cn.split();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_FALSE(cn.isLeaf()) << "Chunk node is not leaf";
-
-	ASSERT_EQ(cn.bounds.center.x, cn.getChild(Quad::NORTH_WEST).bounds.center.x * 2);
-	ASSERT_EQ(cn.bounds.center.x, cn.getChild(Quad::NORTH_EAST).bounds.center.x * 2/3);
-
-	ASSERT_EQ(cn.bounds.halfSize.x, cn.getChild(Quad::NORTH_WEST).bounds.halfSize.x * 2);
-	ASSERT_EQ(cn.bounds.halfSize.y, cn.getChild(Quad::NORTH_WEST).bounds.halfSize.y * 2);
-
-	chunkLodNode.deinitialize();
-}
-
-TEST_F(ChunkNodeTest, Merge) {
-	ghoul::Dictionary dict;
-	ChunkLodGlobe chunkLodNode(dict);
-	chunkLodNode.initialize();
+#include <imgui.h>
 
 
-	BoundingRect bounds(Vec2(2, 2), Vec2(2, 2));
-	ChunkNode cn(chunkLodNode,bounds);
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif (defined __GNUC__)
+#pragma GCC diagnostic pop
+#endif // __clang__
 
-	cn.split();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_FALSE(cn.isLeaf()) << "Chunk node is not leaf";
-
-	cn.merge();
-	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
-	ASSERT_TRUE(cn.isLeaf()) << "Chunk node is leaf";
-
-	chunkLodNode.deinitialize();
-
-}
-*/
+#endif // __OPENSPACE_MODULE_IMGUI___IMGUI_INCLUDE___H__

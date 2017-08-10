@@ -24,6 +24,8 @@
 
 #include <modules/imgui/include/renderproperties.h>
 
+#include <modules/imgui/include/imgui_include.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/optionproperty.h>
@@ -33,8 +35,6 @@
 #include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
-
-#include "imgui.h"
 
 namespace openspace {
 

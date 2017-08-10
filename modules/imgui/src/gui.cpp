@@ -37,25 +37,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#elif (defined __GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif // __clang__
-
-
-#include <imgui.h>
-
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif (defined __GNUC__)
-#pragma GCC diagnostic pop
-#endif // __clang__
+#include <modules/imgui/include/imgui_include.h>
 
 #include "gui_lua.inl"
 

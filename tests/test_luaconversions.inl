@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <ghoul/lua/ghoul_lua.h>
 #include <openspace/properties/propertydelegate.h>
 #include <openspace/properties/scalarproperty.h>

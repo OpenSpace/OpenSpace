@@ -24,32 +24,13 @@
 
 #include <modules/imgui/include/guiparallelcomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/messagestructures.h>
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#elif (defined __GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif // __clang__
-
-
-#include <imgui.h>
-
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif (defined __GNUC__)
-#pragma GCC diagnostic pop
-#endif // __clang__
-
 
 #include <fmt/format.h>
 

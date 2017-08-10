@@ -24,25 +24,14 @@
 
 #include <modules/imgui/include/guiperformancecomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/performance/performancelayout.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <ghoul/misc/sharedmemory.h>
-
-#if (defined(__GNUC__) && !defined(__clang__))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-WWold-style-cast"
-#endif // __GNUC__
-
-#include <imgui.h>
-
-#if (defined(__GNUC__) && !defined(__clang__))
-#pragma GCC diagnostic pop
-#endif // __GNUC__
-
 
 #include <fmt/format.h>
 
