@@ -25,9 +25,6 @@
 #include <openspace/util/powerscaledsphere.h>
 #include <ghoul/logging/logmanager.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 namespace {
     const char* _loggerCat = "PowerScaledSphere";
 } // namespace

@@ -131,16 +131,15 @@ void PerformanceManager::destroyGlobalSharedMemory() {
 }
     
 PerformanceManager::PerformanceManager()
-    : _performanceMemory(nullptr)
-    , _tick(0)
-    , _loggingEnabled(false)
+    : _loggingEnabled(false)
     , _logDir(absPath("${BASE_PATH}"))
     , _prefix("PM-")
     , _ext("log")
+    , _performanceMemory(nullptr)
+    , _tick(0)
 {
     PerformanceManager::createGlobalSharedMemory();
-    
-    
+
     ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
     sharedMemory.acquireLock();
     OnExit([&](){sharedMemory.releaseLock();});
