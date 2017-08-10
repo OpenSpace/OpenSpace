@@ -29,6 +29,7 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
 // Below are all the tiles that are used for contributing the actual fragment color
 
@@ -74,6 +75,10 @@ in vec3 positionCameraSpace;
 #if USE_ACCURATE_NORMALS
 in vec3 ellipsoidTangentThetaCameraSpace;
 in vec3 ellipsoidTangentPhiCameraSpace;
+
+// Once deferred light calculations are done in view space this can be removed
+// so that we only need one normal; in view space.
+uniform mat4 invViewModelTransform;
 #endif // USE_ACCURATE_NORMALS
 
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
@@ -85,10 +90,12 @@ in LevelWeights levelWeights;
  * the local and global chunk rendering. 
  *
  */
-vec4 getTileFragColor() {
-    vec4 color = vec4(0.3, 0.3, 0.3, 1.0);
+Fragment getTileFragment() {
+    Fragment frag;
+    frag.color = vec4(0.3, 0.3, 0.3, 1.0);
 
     vec3 normal = normalize(ellipsoidNormalCameraSpace);
+    vec3 normalModelSpace = normalize(fs_normal);
 #if USE_ACCURATE_NORMALS
     normal = getTileNormal(
         fs_uv,
@@ -97,11 +104,14 @@ vec4 getTileFragColor() {
         normalize(ellipsoidTangentThetaCameraSpace),
         normalize(ellipsoidTangentPhiCameraSpace)
     );
+    // Once deferred light calculations are done in view space this can be removed
+    // so that we only need one normal; in view space.
+    normalModelSpace = mat3(invViewModelTransform) * normal;
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
-    color = calculateColor(
-        color,
+    frag.color = calculateColor(
+        frag.color,
         fs_uv,
         levelWeights,
         ColorLayers
@@ -109,8 +119,8 @@ vec4 getTileFragColor() {
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
-    color = calculateWater(
-        color,
+    frag.color = calculateWater(
+        frag.color,
         fs_uv,
         levelWeights,
         WaterMasks,
@@ -123,8 +133,8 @@ vec4 getTileFragColor() {
 #endif // USE_WATERMASK
 
 #if USE_NIGHTTEXTURE
-    color = calculateNight(
-        color,
+    frag.color = calculateNight(
+        frag.color,
         fs_uv,
         levelWeights,
         NightLayers,
@@ -135,8 +145,8 @@ vec4 getTileFragColor() {
 #endif // USE_NIGHTTEXTURE
 
 #if PERFORM_SHADING
-    color = calculateShadedColor(
-        color,
+    frag.color = calculateShadedColor(
+        frag.color,
         normal,
         lightDirectionCameraSpace,
         normalize(positionCameraSpace),
@@ -146,7 +156,7 @@ vec4 getTileFragColor() {
 
 #if USE_ATMOSPHERE
     // Temporary until the real atmosphere code is here
-    //color = color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
+    //frag.color = frag.color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
     const vec3 n = normalize(ellipsoidNormalCameraSpace);
     const vec3 l = lightDirectionCameraSpace;
     const vec3 c = normalize(positionCameraSpace);
@@ -163,12 +173,12 @@ vec4 getTileFragColor() {
     //vec3 r = reflect(l, n);
     //float scatteredLight = pow(clamp(dot(-r,c), 0, 1), 20);
     const vec3 atmosphereColor = vec3(0.5, 0.5, 1.0) * 2.0;
-    color += vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
+    frag.color += vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
 #endif // USE_ATMOSPHERE
 
 #if USE_OVERLAY
-    color = calculateOverlay(
-        color,
+    frag.color = calculateOverlay(
+        frag.color,
         fs_uv,
         levelWeights,
         Overlays
@@ -176,25 +186,36 @@ vec4 getTileFragColor() {
 #endif // USE_OVERLAY
 
 #if SHOW_HEIGHT_INTENSITIES
-    color.r *= 0.1;
-    color.g *= 0.1;
-    color.b *= 0.1;
+    frag.color.r *= 0.1;
+    frag.color.g *= 0.1;
+    frag.color.b *= 0.1;
 
     float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
     float contourLine = fract(10.0 * untransformedHeight) > 0.98 ? 1.0 : 0.0;
-    color.r += untransformedHeight;
-    color.b = contourLine;
+    frag.color.r += untransformedHeight;
+    frag.color.b = contourLine;
 #endif
 
 #if SHOW_HEIGHT_RESOLUTION
-    color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
+    frag.color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
     #if USE_HEIGHTMAP
-        color.r = min(color.r, 0.8);
-        color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
+        frag.color.r = min(frag.color.r, 0.8);
+        frag.color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
     #endif
 #endif
 
-    return color;
+    // Other data
+#if USE_WATERMASK
+    frag.gOtherData = vec4(waterReflectance, waterReflectance, waterReflectance, 1.0);
+#else
+    frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
+#endif
+    // Normal is written in Camera Rig (OS Eye) Space
+    frag.gNormal    = vec4(normalModelSpace, 1.0); 
+    frag.gPosition  = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
+
+    frag.depth = fs_position.w;
+    return frag;
 }
 
 #endif ///TILE_FRAG_COLOR_HGLSL

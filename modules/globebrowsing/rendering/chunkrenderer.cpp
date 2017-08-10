@@ -175,6 +175,12 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         programObject.setUniform("deltaPhi0", glm::length(deltaPhi0));
         programObject.setUniform("deltaPhi1", glm::length(deltaPhi1));
         programObject.setUniform("tileDelta", tileDelta);
+
+        // This should not be needed once the light calculations for the atmosphere
+        // is performed in view space..
+        programObject.setUniform("invViewModelTransform",
+                               glm::inverse(glm::mat4(data.camera.combinedViewMatrix()) *
+                                            glm::mat4(chunk.owner().modelTransform())));
     }
 
     if (chunk.owner().generalProperties().performShading) {
