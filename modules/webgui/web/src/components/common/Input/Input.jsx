@@ -22,6 +22,10 @@ class Input extends Component {
     this.setInputRef = this.setInputRef.bind(this);
   }
 
+  componentWillReceiveProps({ value }) {
+    this.setState({ value });
+  }
+
   /**
    * callback for input
    * @param event InputEvent
@@ -30,7 +34,7 @@ class Input extends Component {
     const { value } = event.currentTarget;
 
     // update state so that input is re-rendered with new content
-    this.setState(prev => Object.assign(prev, { value }));
+    this.setState({ value });
 
     // send to the onChange (if any)!
     this.props.onChange(event);
@@ -112,7 +116,7 @@ Input.propTypes = {
   id: PropTypes.string,
   loading: PropTypes.bool,
   placeholder: PropTypes.string.isRequired,
-  value: PropTypes.oneOf(PropTypes.string, PropTypes.number),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   wide: PropTypes.bool,
 };
 
