@@ -224,4 +224,3 @@ void GuiIswaComponent::render() {
 } // namespace openspace::gui
 
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
-#

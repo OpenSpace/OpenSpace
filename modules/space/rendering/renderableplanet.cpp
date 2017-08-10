@@ -428,10 +428,10 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));
 
     // Normal Transformation
-    glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
-    glm::mat4 translateCamTrans = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
-    float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
-    glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
+    //glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
+    //glm::mat4 translateCamTrans = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
+    //float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
+    //glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
 
 //    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
 //        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);

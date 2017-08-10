@@ -380,7 +380,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
     Time time = OsEng.timeManager().time();
 
-    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0 };
+    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0, {} };
     RendererTasks tasks;
 
     // Capture standard fbo

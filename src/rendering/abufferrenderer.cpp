@@ -275,7 +275,14 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         static_cast<int>(Renderable::RenderBin::Overlay);
 
     Time time = OsEng.timeManager().time();
-    RenderData data{ *_camera, psc(), time, doPerformanceMeasurements, renderBinMask };
+    RenderData data {
+        *_camera,
+        psc(),
+        time,
+        doPerformanceMeasurements,
+        renderBinMask,
+        {}
+    };
     RendererTasks tasks;
     _scene->render(data, tasks);
     _blackoutFactor = blackoutFactor;
@@ -516,7 +523,7 @@ void ABufferRenderer::updateResolveDictionary() {
     dict.setValue("raycasters", raycastersDict);
 
     ghoul::Dictionary helperPathsDict;
-    for (int i = 0; i < _helperPaths.size(); ++i) {
+    for (size_t i = 0; i < _helperPaths.size(); ++i) {
         helperPathsDict.setValue(std::to_string(i), _helperPaths[i]);
     }
 

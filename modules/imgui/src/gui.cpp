@@ -41,7 +41,7 @@
 #if (defined(__GNUC__) && !defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-WWold-style-cast
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif // __GNUC__
 
 #include <imgui.h>
