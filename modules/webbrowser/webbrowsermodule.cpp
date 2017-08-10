@@ -36,7 +36,9 @@ namespace openspace {
 
 WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
     LDEBUG("Starting CEF...");
-    _cefHost = std::make_unique<CefHost>(findHelperExecutable());
+    auto helperLocation = findHelperExecutable();
+    LDEBUG("Using web helper executable: " + helperLocation);
+    _cefHost = std::make_unique<CefHost>(helperLocation);
     LDEBUG("Starting CEF... done!");
 
     OsEng.registerModuleCallback(
@@ -62,27 +64,38 @@ void WebBrowserModule::deinitialize() {
  * @return the absolute path to the file
  */
 std::string WebBrowserModule::findHelperExecutable() {
-    std::string subprocessName = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebHelperLocation);
-    subprocessName += SUBPROCESS_ENDING;
-	auto subLength = (int) subprocessName.length();
-
-    Directory binDir("${BASE_PATH}/bin/openspace", Directory::AbsolutePath::No);
-    std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);
-
-    // find files matching the given file name
-    std::vector<std::string> matchingFiles;
-    std::copy_if(foundFiles.begin(), foundFiles.end(), std::back_inserter(matchingFiles),
-                 [subprocessName, subLength](std::string s) {
-                     s = s.substr(s.size() - subLength);
-                     return s == subprocessName;
-                 });
-
-    if (matchingFiles.empty()) {
-        LERROR(fmt::format("Could not find requested sub process executable file name: {}", subprocessName));
+    if (OsEng.configurationManager().hasKey(ConfigurationManager::KeyWebHelperLocation)) {
+        auto execLocation = OsEng.configurationManager().value<std::string>(
+            ConfigurationManager::KeyWebHelperLocation) + SUBPROCESS_ENDING;
+        if (!FileSys.fileExists(execLocation)) {
+            LERROR("Could not find web helper executable at location: " + execLocation);
+        }
+        return execLocation;
     }
+    else {
+        std::string subprocessName = SUBPROCESS_NAME;
+        subprocessName += SUBPROCESS_ENDING;
+        LWARNING("Assuming web helper name is " + subprocessName);
+        auto subLength = (int)subprocessName.length();
 
-    return matchingFiles.back();
+        Directory binDir("${BASE_PATH}/bin/openspace", Directory::AbsolutePath::No);
+        std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);
+
+        // find files matching the given file name
+        std::vector<std::string> matchingFiles;
+        std::copy_if(foundFiles.begin(), foundFiles.end(), std::back_inserter(matchingFiles),
+            [subprocessName, subLength](std::string s) {
+            s = s.substr(s.size() - subLength);
+            return s == subprocessName;
+        });
+
+        if (matchingFiles.empty()) {
+            LERROR(fmt::format("Could not find requested sub process executable file name: {}", subprocessName));
+        }
+
+        return matchingFiles.back();
+
+    }
 }
 
 void WebBrowserModule::internalInitialize() {

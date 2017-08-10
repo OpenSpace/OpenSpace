@@ -36,6 +36,7 @@
 
 namespace openspace {
 
+    static const std::string SUBPROCESS_NAME = "openspace_web_helper";
 #ifdef WIN32
 static const std::string SUBPROCESS_ENDING = ".exe";
 #else

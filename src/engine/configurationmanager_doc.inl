@@ -210,8 +210,9 @@ documentation::Documentation ConfigurationManager::Documentation() {
         {
             ConfigurationManager::KeyWebHelperLocation,
             new StringVerifier,
-            Optional::No,
-            "The location of the CEF Web helper executable. No extension should be added."
+            Optional::Yes,
+            "The location of the CEF Web helper executable. No extension should be added. "
+            "If not provided, it will search for the executable name in the bin folder."
         },
         {
             ConfigurationManager::KeyWebGuiUrl,
