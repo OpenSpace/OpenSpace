@@ -27,10 +27,6 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-namespace {
-    const char* _loggerCat = "Tile";
-} // namespace
-
 namespace openspace::globebrowsing {
 
 const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);

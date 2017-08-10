@@ -30,6 +30,7 @@ template <typename T>
 std::string PropertyDelegate<T>::className() {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::className specialization");
+    return "";
 }
 
 template <typename T>
@@ -62,34 +63,37 @@ U PropertyDelegate<T>::defaultSteppingValue() {
 
 template <typename T>
 template <typename U>
-U PropertyDelegate<T>::fromLuaValue(lua_State* state, bool& success) {
+U PropertyDelegate<T>::fromLuaValue(lua_State*, bool&) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::fromLuaValue specialization");
 }
 
 template <typename T>
 template <typename U>
-bool PropertyDelegate<T>::toLuaValue(lua_State* state, U value) {
+bool PropertyDelegate<T>::toLuaValue(lua_State*, U) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::toLuaValue specialization");
+    return false;
 }
 
 template <typename T>
 int PropertyDelegate<T>::typeLua() {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::luaType specialization");
+    return 0;
 }
 
 template <typename T>
 template <typename U>
-bool PropertyDelegate<T>::toString(std::string& outValue, U inValue) {
+bool PropertyDelegate<T>::toString(std::string&, U) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::toString specialization");
+    return false;
 }
 
 template <typename T>
 template <typename U>
-U PropertyDelegate<T>::fromString(std::string value, bool& success) {
+U PropertyDelegate<T>::fromString(std::string, bool&) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::fromString specialization");
 }

@@ -106,11 +106,11 @@ documentation::Documentation RenderableCrawlingLine::Documentation() {
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
+    , _frameCounter(0)
+    , _drawLine(false)
     , _imageSequenceTime(-1.f)
     , _vao(0)
-    , _frameCounter(0)
     , _vbo(0)
-    , _drawLine(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -148,7 +148,7 @@ void RenderableCrawlingLine::initialize() {
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(VBOData), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(VBOData), nullptr, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VBOData), nullptr);

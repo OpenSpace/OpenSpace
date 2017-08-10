@@ -77,4 +77,7 @@ handle_modules(${OPENSPACE_MODULE_DIR} "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
 
 copy_dynamic_libraries()
 
+# Just in case, create the directory
+add_custom_command(TARGET libOpenSpace PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)

@@ -297,7 +297,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->setUniform("modelViewProjectionTransform",
@@ -365,9 +365,9 @@ void RenderableShadowCylinder::createCylinder(double time) {
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
         [](const glm::dvec3& p) {
-            PowerScaledCoordinate psc = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-            psc[3] += 3;
-            return psc;
+            PowerScaledCoordinate coord = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+            coord[3] += 3;
+            return coord;
         }
     );
     
@@ -400,11 +400,11 @@ void RenderableShadowCylinder::createCylinder(double time) {
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(CylinderVBOLayout), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(CylinderVBOLayout), nullptr, GL_DYNAMIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _vertices.size() * sizeof(CylinderVBOLayout), &_vertices[0]);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glBindVertexArray(0);
 }
 

@@ -44,13 +44,14 @@ namespace {
 namespace openspace {
 
 KameleonVolumeRaycaster::KameleonVolumeRaycaster(
-    std::shared_ptr<ghoul::opengl::Texture> texture,
-    std::shared_ptr<TransferFunction> transferFunction,
-    std::shared_ptr<VolumeClipPlanes> clipPlanes)
-    : _volumeTexture(texture)
+                                          std::shared_ptr<ghoul::opengl::Texture> texture,
+                                       std::shared_ptr<TransferFunction> transferFunction,
+                                             std::shared_ptr<VolumeClipPlanes> clipPlanes)
+    : _clipPlanes(clipPlanes)
+    , _volumeTexture(texture)
     , _transferFunction(transferFunction)
-    , _clipPlanes(clipPlanes)
-    , _boundingBox(glm::vec3(1.0)) {}
+    , _boundingBox(glm::vec3(1.0))
+{}
     
 KameleonVolumeRaycaster::~KameleonVolumeRaycaster() {}
 

@@ -24,6 +24,8 @@
 
 #include <modules/imgui/include/guiorigincomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -31,8 +33,6 @@
 #include <openspace/scene/scene.h>
 
 #include <ghoul/misc/assert.h>
-
-#include "imgui.h"
 
 namespace openspace::gui {
 

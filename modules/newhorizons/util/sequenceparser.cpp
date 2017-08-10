@@ -33,7 +33,6 @@
 
 namespace {
     const char* _loggerCat = "SequenceParser";
-    const char* keyTranslation = "DataInputTranslation";
 
     const char* PlaybookIdentifierName = "Playbook";
 } // namespace

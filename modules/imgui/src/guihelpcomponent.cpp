@@ -24,7 +24,7 @@
 
 #include <modules/imgui/include/guihelpcomponent.h>
 
-#include "imgui.h"
+#include <modules/imgui/include/imgui_include.h>
 
 namespace {
     const ImVec2 size = ImVec2(350, 500);

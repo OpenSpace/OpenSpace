@@ -30,14 +30,15 @@ namespace openspace::interaction {
 
 template <typename T>
 Interpolator<T>::Interpolator()
-: _transferFunction([](float t){ return t; })
-, _t(0.0)
-, _interpolationTime(1.0) {};
+    : _transferFunction([](float t){ return t; })
+    , _t(0.0)
+    , _interpolationTime(1.0)
+{}
 
 template <typename T>
 void Interpolator<T>::start() {
     _t = 0.0;
-};
+}
 
 template <typename T>
 void Interpolator<T>::end() {

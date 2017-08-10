@@ -24,9 +24,9 @@
 
 #include <modules/imgui/include/guifilepathcomponent.h>
 
-#include <ghoul/filesystem/filesystem.h>
+#include <modules/imgui/include/imgui_include.h>
 
-#include "imgui.h"
+#include <ghoul/filesystem/filesystem.h>
 
 namespace openspace::gui {
 

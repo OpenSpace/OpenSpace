@@ -53,7 +53,6 @@ public:
 private:
     void createSphere();
 
-    float _modRadius;
     properties::Vec3Property _radius;
     properties::IntProperty _segments;
     PowerScaledSphere* _sphere;

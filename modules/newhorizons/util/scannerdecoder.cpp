@@ -28,23 +28,22 @@
 
 namespace openspace {
    
-ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCANNER")
-{
+ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCANNER") {
     std::string value;
-    for (int k = 0; k < dictionary.size(); k++){
+    for (size_t k = 0; k < dictionary.size(); k++) {
         dictionary.getValue(std::to_string(k + 1), value);
         _spiceIDs.push_back(value);
     }
 }
-std::string ScannerDecoder::getDecoderType(){
+std::string ScannerDecoder::getDecoderType() {
     return _type;
 }
 
-std::vector<std::string> ScannerDecoder::getSpiceIDs(){
+std::vector<std::string> ScannerDecoder::getSpiceIDs() {
     return _spiceIDs;
 }
 
-void ScannerDecoder::setStopCommand(std::string stopCommand){
+void ScannerDecoder::setStopCommand(std::string stopCommand) {
     _abort = stopCommand;
 }
 

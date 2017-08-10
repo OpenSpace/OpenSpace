@@ -36,8 +36,6 @@
 #include <fstream>
 
 namespace {
-    const char* keyTranslation = "DataInputTranslation";
-
     const char* PlaybookIdentifierName = "HongKang";
 } // namespace
 
@@ -265,7 +263,7 @@ bool HongKangParser::create() {
 }
 
 bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft, 
-                                      std::vector<std::string> payload, 
+                                      std::vector<std::string>, 
                                       std::vector<std::string> potentialTargets)
 {
     image.target = "VOID";

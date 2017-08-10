@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <modules/globebrowsing/cache/lrucache.h>
 
 #define _USE_MATH_DEFINES
@@ -33,9 +31,9 @@
 class LRUCacheTest : public testing::Test {};
 
 struct DefaultHasher {
-	unsigned long long operator()(const int& var) const {
-		return static_cast<unsigned long long>(var);
-	}
+    unsigned long long operator()(const int& var) const {
+        return static_cast<unsigned long long>(var);
+    }
 };
 
 TEST_F(LRUCacheTest, Get) {
@@ -70,9 +68,9 @@ std::ostream& operator<<(std::ostream& o, const MyKey& key) {
 
 // custom specialization 
 struct DefaultHasherMyKey {
-	unsigned long long operator()(const MyKey& s) const {
-		return s.x ^ (s.y << 1);
-	}
+    unsigned long long operator()(const MyKey& s) const {
+        return s.x ^ (s.y << 1);
+    }
 };
 
 TEST_F(LRUCacheTest, StructKey) {
@@ -96,5 +94,4 @@ TEST_F(LRUCacheTest, StructKey) {
     ASSERT_TRUE(lru.exist(key2));
     ASSERT_EQ(lru.get(key1), val2);
     ASSERT_EQ(lru.get(key2), val2);
-    
 }

@@ -24,15 +24,14 @@
 
 #include <modules/imgui/include/guipropertycomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
 #include <modules/imgui/include/renderproperties.h>
 
 #include <openspace/properties/propertyowner.h>
 
 #include <algorithm>
-#include "imgui.h"
 
 namespace {
-    const char* _loggerCat = "GuiPropertyComponent";
     const ImVec2 size = ImVec2(350, 500);
 
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props,
@@ -55,7 +54,7 @@ namespace {
             ImGui::IsItemHovered() && (!propOwner->description().empty());
 
         if (shouldDisplay) {
-            ImGui::SetTooltip(propOwner->description().c_str());
+            ImGui::SetTooltip("%s", propOwner->description().c_str());
         }
     }
 } // namespace

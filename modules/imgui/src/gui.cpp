@@ -37,7 +37,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <imgui.h>
+#include <modules/imgui/include/imgui_include.h>
 
 #include "gui_lua.inl"
 
@@ -64,8 +64,12 @@ static void RenderDrawLists(ImDrawData* drawData) {
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
     ImGuiIO& io = ImGui::GetIO();
-    int fb_width = static_cast<int>(io.DisplaySize.x * io.DisplayFramebufferScale.x);
-    int fb_height = static_cast<int>(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+    GLsizei fb_width = static_cast<GLsizei>(
+        io.DisplaySize.x * io.DisplayFramebufferScale.x
+    );
+    GLsizei fb_height = static_cast<GLsizei>(
+        io.DisplaySize.y * io.DisplayFramebufferScale.y
+    );
     if (fb_width == 0 || fb_height == 0) {
         return;
     }
@@ -87,7 +91,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
-    glViewport(0, 0, static_cast<GLsizei>(fb_width), static_cast<GLsizei>(fb_height));
+    glViewport(0, 0, fb_width, fb_height);
     const glm::mat4 ortho(
         2.f / width, 0.0f, 0.0f, 0.f,
         0.0f, 2.0f / -height, 0.0f, 0.f,
@@ -103,7 +107,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
 
     for (int i = 0; i < drawData->CmdListsCount; ++i) {
         const ImDrawList* cmdList = drawData->CmdLists[i];
-        const ImDrawIdx* indexBufferOffset = 0;
+        const ImDrawIdx* indexBufferOffset = nullptr;
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
@@ -126,7 +130,10 @@ static void RenderDrawLists(ImDrawData* drawData) {
                 pcmd->UserCallback(cmdList, pcmd);
             }
             else {
-                glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
+                glBindTexture(
+                    GL_TEXTURE_2D,
+                    static_cast<GLuint>(reinterpret_cast<intptr_t>(pcmd->TextureId))
+                );
                 glScissor(
                     static_cast<int>(pcmd->ClipRect.x),
                     static_cast<int>(fb_height - pcmd->ClipRect.w),
@@ -236,7 +243,9 @@ GUI::GUI()
     addPropertySubOwner(_virtualProperty);
     addPropertySubOwner(_filePath);
     addPropertySubOwner(_time);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     addPropertySubOwner(_iswa);
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
 }
 
 void GUI::initialize() {
@@ -322,13 +331,17 @@ void GUI::initialize() {
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initialize(); 
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
 }
 
 void GUI::deinitialize() {
     ImGui::Shutdown();
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitialize();
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
     _parallel.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();
@@ -368,7 +381,7 @@ void GUI::initializeGL() {
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, nullptr, GL_DYNAMIC_DRAW);
     
     glGenBuffers(1, &vboElements);
     
@@ -385,7 +398,7 @@ void GUI::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, pos))
+        nullptr // = reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, pos))
     );
     glVertexAttribPointer(
         _program->attributeLocation("in_uv"),
@@ -412,7 +425,10 @@ void GUI::initializeGL() {
     _performance.initializeGL();
     _help.initializeGL();
     _parallel.initializeGL();
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initializeGL();
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+
 }
 
 void GUI::deinitializeGL() {
@@ -429,7 +445,9 @@ void GUI::deinitializeGL() {
         glDeleteBuffers(1, &vboElements);
     }
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitializeGL();
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
     _parallel.deinitializeGL();
     _help.deinitializeGL();
     _performance.deinitializeGL();
@@ -485,9 +503,11 @@ void GUI::endFrame() {
         if (_parallel.isEnabled()) {
             _parallel.render();
         }
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
         if (_iswa.isEnabled()) {
             _iswa.render();
         }
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
         if (_filePath.isEnabled()) {
             _filePath.render();
         }
@@ -594,7 +614,7 @@ void GUI::render() {
     bool iswa = _iswa.isEnabled();
     ImGui::Checkbox("iSWA", &iswa);
     _iswa.setEnabled(iswa);
-#endif
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
 
     _origin.render();
     _time.render();

@@ -24,6 +24,8 @@
 
 #include <modules/imgui/include/guiperformancecomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/performance/performancelayout.h>
 #include <openspace/performance/performancemanager.h>
@@ -31,15 +33,12 @@
 
 #include <ghoul/misc/sharedmemory.h>
 
-#include <imgui.h>
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <numeric>
 
 namespace {
-    const char* _loggerCat = "GuiPerformanceComponent";
-
     enum class Sorting {
         NoSorting = -1,
         UpdateTranslation = 0,

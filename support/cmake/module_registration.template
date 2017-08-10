@@ -8,7 +8,7 @@
 @MODULE_HEADERS@
 namespace openspace {
 
-constexpr auto AllModules = []() -> std::vector<OpenSpaceModule*> {
+auto AllModules = []() -> std::vector<OpenSpaceModule*> {
     return {
 @MODULE_CLASSES@    };
 };

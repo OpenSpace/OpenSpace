@@ -22,8 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+
 #include <modules/imgui/include/guiiswacomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
 #include <modules/iswa/util/iswamanager.h>
 
 #include <openspace/engine/downloadmanager.h>
@@ -34,8 +37,6 @@
 
 #include <modules/iswa/ext/json.h>
 
-#include "imgui.h"
-
 namespace {
     using json = nlohmann::json;
     const ImVec2 WindowSize = ImVec2(350, 500);
@@ -45,9 +46,6 @@ namespace openspace::gui {
 
 GuiIswaComponent::GuiIswaComponent()
     : GuiPropertyComponent("iSWA")
-    , _gmData(false)
-    , _gmImage(false)
-    , _ionData(false)
 {}
 
 void GuiIswaComponent::render() {
@@ -223,3 +221,5 @@ void GuiIswaComponent::render() {
 }
 
 } // namespace openspace::gui
+
+#endif // OPENSPACE_MODULE_ISWA_ENABLED

@@ -23,8 +23,6 @@
  ****************************************************************************************/
  
 
-// #include "gtest/gtest.h"
-// //Make private variables public for testing
 // #define private public
 // #include <modules/base/rendering/screenspaceimage.h>
 // #define private private

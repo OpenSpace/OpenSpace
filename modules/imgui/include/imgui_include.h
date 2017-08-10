@@ -22,30 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___LONGDOUBLEPROPERTY___H__
-#define __OPENSPACE_CORE___LONGDOUBLEPROPERTY___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___IMGUI_INCLUDE___H__
+#define __OPENSPACE_MODULE_IMGUI___IMGUI_INCLUDE___H__
 
- /**
- * \file longdoubleproperty.h
- *
- * \addtogroup openspace 
- * @{
- * \addtogroup properties 
- * @{
- 
- * \class LongDoubleProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>long double</code>.
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif (defined __GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif // __clang__
 
- * @} @}
- */
+#include <imgui.h>
 
-#include <openspace/properties/numericalproperty.h>
 
-namespace openspace::properties {
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif (defined __GNUC__)
+#pragma GCC diagnostic pop
+#endif // __clang__
 
-REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double)
-
-} // namespace openspace::properties
-
-#endif // __OPENSPACE_CORE___LONGDOUBLEPROPERTY___H__
+#endif // __OPENSPACE_MODULE_IMGUI___IMGUI_INCLUDE___H__

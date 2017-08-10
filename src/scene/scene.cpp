@@ -63,13 +63,13 @@
 
 namespace {
     const char* _loggerCat = "Scene";
-    const char* _moduleExtension = ".mod";
-    const char* _commonModuleToken = "${COMMON_MODULE}";
+    //const char* _moduleExtension = ".mod";
+    //const char* _commonModuleToken = "${COMMON_MODULE}";
 
-    const char* KeyCamera = "Camera";
-    const char* KeyFocusObject = "Focus";
-    const char* KeyPositionObject = "Position";
-    const char* KeyViewOffset = "Offset";
+    //const char* KeyCamera = "Camera";
+    //const char* KeyFocusObject = "Focus";
+    //const char* KeyPositionObject = "Position";
+    //const char* KeyViewOffset = "Offset";
 
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
     const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
@@ -126,12 +126,12 @@ void Scene::addNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
 
 void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
     // Remove the node and all its children.
-    node->traversePostOrder([this](SceneGraphNode* node) {
+    node->traversePostOrder([this](SceneGraphNode* n) {
         _topologicallySortedNodes.erase(
-            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), node),
+            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), n),
             _topologicallySortedNodes.end()
         );
-        _nodesByName.erase(node->name());
+        _nodesByName.erase(n->name());
     });
     
     if (updateDeps) {

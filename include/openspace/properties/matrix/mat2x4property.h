@@ -31,7 +31,7 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(Mat2x4Property, glm::mat2x4);
+REGISTER_NUMERICALPROPERTY_HEADER(Mat2x4Property, glm::mat2x4)
 
 } // namespace openspace::properties
 

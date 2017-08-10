@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -252,7 +253,7 @@ void LuaConsole::initialize() {
         GL_FLOAT,
         GL_FALSE,
         2 * sizeof(GLfloat),
-        reinterpret_cast<void*>(0)
+        nullptr
     );
 
     glBindVertexArray(0);

@@ -46,11 +46,11 @@ class GUI : public GuiComponent {
 public:
     GUI();
 
-    void initialize();
-    void deinitialize();
+    void initialize() override;
+    void deinitialize() override;
 
-    void initializeGL();
-    void deinitializeGL();
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool mouseButtonCallback(MouseButton button, MouseAction action);
     bool mouseWheelCallback(double position);
@@ -61,7 +61,7 @@ public:
         const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
     void endFrame();
 
-    void render();
+    void render() override;
 
 //protected:
     GuiHelpComponent _help;
@@ -73,7 +73,9 @@ public:
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _virtualProperty;
     GuiTimeComponent _time;
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     GuiIswaComponent _iswa;
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
     GuiParallelComponent _parallel;
 
 private:

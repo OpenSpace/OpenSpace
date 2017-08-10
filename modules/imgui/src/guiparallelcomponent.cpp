@@ -24,21 +24,18 @@
 
 #include <modules/imgui/include/guiparallelcomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/messagestructures.h>
 
-#include <imgui.h>
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <numeric>
-
-namespace {
-    const char* _loggerCat = "GuiParallelComponent";
-} // namespace
 
 namespace openspace::gui {
 

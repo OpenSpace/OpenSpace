@@ -24,6 +24,8 @@
 
 #include <modules/imgui/include/renderproperties.h>
 
+#include <modules/imgui/include/imgui_include.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/optionproperty.h>
@@ -34,8 +36,6 @@
 
 #include <ghoul/filesystem/filesystem.h>
 
-#include "imgui.h"
-
 namespace openspace {
 
 using namespace properties;
@@ -44,10 +44,11 @@ void renderTooltip(Property* prop) {
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
         if (!prop->description().empty()) {
-            ImGui::TextWrapped(prop->description().c_str());
+            ImGui::TextWrapped("%s", prop->description().c_str());
             ImGui::Spacing();
         }
         ImGui::Text(
+            "%s",
             (std::string("Identifier: ") + prop->fullyQualifiedIdentifier()).c_str()
         );
         ImGui::EndTooltip();
@@ -115,7 +116,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     std::vector<OptionProperty::Option> options = p->options();
     switch (p->displayType()) {
     case OptionProperty::DisplayType::Radio: {
-        ImGui::Text(name.c_str());
+        ImGui::Text("%s", name.c_str());
         ImGui::Separator();
         for (const OptionProperty::Option& o : options) {
             ImGui::RadioButton(o.description.c_str(), &value, o.value);
@@ -152,7 +153,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
 
         std::vector<int> selectedIndices = p->value();
 
-        for (int i = 0; i < options.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(options.size()); ++i) {
             std::string description = options[i].description;
             bool selected = std::find(
                 selectedIndices.begin(), selectedIndices.end(), i
