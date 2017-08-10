@@ -6,8 +6,7 @@ import Button from './Button';
 
 /* globals module */
 
-
-storiesOf('Input.Button', module)
+storiesOf('Input/Button', module)
   .addDecorator(story => (
     <div style={{ background: '#252525', padding: '20px' }}>
       { story() }

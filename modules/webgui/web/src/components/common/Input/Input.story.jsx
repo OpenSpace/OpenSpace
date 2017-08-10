@@ -6,8 +6,13 @@ import Input from './Input';
 
 /* globals module */
 
-storiesOf('Input.Input', module)
-  .add('default', () => (<Input placeholder="Input" value="PREDEFined value" />))
+storiesOf('Input/Input', module)
+  .addDecorator(story => (
+    <div style={{ background: '#252525', padding: '20px' }}>
+      { story() }
+    </div>
+  ))
+  .add('default', () => (<Input placeholder="Input" value="PRE EFined value" />))
   .add('no input', () => (<Input placeholder="Input" />))
   .add('unwide', () => (<Input placeholder="Input" wide={false} />))
   .add('disabled', () => (<Input placeholder="Input" value="value" disabled />))
