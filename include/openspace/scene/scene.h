@@ -142,11 +142,17 @@ public:
     const glm::dvec3 currentDisplacementPosition(const std::string & cameraParent,
         const SceneGraphNode* target) const;
 
+    const glm::dmat4 currentMatrixTransformation(const std::string & cameraParent,
+        const SceneGraphNode* target) const;
+
     SceneGraphNode* findCommonParentNode(const SceneGraphNode * firstNode, const SceneGraphNode * secondNode) const;
 
     std::vector<const SceneGraphNode*> pathTo(const SceneGraphNode* node) const;
 
     glm::dvec3 pathCollector(const std::vector<const SceneGraphNode*> & path, const std::string & commonParentName,
+        const bool inverse) const;
+
+    glm::dmat4 matrixCollector(const std::vector<const SceneGraphNode*> & path, const std::string & commonParentName,
         const bool inverse) const;
 
     std::string commonParent(const std::vector<const SceneGraphNode*> & t1, const std::vector<const SceneGraphNode*> & t2) const;

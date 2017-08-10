@@ -244,6 +244,40 @@ const glm::dvec3 Scene::currentDisplacementPosition(const std::string & cameraPa
     }
 }
 
+const glm::dmat4 Scene::currentMatrixTransformation(const std::string & cameraParent,
+    const SceneGraphNode* target) const {
+    if (target != nullptr) {
+
+        std::vector<const SceneGraphNode*> cameraPath;
+        std::vector<const SceneGraphNode*> targetPath;
+        std::vector<const SceneGraphNode*> commonParentPath;
+
+        const SceneGraphNode* cameraParentNode = sceneGraphNode(cameraParent);
+
+        //Find common parent for camera and object
+        std::string commonParentName(cameraParent);  // initiates to camera parent in case 
+                                                     // other path is not found
+        const SceneGraphNode * targetNode = sceneGraphNode(target->name());
+        cameraPath = pathTo(cameraParentNode);
+        targetPath = pathTo(targetNode);
+
+        const SceneGraphNode* commonParentNode = findCommonParentNode(cameraParentNode, targetNode);
+        commonParentPath = pathTo(commonParentNode);
+
+        //Find the path from the camera to the common parent
+
+        glm::dmat4 collectorCamera(matrixCollector(cameraPath, commonParentNode->name(), false));
+        glm::dmat4 collectorTarget(matrixCollector(targetPath, commonParentNode->name(), true));
+
+        return collectorCamera * collectorTarget;
+    }
+    else {
+        LERROR("Target scenegraph node is null.");
+        return glm::dmat4(1.0);
+    }
+}
+
+
 SceneGraphNode* Scene::findCommonParentNode(const SceneGraphNode * firstNode, const SceneGraphNode * secondNode) const {
     if (!firstNode || !secondNode) {
         LERROR("Empty scenegraph node pointer passed to the method.");
@@ -267,9 +301,8 @@ std::vector<const SceneGraphNode*> Scene::pathTo(const SceneGraphNode* node) con
         path.push_back(tmpNode);
         tmpNode = tmpNode->parent();
     }
-    // JCC: Is this necessary??
     path.push_back(tmpNode);
-
+    
     return path;
 }
 
@@ -316,6 +349,40 @@ glm::dvec3 Scene::pathCollector(const std::vector<const SceneGraphNode*> & path,
     }
 
     return collector;
+}
+
+glm::dmat4 Scene::matrixCollector(const std::vector<const SceneGraphNode*> & path, const std::string & commonParentName,
+    const bool inverse) const {
+   
+    if (path.empty() || commonParentName.empty()) {
+        LERROR("Empty path or common parent name passed to matrixCollector method.");
+        return glm::dmat4(1.0);
+    }
+
+    const SceneGraphNode* firstElement = path.front();    
+
+    if (firstElement->name() == commonParentName) {
+        if (inverse)
+            return glm::inverse(firstElement->modelTransform());
+        else
+            return firstElement->modelTransform();
+    }
+        
+
+    int depth = 0;
+    glm::dmat4 collector = glm::dmat4(1.0);
+
+    // adds all elements to the collector, continues untill commomParent is found.    
+    while (firstElement->name() != commonParentName) {
+        if (inverse)
+            collector = glm::inverse(firstElement->modelTransform()) * collector;
+        else
+            collector = firstElement->modelTransform() * collector;
+
+        firstElement = path[++depth];
+    }
+
+    return glm::dmat4(0);
 }
 
 void Scene::updateDependencies() {

@@ -27,6 +27,10 @@
 #include <openspace/util/syncbuffer.h>
 #include <openspace/query/query.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+
 
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -175,27 +179,20 @@ namespace openspace {
     }
 
   
-    glm::mat4 Camera::viewMatrix(const SceneGraphNode & node) {
+    glm::dmat4 Camera::viewMatrixFromAttachedNode(const SceneGraphNode * node) const {
         // Traverses the given node to the attached node
         // through the common acestor in order to avoid the 
         // catastrophic cancellation scenario (see DSG paper).
         // Multiplies the result by the camera rig matrix 
         // and then by the SGCT eye matrix.
 
-        // JCC: Add common ancestor tranformation matrices.
-        if (_cachedCombinedViewMatrix.isDirty) {
-            Mat4 cameraTranslation =
-                glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)));
-            _cachedCombinedViewMatrix.datum =
-                Mat4(sgctInternal.viewMatrix()) *
-                Mat4(viewRotationMatrix()) *
-                cameraTranslation;
-            _cachedCombinedViewMatrix.isDirty = true;
-        }
-        return _cachedCombinedViewMatrix.datum;
+        // JCC: Because the view matrix is calculated for each
+        // node asked, a cache system is not viable.
+        return Mat4(sgctInternal.viewMatrix()) *
+            Mat4(cameraRigMatrix(node));
     }
     
-    glm::mat4 Camera::viewProjectionMatrix(const SceneGraphNode & node) {
+    glm::dmat4 Camera::viewProjectionMatrix(const SceneGraphNode * node) const {
         // Traverses the given node to the attached node
         // through the common acestor in order to avoid the 
         // catastrophic cancellation scenario (see DSG paper).
@@ -203,21 +200,21 @@ namespace openspace {
         // by the SGCT eye matrix and then my the SGCT projection
         // matrix.
         
-        return sgctInternal.projectionMatrix() * viewMatrix(node);
+        return Mat4(sgctInternal.projectionMatrix()) * viewMatrixFromAttachedNode(node);
     }
 
-    glm::mat4 Camera::cameraRigMatrix(const SceneGraphNode & node) {
+    glm::dmat4 Camera::cameraRigMatrix(const SceneGraphNode * node) const {
         // Traverses the given node to the attached node
         // through the common acestor in order to avoid the 
         // catastrophic cancellation scenario (see DSG paper).
         // Multiplies the result by the camera rig matrix.
 
-        // JCC: Add common ancestor tranformation matrices.
         return Mat4(viewRotationMatrix()) * 
-            glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)));        
+            glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)))
+            * OsEng.renderEngine().scene()->currentMatrixTransformation(this->_parent->name(), node);
     }
 
-    glm::mat4 Camera::cameraMatrix() {
+    glm::dmat4 Camera::cameraMatrix() const {
         return sgctInternal.viewMatrix();
     }
 

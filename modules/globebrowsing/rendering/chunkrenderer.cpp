@@ -118,9 +118,11 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
                                       const Chunk& chunk, const RenderData& data)
 {
     glm::dmat4 modelTransform = chunk.owner().modelTransform();
-    glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
+    //glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
+    const SceneGraphNode * currentNode = chunk.owner().sceneGraphNode();
+    glm::dmat4 viewTransform = data.camera.viewMatrixFromAttachedNode(currentNode);
     glm::dmat4 modelViewTransform = viewTransform * modelTransform;
-
+    
     const bool nightLayersActive =
         !_layerManager->layerGroup(layergroupid::NightLayers).activeLayers().empty();
     const bool waterLayersActive =

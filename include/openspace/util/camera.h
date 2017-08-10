@@ -118,24 +118,24 @@ public:
     * Transforms object from its scenegraph node space to camera space.
     * Includes SGCT eye space.
     */
-    glm::mat4 viewMatrix(const SceneGraphNode & node);
+    glm::dmat4 viewMatrixFromAttachedNode(const SceneGraphNode * node) const;
     
     /*
     * Transforms object from its scenegraph node space to projection space.
     * Includes SGCT eye and projection spaces.
     */
-    glm::mat4 viewProjectionMatrix(const SceneGraphNode & node);
+    glm::dmat4 viewProjectionMatrix(const SceneGraphNode * node) const;
     
     /*
     * Transforms object from its scenegraph node space to camera rig space.
     */
-    glm::mat4 cameraRigMatrix(const SceneGraphNode & node);
+    glm::dmat4 cameraRigMatrix(const SceneGraphNode * node) const;
     
     /*
     * Transforms object from camera rig space to camera space.
     * Includes SGCT eye space.
     */
-    glm::mat4 cameraMatrix();
+    glm::dmat4 cameraMatrix() const;
     
 
     // @TODO this should simply be called viewMatrix!
