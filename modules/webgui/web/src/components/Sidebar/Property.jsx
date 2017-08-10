@@ -30,21 +30,6 @@ class Property extends Component {
     this.setState({ value });
   }
 
-  /**
-   * New value received from OpenSpace
-   * @param data
-   */
-  updateValue({ Value }) {
-    this.setState({ value: Value });
-  }
-
-  /**
-   * Send value to OpenSpace
-   */
-  saveValue(value) {
-    DataManager.setValue(this.uri, value);
-  }
-
   get uri() {
     const { Identifier } = this.props.Description;
     return Identifier;
@@ -60,18 +45,34 @@ class Property extends Component {
     }
   }
 
+  /**
+   * Send value to OpenSpace
+   */
+  saveValue(value) {
+    DataManager.setValue(this.uri, value);
+  }
+
+  /**
+   * New value received from OpenSpace
+   * @param data
+   */
+  updateValue({ Value }) {
+    this.setState({ value: Value });
+  }
+
   render() {
-    const { Value, Description } = this.props;
+    const { Description } = this.props;
+    const { value } = this.state;
     const PropInput = this.inputType;
     return (
-      <PropInput value={Value} placeholder={Description.Name} onChange={this.onInput} />
+      <PropInput value={value} placeholder={Description.Name} onChange={this.onInput} />
     );
   }
 }
 
 Property.propTypes = {
   Description: PropTypes.object,
-  Value: PropTypes.oneOf(PropTypes.bool, PropTypes.string, PropTypes.number).isRequired,
+  Value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string, PropTypes.number]).isRequired,
 };
 
 
