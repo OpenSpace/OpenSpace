@@ -30,17 +30,25 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/messagestructures.h>
 
-#if (defined(__GNUC__) && !defined(__clang__))
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif (defined __GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-WWold-style-cast
-#endif // __GNUC__
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif // __clang__
+
 
 #include <imgui.h>
 
-#if (defined(__GNUC__) && !defined(__clang__))
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif (defined __GNUC__)
 #pragma GCC diagnostic pop
-#endif // __GNUC__
+#endif // __clang__
 
 
 #include <fmt/format.h>

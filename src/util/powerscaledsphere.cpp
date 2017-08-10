@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/util/powerscaledsphere.h>
+
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -53,10 +55,10 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             const float fi = static_cast<float>(i);
             const float fj = static_cast<float>(j);
             // inclination angle (north to south)
-            const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
+            const float theta = fi * glm::pi<float>() / fsegments;  // 0 -> PI
 
             // azimuth angle (east to west)
-            const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
+            const float phi = fj * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
 
             const float x = r * sin(phi) * sin(theta);  //
             const float y = r * cos(theta);             // up
@@ -142,9 +144,9 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
             const float fi = static_cast<float>(i);
             const float fj = static_cast<float>(j);
             // inclination angle (north to south)
-            const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
+            const float theta = fi * glm::pi<float>() / fsegments;  // 0 -> PI
             // azimuth angle (east to west)
-            const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
+            const float phi = fj * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
 
             const float x = radius[0] * sin(phi) * sin(theta);  //
             const float y = radius[1] * cos(theta);             // up
