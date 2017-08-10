@@ -6,10 +6,19 @@ import Calendar from './Calendar';
 
 /* globals module */
 
-const yesterDay = new Date();
-yesterDay.setDate(yesterDay.getDay() - 1);
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+
+const fourMonthsFromNow = new Date();
+fourMonthsFromNow.setMonth(fourMonthsFromNow.getMonth() + 4);
 
 storiesOf('Calendar', module)
+  .addDecorator(story => (
+    <div style={{ background: '#d8d8d8' }}>
+      { story() }
+    </div>
+  ))
   .add('default', () => (<Calendar />))
-  .add('with selected day', () => (<Calendar selectedDay={yesterDay} />))
-  .add('with callback', () => (<Calendar selectedDay={yesterDay} onChange={action('changed')} />));
+  .add('with selected day', () => (<Calendar selected={yesterday} />))
+  .add('with activeMonth', () => (<Calendar activeMonth={fourMonthsFromNow} />))
+  .add('with callback', () => (<Calendar selected={yesterday} onChange={action('changed')} />));

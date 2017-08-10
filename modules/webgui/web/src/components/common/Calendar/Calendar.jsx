@@ -27,8 +27,6 @@ const DaysInWeekBefore = [7, 1, 2, 3, 4, 5, 6];
 const expectedDaysInCalendar = 6 * 7;
 
 class Calendar extends Component {
-  state: { activeMonth: Date };
-
   static daysOfMonth(month: Date) {
     const iterator = new Date(month.getTime());
     const days = [];
@@ -58,6 +56,8 @@ class Calendar extends Component {
       activeMonth: props.activeMonth,
     };
   }
+
+  state: { activeMonth: Date };
 
   daysToGet(day: number): number {
     const rotatedDays = rotate(DaysInWeekBefore, 7 - this.props.weekStartsOn);
