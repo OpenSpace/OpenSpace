@@ -76,7 +76,7 @@ class OriginPicker extends Component {
     const { hasOrigin, showPopover } = this.state;
     return (
       <div className={Picker.Wrapper}>
-        <Picker onClick={this.togglePopover} role="button" tabIndex={0} className={styles.button}>
+        <Picker onClick={this.togglePopover} className={(showPopover && Picker.Active)}>
           { this.icon }
           <div className={Picker.Title}>
             <span className={Picker.Name}>

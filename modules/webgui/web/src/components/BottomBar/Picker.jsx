@@ -21,10 +21,11 @@ Picker.defaultProps = {
   className: '',
 };
 
-Picker.Title = styles.Title;
+Picker.Active = styles.Active;
 Picker.Name = styles.Name;
-Picker.Wrapper = styles.Wrapper;
 Picker.Popover = styles.Popover;
+Picker.Title = styles.Title;
+Picker.Wrapper = styles.Wrapper;
 
 export default Picker;
 

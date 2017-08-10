@@ -13,6 +13,10 @@
     outline: none;
     text-shadow: none;
   }
+
+  &.Active {
+    background: $ui-background;
+  }
 }
 
 .Title {
