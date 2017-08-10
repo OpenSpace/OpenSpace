@@ -203,7 +203,7 @@ public:
      * \return the string value
      * \throws an exception if value couldn't be fetched
      */
-    virtual std::string getStringValue() const;
+    std::string getStringValue() const;
 
     /**
      * This method sets the value encapsulated by this Property by deserializing the
