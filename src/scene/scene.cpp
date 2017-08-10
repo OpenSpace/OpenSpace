@@ -200,14 +200,12 @@ std::string Scene::currentDsgAttachedNode(const Camera* camera, const std::strin
                 changedChild = true;
             }
         }
-
         if (!changedChild) {
             outsideAllChildScenes = true;
         }
         else {
             childrenScene = node->children();
         }
-
     }
 
     return node->name();

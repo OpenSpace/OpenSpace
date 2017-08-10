@@ -140,7 +140,8 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         // I.E. dynamicWorldPosition will change to vectorTo(SceneGraphNode &target) and
         // viewTransform (data.camera.combinedViewMatrix()) will become
         // data.camera.viewMatrix(SceneGraphNode &node).
-        glm::dvec3 directionToSunWorldSpace = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->dynamicWorldPosition();
+        glm::dvec3 directionToSunWorldSpace = glm::normalize(OsEng.renderEngine().scene()->sceneGraphNode("Sun")->dynamicWorldPosition()
+            - chunk.owner().sceneGraphNode()->dynamicWorldPosition());
         glm::vec3 directionToSunCameraSpace =
             (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
 

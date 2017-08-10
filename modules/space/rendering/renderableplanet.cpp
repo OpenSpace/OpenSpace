@@ -456,7 +456,8 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     // vectorTo(SceneGraphNode &target)
     // Sun pos
     _programObject->setUniform("sun_pos",
-        glm::vec3(OsEng.renderEngine().scene()->sceneGraphNode("Sun")->dynamicWorldPosition()));
+        glm::normalize(glm::vec3(OsEng.renderEngine().scene()->sceneGraphNode("Sun")->dynamicWorldPosition()))
+        - glm::vec3(this->sceneGraphNode()->dynamicWorldPosition()));
 
     // Bind texture
     ghoul::opengl::TextureUnit dayUnit;
