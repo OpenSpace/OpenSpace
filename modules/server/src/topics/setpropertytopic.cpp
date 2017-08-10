@@ -43,13 +43,18 @@ void SetPropertyTopic::handleJson(nlohmann::json json) {
         auto prop = property(propertyKey);
         if (prop != nullptr) {
             LDEBUG("Setting " + propertyKey + " to " + value + ".");
-            if (!prop->setStringValue("\"" + value + "\"")) {
+            if (!prop->setStringValue(value)) {
                 LERROR("Failed!");
             }
         }
     }
-    catch (...) {
-        LERROR("Could not set property -- key or value is missing.");
+    catch (std::out_of_range& e) {
+        LERROR("Could not set property -- key or value is missing in payload");
+        LERROR(e.what());
+    }
+    catch (ghoul::RuntimeError e) {
+        LERROR("Could not set property -- runtime error:");
+        LERROR(e.what());
     }
 }
 

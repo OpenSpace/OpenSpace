@@ -46,12 +46,11 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
     // An incoming string is of the form
     // "value"
     // so we want to remove the leading and trailing " characters
-    if (value.size() > 2 && (value[0] == '"' && value[value.size() - 1] == '"')) {
+    if (value.size() >= 2 && (value[0] == '"' && value[value.size() - 1] == '"')) {
         // Removing the first and last "
-        success = true;
-        return value.substr(1, value.size() - 2);
+        value = value.substr(1, value.size() - 2);
     }
-    success = false;
+    success = true;
     return value;
 },
 [](std::string& outValue, std::string inValue) -> bool {
