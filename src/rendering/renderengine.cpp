@@ -1368,13 +1368,13 @@ void RenderEngine::renderScreenLog() {
         //                    const float font_with_light = 5;
         RenderFont(
             *_fontLog,
-            glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 39 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             color * alpha,
             "%s",                                    // Format
             lvl.c_str());        // Pad category with "..." if exceeds category_length
 
         RenderFont(*_fontLog,
-            glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 53 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             White * alpha,
             "%s",                                    // Format
             message.c_str());        // Pad category with "..." if exceeds category_length

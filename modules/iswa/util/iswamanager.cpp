@@ -49,6 +49,27 @@
 
 #include "iswamanager_lua.inl"
 
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wuseless-cast"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#elif (defined __GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif // __clang__
+
+
+#include <modules/iswa/ext/json.h>
+
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif (defined __GNUC__)
+#pragma GCC diagnostic pop
+#endif // __clang__
+
 namespace {
     using json = nlohmann::json;
     const char* _loggerCat = "IswaManager";
@@ -631,11 +652,11 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
     }
 }
 
-void IswaManager::addCdfFiles(std::string path) {
-    path = absPath(path);
-    if (FileSys.fileExists(path)) {
+void IswaManager::addCdfFiles(std::string cdfpath) {
+    cdfpath = absPath(cdfpath);
+    if (FileSys.fileExists(cdfpath)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
-        std::ifstream jsonFile(path);
+        std::ifstream jsonFile(cdfpath);
         
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
@@ -673,7 +694,7 @@ void IswaManager::addCdfFiles(std::string path) {
             jsonFile.close();
         }
     } else {
-        LWARNING(path + " is not a cdf file or can't be found.");
+        LWARNING(cdfpath + " is not a cdf file or can't be found.");
     }
 }
 

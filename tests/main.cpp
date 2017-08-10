@@ -30,7 +30,10 @@
 #pragma warning (disable : 4619) // #pragma warning: there is no warning number '4800'
 #elif defined(__clang__)
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "Wundef"
+#pragma clang diagnostic ignored "-Wundef"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma clang diagnostic ignored "-Wsuggest-override"
+
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundef"
