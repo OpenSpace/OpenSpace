@@ -30,6 +30,8 @@
 #pragma clang diagnostic ignored "-Wundef"
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma clang diagnostic ignored "-Wsuggest-override"
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+#pragma clang diagnostic ignored "-Wshift-sign-overflow"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundef"
@@ -42,14 +44,6 @@
 #endif // __GNUC__
 
 #include "gtest/gtest.h"
-
-#ifdef WIN32
-#pragma warning (pop)
-#elif defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif // __GNUC__
 
 // When running the unit tests we don't want to be asked what to do in the case of an
 // assertion
@@ -144,3 +138,11 @@ int main(int argc, char** argv) {
 
     return b;
 }
+
+#ifdef WIN32
+#pragma warning (pop)
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif // __GNUC__
