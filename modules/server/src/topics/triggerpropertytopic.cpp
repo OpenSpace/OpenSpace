@@ -27,47 +27,38 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/server/include/setpropertytopic.h>
+#include <modules/server/include/triggerpropertytopic.h>
 
 namespace {
 const std::string PropertyKey = "property";
 const std::string ValueKey = "value";
-const std::string _loggerCat = "SetPropertyTopic";
-const std::string SpecialKeyTime = "__time";
+const std::string _loggerCat = "TriggerPropertyTopic";
 }
 
 namespace openspace {
 
-void SetPropertyTopic::handleJson(nlohmann::json json) {
+void TriggerPropertyTopic::handleJson(nlohmann::json json) {
     try {
         auto propertyKey = json.at(PropertyKey).get<std::string>();
         auto value = json.at(ValueKey).get<std::string>();
 
-        if (propertyKey == SpecialKeyTime) {
-            setTime(value);
-        }
+        auto prop = property(propertyKey);
+        if (prop != nullptr) {
+            LDEBUG("Triggering " + propertyKey);
+            prop->set("poke");
+        } 
         else {
-            auto prop = property(propertyKey);
-            if (prop != nullptr) {
-                LDEBUG("Setting " + propertyKey + " to " + value + ".");
-                if (!prop->setStringValue(value)) {
-                    LERROR("Failed!");
-                }
-            }
+            LWARNING("Could not find property " + propertyKey);
         }
     }
     catch (std::out_of_range& e) {
-        LERROR("Could not set property -- key or value is missing in payload");
+        LERROR("Could not poke property -- key or value is missing in payload");
         LERROR(e.what());
     }
     catch (ghoul::RuntimeError e) {
-        LERROR("Could not set property -- runtime error:");
+        LERROR("Could not poke property -- runtime error:");
         LERROR(e.what());
     }
-}
-
-void SetPropertyTopic::setTime(const std::string& timeValue) {
-    OsEng.timeManager().time().setTime(timeValue);
 }
 
 }

@@ -32,8 +32,10 @@ set(HEADER_FILES
     include/topic.h
     include/authenticationtopic.h
     include/getpropertytopic.h
+    include/luascripttopic.h
     include/subscriptiontopic.h
     include/setpropertytopic.h
+    include/triggerpropertytopic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -45,8 +47,10 @@ set(SOURCE_FILES
     src/topics/topic.cpp
     src/topics/authenticationtopic.cpp
     src/topics/getpropertytopic.cpp
+    src/topics/luascripttopic.cpp
     src/topics/subscriptiontopic.cpp
     src/topics/setpropertytopic.cpp
+    src/topics/triggerpropertytopic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

@@ -25,8 +25,10 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/authenticationtopic.h>
 #include <modules/server/include/getpropertytopic.h>
+#include <modules/server/include/luascripttopic.h>
 #include <modules/server/include/setpropertytopic.h>
 #include <modules/server/include/subscriptiontopic.h>
+#include <modules/server/include/triggerpropertytopic.h>
 
 namespace {
 const char* _loggerCat = "ServerModule: Connection";
@@ -42,8 +44,10 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
         : socket(s), active(true), _isAuthenticated(false) {
     _topicFactory.registerClass<AuthenticationTopic>("authorize");
     _topicFactory.registerClass<GetPropertyTopic>("get");
+    _topicFactory.registerClass<LuaScriptTopic>("luascript");
     _topicFactory.registerClass<SetPropertyTopic>("set");
     _topicFactory.registerClass<SubscriptionTopic>("subscribe");
+    _topicFactory.registerClass<TriggerPropertyTopic>("trigger");
     _topicFactory.registerClass<BounceTopic>("bounce");
 
     // see if the default config for requiring auth (on) is overwritten
