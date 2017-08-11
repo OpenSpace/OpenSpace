@@ -24,6 +24,8 @@
 
 #include <openspace/query/query.h>
 #include <openspace/properties/property.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <modules/server/include/setpropertytopic.h>
 
@@ -31,6 +33,7 @@ namespace {
 const std::string PropertyKey = "property";
 const std::string ValueKey = "value";
 const std::string _loggerCat = "SetPropertyTopic";
+const std::string SpecialKeyTime = "__time";
 }
 
 namespace openspace {
@@ -40,11 +43,16 @@ void SetPropertyTopic::handleJson(nlohmann::json json) {
         auto propertyKey = json.at(PropertyKey).get<std::string>();
         auto value = json.at(ValueKey).get<std::string>();
 
-        auto prop = property(propertyKey);
-        if (prop != nullptr) {
-            LDEBUG("Setting " + propertyKey + " to " + value + ".");
-            if (!prop->setStringValue(value)) {
-                LERROR("Failed!");
+        if (propertyKey == SpecialKeyTime) {
+            setTime(value);
+        }
+        else {
+            auto prop = property(propertyKey);
+            if (prop != nullptr) {
+                LDEBUG("Setting " + propertyKey + " to " + value + ".");
+                if (!prop->setStringValue(value)) {
+                    LERROR("Failed!");
+                }
             }
         }
     }
@@ -52,10 +60,14 @@ void SetPropertyTopic::handleJson(nlohmann::json json) {
         LERROR("Could not set property -- key or value is missing in payload");
         LERROR(e.what());
     }
-    catch (ghoul::RuntimeError e) {
+    /*catch (ghoul::RuntimeError e) {
         LERROR("Could not set property -- runtime error:");
         LERROR(e.what());
-    }
+    }*/
+}
+
+void SetPropertyTopic::setTime(const std::string& timeValue) {
+    OsEng.timeManager().time().setTime(timeValue);
 }
 
 }

@@ -36,6 +36,9 @@ public:
     ~SetPropertyTopic() {};
     void handleJson(nlohmann::json json);
     bool isDone() { return true; };
+
+private:
+    void setTime(const std::string& value);
 };
 
 }
