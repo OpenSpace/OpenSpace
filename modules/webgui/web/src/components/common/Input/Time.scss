@@ -5,12 +5,7 @@
 }
 
 .textInput {
-  padding: $base-padding / 2;
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    display: none;
-  }
+  padding: $base-padding / 2 !important;
 }
 
 .element {

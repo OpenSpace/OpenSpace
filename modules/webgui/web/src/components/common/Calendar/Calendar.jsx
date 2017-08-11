@@ -6,6 +6,7 @@ import Icon from '../Icon/Icon';
 import Button from '../Input/Button';
 
 import styles from './Calendar.scss';
+import InlineInput from '../Input/InlineInput';
 
 const Days = {
   Sunday: 0,
@@ -79,6 +80,7 @@ class Calendar extends Component {
     };
 
     this.setCurrentMonth = this.setCurrentMonth.bind(this);
+    this.setYear = this.setYear.bind(this);
   }
 
   state: { activeMonth: Date };
@@ -158,6 +160,13 @@ class Calendar extends Component {
     this.setState({ activeMonth: Calendar.toStartOfMonth(new Date()) });
   }
 
+  setYear(event) {
+    const { value } = event.currentTarget;
+    const { activeMonth } = this.state;
+    activeMonth.setFullYear(Number.parseInt(value, 10));
+    this.setState({ activeMonth });
+  }
+
   extraClasses(day: Date): string {
     let classes = '';
 
@@ -188,7 +197,14 @@ class Calendar extends Component {
               <Button onClick={this.setCurrentMonth} title="Today" small transparent>
                 <Icon icon="today" />
               </Button>
-            )} { this.monthString() } { this.month().getFullYear() }
+            )} {
+              this.monthString()
+            } <InlineInput
+              type="number"
+              value={this.month().getFullYear()}
+              onChange={this.setYear}
+              className={styles.year}
+            />
           </div>
           <Button transparent small onClick={this.changeMonth(1)}>
             <Icon icon="chevron_right" />
@@ -203,6 +219,7 @@ class Calendar extends Component {
               </div>
             ))}
           </header>
+
           <section className={styles.month}>
             { this.days.map(day => (
               <div
