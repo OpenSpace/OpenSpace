@@ -1,0 +1,28 @@
+@import "../../../styles/all";
+
+.wrapper {
+  display: inline;
+  position: relative;
+}
+
+.input {
+  background: $ui-background-hover;
+  border: 0;
+  box-sizing: content-box;
+  color: $text-color-focus;
+  display: inline;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+
+  &:focus,
+  &:hover {
+    outline: 0;
+  }
+}
+
+.hidden {
+  left: -100000000000px; // Wohooo!
+  position: absolute;
+  visibility: hidden;
+}
