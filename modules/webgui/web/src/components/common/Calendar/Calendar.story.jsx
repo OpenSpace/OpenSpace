@@ -21,4 +21,5 @@ storiesOf('Calendar', module)
   .add('default', () => (<Calendar />))
   .add('with selected day', () => (<Calendar selected={yesterday} />))
   .add('with activeMonth', () => (<Calendar activeMonth={fourMonthsFromNow} />))
+  .add('with today button', () => (<Calendar todayButton />))
   .add('with callback', () => (<Calendar selected={yesterday} onChange={action('changed')} />));

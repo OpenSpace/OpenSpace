@@ -77,6 +77,8 @@ class Calendar extends Component {
     this.state = {
       activeMonth: Calendar.toStartOfMonth(props.activeMonth),
     };
+
+    this.setCurrentMonth = this.setCurrentMonth.bind(this);
   }
 
   state: { activeMonth: Date };
@@ -152,6 +154,10 @@ class Calendar extends Component {
     return () => this.setState({ activeMonth: this.month(dir) });
   }
 
+  setCurrentMonth() {
+    this.setState({ activeMonth: Calendar.toStartOfMonth(new Date()) });
+  }
+
   extraClasses(day: Date): string {
     let classes = '';
 
@@ -178,7 +184,11 @@ class Calendar extends Component {
             <Icon icon="chevron_left" />
           </Button>
           <div>
-            { this.monthString() } { this.month().getFullYear() }
+            { this.props.todayButton && (
+              <Button onClick={this.setCurrentMonth} title="Today" small transparent>
+                <Icon icon="today" />
+              </Button>
+            )} { this.monthString() } { this.month().getFullYear() }
           </div>
           <Button transparent small onClick={this.changeMonth(1)}>
             <Icon icon="chevron_right" />
@@ -218,6 +228,7 @@ Calendar.propTypes = {
   months: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func,
   selected: PropTypes.instanceOf(Date),
+  todayButton: PropTypes.bool,
   weekStartsOn: PropTypes.number,
 };
 
@@ -227,6 +238,7 @@ Calendar.defaultProps = {
   months: Months,
   onChange: () => {},
   selected: null,
+  todayButton: false,
   weekStartsOn: Calendar.Days.Monday,
 };
 

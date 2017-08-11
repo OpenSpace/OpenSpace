@@ -73,7 +73,7 @@ class TimePicker extends Component {
     const { time } = this.state;
     return (
       <Popover className={Picker.Popover} title="Select date" closeCallback={this.togglePopover}>
-        <Calendar selected={time} activeMonth={time} onChange={this.setDate} />
+        <Calendar selected={time} activeMonth={time} onChange={this.setDate} todayButton />
         <hr className={Popover.styles.delimiter} />
         <div className={Popover.styles.title}>Select time</div>
         <div className={Popover.styles.content}>
