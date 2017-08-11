@@ -22,6 +22,10 @@ $small-padding: ($vertical-padding / 2) ($base-padding / 2);
   background: transparent;
 }
 
+.nopadding {
+  padding: 0;
+}
+
 .small {
   padding: $small-padding;
 }

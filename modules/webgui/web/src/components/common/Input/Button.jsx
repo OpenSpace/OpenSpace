@@ -6,7 +6,7 @@ import styles from './Button.scss';
 /* eslint-disable react/no-unused-prop-types */
 
 const Button = (props) => {
-  const specialClasses = 'block small transparent uppercase smalltext';
+  const specialClasses = 'block small transparent uppercase smalltext nopadding';
   const inheritProps = excludeKeys(props, specialClasses);
 
   // let extraClass = '';
@@ -26,6 +26,7 @@ Button.propTypes = {
   block: PropTypes.bool,
   className: PropTypes.string,
   children: PropTypes.node.isRequired,
+  nopadding: PropTypes.bool,
   small: PropTypes.bool,
   smalltext: PropTypes.bool,
   transparent: PropTypes.bool,
@@ -33,8 +34,9 @@ Button.propTypes = {
 };
 
 Button.defaultProps = {
-  className: '',
   block: false,
+  className: '',
+  nopadding: false,
   small: false,
   smalltext: false,
   transparent: false,
