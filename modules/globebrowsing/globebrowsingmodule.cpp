@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
@@ -162,8 +163,15 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "goToGeo",
                 &globebrowsing::luascriptfunctions::goToGeo,
-                "void",
+                "number, number, number",
                 "Go to geographic coordinates latitude and longitude"
+            },
+            {
+                "getGeoPosition",
+                &globebrowsing::luascriptfunctions::getGeoPosition,
+                "void",
+                "Get geographic coordinates of the camera poosition in latitude, "
+                "longitude, and altitude"
             }
         },
         {
@@ -184,7 +192,9 @@ void GlobeBrowsingModule::goToChunk(int x, int y, int level) {
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude) {
     using namespace globebrowsing;
     Camera* cam = OsEng.navigationHandler().camera();
-    goToGeodetic2(*cam, Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true);
+    goToGeodetic2(*cam, Geodetic2(
+        Angle<double>::fromDegrees(latitude).asRadians(),
+        Angle<double>::fromDegrees(longitude).asRadians()), true);
 }
 
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
@@ -196,7 +206,9 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
     goToGeodetic3(
         *cam,
         {
-            Geodetic2(latitude, longitude) / 180 * glm::pi<double>(),
+            Geodetic2(
+                Angle<double>::fromDegrees(latitude).asRadians(),
+                Angle<double>::fromDegrees(longitude).asRadians()),
             altitude
         },
         true
@@ -246,16 +258,18 @@ void GlobeBrowsingModule::goToGeodetic2(Camera& camera,
         return;
     }
     
-    // Camera position in model space
-    glm::dvec3 camPos = camera.positionVec3();
-    glm::dmat4 inverseModelTransform = globe->inverseModelTransform();
+    glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
+    glm::dmat4 inverseModelTransform =
+        OsEng.navigationHandler().focusNode()->inverseModelTransform();
     glm::dvec3 cameraPositionModelSpace =
-    glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
-        
-    glm::dvec3 positionOnEllipsoid =
-    globe->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
-    double altitude = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
-        
+        inverseModelTransform * glm::dvec4(cameraPosition, 1.0);
+    SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
+                                                                cameraPositionModelSpace);
+    
+    glm::dvec3 centerToActualSurface = posHandle.centerToReferenceSurface +
+        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+    double altitude = glm::length(cameraPositionModelSpace - centerToActualSurface);
+
     goToGeodetic3(camera, {geo2, altitude}, resetCameraDirection);
 }
     
