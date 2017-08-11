@@ -24,7 +24,7 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
-function (create_new_application application_name link_to_openspace)
+function (create_new_application application_name)
     set(sources ${ARGN})
 
     message(STATUS "Configuring application ${application_name}")
@@ -34,16 +34,10 @@ function (create_new_application application_name link_to_openspace)
         ${sources}
     )
 
-    if (${link_to_openspace})
-        target_link_libraries(${application_name} Ghoul)
-        target_link_libraries(${application_name} libOpenSpace)
-    endif ()
-
     set_openspace_compile_settings(${application_name})
 
     if (WIN32)
         get_external_library_dependencies(ext_lib)
-        message("asd   ${ext_lib}")
         ghl_copy_files(
             ${application_name}
             "${CURL_ROOT_DIR}/lib/libcurl.dll"

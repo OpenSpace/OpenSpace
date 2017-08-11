@@ -22,6 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
+include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
+
 set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/openspace.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/core_registration.cpp
@@ -342,3 +344,22 @@ foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
         source_group("" FILES ${original_file})
     endif ()
 endforeach ()
+
+##########################################################################################
+# Create OpenSpace target
+##########################################################################################
+add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+# In order to be able to include libOpenSpace files
+target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
+# In order to be able to include module files
+target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
+# In order to be able to include the module_registration file
+target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
+
+configure_file(
+    ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template
+    ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h
+    @ONLY IMMEDIATE
+)
+
+set_openspace_compile_settings(libOpenSpace)

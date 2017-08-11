@@ -24,18 +24,13 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 
-set(APPLICATION_NAME TaskRunner)
-set(APPLICATION_LINK_TO_OPENSPACE ON)
-
-include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
-
-set(application_path ${OPENSPACE_APPS_DIR}/TaskRunner)
-
-set(SOURCE_FILES
-  ${application_path}/main.cpp
+create_new_application(
+    TaskRunner
+    MACOSX_BUNDLE
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 )
 
-create_new_application(${APPLICATION_NAME} MACOSX_BUNDLE
-    ${SOURCE_FILES}
+target_link_libraries(
+    TaskRunner
+    libOpenSpace
 )
