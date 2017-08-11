@@ -28,8 +28,11 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/handle_modules.cmake)
 
 function (create_openspace_target)
     add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+    # In order to be able to include libOpenSpace files
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
+    # In order to be able to include module files
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
+    # In order to be able to include the module_registration file
     target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
 
     configure_file(
@@ -63,10 +66,6 @@ function (add_external_dependencies)
     # Ghoul
     add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
     target_link_libraries(libOpenSpace Ghoul)
-    get_property(GHOUL_INCLUDE_DIR TARGET Ghoul PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-    target_include_directories(libOpenSpace PUBLIC ${GHOUL_INCLUDE_DIR})
-    get_property(GHOUL_DEFINITIONS TARGET Ghoul PROPERTY INTERFACE_COMPILE_DEFINITIONS)
-    target_compile_definitions(libOpenSpace PUBLIC ${GHOUL_DEFINITIONS})
     set_property(TARGET Lua PROPERTY FOLDER "External")
     set_property(TARGET lz4 PROPERTY FOLDER "External")
 
@@ -122,8 +121,6 @@ function (add_external_dependencies)
     # Spice
     add_subdirectory(${OPENSPACE_EXT_DIR}/spice)
     target_link_libraries(libOpenSpace Spice)
-    get_property(SPICE_INCLUDE_DIR TARGET Spice PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-    target_include_directories(libOpenSpace PUBLIC ${SPICE_INCLUDE_DIR})
     set_property(TARGET Spice PROPERTY FOLDER "External")
 
     # Curl
@@ -152,90 +149,5 @@ function (add_external_dependencies)
             "~/Qt/5.8/clang_64/lib/cmake"
             PARENT_SCOPE
         )
-    endif ()
-endfunction ()
-
-
-
-function (handle_option_vld)
-    if (OPENSPACE_ENABLE_VLD)
-        target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_ENABLE_VLD")
-        target_link_libraries(libOpenSpace ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
-        target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_EXT_DIR}/vld)
-
-        foreach (app ${OPENSPACE_APPLCATIONS})
-            ghl_copy_files(${app} "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll")
-        endforeach ()
-    endif ()
-endfunction ()
-
-
-
-function (handle_option_tests)
-    if (OPENSPACE_HAVE_TESTS)
-        if (NOT TARGET gtest)
-            set(BUILD_GTEST ON CACHE BOOL "")
-            set(BUILD_GMOCK OFF CACHE BOOL "")
-            set(gtest_force_shared_crt ON CACHE BOOL "")
-            # set(BUILD_GMOCK OFF CACHE BOOL "")
-            # option(BUILD_GTEST "Builds the googletest subproject" CACHE ON)
-            # option(BUILD_GMOCK "Builds the googlemock subproject" CACHE OFF)
-            # option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." CACHE ON)
-            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
-            # add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
-            set_property(TARGET gtest PROPERTY FOLDER "External")
-            set_property(TARGET gtest_main PROPERTY FOLDER "External")
-        endif ()
-
-        file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
-
-        add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
-        target_include_directories(OpenSpaceTest PUBLIC
-            "${OPENSPACE_BASE_DIR}/include"
-            "${OPENSPACE_BASE_DIR}/tests"
-            "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
-        )
-        target_compile_definitions(OpenSpaceTest PUBLIC
-            "GHL_THROW_ON_ASSERT"
-            "GTEST_HAS_TR1_TUPLE=0"
-        )
-        target_link_libraries(OpenSpaceTest gtest libOpenSpace)
-
-        if (MSVC)
-            set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
-                "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-            )
-        endif ()
-        set_openspace_compile_settings(OpenSpaceTest)
-    endif (OPENSPACE_HAVE_TESTS)
-    if (TARGET GhoulTest)
-        if (NOT TARGET gtest)
-            set(BUILD_GTEST ON CACHE BOOL "")
-            set(BUILD_GMOCK OFF CACHE BOOL "")
-            set(gtest_force_shared_crt ON CACHE BOOL "")
-            # option(BUILD_GTEST "Builds the googletest subproject" CACHE ON)
-            # option(BUILD_GMOCK "Builds the googlemock subproject" CACHE OFF)
-            # option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." CACHE ON)
-            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
-        endif ()
-
-        set_property(TARGET gtest PROPERTY FOLDER "External")
-        set_property(TARGET GhoulTest PROPERTY FOLDER "Unit Tests")
-    endif ()
-endfunction ()
-
-
-
-function (copy_dynamic_libraries)
-    if (WIN32)
-        ghl_copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
-
-        # Copy DLLs needed by Ghoul into the executable directory
-        ghl_copy_shared_libraries(OpenSpace ${OPENSPACE_EXT_DIR}/ghoul)
-
-        if (TARGET OpenSpaceTest)
-            ghl_copy_shared_libraries(OpenSpaceTest ${OPENSPACE_EXT_DIR}/ghoul)
-            ghl_copy_files(OpenSpaceTest "${CURL_ROOT_DIR}/lib/libcurl.dll")
-        endif ()
     endif ()
 endfunction ()

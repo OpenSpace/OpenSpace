@@ -22,30 +22,36 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
-set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugrenderer.h
-)
-source_group("Header Files" FILES ${HEADER_FILES})
+function (create_new_application application_name link_to_openspace)
+    set(sources ${ARGN})
 
-set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugrenderer.cpp
-)
-source_group("Source Files" FILES ${SOURCE_FILES})
+    message(STATUS "Configuring application ${application_name}")
 
-set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugshader_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugshader_fs.glsl
-)
+    add_executable(
+        ${application_name}
+        ${sources}
+    )
 
-source_group("Shader Files" FILES ${SHADER_FILES})
+    if (${link_to_openspace})
+        target_link_libraries(${application_name} Ghoul)
+        target_link_libraries(${application_name} libOpenSpace)
+    endif ()
 
-create_new_module(
-    "Debugging"
-    debugging_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
-)
+    set_openspace_compile_settings(${application_name})
+
+    if (WIN32)
+        get_external_library_dependencies(ext_lib)
+        message("asd   ${ext_lib}")
+        ghl_copy_files(
+            ${application_name}
+            "${CURL_ROOT_DIR}/lib/libcurl.dll"
+            "${CURL_ROOT_DIR}/lib/libeay32.dll"
+            "${CURL_ROOT_DIR}/lib/ssleay32.dll"
+            ${ext_lib}
+
+        )
+        ghl_copy_shared_libraries(${application_name} ${OPENSPACE_EXT_DIR}/ghoul)
+    endif ()
+endfunction ()

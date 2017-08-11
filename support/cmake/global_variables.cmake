@@ -22,30 +22,18 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
-set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugrenderer.h
-)
-source_group("Header Files" FILES ${HEADER_FILES})
+# Stores the passed library in the global storage
+function (add_external_library_dependencies libraries)
+    get_property(libs GLOBAL PROPERTY AllModuleExternalLibraries)
 
-set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugrenderer.cpp
-)
-source_group("Source Files" FILES ${SOURCE_FILES})
+    list(APPEND libs ${libraries})
 
-set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugshader_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugshader_fs.glsl
-)
+    set_property(GLOBAL PROPERTY AllModuleExternalLibraries ${libs})
+endfunction ()
 
-source_group("Shader Files" FILES ${SHADER_FILES})
+function (get_external_library_dependencies libs)
+    get_property(t GLOBAL PROPERTY AllModuleExternalLibraries)
 
-create_new_module(
-    "Debugging"
-    debugging_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
-)
+    set(${libs} ${t} PARENT_SCOPE)
+endfunction ()

@@ -23,7 +23,11 @@
 ##########################################################################################
 
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake) 
-include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
+# include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
+
+
+
 
 set(APPLICATION_NAME OpenSpace)
 set(APPLICATION_LINK_TO_OPENSPACE ON)
@@ -94,11 +98,13 @@ endif ()
 #  Spout section end   #
 ########################
 
-add_executable(${APPLICATION_NAME}
+create_new_application(${APPLICATION_NAME}
+    On
     ${SGCT_OPENVR_FILES}
     ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
     ${RESOURCE_FILE}
 )
+
 if (OPENSPACE_SPOUT_SUPPORT)
     ghl_copy_files(
         ${APPLICATION_NAME}

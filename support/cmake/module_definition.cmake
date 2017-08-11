@@ -26,12 +26,15 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
+include(GenerateExportHeader)
+
 # Creates a library for the module with name <module_name>. The name of the library is
 # returned in <output_library_name> for outside configuration
 # The library will have the name openspace-module-<name> and has all of their
 # dependencies set correctly.
+# The 'library_mode' determines whether the module is linked STATIC or SHARED
 # Dependencies will have to be set in a file called "include.cmake" 
-function (create_new_module module_name output_library_name)
+function (create_new_module module_name output_library_name library_mode)
     set(sources ${ARGN})
 
     # Create a library name of the style: openspace-module-${name}
@@ -41,13 +44,6 @@ function (create_new_module module_name output_library_name)
 
     # Add the module files to the list of sources
     get_module_files(${module_name} module_files)
-
-    if (${library_name}_LIBRARY_MODE)
-        set(library_mode ${${library_name}_LIBRARY_MODE})
-        message(STATUS "\t Overwritten library mode: ${library_mode}")
-    else ()
-        set(library_mode STATIC)
-    endif ()
 
     # Create the library
     add_library(${library_name} ${library_mode} ${module_files} ${sources})
@@ -59,9 +55,21 @@ function (create_new_module module_name output_library_name)
 
     set(${output_library_name} ${library_name} PARENT_SCOPE)
 
+    if ("${library_mode}" STREQUAL "SHARED")
+        # If it is a shared library, we want to generate the export header
+        string(TOLOWER ${module_name} lower_module_name)
+        generate_export_header(
+            ${library_name}
+            EXPORT_FILE_NAME
+            ${CMAKE_BINARY_DIR}/_generated/include/${lower_module_name}_export.h
+        )
+
+    endif ()
+
     # This is an ugly hack as we can't inject a variable into a scope two parents above
     # would love to: set(${module_class_name} "${module_name}Module" PARENT_PARENT_SCOPE)
     # instead
+    # This value is used in handle_modules.cmake::handle_modules
     set_property(GLOBAL PROPERTY CurrentModuleClassName "${module_name}Module")
 endfunction ()
 

@@ -22,6 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
+include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
+
 function (handle_modules internal_module_path external_modules_paths)
     #
     # Step 1:  Get a list of all modules
@@ -152,7 +154,9 @@ function (handle_modules internal_module_path external_modules_paths)
         get_property(ext_lib GLOBAL PROPERTY CurrentModuleExternalLibraries)
         list(APPEND module_external_libraries ${ext_lib})
     endforeach ()
+    
     list(REMOVE_DUPLICATES module_external_libraries)
+    add_external_library_dependencies(${module_external_libraries})
 
     #
     # Step 6:  Create the moduleregistration.h file with the header file paths, class
@@ -211,19 +215,6 @@ function (handle_modules internal_module_path external_modules_paths)
         ${OPENSPACE_CMAKE_EXT_DIR}/module_path.template
         ${CMAKE_BINARY_DIR}/_generated/include/openspace/modulepath.h
     )
-
-   #
-    # Step 7:  On Windows, copy the DLLs into the application folders
-    #
-    if (WIN32)
-        message(STATUS "Copying DLLs:")
-        foreach (dll ${module_external_libraries})
-            message(STATUS "\t${dll}")
-            foreach (application ${OPENSPACE_APPLICATIONS})
-                ghl_copy_files(${application} ${dll})
-            endforeach ()
-        endforeach ()
-    endif ()
 endfunction()
 
 

@@ -35,12 +35,12 @@ set(OPENSPACE_VERSION_STRING "prerelease-14 (Astronomy Live)")
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
-set(OPENSPACE_MODULE_DIR "${OPENSPACE_BASE_DIR}/modules")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
 set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake) 
 
 # Cleanup project
@@ -62,22 +62,73 @@ include(src/CMakeLists.txt)
 
 create_openspace_target()
 add_external_dependencies()
-handle_applications()
 
 if (MSVC)
     option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
-    handle_option_vld()
+    if (OPENSPACE_ENABLE_VLD)
+        target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_ENABLE_VLD")
+        target_link_libraries(libOpenSpace ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
+        target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_EXT_DIR}/vld)
+    endif ()
 endif ()
 
+
+###
+# Tests
+###
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-handle_option_tests()
+if (OPENSPACE_HAVE_TESTS)
+    if (NOT TARGET gtest)
+        set(BUILD_GTEST ON CACHE BOOL "")
+        set(BUILD_GMOCK OFF CACHE BOOL "")
+        set(gtest_force_shared_crt ON CACHE BOOL "")
+        add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
+    set_property(TARGET gtest PROPERTY FOLDER "External")
+        set_property(TARGET gtest_main PROPERTY FOLDER "External")
+    endif ()
+
+    file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
+
+    add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
+    target_include_directories(OpenSpaceTest PUBLIC
+        "${OPENSPACE_BASE_DIR}/include"
+        "${OPENSPACE_BASE_DIR}/tests"
+        "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
+    )
+    target_compile_definitions(OpenSpaceTest PUBLIC
+        "GHL_THROW_ON_ASSERT"
+        "GTEST_HAS_TR1_TUPLE=0"
+    )
+    target_link_libraries(OpenSpaceTest gtest libOpenSpace)
+
+    if (MSVC)
+        set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
+            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
+        )
+    endif ()
+    set_openspace_compile_settings(OpenSpaceTest)
+endif (OPENSPACE_HAVE_TESTS)
+if (TARGET GhoulTest)
+    if (NOT TARGET gtest)
+        set(BUILD_GTEST ON CACHE BOOL "")
+        set(BUILD_GMOCK OFF CACHE BOOL "")
+        set(gtest_force_shared_crt ON CACHE BOOL "")
+        add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
+    endif ()
+
+    set_property(TARGET gtest PROPERTY FOLDER "External")
+    set_property(TARGET GhoulTest PROPERTY FOLDER "Unit Tests")
+endif ()
 
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
-handle_modules(${OPENSPACE_MODULE_DIR} "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
+handle_modules("${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
 
-copy_dynamic_libraries()
+handle_applications()
 
 # Just in case, create the directory
-add_custom_command(TARGET libOpenSpace PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_custom_command(
+    TARGET libOpenSpace
+    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)
