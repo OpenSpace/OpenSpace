@@ -23,18 +23,18 @@ $padding: $padding-horizontal $padding-vertical;
 .popover header {
   display: flex;
   justify-content: space-between;
-
-  .title {
-    font-weight: 600;
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
-    padding: $padding;
-    text-transform: uppercase;
-  }
 }
 
-.popover p {
+.title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
   padding: $padding;
+  text-transform: uppercase;
+}
+
+.popover p, .content {
+  padding: 0 $padding-horizontal;
 }
 
 .delimiter {
