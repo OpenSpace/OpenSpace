@@ -1,0 +1,23 @@
+@import "../../../styles/all";
+
+.clock {
+  display: flex;
+}
+
+.textInput {
+  padding: $base-padding / 2;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    display: none;
+  }
+}
+
+.element {
+  display: flex;
+  flex-direction: column;
+
+  + .element {
+    padding-left: $base-padding / 2;
+  }
+}
