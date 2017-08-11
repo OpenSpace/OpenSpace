@@ -5,8 +5,10 @@ import Connection from './Connection';
 const TOPIC_TYPES = {
   get: 'get',
   interaction: 'interaction',
+  luascript: 'luascript',
   set: 'set',
   subscribe: 'subscribe',
+  trigger: 'trigger',
 };
 
 function UnknownTypeException(message, type = '') {
@@ -92,6 +94,30 @@ class DataManager {
       payload: {
         property: key,
         value,
+      },
+    });
+    this.send(message);
+  }
+
+  /**
+   * trigger a trigger property
+   * @param key - the uri
+   */
+  trigger(key: string) {
+    const message = this.wrapMessage({
+      type: TOPIC_TYPES.trigger,
+      payload: {
+        property: key,
+      },
+    });
+    this.send(message);
+  }
+
+  runScript(script: string) {
+    const message = this.wrapMessage({
+      type: TOPIC_TYPES.luascript,
+      payload: {
+        script,
       },
     });
     this.send(message);
