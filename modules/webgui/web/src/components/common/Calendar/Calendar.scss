@@ -29,6 +29,7 @@ $selected-border-width: 2px;
   }
 
   &.selected {
+    background: $ui-background-selected;
     border-bottom: $selected-border-width solid $blue;
     font-weight: bold;
     padding-bottom: unquote("calc(#{$vertical-padding} - #{$selected-border-width})");
