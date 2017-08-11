@@ -7,14 +7,11 @@ import Picker from '../Picker';
 import Popover from '../../common/Popover/Popover';
 import FilterList from '../../common/FilterList/FilterList';
 import DataManager from '../../../api/DataManager';
+import { OriginKey, SceneGraphKey } from '../../../api/keys';
 import FocusEntry from './FocusEntry';
 
 import styles from './OriginPicker.scss';
 
-// key to subscribe to the current focus/origin
-const ORIGIN_KEY = 'NavigationHandler.Origin';
-// key to get all scene graph nodes
-const SCENEGRAPH_KEY = '__allNodes';
 // tag that each focusable node must have
 const REQUIRED_TAGS = ['planet_solarSystem'];
 
@@ -34,14 +31,14 @@ class OriginPicker extends Component {
   }
 
   componentDidMount() {
-    DataManager.subscribe(ORIGIN_KEY, this.updateOrigin);
-    DataManager.getValue(SCENEGRAPH_KEY, (sceneGraphNodes) => {
+    DataManager.subscribe(OriginKey, this.updateOrigin);
+    DataManager.getValue(SceneGraphKey, (sceneGraphNodes) => {
       this.setState({ sceneGraphNodes });
     });
   }
 
   componentWillUnmount() {
-    DataManager.unsubscribe(ORIGIN_KEY, this.updateOrigin);
+    DataManager.unsubscribe(OriginKey, this.updateOrigin);
   }
 
   updateOrigin(data) {

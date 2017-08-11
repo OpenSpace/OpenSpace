@@ -7,8 +7,7 @@ import Button from '../common/Input/Button';
 import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
 import Time from '../common/Input/Time';
-
-const TIME_KEY = 'special:currentTime';
+import { TogglePauseScript, TimeKey } from '../../api/keys';
 
 /**
  * Make sure the date string contains a time zone
@@ -31,20 +30,25 @@ class TimePicker extends Component {
 
     this.subscriptionCallback = this.subscriptionCallback.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
+    this.togglePause = this.togglePause.bind(this);
     this.setDate = this.setDate.bind(this);
   }
 
   componentDidMount() {
     // subscribe to data
-    DataManager.subscribe(TIME_KEY, this.subscriptionCallback);
+    DataManager.subscribe(TimeKey, this.subscriptionCallback);
   }
 
   componentWillUnmount() {
-    DataManager.unsubscribe(TIME_KEY, this.subscriptionCallback);
+    DataManager.unsubscribe(TimeKey, this.subscriptionCallback);
   }
 
   togglePopover() {
     this.setState({ showPopover: !this.state.showPopover });
+  }
+
+  togglePause() {
+    DataManager.runScript(TogglePauseScript);
   }
 
   /**
@@ -81,7 +85,7 @@ class TimePicker extends Component {
         </div>
         <hr className={Popover.styles.delimiter} />
         <p>
-          <Button block disabled onClick={this.togglePause}>
+          <Button block onClick={this.togglePause}>
             Pause simulation
           </Button>
         </p>
