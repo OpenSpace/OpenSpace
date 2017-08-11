@@ -228,13 +228,16 @@ const glm::dvec3 Scene::currentDisplacementPosition(const std::string & cameraPa
         cameraPath = pathTo(cameraParentNode);
         targetPath = pathTo(targetNode);
 
-        const SceneGraphNode* commonParentNode = findCommonParentNode(cameraParentNode, targetNode);
+        const SceneGraphNode* commonParentNode = sceneGraphNode(commonParent(cameraPath, targetPath)); 
         commonParentPath = pathTo(commonParentNode);
 
         //Find the path from the camera to the common parent
 
         glm::dvec3 collectorCamera(pathCollector(cameraPath, commonParentNode->name(), true));
         glm::dvec3 collectorTarget(pathCollector(targetPath, commonParentNode->name(), false));
+
+        /*glm::dvec3 collectorCamera(pathCollector(cameraPath, commonParentNode->name(), false));
+        glm::dvec3 collectorTarget(pathCollector(targetPath, commonParentNode->name(), true));*/
 
         return collectorTarget + collectorCamera;
     }
@@ -261,7 +264,7 @@ const glm::dmat4 Scene::currentMatrixTransformation(const std::string & cameraPa
         cameraPath = pathTo(cameraParentNode);
         targetPath = pathTo(targetNode);
 
-        const SceneGraphNode* commonParentNode = findCommonParentNode(cameraParentNode, targetNode);
+        const SceneGraphNode* commonParentNode = sceneGraphNode(commonParent(cameraPath, targetPath));
         commonParentPath = pathTo(commonParentNode);
 
         //Find the path from the camera to the common parent
@@ -275,18 +278,6 @@ const glm::dmat4 Scene::currentMatrixTransformation(const std::string & cameraPa
         LERROR("Target scenegraph node is null.");
         return glm::dmat4(1.0);
     }
-}
-
-
-SceneGraphNode* Scene::findCommonParentNode(const SceneGraphNode * firstNode, const SceneGraphNode * secondNode) const {
-    if (!firstNode || !secondNode) {
-        LERROR("Empty scenegraph node pointer passed to the method.");
-        return sceneGraphNode(ParentOfAllNodes); // This choice is controversal. Better to avoid a crash.
-    }
-
-    std::string strCommonParent = commonParent(pathTo(firstNode), pathTo(secondNode));
-
-    return sceneGraphNode(strCommonParent);
 }
 
 std::vector<const SceneGraphNode*> Scene::pathTo(const SceneGraphNode* node) const {
@@ -362,27 +353,52 @@ glm::dmat4 Scene::matrixCollector(const std::vector<const SceneGraphNode*> & pat
     const SceneGraphNode* firstElement = path.front();    
 
     if (firstElement->name() == commonParentName) {
-        if (inverse)
-            return glm::inverse(firstElement->modelTransform());
-        else
+        if (inverse) {
+            //return glm::inverse(firstElement->modelTransform());
+            // JCC: When walking up on the scenegraph tree, the first
+            // model matrix shouldn't be added to the final transformation
+            // because may be used by its renderable node.
+            return glm::dmat4(1.0);
+        }
+        else {
             return firstElement->modelTransform();
+        }
     }
         
+    glm::dmat4 collector = glm::dmat4(1.0);  
 
-    int depth = 0;
-    glm::dmat4 collector = glm::dmat4(1.0);
-
-    // adds all elements to the collector, continues untill commomParent is found.    
-    while (firstElement->name() != commonParentName) {
-        if (inverse)
-            collector = glm::inverse(firstElement->modelTransform()) * collector;
-        else
-            collector = firstElement->modelTransform() * collector;
-
-        firstElement = path[++depth];
+    int depth = path.size() - 1;;
+    if (inverse) {
+        depth = 0;
     }
+     
+    // adds all elements to the collector, continues untill commomParent is found.    
+    bool first = true;
+    while (firstElement->name() != commonParentName) {
+        if (inverse) {
+            if (first) {
+                // JCC: When walking up on the scenegraph tree, the first
+                // model matrix shouldn't be added to the final transformation
+                // because may be used by its renderable node.
+                first = false;
+            }
+            else {
+                collector = glm::inverse(firstElement->modelTransform()) * collector;
+            }
+        }
+        else {
+            collector = firstElement->modelTransform() * collector;
+        }
+        if (inverse) {
+            firstElement = path[++depth];
+        }
+        else {
+            firstElement = path[--depth];
+        }
+    }
+    
 
-    return glm::dmat4(0);
+    return collector;
 }
 
 void Scene::updateDependencies() {

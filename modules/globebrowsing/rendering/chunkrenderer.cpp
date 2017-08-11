@@ -143,7 +143,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         // viewTransform (data.camera.combinedViewMatrix()) will become
         // data.camera.viewMatrix(SceneGraphNode &node).
         glm::dvec3 directionToSunWorldSpace = glm::normalize(OsEng.renderEngine().scene()->sceneGraphNode("Sun")->dynamicWorldPosition()
-            - chunk.owner().sceneGraphNode()->dynamicWorldPosition());
+            - currentNode->dynamicWorldPosition());
         glm::vec3 directionToSunCameraSpace =
             (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
 
@@ -230,7 +230,9 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     auto patchSize = chunk.surfacePatch().size();
         
     glm::dmat4 modelTransform = chunk.owner().modelTransform();
-    glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
+    const SceneGraphNode * currentNode = chunk.owner().sceneGraphNode();
+    glm::dmat4 viewTransform = data.camera.viewMatrixFromAttachedNode(currentNode);
+    //glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
     glm::mat4 modelViewTransform = glm::mat4(viewTransform * modelTransform);
     glm::mat4 modelViewProjectionTransform = data.camera.sgctInternal.projectionMatrix() *
         modelViewTransform;
@@ -304,7 +306,9 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
     // Calculate other uniform variables needed for rendering
     dmat4 modelTransform = chunk.owner().modelTransform();
-    dmat4 viewTransform = data.camera.combinedViewMatrix();
+    //dmat4 viewTransform = data.camera.combinedViewMatrix();
+    const SceneGraphNode * currentNode = chunk.owner().sceneGraphNode();
+    glm::dmat4 viewTransform = data.camera.viewMatrixFromAttachedNode(currentNode);
     dmat4 modelViewTransform = viewTransform * modelTransform;
 
     std::vector<std::string> cornerNames = { "p01", "p11", "p00", "p10" };
