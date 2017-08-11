@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include <glm/gtx/quaternion.hpp>
+//#include <glm/gtx/quaternion.hpp>
 
 #include <openspace/util/camera.h>
 

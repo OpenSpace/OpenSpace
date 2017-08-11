@@ -38,8 +38,6 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 
-#include <glm/gtc/matrix_transform.hpp>
-
 #include <fstream>
 #include <string>
 
