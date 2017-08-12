@@ -215,12 +215,11 @@ Tile::Status Layer::getTileStatus(const TileIndex& index) const {
 
 layergroupid::TypeID Layer::type() const {
     return _type;
-};
+}
 
 layergroupid::BlendModeID Layer::blendMode() const {
     return static_cast<layergroupid::BlendModeID>(_blendModeOption.value());
-};
-
+}
 
 TileDepthTransform Layer::depthTransform() const {
     if (_tileProvider) {

@@ -47,7 +47,7 @@ TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum glT
     _glTextureFormat = tiledatatype::glTextureFormat(_glType,
         _ghoulTextureFormat);
     calculateHashKey();
-};
+}
 
 TileTextureInitData::TileTextureInitData(const TileTextureInitData& original)
     : TileTextureInitData(
@@ -56,7 +56,7 @@ TileTextureInitData::TileTextureInitData(const TileTextureInitData& original)
         original.glType(),
         original.ghoulTextureFormat(),
         original.shouldAllocateDataOnCPU() ? ShouldAllocateDataOnCPU::Yes : ShouldAllocateDataOnCPU::No)
-{ };
+{}
 
 glm::ivec3 TileTextureInitData::dimensionsWithPadding() const {
     return _dimensionsWithPadding;
@@ -121,7 +121,7 @@ void TileTextureInitData::calculateHashKey() {
     _hashKey |= _dimensionsWithoutPadding.y << 10;
     _hashKey |= static_cast<std::underlying_type_t<GLenum>>(_glType) << (10 + 16);
     _hashKey |= format << (10 + 16 + 4);
-};
+}
 
 unsigned int TileTextureInitData::getUniqueIdFromTextureFormat(
     Format textureFormat) const
