@@ -145,7 +145,6 @@ set_property(TARGET Spice PROPERTY FOLDER "External")
 # Curl
 if (WIN32)
     set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
-    set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl" PARENT_SCOPE)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
     target_link_libraries(libOpenSpace ${CURL_ROOT_DIR}/lib/libcurl_imp.lib)
     target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")

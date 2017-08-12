@@ -156,7 +156,7 @@ function (handle_modules internal_module_path external_modules_paths)
     endforeach ()
     
     list(REMOVE_DUPLICATES module_external_libraries)
-    add_external_library_dependencies(${module_external_libraries})
+    add_external_library_dependencies("${module_external_libraries}")
 
     #
     # Step 6:  Create the moduleregistration.h file with the header file paths, class
