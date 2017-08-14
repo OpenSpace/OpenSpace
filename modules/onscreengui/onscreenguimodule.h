@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -43,8 +43,8 @@ public:
 
     OnScreenGUIModule();
     
-    static gui::GUI gui;
-    static Touch touchInput;
+    gui::GUI gui;
+    Touch touchInput = { false, glm::vec2(0), 0 };
 };
 
 } // namespace openspace

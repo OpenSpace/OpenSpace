@@ -32,7 +32,8 @@ RawVolume<VoxelType>::RawVolume(const glm::uvec3& dimensions)
     : _dimensions(dimensions)
     , _data(static_cast<size_t>(dimensions.x) *
             static_cast<size_t>(dimensions.y) *
-            static_cast<size_t>(dimensions.z)) {}
+            static_cast<size_t>(dimensions.z))
+{}
 
 template <typename VoxelType>
 glm::uvec3 RawVolume<VoxelType>::dimensions() const {

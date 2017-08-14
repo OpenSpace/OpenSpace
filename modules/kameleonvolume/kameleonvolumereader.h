@@ -30,12 +30,21 @@
 #include <modules/volume/rawvolume.h>
 #include <ghoul/misc/dictionary.h>
 
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4619'
+#pragma warning (disable : 4675) // #pragma warning: there is no warning number '4675'
+#pragma warning (disable : 4800) // #pragma warning: there is no warning number '4800'
+#endif // WIN32
+
 #include <ccmc/Kameleon.h>
 #include <ccmc/Interpolator.h>
 
-namespace ccmc {
-    class Model;
-}
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
+
+namespace ccmc { class Model; }
 
 namespace openspace {
 

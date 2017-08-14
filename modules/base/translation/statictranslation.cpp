@@ -28,8 +28,13 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const char* KeyPosition = "Position";
-}
+    static const openspace::properties::Property::PropertyInfo PositionInfo = {
+        "Position",
+        "Position",
+        "This value is used as a static offset (in meters) that is applied to the scene "
+        "graph node that this transformation is attached to relative to its parent."
+    };
+} // namespace
 
 namespace openspace {
 
@@ -42,26 +47,22 @@ documentation::Documentation StaticTranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("StaticTranslation"),
-                "",
                 Optional::No
             },
             {
-                KeyPosition,
+                PositionInfo.identifier,
                 new DoubleVector3Verifier,
-                "Specifies the position (in meters) that this scenegraph node is located "
-                "at relative to its parent",
-                Optional::No
+                Optional::No,
+                PositionInfo.description
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
 
 StaticTranslation::StaticTranslation()
     : _position(
-        "position",
-        "Position",
+        PositionInfo,
         glm::dvec3(0.0),
         glm::dvec3(-std::numeric_limits<double>::max()),
         glm::dvec3(std::numeric_limits<double>::max())
@@ -76,16 +77,14 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "StaticEphemeris"
+        "StaticTranslation"
     );
 
-    _position = dictionary.value<glm::dvec3>(KeyPosition);
+    _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
 }
 
 glm::dvec3 StaticTranslation::position() const {
     return _position;
 }
-
-void StaticTranslation::update(const UpdateData&) {}
 
 } // namespace openspace

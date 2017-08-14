@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,27 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float time;
-uniform sampler2D texture1;
-uniform float transparency;
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
 in vec2 vs_st;
 in vec4 vs_position;
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+uniform float time;
+uniform sampler2D texture1;
+uniform float transparency;
+
 
 Fragment getFragment() {
     vec4 position = vs_position;
     float depth = pscDepth(position);
-    vec4 diffuse;
-    diffuse = texture(texture1, vs_st);
+    vec4 diffuse = texture(texture1, vs_st);
 
-    diffuse.a *= transparency;
-    
     Fragment frag;
-    frag.color = diffuse;
+    frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);
     frag.depth = depth;
     return frag;
-
 }

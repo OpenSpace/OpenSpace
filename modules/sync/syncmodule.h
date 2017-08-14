@@ -42,5 +42,3 @@ protected:
 };
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACE___SYNCMODULE___H__

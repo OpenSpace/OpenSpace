@@ -49,16 +49,30 @@ namespace {
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
     const char* KeyPreCacheLevel = "PreCacheLevel";
+
+    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+        "FilePath",
+        "File Path",
+        "The path of the GDAL file or the image file that is to be used in this tile "
+        "provider."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
+        "TilePixelSize",
+        "Tile Pixel Size",
+        "This value is the preferred size (in pixels) for each tile. Choosing the right "
+        "value is a tradeoff between more efficiency (larger images) and better quality "
+        "(smaller images). The tile pixel size has to be smaller than the size of the "
+        "complete image if a single image is used."
+    };
 }
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
     
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
-    , _filePath("filePath", "File Path", "")
-    , _tilePixelSize("tilePixelSize", "Tile Pixel Size", 32, 32, 1024)
+    , _filePath(FilePathInfo, "")
+    , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
     , _preCacheLevel(0)
 {
     _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
@@ -82,7 +96,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     int tilePixelSize = 0;
     if (dictionary.getValue<double>(KeyTilePixelSize, pixelSize)) {
         LDEBUG("Default pixel size overridden: " << pixelSize);
-        tilePixelSize = pixelSize; 
+        tilePixelSize = static_cast<int>(pixelSize); 
     }
     TileTextureInitData initData(LayerManager::getTileTextureInitData(
         _layerGroupID, tilePixelSize));
@@ -107,15 +121,13 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_tilePixelSize);
 }
 
-DefaultTileProvider::DefaultTileProvider(
-    std::shared_ptr<AsyncTileDataProvider> tileReader)
+DefaultTileProvider::DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader)
     : _asyncTextureDataProvider(tileReader)
-    , _filePath("filePath", "File Path", "")
-    , _tilePixelSize("tilePixelSize", "Tile Pixel Size", 32, 32, 1024)
-{ }
+    , _filePath(FilePathInfo, "")
+    , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
+{}
 
-DefaultTileProvider::~DefaultTileProvider()
-{ }
+DefaultTileProvider::~DefaultTileProvider() {}
 
 void DefaultTileProvider::update() {
     if (_asyncTextureDataProvider) {
@@ -249,6 +261,4 @@ TileDepthTransform DefaultTileProvider::depthTransform() {
     }
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

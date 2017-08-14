@@ -56,9 +56,15 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+
+#pragma warning (push)
+#pragma warning (disable: 4574) // 'INCL_WINSOCK_API_TYPEDEFS' is defined to be '0'
+
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
+
+#pragma warning (pop)
 #endif
 
 #include <openspace/network/parallelconnection.h>
@@ -81,33 +87,79 @@ namespace {
     const uint32_t ProtocolVersion = 2;
     const size_t MaxLatencyDiffs = 64;
     const char* _loggerCat = "ParallelConnection";
+
+    static const openspace::properties::Property::PropertyInfo PasswordInfo = {
+        "Password",
+        "Password",
+        "The general password that allows this OpenSpace instance access to the Wormhole "
+        "server."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HostPasswordInfo = {
+        "HostPassword",
+        "Host Password",
+        "The password that is required to take control of the joint session and thus "
+        "send all commands to connected clients."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PortInfo = {
+        "Port",
+        "Port",
+        "The port on which the Wormhole server is listening to connections from "
+        "OpenSpace."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AddressInfo = {
+        "Address",
+        "Address",
+        "The address of the Wormhole server either as a DNS name or an IP address."
+    };
+
+    static const openspace::properties::Property::PropertyInfo NameInfo = {
+        "Name",
+        "Connection Name",
+        "The name of this OpenSpace instance that will be potentially broadcast to other "
+        "connected instances."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BufferTimeInfo = {
+        "BufferTime",
+        "Buffer Time",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
+        "TimeKeyframeInterval",
+        "Time keyframe interval",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
+        "CameraKeyframeInterval",
+        "Camera Keyframe interval",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
+        "TimeTolerance",
+        "Time tolerance",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 ParallelConnection::ParallelConnection()
-    : properties::PropertyOwner("ParallelConnection")
-    , _password("password", "Password")
-    , _hostPassword("hostPassword", "Host Password")
-    , _port("port", "Port", "20501")
-    , _address("address", "Address", "localhost")
-    , _name("name", "Connection name", "Anonymous")
-    , _bufferTime("bufferTime", "Buffer Time", 1, 0.5, 10)
-    , _timeKeyframeInterval(
-        "timeKeyframeInterval",
-        "Time keyframe interval",
-        0.1f,
-        0.f,
-        1.f
-    )
-    , _cameraKeyframeInterval(
-        "cameraKeyframeInterval",
-        "Camera Keyframe interval",
-        0.1f,
-        0.f,
-        1.f
-    )
-    , _timeTolerance("timeTolerance", "Time tolerance", 1.f, 0.5f, 5.f)
+    : properties::PropertyOwner({ "ParallelConnection" })
+    , _password(PasswordInfo)
+    , _hostPassword(HostPasswordInfo)
+    , _port(PortInfo, "20501")
+    , _address(AddressInfo, "localhost")
+    , _name(NameInfo, "Anonymous")
+    , _bufferTime(BufferTimeInfo, 1, 0.5, 10)
+    , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _timeTolerance(TimeToleranceInfo, 1.f, 0.5f, 5.f)
     , _lastTimeKeyframeTimestamp(0)
     , _lastCameraKeyframeTimestamp(0)
     , _clientSocket(INVALID_SOCKET)

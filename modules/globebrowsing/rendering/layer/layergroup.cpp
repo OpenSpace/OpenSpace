@@ -28,15 +28,24 @@
 
 namespace {
     const char* _loggerCat = "LayerGroup";
-}
 
-namespace openspace {
-namespace globebrowsing {
+    static const openspace::properties::Property::PropertyInfo BlendTileInfo = {
+        "BlendTileLevels",
+        "Blend between levels",
+        "If this value is enabled, images between different levels are interpolated, "
+        "rather than switching between levels abruptly. This makes transitions smoother "
+        "and more visually pleasing.",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+} // namespace
+
+namespace openspace::globebrowsing {
 
 LayerGroup::LayerGroup(layergroupid::GroupID id)
-    : properties::PropertyOwner(std::move(layergroupid::LAYER_GROUP_NAMES[id]))
+    : properties::PropertyOwner({ std::move(layergroupid::LAYER_GROUP_NAMES[id]) })
     , _groupId(id)
-    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", false)
+    , _levelBlendingEnabled(BlendTileInfo, true)
 {
     addProperty(_levelBlendingEnabled);
 }
@@ -82,11 +91,13 @@ void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     else {
         _layers.push_back(layer);
         update();
-        if(_onChangeCallback) {
+        if (_onChangeCallback) {
             _onChangeCallback();
         }
         addPropertySubOwner(layer.get());
     }
+
+    _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
 }
 
 void LayerGroup::deleteLayer(const std::string& layerName) {
@@ -95,10 +106,16 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             removePropertySubOwner(it->get());
             _layers.erase(it);
             update();
-            if(_onChangeCallback) {
+            if (_onChangeCallback) {
                 _onChangeCallback();
             }
             LINFO("Deleted layer " + layerName);
+
+            if (_layers.empty()) {
+                _levelBlendingEnabled.setVisibility(
+                    properties::Property::Visibility::Hidden
+                );
+            }
             return;
         }
     }
@@ -125,5 +142,4 @@ void LayerGroup::onChange(std::function<void(void)> callback) {
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

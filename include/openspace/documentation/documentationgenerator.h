@@ -100,6 +100,15 @@ private:
     const std::string _javascriptFile;
 };
     
+
+/**
+ * This function takes a \p text and escapes all necessary characters () that JSON
+ * does not want in its strings.
+ * \param text The text that is to be escaped
+ * \return The same text will all required characteres escaped
+ */
+std::string escapedJson(const std::string& text);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___DOCUMENTATIONGENERATOR___H__

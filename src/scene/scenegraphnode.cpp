@@ -54,13 +54,13 @@
 #include "scenegraphnode_doc.inl"
 
 namespace {
-    const std::string _loggerCat = "SceneGraphNode";
-    const std::string KeyRenderable = "Renderable";
+    const char* _loggerCat = "SceneGraphNode";
+    const char* KeyRenderable = "Renderable";
 
-    const std::string keyTransformTranslation = "Transform.Translation";
-    const std::string keyTransformRotation = "Transform.Rotation";
-    const std::string keyTransformScale = "Transform.Scale";
-}
+    const char* keyTransformTranslation = "Transform.Translation";
+    const char* keyTransformRotation = "Transform.Rotation";
+    const char* keyTransformScale = "Transform.Scale";
+} // namespace
 
 namespace openspace {
 
@@ -166,7 +166,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
 }
 
 SceneGraphNode::SceneGraphNode()
-    : properties::PropertyOwner("")
+    : properties::PropertyOwner({ "" })
     , _parent(nullptr)
     , _scene(nullptr)
     , _performanceRecord({0, 0, 0, 0, 0})
@@ -182,7 +182,7 @@ SceneGraphNode::~SceneGraphNode() {
     deinitialize();
 }
 
-bool SceneGraphNode::initialize() {
+void SceneGraphNode::initialize() {
     if (_renderable) {
         _renderable->initialize();
     }
@@ -197,11 +197,9 @@ bool SceneGraphNode::initialize() {
     if (_transform.scale) {
         _transform.scale->initialize();
     }
-
-    return true;
 }
 
-bool SceneGraphNode::deinitialize() {
+void SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
 
     setScene(nullptr);
@@ -212,8 +210,6 @@ bool SceneGraphNode::deinitialize() {
     }
     clearChildren();
     _parent = nullptr;
-
-    return true;
 }
 
 void SceneGraphNode::traversePreOrder(std::function<void(SceneGraphNode*)> fn) {
@@ -486,11 +482,11 @@ SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
     }
     else {
-		return {
-			glm::dvec3(0.0, 0.0, 0.0),
-			glm::normalize(targetModelSpace),
-			0.0
-		};
+        return {
+            glm::dvec3(0.0, 0.0, 0.0),
+            glm::normalize(targetModelSpace),
+            0.0
+        };
     }
 }
 

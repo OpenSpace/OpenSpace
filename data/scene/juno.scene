@@ -26,14 +26,14 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    openspace.setPropertyValue("Sun.renderable.Enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", true)
+    openspace.setPropertyValue("EarthMarker.renderable.Enabled", true)
 
-    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
-    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+    openspace.setPropertyValue("MilkyWay.renderable.Transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.Segments", 50)
 
-    openspace.setPropertyValue('Jupiter.renderable.performShading', false);
+    openspace.setPropertyValue('Jupiter.renderable.PerformShading', false);
 
     openspace.printInfo("Done setting default values")
 end
@@ -55,8 +55,10 @@ return {
         "saturn/saturn",
         "uranus",
         "neptune",
-        "stars",
-        "milkyway",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
         "missions/juno"
     }
 }

@@ -23,6 +23,7 @@
 ##########################################################################################
 
 include(${GHOUL_BASE_DIR}/support/cmake/CopySharedLibraries.cmake) 
+include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
 
 set(APPLICATION_NAME OpenSpace)
 set(APPLICATION_LINK_TO_OPENSPACE ON)
@@ -130,3 +131,5 @@ if (MSVC)
         "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
     )
 endif()
+
+set_compile_settings(${APPLICATION_NAME})

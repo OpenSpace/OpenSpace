@@ -36,23 +36,18 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 
-using namespace ghoul::fontrendering;
-
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
-    
 namespace {
     const char* KeyRadii = "Radii";
-}
+} // namespace
+
+namespace openspace::globebrowsing::tileprovider {
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers))
     , _backgroundTile(Tile::TileUnavailable)
 {
-	
     _fontSize = 50;
-    _font = OsEng.fontManager().font("Mono", _fontSize);
+    _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
 
     glm::dvec3 radii(1,1,1);
     dictionary.getValue(KeyRadii, radii);
@@ -76,7 +71,9 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
 
     glm::vec2 textPosition;
     textPosition.x = 0;
-    textPosition.y = aboveEquator ? _fontSize / 2 : _initData.dimensionsWithPadding().y - 3 * _fontSize / 2;
+    textPosition.y = aboveEquator ?
+        _fontSize / 2.f :
+        _initData.dimensionsWithPadding().y - 3.f * _fontSize / 2.f;
     glm::vec4 color(1.0, 1.0, 1.0, 1.0);
 
     fontRenderer.render(
@@ -85,7 +82,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
         color,
         " %.0f %s",
         tileLongitudalLength, unit.c_str()
-        );
+    );
 }
 
 int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileIndex) const {
@@ -100,7 +97,7 @@ int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileInde
     if (useKm) {
         l /= 1000;
     }
-    l = std::round(l);
+    l = static_cast<int>(std::round(l));
     if (useKm) {
         l *= 1000;
     }
@@ -114,6 +111,4 @@ TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIn
     return key;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

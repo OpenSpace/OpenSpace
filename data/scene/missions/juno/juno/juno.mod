@@ -13,10 +13,7 @@ return {
                 GeometryFile = "Juno.obj",
                 Magnification = 4,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             Rotation = {
                 Source = "JUNO_SPACECRAFT",
                 Destination = "GALACTIC",
@@ -129,7 +126,7 @@ return {
             Type = "RenderableTrailTrajectory",
              Translation = {
                 Type = "SpiceTranslation",
-                Body = "JUNO",
+                Target = "JUNO",
                 Observer = "JUPITER BARYCENTER"
             },
             Color = { 0.70, 0.50, 0.20 },

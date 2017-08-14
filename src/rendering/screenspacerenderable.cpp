@@ -33,11 +33,6 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#include <math.h>
-#endif
-
 namespace {
     const char* _loggerCat = "ScreenSpaceRenderable";
 
@@ -49,6 +44,69 @@ namespace {
     const char* KeyAlpha = "Alpha";
     const char* KeyTag = "Tag";
     const float PlaneDepth = -2.f;
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "This setting determines whether this sceen space plane will be visible or not."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FlatScreenInfo = {
+        "FlatScreen",
+        "Flat Screen specification",
+        "This value determines whether the location of this screen space plane will be "
+        "specified in a two-dimensional Euclidean plane (if this is set to 'true') or "
+        "specified in spherical coordinates. By switching this value, the correct "
+        "property will be shown or hidden. The Euclidean coordinate system is useful if "
+        "a regular rendering is applied, whereas the spherical coordinates are most "
+        "useful in a planetarium environment."
+    };
+
+    static const openspace::properties::Property::PropertyInfo EuclideanPositionInfo = {
+        "EuclideanPosition",
+        "Euclidean coordinates",
+        "This value determines the position of this screen space plane in Euclidean "
+        "two-dimensional coordinates."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SphericalPositionInfo = {
+        "SphericalPosition",
+        "Spherical coordinates",
+        "This value determines the position of this screen space plane in a spherical "
+        "coordinate system."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DepthInfo = {
+        "Depth",
+        "Depth value",
+        "This value determines the depth of the plane. This value does not change the "
+        "apparent size of the plane, but is only used to sort the planes correctly. The "
+        "plane with a lower value will be shown in front of a plane with a higher depth "
+        "value."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ScaleInfo = {
+        "Scale",
+        "Scale value",
+        "This value determines a scale factor for the plane. The default size of a plane "
+        "is determined by the concrete instance and reflects, for example, the size of "
+        "the image being displayed."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+        "Alpha",
+        "Transparency",
+        "This value determines the transparency of the screen space plane. If this value "
+        "is 1, the plane is completely opaque, if this value is 0, the plane is "
+        "completely transparent."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+        "Delete",
+        "Delete",
+        "If this property is triggered, this screen space plane is removed from the "
+        "scene."
+    };
 } // namespace
 
 namespace openspace {
@@ -63,11 +121,11 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
             {
                 KeyType,
                 new StringAnnotationVerifier("Must name a valid Screenspace renderable"),
+                Optional::No,
                 "The type of the Screenspace renderable that is to be created. The "
                 "available types of Screenspace renderable depend on the configuration of"
                 "the application and can be written to disk on application startup into "
-                "the FactoryDocumentation.",
-                Optional::No
+                "the FactoryDocumentation."
             }
         }
     };
@@ -97,27 +155,25 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("")
-    , _enabled("enabled", "Is Enabled", true)
-    , _useFlatScreen("flatScreen", "Flat Screen", true)
+    : properties::PropertyOwner({ "" })
+    , _enabled(EnabledInfo, true)
+    , _useFlatScreen(FlatScreenInfo, true)
     , _euclideanPosition(
-        "euclideanPosition",
-        "Euclidean coordinates",
+        EuclideanPositionInfo,
         glm::vec2(0.f),
         glm::vec2(-4.f),
         glm::vec2(4.f)
     )
     , _sphericalPosition(
-        "sphericalPosition",
-        "Spherical coordinates",
-        glm::vec2(0.f, static_cast<float>(M_PI_2)),
-        glm::vec2(-static_cast<float>(M_PI)),
-        glm::vec2(static_cast<float>(M_PI))
+        SphericalPositionInfo,
+        glm::vec2(0.f, glm::half_pi<float>()),
+        glm::vec2(-glm::pi<float>()),
+        glm::vec2(glm::pi<float>())
     )
-    , _depth("depth", "Depth", 0.f, 0.f, 1.f)
-    , _scale("scale", "Scale", 0.25f, 0.f, 2.f)
-    , _alpha("alpha", "Alpha", 1.f, 0.f, 1.f)
-    , _delete("delete", "Delete")
+    , _depth(DepthInfo, 0.f, 0.f, 1.f)
+    , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
+    , _alpha(AlphaInfo, 1.f, 0.f, 1.f)
+    , _delete(DeleteInfo)
     , _quad(0)
     , _vertexPositionBuffer(0)
     , _texture(nullptr)
@@ -260,8 +316,8 @@ glm::vec2 ScreenSpaceRenderable::toEuclidean(const glm::vec2& spherical, float r
 }
 
 glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
-    _radius = -sqrt(pow(euclidean[0],2)+pow(euclidean[1],2)+pow(PlaneDepth,2));
-    float theta = atan2(-PlaneDepth, euclidean[0]) - static_cast<float>(M_PI_2);
+    _radius = -sqrt(pow(euclidean[0],2) + pow(euclidean[1],2) + pow(PlaneDepth,2));
+    float theta = atan2(-PlaneDepth, euclidean[0]) - glm::half_pi<float>();
     float phi = acos(euclidean[1]/_radius);
 
     return glm::vec2(theta, phi);
@@ -317,7 +373,7 @@ glm::mat4 ScreenSpaceRenderable::rotationMatrix() {
         rotation = glm::rotate(rotation, position.x, glm::vec3(0.f, 1.f, 0.f));
         rotation = glm::rotate(
             rotation,
-            static_cast<float>(position.y - M_PI_2),
+            position.y - glm::half_pi<float>(),
             glm::vec3(1.f, 0.f, 0.f)
         );
     }

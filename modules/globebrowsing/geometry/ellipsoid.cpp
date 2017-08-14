@@ -27,8 +27,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(radii) {
     updateInternalCache();
@@ -132,7 +131,7 @@ double Ellipsoid::longitudalDistance(double lat, double lon1, double lon2) const
     return meanRadius * std::abs(lon2 - lon1);
 }
 
-double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const{
+double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const {
     // https://en.wikipedia.org/wiki/Meridian_arc
     // https://en.wikipedia.org/wiki/Great-circle_distance#Vector_version
 
@@ -146,22 +145,19 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
     return centralAngle * glm::length(centralNormal);
 }
 
-Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const
-{
+Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
     glm::dvec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
     return Geodetic2(
         asin(normal.z / length(normal)),    // Latitude
         atan2(normal.y, normal.x));            // Longitude
 }
 
-glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const
-{
+glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const {
     // Position on surface : height = 0
     return cartesianPosition(Geodetic3({ geodetic2, 0 }));
 }
 
-glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const
-{
+glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const {
     glm::dvec3 normal = geodeticSurfaceNormal(geodetic3.geodetic2);
     glm::dvec3 k = _cached._radiiSquared * normal;
     double gamma = sqrt(dot(k, normal));
@@ -169,5 +165,4 @@ glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const
     return rSurface + geodetic3.height * normal;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

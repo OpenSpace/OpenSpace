@@ -27,8 +27,8 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    const std::string _loggerCat = "DataProcessorKameleon";
-}
+    const char* _loggerCat = "DataProcessorKameleon";
+} // namespace
 
 namespace openspace {
 

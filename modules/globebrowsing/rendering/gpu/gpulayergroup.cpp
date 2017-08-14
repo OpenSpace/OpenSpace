@@ -28,8 +28,7 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpuheightlayer.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
@@ -77,5 +76,4 @@ void GPULayerGroup::deactivate() {
     }
 }
     
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

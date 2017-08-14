@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -110,13 +110,11 @@ namespace {
         std::string sceneName;
         std::string cacheFolder;
     } commandlineArgumentPlaceholders;
-}
+} // namespace
 
 namespace openspace {
 
-namespace properties {
-    class Property;
-}
+namespace properties { class Property; }
 
 class Scene;
 
@@ -144,7 +142,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
-    , _globalPropertyNamespace(new properties::PropertyOwner(""))
+    , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
     , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
@@ -325,6 +323,15 @@ void OpenSpaceEngine::create(int argc, char** argv,
         );
     }
 
+    // Create directories that doesn't exist
+    auto tokens = FileSys.tokens();
+    for (const std::string& token : tokens) {
+        if (!FileSys.directoryExists(token)) {
+            std::string p = absPath(token);
+            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
+        }
+    }
+
     // Initialize the requested logs from the configuration file
     _engine->configureLogging();
 
@@ -334,16 +341,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
         OPENSPACE_VERSION_PATCH <<
         " (" << OPENSPACE_VERSION_STRING << ")"
     );
-
-    // Create directories that doesn't exist
-    auto tokens = FileSys.tokens();
-    for (const std::string& token : tokens) {
-        if (!FileSys.directoryExists(token)) {
-            std::string p = absPath(token);
-            LDEBUG("Directory '" << p << "' does not exist, creating.");
-            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
-        }
-    }
 
     // Register modules
     _engine->_moduleEngine->initialize();
@@ -1245,7 +1242,7 @@ void OpenSpaceEngine::decode() {
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,
-                                              int clientId)
+                                              int /*clientId*/)
 {
     if (size == 0) {
         return;
@@ -1298,7 +1295,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
                 {},
-                "type, name, identifier, [value, minimumValue, maximumValue]",
+                "type, name, identifier, description,"
+                "[value, minimumValue, maximumValue]",
                 "Adds a virtual property that will set a group of properties"
             },
             {

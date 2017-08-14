@@ -26,14 +26,11 @@
 
 #include <openspace/interaction/navigationhandler.h>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
-void Controller::setHandler(NavigationHandler* handler)
-{
+void Controller::setHandler(NavigationHandler* handler) {
     _handler = handler;
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 

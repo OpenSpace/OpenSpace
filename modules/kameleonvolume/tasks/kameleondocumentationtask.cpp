@@ -43,7 +43,7 @@ namespace {
     const char* JsFilename = "${OPENSPACE_DATA}/web/kameleondocumentation/script.js";
     const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
     const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
-}
+} // namespace
 
 namespace openspace {
 
@@ -145,16 +145,19 @@ documentation::Documentation KameleonDocumentationTask::documentation() {
             {
                 "Type",
                 new StringEqualVerifier("KameleonDocumentationTask"),
+                Optional::No,
                 "The type of this task"
             },
             {
                 KeyInput,
                 new StringAnnotationVerifier("A file path to a cdf file"),
+                Optional::No,
                 "The cdf file to extract data from"
             },
             {
                 KeyOutput,
                 new StringAnnotationVerifier("A valid filepath"),
+                Optional::No,
                 "The html file to write documentation to"
             }
         }

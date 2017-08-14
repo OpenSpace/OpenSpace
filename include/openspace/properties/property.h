@@ -28,13 +28,13 @@
 #include <openspace/properties/propertydelegate.h>
 
 #include <ghoul/misc/dictionary.h>
+
 #include <functional>
 #include <string>
 
 struct lua_State;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 class PropertyOwner;
 
@@ -63,14 +63,29 @@ class PropertyOwner;
 class Property {
 public:
     /**
-     * The visibility classes for Property%s. The classes are strictly ordered as
-     * All > Developer > User > Hidden
-     */
+    * The visibility classes for Property%s. The classes are strictly ordered as
+    * All > Developer > User > Hidden
+    */
     enum class Visibility {
-        All = 3,  ///< Visible for all types, no matter what
-        Hidden = 2, ///< Never visible
-        Developer = 1, ///< Visible in Developer mode
-        User = 0 ///< Visible in User mode
+        Hidden = 3, ///< Never visible
+        Developer = 2, ///< Visible in Developer mode
+        User = 1, ///< Visible in User mode
+        All = 0,  ///< Visible for all types, no matter what
+    };
+
+    /**
+     * This structure is passed to the constructor of a Property and contains the unique
+     * identifier, a GUI name and descriptive text that are both user facing.
+     */
+    struct PropertyInfo {
+        /// The unique identifier that is part of the fully qualified URI of this Property
+        std::string identifier;
+        /// The name that is displayed in the user interface
+        std::string guiName;
+        /// The user facing description of this Property
+        std::string description;
+        /// Determins the visibility of this Property in the user interface
+        Visibility visibility = Visibility::All;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an 
@@ -85,16 +100,14 @@ public:
      * The constructor for the property. The <code>identifier</code> needs to be unique
      * for each PropertyOwner. The <code>guiName</code> will be stored in the metaData
      * to be accessed by the GUI elements using the <code>guiName</code> key. The default
-     * visibility settings is <code>true</code>, whereas the default read-only state is
+     * visibility settings is Visibility::All, whereas the default read-only state is
      * <code>false</code>.
-     * \param identifier A unique identifier for this property. It has to be unique to the
-     * PropertyOwner and cannot contain any <code>.</code>s
-     * \param guiName The human-readable GUI name for this Property
-     * \pre \p identifier must not be empty
-     * \pre \p guiName must not be empty
+     * \param info The PropertyInfo structure that contains all the required static 
+     * information for initializing this Property.
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
      */
-    Property(std::string identifier, std::string guiName,
-        Visibility visibility = Visibility::All);
+    Property(PropertyInfo info);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -258,18 +271,12 @@ public:
     std::string guiName() const;
 
     /**
-     * Returns the description for this Property that contains all necessary information
-     * required for creating a GUI representation. The format of the description is a
-     * valid Lua table, i.e., it is surrounded by a pair of <code>{</code> and
-     * <code>}</code> with key,value pairs between. Each value can either be a number, a
-     * string, a bool, or another table. The general values set by this base function
-     * are: <code>Identifier</code>, <code>Name</code>, <code>Type</code>. All other
-     * values are specific to the type and are added in a specific subclass, which require
-     * the subclass to call this method first.
-     * \return The descriptive text for the Property that can be used for constructing a
-     * GUI representation
+     * This function returns a user-facing description of the Property which can be
+     * displayed in the user interface to inform the user what this Property does and how
+     * it affects the rendering.
+     * \return The description of this Property
      */
-    virtual std::string description() const;
+    std::string description() const;
 
     /**
      * Sets the identifier of the group that this Property belongs to. Property groups can
@@ -407,6 +414,12 @@ protected:
     /// The identifier for this Property
     std::string _identifier;
 
+    /// The GUI user-facing name of this Property
+    std::string _guiName;
+
+    /// The user-facing description of this Property
+    std::string _description;
+
     /// The Dictionary containing all meta data necessary for external applications
     ghoul::Dictionary _metaData;
 
@@ -415,9 +428,15 @@ protected:
 
 private:
     OnChangeHandle _currentHandleValue;
+
+#ifdef _DEBUG
+    // These identifiers can be used for debugging. Each Property is assigned one unique
+    // identifier.
+    static uint64_t Identifier;
+    uint64_t _id;
+#endif
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___PROPERTY___H__

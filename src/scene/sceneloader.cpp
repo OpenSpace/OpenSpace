@@ -36,18 +36,16 @@
 #include <unordered_set>
 
 namespace {
-    const std::string _loggerCat = "SceneLoader";
-    const std::string KeyPathScene = "ScenePath";
+    const char* _loggerCat = "SceneLoader";
+    const char* KeyPathScene = "ScenePath";
     const std::string KeyAssets = "Assets";
     const std::string AssetExtension = ".asset";
 
-    const std::string RootNodeName = "Root";
-    const std::string KeyDependencies = "Dependencies";
-    const std::string KeyCamera = "Camera";
-    const std::string KeyCameraFocus = "Focus";
-    const std::string KeyCameraPosition = "Position";
-    const std::string KeyCameraRotation = "Rotation";
-}
+    const char* KeyCamera = "Camera";
+    const char* KeyCameraFocus = "Focus";
+    const char* KeyCameraPosition = "Position";
+    const char* KeyCameraRotation = "Rotation";
+} // namespace
 
 namespace openspace {
 

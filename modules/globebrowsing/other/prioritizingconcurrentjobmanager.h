@@ -31,8 +31,7 @@
 
 #include <mutex>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Concurrent job manager which prioritizes which jobs to work on depending on which
@@ -91,8 +90,7 @@ private:
     
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "prioritizingconcurrentjobmanager.inl"
 

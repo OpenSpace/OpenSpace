@@ -169,10 +169,7 @@ return {
                 GeometryFile = "models/orx_base_resized_12_sep_2016.obj",
                 Magnification = 0,
             },
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -182,7 +179,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = "SUN",
                 Kernels = OsirisRexKernels
             },
@@ -204,10 +201,7 @@ return {
                 GeometryFile = "models/orx_polycam_resized_12_sep_2016.obj",
                 Magnification = 0,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -237,10 +231,7 @@ return {
                 GeometryFile = "models/orx_rexis_resized_12_sep_2016.obj",
                 Magnification = 0,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -345,9 +336,9 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Frame = "IAU_EARTH",
-            Observer = "EARTH",
+                Observer = "EARTH",
             },
             Color = { 0.9, 0.9, 0.0 },
             StartTime = "2016 SEP 8 23:05:00.50",
@@ -364,7 +355,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = "SUN",
             },
             Color = { 0.2, 0.9, 0.2 },
@@ -382,7 +373,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = BENNU_BODY,
             },
             Color = { 0.9, 0.2, 0.9 },

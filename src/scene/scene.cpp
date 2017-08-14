@@ -359,7 +359,8 @@ std::string Scene::generateJson() const {
             json << "\"id\": \"" << p->identifier() << "\",";
             json << "\"type\": \"" << p->className() << "\",";
             json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
-            json << "\"guiName\": \"" << p->guiName() << "\"";
+            json << "\"guiName\": \"" << p->guiName() << "\",";
+            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
             json << "}";
             if (p != properties.back()) {
                 json << ",";

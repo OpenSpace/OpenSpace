@@ -44,8 +44,7 @@ namespace {
     const int8_t CurrentCacheVersion = 3;
 } // namespace
 
-namespace openspace {
-namespace modelgeometry {
+namespace openspace::modelgeometry {
 
 documentation:: Documentation ModelGeometry::Documentation() {
     using namespace documentation;
@@ -56,16 +55,16 @@ documentation:: Documentation ModelGeometry::Documentation() {
             {
                 KeyType,
                 new StringVerifier,
-                "The type of the Model Geometry that should be generated",
-                Optional::No
+                Optional::No,
+                "The type of the Model Geometry that should be generated"
             },
             {
                 KeyGeomModelFile,
                 new StringVerifier,
+                Optional::No,
                 "The file that should be loaded in this ModelGeometry. The file can "
                 "contain filesystem tokens or can be specified relatively to the "
-                "location of the .mod file.",
-                Optional::No
+                "location of the .mod file."
             }
         }
     };
@@ -86,7 +85,7 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("ModelGeometry")
+    : properties::PropertyOwner({ "ModelGeometry" })
     , _mode(GL_TRIANGLES)
 {
     documentation::testSpecificationAndThrow(
@@ -295,5 +294,4 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
 
 void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject&) {}
 
-}  // namespace modelgeometry
-}  // namespace openspace
+}  // namespace openspace::modelgeometry

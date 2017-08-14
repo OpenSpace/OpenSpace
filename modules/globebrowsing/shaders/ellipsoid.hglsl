@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,24 +32,21 @@ struct PositionNormalPair {
 
 struct Intersection {
     bool  intersects;
-    float nearParameter;// Along ray
-    float farParameter; // Along ray
+    float nearParameter; // Along ray
+    float farParameter;  // Along ray
 };
 
-vec3 geodeticSurfaceNormal(float latitude, float longitude)
-{
+vec3 geodeticSurfaceNormal(float latitude, float longitude) {
     float cosLat = cos(latitude);
     return vec3(
         cosLat * cos(longitude),
         cosLat * sin(longitude), 
-        sin(latitude));
+        sin(latitude)
+    );
 }
 
-PositionNormalPair geodetic3ToCartesian(
-    float latitude,
-    float longitude,
-    float height,
-    vec3 radiiSquared)
+PositionNormalPair geodetic3ToCartesian(float latitude, float longitude, float height,
+                                        vec3 radiiSquared)
 {
     vec3 normal = geodeticSurfaceNormal(latitude, longitude);
     vec3 k = radiiSquared * normal;
@@ -61,7 +58,8 @@ PositionNormalPair geodetic3ToCartesian(
     return toReturn;
 }
 
-PositionNormalPair geodetic2ToCartesian(float latitude, float longitude, vec3 radiiSquared)
+PositionNormalPair geodetic2ToCartesian(float latitude, float longitude,
+                                        vec3 radiiSquared)
 {
     // Position on surface : height = 0
     return geodetic3ToCartesian(latitude, longitude, 0, radiiSquared);
@@ -71,17 +69,15 @@ vec3 latLonToCartesian(float latitude, float longitude, float radius) {
     return radius * vec3(
         cos(latitude) * cos(longitude),
         cos(latitude) * sin(longitude),
-        sin(latitude));
+        sin(latitude)
+    );
 }
 
 //
 // Assumes ellipsoid is at (0, 0, 0)
 //
-Intersection rayIntersectEllipsoid(
-    vec3 rayOrigin,
-    vec3 rayOriginSquared,
-    vec3 rayDirection,
-    vec3 oneOverEllipsoidRadiiSquared)
+Intersection rayIntersectEllipsoid(vec3 rayOrigin, vec3 rayOriginSquared,
+                                   vec3 rayDirection, vec3 oneOverEllipsoidRadiiSquared)
 {
     float a = dot(rayDirection * rayDirection, oneOverEllipsoidRadiiSquared);
     float b = 2.0 * dot(rayOrigin * rayDirection, oneOverEllipsoidRadiiSquared);

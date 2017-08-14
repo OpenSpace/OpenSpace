@@ -42,6 +42,12 @@ namespace {
     const char* keyEnd = "EndTime";
     const char* KeyType = "Type";
     const char* KeyTag = "Tag";
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "This setting determines whether this object will be visible or not."
+    };
 } // namespace
 
 namespace openspace {
@@ -56,11 +62,11 @@ documentation::Documentation Renderable::Documentation() {
         {
             KeyType,
             new StringAnnotationVerifier("A valid Renderable created by a factory"),
+            Optional::No,
             "This key specifies the type of Renderable that gets created. It has to be one"
             "of the valid Renderables that are available for creation (see the "
             "FactoryDocumentation for a list of possible Renderables), which depends on "
-            "the configration of the application",
-            Optional::No
+            "the configration of the application"
         }
         }
     };
@@ -91,18 +97,9 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     return result;
 }
 
-Renderable::Renderable()
-    : properties::PropertyOwner("renderable")
-    , _enabled("enabled", "Is Enabled", true)
-    , _renderBin(RenderBin::Opaque)
-    , _startTime("")
-    , _endTime("")
-    , _hasTimeInterval(false)
-{}
-
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("renderable")
-    , _enabled("enabled", "Is Enabled", true)
+    : properties::PropertyOwner({ "renderable" })
+    , _enabled(EnabledInfo, true)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
@@ -142,6 +139,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
 Renderable::~Renderable() {}
 
+void Renderable::initialize() {}
+
+void Renderable::deinitialize() {}
+
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;
 }
@@ -152,21 +153,17 @@ float Renderable::boundingSphere() const {
 
 void Renderable::update(const UpdateData&) {}
 
-void Renderable::render(const RenderData& data, RendererTasks&) {
-    render(data);
-}
-
-void Renderable::render(const RenderData&) {}
+void Renderable::render(const RenderData& data, RendererTasks&) {}
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                        const glm::dvec3& targetModelSpace)
 {
     glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
-	return {
-		directionFromCenterToTarget * static_cast<double>(boundingSphere()),
+    return {
+        directionFromCenterToTarget * static_cast<double>(boundingSphere()),
         directionFromCenterToTarget,
-		0.0
-	};
+        0.0
+    };
 }
 
 void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,

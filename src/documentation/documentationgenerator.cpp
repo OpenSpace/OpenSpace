@@ -125,17 +125,10 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
         std::to_string(OPENSPACE_VERSION_PATCH) +
         "]";
     
-        std::string generationTime;
-        try {
-            generationTime = Time::now().ISO8601();
-        }
-        catch (...) {}
-
     file
          << "\t"   << "<script>"                                                  << '\n'
          << "\t\t" << "var " << _jsonName << " = JSON.parse('" << json << "');"   << '\n'
          << "\t\t" << "var version = " << Version << ";"                          << '\n'
-         << "\t\t" << "var generationTime = '" << generationTime << "';"          << '\n'
          << "\t\t" << handlebarsContent                                           << '\n'
          << "\t\t" << jsContent                                                   << '\n'
          << "\t"   << "</script>"                                                 << '\n'
@@ -150,4 +143,28 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
                    << "</html>"                                                   << '\n';
 }
     
+std::string escapedJson(const std::string& text) {
+    std::string jsonString = "";
+    for (const char& c : text) {
+        switch (c) {
+        case '\t':
+            jsonString += "\\t";
+            break;
+        case '"':
+            // The " character has to be double escaped as JSON.parse will remove a single
+            // escape character, thus leaving only " behind that breaks the string
+            jsonString += "\\\\\"";
+            break;
+        case '\\':
+            jsonString += "\\\\";
+            break;
+        default:
+            jsonString += c;
+        }
+    }
+
+    return jsonString;
+}
+
+
 } // namespace openspace

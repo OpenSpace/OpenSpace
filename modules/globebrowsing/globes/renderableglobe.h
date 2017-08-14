@@ -34,8 +34,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class ChunkedLodGlobe;
 class PointGlobe;
@@ -65,14 +64,12 @@ public:
         properties::BoolProperty performHorizonCulling;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
-        properties::BoolProperty toggleEnabledEveryFrame;
         properties::BoolProperty collectStats;
         properties::BoolProperty limitLevelByAvailableData;
         properties::IntProperty modelSpaceRenderingCutoffLevel;
     };
     
     struct GeneralProperties {
-        properties::BoolProperty isEnabled;
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty useAccurateNormals;
@@ -84,11 +81,11 @@ public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     // Getters that perform calculations
@@ -135,7 +132,6 @@ private:
     properties::PropertyOwner _debugPropertyOwner;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__

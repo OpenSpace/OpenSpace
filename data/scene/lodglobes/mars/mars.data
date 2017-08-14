@@ -1,8 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "mars_textures", Destination = "textures", Version = 1 }
-    },
-    TorrentFiles = {
-        -- { File = "MAR063.BSP.torrent", Destination = "${SPICE}" }
-    }
-}

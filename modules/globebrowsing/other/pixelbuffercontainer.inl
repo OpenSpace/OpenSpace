@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 template <class KeyType>
 PixelBufferContainer<KeyType>::PixelBufferContainer(size_t numBytesPerBuffer,
@@ -53,7 +52,7 @@ void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access 
             _pixelBuffers[i]->unbind();
             if (dataPtr) { // Success in mapping
                 // Add this index to the map of mapped pixel buffers
-                _indexMap.emplace(key, i);
+                _indexMap.emplace(key, static_cast<int>(i));
                 return dataPtr;
             }
         }
@@ -126,5 +125,4 @@ GLuint PixelBufferContainer<KeyType>::idOfMappedBuffer(KeyType key) {
     return 0;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

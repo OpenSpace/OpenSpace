@@ -29,7 +29,8 @@ if (WIN32)
     set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/Launcher/openspace.rc)
 endif ()
 
-include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
 
 set(application_path ${OPENSPACE_APPS_DIR}/Launcher)
 
@@ -64,6 +65,8 @@ add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
     ${RESOURCE_FILE}
     ${RESOURCE_FILES}
 )
+
+set_compile_settings(${APPLICATION_NAME})
 
 target_link_libraries(${APPLICATION_NAME}
     Qt5::Widgets

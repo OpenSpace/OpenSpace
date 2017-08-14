@@ -1,8 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "jupiter_textures", Destination = "textures", Version = 1 }
-    },
-    TorrentFiles = {
-        { File = "jup260.bsp.torrent", Destination = "${SPICE}" },
-    }
-}

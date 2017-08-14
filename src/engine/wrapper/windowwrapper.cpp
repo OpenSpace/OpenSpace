@@ -53,7 +53,7 @@ WindowWrapper::WindowWrapperException::WindowWrapperException(const std::string&
 {}
 
 WindowWrapper::WindowWrapper()
-    : properties::PropertyOwner("WindowWrapper")
+    : properties::PropertyOwner({ "WindowWrapper" })
 {}
 
 scripting::LuaLibrary WindowWrapper::luaLibrary() {

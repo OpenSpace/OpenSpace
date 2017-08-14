@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,17 +32,14 @@ uniform vec3 clipNormals_#{id}[8];
 uniform vec2 clipOffsets_#{id}[8];
 
 
-void sample#{id}(vec3 samplePos,
-             vec3 dir,
-             inout vec3 accumulatedColor,
-             inout vec3 accumulatedAlpha,
-             inout float stepSize) {
+void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
+                 inout vec3 accumulatedAlpha, inout float stepSize)
+{
 
     vec3 transformedPos = samplePos;
     if (gridType_#{id} == 1) {
         transformedPos = kameleon_cartesianToSpherical(samplePos);
     }
-
 
     float clipAlpha = 1.0;
     vec3 centerToPos = transformedPos - vec3(0.5);

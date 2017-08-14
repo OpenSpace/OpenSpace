@@ -28,17 +28,19 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-namespace openspace {
-namespace properties {
+#include <algorithm>
+
+#include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* MetaDataKeyGuiName = "guiName";
     const char* MetaDataKeyGroup = "Group";
     const char* MetaDataKeyVisibility = "Visibility";
     const char* MetaDataKeyReadOnly = "isReadOnly";
 
     const char* _metaDataKeyViewPrefix = "view.";
-}
+} // namespace
+
+namespace openspace::properties {
 
 Property::OnChangeHandle Property::OnChangeHandleAll =
                                                std::numeric_limits<OnChangeHandle>::max();
@@ -51,16 +53,24 @@ const char* Property::NameKey = "Name";
 const char* Property::TypeKey = "Type";
 const char* Property::MetaDataKey = "MetaData";
 
-Property::Property(std::string identifier, std::string guiName, Visibility visibility)
+#ifdef _DEBUG
+uint64_t Property::Identifier = 0;
+#endif
+
+Property::Property(PropertyInfo info)
     : _owner(nullptr)
-    , _identifier(std::move(identifier))
+    , _identifier(std::move(info.identifier))
+    , _guiName(std::move(info.guiName))
+    , _description(std::move(info.description))
     , _currentHandleValue(0)
+#ifdef _DEBUG
+    , _id(Identifier++)
+#endif
 {
     ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
-    ghoul_assert(!guiName.empty(), "guiName must not be empty");
+    ghoul_assert(!_guiName.empty(), "guiName must not be empty");
 
-    setVisibility(visibility);
-    _metaData.setValue(MetaDataKeyGuiName, std::move(guiName));
+    setVisibility(info.visibility);
 }
 
 const std::string& Property::identifier() const {
@@ -111,13 +121,11 @@ bool Property::setStringValue(std::string) {
 }
 
 std::string Property::guiName() const {
-    std::string result;
-    _metaData.getValue(MetaDataKeyGuiName, result);
-    return result;
+    return _guiName;
 }
 
 std::string Property::description() const {
-    return "return {" + generateBaseDescription() + "}";
+    return _description;
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
@@ -208,6 +216,8 @@ void Property::notifyListener() {
     }
 }
 
+// This was used in the old version of Property::Description but was never used. Is this
+// still useful? ---abock
 std::string Property::generateBaseDescription() const {
     return
         std::string(TypeKey) + " = \"" + className() + "\", " +
@@ -240,5 +250,4 @@ std::string Property::generateAdditionalDescription() const {
     return "";
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

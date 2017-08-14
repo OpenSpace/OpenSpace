@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+layout (shared) buffer atlasMapBlock_#{id} {
+    uint atlasMap_#{id}[];
+};
 
 uniform float opacity_#{id};
 uniform sampler1D transferFunction_#{id};
@@ -33,12 +36,13 @@ uniform ivec3 nBricksInAtlas_#{id};
 uniform ivec3 atlasSize_#{id};
 uniform float stepSizeCoefficient_#{id} = 1.0;
 
-layout (shared) buffer atlasMapBlock_#{id} {
-    uint atlasMap_#{id}[];
-};
-
-void atlasMapDataFunction_#{id}(ivec3 brickCoords, inout uint atlasIntCoord, inout uint level) {
-    int linearBrickCoord = multires_intCoord(brickCoords, ivec3(maxNumBricksPerAxis_#{id}));
+void atlasMapDataFunction_#{id}(ivec3 brickCoords, inout uint atlasIntCoord,
+                                inout uint level)
+{
+    int linearBrickCoord = multires_intCoord(
+        brickCoords,
+        ivec3(maxNumBricksPerAxis_#{id})
+    );
     uint mapData = atlasMap_#{id}[linearBrickCoord];
     level = mapData >> 28;
     atlasIntCoord = mapData & 0x0FFFFFFF;
@@ -49,11 +53,12 @@ vec3 atlasCoordsFunction_#{id}(vec3 position) {
     uint paddedBrickDim = paddedBrickDim_#{id};
 
     ivec3 brickCoords = ivec3(position * maxNumBricksPerAxis);
-    uint atlasIntCoord, level;
+    uint atlasIntCoord;
+    uint level;
     atlasMapDataFunction_#{id}(brickCoords, atlasIntCoord, level);
 
     float levelDim = float(maxNumBricksPerAxis) / pow(2.0, level);
-    vec3 inBrickCoords = mod(position*levelDim, 1.0);
+    vec3 inBrickCoords = mod(position * levelDim, 1.0);
 
     float scale = float(paddedBrickDim) - 2.0;
     vec3 paddedInBrickCoords = (1.0 + inBrickCoords * scale) / paddedBrickDim;
@@ -63,7 +68,7 @@ vec3 atlasCoordsFunction_#{id}(vec3 position) {
     return (atlasOffset + paddedInBrickCoords) / vec3(numBricksInAtlas);
 }
 
-float stepSize#{id}(vec3 samplePos, vec3 dir){
+float stepSize#{id}(vec3 samplePos, vec3 dir) {
     return 0.01;
     if (true /*opacity_#{id} >= MULTIRES_OPACITY_THRESHOLD*/) {
         return stepSizeCoefficient_#{id}/float(maxNumBricksPerAxis_#{id})/float(paddedBrickDim_#{id});
@@ -73,12 +78,9 @@ float stepSize#{id}(vec3 samplePos, vec3 dir){
     }
 }
 
-void sample#{id}(vec3 samplePos,
-                 vec3 dir,
-                 inout vec3 accumulatedColor,
-                 inout vec3 accumulatedAlpha,
-                 inout float maxStepSize) {
-
+void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor, 
+                 inout vec3 accumulatedAlpha, inout float maxStepSize)
+{
     //vec4 sample#{id}(vec3 samplePos, vec3 dir, vec4 foregroundColor, inout float maxStepSize) {
     //return vec4(1.0, 1.0, 1.0, 1.0);
     
@@ -108,29 +110,7 @@ void sample#{id}(vec3 samplePos,
         vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
         accumulatedColor += oneMinusFrontAlpha * contribution.rgb * contribution.a;
         accumulatedAlpha += oneMinusFrontAlpha * vec3(contribution.a);
-
-
-        //accumulatedAlpha = vec3(1.0-);
-        //return contribution;
     } else {
         maxStepSize = 2.0;
-        //return vec4(0.0);
     }
 }
-
-
-
-/*uniform vec4 color#{id};
-uniform float time#{id};
-uniform float maxStepSize#{id} = 0.02;
-
-vec4 sample#{id}(vec3 samplePos, vec3 dir, vec4 foregroundColor, inout float maxStepSize) {
-    maxStepSize = 0.01;
-    return vec4(1.0, 0.0, 0.0, 0.9999999);
-}
-
-float stepSize#{id}(vec3 samplePos, vec3 dir) {
-    return 0.01;
-}
-*/
-

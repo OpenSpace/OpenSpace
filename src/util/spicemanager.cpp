@@ -100,7 +100,6 @@ using std::string;
 
 namespace openspace {
     
-    
 SpiceManager::SpiceException::SpiceException(const string& msg)
     : ghoul::RuntimeError(msg, "Spice")
 {

@@ -30,16 +30,13 @@
 #include <memory>
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace openspace::globebrowsing::cache {
 
 /**
  * Owner of texture data used for tiles. Instead of dynamically allocating textures one
  * by one, they are created once and reused.
  */
-class TextureContainer
-{
+class TextureContainer {
 public:
     /**
      * \param initData is the description of the texture type.
@@ -74,8 +71,6 @@ private:
     size_t _numTextures;
 };
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::cache
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__

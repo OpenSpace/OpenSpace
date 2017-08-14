@@ -27,8 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 /**
  * This concrete subclass of Property handles a single parameter value that is of type
@@ -52,27 +51,19 @@ namespace properties {
 template <typename T>
 class TemplateProperty : public Property {
 public:
-    typedef T ValueType;
-
-    /**
-     * The constructor initializing the TemplateProperty with the provided
-     * <code>identifier</code> and human-readable <code>guiName</code>. The default value
-     * for the stored type <code>T</code> is retrieved using the PropertyDelegate's
-     * PropertyDelegate::defaultValue method, which must be specialized for new types or
-     * a compile-error will occur.
-     * \param identifier The identifier that is used for this TemplateProperty
-     * \param guiName The human-readable GUI name for this TemplateProperty
-     */
-    TemplateProperty(std::string identifier, std::string guiName,
-        Property::Visibility visibility = Visibility::User);
+    using ValueType = T;
 
     /**
      * The constructor initializing the TemplateProperty with the provided
      * <code>identifier</code>, human-readable <code>guiName</code> and provided
      * <code>value</code>.
+     * \param info The PropertyInfo structure that contains all the required static
+     * information for initializing this Property.
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
      */
-    TemplateProperty(std::string identifier, std::string guiName, T value,
-        Property::Visibility visibility = Visibility::User);
+    TemplateProperty(Property::PropertyInfo info,
+        T value = PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>());
 
     /**
      * Returns the class name for this TemplateProperty. The default implementation makes
@@ -91,7 +82,7 @@ public:
     virtual ghoul::any get() const override;
 
     /**
-     * Sets the value fro the provided ghoul::any object. If the types between
+     * Sets the value from the provided ghoul::any object. If the types between
      * <code>T</code> and <code>value</code> disagree, an error is logged and the stored
      * value remains unchanged.
      */
@@ -160,7 +151,7 @@ public:
 
     /**
      * The assignment operator allows the TemplateProperty's value to be set without using
-     * the TemplateProperty::set method. It will be done internally by thos method and it
+     * the TemplateProperty::set method. It will be done internally by this method and it
      * allows assignments such as <code>prop = T(1)</code>.
      * \param val The value that should be set.
      */
@@ -186,8 +177,7 @@ protected:
     T _value;
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #include "openspace/properties/templateproperty.inl"
 

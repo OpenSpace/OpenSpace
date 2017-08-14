@@ -34,6 +34,15 @@
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
+
+namespace {
+    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size",
+        "This value explicitly specifies the size of the screen space plane."
+    };
+} // namespace
+
 namespace openspace {
 
 documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
@@ -41,14 +50,13 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     return {
         "ScreenSpace Framebuffer",
         "base_screenspace_framebuffer",
-        {},
-        Exhaustive::Yes
+        {}
     };
 }
 
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary) 
     : ScreenSpaceRenderable(dictionary)
-    , _size("size", "Size", glm::vec4(0), glm::vec4(0), glm::vec4(2000))
+    , _size(SizeInfo, glm::vec4(0), glm::vec4(0), glm::vec4(16384))
     , _framebuffer(nullptr)
 {
     documentation::testSpecificationAndThrow(
@@ -63,13 +71,11 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
     glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
     addProperty(_size);
     _size.set(glm::vec4(0, 0, resolution.x,resolution.y));
-
-    _scale.setValue(1.0f);
 }
 
-ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer(){}
+ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
 
-bool ScreenSpaceFramebuffer::initialize(){
+bool ScreenSpaceFramebuffer::initialize() {
     _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
 
     createPlane();
@@ -79,7 +85,7 @@ bool ScreenSpaceFramebuffer::initialize(){
     return isReady();
 }
 
-bool ScreenSpaceFramebuffer::deinitialize(){
+bool ScreenSpaceFramebuffer::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -88,7 +94,7 @@ bool ScreenSpaceFramebuffer::deinitialize(){
 
     _texture = nullptr;
 
-     RenderEngine& renderEngine = OsEng.renderEngine();
+    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
@@ -120,7 +126,7 @@ void ScreenSpaceFramebuffer::render() {
         glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_ALPHA_TEST);
-        for(auto renderFunction : _renderFunctions){
+        for (const auto& renderFunction : _renderFunctions) {
             (*renderFunction)();
         }
         _framebuffer->deactivate();
@@ -142,43 +148,50 @@ void ScreenSpaceFramebuffer::render() {
     }
 }
 
+void ScreenSpaceFramebuffer::update() {}
 
-void ScreenSpaceFramebuffer::update(){}
-
-bool ScreenSpaceFramebuffer::isReady() const{
+bool ScreenSpaceFramebuffer::isReady() const {
     bool ready = true;
-    if (!_shader)
+    if (!_shader) {
         ready &= false;
-    if(!_texture)
+    }
+    if (!_texture) {
         ready &= false;
+    }
     return ready;
 }
 
-
-void ScreenSpaceFramebuffer::setSize(glm::vec4 size){
+void ScreenSpaceFramebuffer::setSize(glm::vec4 size) {
     _size.set(size);
 }
 
-void ScreenSpaceFramebuffer::addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction){
+void ScreenSpaceFramebuffer::addRenderFunction(
+                                    std::shared_ptr<std::function<void()>> renderFunction)
+{
     _renderFunctions.push_back(renderFunction);
 }
 
-void ScreenSpaceFramebuffer::removeAllRenderFunctions(){
+void ScreenSpaceFramebuffer::removeAllRenderFunctions() {
     _renderFunctions.clear();
 }
 
-void ScreenSpaceFramebuffer::createFragmentbuffer(){
+void ScreenSpaceFramebuffer::createFragmentbuffer() {
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
-    _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(_originalViewportSize.x, _originalViewportSize.y, 1));
+    _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(
+        _originalViewportSize.x,
+        _originalViewportSize.y,
+        1
+    ));
     _texture->uploadTexture();
     _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     _framebuffer->deactivate();
 }
 
-int ScreenSpaceFramebuffer::id(){
+int ScreenSpaceFramebuffer::id() {
     static int id = 0;
     return id++;
 }
+
 } //namespace openspace

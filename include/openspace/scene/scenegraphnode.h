@@ -75,8 +75,8 @@ public:
 
     static std::unique_ptr<SceneGraphNode> createFromDictionary(const ghoul::Dictionary& dictionary);
 
-    bool initialize();
-    bool deinitialize();
+    void initialize();
+    void deinitialize();
 
     void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
     void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
