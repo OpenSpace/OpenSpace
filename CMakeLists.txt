@@ -189,7 +189,7 @@ if (OPENSPACE_HAVE_TESTS)
         set(BUILD_GMOCK OFF CACHE BOOL "")
         set(gtest_force_shared_crt ON CACHE BOOL "")
         add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
-    set_property(TARGET gtest PROPERTY FOLDER "External")
+        set_property(TARGET gtest PROPERTY FOLDER "External")
         set_property(TARGET gtest_main PROPERTY FOLDER "External")
     endif ()
 

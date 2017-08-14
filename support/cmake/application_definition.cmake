@@ -25,15 +25,9 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
 function (create_new_application application_name)
-    set(sources ${ARGN})
-
     message(STATUS "Configuring application ${application_name}")
 
-    add_executable(
-        ${application_name}
-        ${sources}
-    )
-
+    add_executable(${application_name} ${ARGN})
     set_openspace_compile_settings(${application_name})
 
     if (WIN32)
@@ -44,7 +38,6 @@ function (create_new_application application_name)
             "${CURL_ROOT_DIR}/lib/libeay32.dll"
             "${CURL_ROOT_DIR}/lib/ssleay32.dll"
             ${ext_lib}
-
         )
         ghl_copy_shared_libraries(${application_name} ${OPENSPACE_EXT_DIR}/ghoul)
     endif ()

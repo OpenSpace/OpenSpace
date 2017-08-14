@@ -35,8 +35,6 @@ include(GenerateExportHeader)
 # The 'library_mode' determines whether the module is linked STATIC or SHARED
 # Dependencies will have to be set in a file called "include.cmake" 
 function (create_new_module module_name output_library_name library_mode)
-    set(sources ${ARGN})
-
     # Create a library name of the style: openspace-module-${name}
     create_library_name(${module_name} library_name)
 
@@ -46,14 +44,12 @@ function (create_new_module module_name output_library_name library_mode)
     get_module_files(${module_name} module_files)
 
     # Create the library
-    add_library(${library_name} ${library_mode} ${module_files} ${sources})
+    add_library(${library_name} ${library_mode} ${module_files} ${ARGN})
 
     # Set compile settings that are common to all modules
     set_openspace_compile_settings(${library_name})
 
     handle_module_dependencies(${library_name} ${module_name})
-
-    set(${output_library_name} ${library_name} PARENT_SCOPE)
 
     if ("${library_mode}" STREQUAL "SHARED")
         # If it is a shared library, we want to generate the export header
@@ -63,7 +59,6 @@ function (create_new_module module_name output_library_name library_mode)
             EXPORT_FILE_NAME
             ${CMAKE_BINARY_DIR}/_generated/include/${lower_module_name}_export.h
         )
-
     endif ()
 
     # This is an ugly hack as we can't inject a variable into a scope two parents above
@@ -71,6 +66,8 @@ function (create_new_module module_name output_library_name library_mode)
     # instead
     # This value is used in handle_modules.cmake::handle_modules
     set_property(GLOBAL PROPERTY CurrentModuleClassName "${module_name}Module")
+    
+    set(${output_library_name} ${library_name} PARENT_SCOPE)
 endfunction ()
 
 

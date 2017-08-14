@@ -24,6 +24,7 @@
 
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake) 
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
 
 #####
@@ -82,22 +83,15 @@ if (OPENSPACE_SPOUT_SUPPORT)
     set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
 endif ()
 
-
-
-
+if (OPENSPACE_SPOUT_SUPPORT)
+    add_external_library_dependencies(${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll)
+endif ()
 
 create_new_application(OpenSpace
     ${SGCT_OPENVR_FILES}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
 )
-
-if (OPENSPACE_SPOUT_SUPPORT)
-    ghl_copy_files(
-        OpenSpace
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll
-    )
-endif ()
 
 target_include_directories(
     OpenSpace PRIVATE
