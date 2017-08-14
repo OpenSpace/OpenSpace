@@ -186,6 +186,7 @@ function (handle_modules internal_module_path external_modules_paths)
     )
 
     foreach (path ${module_paths})
+        list(APPEND MODULE_PATHS "    \"${path}\",\n")
         # The module path should include the 'modules' directory, which is removed for the
         # include path to make all of the includes look the same
         list(APPEND MODULE_PATHS "    \"${path}/modules\",\n")
@@ -205,7 +206,6 @@ function (handle_modules internal_module_path external_modules_paths)
         string(REPLACE "\\" "/" MODULE_PATHS ${MODULE_PATHS})
     endif ()
 
-    
     configure_file(
         ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
         ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
@@ -224,12 +224,23 @@ endfunction()
 function (get_unique_include_paths module_paths internal_module_path result)
     set(res "")
     foreach (p ${all_module_paths})
-        get_filename_component(base_dir "${p}/../.." ABSOLUTE)
+        get_filename_component(base_dir_parent "${p}/.." ABSOLUTE)
+        get_filename_component(base_dir_grandparent "${p}/../.." ABSOLUTE)
         get_filename_component(int_dir "${internal_module_path}/.." ABSOLUTE)
-        if (NOT ${base_dir} STREQUAL ${int_dir})
-            list(APPEND res ${base_dir})
+        if (NOT ${base_dir_grandparent} STREQUAL ${int_dir})
+            # We need to add both parent and grantparent directory:
+            # The grandparent has to be added if we have an external module in the path
+            # x/modules/name and we need to add 'x' to the module search path such that
+            # people can write #include <modules/name/namemodule.h>
+            #
+            # The parent needs to be included for modules in subdirectories of the form
+            # openspace/modules/dir/name such that 'dir' is included in the search path
+            list(APPEND res ${base_dir_parent})
+            list(APPEND res ${base_dir_grandparent})
         endif ()
     endforeach ()
+
+    list(REMOVE_DUPLICATES res)
     set(${result} ${res} PARENT_SCOPE)
 endfunction ()
 
@@ -315,7 +326,11 @@ function (get_individual_modules path module_names module_paths)
             list(APPEND names ${dir})
             list(APPEND paths ${path}/${dir})
         else ()
-            message(STATUS "Skipping ${dir} as ${dir}/CMakeLists.txt does not exist")
+            # The CMakeLists.txt does not exist, so it might be a group of subdirectories
+            get_individual_modules(${path}/${dir} _mod_names _mod_paths)
+            list(APPEND names ${_mod_names})
+            list(APPEND paths ${_mod_paths})
+            # message(STATUS "Skipping ${dir} as ${dir}/CMakeLists.txt does not exist")
         endif ()
     endforeach ()
 
