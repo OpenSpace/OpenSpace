@@ -70,6 +70,8 @@ private:
         properties::BoolProperty roll;
         properties::BoolProperty rotational;
         properties::BoolProperty zoom;
+
+        properties::FloatProperty friction;
     };
 
     Friction _friction;
@@ -77,7 +79,6 @@ private:
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _sensitivity;
-    properties::FloatProperty _motionLag;
 
     MouseStates _mouseStates;
 
@@ -96,11 +97,9 @@ private:
      * from the global to the current total rotation so that
      * <code>cameraRotation = globalRotation * localRotation</code>. 
      */
-    CameraRotationDecomposition decomposeCameraRotation(
-                                                   const glm::dvec3& cameraPosition,
-                                                   const glm::dquat& cameraRotation,
-                                                   const glm::dvec3& cameraLookUp,
-                                                   const glm::dvec3& cameraViewDirection);
+    CameraRotationDecomposition decomposeCameraRotation(const glm::dvec3& cameraPosition,
+        const glm::dquat& cameraRotation, const glm::dvec3& cameraLookUp,
+        const glm::dvec3& cameraViewDirection);
 
     /*
      * Perform a camera roll on the local camera rotation

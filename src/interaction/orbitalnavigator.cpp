@@ -93,10 +93,12 @@ OrbitalNavigator::Friction::Friction()
     , roll(RollFrictionInfo, true)
     , rotational(RotationalFrictionInfo, true)
     , zoom(ZoomFrictionInfo, true)
+    , friction(FrictionInfo, 0.5f, 0.f, 1.f)
 {
     addProperty(roll);
     addProperty(rotational);
     addProperty(zoom);
+    addProperty(friction);
 }
 
 OrbitalNavigator::OrbitalNavigator()
@@ -104,8 +106,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 2.0f, 0.0f, 10.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
-    , _motionLag(FrictionInfo, 0.5f, 0.f, 1.f)
-    , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_motionLag + 0.0000001))
+    , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
 {
     auto smoothStep = 
         [](double t) {
@@ -144,11 +145,12 @@ OrbitalNavigator::OrbitalNavigator()
     _friction.zoom.onChange([&]() {
         _mouseStates.setVerticalFriction(_friction.zoom);
     });
+    _friction.friction.onChange([&]() {
+        _mouseStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
+    });
+
     _sensitivity.onChange([&]() {
         _mouseStates.setSensitivity(_sensitivity * pow(10.0,-4));
-    });
-    _motionLag.onChange([&]() {
-        _mouseStates.setVelocityScaleFactor(1 / (_motionLag + 0.0000001));
     });
 
     addPropertySubOwner(_friction);
@@ -156,7 +158,6 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);
-    addProperty(_motionLag);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
