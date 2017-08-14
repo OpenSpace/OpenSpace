@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIPROPERTYCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIPROPERTYCOMPONENT___H__
 
 #include <modules/imgui/include/guicomponent.h>
 
@@ -70,4 +70,4 @@ protected:
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIPROPERTYCOMPONENT___H__
