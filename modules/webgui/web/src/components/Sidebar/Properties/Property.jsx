@@ -9,7 +9,7 @@ class Property extends Component {
 
     this.state = { value: props.Value };
 
-    this.onInput = this.onInput.bind(this);
+    this.onChange = this.onChange.bind(this);
     this.updateValue = this.updateValue.bind(this);
   }
 
@@ -21,7 +21,7 @@ class Property extends Component {
     DataManager.unsubscribe(this.uri, this.updateValue);
   }
 
-  onInput(event) {
+  onChange(event) {
     const { value } = event.currentTarget;
 
     this.saveValue(value);
@@ -38,7 +38,6 @@ class Property extends Component {
   get inputType() {
     const { Description } = this.props;
     switch (Description.Type) {
-      case 'BoolProperty':
       case 'StringProperty':
       default:
         return Input;
@@ -54,7 +53,7 @@ class Property extends Component {
 
   /**
    * New value received from OpenSpace
-   * @param data
+   * @param Value - the value
    */
   updateValue({ Value }) {
     this.setState({ value: Value });
@@ -65,14 +64,14 @@ class Property extends Component {
     const { value } = this.state;
     const PropInput = this.inputType;
     return (
-      <PropInput value={value} placeholder={Description.Name} onChange={this.onInput} />
+      <PropInput value={value} placeholder={Description.Name} onChange={this.onChange} />
     );
   }
 }
 
 Property.propTypes = {
   Description: PropTypes.object,
-  Value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string, PropTypes.number]).isRequired,
+  Value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
 
