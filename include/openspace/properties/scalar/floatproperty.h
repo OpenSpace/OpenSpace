@@ -44,7 +44,7 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float);
+REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float)
 
 } // namespace openspace::properties
 

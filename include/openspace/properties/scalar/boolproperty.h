@@ -44,7 +44,7 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(BoolProperty, bool);
+REGISTER_TEMPLATEPROPERTY_HEADER(BoolProperty, bool)
 
 } // namespace openspace::properties
 

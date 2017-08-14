@@ -72,6 +72,7 @@ public:
     bool loggingEnabled() const;
 
     PerformanceLayout* performanceData();
+
 private:
     bool _doPerformanceMeasurements;
     bool _loggingEnabled;

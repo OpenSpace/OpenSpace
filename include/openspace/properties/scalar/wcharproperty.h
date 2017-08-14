@@ -44,7 +44,7 @@
 
 namespace openspace::properties {
 
-//REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t);
+//REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t)
 
 } // namespace openspace::properties
 

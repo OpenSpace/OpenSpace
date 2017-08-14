@@ -33,7 +33,6 @@
 
 namespace {
     const char* _loggerCat = "SequenceParser";
-    const char* keyTranslation = "DataInputTranslation";
 
     const char* PlaybookIdentifierName = "Playbook";
 } // namespace
@@ -51,7 +50,7 @@ std::vector<std::pair<double, std::string>> SequenceParser::getTargetTimes(){
 }
 std::vector<double> SequenceParser::getCaptureProgression(){
     return _captureProgression;
-};
+}
 
 std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::getTranslation() {
     return _fileTranslation;

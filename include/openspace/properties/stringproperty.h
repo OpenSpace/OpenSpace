@@ -29,7 +29,7 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string);
+REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string)
 
 } // namespace openspace::properties
 

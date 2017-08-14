@@ -54,7 +54,6 @@ private:
     std::string _target;
     std::string _detectorType;
     std::string _sequenceID;
-    bool _badDecoding;
 };
 
 } // namespace openspace

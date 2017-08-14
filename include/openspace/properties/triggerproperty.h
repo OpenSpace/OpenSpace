@@ -49,7 +49,7 @@ public:
      * Returns the class name <code>TriggerProperty</code>.
      * \return The class name <code>TriggerProperty</code>
      */
-    std::string className() const;
+    std::string className() const override;
 
     /**
      * Accepts only the <code>LUA_TNIL</code> type and will notify all the listeners
@@ -57,14 +57,14 @@ public:
      * \param state The unused Lua state 
      * \return Returns always <code>true</code>
      */
-    bool setLuaValue(lua_State* state);
+    bool setLuaValue(lua_State* state) override;
 
     /**
      * Silently ignores any value that is passed into this function and will trigger the
      * listeners regardless of the value
      * \param value The ignored value
      */
-    void set(ghoul::any value);
+    void set(ghoul::any value) override;
 };
 
 } // namespace openspace::properties

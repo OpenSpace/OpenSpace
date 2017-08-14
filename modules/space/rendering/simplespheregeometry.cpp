@@ -30,8 +30,6 @@
 #include <openspace/util/powerscaledsphere.h>
 
 namespace {
-    const char* _loggerCat = "SimpleSphereGeometry";
-
     static const openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",

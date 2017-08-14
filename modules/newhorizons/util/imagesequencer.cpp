@@ -58,11 +58,11 @@ namespace openspace {
 ImageSequencer* ImageSequencer::_instance = nullptr;
 
 ImageSequencer::ImageSequencer()
-    : _hasData(false)
-    , _currentTime(0.0)
+    : _currentTime(0.0)
     , _previousTime(0.0)
     , _intervalLength(0.0)
     , _nextCapture(0.0)
+    , _hasData(false)
 {}
 
 ImageSequencer& ImageSequencer::ref() {
@@ -410,7 +410,7 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
                 // simple search function
                 double min = 10;                
                 auto findMin = [&](std::vector<Image> &vector)->double{
-                    for (int i = 1; i < vector.size(); i++){
+                    for (int i = 1; i < static_cast<int>(vector.size()); i++){
                         double e = std::abs(vector[i].timeRange.start - vector[i - 1].timeRange.start);
                         if (e < min){
                             min = e;
@@ -428,8 +428,8 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
                 
                 // IFF images have same time as mission planned capture, erase that event from 
                 // 'predicted event file' (mission-playbook)
-                for (int i = 0; i < source.size(); i++){
-                    for (int j = 0; j < destination.size(); j++){
+                for (size_t i = 0; i < source.size(); i++) {
+                    for (size_t j = 0; j < destination.size(); j++) {
                         double diff = std::abs(source[i].timeRange.start - destination[j].timeRange.start);
                         if (diff < epsilon){
                             source.erase(source.begin() + i);

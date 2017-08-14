@@ -31,7 +31,7 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(IVec2Property, glm::ivec2);
+REGISTER_NUMERICALPROPERTY_HEADER(IVec2Property, glm::ivec2)
 
 } // namespace openspace::properties
 

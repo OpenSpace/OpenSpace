@@ -74,7 +74,7 @@ namespace {
         // Get the total number of days as the sum of leap years + non leap years
         int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
         return result;
-    };
+    }
     
     // Returns the number of leap seconds that lie between the {year, dayOfYear}
     // time point and { 2000, 1 }
@@ -134,7 +134,7 @@ namespace {
         // The distance between the two iterators gives us the number of leap years
         int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
         return nLeapSeconds;
-    };
+    }
     
     double epochFromSubstring(const std::string& epochString) {
         // The epochString is in the form:

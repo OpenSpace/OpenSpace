@@ -330,7 +330,7 @@ void LabelParser::createImage(Image& image, double startTime, double stopTime, s
     image.timeRange = { startTime , stopTime };
     ghoul_assert(image.timeRange.isDefined(), "Invalid time range!");
     image.path = pot;
-    for (int i = 0; i < instr.size(); i++){
+    for (size_t i = 0; i < instr.size(); i++){
         image.activeInstruments.push_back(instr[i]);
     }
     image.target = targ;

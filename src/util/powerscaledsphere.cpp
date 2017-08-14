@@ -23,10 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/util/powerscaledsphere.h>
-#include <ghoul/logging/logmanager.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     const char* _loggerCat = "PowerScaledSphere";
@@ -48,7 +47,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
 
     int nr = 0;
     const float fsegments = static_cast<float>(segments);
-    const float r = static_cast<float>(radius[0]);
+    const float r = radius[0];
 
     for (int i = 0; i <= segments; i++) {
         // define an extra vertex around the y-axis due to texture mapping
@@ -56,10 +55,10 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             const float fi = static_cast<float>(i);
             const float fj = static_cast<float>(j);
             // inclination angle (north to south)
-            const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
+            const float theta = fi * glm::pi<float>() / fsegments;  // 0 -> PI
 
             // azimuth angle (east to west)
-            const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
+            const float phi = fj * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
 
             const float x = r * sin(phi) * sin(theta);  //
             const float y = r * cos(theta);             // up
@@ -77,7 +76,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             _varray[nr].location[0] = x;
             _varray[nr].location[1] = y;
             _varray[nr].location[2] = z;
-            _varray[nr].location[3] = static_cast<GLfloat>(radius[1]);
+            _varray[nr].location[3] = radius[1];
             _varray[nr].normal[0] = normal[0];
             _varray[nr].normal[1] = normal[1];
             _varray[nr].normal[2] = normal[2];
@@ -145,9 +144,9 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
             const float fi = static_cast<float>(i);
             const float fj = static_cast<float>(j);
             // inclination angle (north to south)
-            const float theta = fi * float(M_PI) / fsegments;  // 0 -> PI
+            const float theta = fi * glm::pi<float>() / fsegments;  // 0 -> PI
             // azimuth angle (east to west)
-            const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
+            const float phi = fj * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
 
             const float x = radius[0] * sin(phi) * sin(theta);  //
             const float y = radius[1] * cos(theta);             // up
@@ -213,13 +212,11 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledSphere& cpy)
 }
 
 PowerScaledSphere::~PowerScaledSphere() {
-    if (_varray)
-        delete[] _varray;
-    if (_iarray)
-        delete[] _iarray;
+    delete[] _varray;
+    delete[] _iarray;
 
-    _varray = 0;
-    _iarray = 0;
+    _varray = nullptr;
+    _iarray = nullptr;
 
     glDeleteBuffers(1, &_vBufferID);
     glDeleteBuffers(1, &_iBufferID);
@@ -258,12 +255,30 @@ bool PowerScaledSphere::initialize() {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
+    );
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
+    );
+    glVertexAttribPointer(
+        2,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
+    );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
@@ -275,7 +290,7 @@ bool PowerScaledSphere::initialize() {
 void PowerScaledSphere::render() {
     glBindVertexArray(_vaoID);  // select first VAO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }
 
