@@ -31,7 +31,7 @@
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/newhorizons/rendering/renderableplanetprojection.h>
+#include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>

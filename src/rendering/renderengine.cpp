@@ -24,8 +24,8 @@
 
 #include <openspace/rendering/renderengine.h> 
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-#include <modules/newhorizons/util/imagesequencer.h>
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
 #endif
 #include <openspace/util/syncdata.h>
 
@@ -1021,7 +1021,7 @@ void RenderEngine::renderInformation() {
         }
 
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
         double currentTime = OsEng.timeManager().time().j2000Seconds();
 
@@ -1282,8 +1282,8 @@ void RenderEngine::renderInformation() {
                     }
                 }
             }
-        }
 #endif
+        }
     }
 }
 
