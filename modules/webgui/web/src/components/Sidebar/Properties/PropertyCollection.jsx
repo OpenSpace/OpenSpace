@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ToggleContent from '../common/ToggleContent/ToggleContent';
+import ToggleContent from '../../common/ToggleContent/ToggleContent';
 import Property from './Property';
 
 const PropertyCollection = ({ name, properties }) => (

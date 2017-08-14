@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Input from '../common/Input/Input';
-import DataManager from '../../api/DataManager';
+import Input from '../../common/Input/Input';
+import DataManager from '../../../api/DataManager';
 
 class Property extends Component {
   constructor(props) {

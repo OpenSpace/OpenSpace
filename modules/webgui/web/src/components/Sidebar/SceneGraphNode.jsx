@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PropertyCollection from './PropertyCollection';
+import PropertyCollection from './Properties/PropertyCollection';
 import ToggleContent from '../common/ToggleContent/ToggleContent';
 import Button from '../common/Input/Button';
 import Icon from '../common/Icon/Icon';
