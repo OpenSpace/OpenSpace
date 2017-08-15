@@ -27,6 +27,7 @@ stage('Build') {
     parallel linux: {
         node('linux') {
             timeout(time: 45, unit: 'MINUTES') {
+                
                 deleteDir()
                 checkout scm
                 sh 'git submodule update --init --recursive'
@@ -43,16 +44,18 @@ stage('Build') {
     windows: {
         node('windows') {
             timeout(time: 45, unit: 'MINUTES') {
-                deleteDir()
-                checkout scm
-                bat '''
-                    git submodule update --init --recursive
-                    if not exist "build" mkdir "build"
-                    cd build
-                    cmake -G "Visual Studio 15 2017 Win64" .. ''' +
-                    flags + ''' ..
-                    msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:2 /p:Configuration=Debug
-                '''
+                ws("C:/J") {
+                    deleteDir()
+                    checkout scm
+                    bat '''
+                        git submodule update --init --recursive
+                        if not exist "build" mkdir "build"
+                        cd build
+                        cmake -G "Visual Studio 15 2017 Win64" .. ''' +
+                        flags + ''' ..
+                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:2 /p:Configuration=Debug
+                    '''
+                }
             }
         }
     },
