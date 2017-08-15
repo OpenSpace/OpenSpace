@@ -29,8 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "TileProviderByLevel";
-
     const char* KeyProviders = "LevelTileProviders";
     const char* KeyMaxLevel = "MaxLevel";
     const char* KeyTileProvider = "TileProvider";
@@ -52,66 +50,61 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     }
     
     for (size_t i = 0; i < providers.size(); i++) {
-        try {
-            std::string dictKey = std::to_string(i + 1);
-            ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
-                dictKey
+        std::string dictKey = std::to_string(i + 1);
+        ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
+            dictKey
+        );
+        double floatMaxLevel;
+        int maxLevel = 0;
+        if (!levelProviderDict.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
+            throw std::runtime_error(
+                "Must define key '" + std::string(KeyMaxLevel) + "'"
             );
-            double floatMaxLevel;
-            int maxLevel = 0;
-            if (!levelProviderDict.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
-                throw std::runtime_error(
-                    "Must define key '" + std::string(KeyMaxLevel) + "'"
-                );
-            }
-            maxLevel = std::round(floatMaxLevel);
-                
-            ghoul::Dictionary providerDict;
-            if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict)) {
-                throw std::runtime_error(
-                    "Must define key '" + std::string(KeyTileProvider) + "'"
-                );
-            }
-            providerDict.setValue(KeyLayerGroupID, layerGroupID);
-
-            std::string typeString;
-            providerDict.getValue("Type", typeString);
-            layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
-            if (typeString.empty()) {
-                typeID = layergroupid::TypeID::DefaultTileLayer;
-            }
-            else {
-                typeID = layergroupid::getTypeIDFromTypeString(typeString);
-            }
-
-            if (typeID == layergroupid::TypeID::Unknown) {
-                throw ghoul::RuntimeError("Unknown layer type: " + typeString);
-            }
-
-            _levelTileProviders.push_back(
-                std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(typeID, providerDict))
-            );
-
-            std::string providerName;
-            providerDict.getValue("Name", providerName);
-            _levelTileProviders.back()->setName(providerName);
-            addPropertySubOwner(_levelTileProviders.back().get());
-            
-            // Ensure we can represent the max level
-            if(static_cast<int>(_providerIndices.size()) < maxLevel){
-                _providerIndices.resize(maxLevel+1, -1);
-            }
-                
-            // map this level to the tile provider index
-            _providerIndices[maxLevel] = _levelTileProviders.size() - 1;
         }
-        catch (const ghoul::RuntimeError& e) {
-            LWARNING("Unable to create tile provider: " + std::string(e.what()));
-        }    
+        maxLevel = std::round(floatMaxLevel);
+            
+        ghoul::Dictionary providerDict;
+        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict)) {
+            throw std::runtime_error(
+                "Must define key '" + std::string(KeyTileProvider) + "'"
+            );
+        }
+        providerDict.setValue(KeyLayerGroupID, layerGroupID);
+
+        std::string typeString;
+        providerDict.getValue("Type", typeString);
+        layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
+        if (typeString.empty()) {
+            typeID = layergroupid::TypeID::DefaultTileLayer;
+        }
+        else {
+            typeID = layergroupid::getTypeIDFromTypeString(typeString);
+        }
+
+        if (typeID == layergroupid::TypeID::Unknown) {
+            throw ghoul::RuntimeError("Unknown layer type: " + typeString);
+        }
+
+        _levelTileProviders.push_back(
+            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(typeID, providerDict))
+        );
+
+        std::string providerName;
+        providerDict.getValue("Name", providerName);
+        _levelTileProviders.back()->setName(providerName);
+        addPropertySubOwner(_levelTileProviders.back().get());
+        
+        // Ensure we can represent the max level
+        if (static_cast<int>(_providerIndices.size()) < maxLevel) {
+            _providerIndices.resize(maxLevel+1, -1);
+        }
+            
+        // map this level to the tile provider index
+        _providerIndices[maxLevel] = _levelTileProviders.size() - 1;
     }
 
     // Fill in the gaps (value -1) in provider indices, from back to end
-    for(int i = _providerIndices.size() - 2; i >= 0; --i){
+    for (int i = _providerIndices.size() - 2; i >= 0; --i) {
         if(_providerIndices[i] == -1){
             _providerIndices[i] = _providerIndices[i+1];
         }

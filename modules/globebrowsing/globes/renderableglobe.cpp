@@ -258,6 +258,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
     //addPropertySubOwner(_pointGlobe.get());
+
+    // Recompile the shaders directly so that it is not done the first time the render
+    // function is called.
+    _chunkedLodGlobe->recompileShaders();
 }
 
 void RenderableGlobe::initialize() {

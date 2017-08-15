@@ -97,8 +97,6 @@ vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCamer
                    vec3 ellipsoidTangentThetaCameraSpace,
                    vec3 ellipsoidTangentPhiCameraSpace)
 {
-    return ellipsoidNormalCameraSpace;
-
 #if USE_ACCURATE_NORMALS
     float deltaPhi = mix(deltaPhi0, deltaPhi1, uv.x);
     float deltaTheta = mix(deltaTheta0, deltaTheta1, uv.y);
@@ -114,7 +112,9 @@ vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCamer
     vec3 diffPhi = deltaPhiVec + ellipsoidNormalCameraSpace * (height01 - height00);
 
     return normalize(cross(diffTheta, diffPhi));
-#endif // USE_ACCURATE_NORMALS
+#else // USE_ACCURATE_NORMALS
+    return ellipsoidNormalCameraSpace;
+#endif
 }
 
 #endif // TILE_HEIGHT_HGLSL
