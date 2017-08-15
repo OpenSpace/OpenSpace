@@ -25,13 +25,15 @@
 #ifndef __OPENSPACE_CORE___DEFERREDCASTERLISTENER___H__
 #define __OPENSPACE_CORE___DEFERREDCASTERLISTENER___H__
 
+#include <ghoul/misc/boolean.h>
+
 namespace openspace {
 
 class Deferredcaster;
 
 class DeferredcasterListener {
 public:
-    virtual void deferredcastersChanged(Deferredcaster& deferredcaster, bool attached) = 0;
+    virtual void deferredcastersChanged(Deferredcaster& deferredcaster, ghoul::Boolean isAttached) = 0;
 };
 
 } // openspace

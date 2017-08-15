@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSAPCE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
-#define __OPENSAPCE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
+#ifndef __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
+#define __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -38,4 +38,4 @@ public:
 
 } // namespace openspace
 
-#endif // __OPENSAPCE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
+#endif // __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__

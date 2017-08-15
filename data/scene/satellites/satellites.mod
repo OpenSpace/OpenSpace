@@ -1,4 +1,4 @@
-DOWNLOAD = true
+DOWNLOAD = false
 
 function dirListing(dirname)
   f = io.popen('ls ' .. dirname)

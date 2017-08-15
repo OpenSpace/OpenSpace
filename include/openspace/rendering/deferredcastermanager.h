@@ -43,6 +43,7 @@ public:
 
     void addListener(DeferredcasterListener& listener);
     void removeListener(DeferredcasterListener& listener);
+
 private:
     std::vector<Deferredcaster*> _deferredcasters;
     std::vector<DeferredcasterListener*> _listeners;

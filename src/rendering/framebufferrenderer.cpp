@@ -228,9 +228,9 @@ void FramebufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
     _dirtyRaycastData = true;
 }
 
-void FramebufferRenderer::deferredcastersChanged(Deferredcaster& deferredcaster, bool attached) {
+void FramebufferRenderer::deferredcastersChanged(Deferredcaster& deferredcaster, ghoul::Boolean isAttached) {
     (void) deferredcaster;
-    (void) attached;
+    (void) isAttached;
     _dirtyDeferredcastData = true;
 }
 
@@ -250,11 +250,7 @@ void FramebufferRenderer::update() {
     // If the resolve dictionary changed (or a file changed on disk)
     // then rebuild the resolve program.
     if (_hdrBackGroundProgram && _hdrBackGroundProgram->isDirty()) {
-        try {
-            _hdrBackGroundProgram->rebuildFromFile();
-        } catch (const ghoul::RuntimeError& error) {
-            LERRORC(error.component, error.message);
-        }
+        _hdrBackGroundProgram->rebuildFromFile();
     }
 
     if (_resolveProgram->isDirty()) {
@@ -299,11 +295,7 @@ void FramebufferRenderer::update() {
 
     for (auto &program : _deferredcastPrograms) {
         if (program.second && program.second->isDirty()) {
-            try {
-                program.second->rebuildFromFile();
-            } catch (ghoul::RuntimeError e) {
-                LERROR(e.message);
-            }
+            program.second->rebuildFromFile();
         }
     }
 }
@@ -508,15 +500,15 @@ void FramebufferRenderer::updateDeferredcastData() {
         data.id = nextId++;
         data.namespaceName = "HELPER";
 
-        std::string vsPath = deferredcaster->getDeferredcastVSPath();
-        std::string fsPath = deferredcaster->getDeferredcastFSPath();
-        std::string deferredShaderPath = deferredcaster->getDeferredcastPath();
+        std::string vsPath = deferredcaster->deferredcastVSPath();
+        std::string fsPath = deferredcaster->deferredcastFSPath();
+        std::string deferredShaderPath = deferredcaster->deferredcastPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
         //dict.setValue("fragmentPath", fsPath);
         dict.setValue("id", data.id);
-        std::string helperPath = deferredcaster->getHelperPath();
+        std::string helperPath = deferredcaster->helperPath();
         ghoul::Dictionary helpersDict;
         if (helperPath != "") {
             helpersDict.setValue("0", helperPath);

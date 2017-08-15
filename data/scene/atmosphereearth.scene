@@ -52,11 +52,11 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", true)
-     openspace.setPropertyValue("SunGlare.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
-    openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+    openspace.setPropertyValue("Sun.renderable.Enabled", true)
+    openspace.setPropertyValue("SunGlare.renderable.Enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.Enabled", false)
+    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
 
     openspace.setPropertyValue("MilkyWay.renderable.Transparency", 0.33)
     openspace.setPropertyValue("MilkyWay.renderable.Segments", 50)

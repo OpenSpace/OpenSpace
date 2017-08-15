@@ -68,9 +68,7 @@ return {
                 Type = "RenderablePlanet",
                 -- Atmosphere radius in Km
                 AtmosphereRadius = 6447.0,
-                --PlanetRadius    = 6378.137,
                 PlanetRadius    = 6356.752,
-                --PlanetRadius    = 6360.0,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {
@@ -97,7 +95,6 @@ return {
                     Coefficients = {
                         -- Reflection coefficients are given in km^-1
                         Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
-                        --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
                         -- Extinction coefficients are a fraction of the Mie coefficients
                         Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
                     },

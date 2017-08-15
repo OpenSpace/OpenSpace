@@ -270,25 +270,22 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
     bool disableShadows = false;
     if (success) {
-        std::vector< std::pair<std::string, float > > sourceArray;
+        std::vector<std::pair<std::string, float>> sourceArray;
         unsigned int sourceCounter = 1;
         while (success) {
             std::string sourceName;
-            std::stringstream ss;
-            ss << keyShadowSource << sourceCounter << ".Name";
-            success = shadowDictionary.getValue(ss.str(), sourceName);
+            success = shadowDictionary.getValue(keyShadowSource +
+                std::to_string(sourceCounter) + ".Name", sourceName);
             if (success) {
                 float sourceRadius;
-                ss.str(std::string());
-                ss << keyShadowSource << sourceCounter << ".Radius";
-                success = shadowDictionary.getValue(ss.str(), sourceRadius);
+                success = shadowDictionary.getValue(keyShadowSource +
+                    std::to_string(sourceCounter) + ".Radius", sourceRadius);
                 if (success) {
-                    sourceArray.push_back(std::pair< std::string, float>(
-                        sourceName, sourceRadius));
+                    sourceArray.emplace_back(sourceName, sourceRadius);
                 }
                 else {
-                    LWARNING("No Radius value expecified for Shadow Source Name " 
-                        << sourceName << " from " << name 
+                    LWARNING("No Radius value expecified for Shadow Source Name "
+                        << sourceName << " from " << name
                         << " planet.\nDisabling shadows for this planet.");
                     disableShadows = true;
                     break;
@@ -303,17 +300,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             unsigned int casterCounter = 1;
             while (success) {
                 std::string casterName;
-                std::stringstream ss;
-                ss << keyShadowCaster << casterCounter << ".Name";
-                success = shadowDictionary.getValue(ss.str(), casterName);
+                success = shadowDictionary.getValue(keyShadowCaster +
+                    std::to_string(casterCounter) + ".Name", casterName);
                 if (success) {
                     float casterRadius;
-                    ss.str(std::string());
-                    ss << keyShadowCaster << casterCounter << ".Radius";
-                    success = shadowDictionary.getValue(ss.str(), casterRadius);
+                    success = shadowDictionary.getValue(keyShadowCaster +
+                        std::to_string(casterCounter) + ".Radius", casterRadius);
                     if (success) {
-                        casterArray.push_back(std::pair< std::string, float>(
-                            casterName, casterRadius));
+                        casterArray.emplace_back(casterName, casterRadius);
                     }
                     else {
                         LWARNING("No Radius value expecified for Shadow Caster Name "
@@ -328,13 +322,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             }
 
             if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (const auto & source : sourceArray)
-                    for (const auto & caster : casterArray) {
-                        ShadowConf sc;
+                for (auto & source : sourceArray) {
+                    for (auto & caster : casterArray) {
+                        ShadowConfiguration sc;
                         sc.source = source;
                         sc.caster = caster;
                         _shadowConfArray.push_back(sc);
                     }
+                }
                 _shadowEnabled = true;
             }
         }
@@ -414,9 +409,9 @@ bool RenderablePlanet::isReady() const {
     return ready;
 }
 
-void RenderablePlanet::computeModelTransformMatrix(const openspace::TransformData & transformData, glm::dmat4 * modelTransform) {
+glm::dmat4 RenderablePlanet::computeModelTransformMatrix(const openspace::TransformData & transformData) {
     // scale the planet to appropriate size since the planet is a unit sphere    
-    *modelTransform =
+    glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
         glm::dmat4(transformData.rotation) *  // Spice rotation
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));
@@ -424,16 +419,15 @@ void RenderablePlanet::computeModelTransformMatrix(const openspace::TransformDat
     //earth needs to be rotated for that to work.
     glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
     glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
-    //glm::dmat4 rotProp = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0));
-    *modelTransform = *modelTransform * rot * roty /** rotProp*/;
+    
+    return modelTransform * rot * roty;
 }
 
 void RenderablePlanet::render(const RenderData& data, RendererTasks& renderTask) {
     // activate shader
     _programObject->activate();
     
-    glm::dmat4 modelTransform = glm::dmat4(1.0);
-    computeModelTransformMatrix(data.modelTransform, &modelTransform);
+    glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     

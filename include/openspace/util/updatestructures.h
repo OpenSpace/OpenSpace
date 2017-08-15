@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -37,51 +37,51 @@ class VolumeRaycaster;
 struct InitializeData {};
 
 struct TransformData {
-    glm::dvec3 translation;
-    glm::dmat3 rotation;
-    double scale;
+	glm::dvec3 translation;
+	glm::dmat3 rotation;
+	double scale;
 };
 
 struct UpdateData {
-    TransformData modelTransform;
-    const Time time;
-    const bool doPerformanceMeasurement;
+	TransformData modelTransform;
+	const Time time;
+	const bool doPerformanceMeasurement;
 };
 
 struct RenderData {
-    const Camera& camera;
-    // psc position to be removed in favor of the double precision position defined in
-    // the translation in transform.
-    psc position;
-    const Time time;
-    bool doPerformanceMeasurement;
-    int renderBinMask;
-    TransformData modelTransform;
+	const Camera& camera;
+	// psc position to be removed in favor of the double precision position defined in
+	// the translation in transform.
+	psc position;
+	const Time time;
+	bool doPerformanceMeasurement;
+	int renderBinMask;
+	TransformData modelTransform;
 };
 
 struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
+	VolumeRaycaster* raycaster;
+	RenderData renderData;
 };
 
 struct DeferredcasterTask {
-    Deferredcaster* deferredcaster;
-    RenderData renderData;
+	Deferredcaster* deferredcaster;
+	RenderData renderData;
 };
 
 struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-    std::vector<DeferredcasterTask> deferredcasterTasks;
+	std::vector<RaycasterTask> raycasterTasks;
+	std::vector<DeferredcasterTask> deferredcasterTasks;
 };
 
 struct RaycastData {
-    int id;
-    std::string namespaceName;
+	int id;
+	std::string namespaceName;
 };
 
 struct DeferredcastData {
-    int id;
-    std::string namespaceName;
+	int id;
+	std::string namespaceName;
 };
 
 /**
@@ -89,14 +89,14 @@ struct DeferredcastData {
  * a reference surface together with a height offset from that reference surface.
  */
 struct SurfacePositionHandle {
-    /// Vector from the center of the object to the reference surface of the object
-    glm::dvec3 centerToReferenceSurface;
-    /// Direction out from the reference. Can conincide with the surface normal but does
-    /// not have to.
-    glm::dvec3 referenceSurfaceOutDirection;
-    /// Height from the reference surface out to the actual surface in the direction of
-    /// the surface normal. Can be positive or negative.
-    double heightToSurface;
+	/// Vector from the center of the object to the reference surface of the object
+	glm::dvec3 centerToReferenceSurface;
+	/// Direction out from the reference. Can conincide with the surface normal but does
+	/// not have to.
+	glm::dvec3 referenceSurfaceOutDirection;
+	/// Height from the reference surface out to the actual surface in the direction of
+	/// the surface normal. Can be positive or negative.
+	double heightToSurface;
 };
 
 } // namespace openspace

@@ -404,7 +404,8 @@ vec4 calculateWater(
     const vec3 ellipsoidNormalCameraSpace,
     const vec3 lightDirectionCameraSpace,
     const vec3 positionCameraSpace,
-    out float reflectance) {
+    out float reflectance) 
+    {
 
     vec4 waterColor = vec4(0,0,0,0);
 

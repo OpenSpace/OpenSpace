@@ -39,5 +39,5 @@ void main() {
      color /= nAaSamples;
      color.rgb *= blackoutFactor;
      
-     finalColor = vec4(color.rgb, 1.0);     
+     finalColor = vec4(color.rgb, 1.0);
 }

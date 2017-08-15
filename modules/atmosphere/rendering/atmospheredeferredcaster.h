@@ -33,11 +33,10 @@
 
 //#include <ghoul/opengl/textureunit.h>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;        
-        class ProgramObject;
-    }
+namespace ghoul::opengl {
+    class Texture;        
+    class ProgramObject;
+    
 }
 
 namespace openspace {
@@ -45,8 +44,7 @@ namespace openspace {
 struct RenderData;
 struct DeferredcastData;
 
-class AtmosphereDeferredcaster : public Deferredcaster
-{
+class AtmosphereDeferredcaster : public Deferredcaster {
 public:
     enum AtmospherRenderableClass {
         NoRenderableClass = 0,
@@ -54,21 +52,20 @@ public:
         RenderableGlobe = 2
     };
 
-public:
     AtmosphereDeferredcaster();
-    virtual ~AtmosphereDeferredcaster();
+    virtual ~AtmosphereDeferredcaster() = default;
 
     void initialize();
     void deinitialize();
-    void preRaycast(const RenderData & renderData, const DeferredcastData& deferredData,
+    void preRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
                     ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RenderData & renderData, const DeferredcastData& deferredData,
+    void postRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
                      ghoul::opengl::ProgramObject& program) override;
     
-    std::string getDeferredcastPath() const override;
-    std::string getDeferredcastVSPath() const override;
-    std::string getDeferredcastFSPath() const override;
-    std::string getHelperPath() const override;
+    std::string deferredcastPath() const override;
+    std::string deferredcastVSPath() const override;
+    std::string deferredcastFSPath() const override;
+    std::string helperPath() const override;
 
     void preCalculateAtmosphereParam();
 
@@ -119,7 +116,6 @@ private:
                               const int width, const int height) const;    
     bool isAtmosphereInFrustum(const double * MVMatrix, const glm::dvec3 position, const double radius) const;
 
-private:
 
     const double DISTANCE_CULLING = 1e10;
     
@@ -180,16 +176,16 @@ private:
     GLuint _atmosphereRenderVBO;
 
     // Atmosphere Textures Dimmensions
-    unsigned int _transmittance_table_width;
-    unsigned int _transmittance_table_height;
-    unsigned int _irradiance_table_width;
-    unsigned int _irradiance_table_height;
-    unsigned int _delta_e_table_width;
-    unsigned int _delta_e_table_height;
-    unsigned int _r_samples;
-    unsigned int _mu_samples;
-    unsigned int _mu_s_samples;
-    unsigned int _nu_samples;
+    int _transmittance_table_width;
+    int _transmittance_table_height;
+    int _irradiance_table_width;
+    int _irradiance_table_height;
+    int _delta_e_table_width;
+    int _delta_e_table_height;
+    int _r_samples;
+    int _mu_samples;
+    int _mu_s_samples;
+    int _nu_samples;
 
 
     glm::dmat4 _modelTransform;

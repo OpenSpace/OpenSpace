@@ -85,14 +85,16 @@ public:
     };
 
     // Shadow structure
-    typedef struct {
+    struct ShadowConfiguration {
         std::pair<std::string, float> source;
         std::pair<std::string, float> caster;
-    } ShadowConf;
+    };
 
     struct ShadowRenderingStruct {
-        float xu, xp;
-        float rs, rc;
+        float xu, 
+              xp;
+        float rs, 
+              rc;
         glm::vec3 sourceCasterVec;
         glm::vec3 casterPositionVec;
         bool isShadowing;
@@ -154,7 +156,7 @@ private:
 
     // Shadow
     bool _shadowEnabled;
-    std::vector< ShadowConf > _shadowConfArray;
+    std::vector<ShadowConfiguration> _shadowConfArray;
 };
 
 } // namespace openspace::globebrowsing

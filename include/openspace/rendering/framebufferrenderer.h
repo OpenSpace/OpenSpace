@@ -84,7 +84,7 @@ public:
     virtual void updateRendererData() override;
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
-    virtual void deferredcastersChanged(Deferredcaster& deferredcaster, bool attached) override;
+    virtual void deferredcastersChanged(Deferredcaster& deferredcaster, ghoul::Boolean isAttached) override;
 
 private:
 

@@ -311,21 +311,18 @@ namespace openspace {
         bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
         bool disableShadows = false;
         if (success) {
-            std::vector< std::pair<std::string, float > > sourceArray;
+            std::vector<std::pair<std::string, float>> sourceArray;
             unsigned int sourceCounter = 1;
             while (success) {
                 std::string sourceName;
-                std::stringstream ss;
-                ss << keyShadowSource << sourceCounter << ".Name";
-                success = shadowDictionary.getValue(ss.str(), sourceName);
+                success = shadowDictionary.getValue(keyShadowSource + 
+                    std::to_string(sourceCounter) + ".Name", sourceName);
                 if (success) {
                     float sourceRadius;
-                    ss.str(std::string());
-                    ss << keyShadowSource << sourceCounter << ".Radius";
-                    success = shadowDictionary.getValue(ss.str(), sourceRadius);
+                    success = shadowDictionary.getValue(keyShadowSource + 
+                        std::to_string(sourceCounter) + ".Radius", sourceRadius);
                     if (success) {
-                        sourceArray.push_back(std::pair< std::string, float>(
-                            sourceName, sourceRadius));
+                        sourceArray.emplace_back(sourceName, sourceRadius);
                     }
                     else {
                         LWARNING("No Radius value expecified for Shadow Source Name "
@@ -340,21 +337,18 @@ namespace openspace {
 
             if (!disableShadows && !sourceArray.empty()) {
                 success = true;
-                std::vector< std::pair<std::string, float > > casterArray;
+                std::vector<std::pair<std::string, float>> casterArray;
                 unsigned int casterCounter = 1;
                 while (success) {
                     std::string casterName;
-                    std::stringstream ss;
-                    ss << keyShadowCaster << casterCounter << ".Name";
-                    success = shadowDictionary.getValue(ss.str(), casterName);
+                    success = shadowDictionary.getValue(keyShadowCaster +
+                        std::to_string(casterCounter) + ".Name", casterName);
                     if (success) {
                         float casterRadius;
-                        ss.str(std::string());
-                        ss << keyShadowCaster << casterCounter << ".Radius";
-                        success = shadowDictionary.getValue(ss.str(), casterRadius);
+                        success = shadowDictionary.getValue(keyShadowCaster +
+                            std::to_string(casterCounter) + ".Radius", casterRadius);
                         if (success) {
-                            casterArray.push_back(std::pair< std::string, float>(
-                                casterName, casterRadius));
+                            casterArray.emplace_back(casterName, casterRadius);
                         }
                         else {
                             LWARNING("No Radius value expecified for Shadow Caster Name "
@@ -369,13 +363,14 @@ namespace openspace {
                 }
 
                 if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                    for (const auto & source : sourceArray)
+                    for (const auto & source : sourceArray) {
                         for (const auto & caster : casterArray) {
-                            ShadowConf sc;
+                            ShadowConfiguration sc;
                             sc.source = source;
                             sc.caster = caster;
                             _shadowConfArray.push_back(sc);
                         }
+                    }
                     _shadowEnabled = true;
                 }
             }
@@ -539,88 +534,89 @@ namespace openspace {
                 //============== Atmosphere Properties ===================
                 //========================================================
 
-                _atmosphereHeightP.set(_atmosphereRadius - _atmospherePlanetRadius);
-                _atmosphereHeightP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _atmosphereHeightP =_atmosphereRadius - _atmospherePlanetRadius;
+                _atmosphereHeightP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_atmosphereHeightP);
 
-                _groundAverageReflectanceP.set(_planetAverageGroundReflectance);
-                _groundAverageReflectanceP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _groundAverageReflectanceP = _planetAverageGroundReflectance;
+                _groundAverageReflectanceP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_groundAverageReflectanceP);
 
-                _rayleighHeightScaleP.set(_rayleighHeightScale);
-                _rayleighHeightScaleP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _rayleighHeightScaleP = _rayleighHeightScale;
+                _rayleighHeightScaleP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_rayleighHeightScaleP);
 
-                _rayleighScatteringCoeffXP.set(_rayleighScatteringCoeff.x * 1000.0f);
-                _rayleighScatteringCoeffXP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _rayleighScatteringCoeffXP = _rayleighScatteringCoeff.x * 1000.0f;
+                _rayleighScatteringCoeffXP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_rayleighScatteringCoeffXP);
 
-                _rayleighScatteringCoeffYP.set(_rayleighScatteringCoeff.y * 1000.0f);
-                _rayleighScatteringCoeffYP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _rayleighScatteringCoeffYP = _rayleighScatteringCoeff.y * 1000.0f;
+                _rayleighScatteringCoeffYP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_rayleighScatteringCoeffYP);
 
-                _rayleighScatteringCoeffZP.set(_rayleighScatteringCoeff.z * 1000.0f);
-                _rayleighScatteringCoeffZP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _rayleighScatteringCoeffZP = _rayleighScatteringCoeff.z * 1000.0f;
+                _rayleighScatteringCoeffZP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_rayleighScatteringCoeffZP);
 
-                _ozoneEnabledP.set(_ozoneLayerEnabled);
-                _ozoneEnabledP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _ozoneEnabledP = _ozoneLayerEnabled;
+                _ozoneEnabledP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_ozoneEnabledP);
 
-                _ozoneHeightScaleP.set(_ozoneHeightScale);
-                _ozoneHeightScaleP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _ozoneHeightScaleP = _ozoneHeightScale;
+                _ozoneHeightScaleP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_ozoneHeightScaleP);
 
-                _ozoneCoeffXP.set(_ozoneExtinctionCoeff.x * 100000.0f);
-                _ozoneCoeffXP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _ozoneCoeffXP = _ozoneExtinctionCoeff.x * 100000.0f;
+                _ozoneCoeffXP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_ozoneCoeffXP);
 
-                _ozoneCoeffYP.set(_ozoneExtinctionCoeff.y * 100000.0f);
-                _ozoneCoeffYP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _ozoneCoeffYP = _ozoneExtinctionCoeff.y * 100000.0f;
+                _ozoneCoeffYP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_ozoneCoeffYP);
 
-                _ozoneCoeffZP.set(_ozoneExtinctionCoeff.z * 100000.0f);
-                _ozoneCoeffZP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+
+                _ozoneCoeffZP = _ozoneExtinctionCoeff.z * 100000.0f;
+                _ozoneCoeffZP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_ozoneCoeffZP);
 
-                _mieHeightScaleP.set(_mieHeightScale);
-                _mieHeightScaleP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _mieHeightScaleP = _mieHeightScale;
+                _mieHeightScaleP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_mieHeightScaleP);
 
-                _mieScatteringCoeffXP.set(_mieScatteringCoeff.x * 1000.0f);
-                _mieScatteringCoeffXP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _mieScatteringCoeffXP = _mieScatteringCoeff.x * 1000.0f;
+                _mieScatteringCoeffXP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_mieScatteringCoeffXP);
 
-                _mieScatteringCoeffYP.set(_mieScatteringCoeff.y * 1000.0f);
-                _mieScatteringCoeffYP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _mieScatteringCoeffYP = _mieScatteringCoeff.y * 1000.0f;
+                _mieScatteringCoeffYP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_mieScatteringCoeffYP);
 
-                _mieScatteringCoeffZP.set(_mieScatteringCoeff.z * 1000.0f);
-                _mieScatteringCoeffZP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _mieScatteringCoeffZP = _mieScatteringCoeff.z * 1000.0f;
+                _mieScatteringCoeffZP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_mieScatteringCoeffZP);
 
-                _mieScatteringExtinctionPropCoefficientP.set(_mieScatteringCoeff.x / _mieExtinctionCoeff.x);
-                _mieScatteringExtinctionPropCoefficientP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _mieScatteringExtinctionPropCoefficientP = _mieScatteringCoeff.x / _mieExtinctionCoeff.x;
+                _mieScatteringExtinctionPropCoefficientP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_mieScatteringExtinctionPropCoefficientP);
 
-                _mieAsymmetricFactorGP.set(_miePhaseConstant);
-                _mieAsymmetricFactorGP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _mieAsymmetricFactorGP = _miePhaseConstant;
+                _mieAsymmetricFactorGP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_mieAsymmetricFactorGP);
 
-                _sunIntensityP.set(_sunRadianceIntensity);
-                _sunIntensityP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _sunIntensityP = _sunRadianceIntensity;
+                _sunIntensityP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_sunIntensityP);
 
-                _hdrExpositionP.set(_hdrConstant);
-                _hdrExpositionP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _hdrExpositionP = _hdrConstant;
+                _hdrExpositionP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_hdrExpositionP);
                 
-                _gammaConstantP.set(_gammaConstant);
-                _gammaConstantP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _gammaConstantP = _gammaConstant;
+                _gammaConstantP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_gammaConstantP);
 
-                _sunFollowingCameraEnabledP.set(_sunFollowingCameraEnabled);
-                _sunFollowingCameraEnabledP.onChange(std::bind(&RenderableAtmosphere::updateAtmosphereParameters, this));
+                _sunFollowingCameraEnabledP = _sunFollowingCameraEnabled;
+                _sunFollowingCameraEnabledP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_sunFollowingCameraEnabledP);
             }
         }
@@ -661,22 +657,12 @@ namespace openspace {
             }
 
             OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(*_deferredcaster.get());
-
-            std::function<void(bool)> onChange = [&](bool enabled) {
-                if (enabled) {
-                    OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(*_deferredcaster.get());
-                }
-                else {
-                    OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
-                }
-            };
         }
 
         return isReady();
     }
 
     bool RenderableAtmosphere::deinitialize() {
-
         if (_deferredcaster) {
             OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
             _deferredcaster = nullptr;
@@ -691,11 +677,9 @@ namespace openspace {
         return ready;
     }
 
-    void RenderableAtmosphere::computeModelTransformMatrix(const openspace::TransformData & transformData, 
-                                                           glm::dmat4 * modelTransform) {
+    glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const openspace::TransformData& transformData) {
         // scale the planet to appropriate size since the planet is a unit sphere    
-        *modelTransform =
-            glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
+        return glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
             glm::dmat4(transformData.rotation) *  // Spice rotation
             glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));          
     }
@@ -715,8 +699,7 @@ namespace openspace {
 
         if (_deferredcaster) {
             _deferredcaster->setTime(data.time.j2000Seconds());
-            glm::dmat4 modelTransform;
-            computeModelTransformMatrix(data.modelTransform, &modelTransform);
+            glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
             if (_atmosphereType == AtmosphereDeferredcaster::RenderablePlanet) {
                 //earth needs to be rotated
                 glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
@@ -737,8 +720,10 @@ namespace openspace {
             _hdrConstant != _hdrExpositionP ||
             _exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground() ||
             _gammaConstant != _gammaConstantP ||
-            _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP)
+            _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP) {
             executeComputation = false;
+        }
+            
 
         _atmosphereRadius = _atmospherePlanetRadius + _atmosphereHeightP;
         _planetAverageGroundReflectance = _groundAverageReflectanceP;

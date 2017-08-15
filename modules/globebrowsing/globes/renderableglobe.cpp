@@ -266,17 +266,14 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         unsigned int sourceCounter = 1;
         while (dicSuccess) {
             std::string sourceName;
-            std::stringstream ss;
-            ss << keyShadowSource << sourceCounter << ".Name";
-            dicSuccess = shadowDictionary.getValue(ss.str(), sourceName);
+            dicSuccess = shadowDictionary.getValue(keyShadowSource +
+                std::to_string(sourceCounter) + ".Name", sourceName);
             if (dicSuccess) {
                 float sourceRadius;
-                ss.str(std::string());
-                ss << keyShadowSource << sourceCounter << ".Radius";
-                dicSuccess = shadowDictionary.getValue(ss.str(), sourceRadius);
+                dicSuccess = shadowDictionary.getValue(keyShadowSource +
+                    std::to_string(sourceCounter) + ".Radius", sourceRadius);
                 if (dicSuccess) {
-                    sourceArray.push_back(std::pair< std::string, float>(
-                        sourceName, sourceRadius));
+                    sourceArray.emplace_back(sourceName, sourceRadius);                    
                 }
                 else {
                     /*LWARNING("No Radius value expecified for Shadow Source Name "
@@ -295,17 +292,14 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             unsigned int casterCounter = 1;
             while (dicSuccess) {
                 std::string casterName;
-                std::stringstream ss;
-                ss << keyShadowCaster << casterCounter << ".Name";
-                dicSuccess = shadowDictionary.getValue(ss.str(), casterName);
+                dicSuccess = shadowDictionary.getValue(keyShadowCaster +
+                    std::to_string(casterCounter) + ".Name", casterName);
                 if (dicSuccess) {
                     float casterRadius;
-                    ss.str(std::string());
-                    ss << keyShadowCaster << casterCounter << ".Radius";
-                    dicSuccess = shadowDictionary.getValue(ss.str(), casterRadius);
+                    dicSuccess = shadowDictionary.getValue(keyShadowCaster +
+                        std::to_string(casterCounter) + ".Radius", casterRadius);
                     if (dicSuccess) {
-                        casterArray.push_back(std::pair< std::string, float>(
-                            casterName, casterRadius));
+                        casterArray.emplace_back(casterName, casterRadius);
                     }
                     else {
                         /*LWARNING("No Radius value expecified for Shadow Caster Name "
@@ -320,9 +314,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             }
 
             if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (const auto & source : sourceArray)
-                    for (const auto & caster : casterArray) {
-                        ShadowConf sc;
+                for (auto source : sourceArray)
+                    for (auto caster : casterArray) {
+                        ShadowConfiguration sc;
                         sc.source = source;
                         sc.caster = caster;
                         _shadowConfArray.push_back(sc);
@@ -334,12 +328,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableGlobe::initialize() {
-
     return _distanceSwitch.initialize();
 }
 
 bool RenderableGlobe::deinitialize() {
-
     return _distanceSwitch.deinitialize();
 }
 

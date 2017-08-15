@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,25 +27,22 @@ uniform float gamma;
 
 vec3 exponentialToneMapping(vec3 color) {
   color *= exposure;
-    
+  
   color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.r);
   color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.g);
   color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.b);
     
   return color;
-
 }
 
-vec3 linearToneMapping(vec3 color)
-{
+vec3 linearToneMapping(vec3 color) {
   float tExposure = 1.0f;
   color = clamp(tExposure * color, 0.0f, 1.0f);
   color = pow(color, vec3(1.0f / gamma));
   return color;
 }
 
-vec3 simpleReinhardToneMapping(vec3 color)
-{
+vec3 simpleReinhardToneMapping(vec3 color) {
   float tExposure = 1.5f;
   color *= tExposure/(1.0f + color / tExposure);
   color = pow(color, vec3(1. / gamma));

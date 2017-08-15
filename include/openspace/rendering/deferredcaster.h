@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -54,11 +54,11 @@ public:
     virtual void postRaycast(const RenderData & renderData, const DeferredcastData& deferredData, 
                              ghoul::opengl::ProgramObject& program) {};
 
-    virtual std::string getDeferredcastPath() const = 0;
+    virtual std::string deferredcastPath() const = 0;
 
-    virtual std::string getDeferredcastVSPath() const = 0;
+    virtual std::string deferredcastVSPath() const = 0;
 
-    virtual std::string getDeferredcastFSPath() const = 0;
+    virtual std::string deferredcastFSPath() const = 0;
 
     /**
      * Return a path to a glsl file with helper functions required for the
@@ -70,7 +70,7 @@ public:
      * The shader preprocessor will have access to the #{namespace} variable (unique per helper file)
      * which should be a prefix to all symbols defined by the helper
      */
-    virtual std::string getHelperPath() const = 0;
+    virtual std::string helperPath() const = 0;
 };
 
 } // namespace openspace

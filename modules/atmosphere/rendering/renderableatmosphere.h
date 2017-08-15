@@ -62,20 +62,21 @@ namespace planetgeometry { class PlanetGeometry; }
 class RenderableAtmosphere : public Renderable {
 public:
     // Shadow structure
-    typedef struct {
+    struct ShadowConfiguration {
         std::pair<std::string, float> source;
         std::pair<std::string, float> caster;
-    } ShadowConf;
+    };
 
     struct ShadowRenderingStruct {
-        float xu, xp;
-        float rs, rc;
+        float xu, 
+              xp;
+        float rs, 
+              rc;
         glm::vec3 sourceCasterVec;
         glm::vec3 casterPositionVec;
         bool isShadowing;
     };
 
-public:
     RenderableAtmosphere(const ghoul::Dictionary& dictionary);
 
     bool initialize() override;
@@ -88,10 +89,8 @@ public:
     static documentation::Documentation Documentation();
 
 private: 
-    void computeModelTransformMatrix(const openspace::TransformData & transformData, glm::dmat4 * modelTransform);
+    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& transformData);
     void updateAtmosphereParameters();
-
-private:
     
     AtmosphereDeferredcaster::AtmospherRenderableClass _atmosphereType;
 
@@ -148,7 +147,7 @@ private:
 
     glm::dmat3 _stateMatrix;
 
-    std::vector< ShadowConf > _shadowConfArray;
+    std::vector<ShadowConfiguration> _shadowConfArray;
 
     
 };

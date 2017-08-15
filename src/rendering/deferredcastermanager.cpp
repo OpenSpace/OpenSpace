@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,21 +28,21 @@
 #include <string>
 
 namespace {
-    const std::string _loggerCat = "DeferredcasterManager";
+    const char* _loggerCat = "DeferredcasterManager";
 }
 
 namespace openspace {
 
-DeferredcasterManager::DeferredcasterManager() {}
+DeferredcasterManager::DeferredcasterManager() = default;
 
-DeferredcasterManager::~DeferredcasterManager() {}
+DeferredcasterManager::~DeferredcasterManager() = default;
 
 void DeferredcasterManager::attachDeferredcaster(Deferredcaster& deferredcaster) {
     if (!isAttached(deferredcaster)) {
         _deferredcasters.push_back(&deferredcaster);
     }
     for (auto &listener : _listeners) {
-        listener->deferredcastersChanged(deferredcaster, true);
+        listener->deferredcastersChanged(deferredcaster, ghoul::Boolean::Yes);
     }
 }
 
@@ -51,7 +51,7 @@ void DeferredcasterManager::detachDeferredcaster(Deferredcaster& deferredcaster)
     if (it != _deferredcasters.end()) {
         _deferredcasters.erase(it);
         for (auto &listener : _listeners) {
-            listener->deferredcastersChanged(deferredcaster, false);
+            listener->deferredcastersChanged(deferredcaster, ghoul::Boolean::No);
         }
     }
 }
