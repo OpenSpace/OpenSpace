@@ -24,8 +24,8 @@
 
 #include <openspace/rendering/renderengine.h> 
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-#include <modules/newhorizons/util/imagesequencer.h>
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
 #endif
 #include <openspace/util/syncdata.h>
 
@@ -73,10 +73,6 @@
 
 #include <array>
 #include <stack>
-
-// ABuffer defines
-#define RENDERER_FRAMEBUFFER 0
-#define RENDERER_ABUFFER 1
 
 #include "renderengine_lua.inl"
 
@@ -1033,7 +1029,7 @@ void RenderEngine::renderInformation() {
         }
 
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
         bool hasNewHorizons = scene() && scene()->sceneGraphNode("NewHorizons");
         double currentTime = OsEng.timeManager().time().j2000Seconds();
 
@@ -1046,7 +1042,7 @@ void RenderEngine::renderInformation() {
                     //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
                     static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
                     static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
-                    static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+                    // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
                     static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
                     // Add spacing
@@ -1251,19 +1247,19 @@ void RenderEngine::renderInformation() {
                         "Active Instruments:"
                         );
 
-                    for (auto t : activeMap) {
-                        if (t.second == false) {
+                    for (auto m : activeMap) {
+                        if (m.second == false) {
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "| |"
-                                );
+                            );
                             RenderFontCr(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "    %5s",
-                                t.first.c_str()
-                                );
+                                m.first.c_str()
+                            );
 
                         }
                         else {
@@ -1271,31 +1267,31 @@ void RenderEngine::renderInformation() {
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "|"
-                                );
-                            if (t.first == "NH_LORRI") {
+                            );
+                            if (m.first == "NH_LORRI") {
                                 RenderFont(*_fontInfo,
                                     penPosition,
                                     firing,
                                     " + "
-                                    );
+                                );
                             }
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "  |"
-                                );
+                            );
                             RenderFontCr(*_fontInfo,
                                 penPosition,
                                 active,
                                 "    %5s",
-                                t.first.c_str()
-                                );
+                                m.first.c_str()
+                            );
                         }
                     }
                 }
             }
-        }
 #endif
+        }
     }
 }
 
@@ -1380,13 +1376,13 @@ void RenderEngine::renderScreenLog() {
         //                    const float font_with_light = 5;
         RenderFont(
             *_fontLog,
-            glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 39 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             color * alpha,
             "%s",                                    // Format
             lvl.c_str());        // Pad category with "..." if exceeds category_length
 
         RenderFont(*_fontLog,
-            glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 53 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             White * alpha,
             "%s",                                    // Format
             message.c_str());        // Pad category with "..." if exceeds category_length

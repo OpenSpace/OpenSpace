@@ -26,16 +26,16 @@
 
 namespace openspace::properties {
 
-// The following macros can be used to quickly generate the necessary PropertyDelegate
-// specializations required by the TemplateProperty class. Use the
-// REGISTER_TEMPLATEPROPERTY_HEADER    macro in the header file and the
-// REGISTER_TEMPLATEPROPERTY_SOURCE macro in the source file of your new specialization of
-// a TemplateProperty
+    // The following macros can be used to quickly generate the necessary PropertyDelegate
+    // specializations required by the TemplateProperty class. Use the
+    // REGISTER_TEMPLATEPROPERTY_HEADER    macro in the header file and the
+    // REGISTER_TEMPLATEPROPERTY_SOURCE macro in the source file of your new specialization of
+    // a TemplateProperty
 
 
-// CLASS_NAME = The string that the Property::className() should return as well as the
-//              C++ class name for which a typedef will be created
-// TYPE       = The template parameter T for which the TemplateProperty is specialized
+    // CLASS_NAME = The string that the Property::className() should return as well as the
+    //              C++ class name for which a typedef will be created
+    // TYPE       = The template parameter T for which the TemplateProperty is specialized
 #define REGISTER_TEMPLATEPROPERTY_HEADER(CLASS_NAME, TYPE)                               \
     using CLASS_NAME = TemplateProperty<TYPE>;                                           \
                                                                                          \
@@ -105,40 +105,38 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State * state, \
-                                                                      bool& success)     \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* l,      \
+                                                                      bool& s)           \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(state, success);                               \
+        return FROM_LUA_LAMBDA_EXPRESSION(l, s);                                         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State * state,   \
-                                                                    TYPE value)          \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l, TYPE v)\
     {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(state, value);                                   \
+        return TO_LUA_LAMBDA_EXPRESSION(l, v);                                           \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
-    int PropertyDelegate<TemplateProperty<TYPE>>::typeLua()                              \
-    {                                                                                    \
+    int PropertyDelegate<TemplateProperty<TYPE>>::typeLua() {                            \
         return LUA_TYPE;                                                                 \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
-                                                              bool& success)             \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string v,             \
+                                                              bool& s)                   \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(value, success);                            \
+        return FROM_STRING_LAMBDA_EXPRESSION(v, s);                                      \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
-                                                            TYPE inValue)                \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outVal,         \
+                                                            TYPE inVal)                  \
     {                                                                                    \
-        return TO_STRING_LAMBDA_EXPRESSION(outValue, inValue);                           \
+        return TO_STRING_LAMBDA_EXPRESSION(outVal, inVal);                               \
     }                                                                                    \
 
 
@@ -170,16 +168,13 @@ TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
 }
 
 template <typename T>
-T openspace::properties::TemplateProperty<T>::value() const
-{
+T openspace::properties::TemplateProperty<T>::value() const {
     return _value;
 }
 
 template <typename T>
-void openspace::properties::TemplateProperty<T>::setValue(T val)
-{
-    const bool changed = (val != _value);
-    if (changed) {
+void openspace::properties::TemplateProperty<T>::setValue(T val) {
+    if (val != _value) {
         _value = std::move(val);
         notifyListener();
     }

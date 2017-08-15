@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include "gtest/gtest.h"
-
 #include <openspace/scene/assetloader.h>
+
 #include <openspace/scene/sceneloader.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/documentation/documentation.h>

@@ -38,8 +38,8 @@
 namespace {
     const char* _loggerCat = "SceneLoader";
     const char* KeyPathScene = "ScenePath";
-    const std::string KeyAssets = "Assets";
-    const std::string AssetExtension = ".asset";
+    const char* KeyAssets = "Assets";
+    const char* AssetExtension = ".asset";
 
     const char* KeyCamera = "Camera";
     const char* KeyCameraFocus = "Focus";

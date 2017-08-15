@@ -407,38 +407,85 @@ void RenderableStars::update(const UpdateData&) {
         const int colorOption = _colorOption;
         switch (colorOption) {
         case ColorOption::Color:
-            glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
-                reinterpret_cast<void*>(offsetof(ColorVBOLayout, position)));
-            glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
-                reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor)));
+            glVertexAttribPointer(
+                positionAttrib,
+                4,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                nullptr // = offsetof(ColorVBOLayout, position)
+            );
+            glVertexAttribPointer(
+                brightnessDataAttrib,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor))
+            );
             
             break;
         case ColorOption::Velocity:
             {
-                glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, position)));
-                glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor)));
+                glVertexAttribPointer(
+                    positionAttrib,
+                    4,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    nullptr // = offsetof(VelocityVBOLayout, position)
+                );
+                glVertexAttribPointer(
+                    brightnessDataAttrib,
+                    3,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor))
+                );
 
                 GLint velocityAttrib = _program->attributeLocation("in_velocity");
                 glEnableVertexAttribArray(velocityAttrib);
-                glVertexAttribPointer(velocityAttrib, 3, GL_FLOAT, GL_TRUE, stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)));
+                glVertexAttribPointer(
+                    velocityAttrib,
+                    3,
+                    GL_FLOAT,
+                    GL_TRUE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
+                );
 
                 break;
             }
         case ColorOption::Speed:
             {
-                glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, position)));
-                glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor)));
+                glVertexAttribPointer(
+                    positionAttrib,
+                    4,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    nullptr // = offsetof(SpeedVBOLayout, position)
+                );
+                glVertexAttribPointer(
+                    brightnessDataAttrib,
+                    3,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor))
+                );
 
                 GLint speedAttrib = _program->attributeLocation("in_speed");
                 glEnableVertexAttribArray(speedAttrib);
-                glVertexAttribPointer(speedAttrib, 1, GL_FLOAT, GL_TRUE, stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed)));
-
+                glVertexAttribPointer(
+                    speedAttrib,
+                    1,
+                    GL_FLOAT,
+                    GL_TRUE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed))
+                );
             }
         }
 

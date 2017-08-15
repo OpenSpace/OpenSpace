@@ -38,7 +38,6 @@
 namespace {
     const char* _loggerCat = "ModelGeometry";
 
-    const char* KeyName = "Name";
     const char* KeyType = "Type";
     const char* KeyGeomModelFile = "GeometryFile";
     const int8_t CurrentCacheVersion = 3;
@@ -114,7 +113,7 @@ double ModelGeometry::boundingRadius() const {
 void ModelGeometry::render() {
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glDrawElements(_mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(_mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }
 
@@ -158,7 +157,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
+        nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
     );
     glVertexAttribPointer(
         1,

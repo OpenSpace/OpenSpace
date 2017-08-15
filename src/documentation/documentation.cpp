@@ -101,8 +101,8 @@ namespace documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
-SpecificationError::SpecificationError(TestResult res, std::string component)
-    : ghoul::RuntimeError("Error in specification", std::move(component))
+SpecificationError::SpecificationError(TestResult res, std::string comp)
+    : ghoul::RuntimeError("Error in specification", std::move(comp))
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
@@ -125,24 +125,24 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
     ghoul_assert(verifier, "Verifier must not be nullptr");
 }
 
-DocumentationEntry::DocumentationEntry(std::string key, Verifier* v, Optional optional,
+DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
                                        std::string doc)
-    : DocumentationEntry(std::move(key), std::shared_ptr<Verifier>(v), optional,
+    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt,
                          std::move(doc))
 {}
 
-Documentation::Documentation(std::string n, std::string id, DocumentationEntries entries)
+Documentation::Documentation(std::string n, std::string i, DocumentationEntries ents)
     : name(std::move(n))
-    , id(std::move(id))
-    , entries(std::move(entries))
+    , id(std::move(i))
+    , entries(std::move(ents))
 {}
 
-Documentation::Documentation(std::string n, DocumentationEntries entries)
-    : Documentation(n, "", entries)
+Documentation::Documentation(std::string n, DocumentationEntries ents)
+    : Documentation(n, "", ents)
 {}
 
-Documentation::Documentation(DocumentationEntries entries)
-    : Documentation("", "", entries)
+Documentation::Documentation(DocumentationEntries ents)
+    : Documentation("", "", ents)
 {}
 
 TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dict) {

@@ -104,8 +104,6 @@ private:
     bool _hasHeightTexture;
     bool _shadowEnabled;
     double _time;
-
-    bool tempPic;
 };
 
 } // namespace openspace

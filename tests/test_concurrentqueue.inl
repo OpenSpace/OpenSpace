@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include "gtest/gtest.h"
-
 #include <openspace/util/concurrentqueue.h>
 
 #define _USE_MATH_DEFINES

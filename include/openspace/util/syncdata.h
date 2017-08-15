@@ -97,19 +97,19 @@ public:
     }
 
 protected:
-    virtual void encode(SyncBuffer* syncBuffer) {
+    virtual void encode(SyncBuffer* syncBuffer) override {
         _mutex.lock();
         syncBuffer->encode(data);
         _mutex.unlock();
     }
 
-    virtual void decode(SyncBuffer* syncBuffer) {
+    virtual void decode(SyncBuffer* syncBuffer) override {
         _mutex.lock();
         syncBuffer->decode(doubleBufferedData);
         _mutex.unlock();
     }
 
-    virtual void postsync(bool isMaster) {
+    virtual void postsync(bool isMaster) override {
         // apply synced update
         if (!isMaster) {
             _mutex.lock();

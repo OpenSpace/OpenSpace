@@ -30,7 +30,6 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const char* _loggerCat = "PlanetGeometry";
     const char* KeyType = "Type";
 } // namespace
 

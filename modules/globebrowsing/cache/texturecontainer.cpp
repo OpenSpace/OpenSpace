@@ -78,10 +78,10 @@ ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
 
 const openspace::globebrowsing::TileTextureInitData& TextureContainer::tileTextureInitData() const {
     return _initData;
-};
+}
 
 size_t TextureContainer::size() const {
     return _textures.size();
-};
+}
 
 } // namespace openspace::globebrowsing::cache

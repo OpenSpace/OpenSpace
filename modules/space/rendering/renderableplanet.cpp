@@ -46,21 +46,15 @@
 #include <memory>
 #include <fstream>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-
 namespace {
     const char* KeyGeometry = "Geometry";
     const char* KeyRadius = "Radius";
 
     static const char* _loggerCat = "RenderablePlanet";
 
-    const char* keyFrame                         = "Frame";
     const char* keyShadowGroup                   = "Shadow_Group";
     const char* keyShadowSource                  = "Source";
     const char* keyShadowCaster                  = "Caster";
-    const char* keyBody                          = "Body";
     
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
@@ -413,14 +407,14 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     // scale the planet to appropriate size since the planet is a unit sphere
     //glm::mat4 transform = glm::mat4(1);
     
     //earth needs to be rotated for that to work.
-    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
-    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
+    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), glm::half_pi<double>(), glm::dvec3(1, 0, 0));
+    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), glm::half_pi<double>(), glm::dvec3(0, -1, 0));
     //glm::dmat4 rotProp = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0));
     modelTransform = modelTransform * rot * roty /** rotProp*/;
 
@@ -434,10 +428,10 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));
 
     // Normal Transformation
-    glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
-    glm::mat4 translateCamTrans = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
-    float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
-    glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
+    //glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
+    //glm::mat4 translateCamTrans = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
+    //float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
+    //glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
 
 //    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
 //        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);

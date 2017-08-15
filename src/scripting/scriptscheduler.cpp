@@ -245,7 +245,7 @@ ScriptScheduler::progressTo(double newTime)
 
 double ScriptScheduler::currentTime() const {
     return _currentTime; 
-};
+}
 
 std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
     std::vector<ScheduledScript> result;
@@ -258,7 +258,7 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() cons
         result.push_back(std::move(script));
     }
     return result;
-};
+}
 
 LuaLibrary ScriptScheduler::luaLibrary() {    
     return {

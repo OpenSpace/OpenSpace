@@ -32,25 +32,17 @@
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
 
 #include <fstream>
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
 namespace {
-    const char* KeyReferenceFrame = "ReferenceFrame";
-
-    const char* DefaultReferenceFrame = "J2000";
-
-    float deg2rad(float deg) {
-        return static_cast<float>((deg / 360.f) * 2.f * M_PI);
-    }
     float convertHrsToRadians(float rightAscension) {
         // 360 degrees / 24h = 15 degrees/h
-        return deg2rad(rightAscension * 15);
+        return glm::radians(rightAscension * 15);
     }
 
 
@@ -170,7 +162,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
             _constellationSelection.options();
         std::vector<int> selectedIndices;
 
-        for (int i = 1; i <= selection.size(); ++i) {
+        for (size_t i = 1; i <= selection.size(); ++i) {
             const std::string s = selection.value<std::string>(std::to_string(i));
 
             auto it = std::find_if(
@@ -223,7 +215,7 @@ void RenderableConstellationBounds::initialize() {
 
     GLint positionAttrib = _program->attributeLocation("in_position");
     glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
 }
@@ -338,7 +330,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
         ra = convertHrsToRadians(ra);
 
         // Likewise, the declination is stored in degrees and needs to be converted
-        dec = deg2rad(dec);
+        dec = glm::radians(dec);
 
         // Convert the (right ascension, declination) to rectangular coordinates)
         // The 1.0 is the distance of the celestial sphere, we will scale that in the

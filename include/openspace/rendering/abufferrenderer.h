@@ -74,7 +74,7 @@ public:
     void preRaycast(const RaycasterTask& raycasterTask);
     void postRaycast(const RaycasterTask& raycasterTask);
 
-    void update();
+    void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
 
     /**

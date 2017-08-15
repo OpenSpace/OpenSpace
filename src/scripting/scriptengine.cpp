@@ -43,10 +43,6 @@
 namespace {
     const char* _loggerCat = "ScriptEngine";
 
-    const char* LuaGlobalNamespace = "_G";
-    const char* PrintFunctionName = "print";
-    //const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
-
     const int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
 
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
@@ -151,7 +147,7 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
     auto it = std::find_if(
         _registeredLibraries.begin(),
         _registeredLibraries.end(),
-        [name](const LuaLibrary& it) { return it.name == name; }
+        [name](const LuaLibrary& i) { return i.name == name; }
     );
     return (it != _registeredLibraries.end());
 }

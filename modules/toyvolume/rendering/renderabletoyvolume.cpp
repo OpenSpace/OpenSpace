@@ -37,9 +37,9 @@ namespace openspace {
 
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _scaling({ "Scaling", "Scaling", "" }, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
     , _scalingExponent({ "ScalingExponent", "Scaling Exponent", "" }, 1, -10, 20)
     , _stepSize({ "StepSize", "Step Size", "" }, 0.02f, 0.01f, 1.f) // @TODO Missing documentation
-    , _scaling({ "Scaling", "Scaling", "" }, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
     , _translation({ "Translation", "Translation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
     , _rotation({ "Rotation", "Euler rotation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f)) // @TODO Missing documentation
     , _color({ "Color", "Color", "" }, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f)) // @TODO Missing documentation

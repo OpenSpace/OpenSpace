@@ -34,10 +34,12 @@ namespace openspace::globebrowsing {
 
 struct ChunkTile {
     ChunkTile() : tile(Tile::TileUnavailable) {};
-    ChunkTile(Tile tile, TileUvTransform uvTransform, TileDepthTransform depthTransform) :
-        tile(tile),
-        uvTransform(uvTransform),
-        depthTransform(depthTransform) {};
+
+    ChunkTile(Tile t, TileUvTransform uv, TileDepthTransform depth)
+        : tile(t)
+        , uvTransform(uv)
+        , depthTransform(depth)
+    {};
 
     Tile tile;
     TileUvTransform uvTransform;

@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/verifier.h>

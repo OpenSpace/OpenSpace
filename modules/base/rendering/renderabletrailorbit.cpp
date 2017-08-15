@@ -309,7 +309,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     }
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
     _previousTime = data.time.j2000Seconds();

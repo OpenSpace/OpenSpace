@@ -62,13 +62,13 @@
 
 namespace {
     const char* _loggerCat = "Scene";
-    const char* _moduleExtension = ".mod";
-    const char* _commonModuleToken = "${COMMON_MODULE}";
+    //const char* _moduleExtension = ".mod";
+    //const char* _commonModuleToken = "${COMMON_MODULE}";
 
-    const char* KeyCamera = "Camera";
-    const char* KeyFocusObject = "Focus";
-    const char* KeyPositionObject = "Position";
-    const char* KeyViewOffset = "Offset";
+    //const char* KeyCamera = "Camera";
+    //const char* KeyFocusObject = "Focus";
+    //const char* KeyPositionObject = "Position";
+    //const char* KeyViewOffset = "Offset";
 
     const std::string KeyName = "Name";
     const std::string KeyParentName = "Parent";

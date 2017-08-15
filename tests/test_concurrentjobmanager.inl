@@ -22,9 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+
 #include "gtest/gtest.h"
 
 #include <openspace/util/concurrentjobmanager.h>
+
 #include <ghoul/misc/threadpool.h>
 
 #define _USE_MATH_DEFINES
