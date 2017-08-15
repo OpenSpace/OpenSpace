@@ -1,0 +1,70 @@
+@import "../../../styles/all";
+@import "./Input";
+
+.inputGroup {
+  position: relative;
+}
+
+.rangeLabel {
+  @extend .label;
+  display: block;
+  pointer-events: none;
+}
+
+.value {
+  position: absolute;
+  bottom: $padding-bottom;
+  left: $padding-horizontal;
+}
+
+.wide,
+.wide .range {
+  width: 100%;
+}
+
+.inputGroup {
+  .range:focus + .rangeLabel {
+    color: $green;
+  }
+
+  &:hover {
+    background: $ui-background-active;
+
+    .rangeLabel {
+      color: $text-color-focus;
+    }
+  }
+}
+
+// consider using something like https://github.com/darlanrod/input-range-scss
+.range {
+  // calculate the width of the background bar
+  --normalized-value: calc(var(--value) - var(--min));
+  --normalized-max: calc(var(--max) - var(--min));
+  --bg-width: calc(100% * var(--normalized-value) / var(--normalized-max));
+  height: $input-total-height;
+
+  // reset styles
+  background: transparent;
+  -webkit-appearance: none;
+
+  &:focus {
+    outline: 0;
+    background: $ui-background-hover;
+  }
+
+  // this cannot be completely hidden, as that destroys the input
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 100%;
+    width: 1px;
+    background: transparent;
+  }
+
+  &::-webkit-slider-runnable-track {
+    transition: $background-transition;
+    background: linear-gradient(to right, $ui-background-hover var(--bg-width), transparent var(--bg-width));
+    height: 100%;
+    min-width: 2px;
+  }
+}
