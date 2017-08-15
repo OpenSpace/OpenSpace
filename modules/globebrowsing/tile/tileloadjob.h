@@ -26,11 +26,9 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 
 #include <modules/globebrowsing/tile/tile.h>
-
+#include <openspace/util/concurrentjobmanager.h>
 
 namespace openspace::globebrowsing {
-
-#include <openspace/util/concurrentjobmanager.h>
 
 class RawTileDataReader;
 struct RawTile;
