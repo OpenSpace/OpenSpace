@@ -16,5 +16,7 @@ storiesOf('Input/NumericInput', module)
   .add('no input', () => (<NumericInput placeholder="NumericInput" />))
   .add('unwide', () => (<NumericInput placeholder="NumericInput" wide={false} />))
   .add('disabled', () => (<NumericInput placeholder="NumericInput" value={33.3} disabled />))
+  .add('inputOnly ', () => (<NumericInput placeholder="NumericInput" value={33.3} inputOnly />))
+  .add('disableInput ', () => (<NumericInput placeholder="NumericInput" value={33.3} disableInput />))
   .add('with callback', () =>
     (<NumericInput placeholder="Input" value="change me" onChange={action('input')} />));

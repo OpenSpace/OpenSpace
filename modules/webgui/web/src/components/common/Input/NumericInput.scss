@@ -3,6 +3,8 @@
 
 .inputGroup {
   position: relative;
+  box-sizing: border-box;
+  height: $input-total-height;
 }
 
 .rangeLabel {
@@ -42,7 +44,9 @@
   --normalized-value: calc(var(--value) - var(--min));
   --normalized-max: calc(var(--max) - var(--min));
   --bg-width: calc(100% * var(--normalized-value) / var(--normalized-max));
+
   height: $input-total-height;
+  margin: 0;
 
   // reset styles
   background: transparent;
