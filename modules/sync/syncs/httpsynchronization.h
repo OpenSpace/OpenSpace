@@ -25,9 +25,29 @@
 #ifndef __OPENSPACE_MODULE_SYNC___HTTPSYNCHRONIZATION___H__
 #define __OPENSPACE_MODULE_SYNC___HTTPSYNCHRONIZATION___H__
 
+#include <openspace/util/resourcesynchronization.h>
+#include <openspace/documentation/documentation.h>
+
+#include <ghoul/misc/dictionary.h>
+
 namespace openspace {
+    
+class HttpSynchronization : public ResourceSynchronization {
+public:
+    HttpSynchronization(const ghoul::Dictionary& dict);
+    bool needsSync() override;
+    std::shared_ptr<SynchronizationJob> createSynchronizationJob() override;
+    static documentation::Documentation Documentation();
+};
 
+class HttpSynchronizationJob : public SynchronizationJob {
+public:
+	HttpSynchronizationJob();
+	virtual ~HttpSynchronizationJob();
 
+	void execute() override;
+	std::shared_ptr<SynchronizationProduct> product() override;
+};
 
 } // namespace openspace
 

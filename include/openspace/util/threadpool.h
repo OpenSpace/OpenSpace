@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
+#ifndef __OPENSPACE_CORE___THREAD_POOL___H__
+#define __OPENSPACE_CORE___THREAD_POOL___H__
 
 #include <condition_variable>
 #include <functional>
@@ -35,7 +35,7 @@
 
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class ThreadPool;
 
@@ -69,6 +69,6 @@ private:
     bool stop;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
+#endif // __OPENSPACE_CORE___THREAD_POOL___H__

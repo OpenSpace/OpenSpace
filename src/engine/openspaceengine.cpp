@@ -51,6 +51,7 @@
 #include <openspace/scene/translation.h>
 #include <openspace/scene/sceneloader.h>
 #include <openspace/scene/assetloader.h>
+#include <openspace/util/resourcesynchronization.h>
 
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
@@ -179,6 +180,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Task>>(),
         "Task"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
+        "ResourceSynchronization"
     );
 
     SpiceManager::initialize();

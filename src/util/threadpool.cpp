@@ -22,13 +22,85 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___SYNCHRONIZATION___H__
-#define __OPENSPACE_MODULE_SYNC___SYNCHRONIZATION___H__
+#include <openspace/util/threadpool.h>
 
 namespace openspace {
 
+Worker::Worker(ThreadPool& pool) : pool(pool) {}
 
+void Worker::operator()() {
+    std::function<void()> task;
+    while (true) {
+        // acquire lock
+        {
+            std::unique_lock<std::mutex> lock(pool.queue_mutex);
+
+            // look for a work item
+            while (!pool.stop && pool.tasks.empty()) {
+                // if there are none wait for notification
+                pool.condition.wait(lock);
+            }
+
+            if (pool.stop) { // exit if the pool is stopped
+                return;
+            }
+
+            // get the task from the queue
+            task = pool.tasks.front();
+            pool.tasks.pop_front();
+
+        }// release lock
+
+        // execute the task
+        task();
+    }
+}
+
+ThreadPool::ThreadPool(size_t numThreads)
+    : stop(false)
+{
+    for (size_t i = 0; i < numThreads; ++i) {
+        workers.push_back(std::thread(Worker(*this)));
+    }
+}
+
+ThreadPool::ThreadPool(const ThreadPool& toCopy)
+    : ThreadPool(toCopy.workers.size())
+{ }
+
+// the destructor joins all threads
+ThreadPool::~ThreadPool() {
+    // stop all threads
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        stop = true;
+    }
+    condition.notify_all();
+
+    // join them
+    for (size_t i = 0; i < workers.size(); ++i) {
+        workers[i].join();
+    }
+}
+
+// add new work item to the pool
+void ThreadPool::enqueue(std::function<void()> f) {
+    { // acquire lock
+        std::unique_lock<std::mutex> lock(queue_mutex);
+
+        // add the task
+        tasks.push_back(f);
+    } // release lock
+
+        // wake up one thread
+    condition.notify_one();
+}
+
+void ThreadPool::clearTasks() {
+    { // acquire lock
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        tasks.clear();
+    } // release lock
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SYNC___SYNCHRONIZATION___H__

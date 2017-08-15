@@ -26,15 +26,14 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/resourcesynchronization.h
+    # ${CMAKE_CURRENT_SOURCE_DIR}/syncs/resourcesynchronization.h
     # ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/synchronization.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/resourcesynchronization.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/syncs/resourcesynchronization.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
