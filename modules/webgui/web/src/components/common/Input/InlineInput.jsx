@@ -6,7 +6,7 @@ import styles from './InlineInput.scss';
 class InlineInput extends Component {
   constructor(props) {
     super(props);
-    this.state = { value: props.value };
+    this.state = { value: props.value, widthElement: null };
 
     this.onChange = this.onChange.bind(this);
     this.setWidthElement = this.setWidthElement.bind(this);
@@ -22,12 +22,12 @@ class InlineInput extends Component {
     this.props.onChange(event);
   }
 
-  setWidthElement(elem) {
-    this.widthElement = elem;
+  setWidthElement(widthElement) {
+    this.widthElement = widthElement;
   }
 
   get width() {
-    return this.widthElement && this.widthElement.offsetWidth;
+    return this.widthElement ? this.widthElement.offsetWidth : 0;
   }
 
   render() {
