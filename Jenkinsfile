@@ -44,7 +44,7 @@ stage('Build') {
     windows: {
         node('windows') {
             timeout(time: 45, unit: 'MINUTES') {
-                ws("C:/J") {
+                ws("C:/J/${env.BRANCH_NAME}") {
                     deleteDir()
                     checkout scm
                     bat '''
