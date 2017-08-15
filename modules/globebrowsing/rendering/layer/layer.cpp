@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -337,8 +337,14 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
             );
             break;
         }
-        case layergroupid::TypeID::SolidColor:
+        case layergroupid::TypeID::SolidColor: {
+            if (initDict.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
+                glm::vec3 color;
+                initDict.getValue(ColorInfo.identifier, color);
+                _otherTypesProperties.color.setValue(color);
+            }
             break;
+        }
         default:
             throw ghoul::RuntimeError("Unable to create layer. Unknown type.");
             break;
