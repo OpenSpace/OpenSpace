@@ -9,6 +9,7 @@ const findStyles = arr => arr.split(' ')
   .map(style => styles[style] || style)
   .join(' ');
 
+// TODO: make stateless functional component
 class Popover extends Component {
   get arrowStyle() {
     return findStyles(this.props.arrow);

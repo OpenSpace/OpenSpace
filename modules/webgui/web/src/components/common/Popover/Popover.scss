@@ -2,7 +2,7 @@
 
 $background: $ui-background-solid;
 $arrow-size: $popover-arrow-size;
-$corner-radius: $arrow-size / 2;
+$popover-corner-radius: $arrow-size / 2;
 
 $padding-horizontal: 0.3rem;
 $padding-vertical: 0.5rem;
@@ -10,7 +10,7 @@ $padding: $padding-horizontal $padding-vertical;
 
 .popover {
   background: $background;
-  border-radius: $corner-radius;
+  border-radius: $popover-corner-radius;
   box-shadow: $box-shadow;
   color: $text-color-focus;
   max-width: 300px;
