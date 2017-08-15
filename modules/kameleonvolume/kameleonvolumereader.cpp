@@ -85,7 +85,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;
 
-    std::function<float(const std::string&, glm::vec3)> interpolate =
+    auto interpolate =
         [this](const std::string& variable, glm::vec3 volumeCoords) {
             return _interpolator->interpolate(
                 variable,
@@ -94,7 +94,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                 volumeCoords[2]);
         };
 
-    std::function<float(glm::vec3)> sample = [this, &variable, &interpolate](glm::vec3 volumeCoords) {
+    auto sample = [this, &variable, &interpolate](glm::vec3 volumeCoords) {
         return interpolate(variable, volumeCoords);
     };
 
