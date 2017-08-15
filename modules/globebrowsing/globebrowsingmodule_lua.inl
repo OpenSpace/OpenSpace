@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
+#include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
@@ -158,8 +159,8 @@ int goToGeo(lua_State* L) {
         return luaL_error(L, "Expected 2 or 3 arguments.");
     }
     
-    double latitude = static_cast<int>(lua_tonumber(L, 1));
-    double longitude = static_cast<int>(lua_tonumber(L, 2));
+    double latitude = static_cast<double>(lua_tonumber(L, 1));
+    double longitude = static_cast<double>(lua_tonumber(L, 2));
 
     if (nArguments == 2) {
         OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
@@ -171,6 +172,36 @@ int goToGeo(lua_State* L) {
     }
     
     return 0;
+}
+
+int getGeoPosition(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected 0 arguments.");
+    }
+
+    RenderableGlobe* globe =
+     OsEng.moduleEngine().module<GlobeBrowsingModule>()->castFocusNodeRenderableToGlobe();
+    if (!globe) {
+        return luaL_error(L, "Focus node must be a RenderableGlobe");
+    }
+
+    glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
+    glm::dmat4 inverseModelTransform =
+        OsEng.navigationHandler().focusNode()->inverseModelTransform();
+    glm::dvec3 cameraPositionModelSpace =
+        inverseModelTransform * glm::dvec4(cameraPosition, 1.0);
+    SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
+                                                                cameraPositionModelSpace);
+    
+    Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(posHandle.centerToReferenceSurface);
+    double altitude = glm::length(cameraPositionModelSpace - posHandle.centerToReferenceSurface);
+
+    lua_pushnumber(L, Angle<double>::fromRadians(geo2.lat).asDegrees());
+    lua_pushnumber(L, Angle<double>::fromRadians(geo2.lon).asDegrees());
+    lua_pushnumber(L, altitude);
+    
+    return 3;
 }
 
 } // namespace openspace::globebrowsing::luascriptfunctions
