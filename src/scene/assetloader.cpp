@@ -272,9 +272,9 @@ void AssetLoader::pushAsset(Asset* asset) {
     lua_pushcfunction(*_luaState, &assetloader::noOperation);
     lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
 
-    // Register empty data table on imported asset
+    // Register empty sync table on imported asset
     lua_newtable(*_luaState);
-    lua_setfield(*_luaState, assetTableIndex, DataTableName);
+    lua_setfield(*_luaState, assetTableIndex, SyncTableName);
 
     // Register empty dependant table on imported asset.
     // (importer => dependant object)
@@ -492,7 +492,7 @@ int AssetLoader::Asset::resolveSyncedResourceLua() {
 }
 
 AssetLoader::Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory directory)
-    : PropertyOwner("RootAsset")
+    : PropertyOwner({ "RootAsset", "Root asset" })
     , _assetDirectory(directory)
     , _loader(loader)
     , _initialized(false)
@@ -500,7 +500,7 @@ AssetLoader::Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory dire
 {}
 
 AssetLoader::Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, std::string assetPath)
-    : PropertyOwner(assetPath)
+    : PropertyOwner({ assetPath, assetPath })
     , _initialized(false)
     , _hasLuaTable(true)
     , _loader(loader)
@@ -697,8 +697,8 @@ bool AssetLoader::Asset::hasInitializedDependants(InitializationRequirement init
 
 // Dependency toggle
 AssetLoader::DependencyToggle::DependencyToggle(Asset* dependency, Asset* dependant, bool enabled)
-    : PropertyOwner(dependency->name())
-    , _enabled("enabled", "Enabled", enabled)
+    : PropertyOwner({ dependency->name(), dependency->name() })
+    , _enabled({ "enabled", "Enabled", "Enable dependency" }, enabled)
     , _dependency(dependency)
     , _dependant(dependant)
 {

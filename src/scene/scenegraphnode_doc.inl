@@ -48,11 +48,10 @@ documentation::Documentation SceneGraphNode::Documentation() {
             new StringAnnotationVerifier(
                 "If specified, this must be a name for another scenegraph node"
             ),
-            Optional::No,
+            Optional::Yes,
             "This names the parent of the currently specified scenegraph node. The "
             "parent must already exist in the scene graph. If not specified, the node "
             "will be attached to the root of the scenegraph.",
-            Optional::Yes
         },
         {
             "Renderable",

@@ -31,10 +31,10 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <modules/sync/syncs/syncrhonization.h>
-#include <modules/sync/syncs/httpsyncrhonization.h>
-#include <modules/sync/syncs/resourcesyncrhonization.h>
-#include <modules/sync/syncs/torrentsyncrhonization.h>
+#include <modules/sync/syncs/synchronization.h>
+#include <modules/sync/syncs/httpsynchronization.h>
+#include <modules/sync/syncs/resourcesynchronization.h>
+#include <modules/sync/syncs/torrentsynchronization.h>
 
 
 namespace openspace {
