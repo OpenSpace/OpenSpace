@@ -54,7 +54,7 @@ class NumericInput extends Component {
     if (this.showInput) {
       return (
         <Input
-          {...excludeKeys(this.props, 'disableInput, inputOnly')}
+          {...excludeKeys(this.props, 'disableInput inputOnly')}
           type="number"
           value={value}
           onChange={this.onChange}
@@ -65,7 +65,7 @@ class NumericInput extends Component {
     }
 
     const { placeholder, className, wide, id, min, max } = this.props;
-    const doNotInclude = 'wide onChange value className type';
+    const doNotInclude = 'wide onChange value className type disableInput inputOnly';
     const inheritedProps = excludeKeys(this.props, doNotInclude);
 
     return (
