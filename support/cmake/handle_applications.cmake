@@ -38,9 +38,8 @@ function (handle_applications)
 
         get_application_attribute_default(${app_dir} is_default_application)
         if (${is_default_application})
-            set(OPENSPACE_APPLICATION_${upper_app} ON)
+            set(OPENSPACE_APPLICATION_${upper_app} ON CACHE BOOL "Build ${app} application" FORCE)
         endif ()
-
 
         if (OPENSPACE_APPLICATION_${upper_app})
             message(STATUS "Adding application ${app}")
