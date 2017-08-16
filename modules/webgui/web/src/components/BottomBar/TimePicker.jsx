@@ -19,6 +19,10 @@ const DateStringWithTimeZone = (date, zone = 'Z') =>
   (!date.includes('Z') ? `${date}${zone}` : date);
 
 class TimePicker extends Component {
+  static togglePause() {
+    DataManager.runScript(TogglePauseScript);
+  }
+
   constructor(props) {
     super(props);
 
@@ -30,7 +34,7 @@ class TimePicker extends Component {
 
     this.subscriptionCallback = this.subscriptionCallback.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
-    this.togglePause = this.togglePause.bind(this);
+    this.now = this.now.bind(this);
     this.setDate = this.setDate.bind(this);
   }
 
@@ -43,21 +47,33 @@ class TimePicker extends Component {
     DataManager.unsubscribe(TimeKey, this.subscriptionCallback);
   }
 
-  togglePopover() {
-    this.setState({ showPopover: !this.state.showPopover });
+  get time() {
+    return this.state.time.toUTCString();
   }
 
-  togglePause() {
-    DataManager.runScript(TogglePauseScript);
-  }
-
-  /**
-   * Callback for subscription
-   * @param message [object] - message object sent from Subscription
-   */
-  subscriptionCallback(message) {
-    const time = new Date(DateStringWithTimeZone(message.time));
-    this.setState({ time, hasTime: true });
+  get popover() {
+    const { time } = this.state;
+    return (
+      <Popover className={Picker.Popover} title="Select date" closeCallback={this.togglePopover}>
+        <Calendar selected={time} activeMonth={time} onChange={this.setDate} todayButton />
+        <hr className={Popover.styles.delimiter} />
+        <div className={Popover.styles.title}>Select local time</div>
+        <div className={Popover.styles.content}>
+          <Time time={time} onChange={this.setDate} />
+        </div>
+        <hr className={Popover.styles.delimiter} />
+        <div className={Popover.styles.title}>Simulation increment</div>
+        <hr className={Popover.styles.delimiter} />
+        <div className={`${Popover.styles.row} ${Popover.styles.content}`}>
+          <Button block smalltext onClick={TimePicker.togglePause}>
+            Pause simulation
+          </Button>
+          <Button block smalltext onClick={this.now}>
+            Now
+          </Button>
+        </div>
+      </Popover>
+    );
   }
 
   setDate(time) {
@@ -69,28 +85,21 @@ class TimePicker extends Component {
     DataManager.setValue('__time', fixedTimeString);
   }
 
-  get time() {
-    return this.state.time.toUTCString();
+  togglePopover() {
+    this.setState({ showPopover: !this.state.showPopover });
   }
 
-  get popover() {
-    const { time } = this.state;
-    return (
-      <Popover className={Picker.Popover} title="Select date" closeCallback={this.togglePopover}>
-        <Calendar selected={time} activeMonth={time} onChange={this.setDate} todayButton />
-        <hr className={Popover.styles.delimiter} />
-        <div className={Popover.styles.title}>Select time</div>
-        <div className={Popover.styles.content}>
-          <Time time={time} onChange={this.setDate} />
-        </div>
-        <hr className={Popover.styles.delimiter} />
-        <p>
-          <Button block onClick={this.togglePause}>
-            Pause simulation
-          </Button>
-        </p>
-      </Popover>
-    );
+  now() {
+    this.setDate(new Date());
+  }
+
+  /**
+   * Callback for subscription
+   * @param message [object] - message object sent from Subscription
+   */
+  subscriptionCallback(message) {
+    const time = new Date(DateStringWithTimeZone(message.time));
+    this.setState({ time, hasTime: true });
   }
 
   render() {

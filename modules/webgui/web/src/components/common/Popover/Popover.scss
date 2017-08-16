@@ -18,6 +18,10 @@ $padding: $padding-horizontal $padding-vertical;
   &.small {
     max-width: 150px;
   }
+
+  > :last-child {
+    padding-bottom: $popover-corner-radius;
+  }
 }
 
 .popover header {
@@ -52,6 +56,14 @@ $padding: $padding-horizontal $padding-vertical;
   &:hover, &:focus {
     background: $ui-background-hover;
     color: $text-color-focus;
+  }
+}
+
+.row {
+  display: flex;
+
+  * + * {
+    margin-left: $popover-corner-radius;
   }
 }
 
