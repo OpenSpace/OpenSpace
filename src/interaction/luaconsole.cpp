@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -36,8 +37,6 @@
 #include <ghoul/misc/clipboard.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
-
-#include <glm/gtc/matrix_transform.hpp>
 
 #include <fstream>
 #include <string>
@@ -125,7 +124,7 @@ namespace {
 namespace openspace {
 
 LuaConsole::LuaConsole()
-    : properties::PropertyOwner("LuaConsole")
+    : properties::PropertyOwner({ "LuaConsole" })
     , _isVisible(VisibleInfo, false)
     , _remoteScripting(RemoveScriptingInfo, false)
     , _backgroundColor(
@@ -252,7 +251,7 @@ void LuaConsole::initialize() {
         GL_FLOAT,
         GL_FALSE,
         2 * sizeof(GLfloat),
-        reinterpret_cast<void*>(0)
+        nullptr
     );
 
     glBindVertexArray(0);

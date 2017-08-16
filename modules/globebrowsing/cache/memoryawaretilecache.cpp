@@ -82,7 +82,7 @@ namespace {
 namespace openspace::globebrowsing::cache {
 
 MemoryAwareTileCache::MemoryAwareTileCache()
-    : PropertyOwner("TileCache")
+    : PropertyOwner({ "TileCache" })
     , _numTextureBytesAllocatedOnCPU(0)
     , _cpuAllocatedTileData(CpuAllocatedDataInfo, 1024, 128, 2048, 1)
     , _gpuAllocatedTileData(GpuAllocatedDataInfo, 1024, 128, 2048, 1)
@@ -143,7 +143,7 @@ void MemoryAwareTileCache::clear() {
 void MemoryAwareTileCache::createDefaultTextureContainers() {
     for (int id = 0; id < layergroupid::NUM_LAYER_GROUPS; id++) {
         TileTextureInitData initData =
-            LayerManager::getTileTextureInitData(layergroupid::GroupID(id));
+            LayerManager::getTileTextureInitData(layergroupid::GroupID(id), true);
         assureTextureContainerExists(initData);
     }
 }

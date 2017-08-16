@@ -121,11 +121,11 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
             {
                 KeyType,
                 new StringAnnotationVerifier("Must name a valid Screenspace renderable"),
+                Optional::No,
                 "The type of the Screenspace renderable that is to be created. The "
                 "available types of Screenspace renderable depend on the configuration of"
                 "the application and can be written to disk on application startup into "
-                "the FactoryDocumentation.",
-                Optional::No
+                "the FactoryDocumentation."
             }
         }
     };
@@ -155,7 +155,7 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("")
+    : properties::PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
     , _useFlatScreen(FlatScreenInfo, true)
     , _euclideanPosition(
@@ -285,7 +285,7 @@ void ScreenSpaceRenderable::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     
     glEnableVertexAttribArray(1);

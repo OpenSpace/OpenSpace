@@ -100,15 +100,13 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
 KameleonPlane::~KameleonPlane() {}
 
-bool KameleonPlane::deinitialize() {
+void KameleonPlane::deinitialize() {
     IswaCygnet::deinitialize();
     _fieldlines.set(std::vector<int>());
-    return true;
 }
 
-bool KameleonPlane::initialize(){
-
-    if(!_data->groupName.empty()){
+void KameleonPlane::initialize() {
+    if (!_data->groupName.empty()) {
         initializeGroup();
     }
     
@@ -174,8 +172,6 @@ bool KameleonPlane::initialize(){
         _group->updateGroup();
     }
     updateTextureResource();
-
-    return true;
 }
 
 bool KameleonPlane::createGeometry() {

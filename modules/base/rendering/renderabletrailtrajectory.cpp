@@ -43,8 +43,6 @@
 // _endTime. This buffer is updated every frame.
 
 namespace {
-    const char* KeyTranslation = "Translation";
-
     static const openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start Time",
@@ -97,32 +95,32 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
             {
                 StartTimeInfo.identifier,
                 new StringAnnotationVerifier("A valid date in ISO 8601 format"),
-                StartTimeInfo.description,
-                Optional::No
+                Optional::No,
+                StartTimeInfo.description
             },
             {
                 EndTimeInfo.identifier,
                 new StringAnnotationVerifier("A valid date in ISO 8601 format"),
-                EndTimeInfo.description,
-                Optional::No
+                Optional::No,
+                EndTimeInfo.description
             },
             {
                 SampleIntervalInfo.identifier,
                 new DoubleVerifier,
-                SampleIntervalInfo.description,
-                Optional::No
+                Optional::No,
+                SampleIntervalInfo.description
             },
             {
                 TimeSubSampleInfo.identifier,
                 new IntVerifier,
-                TimeSubSampleInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TimeSubSampleInfo.description
             },
             {
                 RenderFullPathInfo.identifier,
                 new BoolVerifier,
-                RenderFullPathInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                RenderFullPathInfo.description
             }
         }
     };
@@ -189,8 +187,8 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 }
 
-bool RenderableTrailTrajectory::initialize() {
-    bool res = RenderableTrail::initialize();
+void RenderableTrailTrajectory::initialize() {
+    RenderableTrail::initialize();
 
     // We don't need an index buffer, so we keep it at the default value of 0
     glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
@@ -201,18 +199,16 @@ bool RenderableTrailTrajectory::initialize() {
     glGenVertexArrays(1, &_floatingRenderInformation._vaoID);
     glGenBuffers(1, &_floatingRenderInformation._vBufferID);
     _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
-
-    return res;
 }
 
-bool RenderableTrailTrajectory::deinitialize() {
+void RenderableTrailTrajectory::deinitialize() {
     glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
     glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
 
     glDeleteVertexArrays(1, &_floatingRenderInformation._vaoID);
     glDeleteBuffers(1, &_floatingRenderInformation._vBufferID);
 
-    return RenderableTrail::deinitialize();
+    RenderableTrail::deinitialize();
 }
 
 void RenderableTrailTrajectory::update(const UpdateData& data) {
@@ -247,7 +243,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         );
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         
         // We clear the indexArray just in case. The base class will take care not to use
         // it if it is empty
@@ -314,7 +310,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         );
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
     else {
         // if we are outside of the valid range, we don't render anything

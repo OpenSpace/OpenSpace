@@ -71,5 +71,6 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 create_new_module(
     "Atmosphere"
     atmosphere_module
+    STATIC
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

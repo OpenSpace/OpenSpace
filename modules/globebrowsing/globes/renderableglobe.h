@@ -103,8 +103,8 @@ public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -152,8 +152,7 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
-    properties::PropertyOwner _texturePropertyOwner;
-
+    
     // Shadow
     bool _shadowEnabled;
     std::vector<ShadowConfiguration> _shadowConfArray;

@@ -53,7 +53,7 @@ uniform vec2 magnitudeClamp;
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
-    const float t = (bv + 0.4) / (2.0 + 0.4);
+    float t = (bv + 0.4) / (2.0 + 0.4);
     return texture(colorTexture, t);
 }
 

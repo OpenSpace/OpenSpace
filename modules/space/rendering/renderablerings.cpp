@@ -87,38 +87,37 @@ documentation::Documentation RenderableRings::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableRings"),
-                "",
                 Optional::No
             },
             {
                 TextureInfo.identifier,
                 new StringVerifier,
-                TextureInfo.description,
-                Optional::No
+                Optional::No,
+                TextureInfo.description
             },
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                SizeInfo.description,
-                Optional::No
+                Optional::No,
+                SizeInfo.description
             },
             {
                 OffsetInfo.identifier,
                 new DoubleVector2Verifier,
-                OffsetInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                OffsetInfo.description
             },
             {
                 NightFactorInfo.identifier,
                 new DoubleVerifier,
-                NightFactorInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                NightFactorInfo.description
             },
             {
                 TransparencyInfo.identifier,
                 new DoubleVerifier,
-                TransparencyInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TransparencyInfo.description
             }
         }
     };
@@ -185,7 +184,7 @@ bool RenderableRings::isReady() const {
     return _shader && _texture;
 }
 
-bool RenderableRings::initialize() {
+void RenderableRings::initialize() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("RingProgram",
@@ -201,11 +200,9 @@ bool RenderableRings::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer);
     createPlane();
     loadTexture();
-
-    return isReady();
 }
 
-bool RenderableRings::deinitialize() {
+void RenderableRings::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -217,8 +214,6 @@ bool RenderableRings::deinitialize() {
 
     OsEng.renderEngine().removeRenderProgram(_shader);
     _shader = nullptr;
-
-    return true;
 }
 
 void RenderableRings::render(const RenderData& data, RendererTasks&) {
@@ -227,7 +222,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -331,7 +326,7 @@ void RenderableRings::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VertexData),
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(

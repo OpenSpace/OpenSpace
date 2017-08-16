@@ -63,11 +63,10 @@ public:
     * \param baseDirectory, the base directory to use in future loading operations
     */
     GdalRawTileDataReader(const std::string& filePath,
-        const TileTextureInitData& initData,
-        const std::string& baseDirectory = "",
-        RawTileDataReader::PerformPreprocessing preprocess =
-            RawTileDataReader::PerformPreprocessing::No
-        );
+                          const TileTextureInitData& initData,
+                          const std::string& baseDirectory = "",
+                          RawTileDataReader::PerformPreprocessing preprocess =
+                            RawTileDataReader::PerformPreprocessing::No);
 
 
     virtual ~GdalRawTileDataReader() override;
@@ -78,6 +77,7 @@ public:
     virtual float noDataValueAsFloat() const override;
     virtual int rasterXSize() const override;
     virtual int rasterYSize() const override;
+    virtual int dataSourceNumRasters() const;
     virtual float depthOffset() const override;
     virtual float depthScale() const override;
 
@@ -90,15 +90,12 @@ protected:
      * the pixel coordinates to cover the whole geodetic lat long space.
     */
     virtual std::array<double, 6> getGeoTransform() const override;
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const override;
 
 private:
     // Private virtual function overloading
     virtual void initialize() override;
-    virtual void readImageData(IODescription& io, RawTile::ReadError& worstError,
-        char* dataDestination) const override;
-    virtual RawTile::ReadError rasterRead(
-        int rasterBand, const IODescription& io, char* dst) const override;
+    virtual RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
+                                          char* dst) const override;
 
     // GDAL Helper methods
     GDALDataset* openGdalDataset(const std::string& filePath);

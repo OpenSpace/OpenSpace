@@ -31,7 +31,7 @@
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/newhorizons/rendering/renderableplanetprojection.h>
+#include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
@@ -89,31 +89,30 @@ documentation::Documentation RenderableDebugPlane::Documentation() {
             {
                 TextureInfo.identifier,
                 new IntVerifier,
-                TextureInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TextureInfo.description
             },
             {
                 BillboardInfo.identifier,
                 new BoolVerifier,
-                BillboardInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                BillboardInfo.description
             },
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                SizeInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                SizeInfo.description
             },
             {
                 OriginInfo.identifier,
                 new StringInListVerifier(
                     { "LowerLeft", "LowerRight", "UpperLeft", "UpperRight", "Center" }
                 ),
-                OriginInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                OriginInfo.description
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -191,7 +190,7 @@ bool RenderableDebugPlane::isReady() const {
     return ready;
 }
 
-bool RenderableDebugPlane::initialize() {
+void RenderableDebugPlane::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -203,11 +202,9 @@ bool RenderableDebugPlane::initialize() {
             "${MODULE_BASE}/shaders/plane_fs.glsl"
             );
     }
-
-    return isReady();
 }
 
-bool RenderableDebugPlane::deinitialize() {
+void RenderableDebugPlane::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -219,8 +216,6 @@ bool RenderableDebugPlane::deinitialize() {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-
-    return true;
 }
 
 void RenderableDebugPlane::render(const RenderData& data, RendererTasks&) {
@@ -277,7 +272,7 @@ void RenderableDebugPlane::createPlane() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 }

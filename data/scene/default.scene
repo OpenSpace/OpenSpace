@@ -1,3 +1,8 @@
+-- Add folders to this list that contain .info files describing HiRISE patches
+local mars_folders = {
+    -- Add a folder here whose contents will be automatically added to the Mars globe
+}
+
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -11,35 +16,76 @@ function preInitialization()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+
+
+    -- Toggle night texture, shading, atmosphere and water
+    openspace.bindKey("s",
+        helper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.PerformShading') ..
+        helper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+        "Toggle night texture, shading, atmosphere, and water for Earth."
+    )
+
+    -- Toggle background
+    openspace.bindKey("b",
+        helper.property.invert('MilkyWay.renderable.Enabled') ..
+        helper.property.invert('Stars.renderable.Enabled'),
+        "Toggle background (Stars and Milkyway)."
+    )
+
+    openspace.bindKey("g",
+        helper.property.invert('MilkyWay.renderable.Enabled') ..
+        helper.property.invert('Stars.renderable.Enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.PerformShading') ..
+        helper.property.invert('Mars.RenderableGlobe.PerformShading') ..
+        helper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+        helper.property.invert('Moon.RenderableGlobe.Enabled') ..
+        helper.property.invert('Sun.renderable.Enabled'),
+        "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun"
+    )
+
+    openspace.bindKey("h",
+        "openspace.setPropertyValue('*Trail.renderable.Enabled', false)",
+        "Disables visibility of the trails"
+    )
 end
 
 function postInitialization()
-    --[[
-    The scripts in this function are executed after all objects in the scene have been
-    created and initialized, but before the first render call. This is the place to set
-    graphical settings for the renderables.
-    ]]--
-    openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
-    openspace.setPropertyValue("EarthMarker.renderable.Enabled", false)
-    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
-
-    openspace.setPropertyValue("MilkyWay.renderable.Transparency", 0.55)
-    openspace.setPropertyValue("MilkyWay.renderable.Segments", 50)
-
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.enabled",
+        "*Trail.renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
         nil
     )
 
-    openspace.navigation.resetCameraDirection()
+    openspace.printInfo("Setting default values")
+
+    openspace.setPropertyValue("SunGlare.renderable.Enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
+    
+    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
+    
+    openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", false)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
+
+    openspace.setPropertyValue("Ecliptic Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("Equatorial Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("Galactic Grid.renderable.Enabled", false)
+
+    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
     openspace.printInfo("Done setting default values")
+
+    -- Add the HiRISE patches described at the top of this file
+    for _, file in pairs(mars_folders) do
+        openspace.globebrowsing.addBlendingLayersFromDirectory(file, "Mars")
+    end
 end
 
 
@@ -48,23 +94,27 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
-        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
+        Position = {0, 0, 0},
+        Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
     },
     Modules = {
         "sun",
         "mercury",
         "venus",
         "earth",
+        "moon",
         "mars",
         "jupiter",
         "saturn",
         "uranus",
         "neptune",
-        "stars",
-        -- "stars-denver",
-        "milkyway",
-        --"milkyway-eso",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
+        -- "satellites"
         "constellationbounds",
+        "grids"
     }
 }
+

@@ -82,26 +82,26 @@ documentation::Documentation RenderablePlane::Documentation() {
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                SizeInfo.description,
-                Optional::No
+                Optional::No,
+                SizeInfo.description
             },
             {
                 BillboardInfo.identifier,
                 new BoolVerifier,
-                BillboardInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                BillboardInfo.description
             },
             {
                 BlendModeInfo.identifier,
                 new StringInListVerifier({ "Normal", "Additive" }),
+                Optional::Yes,
                 BlendModeInfo.description, // + " The default value is 'Normal'.",
-                Optional::Yes
             },
             {
                 TextureInfo.identifier,
                 new StringVerifier,
+                Optional::No,
                 TextureInfo.description,
-                Optional::No
             }
         }
     };
@@ -179,7 +179,7 @@ bool RenderablePlane::isReady() const {
     return _shader && _texture;
 }
 
-bool RenderablePlane::initialize() {
+void RenderablePlane::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -187,14 +187,12 @@ bool RenderablePlane::initialize() {
     _shader = OsEng.renderEngine().buildRenderProgram("PlaneProgram",
         "${MODULE_BASE}/shaders/plane_vs.glsl",
         "${MODULE_BASE}/shaders/plane_fs.glsl"
-        );
+    );
 
     loadTexture();
-
-    return isReady();
 }
 
-bool RenderablePlane::deinitialize() {
+void RenderablePlane::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -208,8 +206,6 @@ bool RenderablePlane::deinitialize() {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-
-    return true;
 }
 
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
@@ -235,7 +231,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         rotationTransform *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
         glm::dmat4(1.0);
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -335,7 +331,7 @@ void RenderablePlane::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     
     glEnableVertexAttribArray(1);

@@ -75,8 +75,6 @@ private:
     
     std::string generateJson() const override;
 
-    bool _cameraUpdatedFromScript = false;
-
     std::multimap<KeyWithModifier, KeyInformation> _keyLua;
 };
 

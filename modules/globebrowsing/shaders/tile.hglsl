@@ -25,90 +25,25 @@
 #ifndef TEXTURETILE_HGLSL
 #define TEXTURETILE_HGLSL
 
-// Must match the values in tiledataset.cpp
-// (could be set as shader preprocessing data so that multiple definitions
-// are not needed)
-#define TILE_PIXEL_START_OFFSET #{tilePaddingStart}
-#define TILE_PIXEL_SIZE_DIFFERENCE #{tilePaddingSizeDiff}
-
-vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
-    vec2 uvOffset = uv - vec2(0.5);
-    float thres = 0.5 - borderSize/2;
-    bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-    vec3 color = isBorder ? borderColor : vec3(0);
-    return vec4(color, 0);
-}
-
-
-/////////////////////////////////////////////////////////////////////
-//                       ChunkTile Depth Transform                 //
-/////////////////////////////////////////////////////////////////////
-
 struct TileDepthTransform {
     float depthScale;
     float depthOffset;
 };
-
-float getTransformedTexVal(const TileDepthTransform transform, const float val) {
-    return transform.depthOffset + transform.depthScale * val;
-}
-
-vec4 getTransformedTexVal(const TileDepthTransform transform, const vec4 val) {
-    return transform.depthOffset + transform.depthScale * val;
-}
-
-
-/////////////////////////////////////////////////////////////////////
-//                        ChunkTile UV Transform                   //
-/////////////////////////////////////////////////////////////////////
 
 struct TileUvTransform {
     vec2 uvOffset;
     vec2 uvScale;
 };
 
-
-/////////////////////////////////////////////////////////////////////
-//                              ChunkTile                          //
-/////////////////////////////////////////////////////////////////////
-
 struct ChunkTile {
     sampler2D textureSampler;
     TileUvTransform uvTransform;
 };
 
-vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff,
-                                     const ChunkTile chunkTile, vec2 tileUV)
-{
-    const ivec2 resolution = textureSize(chunkTile.textureSampler, 0);
-
-    const vec2 sourceSize = vec2(resolution) + sizeDiff;
-    const vec2 currentSize = vec2(resolution);
-    const vec2 sourceToCurrentSize = currentSize / sourceSize;
-    return sourceToCurrentSize * (tileUV - startOffset / sourceSize);
-}
-
-vec2 TileUVToTextureSamplePosition(const ChunkTile chunkTile, vec2 tileUV) {
-    vec2 uv = chunkTile.uvTransform.uvOffset + chunkTile.uvTransform.uvScale * tileUV;
-    return compensateSourceTextureSampling(
-        TILE_PIXEL_START_OFFSET,
-        TILE_PIXEL_SIZE_DIFFERENCE,
-        chunkTile,
-        uv
-    );
-}
-
-vec4 getTexVal(const ChunkTile chunkTile, vec2 tileUV) {
-    return texture(
-        chunkTile.textureSampler,
-        TileUVToTextureSamplePosition(chunkTile, tileUV)
-    );
-}
-
-
-/////////////////////////////////////////////////////////////////////
-//                         Chunk Tile Pile                         //
-/////////////////////////////////////////////////////////////////////
+struct PixelPadding {
+    ivec2 startOffset;
+    ivec2 sizeDifference;
+};
 
 struct ChunkTilePile {
     ChunkTile chunkTile0;
@@ -134,6 +69,7 @@ struct Layer {
     TileDepthTransform depthTransform;
     LayerSettings settings;
     LayerAdjustment adjustment;
+    PixelPadding padding;
     
     // Other layer type properties stuff
     vec3 color;
@@ -145,11 +81,57 @@ struct LevelWeights {
     float w3;
 };
 
+vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
+    vec2 uvOffset = uv - vec2(0.5);
+    float thres = 0.5 - borderSize/2;
+    bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
+    vec3 color = isBorder ? borderColor : vec3(0);
+    return vec4(color, 0);
+}
+
+float getTransformedTexVal(TileDepthTransform transform, float val) {
+    return transform.depthOffset + transform.depthScale * val;
+}
+
+vec4 getTransformedTexVal(TileDepthTransform transform, vec4 val) {
+    return transform.depthOffset + transform.depthScale * val;
+}
+
+vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, ChunkTile chunkTile,
+                                     vec2 tileUV)
+{
+    ivec2 resolution = textureSize(chunkTile.textureSampler, 0);
+
+    vec2 sourceSize = vec2(resolution) + sizeDiff;
+    vec2 currentSize = vec2(resolution);
+    vec2 sourceToCurrentSize = currentSize / sourceSize;
+    return sourceToCurrentSize * (tileUV - startOffset / sourceSize);
+}
+
+vec2 TileUVToTextureSamplePosition(ChunkTile chunkTile, vec2 tileUV,
+                                   PixelPadding padding)
+{
+    vec2 uv = chunkTile.uvTransform.uvOffset + chunkTile.uvTransform.uvScale * tileUV;
+    return compensateSourceTextureSampling(
+        padding.startOffset,
+        padding.sizeDifference,
+        chunkTile,
+        uv
+    );
+}
+
+vec4 getTexVal(ChunkTile chunkTile, vec2 tileUV, PixelPadding padding) {
+    return texture(
+        chunkTile.textureSampler,
+        TileUVToTextureSamplePosition(chunkTile, tileUV, padding)
+    );
+}
+
 float getLevelInterpolationParameter(int chunkLevel, float distanceScaleFactor,
                                      float distToVertexOnEllipsoid)
 {
-    const float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
-    const float desiredLevel = log2(projectedScaleFactor);
+    float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
+    float desiredLevel = log2(projectedScaleFactor);
     return chunkLevel - desiredLevel;
 }
 
@@ -172,10 +154,12 @@ LevelWeights getDefaultLevelWeights() {
     return levelWeights;
 }
 
-vec4 getTexVal(const ChunkTilePile chunkTilePile, const LevelWeights w, const vec2 uv) {
-    return w.w1 * getTexVal(chunkTilePile.chunkTile0, uv) + 
-        w.w2 * getTexVal(chunkTilePile.chunkTile1, uv) + 
-        w.w3 * getTexVal(chunkTilePile.chunkTile2, uv);
+vec4 getTexVal(ChunkTilePile chunkTilePile, LevelWeights w, vec2 uv,
+               PixelPadding padding)
+{
+    return w.w1 * getTexVal(chunkTilePile.chunkTile0, uv, padding) + 
+        w.w2 * getTexVal(chunkTilePile.chunkTile1, uv, padding) + 
+        w.w3 * getTexVal(chunkTilePile.chunkTile2, uv, padding);
 }
 
 #endif // TEXTURETILE_HGLSL

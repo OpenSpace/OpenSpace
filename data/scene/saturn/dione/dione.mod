@@ -3,22 +3,23 @@ return {
         Name = "Dione",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_DIONE",
-            Body = "DIONE",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.563E3,
-                Segments = 50
-            },
-            Textures = {
-                Color = "textures/dione.jpg"
+            Type = "RenderableGlobe",
+            Radii = 561400,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Dione Texture",
+                        FilePath = "textures/dione.jpg",
+                        Enabled = true
+                    }
+                }
             }
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "DIONE",
+                Target = "DIONE",
                 Observer = "SATURN BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/sat375.bsp"
             },
@@ -36,7 +37,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "DIONE",
+                Target = "DIONE",
                 Observer = "SATURN BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },

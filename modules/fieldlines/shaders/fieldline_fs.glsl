@@ -34,7 +34,7 @@ uniform vec4 fieldLineColor;
 
 
 Fragment getFragment() {
-    const float alpha = 1 - length(gs_normal) * length(gs_normal);
+    float alpha = 1 - length(gs_normal) * length(gs_normal);
 
     Fragment frag;
     if (classification) {

@@ -70,14 +70,13 @@ public:
     IswaCygnet(const ghoul::Dictionary& dictionary);
     ~IswaCygnet();
 
-    virtual bool initialize();
-    virtual bool deinitialize();
-    virtual bool isReady() const;
-    void render(const RenderData& data, RendererTasks& rendererTask);
-    void update(const UpdateData& data);
+    void initialize() override;
+    void deinitialize() override;
+    virtual bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
 
 protected:
-
     void enabled(bool enabled){_enabled.setValue(enabled);};
 
     /**

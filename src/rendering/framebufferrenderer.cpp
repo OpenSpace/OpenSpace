@@ -102,7 +102,7 @@ void FramebufferRenderer::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 4,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     glEnableVertexAttribArray(0);
 
@@ -573,7 +573,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
     Time time = OsEng.timeManager().time();
 
-    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0 };
+    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0, {} };
     RendererTasks tasks;
 
     // Capture standard fbo
@@ -655,7 +655,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
-            raycastProgram->setUniform("windowSize", glm::vec2(_resolution));
+            raycastProgram->setUniform("windowSize", _resolution);
 
 
             glDisable(GL_DEPTH_TEST);

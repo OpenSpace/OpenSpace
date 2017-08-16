@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,7 +24,9 @@
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace::globebrowsing {
 
@@ -32,11 +34,13 @@ namespace {
     const char* _loggerCat = "Layer";
 
     const char* keyName = "Name";
+    const char* keyDescription = "Description";
     const char* keyEnabled = "Enabled";
     const char* keyLayerGroupID = "LayerGroupID";
     const char* keySettings = "Settings";
     const char* keyAdjustment = "Adjustment";
     const char* KeyBlendMode = "BlendMode";
+    const char* KeyPadTiles = "PadTiles";
 
     static const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -73,11 +77,13 @@ namespace {
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is."
     };
-
 } // namespace
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
-    : properties::PropertyOwner(layerDict.value<std::string>(keyName))
+    : properties::PropertyOwner({
+        layerDict.value<std::string>(keyName),
+        layerDict.hasKey(keyDescription) ? layerDict.value<std::string>(keyDescription) : ""
+    })
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _blendModeOption(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _enabled(EnabledInfo, false)
@@ -98,6 +104,14 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     bool enabled = false; // defaults to false if unspecified
     layerDict.getValue(keyEnabled, enabled);
     _enabled.setValue(enabled);
+
+    bool padTiles = true;
+    layerDict.getValue<bool>(KeyPadTiles, padTiles);
+    
+    TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId,
+                                                                        padTiles);
+    _padTilePixelStartOffset = initData.tilePixelStartOffset();
+    _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
 
     // Initialize settings
     ghoul::Dictionary settingsDict;
@@ -212,12 +226,11 @@ Tile::Status Layer::getTileStatus(const TileIndex& index) const {
 
 layergroupid::TypeID Layer::type() const {
     return _type;
-};
+}
 
 layergroupid::BlendModeID Layer::blendMode() const {
     return static_cast<layergroupid::BlendModeID>(_blendModeOption.value());
-};
-
+}
 
 TileDepthTransform Layer::depthTransform() const {
     if (_tileProvider) {
@@ -258,6 +271,36 @@ void Layer::update() {
     }
 }
 
+glm::ivec2 Layer::tilePixelStartOffset() const {
+    return _padTilePixelStartOffset;
+}
+
+glm::ivec2 Layer::tilePixelSizeDifference() const {
+    return _padTilePixelSizeDifference;
+}
+
+glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
+                                                 glm::uvec2 resolution, glm::vec2 tileUV)
+{
+    glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
+    glm::vec2 currentSize = glm::vec2(resolution);
+    glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
+    tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
+    return tileUV;
+}
+
+glm::vec2 Layer::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
+                                               glm::vec2 tileUV, glm::uvec2 resolution)
+{
+    glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
+    uv = compensateSourceTextureSampling(
+        tilePixelStartOffset(),
+        tilePixelSizeDifference(),
+        resolution,
+        uv);
+    return uv;
+}
+
 layergroupid::TypeID Layer::parseTypeIdFromDictionary(
     const ghoul::Dictionary& initDict) const
 {
@@ -294,8 +337,14 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
             );
             break;
         }
-        case layergroupid::TypeID::SolidColor:
+        case layergroupid::TypeID::SolidColor: {
+            if (initDict.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
+                glm::vec3 color;
+                initDict.getValue(ColorInfo.identifier, color);
+                _otherTypesProperties.color.setValue(color);
+            }
             break;
+        }
         default:
             throw ghoul::RuntimeError("Unable to create layer. Unknown type.");
             break;

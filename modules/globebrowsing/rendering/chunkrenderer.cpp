@@ -142,7 +142,9 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
             chunk.owner().generalProperties().orenNayarRoughness);
     }
 
-    if (chunk.owner().generalProperties().useAccurateNormals) {
+    if (chunk.owner().generalProperties().useAccurateNormals &&
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty()) 
+    {
         glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::SOUTH_WEST));
         glm::dvec3 corner10 = chunk.owner().ellipsoid().cartesianSurfacePosition(
@@ -181,12 +183,6 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         programObject.setUniform("invViewModelTransform",
                                glm::inverse(glm::mat4(data.camera.combinedViewMatrix()) *
                                             glm::mat4(chunk.owner().modelTransform())));
-    }
-
-    if (chunk.owner().generalProperties().performShading) {
-        programObject.setUniform(
-            "orenNayarRoughness",
-            chunk.owner().generalProperties().orenNayarRoughness);
     }
 }
 
@@ -245,7 +241,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     }
     
     if (chunk.owner().generalProperties().useAccurateNormals &&
-        _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0)
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(

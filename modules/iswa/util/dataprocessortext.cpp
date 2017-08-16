@@ -99,9 +99,6 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
         std::vector<float> values;
         float value;
 
-        int first, last, option, lineSize;
-
-
         // for each data point
         while(getline(memorystream, line)){
             if(line.find("#") == 0) continue;

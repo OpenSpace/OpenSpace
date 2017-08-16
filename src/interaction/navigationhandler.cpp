@@ -68,7 +68,7 @@ namespace {
 namespace openspace::interaction {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner("NavigationHandler")
+    : properties::PropertyOwner({ "NavigationHandler" })
     , _origin(OriginInfo)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
@@ -165,7 +165,7 @@ glm::dvec3 NavigationHandler::focusNodeToCameraVector() const {
 }
 
 glm::quat NavigationHandler::focusNodeToCameraRotation() const {
-    glm::dmat4 invWorldRotation = glm::inverse(focusNode()->worldRotationMatrix());
+    glm::dmat4 invWorldRotation = glm::dmat4(glm::inverse(focusNode()->worldRotationMatrix()));
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 

@@ -115,9 +115,9 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
 
 namespace openspace {
     
-KeplerTranslation::RangeError::RangeError(std::string offender)
-    : ghoul::RuntimeError("Value '" + offender + "' out of range", "KeplerTranslation")
-    , offender(std::move(offender))
+KeplerTranslation::RangeError::RangeError(std::string off)
+    : ghoul::RuntimeError("Value '" + off + "' out of range", "KeplerTranslation")
+    , offender(std::move(off))
 {}
 
 documentation::Documentation KeplerTranslation::Documentation() {
@@ -129,59 +129,57 @@ documentation::Documentation KeplerTranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("KeplerTranslation"),
-                "",
                 Optional::No
             },
             {
                 EccentricityInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 1.0),
-                EccentricityInfo.description,
-                Optional::No
+                Optional::No,
+                EccentricityInfo.description
             },
             {
                 SemiMajorAxisInfo.identifier,
                 new DoubleVerifier,
-                SemiMajorAxisInfo.description,
-                Optional::No
+                Optional::No,
+                SemiMajorAxisInfo.description
             },
             {
                 InclinationInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                InclinationInfo.description,
-                Optional::No
+                Optional::No,
+                InclinationInfo.description
             },
             {
                 AscendingNodeInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                AscendingNodeInfo.description,
-                Optional::No
+                Optional::No,
+                AscendingNodeInfo.description
             },
             {
                 ArgumentOfPeriapsisInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                ArgumentOfPeriapsisInfo.description,
-                Optional::No
+                Optional::No,
+                ArgumentOfPeriapsisInfo.description
             },
             {
                 MeanAnomalyAtEpochInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 360.0),
-                MeanAnomalyAtEpochInfo.description,
-                Optional::No
+                Optional::No,
+                MeanAnomalyAtEpochInfo.description
             },
             {
                 EpochInfo.identifier,
                 new StringVerifier,
-                EpochInfo.description,
-                Optional::No
+                Optional::No,
+                EpochInfo.description
             },
             {
                 PeriodInfo.identifier,
                 new DoubleGreaterVerifier(0.0),
-                PeriodInfo.description,
-                Optional::No
+                Optional::No,
+                PeriodInfo.description
             },
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -279,9 +277,8 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
         double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
 
         auto solver = [this, &meanAnomaly, &sign](double x) -> double {
-            double e = _eccentricity;
-            double s = e * sin(x);
-            double c = e * cos(x);
+            double s = _eccentricity * sin(x);
+            double c = _eccentricity * cos(x);
             double f = x - s - meanAnomaly;
             double f1 = 1 - c;
             double f2 = s;

@@ -31,14 +31,12 @@
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 namespace {
     enum Orientation {
@@ -92,32 +90,32 @@ documentation::Documentation RenderableSphere::Documentation() {
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                SizeInfo.description,
-                Optional::No
+                Optional::No,
+                SizeInfo.description
             },
             {
                 SegmentsInfo.identifier,
                 new IntVerifier,
-                SegmentsInfo.description,
-                Optional::No
+                Optional::No,
+                SegmentsInfo.description
             },
             {
                 TextureInfo.identifier,
                 new StringVerifier,
-                TextureInfo.description,
-                Optional::No
+                Optional::No,
+                TextureInfo.description
             },
             {
                 OrientationInfo.identifier,
                 new StringInListVerifier({ "Inside", "Outside", "Inside/Outside" }),
-                OrientationInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                OrientationInfo.description
             },
             {
                 TransparencyInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 1.0),
-                TransparencyInfo.description,
-                Optional::Yes
+                Optional::Yes,
+                TransparencyInfo.description
             }
         }
     };
@@ -202,7 +200,7 @@ bool RenderableSphere::isReady() const {
     return _shader && _texture;
 }
 
-bool RenderableSphere::initialize() {
+void RenderableSphere::initialize() {
     _sphere = std::make_unique<PowerScaledSphere>(
         PowerScaledScalar::CreatePSS(_size), _segments
     );
@@ -214,25 +212,21 @@ bool RenderableSphere::initialize() {
         "${MODULE_BASE}/shaders/sphere_fs.glsl");
 
     loadTexture();
-
-    return isReady();
 }
 
-bool RenderableSphere::deinitialize() {
+void RenderableSphere::deinitialize() {
     _texture = nullptr;
 
     if (_shader) {
         OsEng.renderEngine().removeRenderProgram(_shader);
         _shader = nullptr;
     }
-
-    return true;
 }
 
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glm::mat4 transform = glm::mat4(1.0);
 
-    transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+    transform = glm::rotate(transform, glm::half_pi<float>(), glm::vec3(1, 0, 0));
 
     // Activate shader
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;

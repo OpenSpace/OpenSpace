@@ -112,14 +112,14 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
             {
                 PeriodInfo.identifier,
                 new DoubleVerifier,
-                PeriodInfo.description,
-                Optional::No
+                Optional::No,
+                PeriodInfo.description
             },
             {
                 ResolutionInfo.identifier,
                 new IntVerifier,
-                ResolutionInfo.description,
-                Optional::No
+                Optional::No,
+                ResolutionInfo.description
             }
         }
     };
@@ -169,22 +169,20 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 }
 
-bool RenderableTrailOrbit::initialize() {
-    bool res = RenderableTrail::initialize();
+void RenderableTrailOrbit::initialize() {
+    RenderableTrail::initialize();
 
     glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
     glGenBuffers(1, &_primaryRenderInformation._vBufferID);
     glGenBuffers(1, &_primaryRenderInformation._iBufferID);
-
-    return res;
 }
 
-bool RenderableTrailOrbit::deinitialize() {
+void RenderableTrailOrbit::deinitialize() {
     glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
     glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
     glDeleteBuffers(1, &_primaryRenderInformation._iBufferID);
 
-    return RenderableTrail::deinitialize();
+    RenderableTrail::deinitialize();
 }
 
 void RenderableTrailOrbit::update(const UpdateData& data) {
@@ -311,7 +309,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     }
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
     _previousTime = data.time.j2000Seconds();

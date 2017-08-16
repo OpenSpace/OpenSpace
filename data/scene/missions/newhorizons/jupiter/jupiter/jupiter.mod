@@ -8,7 +8,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "JUPITER BARYCENTER",
+                Target = "JUPITER BARYCENTER",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -28,9 +28,9 @@ return {
                 Radius = jupiter_local,
                 Segments = 200,
             },
+            ColorTexture = "textures/jupiterFlipped_low.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/jupiterFlipped_low.jpg",
                 Project = "textures/lorriTest1.jpg",
                 Sequencing = "true",
             },
@@ -125,7 +125,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "JUPITER BARYCENTER",
+                Target = "JUPITER BARYCENTER",
                 Observer = "SUN",
             },
             Color = { 0.8, 0.7, 0.7 },

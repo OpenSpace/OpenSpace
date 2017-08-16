@@ -54,6 +54,8 @@ public:
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
+    globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
+
 protected:
     void internalInitialize() override;
 
@@ -66,7 +68,6 @@ private:
     void goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3,
                        bool resetCameraDirection);
     void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
-    globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
 
     /**
      \return a comma separated list of layer group names.

@@ -61,39 +61,39 @@ documentation::Documentation ScriptScheduler::Documentation() {
                     {
                         KeyTime,
                         new TimeVerifier,
+                        Optional::No,
                         "The time at which, when the in game time passes it, the two "
                         "scripts will be executed. If the traversal is forwards (towards "
                         "+ infinity), the ForwardScript will be executed, otherwise the "
-                        "BackwardScript will be executed instead.",
-                        Optional::No
+                        "BackwardScript will be executed instead."
                     },
                     {
                         KeyUniversalScript,
                         new LuaScriptVerifier,
+                        Optional::Yes,
                         "The Lua script that will be executed when the specified time is "
                         "passed independent of its direction. This script will be "
                         "executed before the specific scripts if both versions are "
-                        "specified",
-                        Optional::Yes
+                        "specified"
                     },
                     {
                         KeyForwardScript,
                         new LuaScriptVerifier,
+                        Optional::Yes,
                         "The Lua script that is executed when OpenSpace passes the time "
-                        "in a forward direction.",
-                        Optional::Yes
+                        "in a forward direction."
                     },
                     {
                         KeyBackwardScript,
                         new LuaScriptVerifier,
+                        Optional::Yes,
                         "The Lua script that is executed when OpenSpace passes the time "
-                        "in a backward direction.",
-                        Optional::Yes
+                        "in a backward direction."
                     }
-                })
+                }),
+                Optional::No
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -245,7 +245,7 @@ ScriptScheduler::progressTo(double newTime)
 
 double ScriptScheduler::currentTime() const {
     return _currentTime; 
-};
+}
 
 std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
     std::vector<ScheduledScript> result;
@@ -258,7 +258,7 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() cons
         result.push_back(std::move(script));
     }
     return result;
-};
+}
 
 LuaLibrary ScriptScheduler::luaLibrary() {    
     return {

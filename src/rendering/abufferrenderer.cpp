@@ -61,8 +61,8 @@ ABufferRenderer::ABufferRenderer()
     , _scene(nullptr)
     , _resolution(glm::ivec2(0))
     , _dirtyResolution(true)
-    , _dirtyRaycastData(true)
     , _dirtyRendererData(true)
+    , _dirtyRaycastData(true)
     , _dirtyResolveDictionary(true)
     , _resolveProgram(nullptr)
     , _hdrExposure(0.4)
@@ -99,7 +99,7 @@ void ABufferRenderer::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 4,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     glEnableVertexAttribArray(0);
 
@@ -107,7 +107,7 @@ void ABufferRenderer::initialize() {
     glGenBuffers(1, &_anchorPointerTextureInitializer);
     glGenBuffers(1, &_atomicCounterBuffer);
     glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, _atomicCounterBuffer);
-    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
+    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), nullptr, GL_DYNAMIC_COPY);
     glGenBuffers(1, &_fragmentBuffer);
     glGenTextures(1, &_fragmentTexture);
 
@@ -279,7 +279,14 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         static_cast<int>(Renderable::RenderBin::Overlay);
 
     Time time = OsEng.timeManager().time();
-    RenderData data{ *_camera, psc(), time, doPerformanceMeasurements, renderBinMask };
+    RenderData data {
+        *_camera,
+        psc(),
+        time,
+        doPerformanceMeasurements,
+        renderBinMask,
+        {}
+    };
     RendererTasks tasks;
     _scene->render(data, tasks);
     _blackoutFactor = blackoutFactor;
@@ -508,8 +515,8 @@ void ABufferRenderer::updateResolution() {
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_RGBA,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         true
     );
 
@@ -518,8 +525,8 @@ void ABufferRenderer::updateResolution() {
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_DEPTH_COMPONENT32F,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         true
     );
 
@@ -549,7 +556,7 @@ void ABufferRenderer::updateResolveDictionary() {
     dict.setValue("raycasters", raycastersDict);
 
     ghoul::Dictionary helperPathsDict;
-    for (int i = 0; i < _helperPaths.size(); ++i) {
+    for (size_t i = 0; i < _helperPaths.size(); ++i) {
         helperPathsDict.setValue(std::to_string(i), _helperPaths[i]);
     }
 

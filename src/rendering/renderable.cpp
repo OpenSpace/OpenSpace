@@ -62,11 +62,11 @@ documentation::Documentation Renderable::Documentation() {
         {
             KeyType,
             new StringAnnotationVerifier("A valid Renderable created by a factory"),
+            Optional::No,
             "This key specifies the type of Renderable that gets created. It has to be one"
             "of the valid Renderables that are available for creation (see the "
             "FactoryDocumentation for a list of possible Renderables), which depends on "
-            "the configration of the application",
-            Optional::No
+            "the configration of the application"
         }
         }
     };
@@ -98,7 +98,7 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("renderable")
+    : properties::PropertyOwner({ "renderable" })
     , _enabled(EnabledInfo, true)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
@@ -139,6 +139,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
 Renderable::~Renderable() {}
 
+void Renderable::initialize() {}
+
+void Renderable::deinitialize() {}
+
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;
 }
@@ -149,7 +153,7 @@ float Renderable::boundingSphere() const {
 
 void Renderable::update(const UpdateData&) {}
 
-void Renderable::render(const RenderData& data, RendererTasks&) {}
+void Renderable::render(const RenderData&, RendererTasks&) {}
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                        const glm::dvec3& targetModelSpace)

@@ -167,7 +167,7 @@ Fragment getTileFragment() {
     cosFactor = cosFactor + pow(cosFactor, 5);
     
     const float shadowLight = 0.15;
-    const float cosFactorLight = pow(max(dot(-l, n), -shadowLight) + shadowLight, 0.8);
+    float cosFactorLight = pow(max(dot(-l, n), -shadowLight) + shadowLight, 0.8);
     //float cosFactorScatter = pow(max(dot(l, n) + shadowLight, 0), 5);
     //float cosFactorLight = max(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)), 0);
     //vec3 r = reflect(l, n);

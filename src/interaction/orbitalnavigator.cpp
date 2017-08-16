@@ -34,8 +34,6 @@
 #include <glm/gtx/vector_angle.hpp>
 
 namespace {
-    const char* _loggerCat = "OrbitalNavigator";
-
     static const openspace::properties::Property::PropertyInfo RollFrictionInfo = {
         "RollFriction",
         "Roll Friction",
@@ -90,16 +88,25 @@ namespace {
 
 namespace openspace::interaction {
 
+OrbitalNavigator::Friction::Friction() 
+    : properties::PropertyOwner({ "Friction" })
+    , roll(RollFrictionInfo, true)
+    , rotational(RotationalFrictionInfo, true)
+    , zoom(ZoomFrictionInfo, true)
+    , friction(FrictionInfo, 0.5f, 0.f, 1.f)
+{
+    addProperty(roll);
+    addProperty(rotational);
+    addProperty(zoom);
+    addProperty(friction);
+}
+
 OrbitalNavigator::OrbitalNavigator()
-    : properties::PropertyOwner("OrbitalNavigator")
-    , _rollFriction(RollFrictionInfo, true)
-    , _rotationalFriction(RotationalFrictionInfo, true)
-    , _zoomFriction(ZoomFrictionInfo, true)
+    : properties::PropertyOwner({ "OrbitalNavigator" })
     , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 2.0f, 0.0f, 10.f)
-    , _minimumAllowedDistance(FollowFocusNodeInfo, 10.0f, 0.0f, 10000.f)
+    , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
-    , _motionLag(FrictionInfo, 0.5f, 0.f, 1.f)
-    , _mouseStates(_sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001))
+    , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
 {
     auto smoothStep = 
         [](double t) {
@@ -123,41 +130,37 @@ OrbitalNavigator::OrbitalNavigator()
     // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear
     // interpolation from 1 to 0.
 
-    auto smoothStepDerivedTranferFunction = 
-        [](double t) {
-            return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
-        };
+    auto smoothStepDerivedTranferFunction = [](double t) {
+        return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
+    };
     _rotateToFocusNodeInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
 
     // Define callback functions for changed properties
-    _rollFriction.onChange([&]() {
-        _mouseStates.setRotationalFriction(_rollFriction);
+    _friction.roll.onChange([&]() {
+        _mouseStates.setRotationalFriction(_friction.roll);
     });
-    _rotationalFriction.onChange([&]() {
-        _mouseStates.setHorizontalFriction(_rotationalFriction);
+    _friction.rotational.onChange([&]() {
+        _mouseStates.setHorizontalFriction(_friction.rotational);
     });
-    _zoomFriction.onChange([&]() {
-        _mouseStates.setVerticalFriction(_zoomFriction);
+    _friction.zoom.onChange([&]() {
+        _mouseStates.setVerticalFriction(_friction.zoom);
     });
+    _friction.friction.onChange([&]() {
+        _mouseStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
+    });
+
     _sensitivity.onChange([&]() {
         _mouseStates.setSensitivity(_sensitivity * pow(10.0,-4));
     });
-    _motionLag.onChange([&]() {
-        _mouseStates.setVelocityScaleFactor(1 / (_motionLag + 0.0000001));
-    });
 
-    // Add the properties
-    addProperty(_rollFriction);
-    addProperty(_rotationalFriction);
-    addProperty(_zoomFriction);
+    addPropertySubOwner(_friction);
+
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);
-    addProperty(_motionLag);
 }
 
-OrbitalNavigator::~OrbitalNavigator()
-{ }
+OrbitalNavigator::~OrbitalNavigator() {}
 
 void OrbitalNavigator::updateMouseStatesFromInput(const InputState& inputState,
                                                   double deltaTime)
@@ -165,9 +168,7 @@ void OrbitalNavigator::updateMouseStatesFromInput(const InputState& inputState,
     _mouseStates.updateMouseStatesFromInput(inputState, deltaTime);
 }
 
-void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera,
-                                                        double deltaTime)
-{
+void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double deltaTime){
     if (_focusNode) {
         // Read the current state of the camera
         glm::dvec3 camPos = camera.positionVec3();
@@ -332,7 +333,7 @@ OrbitalNavigator::CameraRotationDecomposition
 }
 
 glm::dquat OrbitalNavigator::roll(double deltaTime,
-                            const glm::dquat& localCameraRotation) const
+                                  const glm::dquat& localCameraRotation) const
 {
     glm::dquat rollQuat = glm::angleAxis(
         _mouseStates.localRollMouseVelocity().x * deltaTime,
@@ -353,9 +354,8 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
     return localCameraRotation * rotationDiff;
 }
 
-glm::dquat OrbitalNavigator::interpolateLocalRotation(
-    double deltaTime,
-    const glm::dquat& localCameraRotation)
+glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
+                                                    const glm::dquat& localCameraRotation)
 {
     if (_rotateToFocusNodeInterpolator.isInterpolating()) {
         double t = _rotateToFocusNodeInterpolator.value();
@@ -375,13 +375,12 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(
     }
 }
 
-glm::dvec3 OrbitalNavigator::translateHorizontally(
-    double deltaTime,
-    const glm::dvec3& cameraPosition,
-    const glm::dvec3& objectPosition,
-    const glm::dquat& /*focusNodeRotationDiff*/,
-    const glm::dquat& globalCameraRotation,
-    const SurfacePositionHandle& positionHandle) const
+glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
+                                                   const glm::dvec3& cameraPosition,
+                                                   const glm::dvec3& objectPosition,
+                                              const glm::dquat& /*focusNodeRotationDiff*/,
+                                                   const glm::dquat& globalCameraRotation,
+                                        const SurfacePositionHandle& positionHandle) const
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
 

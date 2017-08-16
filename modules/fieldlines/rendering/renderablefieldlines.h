@@ -45,8 +45,8 @@ class RenderableFieldlines : public Renderable {
 public:
     RenderableFieldlines(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 

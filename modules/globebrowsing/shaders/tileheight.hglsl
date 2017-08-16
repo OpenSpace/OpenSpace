@@ -43,13 +43,13 @@ uniform Layer HeightLayers[NUMLAYERS_HEIGHTMAP];
 uniform float heightScale;
 #endif // USE_HEIGHTMAP
 
-#if USE_ACCURATE_NORMALS
+#if USE_ACCURATE_NORMALS && USE_HEIGHTMAP
 uniform float deltaTheta0;
 uniform float deltaTheta1;
 uniform float deltaPhi0;
 uniform float deltaPhi1;
 uniform float tileDelta;
-#endif //USE_ACCURATE_NORMALS
+#endif //USE_ACCURATE_NORMALS && USE_HEIGHTMAP
 
 float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights) {
     float height = CHUNK_DEFAULT_HEIGHT;

@@ -37,7 +37,7 @@ struct Intersection {
 };
 
 vec3 geodeticSurfaceNormal(float latitude, float longitude) {
-    const float cosLat = cos(latitude);
+    float cosLat = cos(latitude);
     return vec3(
         cosLat * cos(longitude),
         cosLat * sin(longitude), 
@@ -48,10 +48,10 @@ vec3 geodeticSurfaceNormal(float latitude, float longitude) {
 PositionNormalPair geodetic3ToCartesian(float latitude, float longitude, float height,
                                         vec3 radiiSquared)
 {
-    const vec3 normal = geodeticSurfaceNormal(latitude, longitude);
-    const vec3 k = radiiSquared * normal;
-    const float gamma = sqrt(dot(k, normal));
-    const vec3 rSurface = k / gamma;
+    vec3 normal = geodeticSurfaceNormal(latitude, longitude);
+    vec3 k = radiiSquared * normal;
+    float gamma = sqrt(dot(k, normal));
+    vec3 rSurface = k / gamma;
     PositionNormalPair toReturn;
     toReturn.position = rSurface + height * normal;
     toReturn.normal = normal;
@@ -79,22 +79,22 @@ vec3 latLonToCartesian(float latitude, float longitude, float radius) {
 Intersection rayIntersectEllipsoid(vec3 rayOrigin, vec3 rayOriginSquared,
                                    vec3 rayDirection, vec3 oneOverEllipsoidRadiiSquared)
 {
-    const float a = dot(rayDirection * rayDirection, oneOverEllipsoidRadiiSquared);
-    const float b = 2.0 * dot(rayOrigin * rayDirection, oneOverEllipsoidRadiiSquared);
-    const float c = dot(rayOriginSquared, oneOverEllipsoidRadiiSquared) - 1.0;
-    const float discriminant = b * b - 4.0 * a * c;
+    float a = dot(rayDirection * rayDirection, oneOverEllipsoidRadiiSquared);
+    float b = 2.0 * dot(rayOrigin * rayDirection, oneOverEllipsoidRadiiSquared);
+    float c = dot(rayOriginSquared, oneOverEllipsoidRadiiSquared) - 1.0;
+    float discriminant = b * b - 4.0 * a * c;
 
     if (discriminant < 0.0) {
         return Intersection(false, 0.0, 0.0);
     }
     else if (discriminant == 0.0) {
-        const float time = -0.5 * b / a;
+        float time = -0.5 * b / a;
         return Intersection(true, time, time);
     }
 
-    const float t = -0.5 * (b + (b > 0.0 ? 1.0 : -1.0) * sqrt(discriminant));
-    const float root1 = t / a;
-    const float root2 = c / t;
+    float t = -0.5 * (b + (b > 0.0 ? 1.0 : -1.0) * sqrt(discriminant));
+    float root1 = t / a;
+    float root2 = c / t;
 
     return Intersection(true, min(root1, root2), max(root1, root2));
 }

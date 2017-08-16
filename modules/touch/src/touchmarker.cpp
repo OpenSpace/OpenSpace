@@ -38,7 +38,7 @@ namespace {
 namespace openspace {
 
 TouchMarker::TouchMarker()
-    : properties::PropertyOwner("TouchMarker")
+    : properties::PropertyOwner({ "TouchMarker" })
     , _visible({ "TouchMarkers visible", "Toggle visibility of markers", "" }, true) // @TODO Missing documentation
     , _radiusSize({ "Marker size", "Marker radius", "" }, 30.f, 0.f, 100.f) // @TODO Missing documentation
     , _transparency({ "Transparency of marker", "Marker transparency", "" }, 0.8f, 0.f, 1.f) // @TODO Missing documentation

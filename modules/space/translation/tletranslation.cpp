@@ -74,7 +74,7 @@ namespace {
         // Get the total number of days as the sum of leap years + non leap years
         int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
         return result;
-    };
+    }
     
     // Returns the number of leap seconds that lie between the {year, dayOfYear}
     // time point and { 2000, 1 }
@@ -134,7 +134,7 @@ namespace {
         // The distance between the two iterators gives us the number of leap years
         int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
         return nLeapSeconds;
-    };
+    }
     
     double epochFromSubstring(const std::string& epochString) {
         // The epochString is in the form:
@@ -239,23 +239,22 @@ documentation::Documentation TLETranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("TLETranslation"),
-                "",
                Optional::No
             },
             {
                 KeyFile,
                 new StringVerifier,
-                "Specifies the filename of the Two-Line-Element file",
-                Optional::No
+                Optional::No,
+                "Specifies the filename of the Two-Line-Element file"
             },
             {
                 KeyLineNum,
                 new DoubleGreaterVerifier(0),
-                "Specifies the line number within the file where the group of 3 TLE lines begins (1-based)",
-                Optional::No
+                Optional::No,
+                "Specifies the line number within the file where the group of 3 TLE "
+                "lines begins (1-based)."
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 

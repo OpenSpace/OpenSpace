@@ -419,8 +419,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
     return false;
 }
 
-bool RenderableMultiresVolume::initialize() {
-
+void RenderableMultiresVolume::initialize() {
     bool success = _tsp && _tsp->load();
 
     unsigned int maxNumBricks = _tsp->header().xNumBricks_ * _tsp->header().yNumBricks_ * _tsp->header().zNumBricks_;
@@ -477,19 +476,19 @@ bool RenderableMultiresVolume::initialize() {
 
     onEnabledChange(onChange);
 
-    return success;
+    if (!success) {
+        throw ghoul::RuntimeError("Error during initialization");
+    }
 }
 
-bool RenderableMultiresVolume::deinitialize() {
+void RenderableMultiresVolume::deinitialize() {
     _tsp = nullptr;
     _transferFunction = nullptr;
-    return true;
 }
 
 bool RenderableMultiresVolume::isReady() const {
     return true;
 }
-
 
 bool RenderableMultiresVolume::initializeSelector() {
     int nHistograms = 50;

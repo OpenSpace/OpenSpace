@@ -26,10 +26,20 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec4property.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul::opengl {
+    class ProgramObject;
+} // namespace ghoul::opengl
+
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
@@ -38,41 +48,40 @@ public:
     RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
     ~RenderableSphericalGrid();
 
-    bool initialize()   override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
 
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 protected:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
+    struct Vertex {
+        float location[3];
+    };
 
-    ghoul::opengl::ProgramObject* _gridProgram;
-    std::string _gridType;
-    glm::vec4 _gridColor;
-    glm::mat4 _gridMatrix;
-    int _segments;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _gridProgram;
 
-    bool staticGrid;
-    std::string _parentsRotation;
-    glm::dmat3 _parentMatrix;
+    properties::DMat4Property _gridMatrix;
+    properties::Vec4Property _gridColor;
+    properties::IntProperty _segments;
+    properties::FloatProperty _lineWidth;
+    properties::FloatProperty _radius;
 
-    GLuint _vaoID = 3;
-    GLuint _vBufferID = 4;
-    GLuint _iBufferID = 5;
+    bool _gridIsDirty;
+
+    GLuint _vaoID;
+    GLuint _vBufferID;
+    GLuint _iBufferID;
 
     GLenum _mode;
     unsigned int _isize;
     unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
+    std::vector<Vertex> _varray;
+    std::vector<int> _iarray;
 };
 
 }// namespace openspace

@@ -622,7 +622,7 @@ namespace openspace {
         }
     }
 
-    bool RenderableAtmosphere::initialize() {
+    void RenderableAtmosphere::initialize() {
         RenderEngine& renderEngine = OsEng.renderEngine();
 
         if (_atmosphereEnabled) {
@@ -659,16 +659,16 @@ namespace openspace {
             OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(*_deferredcaster.get());
         }
 
-        return isReady();
+        return;
     }
 
-    bool RenderableAtmosphere::deinitialize() {
+    void RenderableAtmosphere::deinitialize() {
         if (_deferredcaster) {
             OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
             _deferredcaster = nullptr;
         }
 
-        return true;
+        return;
     }
 
     bool RenderableAtmosphere::isReady() const {

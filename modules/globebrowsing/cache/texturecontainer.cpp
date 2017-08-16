@@ -45,7 +45,7 @@ void TextureContainer::reset() {
     for (size_t i = 0; i < _numTextures; ++i)
     {
         auto tex = std::make_unique<ghoul::opengl::Texture>(
-            _initData.dimensionsWithPadding(),
+            _initData.dimensions(),
             _initData.ghoulTextureFormat(),
             _initData.glTextureFormat(),
             _initData.glType(),
@@ -78,10 +78,10 @@ ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
 
 const openspace::globebrowsing::TileTextureInitData& TextureContainer::tileTextureInitData() const {
     return _initData;
-};
+}
 
 size_t TextureContainer::size() const {
     return _textures.size();
-};
+}
 
 } // namespace openspace::globebrowsing::cache

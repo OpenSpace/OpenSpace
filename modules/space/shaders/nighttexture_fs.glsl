@@ -46,22 +46,22 @@ uniform sampler2D nightTex;
 
 Fragment getFragment() {
     vec4 diffuse = texture(texture1, vs_st);
-    const vec4 diffuse2 = texture(nightTex, vs_st);
+    vec4 diffuse2 = texture(nightTex, vs_st);
 
     Fragment frag;
     if (_performShading) {
-        const vec3 n = normalize(vs_normal.xyz);
-        const vec3 l_pos = sun_pos; // sun
-        const vec3 l_dir = normalize(l_pos - objpos.xyz);
-        const float intensity = min(max(5 * dot(n, l_dir), 0.0), 1.0);
-        const float darkSide  = min(max(5 * dot(n, -l_dir), 0.0), 1.0);
+        vec3 n = normalize(vs_normal.xyz);
+        vec3 l_pos = sun_pos; // sun
+        vec3 l_dir = normalize(l_pos - objpos.xyz);
+        float intensity = min(max(5 * dot(n, l_dir), 0.0), 1.0);
+        float darkSide  = min(max(5 * dot(n, -l_dir), 0.0), 1.0);
         
         // float shine = 0.0001;
 
-        const vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
+        vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
         
-        const vec4 daytex = max(intensity * diffuse, ambient);
-        const vec4 mixtex = mix(diffuse, diffuse2,  (1.0 + dot(n, -l_dir)) / 2.0);
+        vec4 daytex = max(intensity * diffuse, ambient);
+        vec4 mixtex = mix(diffuse, diffuse2,  (1.0 + dot(n, -l_dir)) / 2.0);
         
         diffuse = (daytex * 2.0 + mixtex) / 3.0;
     }

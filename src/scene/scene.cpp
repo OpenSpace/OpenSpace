@@ -63,13 +63,13 @@
 
 namespace {
     const char* _loggerCat = "Scene";
-    const char* _moduleExtension = ".mod";
-    const char* _commonModuleToken = "${COMMON_MODULE}";
+    //const char* _moduleExtension = ".mod";
+    //const char* _commonModuleToken = "${COMMON_MODULE}";
 
-    const char* KeyCamera = "Camera";
-    const char* KeyFocusObject = "Focus";
-    const char* KeyPositionObject = "Position";
-    const char* KeyViewOffset = "Offset";
+    //const char* KeyCamera = "Camera";
+    //const char* KeyFocusObject = "Focus";
+    //const char* KeyPositionObject = "Position";
+    //const char* KeyViewOffset = "Offset";
 
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
     const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
@@ -126,12 +126,12 @@ void Scene::addNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
 
 void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
     // Remove the node and all its children.
-    node->traversePostOrder([this](SceneGraphNode* node) {
+    node->traversePostOrder([this](SceneGraphNode* n) {
         _topologicallySortedNodes.erase(
-            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), node),
+            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), n),
             _topologicallySortedNodes.end()
         );
-        _nodesByName.erase(node->name());
+        _nodesByName.erase(n->name());
     });
     
     if (updateDeps) {
@@ -212,13 +212,10 @@ void Scene::sortTopologically() {
 void Scene::initialize() {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            bool success = node->initialize();
-            if (success)
-                LDEBUG(node->name() << " initialized successfully!");
-            else
-                LWARNING(node->name() << " not initialized.");
+            node->initialize();
         }
         catch (const ghoul::RuntimeError& e) {
+            LERROR(node->name() << " not initialized.");
             LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
         }
     }
@@ -290,7 +287,8 @@ std::string Scene::generateJson() const {
             json << "\"id\": \"" << p->identifier() << "\",";
             json << "\"type\": \"" << p->className() << "\",";
             json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
-            json << "\"guiName\": \"" << p->guiName() << "\"";
+            json << "\"guiName\": \"" << p->guiName() << "\",";
+            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
             json << "}";
             if (p != properties.back()) {
                 json << ",";

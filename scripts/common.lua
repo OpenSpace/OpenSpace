@@ -14,7 +14,7 @@ helper.scheduledScript.reversible = {}
 helper.setCommonKeys = function()
     openspace.bindKeyLocal(
         "F1",
-        helper.property.invert('Global Properties.OnScreenGUI.Main.Enabled'),
+        helper.property.invert('Global Properties.ImGUI.Main.Enabled'),
         "Toggles the visibility of the on-screen GUI."
     )
     openspace.bindKeyLocal(
@@ -52,18 +52,18 @@ helper.setCommonKeys = function()
 
     openspace.bindKey(
         "f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.RotationalFriction'),
+        helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
         "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely."
     )
 
     openspace.bindKey(
         "Shift+f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.ZoomFriction'),
+        helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
         "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely."
     )
     openspace.bindKey(
         "Ctrl+f",
-        helper.property.invert('NavigationHandler.OrbitalNavigator.RollFriction'),
+        helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
         "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely."
     )
 
