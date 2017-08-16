@@ -24,11 +24,14 @@
 
 #include <openspace/query/query.h>
 #include <openspace/properties/property.h>
-#include "include/subscriptiontopic.h"
+#include "modules/server/include/connection.h"
+#include "modules/server/include/timetopic.h"
 
 namespace {
-const char* _loggerCat = "SubscriptionTopic";
+const char* _loggerCat = "TimeTopic";
 const char* PropertyKey = "property";
+const char* CurrentTimeKey = "currentTime";
+const char* DeltaTimeKey = "deltaTime";
 const int UNSET_ONCHANGE_HANDLE = -1;
 }
 
@@ -36,43 +39,47 @@ using nlohmann::json;
 
 namespace openspace {
 
-SubscriptionTopic::SubscriptionTopic()
+TimeTopic::TimeTopic()
         : Topic()
         , _requestedResourceIsSubscribable(false)
         , _onChangeHandle(-1) {
     LDEBUG("Starting new subscription");
 }
 
-SubscriptionTopic::~SubscriptionTopic() {
-    if (_onChangeHandle != UNSET_ONCHANGE_HANDLE) {
-        _prop->removeOnChange(_onChangeHandle);
-    }
+TimeTopic::~TimeTopic() {
+    // TODO: remove post draw call
 }
 
-bool SubscriptionTopic::isDone() {
+bool TimeTopic::isDone() {
     return !_requestedResourceIsSubscribable || !_connection->active;
 }
 
-void SubscriptionTopic::handleJson(json j) {
-    std::string key = j.at(PropertyKey).get<std::string>();
-    LDEBUG("Subscribing to property '" + key + "'...");
+void TimeTopic::handleJson(json j) {
+    std::string requestedKey = j.at(PropertyKey).get<std::string>();
+    LDEBUG("Subscribing to " + requestedKey);
 
-    _prop = property(key);
-    if (_prop != nullptr) {
+    if (requestedKey == CurrentTimeKey) {
         _requestedResourceIsSubscribable = true;
-        auto onChange = [this, key]() {
-            LDEBUG("Updating subscription '" + key + "'.");
-            json payload = json::parse(_prop->toJson());
-            _connection->sendJson(wrappedPayload(payload));
-        };
-        _onChangeHandle = _prop->onChange(onChange);
-
-        // immediately send the value
-        onChange();
+        _connection->addRefreshCall([this]() { return currentTime(); });
+    }
+    else if (requestedKey == DeltaTimeKey) {
+        _requestedResourceIsSubscribable = true;
+        _connection->addRefreshCall([this]() { return deltaTime(); });
     }
     else {
-        LWARNING("Could not subscribe. Property '" + key + "' not found.");
+        LWARNING("Cannot get " + requestedKey);
     }
+}
+
+json TimeTopic::currentTime() {
+    json timeJson = { { "time", OsEng.timeManager().time().ISO8601() } };
+    return wrappedPayload(timeJson);
+}
+
+json TimeTopic::deltaTime() {
+    // TODO: change to real value
+    json timeJson = { { "deltaTime", 1.0f } };
+    return wrappedPayload(timeJson);
 }
 
 } // namespace openspace

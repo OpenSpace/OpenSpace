@@ -35,6 +35,7 @@ set(HEADER_FILES
     include/luascripttopic.h
     include/subscriptiontopic.h
     include/setpropertytopic.h
+    include/timetopic.h
     include/triggerpropertytopic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.h
 )
@@ -50,6 +51,7 @@ set(SOURCE_FILES
     src/topics/luascripttopic.cpp
     src/topics/subscriptiontopic.cpp
     src/topics/setpropertytopic.cpp
+    src/topics/timetopic.cpp
     src/topics/triggerpropertytopic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.cpp
 )

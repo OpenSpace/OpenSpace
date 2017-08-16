@@ -22,57 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
-#include <openspace/properties/property.h>
-#include "include/subscriptiontopic.h"
+#ifndef OPENSPACE_MODULES_SERVER__TIME_TOPIC_H
+#define OPENSPACE_MODULES_SERVER__TIME_TOPIC_H
 
-namespace {
-const char* _loggerCat = "SubscriptionTopic";
-const char* PropertyKey = "property";
-const int UNSET_ONCHANGE_HANDLE = -1;
-}
-
-using nlohmann::json;
+#include <openspace/util/timemanager.h>
+#include "topic.h"
 
 namespace openspace {
 
-SubscriptionTopic::SubscriptionTopic()
-        : Topic()
-        , _requestedResourceIsSubscribable(false)
-        , _onChangeHandle(-1) {
-    LDEBUG("Starting new subscription");
+class TimeTopic : public Topic {
+public:
+    TimeTopic();
+    ~TimeTopic();
+    void handleJson(nlohmann::json json);
+    bool isDone();
+private: 
+    bool _requestedResourceIsSubscribable;
+    int _onChangeHandle;
+
+    nlohmann::json currentTime();
+    nlohmann::json deltaTime();
+};
+
 }
 
-SubscriptionTopic::~SubscriptionTopic() {
-    if (_onChangeHandle != UNSET_ONCHANGE_HANDLE) {
-        _prop->removeOnChange(_onChangeHandle);
-    }
-}
-
-bool SubscriptionTopic::isDone() {
-    return !_requestedResourceIsSubscribable || !_connection->active;
-}
-
-void SubscriptionTopic::handleJson(json j) {
-    std::string key = j.at(PropertyKey).get<std::string>();
-    LDEBUG("Subscribing to property '" + key + "'...");
-
-    _prop = property(key);
-    if (_prop != nullptr) {
-        _requestedResourceIsSubscribable = true;
-        auto onChange = [this, key]() {
-            LDEBUG("Updating subscription '" + key + "'.");
-            json payload = json::parse(_prop->toJson());
-            _connection->sendJson(wrappedPayload(payload));
-        };
-        _onChangeHandle = _prop->onChange(onChange);
-
-        // immediately send the value
-        onChange();
-    }
-    else {
-        LWARNING("Could not subscribe. Property '" + key + "' not found.");
-    }
-}
-
-} // namespace openspace
+#endif //OPENSPACE_MODULES_SERVER__TIME_TOPIC_H

@@ -28,6 +28,7 @@
 #include <modules/server/include/luascripttopic.h>
 #include <modules/server/include/setpropertytopic.h>
 #include <modules/server/include/subscriptiontopic.h>
+#include <modules/server/include/timetopic.h>
 #include <modules/server/include/triggerpropertytopic.h>
 
 namespace {
@@ -47,6 +48,7 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
     _topicFactory.registerClass<LuaScriptTopic>("luascript");
     _topicFactory.registerClass<SetPropertyTopic>("set");
     _topicFactory.registerClass<SubscriptionTopic>("subscribe");
+    _topicFactory.registerClass<TimeTopic>("time");
     _topicFactory.registerClass<TriggerPropertyTopic>("trigger");
     _topicFactory.registerClass<BounceTopic>("bounce");
 
@@ -151,6 +153,7 @@ void Connection::refresh() {
 
 void Connection::addRefreshCall(std::function<nlohmann::json()> func) {
 //    struct MethodAndValue mav = { .method=std::move(func), .value=nlohmann::json };
+    sendJson(func());
     _refreshCalls.push_back({std::move(func), nlohmann::json::object()});
 }
 
