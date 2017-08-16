@@ -206,11 +206,15 @@ Fragment getTileFragment() {
 
     // Other data
 #if USE_WATERMASK
+    // Water reflectance is added to the G-Buffer.
     frag.gOtherData = vec4(waterReflectance, waterReflectance, waterReflectance, 1.0);
 #else
     frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
 #endif
-    // Normal is written in Camera Rig (OS Eye) Space
+    // Normal is written Object Space.
+    // Right now the only renderable using this info is the atm and,
+    // because all calculation for light interactions are done in Object
+    // Space, we avoid a new computation saving the normals in Object Space.
     frag.gNormal    = vec4(normalModelSpace, 1.0); 
     frag.gPosition  = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
 

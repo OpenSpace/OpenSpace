@@ -110,7 +110,7 @@ void main() {
     // Add the height in the direction of the normal
     pair.position += pair.normal * height;
     vec4 positionClippingSpace =
-        modelViewProjectionTransform * vec4(pair.position, 1);
+        modelViewProjectionTransform * vec4(pair.position, 1.0);
 
     // Write output
     fs_uv = in_uv;
@@ -118,5 +118,5 @@ void main() {
     gl_Position = fs_position;
     ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
     fs_normal = pair.normal;
-    positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1));
+    positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1.0));
 }

@@ -514,11 +514,12 @@ void main() {
       //vec4 positionArray[8];
       float maxAlpha = -1.0;
       for (int i = 0; i < nAaSamples; i++) {
-        meanNormal   += texelFetch(mainNormalTexture, ivec2(gl_FragCoord), i);
+        meanNormal += texelFetch(mainNormalTexture, ivec2(gl_FragCoord), i);
         vec4 color = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
         if ( color.a > maxAlpha )
           maxAlpha = color.a;
         meanColor       += color;
+        // Data in the mainPositionTexture are written in view space (view plus camera rig)
         meanPosition    += texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
         meanOtherData   += texelFetch(otherDataTexture, ivec2(gl_FragCoord), i);
         //positionArray[i] = texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
