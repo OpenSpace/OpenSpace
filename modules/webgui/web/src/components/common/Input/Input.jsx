@@ -77,7 +77,7 @@ class Input extends Component {
     const { placeholder, className, wide, loading, clearable } = this.props;
     const { value, id } = this.state;
     return (
-      <div className={styles.group}>
+      <div className={`${styles.group} ${wide ? styles.wide : ''}`}>
         <input
           {...this.inheritProps}
           className={`${className} ${styles.input}

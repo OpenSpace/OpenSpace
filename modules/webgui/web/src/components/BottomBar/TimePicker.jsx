@@ -7,7 +7,8 @@ import Button from '../common/Input/Button';
 import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
 import Time from '../common/Input/Time';
-import { TogglePauseScript, CurrenTimeKey } from '../../api/keys';
+import { TogglePauseScript, CurrenTimeKey, ValuePlaceholder, SetDeltaTimeScript } from '../../api/keys';
+import SimulationIncrement from './SimulationIncrement';
 
 /**
  * Make sure the date string contains a time zone
@@ -21,6 +22,11 @@ const DateStringWithTimeZone = (date, zone = 'Z') =>
 class TimePicker extends Component {
   static togglePause() {
     DataManager.runScript(TogglePauseScript);
+  }
+
+  static realtime() {
+    const script = SetDeltaTimeScript.replace(ValuePlaceholder, 1);
+    DataManager.runScript(script);
   }
 
   constructor(props) {
@@ -63,10 +69,16 @@ class TimePicker extends Component {
         </div>
         <hr className={Popover.styles.delimiter} />
         <div className={Popover.styles.title}>Simulation increment</div>
+        <div className={Popover.styles.content}>
+          <SimulationIncrement />
+        </div>
         <hr className={Popover.styles.delimiter} />
         <div className={`${Popover.styles.row} ${Popover.styles.content}`}>
           <Button block smalltext onClick={TimePicker.togglePause}>
-            Pause simulation
+            Pause
+          </Button>
+          <Button block smalltext onClick={TimePicker.realtime}>
+            Realtime
           </Button>
           <Button block smalltext onClick={this.now}>
             Now
@@ -78,7 +90,7 @@ class TimePicker extends Component {
 
   setDate(time) {
     this.setState({ time });
-    // Spice, that is handling the time parsing in OpenSpace does not suppport
+    // Spice, that is handling the time parsing in OpenSpace does not support
     // ISO 8601-style time zones (the Z). It does, however, always assume that UTC
     // is given.
     const fixedTimeString = time.toJSON().replace('Z', '');

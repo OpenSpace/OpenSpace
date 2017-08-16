@@ -17,3 +17,7 @@ export const ToggleConsoleScript = 'openspace.setPropertyValue("Global Propertie
 export const CurrenTimeKey = 'currentTime';
 // key for getting the delta time
 export const DeltaTime = 'deltaTime';
+// value placeholder in scripts with parameter
+export const ValuePlaceholder = '___value___';
+// script for setting deltatime
+export const SetDeltaTimeScript = `openspace.time.setDeltaTime(${ValuePlaceholder})`;
