@@ -13,3 +13,7 @@ export const ShutdownScript = 'openspace.toggleShutdown()';
 // toggle console
 export const ToggleConsoleScript = 'openspace.setPropertyValue("Global Properties.ImGUI.Main.Enabled", ' +
                                    'not openspace.getPropertyValue("Global Properties.ImGUI.Main.Enabled"))';
+// key for getting current simulation time
+export const CurrenTimeKey = 'currentTime';
+// key for getting the delta time
+export const DeltaTime = 'deltaTime';

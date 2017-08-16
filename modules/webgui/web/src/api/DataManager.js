@@ -8,8 +8,12 @@ const TOPIC_TYPES = {
   luascript: 'luascript',
   set: 'set',
   subscribe: 'subscribe',
+  time: 'time',
   trigger: 'trigger',
 };
+
+const ResubscribeOnReconnect = true;
+Object.freeze(ResubscribeOnReconnect);
 
 function UnknownTypeException(message, type = '') {
   this.message = message;
@@ -37,10 +41,10 @@ class DataManager {
    * @param key - the uri of the property
    * @param callback (function) - callback to handle the incoming subscription
    */
-  subscribe(key: string, callback: Function) {
+  subscribe(key: string, callback: Function, type: string = TOPIC_TYPES.subscribe) {
     let subscription = this.subscriptions[key];
     if (!subscription) {
-      subscription = this.createSubscription(key);
+      subscription = this.createSubscription(key, type);
       this.subscriptions[key] = subscription;
     }
     subscription.addCallback(callback);
@@ -113,6 +117,10 @@ class DataManager {
     this.send(message);
   }
 
+  /**
+   * Run a lua script
+   * @param script - the script to run
+   */
   runScript(script: string) {
     const message = this.wrapMessage({
       type: TOPIC_TYPES.luascript,
@@ -123,16 +131,15 @@ class DataManager {
     this.send(message);
   }
 
-  createSubscription(key: string) {
+  createSubscription(key: string, type: string = TOPIC_TYPES.subscribe) {
     const message = this.wrapMessage({
-      type: TOPIC_TYPES.subscribe,
+      type,
       payload: {
-        subscriptionProperty: key,
+        property: key,
       },
     });
     const subscription = new Subscription(key, message.topic);
-    const resubscribeOnReconnect = true;
-    this.send(message, subscription.onMessage, resubscribeOnReconnect);
+    this.send(message, subscription.onMessage, ResubscribeOnReconnect);
     return subscription;
   }
 

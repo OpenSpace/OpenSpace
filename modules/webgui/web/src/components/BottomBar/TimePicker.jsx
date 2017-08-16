@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import DataManager from '../../api/DataManager';
+import DataManager, { TopicTypes } from '../../api/DataManager';
 import LoadingString from '../common/LoadingString/LoadingString';
 import Popover from '../common/Popover/Popover';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
@@ -7,7 +7,7 @@ import Button from '../common/Input/Button';
 import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
 import Time from '../common/Input/Time';
-import { TogglePauseScript, TimeKey } from '../../api/keys';
+import { TogglePauseScript, CurrenTimeKey } from '../../api/keys';
 
 /**
  * Make sure the date string contains a time zone
@@ -40,11 +40,11 @@ class TimePicker extends Component {
 
   componentDidMount() {
     // subscribe to data
-    DataManager.subscribe(TimeKey, this.subscriptionCallback);
+    DataManager.subscribe(CurrenTimeKey, this.subscriptionCallback, TopicTypes.time);
   }
 
   componentWillUnmount() {
-    DataManager.unsubscribe(TimeKey, this.subscriptionCallback);
+    DataManager.unsubscribe(CurrenTimeKey, this.subscriptionCallback);
   }
 
   get time() {
