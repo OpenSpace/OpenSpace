@@ -139,8 +139,8 @@ void RenderableCrawlingLine::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram(
         "RenderableCrawlingLine",
-        "${MODULE_NEWHORIZONS}/shaders/crawlingline_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/crawlingline_fs.glsl"
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_vs.glsl",
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl"
     );
 
     glGenVertexArrays(1, &_vao);
