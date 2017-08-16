@@ -77,8 +77,7 @@ json TimeTopic::currentTime() {
 }
 
 json TimeTopic::deltaTime() {
-    // TODO: change to real value
-    json timeJson = { { "deltaTime", 1.0f } };
+    json timeJson = { { "deltaTime", OsEng.timeManager().time().deltaTime() } };
     return wrappedPayload(timeJson);
 }
 
