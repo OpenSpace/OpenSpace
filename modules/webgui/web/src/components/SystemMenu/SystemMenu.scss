@@ -39,10 +39,27 @@
   }
 }
 
-.links li {
-  padding: ($base-padding / 2) $base-padding;
+.links {
+  .shortcut {
+    font-size: 0.8em;
+    color: $text-color-blur;
+  }
 
-  &:hover {
-    background: $blue;
+  a, button {
+    padding: ($base-padding / 2) $base-padding;
+    color: $text-color-focus;
+    display: block;
+    text-decoration: none;
+
+    &:hover {
+      background: $blue;
+    }
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    text-align: left;
+    width: 100%;
   }
 }

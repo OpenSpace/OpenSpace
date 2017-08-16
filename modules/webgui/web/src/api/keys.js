@@ -8,3 +8,8 @@ export const SceneGraphKey = '__allNodes';
 export const TogglePauseScript = 'openspace.time.togglePause()';
 // key for getting current time subscription
 export const TimeKey = 'special:currentTime';
+// script to toggle shutdown
+export const ShutdownScript = 'openspace.toggleShutdown()';
+// toggle console
+export const ToggleConsoleScript = 'openspace.setPropertyValue("Global Properties.ImGUI.Main.Enabled", ' +
+                                   'not openspace.getPropertyValue("Global Properties.ImGUI.Main.Enabled"))';

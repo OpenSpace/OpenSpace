@@ -1,10 +1,20 @@
 import React, { Component } from 'react';
+import DataManager from '../../api/DataManager';
 import Icon from '../common/Icon/Icon';
 import Button from '../common/Input/Button';
 import styles from './SystemMenu.scss';
 import Popover from '../common/Popover/Popover';
+import { ShutdownScript, ToggleConsoleScript } from '../../api/keys';
 
 class SystemMenu extends Component {
+  static quit() {
+    DataManager.runScript(ShutdownScript);
+  }
+
+  static console() {
+    DataManager.runScript(ToggleConsoleScript);
+  }
+
   constructor(props) {
     super(props);
     this.state = { showMenu: false };
@@ -20,15 +30,41 @@ class SystemMenu extends Component {
       <div className={styles.SystemMenu}>
         { this.state.showMenu && (
           <Popover className={styles.popover} arrow="arrow bottom leftside">
-            <ul className={styles.links}>
-              <li>Toggle console <span className="shortcut">~</span></li>
+            <nav className={styles.links}>
+              <button onClick={SystemMenu.console}>
+                Toggle console <span className={styles.shortcut}>~</span>
+              </button>
+
               <hr className={Popover.styles.delimiter} />
-              <li>Quit Openspace <span className="shortcut">ESC</span></li>
+
+              <button onClick={SystemMenu.quit}>
+                Quit OpenSpace <span className={styles.shortcut}>ESC</span>
+              </button>
+
               <hr className={Popover.styles.delimiter} />
-              <li>Help</li>
-              <li>Report a problem</li>
-              <li>About OpenSpace</li>
-            </ul>
+
+              <a
+                href="https://github.com/OpenSpace/OpenSpace/wiki/General-Getting-Started-Guide-Using-OpenSpace"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Help
+              </a>
+              <a
+                href="https://github.com/OpenSpace/OpenSpace/issues/new"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Report a problem
+              </a>
+              <a
+                href="http://openspaceproject.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                About OpenSpace
+              </a>
+            </nav>
           </Popover>
         )}
 
