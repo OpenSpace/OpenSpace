@@ -108,7 +108,7 @@ return {
                 HeightLayers = {
                     {
                         Name = "Mola Elevation",
-                        FilePath = "map_service_configs/Mars_MGS_MOLA_DEM.xml"
+                        FilePath = "map_service_configs/Mars_MGS_MOLA_DEM.xml",
                         TilePixelSize = 90
                     },
                     {
