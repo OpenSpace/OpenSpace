@@ -1,22 +1,15 @@
 local charon_radius = 6.035E5
 
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp",
-        "${SPICE}/nh_20170126/spk/NavPE_de433_od122.bsp",
-    }
-else
-    NewHorizonsKernels = {
-        "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-    }
-end
-
-local Files = {
-    low = "textures/charon_highres.jpg",
-    med = "textures/charon_highres.jpg",
-    high = "textures/cpmap_cyl_HR_0e.jpg"
+local NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp",
+    "${SPICE}/new_horizons/spk/NavPE_de433_od122.bsp",
 }
-local ColorTexture = Files[TextureResolution]
+
+-- Loading the smaller version for higher compatability
+-- if we have a good way to measure GPU memory, we can make this dynamic
+local ColorTexture = "textures/NH_Charon_mosaic_8192.png"
+local HeightTexture = "textures/NH_Charon_DTM_8192.png"
+
 
 return {
     -- CharonProjection module
@@ -32,7 +25,7 @@ return {
                 Segments = 100
             },
             ColorTexture = ColorTexture,
-            HeightTexture = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
+            HeightTexture = HeightTexture,
             Projection = {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",
