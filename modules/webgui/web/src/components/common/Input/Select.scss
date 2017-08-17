@@ -1,0 +1,44 @@
+@import "../../../styles/all";
+@import "./Input";
+
+.selectgroup {
+  height: $input-total-height;
+  position: relative;
+  width: 100%;
+}
+
+.select {
+  background: $ui-background-hover;
+  border: none;
+  color: $text-color-focus;
+  font-family: $font-family;
+  font-size: $input-font-size;
+  height: 100%;
+  line-height: 1;
+  // Before you scream "MAGIC PIXELLLLS" and go on a Twitter rant about
+  // your incompetent colleague, hear this: Select fields are weird. These
+  // magic pixels push things around so that the Select component aligns well with
+  // the Input component.
+  padding: ($padding-top - 10px) ($input-padding-horizontal - 5px) 0;
+  width: 100%;
+
+  &:hover {
+    background: $ui-background-selected;
+  }
+
+  &:focus,
+  &:active {
+    background: $ui-background-solid;
+
+    + .selectlabel {
+      color: $green;
+    }
+  }
+}
+
+.selectlabel {
+  font-size: $input-label-size;
+  left: $input-padding-horizontal;
+  position: absolute;
+  top: $input-label-margin / 2;
+}
