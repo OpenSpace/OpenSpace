@@ -37,6 +37,8 @@ const char* _loggerCat = "ServerModule: Connection";
 const char* MessageKeyType = "type";
 const char* MessageKeyPayload = "payload";
 const char* MessageKeyTopic = "topic";
+
+const int ThrottleMessageWaitInMs = 100;
 }
 
 namespace openspace {
@@ -99,7 +101,7 @@ void Connection::handleJson(nlohmann::json j) {
     }
 
     // The topic id may be an already discussed topic, or a new one.
-    size_t topicId = *topicJson;
+    TopicId topicId = *topicJson;
     auto topicIt = _topics.find(topicId);
 
     if (topicIt == _topics.end()) {
@@ -146,15 +148,53 @@ void Connection::refresh() {
         nlohmann::json newValue = entry.method();
         if (newValue != entry.value) {
             entry.value = newValue;
-            sendJson(newValue);
+            placeInMessageQueue(newValue, entry.topicId);
         }
+    }
+
+    flushQueue();
+}
+
+void Connection::addRefreshCall(std::function<nlohmann::json()> func, const TopicId topicId) {
+    sendJson(func());
+    _refreshCalls.push_back({std::move(func), topicId, nlohmann::json::object()});
+}
+
+void Connection::placeInMessageQueue(const nlohmann::json &j, const TopicId topic) {
+    placeInMessageQueue(j.dump(), topic);
+}
+
+void Connection::placeInMessageQueue(const std::string &message, const TopicId topic) {
+    // add or replace message - only one message per topic is allowed
+    auto queueIt = _messageQueue.find(topic);
+    if (queueIt == _messageQueue.end()) {
+        _messageQueue.emplace(topic, message);
+    }
+    else {
+        queueIt->second = message;
     }
 }
 
-void Connection::addRefreshCall(std::function<nlohmann::json()> func) {
-//    struct MethodAndValue mav = { .method=std::move(func), .value=nlohmann::json };
-    sendJson(func());
-    _refreshCalls.push_back({std::move(func), nlohmann::json::object()});
+void Connection::flushQueue() {
+    const std::chrono::milliseconds requiredWait(ThrottleMessageWaitInMs);
+    const auto now = std::chrono::system_clock::now();
+    std::vector<TopicId> toRemove;
+
+    for (auto &entry : _messageQueue) {
+        auto sentIt = _sentMessages.find(entry.first);
+
+        if (sentIt == _sentMessages.end() || (now - sentIt->second) > requiredWait) {
+            sendMessage(std::string(entry.second));
+            
+            // store this message as sent and remove it from queue
+            _sentMessages[entry.first] = now;
+            toRemove.push_back(entry.first);
+        }
+    }
+
+    for (auto &topic : toRemove) {
+        _messageQueue.erase(topic);
+    }
 }
 
 } // namespace openspace

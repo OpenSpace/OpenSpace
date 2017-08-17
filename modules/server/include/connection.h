@@ -40,8 +40,11 @@
 
 namespace openspace {
 
+using TopicId = size_t;
+
 struct MethodAndValue {
     std::function<nlohmann::json()> method;
+    TopicId topicId;
     nlohmann::json value;
 };
 
@@ -54,10 +57,10 @@ public:
     void handleJson(nlohmann::json json);
     void sendJson(const nlohmann::json& json);
     void refresh();
-    void addRefreshCall(std::function<nlohmann::json()>);
+    void addRefreshCall(std::function<nlohmann::json()>, const TopicId topicId);
 
     ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<size_t, std::unique_ptr<Topic>> _topics;
+    std::map<TopicId, std::unique_ptr<Topic>> _topics;
     std::shared_ptr<ghoul::io::Socket> socket;
     std::thread thread;
     bool needsToBeAuthenticated();
@@ -65,7 +68,13 @@ public:
 
 private:
     bool _requireAuthentication, _isAuthenticated;
+    std::map <TopicId, std::string> _messageQueue;
+    std::map <TopicId, std::chrono::system_clock::time_point> _sentMessages;
     std::vector<MethodAndValue> _refreshCalls;
+
+    void placeInMessageQueue(const std::string &message, const TopicId topicId);
+    void placeInMessageQueue(const nlohmann::json &j, const TopicId topicId);
+    void flushQueue();
 };
 
 }

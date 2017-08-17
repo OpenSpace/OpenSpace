@@ -60,11 +60,11 @@ void TimeTopic::handleJson(json j) {
 
     if (requestedKey == CurrentTimeKey) {
         _requestedResourceIsSubscribable = true;
-        _connection->addRefreshCall([this]() { return currentTime(); });
+        _connection->addRefreshCall([this]() { return currentTime(); }, _topicId);
     }
     else if (requestedKey == DeltaTimeKey) {
         _requestedResourceIsSubscribable = true;
-        _connection->addRefreshCall([this]() { return deltaTime(); });
+        _connection->addRefreshCall([this]() { return deltaTime(); }, _topicId);
     }
     else {
         LWARNING("Cannot get " + requestedKey);
