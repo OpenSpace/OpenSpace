@@ -1,8 +1,17 @@
 import React, { Component } from 'react';
+import { throttle } from 'lodash/function';
 import DataManager, { TopicTypes } from '../../api/DataManager';
 import { DeltaTime, ValuePlaceholder, SetDeltaTimeScript } from '../../api/keys';
 import NumericInput from '../common/Input/NumericInput';
 import Row from '../common/Row/Row';
+
+const UpdateDelayMs = 1000;
+// Throttle the delta time updating, so that we don't accidentally flood
+// the simulation with updates.
+const UpdateDeltaTime = throttle((value) => {
+  const script = SetDeltaTimeScript.replace(ValuePlaceholder, value);
+  DataManager.runScript(script);
+}, UpdateDelayMs);
 
 class SimulationIncrement extends Component {
   constructor(props) {
@@ -22,13 +31,10 @@ class SimulationIncrement extends Component {
   }
 
   setDeltaTime(event) {
-    // TODO: do this deffered!!
-
     const { value } = event.currentTarget;
     // optimistic ui change
     this.setState({ deltaTime: value });
-    const script = SetDeltaTimeScript.replace(ValuePlaceholder, value);
-    DataManager.runScript(script);
+    UpdateDeltaTime(value);
   }
 
   deltaTimeUpdated({ deltaTime }) {
@@ -38,7 +44,7 @@ class SimulationIncrement extends Component {
   render() {
     return (
       <Row>
-        {/* TODO: Add deffering support to inputs */}
+        {/* TODO: Add debouncing support to inputs */}
         <NumericInput
           value={this.state.deltaTime}
           placeholder="Seconds per step"
