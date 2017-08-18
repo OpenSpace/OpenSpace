@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import ReactSelect from 'react-select';
 import 'react-select/dist/react-select.css';
@@ -6,22 +6,20 @@ import 'react-select/dist/react-select.css';
 import styles from './Select.scss';
 import { excludeKeys } from '../../../utils/helpers';
 
-class Select extends Component {
-  render() {
-    const { id, label, direction } = this.props;
-    const inheritedProps = excludeKeys(this.props, 'label direction');
-    return (
-      <div className={styles.selectgroup}>
-        <ReactSelect
-          {...inheritedProps}
-          id={id}
-          className={`${styles.select} ${styles[direction]}`}
-        />
-        <label htmlFor={id} className={styles.selectlabel}>{ label }</label>
-      </div>
-    );
-  }
-}
+const Select = (props) => {
+  const { id, label, direction } = props;
+  const inheritedProps = excludeKeys(props, 'label direction');
+  return (
+    <div className={styles.selectgroup}>
+      <ReactSelect
+        {...inheritedProps}
+        id={id}
+        className={`${styles.select} ${styles[direction]}`}
+      />
+      <label htmlFor={id} className={styles.selectlabel}>{ label }</label>
+    </div>
+  );
+};
 
 Select.id = 0;
 
