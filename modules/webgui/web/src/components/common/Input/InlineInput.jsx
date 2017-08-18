@@ -1,51 +1,17 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import AutosizeInput from 'react-input-autosize';
 import Input from './Input';
 import styles from './InlineInput.scss';
 
-class InlineInput extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { value: props.value, widthElement: null };
-
-    this.onChange = this.onChange.bind(this);
-    this.setWidthElement = this.setWidthElement.bind(this);
-  }
-
-  componentWillReceiveProps({ value }) {
-    this.setState({ value });
-  }
-
-  onChange(event) {
-    const { value } = event.currentTarget;
-    this.setState({ value });
-    this.props.onChange(event);
-  }
-
-  setWidthElement(widthElement) {
-    this.widthElement = widthElement;
-  }
-
-  get width() {
-    return this.widthElement ? this.widthElement.offsetWidth : 0;
-  }
-
-  render() {
-    const { value } = this.state;
-    return (
-      <div className={styles.wrapper}>
-        <span className={styles.hidden} ref={this.setWidthElement}>{ value }</span>
-        <input
-          {...this.props}
-          className={`${styles.input} ${this.props.className}`}
-          value={value}
-          onChange={this.onChange}
-          style={{ width: `${this.width}px` }}
-        />
-      </div>
-    );
-  }
-}
+const InlineInput = props => (
+  <AutosizeInput
+    {...props}
+    value={props.value}
+    onChange={this.onChange}
+    className={`${styles.input} ${props.className}`}
+  />
+);
 
 InlineInput.propTypes = {
   className: PropTypes.string,

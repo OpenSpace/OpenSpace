@@ -1,12 +1,7 @@
 @import "../../../styles/all";
 
-.wrapper {
-  display: inline;
-  position: relative;
-}
-
 .input {
-  background: rgba(white, 0.05);
+  background: $ui-background-selected;
   border: 0;
   box-sizing: content-box;
   color: $text-color-focus;
@@ -16,20 +11,20 @@
   min-width: 10px;
   padding: 0;
 
-  &:focus,
-  &:hover {
-    outline: 0;
-    background: $ui-background-hover;
-  }
-
-  &[type="number"]::-webkit-outer-spin-button,
-  &[type="number"]::-webkit-inner-spin-button {
+  [type="number"]::-webkit-outer-spin-button,
+  [type="number"]::-webkit-inner-spin-button {
     display: none;
   }
-}
 
-.hidden {
-  left: -100000000000px; // Wohooo!
-  position: absolute;
-  visibility: hidden;
+  input {
+    background: transparent;
+    color: $text-color-focus;
+    border: none;
+
+    &:focus,
+    &:hover {
+      outline: 0;
+      background: $ui-background-hover;
+    }
+  }
 }
