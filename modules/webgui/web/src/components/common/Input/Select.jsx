@@ -1,18 +1,22 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ReactSelect from 'react-select';
+import 'react-select/dist/react-select.css';
 
 import styles from './Select.scss';
 import { excludeKeys } from '../../../utils/helpers';
 
 class Select extends Component {
   render() {
-    const { children, id, label } = this.props;
-    const inheritedProps = excludeKeys(this.props, 'label children');
+    const { id, label, direction } = this.props;
+    const inheritedProps = excludeKeys(this.props, 'label direction');
     return (
       <div className={styles.selectgroup}>
-        <select {...inheritedProps} className={styles.select}>
-          { children }
-        </select>
+        <ReactSelect
+          {...inheritedProps}
+          id={id}
+          className={`${styles.select} ${styles[direction]}`}
+        />
         <label htmlFor={id} className={styles.selectlabel}>{ label }</label>
       </div>
     );
@@ -22,13 +26,23 @@ class Select extends Component {
 Select.id = 0;
 
 Select.propTypes = {
-  children: PropTypes.node.isRequired,
+  clearable: PropTypes.bool,
+  direction: PropTypes.oneOf(['up', 'down']),
   id: PropTypes.string,
   label: PropTypes.string.isRequired,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string,
+      label: PropTypes.string,
+    })).isRequired,
+  searchable: PropTypes.bool,
 };
 
 Select.defaultProps = {
+  direction: 'down',
   id: `select-${Select.id++}`,
+  searchable: false,
+  clearable: false,
 };
 
 export default Select;

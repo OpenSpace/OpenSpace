@@ -40,8 +40,8 @@ const StepPrecisions = {
   [Steps.years]: -14,
 };
 const Limits = {
-  [Steps.seconds]: { min: -1000000, max: 1000000, step: 1 },
-  [Steps.minutes]: { min: -100000, max: 100000, step: 0.001 },
+  [Steps.seconds]: { min: -20000, max: 20000, step: 1 },
+  [Steps.minutes]: { min: -20000, max: 20000, step: 0.001 },
   [Steps.hours]: { min: -1000, max: 1000, step: 0.0001 },
   [Steps.days]: { min: -10, max: 10, step: 0.000001 },
   [Steps.months]: { min: -10, max: 10, step: 0.00000001 },
@@ -92,8 +92,7 @@ class SimulationIncrement extends Component {
     UpdateDeltaTime(deltaTime);
   }
 
-  setStepSize(event) {
-    const { value } = event.currentTarget;
+  setStepSize({ value }) {
     if (!Object.values(Steps).includes(value)) return;
 
     this.setState({ stepSize: value });
@@ -107,23 +106,23 @@ class SimulationIncrement extends Component {
     const { deltaTime, stepSize } = this.state;
     const adjustedDelta = round10(deltaTime / this.stepSize, StepPrecisions[stepSize]);
 
+    const options = Object.values(Steps)
+      .map(step => ({ value: step, label: step }));
+
     return (
       <Row>
-        <Select label="Step size" onChange={this.setStepSize} value={stepSize}>
-          <option value={Steps.seconds}>Seconds</option>
-          <option value={Steps.minutes}>Minutes</option>
-          <option value={Steps.hours}>Hours</option>
-          <option value={Steps.days}>Days</option>
-          <option value={Steps.months}>Months</option>
-          <option value={Steps.years}>Years</option>
-        </Select>
-
+        <Select
+          direction="up"
+          label="Step size"
+          onChange={this.setStepSize}
+          options={options}
+          value={stepSize}
+        />
         <NumericInput
-          value={adjustedDelta}
-          placeholder={`${stepSize} per step`}
-          step={0.0000001}
           {...this.limits}
           onChange={this.setDeltaTime}
+          placeholder={`${stepSize} per step`}
+          value={adjustedDelta}
         />
       </Row>
     );
