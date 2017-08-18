@@ -206,7 +206,6 @@ if (it != nodes.end()) {
             continue;
         }
 
-
         ImGui::PushID(l.url.c_str());
 
         ImGui::Text("%s", l.name.c_str());
@@ -230,17 +229,20 @@ if (it != nodes.end()) {
         auto addFunc = [&currentNode, &l](const std::string& type) {
             std::string layerName = l.name;
             std::replace(layerName.begin(), layerName.end(), '.', '-');
-            OsEng.scriptEngine().runScript(fmt::format(
-                "openspace.globebrowsing.addLayer(\
-                    '{}', \
-                    '{}', \
-                    {{ Name = '{}', FilePath = '{}', Enabled = true \}}\
-                );",
-                currentNode,
-                type,
-                layerName,
-                l.url
-            ));
+            OsEng.scriptEngine().queueScript(
+                fmt::format(
+                    "openspace.globebrowsing.addLayer(\
+                        '{}', \
+                        '{}', \
+                        {{ Name = '{}', FilePath = '{}', Enabled = true \}}\
+                    );",
+                    currentNode,
+                    type,
+                    layerName,
+                    l.url
+                ),
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         };
 
         if (addColor) {

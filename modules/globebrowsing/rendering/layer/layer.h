@@ -39,6 +39,8 @@
 
 namespace openspace::globebrowsing {
 
+struct LayerGroup;
+
 namespace tileprovider { class TileProvider; }
 
 class Layer : public properties::PropertyOwner {
@@ -51,7 +53,7 @@ public:
         properties::Vec3Property color;
     };
 
-    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict);
+    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     Tile::Status getTileStatus(const TileIndex& index) const;
@@ -81,11 +83,14 @@ private:
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
     void addVisibleProperties();
     void removeVisibleProperties();
+
+    LayerGroup& _parent;
     
     properties::OptionProperty _typeOption;
     properties::OptionProperty _blendModeOption;
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
+    properties::TriggerProperty _remove;
 
     layergroupid::TypeID _type;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
