@@ -36,6 +36,8 @@
 
 #include <ghoul/misc/onscopeexit.h>
 
+#include <ghoul/lua/ghoul_lua.h>
+
 #include <gdal.h>
 #include <cpl_string.h>
 
@@ -51,9 +53,37 @@ GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
     : GuiPropertyComponent("GlobeBrowsing")
     , _currentNode(-1)
     , _currentServer(-1)
+    , _isDefaultFileLoaded(false)
 {}
 
 void GuiGlobeBrowsingComponent::render() {
+    if (!_isDefaultFileLoaded) {
+        ghoul::Dictionary allServers = ghoul::lua::loadDictionaryFromFile(
+            "${OPENSPACE_DATA}/globebrowsing_servers.lua"
+        );
+
+        std::vector<std::string> keys = allServers.keys();
+        for (const std::string& globe : keys) {
+            ghoul::Dictionary servers = allServers.value<ghoul::Dictionary>(globe);
+
+            for (int j = 1; j <= servers.size(); ++j) {
+                std::string s = servers.value<std::string>(std::to_string(j));
+
+                auto it = _urlMap.find(globe);
+                if (it != _urlMap.end()) {
+                    it->second.push_back(std::move(s));
+                }
+                else {
+                    _urlMap[globe] = { std::move(s) };
+                }
+            }
+        }
+
+        _isDefaultFileLoaded = true;
+    }
+
+
+
     bool e = _isEnabled;
     e = e; 
 
@@ -91,9 +121,9 @@ void GuiGlobeBrowsingComponent::render() {
         // node
         const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
         auto it = std::find(nodes.begin(), nodes.end(), focus);
-if (it != nodes.end()) {
-    _currentNode = std::distance(nodes.begin(), it);
-}
+        if (it != nodes.end()) {
+            _currentNode = std::distance(nodes.begin(), it);
+        }
     }
 
     ImGui::Combo("Globe", &_currentNode, nodeNames.c_str());
@@ -113,14 +143,28 @@ if (it != nodes.end()) {
 
     std::string serverList;
     if (_currentNode != -1) {
-
         if (urlIt != _urlMap.end()) {
             for (std::string s : urlIt->second) {
                 serverList += s + '\0';
             }
         }
     }
+
+    if (_currentServer == -1) {
+        // We haven't selected a server yet, so first instinct is to just use the first
+        if (!urlIt->second.empty()) {
+            _currentServer = 0;
+        }
+    }
+
     ImGui::Combo("Servers", &_currentServer, serverList.c_str());
+
+    ImGui::SameLine();
+    bool deleteServer = ImGui::Button("Delete");
+    if (deleteServer) {
+        urlIt->second.erase(urlIt->second.begin() + _currentServer);
+        --_currentServer;
+    }
 
     // Add server
     constexpr int InputBufferSize = 512;
@@ -145,9 +189,16 @@ if (it != nodes.end()) {
         return;
     }
 
-    ImGui::Separator();
 
     // Can't use urlIt here since it might have been invalidated before
+    urlIt = _urlMap.find(currentNode);
+    if (urlIt == _urlMap.end()) {
+        // There are no server so we have to bail
+        return;
+    }
+
+    ImGui::Separator();
+
     std::string currentServer = _urlMap.find(currentNode)->second[_currentServer];
 
     // If the capabilities haven't been created yet, do so

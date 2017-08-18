@@ -61,6 +61,8 @@ private:
 
     int _currentNode;
     int _currentServer;
+
+    bool _isDefaultFileLoaded;
 };
 
 } // namespace openspace::gui
