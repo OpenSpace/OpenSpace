@@ -241,6 +241,7 @@ GUI::GUI()
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
     addPropertySubOwner(_virtualProperty);
+    addPropertySubOwner(_globeBrowsing);
     addPropertySubOwner(_filePath);
     addPropertySubOwner(_time);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -328,6 +329,7 @@ void GUI::initialize() {
     _globalProperty.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _filePath.initialize();
+    _globeBrowsing.initialize();
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
@@ -349,6 +351,7 @@ void GUI::deinitialize() {
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
     _filePath.deinitialize();
+    _globeBrowsing.deinitialize();
     _property.deinitialize();
 
     delete iniFileBuffer;
@@ -424,6 +427,8 @@ void GUI::initializeGL() {
     _globalProperty.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();
+    _globeBrowsing.initializeGL();
+    _filePath.initializeGL();
     _parallel.initializeGL();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initializeGL();
@@ -453,6 +458,8 @@ void GUI::deinitializeGL() {
     _performance.deinitializeGL();
     _globalProperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
+    _globeBrowsing.deinitializeGL();
+    _filePath.deinitializeGL();
     _property.deinitializeGL();
 }
 
@@ -510,6 +517,10 @@ void GUI::endFrame() {
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
         if (_filePath.isEnabled()) {
             _filePath.render();
+        }
+
+        if (_globeBrowsing.isEnabled()) {
+            _globeBrowsing.render();
         }
     }
 
@@ -609,6 +620,10 @@ void GUI::render() {
     bool filePath = _filePath.isEnabled();
     ImGui::Checkbox("File Paths", &filePath);
     _filePath.setEnabled(filePath);
+
+    bool globeBrowsing = _globeBrowsing.isEnabled();
+    ImGui::Checkbox("GlobeBrowsing", &globeBrowsing);
+    _globeBrowsing.setEnabled(globeBrowsing);
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     bool iswa = _iswa.isEnabled();
