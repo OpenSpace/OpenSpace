@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { excludeKeys } from '../../../utils/helpers';
+import { excludeKeys } from '../../../../utils/helpers';
 import styles from './Checkbox.scss';
 
 class Checkbox extends Component {

@@ -1,6 +1,6 @@
 import React from 'react';
 import Property from './Property';
-import NumericInput from '../../common/Input/NumericInput';
+import NumericInput from '../../common/Input/NumericInput/NumericInput';
 
 class NumericProperty extends Property {
   onChange(event) {

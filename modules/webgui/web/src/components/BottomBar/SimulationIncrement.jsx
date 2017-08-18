@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { throttle } from 'lodash/function';
 import DataManager, { TopicTypes } from '../../api/DataManager';
 import { DeltaTime, ValuePlaceholder, SetDeltaTimeScript } from '../../api/keys';
-import NumericInput from '../common/Input/NumericInput';
+import NumericInput from '../common/Input/NumericInput/NumericInput';
 import Row from '../common/Row/Row';
-import Select from '../common/Input/Select';
+import Select from '../common/Input/Select/Select';
 import { round10 } from '../../utils/rounding';
 
 const UpdateDelayMs = 1000;

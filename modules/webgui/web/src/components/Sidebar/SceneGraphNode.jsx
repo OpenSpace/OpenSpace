@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import PropertyCollection from './Properties/PropertyCollection';
 import ToggleContent from '../common/ToggleContent/ToggleContent';
-import Button from '../common/Input/Button';
+import Button from '../common/Input/Button/Button';
 import Icon from '../common/Icon/Icon';
 import DataManager from '../../api/DataManager';
 import { OriginKey } from '../../api/keys';

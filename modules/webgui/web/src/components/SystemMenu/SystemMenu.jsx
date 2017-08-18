@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import DataManager from '../../api/DataManager';
 import Icon from '../common/Icon/Icon';
-import Button from '../common/Input/Button';
+import Button from '../common/Input/Button/Button';
 import styles from './SystemMenu.scss';
 import Popover from '../common/Popover/Popover';
 import { ShutdownScript, ToggleConsoleScript } from '../../api/keys';

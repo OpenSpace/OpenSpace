@@ -4,7 +4,7 @@ import ReactSelect from 'react-select';
 import 'react-select/dist/react-select.css';
 
 import styles from './Select.scss';
-import { excludeKeys } from '../../../utils/helpers';
+import { excludeKeys } from '../../../../utils/helpers';
 
 const Select = (props) => {
   const { id, label, direction } = props;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Input from '../Input/Input';
+import Input from '../Input/Input/Input';
 import CenteredLabel from '../CenteredLabel/CenteredLabel';
 import ScrollOverlay from '../ScrollOverlay/ScrollOverlay';
 import { SimpleSubstring } from '../../../utils/StringMatchers';

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import AutosizeInput from 'react-input-autosize';
-import Input from './Input';
+import Input from '../Input/Input';
 import styles from './InlineInput.scss';
 
 const InlineInput = props => (

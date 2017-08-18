@@ -1,6 +1,6 @@
 import React from 'react';
 import Property from './Property';
-import Checkbox from '../../common/Input/Checkbox';
+import Checkbox from '../../common/Input/Checkbox/Checkbox';
 
 class BoolProperty extends Property {
   onChange(value) {

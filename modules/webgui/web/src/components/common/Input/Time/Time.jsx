@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Button from './Button/Button';
-import InlineInput from './InlineInput';
+import Button from '../Button/Button';
+import InlineInput from '../InlineInput/InlineInput';
 import styles from './Time.scss';
-import Icon from '../Icon/Icon';
+import Icon from '../../Icon/Icon';
 
 const Elements = {
   Hours: 'hours',

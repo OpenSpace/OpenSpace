@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { excludeKeys } from '../../../utils/helpers';
+import { excludeKeys } from '../../../../utils/helpers';
 import styles from './NumericInput.scss';
-import Input from './Input';
+import Input from '../Input/Input';
 
 class NumericInput extends Component {
   constructor(props) {

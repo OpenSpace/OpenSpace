@@ -3,10 +3,10 @@ import DataManager, { TopicTypes } from '../../api/DataManager';
 import LoadingString from '../common/LoadingString/LoadingString';
 import Popover from '../common/Popover/Popover';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
-import Button from '../common/Input/Button';
+import Button from '../common/Input/Button/Button';
 import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
-import Time from '../common/Input/Time';
+import Time from '../common/Input/Time/Time';
 import { TogglePauseScript, CurrenTimeKey, ValuePlaceholder, SetDeltaTimeScript } from '../../api/keys';
 import SimulationIncrement from './SimulationIncrement';
 

@@ -3,10 +3,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { rotate } from '../../../utils/helpers';
 import Icon from '../Icon/Icon';
-import Button from '../Input/Button';
+import Button from '../Input/Button/Button';
 
 import styles from './Calendar.scss';
-import InlineInput from '../Input/InlineInput';
+import InlineInput from '../Input/InlineInput/InlineInput';
 
 const Days = {
   Sunday: 0,

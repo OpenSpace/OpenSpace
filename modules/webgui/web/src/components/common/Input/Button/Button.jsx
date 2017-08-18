@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { excludeKeys } from '../../../utils/helpers';
+import { excludeKeys } from '../../../../utils/helpers';
 import styles from './Button.scss';
 
 /* eslint-disable react/no-unused-prop-types */

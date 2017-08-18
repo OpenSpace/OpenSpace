@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { excludeKeys } from '../../../utils/helpers';
-import Icon from '../Icon/Icon';
+import { excludeKeys } from '../../../../utils/helpers';
+import Icon from '../../Icon/Icon';
 import styles from './Input.scss';
 
 class Input extends Component {
