@@ -26,6 +26,9 @@ module.exports = {
         ],
         include: path.resolve(__dirname, '../')
       }, {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      }, {
         test: /\.(woff|woff2|ttf|eot)$/,
         loader: 'file-loader',
         options: {

@@ -34,6 +34,7 @@ module.exports = {
       // Load SASS!
       {
         test: /\.scss$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: 'style-loader',
@@ -54,7 +55,10 @@ module.exports = {
           },
         ],
       },
-      // Load fonts!
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
       {
         test: /\.(woff|woff2|ttf|eot)$/,
         loader: 'file-loader',
