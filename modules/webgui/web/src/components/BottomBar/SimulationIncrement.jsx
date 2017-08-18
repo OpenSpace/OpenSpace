@@ -6,14 +6,16 @@ import NumericInput from '../common/Input/NumericInput/NumericInput';
 import Row from '../common/Row/Row';
 import Select from '../common/Input/Select/Select';
 import { round10 } from '../../utils/rounding';
+import ScaleInput from '../common/Input/ScaleInput/ScaleInput';
 
 const UpdateDelayMs = 1000;
 // Throttle the delta time updating, so that we don't accidentally flood
 // the simulation with updates.
-const UpdateDeltaTime = throttle((value) => {
+const UpdateDeltaTimeNow = (value) => {
   const script = SetDeltaTimeScript.replace(ValuePlaceholder, value);
   DataManager.runScript(script);
-}, UpdateDelayMs);
+};
+const UpdateDeltaTime = throttle(UpdateDeltaTimeNow, UpdateDelayMs);
 
 const Steps = {
   seconds: 'Seconds',
@@ -58,11 +60,13 @@ class SimulationIncrement extends Component {
     this.state = {
       deltaTime: 1,
       stepSize: Steps.seconds,
+      quickAdjust: 1,
     };
 
     this.deltaTimeUpdated = this.deltaTimeUpdated.bind(this);
     this.setDeltaTime = this.setDeltaTime.bind(this);
     this.setStepSize = this.setStepSize.bind(this);
+    this.setQuickAdjust = this.setQuickAdjust.bind(this);
   }
 
   componentDidMount() {
@@ -98,6 +102,18 @@ class SimulationIncrement extends Component {
     this.setState({ stepSize: value });
   }
 
+  setQuickAdjust(value) {
+    if (value !== 0) {
+      this.beforeAdjust = this.beforeAdjust || this.state.deltaTime;
+      const quickAdjust = (value ** 5);
+      UpdateDeltaTime(this.beforeAdjust * quickAdjust);
+    } else {
+      UpdateDeltaTime.cancel();
+      UpdateDeltaTimeNow(this.beforeAdjust);
+      this.beforeAdjust = null;
+    }
+  }
+
   deltaTimeUpdated({ deltaTime }) {
     this.setState({ deltaTime });
   }
@@ -110,21 +126,31 @@ class SimulationIncrement extends Component {
       .map(step => ({ value: step, label: step }));
 
     return (
-      <Row>
-        <Select
-          direction="up"
-          label="Step size"
-          onChange={this.setStepSize}
-          options={options}
-          value={stepSize}
+      <div>
+        <Row>
+          <Select
+            direction="up"
+            label="Step size"
+            onChange={this.setStepSize}
+            options={options}
+            value={stepSize}
+          />
+          <NumericInput
+            {...this.limits}
+            onChange={this.setDeltaTime}
+            placeholder={`${stepSize} per step`}
+            value={adjustedDelta}
+          />
+        </Row>
+        <div style={{ height: '10px' }} />
+        <ScaleInput
+          defaultValue={0}
+          label="Quick adjust"
+          min={-10}
+          max={10}
+          onChange={this.setQuickAdjust}
         />
-        <NumericInput
-          {...this.limits}
-          onChange={this.setDeltaTime}
-          placeholder={`${stepSize} per step`}
-          value={adjustedDelta}
-        />
-      </Row>
+      </div>
     );
   }
 }
