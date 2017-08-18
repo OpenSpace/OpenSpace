@@ -301,8 +301,8 @@ void RenderableFov::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "FovProgram",
-        "${MODULE_NEWHORIZONS}/shaders/fov_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/fov_fs.glsl"
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl",
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl"
     );
 
     // Fetch information about the specific instrument

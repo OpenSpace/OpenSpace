@@ -27,6 +27,7 @@ stage('Build') {
     parallel linux: {
         node('linux') {
             timeout(time: 45, unit: 'MINUTES') {
+                
                 deleteDir()
                 checkout scm
                 sh 'git submodule update --init --recursive'
@@ -43,16 +44,19 @@ stage('Build') {
     windows: {
         node('windows') {
             timeout(time: 45, unit: 'MINUTES') {
-                deleteDir()
-                checkout scm
-                bat '''
-                    git submodule update --init --recursive
-                    if not exist "build" mkdir "build"
-                    cd build
-                    cmake -G "Visual Studio 15 2017 Win64" .. ''' +
-                    flags + ''' ..
-                    msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:2 /p:Configuration=Debug
-                '''
+                // We specify the workspace directory manually to reduce the path length and thus try to avoid MSB3491 on Visual Studio
+                ws("C:/J/O/${env.BRANCH_NAME}") {
+                    deleteDir()
+                    checkout scm
+                    bat '''
+                        git submodule update --init --recursive
+                        if not exist "build" mkdir "build"
+                        cd build
+                        cmake -G "Visual Studio 15 2017 Win64" .. ''' +
+                        flags + ''' ..
+                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:2 /p:Configuration=Debug
+                    '''
+                }
             }
         }
     },

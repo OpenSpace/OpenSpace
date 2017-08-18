@@ -183,20 +183,20 @@ bool RenderableModelProjection::isReady() const {
 void RenderableModelProjection::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram("ModelShader",
-        "${MODULE_NEWHORIZONS}/shaders/renderableModel_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/renderableModel_fs.glsl");
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl",
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl");
 
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build("ProjectionPass",
-        "${MODULE_NEWHORIZONS}/shaders/renderableModelProjection_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/renderableModelProjection_fs.glsl");
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_vs.glsl",
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_fs.glsl");
     _fboProgramObject->setIgnoreUniformLocationError(
         ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
     _depthFboProgramObject = ghoul::opengl::ProgramObject::Build("DepthPass",
-        "${MODULE_NEWHORIZONS}/shaders/renderableModelDepth_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/renderableModelDepth_fs.glsl");
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_vs.glsl",
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_fs.glsl");
 
 
     loadTextures();

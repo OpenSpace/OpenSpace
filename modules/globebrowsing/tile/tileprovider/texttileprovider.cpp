@@ -50,7 +50,7 @@ TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t f
     _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
         
     _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
-    _fontRenderer->setFramebufferSize(_initData.dimensionsWithPadding());
+    _fontRenderer->setFramebufferSize(_initData.dimensions());
     
     glGenFramebuffers(1, &_fbo);
 }

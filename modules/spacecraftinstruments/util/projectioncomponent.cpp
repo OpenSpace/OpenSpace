@@ -382,8 +382,8 @@ bool ProjectionComponent::initializeGL() {
     if (_dilation.isEnabled) {
         _dilation.program = ghoul::opengl::ProgramObject::Build(
             "Dilation",
-            "${MODULE_NEWHORIZONS}/shaders/dilation_vs.glsl",
-            "${MODULE_NEWHORIZONS}/shaders/dilation_fs.glsl"
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_vs.glsl",
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_fs.glsl"
         );
         
         const GLfloat plane[] = {

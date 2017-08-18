@@ -32,14 +32,24 @@ return {
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
+                    -- University of Utah based servers
                     {
-                        Name = "Messenger_MDIS",
+                        Name = "Messenger MDIS [Utah]",
                         FilePath = "map_service_configs/Utah/MessengerMDIS.wms",
                         Enabled = true
                     },
                     {
-                        Name = "Messenger_Mosaic",
+                        Name = "Messenger Mosaic [Utah]",
                         FilePath = "map_service_configs/Utah/MessengerMosaic.wms"
+                    },
+                    -- AWS based servers
+                    {
+                        Name = "Messenger MDIS [AWS]",
+                        FilePath = "map_service_configs/AWS/MessengerMdis.wms",
+                    },
+                    {
+                        Name = "Messenger Mosaic [AWS]",
+                        FilePath = "map_service_configs/AWS/MessengerMosaic.wms",
                     }
                 }
             }

@@ -85,10 +85,6 @@ public:
         return _texture;
     };
 
-    static glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, 
-        glm::vec2 sizeDiff, glm::uvec2 resolution, glm::vec2 tileUV);
-    static glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-        glm::vec2 tileUV, glm::uvec2 resolution);
     /**
     * A tile with status unavailable that any user can return to
     * indicate that a tile was unavailable.

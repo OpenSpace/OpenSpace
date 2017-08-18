@@ -49,6 +49,7 @@ namespace {
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
     const char* KeyPreCacheLevel = "PreCacheLevel";
+    const char* KeyPadTiles = "PadTiles";
 
     static const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
@@ -98,9 +99,13 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
         LDEBUG("Default pixel size overridden: " << pixelSize);
         tilePixelSize = static_cast<int>(pixelSize); 
     }
+
+    _padTiles = true;
+    dictionary.getValue<bool>(KeyPadTiles, _padTiles);
+    
     TileTextureInitData initData(LayerManager::getTileTextureInitData(
-        _layerGroupID, tilePixelSize));
-    _tilePixelSize.setValue(initData.dimensionsWithoutPadding().x);
+        _layerGroupID, _padTiles, tilePixelSize));
+    _tilePixelSize.setValue(initData.dimensions().x);
 
     _performPreProcessing =
         LayerManager::shouldPerformPreProcessingOnLayergroup(_layerGroupID);
@@ -135,8 +140,10 @@ void DefaultTileProvider::update() {
         initTexturesFromLoadedData();
         if (_asyncTextureDataProvider->shouldBeDeleted()) {
             _asyncTextureDataProvider = nullptr;
-            TileTextureInitData initData(LayerManager::getTileTextureInitData(
-                _layerGroupID, _tilePixelSize));
+            TileTextureInitData initData(
+                LayerManager::getTileTextureInitData(_layerGroupID, _padTiles,
+                                                     _tilePixelSize)
+            );
             initAsyncTileDataReader(initData);
         }
     }
@@ -148,8 +155,10 @@ void DefaultTileProvider::reset() {
         _asyncTextureDataProvider->prepairToBeDeleted();
     }
     else {
-        TileTextureInitData initData(LayerManager::getTileTextureInitData(
-            _layerGroupID, _tilePixelSize));
+        TileTextureInitData initData(
+            LayerManager::getTileTextureInitData(_layerGroupID, _padTiles,
+                                                 _tilePixelSize)
+        );
         initAsyncTileDataReader(initData);
     }
 }
@@ -224,7 +233,8 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(_name, tileDataset);
 
-    if (_preCacheLevel > -1) {
+    // Tiles are only available for levels 2 and higher.
+    if (_preCacheLevel >= 2) {
         LDEBUG("Precaching '" << _filePath << "' with level '" << _preCacheLevel << "'");
         for (int level = 0; level <= _preCacheLevel; ++level) {
             for (int x = 0; x <= level * 2; ++x) {

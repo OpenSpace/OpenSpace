@@ -267,8 +267,8 @@ void RenderableShadowCylinder::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
         "ShadowCylinderProgram",
-        "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl"
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl",
+        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_fs.glsl"
     );
 }
 
