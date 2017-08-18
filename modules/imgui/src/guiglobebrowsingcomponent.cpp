@@ -26,16 +26,20 @@
 
 #include <modules/imgui/include/imgui_include.h>
 
- //#include <openspace/scripting/scriptengine.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/misc/onscopeexit.h>
 
 #include <gdal.h>
+#include <cpl_string.h>
+
+#include <fmt/format.h>
 
 namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
@@ -55,11 +59,13 @@ void GuiGlobeBrowsingComponent::render() {
 
     ImGui::Begin("Globe Browsing", &e, WindowSize, 0.5f);
     _isEnabled = e;
-    OnExit([]() {ImGui::End(); }); // We escape early from this function
+    OnExit([]() {ImGui::End(); }); // We escape early from this function in a few places
 
 
     // Render the list of planets
-    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
+    std::vector<SceneGraphNode*> nodes =
+        OsEng.renderEngine().scene()->allSceneGraphNodes();
+
     nodes.erase(
         std::remove_if(
             nodes.begin(),
@@ -79,20 +85,37 @@ void GuiGlobeBrowsingComponent::render() {
     for (SceneGraphNode* n : nodes) {
         nodeNames += n->name() + '\0';
     }
+
+    if (_currentNode == -1) {
+        // We haven't selected a node yet, so first instinct is to use the current focus
+        // node
+        const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
+        auto it = std::find(nodes.begin(), nodes.end(), focus);
+if (it != nodes.end()) {
+    _currentNode = std::distance(nodes.begin(), it);
+}
+    }
+
     ImGui::Combo("Globe", &_currentNode, nodeNames.c_str());
 
     if (_currentNode == -1) {
+        // This should only occur if the Focusnode is not a RenderableGlobe
         return;
     }
 
+    ImGui::Separator();
+
+    std::string currentNode = nodes[_currentNode]->name();
 
     // Render the list of servers for the planet
+
+    auto urlIt = _urlMap.find(currentNode);
+
     std::string serverList;
     if (_currentNode != -1) {
-        auto it = _urlMap.find(nodes[_currentNode]->name());
 
-        if (it != _urlMap.end()) {
-            for (std::string s : it->second) {
+        if (urlIt != _urlMap.end()) {
+            for (std::string s : urlIt->second) {
                 serverList += s + '\0';
             }
         }
@@ -100,32 +123,34 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::Combo("Servers", &_currentServer, serverList.c_str());
 
     // Add server
-    static char Buffer[256];
-    ImGui::InputText("", Buffer, 256);
+    constexpr int InputBufferSize = 512;
+    static char InputBuffer[InputBufferSize];
+    ImGui::InputText("", InputBuffer, 256);
 
     ImGui::SameLine();
     bool addServer = ImGui::Button("Add Server");
     if (addServer && (_currentNode != -1)) {
-        std::string currentNode = nodes[_currentNode]->name();
-        auto it = _urlMap.find(currentNode);
-        if (it != _urlMap.end()) {
-            it->second.push_back(std::string(Buffer));
-            _currentServer = it->second.size() - 1;
+        if (urlIt != _urlMap.end()) {
+            urlIt->second.push_back(std::string(InputBuffer));
+            _currentServer = urlIt->second.size() - 1;
         }
         else {
-            _urlMap[nodes[_currentNode]->name()] = { std::string(Buffer) };
+            _urlMap[currentNode] = { std::string(InputBuffer) };
             _currentServer = 0;
         }
-        std::memset(Buffer, 0, 256 * sizeof(char));
+        std::memset(InputBuffer, 0, InputBufferSize * sizeof(char));
     }
 
     if (_currentServer == -1) {
         return;
     }
 
-    std::string currentServer = _urlMap.find(nodes[_currentNode]->name())->second[_currentServer];
+    ImGui::Separator();
 
-    // If the capabilities haven't been requested yet, do so
+    // Can't use urlIt here since it might have been invalidated before
+    std::string currentServer = _urlMap.find(currentNode)->second[_currentServer];
+
+    // If the capabilities haven't been created yet, do so
     Capabilities& cap = [&currentServer, this]() -> Capabilities& {
         auto it = _capabilities.find(currentServer);
         if (it != _capabilities.end()) {
@@ -137,34 +162,156 @@ void GuiGlobeBrowsingComponent::render() {
         }
     }();
 
-    if (!cap.isRequested) {
-        LDEBUGC("GlobeBrowsingGui", "File '" << nodes[_currentNode]->name() << "'/'" << currentServer << "' requested");
-        std::future<DownloadManager::MemoryFile> f = OsEng.downloadManager().fetchFile(
-            currentServer,
-            [&cap](const DownloadManager::MemoryFile& f) {
-                if (f.corrupted) {
-                    LERRORC("GlobeBrowsingGui", "File is corrupted");
-                }
-                else {
-                    std::string res(f.size, ' ');
-                    std::memmove(res.data(), f.buffer, f.size);
-
-                    GDALOpen();
-
-                    cap.values.push_back(std::move(res));
-                    cap.isReceived = true;
-                }
-            }
+    if (!cap.hasData) {
+        GDALDatasetH dataset = GDALOpenEx(
+            currentServer.c_str(),
+            GDAL_OF_READONLY | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
+            nullptr,
+            nullptr,
+            nullptr
         );
-        cap.isRequested = true;
+
+        char** subDatasets = GDALGetMetadata(dataset, "SUBDATASETS");
+        int nSubdatasets = CSLCount(subDatasets);
+        cap.layers = parseSubDatasets(subDatasets, nSubdatasets);
+
+        GDALClose(dataset);
+        cap.hasData = true;
     }
-    
-    // If values have been received, display them
-    if (cap.isReceived) {
-        for (std::string v : cap.values) {
-            ImGui::Text("%s", v.c_str());
+
+    ImGui::Columns(6, nullptr, false);
+
+    float width = ImGui::GetWindowWidth();
+    constexpr float ButtonWidth = 60.f;
+    ImGui::SetColumnOffset(5, width - 1.5 * ButtonWidth);
+    ImGui::SetColumnOffset(4, width - 2.5 * ButtonWidth);
+    ImGui::SetColumnOffset(3, width - 3.5 * ButtonWidth);
+    ImGui::SetColumnOffset(2, width - 4.5 * ButtonWidth);
+    ImGui::SetColumnOffset(1, width - 5.5 * ButtonWidth);
+    ImGui::SetColumnOffset(0, 0);
+
+    //ImGui::PushItemWidth(500.f);
+    ImGui::Text("%s", "Layer name");
+    ImGui::NextColumn();
+    ImGui::Text("%s", "Add as ...");
+    ImGui::NextColumn();
+    ImGui::NextColumn();
+    ImGui::NextColumn();
+    ImGui::NextColumn();
+    ImGui::NextColumn();
+    ImGui::Separator();
+
+    for (const Capabilities::Layer& l : cap.layers) {
+        if (l.name.empty() || l.url.empty()) {
+            continue;
+        }
+
+
+        ImGui::PushID(l.url.c_str());
+
+        ImGui::Text("%s", l.name.c_str());
+        ImGui::NextColumn();
+
+        bool addColor = ImGui::Button("Color", { ButtonWidth, 25.f });
+        ImGui::NextColumn();
+
+        bool addNight = ImGui::Button("Night", { ButtonWidth, 25.f });
+        ImGui::NextColumn();
+
+        bool addOverlay = ImGui::Button("Overlay", { ButtonWidth, 25.f });
+        ImGui::NextColumn();
+
+        bool addHeight = ImGui::Button("Height", { ButtonWidth, 25.f });
+        ImGui::NextColumn();
+
+        bool addWaterMask = ImGui::Button("Water", { ButtonWidth, 25.f });
+        ImGui::NextColumn();
+
+        auto addFunc = [&currentNode, &l](const std::string& type) {
+            std::string layerName = l.name;
+            std::replace(layerName.begin(), layerName.end(), '.', '-');
+            OsEng.scriptEngine().runScript(fmt::format(
+                "openspace.globebrowsing.addLayer(\
+                    '{}', \
+                    '{}', \
+                    {{ Name = '{}', FilePath = '{}', Enabled = true \}}\
+                );",
+                currentNode,
+                type,
+                layerName,
+                l.url
+            ));
+        };
+
+        if (addColor) {
+            addFunc("ColorLayers");
+        }
+        if (addNight) {
+            addFunc("NightLayers");
+        }
+        if (addOverlay) {
+            addFunc("Overlays");
+        }
+        if (addHeight) {
+            addFunc("HeightLayers");
+        }
+        if (addWaterMask) {
+            addFunc("WaterMasks");
+        }
+
+        ImGui::PopID();
+    }
+    ImGui::Columns(1);
+}
+
+std::vector<GuiGlobeBrowsingComponent::Capabilities::Layer>
+GuiGlobeBrowsingComponent::parseSubDatasets(char** subDatasets, int nSubdatasets)
+{
+    // Idea:  Iterate over the list of sublayers keeping a current layer and identify it
+    //        by its number.  If this number changes, we know that we have a new layer
+
+
+    using Layer = Capabilities::Layer;
+    std::vector<Layer> result;
+
+    int currentLayerNumber = -1;
+    Layer currentLayer;
+    for (int i = 0; i < nSubdatasets; ++i) {
+        int iDataset = -1;
+        static char IdentifierBuffer[64];
+        sscanf(
+            subDatasets[i],
+            "SUBDATASET_%i_%[^=]",
+            &iDataset,
+            IdentifierBuffer
+        );
+
+        
+
+        if (iDataset != currentLayerNumber) {
+            // We are done with the previous version
+            result.push_back(std::move(currentLayer));
+            currentLayer = Layer();
+            currentLayerNumber = iDataset;
+        }
+
+        std::string identifier = std::string(IdentifierBuffer);
+        std::string ds(subDatasets[i]);
+        std::string value = ds.substr(ds.find_first_of('=') + 1);
+
+        // The DESC/NAME difference is not a typo
+        if (identifier == "DESC") {
+            currentLayer.name = value;
+        }
+        else if (identifier == "NAME") {
+            currentLayer.url = value;
+        }
+        else {
+            LINFOC("GlobeBrowsingGUI", "Unknown subdataset identifier: " + identifier);
         }
     }
+
+    return result;
 }
 
 } // namespace openspace::gui

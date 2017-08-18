@@ -232,6 +232,7 @@ GUI::GUI()
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
+    , _showInternals(false)
     , _currentVisibility(properties::Property::Visibility::Developer)
 {
     addPropertySubOwner(_help);
@@ -653,19 +654,20 @@ void GUI::render() {
         addScreenSpaceRenderable(std::string(addImageBuffer));
     }
 
-#ifdef SHOW_IMGUI_HELPERS
-    ImGui::Begin("Style Editor");
-    ImGui::ShowStyleEditor();
-    ImGui::End();
+    ImGui::Checkbox("ImGUI Internals", &_showInternals);
+    if (_showInternals) {
+        ImGui::Begin("Style Editor");
+        ImGui::ShowStyleEditor();
+        ImGui::End();
 
-    ImGui::Begin("Test Window");
-    ImGui::ShowTestWindow();
-    ImGui::End();
+        ImGui::Begin("Test Window");
+        ImGui::ShowTestWindow();
+        ImGui::End();
 
-    ImGui::Begin("Metrics Window");
-    ImGui::ShowMetricsWindow();
-    ImGui::End();
-#endif
+        ImGui::Begin("Metrics Window");
+        ImGui::ShowMetricsWindow();
+        ImGui::End();
+    }
 
     ImGui::End();
 }

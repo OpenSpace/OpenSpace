@@ -41,14 +41,21 @@ public:
     void render() override;
 
 private:
+    struct Capabilities {
+        struct Layer {
+            std::string name;
+            std::string url;
+        };
+        std::vector<Layer> layers;
+        bool hasData = false;
+    };
+
+
+    std::vector<Capabilities::Layer> parseSubDatasets(char** subDatasets, int nSubdatasets);
+
     // Stores the servers for a globe
     std::map<std::string, std::vector<std::string>> _urlMap;
 
-    struct Capabilities {
-        std::vector<std::string> values;
-        bool isRequested = false;
-        bool isReceived = false;
-    };
     // Stores the capabilities for a server
     std::map<std::string, Capabilities> _capabilities;
 

@@ -80,6 +80,8 @@ public:
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
     GuiParallelComponent _parallel;
 
+    bool _showInternals;
+
 private:
     void renderAndUpdatePropertyVisibility();
 
