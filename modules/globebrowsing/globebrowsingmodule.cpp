@@ -173,6 +173,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "getGeoPosition",
                 &globebrowsing::luascriptfunctions::getGeoPosition,
+                {},
                 "void",
                 "Get geographic coordinates of the camera poosition in latitude, "
                 "longitude, and altitude"
