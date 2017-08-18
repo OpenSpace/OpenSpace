@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Button from './Button';
+import Button from './Button/Button';
 import InlineInput from './InlineInput';
 import styles from './Time.scss';
 import Icon from '../Icon/Icon';
