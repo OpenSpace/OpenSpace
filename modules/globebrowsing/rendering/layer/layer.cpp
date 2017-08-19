@@ -172,6 +172,10 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     });
 
     _remove.onChange([&](){
+        if (_tileProvider) {
+            _tileProvider->reset();
+        }
+
         _parent.deleteLayer(name());
     });
 

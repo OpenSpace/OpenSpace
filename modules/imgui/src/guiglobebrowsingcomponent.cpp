@@ -119,6 +119,18 @@ void GuiGlobeBrowsingComponent::render() {
 
     bool nodeChanged = ImGui::Combo("Globe", &iNode, nodeNames.c_str());
 
+    ImGui::SameLine();
+    bool selectFocusNode = ImGui::Button("From Focus");
+    if (selectFocusNode) {
+        const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
+        auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
+        if (it != nodes.end()) {
+            _currentNode = focus->name();
+            iNode = std::distance(nodes.cbegin(), it);
+            nodeChanged = true;
+        }
+    }
+
     if (iNode == -1) {
         // This should only occur if the Focusnode is not a RenderableGlobe
         // or if there are no nodes
@@ -128,7 +140,6 @@ void GuiGlobeBrowsingComponent::render() {
 
     if (nodeChanged) {
         _currentServer = "";
-
     }
 
     ImGui::Separator();
