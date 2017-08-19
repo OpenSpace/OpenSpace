@@ -53,8 +53,6 @@ namespace openspace::gui {
 
 GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
     : GuiPropertyComponent("GlobeBrowsing")
-    , _currentNode(-1)
-    , _currentServer(-1)
 {}
 
 void GuiGlobeBrowsingComponent::render() {
@@ -95,29 +93,48 @@ void GuiGlobeBrowsingComponent::render() {
         nodeNames += n->name() + '\0';
     }
 
-    if (_currentNode == -1) {
+    int iNode = -1;
+    if (_currentNode.empty()) {
         // We haven't selected a node yet, so first instinct is to use the current focus
         // node
+
+        // Check if the focus node is a RenderableGlobe
         const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
-        auto it = std::find(nodes.begin(), nodes.end(), focus);
+        auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
-            _currentNode = std::distance(nodes.begin(), it);
+            _currentNode = focus->name();
+            iNode = std::distance(nodes.cbegin(), it);
         }
     }
+    else {
+        auto it = std::find_if(
+            nodes.cbegin(),
+            nodes.cend(),
+            [this](SceneGraphNode* lhs) {
+                return lhs->name() == _currentNode;
+            }
+        );
+        iNode = std::distance(nodes.cbegin(), it);
+    }
 
-    ImGui::Combo("Globe", &_currentNode, nodeNames.c_str());
+    bool nodeChanged = ImGui::Combo("Globe", &iNode, nodeNames.c_str());
 
-    if (_currentNode == -1) {
+    if (iNode == -1) {
         // This should only occur if the Focusnode is not a RenderableGlobe
+        // or if there are no nodes
         return;
+    }
+    _currentNode = nodes[iNode]->name();
+
+    if (nodeChanged) {
+        _currentServer = "";
+
     }
 
     ImGui::Separator();
 
-    std::string currentNode = nodes[_currentNode]->name();
-
     // Render the list of servers for the planet
-    std::vector<UrlInfo> urlInfo = module->urlInfo(currentNode);
+    std::vector<UrlInfo> urlInfo = module->urlInfo(_currentNode);
 
     std::string serverList = std::accumulate(
         urlInfo.cbegin(),
@@ -128,12 +145,29 @@ void GuiGlobeBrowsingComponent::render() {
         }
     );
 
-    if (_currentServer == -1 && !urlInfo.empty()) {
+    int iServer = -1;
+    if (_currentServer.empty()) {
         // We haven't selected a server yet, so first instinct is to just use the first
-        _currentServer = 0;
+        if (!urlInfo.empty()) {
+            _currentServer = urlInfo[0].name;
+            iServer = 0;
+        }
+    }
+    else {
+        auto it = std::find_if(
+            urlInfo.cbegin(),
+            urlInfo.cend(),
+            [this](const UrlInfo& i) {
+                return i.name == _currentServer;
+            }
+        );
+        if (it != urlInfo.end()) {
+            iServer = std::distance(urlInfo.cbegin(), it);
+        }
     }
 
-    ImGui::Combo("Server", &_currentServer, serverList.c_str());
+    ImGui::Combo("Server", &iServer, serverList.c_str());
+
     ImGui::SameLine(0.f, 60.f);
 
     if (ImGui::Button("Add Server")) {
@@ -149,17 +183,18 @@ void GuiGlobeBrowsingComponent::render() {
         ImGui::InputText("Server URL", UrlInputBuffer, InputBufferSize);
 
         bool addServer = ImGui::Button("Add Server");
-        if (addServer && (_currentNode != -1)) {
+        if (addServer && (!_currentNode.empty())) {
             module->loadWMSCapabilities(
                 std::string(NameInputBuffer),
-                currentNode,
+                _currentNode,
                 std::string(UrlInputBuffer)
             );
             std::memset(NameInputBuffer, 0, InputBufferSize * sizeof(char));
             std::memset(UrlInputBuffer, 0, InputBufferSize * sizeof(char));
 
-            urlInfo = module->urlInfo(currentNode);
-            _currentServer = urlInfo.size() - 1;
+            urlInfo = module->urlInfo(_currentNode);
+            _currentServer = urlInfo.back().name;
+            --iServer;
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
@@ -168,9 +203,18 @@ void GuiGlobeBrowsingComponent::render() {
 
     bool deleteServer = ImGui::Button("Delete Server");
     if (deleteServer) {
-        module->removeWMSServer(urlInfo[_currentServer].name);
-        --_currentServer;
+        module->removeWMSServer(_currentServer);
+        _currentServer = "";
+        iServer = -1;
+
     }
+
+    if (iServer == -1) {
+        return;
+    }
+    _currentServer = urlInfo[iServer].name;
+
+
 
     // Can't use urlIt here since it might have been invalidated before
     if (urlInfo.empty()) {
@@ -180,12 +224,12 @@ void GuiGlobeBrowsingComponent::render() {
 
     ImGui::Separator();
 
-    Capabilities cap = module->capabilities(urlInfo[_currentServer].name);
+    Capabilities cap = module->capabilities(_currentServer);
 
     if (cap.empty()) {
         LWARNINGC(
             "GlobeBrowsingGUI",
-            "Unknown server: '" << urlInfo[_currentServer].name << "'"
+            "Unknown server: '" << _currentServer << "'"
         );
     }
 
@@ -236,7 +280,7 @@ void GuiGlobeBrowsingComponent::render() {
         bool addWaterMask = ImGui::Button("Water", { ButtonWidth, 25.f });
         ImGui::NextColumn();
 
-        auto addFunc = [&currentNode, &l](const std::string& type) {
+        auto addFunc = [this, &l](const std::string& type) {
             std::string layerName = l.name;
             std::replace(layerName.begin(), layerName.end(), '.', '-');
             OsEng.scriptEngine().queueScript(
@@ -246,7 +290,7 @@ void GuiGlobeBrowsingComponent::render() {
                         '{}', \
                         {{ Name = '{}', FilePath = '{}', Enabled = true \}}\
                     );",
-                    currentNode,
+                    _currentNode,
                     type,
                     layerName,
                     l.url

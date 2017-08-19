@@ -231,6 +231,33 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "void",
                 "Get geographic coordinates of the camera poosition in latitude, "
                 "longitude, and altitude"
+            },
+            {
+                "loadWMSCapabilities",
+                &globebrowsing::luascriptfunctions::loadWMSCapabilities,
+                "string, string, string",
+                "Loads and parses the WMS capabilities xml file from a remote server. "
+                "The first argument is the name of the capabilities that can be used to "
+                "later refer to the set of capabilities. The second argument is the "
+                "globe for which this server is applicable. The third argument is the "
+                "URL at which the capabilities file can be found."
+            },
+            {
+                "removeWMSServer",
+                &globebrowsing::luascriptfunctions::removeWMSServer,
+                "string",
+                "Removes the WMS server identified by the first argument from the list "
+                "of available servers. The parameter corrsponds to the first argument in "
+                "the loadWMSCapabilities call that was used to load the WMS server."
+            },
+            {
+                "capabilitiesWMS",
+                &globebrowsing::luascriptfunctions::capabilities,
+                "string",
+                "Returns an array of tables that describe the available layers that are "
+                "supported by the WMS server identified by the provided name. The 'URL'"
+                "component of the returned table can be used in the 'FilePath' argument "
+                "for a call to the 'addLayer' function to add the value to a globe."
             }
         },
         {
@@ -468,6 +495,7 @@ GlobeBrowsingModule::capabilities(const std::string& name)
             // otherwise it will just return
             Capabilities cap = inFlightIt->second.get();
             _capabilitiesMap[name] = cap;
+            _inFlightCapabilitiesMap.erase(inFlightIt);
             return cap;
         }
         else {
@@ -477,7 +505,27 @@ GlobeBrowsingModule::capabilities(const std::string& name)
 }
 
 void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
+    // First delete all the capabilities that are currently in flight
+    auto inFlightIt = _inFlightCapabilitiesMap.find(name);
+    if (inFlightIt != _inFlightCapabilitiesMap.end()) {
+        _inFlightCapabilitiesMap.erase(inFlightIt);
+    }
 
+    // Then download the ones that are already finished
+    auto it = _capabilitiesMap.find(name);
+    if (it != _capabilitiesMap.end()) {
+        _capabilitiesMap.erase(it);
+    }
+
+    // Then remove the calues from the globe server list
+    for (auto it = _urlList.begin(); it != _urlList.end(); ) {
+        // We have to increment first because the erase will invalidate the iterator
+        auto eraseIt = it++;
+
+        if (eraseIt->second.name == name) {
+            _urlList.erase(eraseIt);
+        }
+    }
 }
 
 

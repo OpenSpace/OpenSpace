@@ -3,20 +3,35 @@
 
 return {
     Earth = {
-        "https://gibs.earthdata.nasa.gov/twms/epsg4326/best/twms.cgi?request=GetTileService"
+        {
+            Name = "GIBS",
+            URL  = "https://gibs.earthdata.nasa.gov/twms/epsg4326/best/twms.cgi?request=GetTileService"
+        },
     },
     Moon = {
-        "https://onmoon.lmmp.nasa.gov/wms.cgi?request=GetCapabilities"
+        {
+            Name = "OnMoon LMMP",
+            URL  = "https://onmoon.lmmp.nasa.gov/wms.cgi?request=GetCapabilities"
+        },
     },
     Mercury = {
-        "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mercury/mercury_simp_cyl.map&service=WMS&request=GetCapabilities"
+        {
+            Name = "USGS Mercury",
+            URL  = "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mercury/mercury_simp_cyl.map&service=WMS&request=GetCapabilities"
+        },
     },
     Callisto = {
-        "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/jupiter/callisto_simp_cyl.map&service=WMS&request=GetCapabilities"
+        {
+            Name = "USGS Callisto",
+            URL  = "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/jupiter/callisto_simp_cyl.map&service=WMS&request=GetCapabilities"
+        },
     },
     Deimos = {
-        "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/deimos_simp_cyl.map&service=WMS&request=GetCapabilities"
-    }
+        {
+            Name = "USGS Deimos",
+            URL  = "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/deimos_simp_cyl.map&service=WMS&request=GetCapabilities"
+        },
+    },
 }
 
 

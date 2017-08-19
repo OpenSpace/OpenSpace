@@ -41,10 +41,8 @@ public:
     void render() override;
 
 private:
-    int _currentNode;
-    int _currentServer;
-
-    //bool _isDefaultFileLoaded;
+    std::string _currentNode;
+    std::string _currentServer;
 };
 
 } // namespace openspace::gui
