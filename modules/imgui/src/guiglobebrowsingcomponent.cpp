@@ -103,7 +103,7 @@ void GuiGlobeBrowsingComponent::render() {
         auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
             _currentNode = focus->name();
-            iNode = std::distance(nodes.cbegin(), it);
+            iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
         }
     }
     else {
@@ -114,7 +114,7 @@ void GuiGlobeBrowsingComponent::render() {
                 return lhs->name() == _currentNode;
             }
         );
-        iNode = std::distance(nodes.cbegin(), it);
+        iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
     }
 
     bool nodeChanged = ImGui::Combo("Globe", &iNode, nodeNames.c_str());
@@ -126,7 +126,7 @@ void GuiGlobeBrowsingComponent::render() {
         auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
             _currentNode = focus->name();
-            iNode = std::distance(nodes.cbegin(), it);
+            iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
             nodeChanged = true;
         }
     }
@@ -173,7 +173,7 @@ void GuiGlobeBrowsingComponent::render() {
             }
         );
         if (it != urlInfo.end()) {
-            iServer = std::distance(urlInfo.cbegin(), it);
+            iServer = static_cast<int>(std::distance(urlInfo.cbegin(), it));
         }
     }
 
@@ -248,11 +248,11 @@ void GuiGlobeBrowsingComponent::render() {
 
     float width = ImGui::GetWindowWidth();
     constexpr float ButtonWidth = 60.f;
-    ImGui::SetColumnOffset(5, width - 1.5 * ButtonWidth);
-    ImGui::SetColumnOffset(4, width - 2.5 * ButtonWidth);
-    ImGui::SetColumnOffset(3, width - 3.5 * ButtonWidth);
-    ImGui::SetColumnOffset(2, width - 4.5 * ButtonWidth);
-    ImGui::SetColumnOffset(1, width - 5.5 * ButtonWidth);
+    ImGui::SetColumnOffset(5, width - 1.5f * ButtonWidth);
+    ImGui::SetColumnOffset(4, width - 2.5f * ButtonWidth);
+    ImGui::SetColumnOffset(3, width - 3.5f * ButtonWidth);
+    ImGui::SetColumnOffset(2, width - 4.5f * ButtonWidth);
+    ImGui::SetColumnOffset(1, width - 5.5f * ButtonWidth);
     ImGui::SetColumnOffset(0, 0);
 
     //ImGui::PushItemWidth(500.f);
@@ -299,7 +299,7 @@ void GuiGlobeBrowsingComponent::render() {
                     "openspace.globebrowsing.addLayer(\
                         '{}', \
                         '{}', \
-                        {{ Name = '{}', FilePath = '{}', Enabled = true \}}\
+                        {{ Name = '{}', FilePath = '{}', Enabled = true }}\
                     );",
                     _currentNode,
                     type,

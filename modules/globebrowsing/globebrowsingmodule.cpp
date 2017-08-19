@@ -460,13 +460,15 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
                                               std::string url)
 {
     auto downloadFunction = [](const std::string& url) {
-        GDALDatasetH dataset = GDALOpenEx(
+        GDALDatasetH dataset = GDALOpen(
             url.c_str(),
-            GDAL_OF_READONLY | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
-            nullptr,
-            nullptr,
-            nullptr
+            GA_ReadOnly
         );
+        //    GDAL_OF_READONLY | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
+        //    nullptr,
+        //    nullptr,
+        //    nullptr
+        //);
 
         char** subDatasets = GDALGetMetadata(dataset, "SUBDATASETS");
         int nSubdatasets = CSLCount(subDatasets);
@@ -512,9 +514,9 @@ void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
     }
 
     // Then download the ones that are already finished
-    auto it = _capabilitiesMap.find(name);
-    if (it != _capabilitiesMap.end()) {
-        _capabilitiesMap.erase(it);
+    auto capIt = _capabilitiesMap.find(name);
+    if (capIt != _capabilitiesMap.end()) {
+        _capabilitiesMap.erase(capIt);
     }
 
     // Then remove the calues from the globe server list
