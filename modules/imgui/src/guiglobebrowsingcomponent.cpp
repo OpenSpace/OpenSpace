@@ -26,7 +26,10 @@
 
 #include <modules/imgui/include/imgui_include.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
+
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
@@ -38,10 +41,9 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <gdal.h>
-#include <cpl_string.h>
-
 #include <fmt/format.h>
+
+#include <numeric>
 
 namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
@@ -53,39 +55,16 @@ GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
     : GuiPropertyComponent("GlobeBrowsing")
     , _currentNode(-1)
     , _currentServer(-1)
-    , _isDefaultFileLoaded(false)
 {}
 
 void GuiGlobeBrowsingComponent::render() {
-    if (!_isDefaultFileLoaded) {
-        ghoul::Dictionary allServers = ghoul::lua::loadDictionaryFromFile(
-            "${OPENSPACE_DATA}/globebrowsing_servers.lua"
-        );
-
-        std::vector<std::string> keys = allServers.keys();
-        for (const std::string& globe : keys) {
-            ghoul::Dictionary servers = allServers.value<ghoul::Dictionary>(globe);
-
-            for (int j = 1; j <= servers.size(); ++j) {
-                std::string s = servers.value<std::string>(std::to_string(j));
-
-                auto it = _urlMap.find(globe);
-                if (it != _urlMap.end()) {
-                    it->second.push_back(std::move(s));
-                }
-                else {
-                    _urlMap[globe] = { std::move(s) };
-                }
-            }
-        }
-
-        _isDefaultFileLoaded = true;
-    }
-
-
+    GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
+    using UrlInfo = GlobeBrowsingModule::UrlInfo;
+    using Capabilities = GlobeBrowsingModule::Capabilities;
+    using Layer = GlobeBrowsingModule::Layer;
 
     bool e = _isEnabled;
-    e = e; 
+    e = e;
 
     ImGui::Begin("Globe Browsing", &e, WindowSize, 0.5f);
     _isEnabled = e;
@@ -138,96 +117,76 @@ void GuiGlobeBrowsingComponent::render() {
     std::string currentNode = nodes[_currentNode]->name();
 
     // Render the list of servers for the planet
+    std::vector<UrlInfo> urlInfo = module->urlInfo(currentNode);
 
-    auto urlIt = _urlMap.find(currentNode);
-
-    std::string serverList;
-    if (_currentNode != -1) {
-        if (urlIt != _urlMap.end()) {
-            for (std::string s : urlIt->second) {
-                serverList += s + '\0';
-            }
+    std::string serverList = std::accumulate(
+        urlInfo.cbegin(),
+        urlInfo.cend(),
+        std::string(),
+        [](std::string lhs, const UrlInfo& i) {
+            return lhs + i.name + ": (" + i.url + ")" + '\0';
         }
-    }
+    );
 
-    if (_currentServer == -1) {
+    if (_currentServer == -1 && !urlInfo.empty()) {
         // We haven't selected a server yet, so first instinct is to just use the first
-        if (!urlIt->second.empty()) {
-            _currentServer = 0;
-        }
+        _currentServer = 0;
     }
 
-    ImGui::Combo("Servers", &_currentServer, serverList.c_str());
+    ImGui::Combo("Server", &_currentServer, serverList.c_str());
+    ImGui::SameLine(0.f, 60.f);
 
-    ImGui::SameLine();
-    bool deleteServer = ImGui::Button("Delete");
+    if (ImGui::Button("Add Server")) {
+        ImGui::OpenPopup("globebrowsing_add_server");
+    }
+
+    if (ImGui::BeginPopup("globebrowsing_add_server")) {
+        constexpr int InputBufferSize = 512;
+        static char NameInputBuffer[InputBufferSize];
+        static char UrlInputBuffer[InputBufferSize];
+        ImGui::InputText("Server Name", NameInputBuffer, InputBufferSize);
+
+        ImGui::InputText("Server URL", UrlInputBuffer, InputBufferSize);
+
+        bool addServer = ImGui::Button("Add Server");
+        if (addServer && (_currentNode != -1)) {
+            module->loadWMSCapabilities(
+                std::string(NameInputBuffer),
+                currentNode,
+                std::string(UrlInputBuffer)
+            );
+            std::memset(NameInputBuffer, 0, InputBufferSize * sizeof(char));
+            std::memset(UrlInputBuffer, 0, InputBufferSize * sizeof(char));
+
+            urlInfo = module->urlInfo(currentNode);
+            _currentServer = urlInfo.size() - 1;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::SameLine(0.f, 20.f);
+
+    bool deleteServer = ImGui::Button("Delete Server");
     if (deleteServer) {
-        urlIt->second.erase(urlIt->second.begin() + _currentServer);
+        module->removeWMSServer(urlInfo[_currentServer].name);
         --_currentServer;
     }
 
-    // Add server
-    constexpr int InputBufferSize = 512;
-    static char InputBuffer[InputBufferSize];
-    ImGui::InputText("", InputBuffer, 256);
-
-    ImGui::SameLine();
-    bool addServer = ImGui::Button("Add Server");
-    if (addServer && (_currentNode != -1)) {
-        if (urlIt != _urlMap.end()) {
-            urlIt->second.push_back(std::string(InputBuffer));
-            _currentServer = urlIt->second.size() - 1;
-        }
-        else {
-            _urlMap[currentNode] = { std::string(InputBuffer) };
-            _currentServer = 0;
-        }
-        std::memset(InputBuffer, 0, InputBufferSize * sizeof(char));
-    }
-
-    if (_currentServer == -1) {
-        return;
-    }
-
-
     // Can't use urlIt here since it might have been invalidated before
-    urlIt = _urlMap.find(currentNode);
-    if (urlIt == _urlMap.end()) {
+    if (urlInfo.empty()) {
         // There are no server so we have to bail
         return;
     }
 
     ImGui::Separator();
 
-    std::string currentServer = _urlMap.find(currentNode)->second[_currentServer];
+    Capabilities cap = module->capabilities(urlInfo[_currentServer].name);
 
-    // If the capabilities haven't been created yet, do so
-    Capabilities& cap = [&currentServer, this]() -> Capabilities& {
-        auto it = _capabilities.find(currentServer);
-        if (it != _capabilities.end()) {
-            return it->second;
-        }
-        else {
-            _capabilities[currentServer] = Capabilities();
-            return _capabilities[currentServer];
-        }
-    }();
-
-    if (!cap.hasData) {
-        GDALDatasetH dataset = GDALOpenEx(
-            currentServer.c_str(),
-            GDAL_OF_READONLY | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
-            nullptr,
-            nullptr,
-            nullptr
+    if (cap.empty()) {
+        LWARNINGC(
+            "GlobeBrowsingGUI",
+            "Unknown server: '" << urlInfo[_currentServer].name << "'"
         );
-
-        char** subDatasets = GDALGetMetadata(dataset, "SUBDATASETS");
-        int nSubdatasets = CSLCount(subDatasets);
-        cap.layers = parseSubDatasets(subDatasets, nSubdatasets);
-
-        GDALClose(dataset);
-        cap.hasData = true;
     }
 
     ImGui::Columns(6, nullptr, false);
@@ -252,7 +211,7 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::NextColumn();
     ImGui::Separator();
 
-    for (const Capabilities::Layer& l : cap.layers) {
+    for (const Layer& l : cap) {
         if (l.name.empty() || l.url.empty()) {
             continue;
         }
@@ -315,56 +274,6 @@ void GuiGlobeBrowsingComponent::render() {
         ImGui::PopID();
     }
     ImGui::Columns(1);
-}
-
-std::vector<GuiGlobeBrowsingComponent::Capabilities::Layer>
-GuiGlobeBrowsingComponent::parseSubDatasets(char** subDatasets, int nSubdatasets)
-{
-    // Idea:  Iterate over the list of sublayers keeping a current layer and identify it
-    //        by its number.  If this number changes, we know that we have a new layer
-
-
-    using Layer = Capabilities::Layer;
-    std::vector<Layer> result;
-
-    int currentLayerNumber = -1;
-    Layer currentLayer;
-    for (int i = 0; i < nSubdatasets; ++i) {
-        int iDataset = -1;
-        static char IdentifierBuffer[64];
-        sscanf(
-            subDatasets[i],
-            "SUBDATASET_%i_%[^=]",
-            &iDataset,
-            IdentifierBuffer
-        );
-
-        
-
-        if (iDataset != currentLayerNumber) {
-            // We are done with the previous version
-            result.push_back(std::move(currentLayer));
-            currentLayer = Layer();
-            currentLayerNumber = iDataset;
-        }
-
-        std::string identifier = std::string(IdentifierBuffer);
-        std::string ds(subDatasets[i]);
-        std::string value = ds.substr(ds.find_first_of('=') + 1);
-
-        // The DESC/NAME difference is not a typo
-        if (identifier == "DESC") {
-            currentLayer.name = value;
-        }
-        else if (identifier == "NAME") {
-            currentLayer.url = value;
-        }
-        else {
-            LINFOC("GlobeBrowsingGUI", "Unknown subdataset identifier: " + identifier);
-        }
-    }
-
-    return result;
 }
 
 } // namespace openspace::gui

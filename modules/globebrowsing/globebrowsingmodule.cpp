@@ -50,14 +50,73 @@
 
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
-
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+
+#ifdef GLOBEBROWSING_USE_GDAL
+#include <gdal.h>
+#include <cpl_string.h>
+#endif // GLOBEBROWSING_USE_GDAL
 
 #include "globebrowsingmodule_lua.inl"
 
+
 namespace {
     const char* _loggerCat = "GlobeBrowsingModule";
-}
+
+#ifdef GLOBEBROWSING_USE_GDAL
+    openspace::GlobeBrowsingModule::Capabilities
+    parseSubDatasets(char** subDatasets, int nSubdatasets)
+    {
+        // Idea:  Iterate over the list of sublayers keeping a current layer and identify it
+        //        by its number.  If this number changes, we know that we have a new layer
+
+
+        using Layer = openspace::GlobeBrowsingModule::Layer;
+        std::vector<Layer> result;
+
+        int currentLayerNumber = -1;
+        Layer currentLayer;
+        for (int i = 0; i < nSubdatasets; ++i) {
+            int iDataset = -1;
+            static char IdentifierBuffer[64];
+            sscanf(
+                subDatasets[i],
+                "SUBDATASET_%i_%[^=]",
+                &iDataset,
+                IdentifierBuffer
+            );
+
+
+
+            if (iDataset != currentLayerNumber) {
+                // We are done with the previous version
+                result.push_back(std::move(currentLayer));
+                currentLayer = Layer();
+                currentLayerNumber = iDataset;
+            }
+
+            std::string identifier = std::string(IdentifierBuffer);
+            std::string ds(subDatasets[i]);
+            std::string value = ds.substr(ds.find_first_of('=') + 1);
+
+            // The DESC/NAME difference is not a typo
+            if (identifier == "DESC") {
+                currentLayer.name = value;
+            }
+            else if (identifier == "NAME") {
+                currentLayer.url = value;
+            }
+            else {
+                LINFOC("GlobeBrowsingGUI", "Unknown subdataset identifier: " + identifier);
+            }
+        }
+
+        return result;
+    }
+
+#endif // GLOBEBROWSING_USE_GDAL
+
+} // namespace
 
 namespace openspace {
 
@@ -367,5 +426,73 @@ std::string GlobeBrowsingModule::layerTypeNamesList() {
         " and " + std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[globebrowsing::layergroupid::NUM_LAYER_TYPES - 1]);
     return listLayerTypes;
 }
+
+#ifdef GLOBEBROWSING_USE_GDAL
+
+void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
+                                              std::string url)
+{
+    auto downloadFunction = [](const std::string& url) {
+        GDALDatasetH dataset = GDALOpenEx(
+            url.c_str(),
+            GDAL_OF_READONLY | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
+            nullptr,
+            nullptr,
+            nullptr
+        );
+
+        char** subDatasets = GDALGetMetadata(dataset, "SUBDATASETS");
+        int nSubdatasets = CSLCount(subDatasets);
+        Capabilities cap = parseSubDatasets(subDatasets, nSubdatasets);
+        GDALClose(dataset);
+        return cap;
+    };
+    
+    _inFlightCapabilitiesMap[name] = std::async(std::launch::async, downloadFunction, url);
+
+    _urlList.emplace(std::move(globe), UrlInfo{ std::move(name), std::move(url) });
+}
+
+GlobeBrowsingModule::Capabilities
+GlobeBrowsingModule::capabilities(const std::string& name)
+{
+    // First check the ones that have already finished
+    auto it = _capabilitiesMap.find(name);
+    if (it != _capabilitiesMap.end()) {
+        return it->second;
+    }
+    else {
+        auto inFlightIt = _inFlightCapabilitiesMap.find(name);
+        if (inFlightIt != _inFlightCapabilitiesMap.end()) {
+            // If the download and the parsing has not finished yet, this will block,
+            // otherwise it will just return
+            Capabilities cap = inFlightIt->second.get();
+            _capabilitiesMap[name] = cap;
+            return cap;
+        }
+        else {
+            return {};
+        }
+    }
+}
+
+void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
+
+}
+
+
+std::vector<GlobeBrowsingModule::UrlInfo>
+GlobeBrowsingModule::urlInfo(const std::string& globe) const
+{
+    auto range = _urlList.equal_range(globe);
+    std::vector<UrlInfo> res;
+    for (auto i = range.first; i != range.second; ++i) {
+        res.emplace_back(i->second);
+    }
+    return res;
+}
+
+
+#endif // GLOBEBROWSING_USE_GDAL
 
 } // namespace openspace
