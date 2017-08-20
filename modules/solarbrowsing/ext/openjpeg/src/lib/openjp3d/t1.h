@@ -49,10 +49,10 @@ in T1.C are used by some function in TCD.C.
 #define T1_NMSEDEC_BITS 7
 
 #define T1_MAXCBLKW 256 /*< Maximum size of code-block (width) */
-#define T1_MAXCBLKH 256 /*< Maximum size of code-block (heigth) */
+#define T1_MAXCBLKH 256 /*< Maximum size of code-block (height) */
 #define T1_MAXCBLKD 256 /*< Maximum size of code-block (depth) */
 #define T1_MINCBLKW 4       /*< Minimum size of code-block (width) */
-#define T1_MINCBLKH 4       /*< Minimum size of code-block (heigth) */
+#define T1_MINCBLKH 4       /*< Minimum size of code-block (height) */
 #define T1_MINCBLKD 4       /*< Minimum size of code-block (depth) */
 #define T1_MAXWHD 18
 #define T1_CBLKW 256

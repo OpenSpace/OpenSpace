@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -36,7 +36,7 @@
 /////////////////////////////////////////////////////////////////////
 
 OPJEncoThread::OPJEncoThread(OPJCanvas *canvas)
-        : wxThread()
+    : wxThread()
 {
     m_count = 0;
     m_canvas = canvas;
@@ -49,14 +49,14 @@ void OPJEncoThread::WriteText(const wxString& text)
     // before doing any GUI calls we must ensure that this thread is the only
     // one doing it!
 
-#ifndef __WXGTK__ 
+#ifndef __WXGTK__
     wxMutexGuiEnter();
 #endif // __WXGTK__
 
     msg << text;
     m_canvas->WriteText(msg);
 
-#ifndef __WXGTK__ 
+#ifndef __WXGTK__
     wxMutexGuiLeave();
 #endif // __WXGTK__
 }
@@ -68,8 +68,7 @@ void OPJEncoThread::OnExit()
     wxArrayThread& ethreads = wxGetApp().m_enco_threads;
     ethreads.Remove(this);
 
-    if (ethreads.IsEmpty() )
-    {
+    if (ethreads.IsEmpty()) {
         // signal the main thread that there are no more threads left if it is
         // waiting for us
         if (wxGetApp().m_enco_waitingUntilAllDone) {
@@ -83,50 +82,54 @@ void *OPJEncoThread::Entry()
 {
     wxString text;
 
-	srand(GetId());
-	//int m_countnum = rand() % 9;
+    srand(GetId());
+    //int m_countnum = rand() % 9;
     //text.Printf(wxT("Deco thread 0x%lx started (priority = %u, time = %d)."),
     //            GetId(), GetPriority(), m_countnum);
     text.Printf(wxT("Enco thread %d started"), m_canvas->m_childframe->m_winnumber);
     WriteText(text);
 
-	// set handler properties
-	wxJPEG2000Handler *jpeg2000handler = (wxJPEG2000Handler *) wxImage::FindHandler(wxBITMAP_TYPE_JPEG2000);
-	jpeg2000handler->m_subsampling = wxGetApp().m_subsampling;
-	jpeg2000handler->m_origin = wxGetApp().m_origin;
-	jpeg2000handler->m_rates = wxGetApp().m_rates;
-	jpeg2000handler->m_quality = wxGetApp().m_quality;
-	jpeg2000handler->m_enablequality = wxGetApp().m_enablequality;
-	jpeg2000handler->m_multicomp = wxGetApp().m_multicomp;
-	jpeg2000handler->m_irreversible = wxGetApp().m_irreversible;
-	jpeg2000handler->m_resolutions = wxGetApp().m_resolutions;
-	jpeg2000handler->m_progression = wxGetApp().m_progression;
-	jpeg2000handler->m_cbsize = wxGetApp().m_cbsize;
-	jpeg2000handler->m_prsize = wxGetApp().m_prsize;
-	jpeg2000handler->m_tsize = wxGetApp().m_tsize;
-	jpeg2000handler->m_torigin = wxGetApp().m_torigin;
-	jpeg2000handler->m_enablesop = wxGetApp().m_enablesop;
-	jpeg2000handler->m_enableeph = wxGetApp().m_enableeph;
-	jpeg2000handler->m_enablebypass = wxGetApp().m_enablebypass;
-	jpeg2000handler->m_enablerestart = wxGetApp().m_enablerestart;
-	jpeg2000handler->m_enablereset = wxGetApp().m_enablereset;
-	jpeg2000handler->m_enablesegmark = wxGetApp().m_enablesegmark;
-	jpeg2000handler->m_enableerterm = wxGetApp().m_enableerterm;
-	jpeg2000handler->m_enablevsc = wxGetApp().m_enablevsc;
-	jpeg2000handler->m_enableidx = wxGetApp().m_enableidx;
-	jpeg2000handler->m_index = m_canvas->m_savename.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + wxGetApp().m_index;
-	jpeg2000handler->m_enablecomm = wxGetApp().m_enablecomm;
-	jpeg2000handler->m_comment = wxGetApp().m_comment;
-	jpeg2000handler->m_enablepoc = wxGetApp().m_enablepoc;
-	jpeg2000handler->m_poc = wxGetApp().m_poc;
+    // set handler properties
+    wxJPEG2000Handler *jpeg2000handler = (wxJPEG2000Handler *) wxImage::FindHandler(
+            wxBITMAP_TYPE_JPEG2000);
+    jpeg2000handler->m_subsampling = wxGetApp().m_subsampling;
+    jpeg2000handler->m_origin = wxGetApp().m_origin;
+    jpeg2000handler->m_rates = wxGetApp().m_rates;
+    jpeg2000handler->m_quality = wxGetApp().m_quality;
+    jpeg2000handler->m_enablequality = wxGetApp().m_enablequality;
+    jpeg2000handler->m_multicomp = wxGetApp().m_multicomp;
+    jpeg2000handler->m_irreversible = wxGetApp().m_irreversible;
+    jpeg2000handler->m_resolutions = wxGetApp().m_resolutions;
+    jpeg2000handler->m_progression = wxGetApp().m_progression;
+    jpeg2000handler->m_cbsize = wxGetApp().m_cbsize;
+    jpeg2000handler->m_prsize = wxGetApp().m_prsize;
+    jpeg2000handler->m_tsize = wxGetApp().m_tsize;
+    jpeg2000handler->m_torigin = wxGetApp().m_torigin;
+    jpeg2000handler->m_enablesop = wxGetApp().m_enablesop;
+    jpeg2000handler->m_enableeph = wxGetApp().m_enableeph;
+    jpeg2000handler->m_enablebypass = wxGetApp().m_enablebypass;
+    jpeg2000handler->m_enablerestart = wxGetApp().m_enablerestart;
+    jpeg2000handler->m_enablereset = wxGetApp().m_enablereset;
+    jpeg2000handler->m_enablesegmark = wxGetApp().m_enablesegmark;
+    jpeg2000handler->m_enableerterm = wxGetApp().m_enableerterm;
+    jpeg2000handler->m_enablevsc = wxGetApp().m_enablevsc;
+    jpeg2000handler->m_enableidx = wxGetApp().m_enableidx;
+    jpeg2000handler->m_index = m_canvas->m_savename.GetPath(
+                                   wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR) + wxGetApp().m_index;
+    jpeg2000handler->m_enablecomm = wxGetApp().m_enablecomm;
+    jpeg2000handler->m_comment = wxGetApp().m_comment;
+    jpeg2000handler->m_enablepoc = wxGetApp().m_enablepoc;
+    jpeg2000handler->m_poc = wxGetApp().m_poc;
 
-	// save the file
-	if (!m_canvas->m_image100.SaveFile(m_canvas->m_savename.GetFullPath(), (wxBitmapType) wxBITMAP_TYPE_JPEG2000)) {
-		WriteText(wxT("Can't save image"));
-		return NULL;
-	}
+    // save the file
+    if (!m_canvas->m_image100.SaveFile(m_canvas->m_savename.GetFullPath(),
+                                       (wxBitmapType) wxBITMAP_TYPE_JPEG2000)) {
+        WriteText(wxT("Can't save image"));
+        return NULL;
+    }
 
-    text.Printf(wxT("Enco thread %d finished"), m_canvas->m_childframe->m_winnumber);
+    text.Printf(wxT("Enco thread %d finished"),
+                m_canvas->m_childframe->m_winnumber);
     WriteText(text);
     return NULL;
 }
@@ -136,7 +139,7 @@ void *OPJEncoThread::Entry()
 // Decoding thread class
 /////////////////////////////////////////////////////////////////////
 OPJDecoThread::OPJDecoThread(OPJCanvas *canvas)
-        : wxThread()
+    : wxThread()
 {
     m_count = 0;
     m_canvas = canvas;
@@ -145,29 +148,29 @@ OPJDecoThread::OPJDecoThread(OPJCanvas *canvas)
 void OPJDecoThread::WriteText(const wxString& text)
 {
     wxString msg;
-	
-	// we use a fake event and post it for inter-thread gui communication
+
+    // we use a fake event and post it for inter-thread gui communication
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, OPJFRAME_THREADLOGMSG);
-    event.SetInt(-1); 
-	msg << text;
-	event.SetString(msg);
+    event.SetInt(-1);
+    msg << text;
+    event.SetString(msg);
     wxPostEvent(this->m_canvas->m_childframe->m_frame, event);
 
-/*
-    // before doing any GUI calls we must ensure that this thread is the only
-    // one doing it!
+    /*
+        // before doing any GUI calls we must ensure that this thread is the only
+        // one doing it!
 
-#ifndef __WXGTK__ 
-    wxMutexGuiEnter();
-#endif // __WXGTK__
+    #ifndef __WXGTK__
+        wxMutexGuiEnter();
+    #endif // __WXGTK__
 
-    msg << text;
-    m_canvas->WriteText(msg);
+        msg << text;
+        m_canvas->WriteText(msg);
 
-#ifndef __WXGTK__ 
-    wxMutexGuiLeave();
-#endif // __WXGTK__
-*/
+    #ifndef __WXGTK__
+        wxMutexGuiLeave();
+    #endif // __WXGTK__
+    */
 }
 
 void OPJDecoThread::OnExit()
@@ -177,8 +180,7 @@ void OPJDecoThread::OnExit()
     wxArrayThread& dthreads = wxGetApp().m_deco_threads;
     dthreads.Remove(this);
 
-    if (dthreads.IsEmpty() )
-    {
+    if (dthreads.IsEmpty()) {
         // signal the main thread that there are no more threads left if it is
         // waiting for us
         if (wxGetApp().m_deco_waitingUntilAllDone) {
@@ -193,95 +195,98 @@ void *OPJDecoThread::Entry()
 
     wxString text;
 
-	//srand(GetId());
-	//int m_countnum = rand() % 9;
+    //srand(GetId());
+    //int m_countnum = rand() % 9;
     //text.Printf(wxT("Deco thread 0x%lx started (priority = %u, time = %d)."),
     //            GetId(), GetPriority(), m_countnum);
 
-	// we have started
+    // we have started
     text.Printf(wxT("Deco thread %d started"), m_canvas->m_childframe->m_winnumber);
     WriteText(text);
 
-	// prepare dummy wximage
+    // prepare dummy wximage
     wxBitmap bitmap(100, 100);
     wxImage image(100, 100, true); //= bitmap.ConvertToImage();
     image.Destroy();
 
-	// show image full name
-	WriteText(m_canvas->m_fname.GetFullPath());
+    // show image full name
+    WriteText(m_canvas->m_fname.GetFullPath());
 
-	// set handler properties
-	wxJPEG2000Handler *jpeg2000handler = (wxJPEG2000Handler *) wxImage::FindHandler(wxBITMAP_TYPE_JPEG2000);
-	jpeg2000handler->m_reducefactor = wxGetApp().m_reducefactor;
-	jpeg2000handler->m_qualitylayers = wxGetApp().m_qualitylayers;
-	jpeg2000handler->m_components = wxGetApp().m_components;
-	jpeg2000handler->m_framenum = wxGetApp().m_framenum;
+    // set handler properties
+    wxJPEG2000Handler *jpeg2000handler = (wxJPEG2000Handler *) wxImage::FindHandler(
+            wxBITMAP_TYPE_JPEG2000);
+    jpeg2000handler->m_reducefactor = wxGetApp().m_reducefactor;
+    jpeg2000handler->m_qualitylayers = wxGetApp().m_qualitylayers;
+    jpeg2000handler->m_components = wxGetApp().m_components;
+    jpeg2000handler->m_framenum = wxGetApp().m_framenum;
 #ifdef USE_JPWL
-	jpeg2000handler->m_enablejpwl = wxGetApp().m_enablejpwl;
-	jpeg2000handler->m_expcomps = wxGetApp().m_expcomps;
-	jpeg2000handler->m_maxtiles = wxGetApp().m_maxtiles;
+    jpeg2000handler->m_enablejpwl = wxGetApp().m_enablejpwl;
+    jpeg2000handler->m_expcomps = wxGetApp().m_expcomps;
+    jpeg2000handler->m_maxtiles = wxGetApp().m_maxtiles;
 #endif // USE_JPWL
 
 #ifdef USE_MXF
-	wxMXFHandler *mxfffhandler = (wxMXFHandler *) wxImage::FindHandler(wxBITMAP_TYPE_MXF);
-	mxfffhandler->m_reducefactor = wxGetApp().m_reducefactor;
-	mxfffhandler->m_qualitylayers = wxGetApp().m_qualitylayers;
-	mxfffhandler->m_components = wxGetApp().m_components;
-	mxfffhandler->m_framenum = wxGetApp().m_framenum;
-	mxfffhandler->m_filename = m_canvas->m_fname;
+    wxMXFHandler *mxfffhandler = (wxMXFHandler *) wxImage::FindHandler(
+                                     wxBITMAP_TYPE_MXF);
+    mxfffhandler->m_reducefactor = wxGetApp().m_reducefactor;
+    mxfffhandler->m_qualitylayers = wxGetApp().m_qualitylayers;
+    mxfffhandler->m_components = wxGetApp().m_components;
+    mxfffhandler->m_framenum = wxGetApp().m_framenum;
+    mxfffhandler->m_filename = m_canvas->m_fname;
 #ifdef USE_JPWL
-	mxfffhandler->m_enablejpwl = wxGetApp().m_enablejpwl;
-	mxfffhandler->m_expcomps = wxGetApp().m_expcomps;
-	mxfffhandler->m_maxtiles = wxGetApp().m_maxtiles;
+    mxfffhandler->m_enablejpwl = wxGetApp().m_enablejpwl;
+    mxfffhandler->m_expcomps = wxGetApp().m_expcomps;
+    mxfffhandler->m_maxtiles = wxGetApp().m_maxtiles;
 #endif // USE_JPWL
 #endif // USE_MXF
 
-	// if decoding is enabled...
-	if (wxGetApp().m_enabledeco) {
+    // if decoding is enabled...
+    if (wxGetApp().m_enabledeco) {
 
-		// load the file
-		if (!image.LoadFile(m_canvas->m_fname.GetFullPath(), wxBITMAP_TYPE_ANY, 0)) {
-			WriteText(wxT("Can't load image!"));
-			return NULL;
-		}
+        // load the file
+        if (!image.LoadFile(m_canvas->m_fname.GetFullPath(), wxBITMAP_TYPE_ANY, 0)) {
+            WriteText(wxT("Can't load image!"));
+            return NULL;
+        }
 
-	} else {
+    } else {
 
-		// display a warning
-		if (!image.Create(300, 5, false)) {
-			WriteText(wxT("Can't create image!"));
-			return NULL;
-		}
+        // display a warning
+        if (!image.Create(300, 5, false)) {
+            WriteText(wxT("Can't create image!"));
+            return NULL;
+        }
 
-	}
+    }
 
-	// assign 100% image
+    // assign 100% image
     m_canvas->m_image100 = wxBitmap(image);
 
-	// signal the frame to refresh the canvas
+    // signal the frame to refresh the canvas
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, OPJFRAME_VIEWFIT);
-	event.SetString(wxT("Fit me"));
-    event.SetInt(m_canvas->m_childframe->m_winnumber); 
+    event.SetString(wxT("Fit me"));
+    event.SetInt(m_canvas->m_childframe->m_winnumber);
     wxPostEvent(m_canvas->m_childframe->m_frame, event);
 
-	// find a fit-to-width zoom
-	/*int zooml, wzooml, hzooml;
-	wxSize clientsize = m_canvas->GetClientSize();
-	wzooml = (int) floor(100.0 * (double) clientsize.GetWidth() / (double) (2 * OPJ_CANVAS_BORDER + image.GetWidth()));
-	hzooml = (int) floor(100.0 * (double) clientsize.GetHeight() / (double) (2 * OPJ_CANVAS_BORDER + image.GetHeight()));
-	zooml = wxMin(100, wxMin(wzooml, hzooml));*/
+    // find a fit-to-width zoom
+    /*int zooml, wzooml, hzooml;
+    wxSize clientsize = m_canvas->GetClientSize();
+    wzooml = (int) floor(100.0 * (double) clientsize.GetWidth() / (double) (2 * OPJ_CANVAS_BORDER + image.GetWidth()));
+    hzooml = (int) floor(100.0 * (double) clientsize.GetHeight() / (double) (2 * OPJ_CANVAS_BORDER + image.GetHeight()));
+    zooml = wxMin(100, wxMin(wzooml, hzooml));*/
 
-	// fit to width
+    // fit to width
 #ifndef __WXGTK__
-	//m_canvas->m_childframe->m_frame->Rescale(zooml, m_canvas->m_childframe);
+    //m_canvas->m_childframe->m_frame->Rescale(zooml, m_canvas->m_childframe);
 #endif // __WXGTK__
 
-	//m_canvas->m_image = m_canvas->m_image100;
-	//m_canvas->Refresh();
-	//m_canvas->SetScrollbars(20, 20, (int)(0.5 + (double) image.GetWidth() / 20.0), (int)(0.5 + (double) image.GetHeight() / 20.0));
+    //m_canvas->m_image = m_canvas->m_image100;
+    //m_canvas->Refresh();
+    //m_canvas->SetScrollbars(20, 20, (int)(0.5 + (double) image.GetWidth() / 20.0), (int)(0.5 + (double) image.GetHeight() / 20.0));
 
     //text.Printf(wxT("Deco thread 0x%lx finished."), GetId());
-    text.Printf(wxT("Deco thread %d finished"), m_canvas->m_childframe->m_winnumber);
+    text.Printf(wxT("Deco thread %d finished"),
+                m_canvas->m_childframe->m_winnumber);
     WriteText(text);
     return NULL;
 
@@ -292,37 +297,37 @@ void *OPJDecoThread::Entry()
 /////////////////////////////////////////////////////////////////////
 
 OPJParseThread::OPJParseThread(OPJMarkerTree *tree, wxTreeItemId parentid)
-        : wxThread()
+    : wxThread()
 {
     m_count = 0;
     m_tree = tree;
-	m_parentid = parentid;
+    m_parentid = parentid;
 }
 
 void OPJParseThread::WriteText(const wxString& text)
 {
     wxString msg;
-	
-	// we use a fake event and post it for inter-thread gui communication
+
+    // we use a fake event and post it for inter-thread gui communication
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, OPJFRAME_THREADLOGMSG);
-    event.SetInt(-1); 
-	msg << text;
-	event.SetString(msg);
+    event.SetInt(-1);
+    msg << text;
+    event.SetString(msg);
     wxPostEvent(this->m_tree->m_childframe->m_frame, event);
 
-/*    // before doing any GUI calls we must ensure that this thread is the only
-    // one doing it!
+    /*    // before doing any GUI calls we must ensure that this thread is the only
+        // one doing it!
 
-#ifndef __WXGTK__ 
-    wxMutexGuiEnter();
-#endif // __WXGTK
+    #ifndef __WXGTK__
+        wxMutexGuiEnter();
+    #endif // __WXGTK
 
-    msg << text;
-    m_tree->WriteText(msg);
+        msg << text;
+        m_tree->WriteText(msg);
 
-#ifndef __WXGTK__ 
-    wxMutexGuiLeave();
-#endif // __WXGTK*/
+    #ifndef __WXGTK__
+        wxMutexGuiLeave();
+    #endif // __WXGTK*/
 }
 
 void OPJParseThread::OnExit()
@@ -345,14 +350,14 @@ void OPJParseThread::OnExit()
 void *OPJParseThread::Entry()
 {
 
-	printf("Entering\n\n");
+    printf("Entering\n\n");
 
     wxString text;
 
-	srand(GetId());
-	int m_countnum = rand() % 9;
+    srand(GetId());
+    int m_countnum = rand() % 9;
     text.Printf(wxT("Parse thread 0x%lx started (priority = %u, time = %d)."),
-            GetId(), GetPriority(), m_countnum);
+                GetId(), GetPriority(), m_countnum);
     WriteText(text);
     LoadFile(m_tree->m_fname);
     text.Printf(wxT("Parse thread 0x%lx finished."), GetId());
@@ -361,8 +366,8 @@ void *OPJParseThread::Entry()
 
     //wxLogMessage(wxT("Entering\n")); //test wxLog thread safeness
 
-	//wxBusyCursor wait;
-	//wxBusyInfo wait(wxT("Decoding image ..."));
+    //wxBusyCursor wait;
+    //wxBusyInfo wait(wxT("Decoding image ..."));
 
 
     /*for ( m_count = 0; m_count < m_countnum; m_count++ )
@@ -380,7 +385,7 @@ void *OPJParseThread::Entry()
 
     // wxLogMessage(text); -- test wxLog thread safeness
 
-	printf("Exiting\n\n");
+    printf("Exiting\n\n");
 
     return NULL;
 }
@@ -393,7 +398,7 @@ void *OPJParseThread::Entry()
 #if USE_GENERIC_TREECTRL
 BEGIN_EVENT_TABLE(OPJMarkerTree, wxGenericTreeCtrl)
 #else
-BEGIN_EVENT_TABLE(OPJMarkerTree, wxTreeCtrl)
+    BEGIN_EVENT_TABLE(OPJMarkerTree, wxTreeCtrl)
 #endif
     /*EVT_TREE_BEGIN_DRAG(TreeTest_Ctrl, OPJMarkerTree::OnBeginDrag)
     EVT_TREE_BEGIN_RDRAG(TreeTest_Ctrl, OPJMarkerTree::OnBeginRDrag)
@@ -415,7 +420,7 @@ BEGIN_EVENT_TABLE(OPJMarkerTree, wxTreeCtrl)
     /*EVT_TREE_KEY_DOWN(TreeTest_Ctrl, OPJMarkerTree::OnTreeKeyDown)*/
     /*EVT_TREE_ITEM_ACTIVATED(TreeTest_Ctrl, OPJMarkerTree::OnItemActivated)*/
 
-    // so many differents ways to handle right mouse button clicks...
+    // so many different ways to handle right mouse button clicks...
     /*EVT_CONTEXT_MENU(OPJMarkerTree::OnContextMenu)*/
     // EVT_TREE_ITEM_MENU is the preferred event for creating context menus
     // on a tree control, because it includes the point of the click or item,
@@ -435,14 +440,16 @@ IMPLEMENT_DYNAMIC_CLASS(OPJMarkerTree, wxGenericTreeCtrl)
 IMPLEMENT_DYNAMIC_CLASS(OPJMarkerTree, wxTreeCtrl)
 #endif
 
-OPJMarkerTree::OPJMarkerTree(wxWindow *parent, OPJChildFrame *subframe, wxFileName fname, wxString name, const wxWindowID id,
-           const wxPoint& pos, const wxSize& size, long style)
-          : wxTreeCtrl(parent, id, pos, size, style)
+OPJMarkerTree::OPJMarkerTree(wxWindow *parent, OPJChildFrame *subframe,
+                             wxFileName fname, wxString name, const wxWindowID id,
+                             const wxPoint& pos, const wxSize& size, long style)
+    : wxTreeCtrl(parent, id, pos, size, style)
 {
     m_reverseSort = false;
-	m_fname = fname;
+    m_fname = fname;
 
-	m_peektextCtrl = ((OPJFrame *) (parent->GetParent()->GetParent()))->m_textCtrlbrowse;
+    m_peektextCtrl = ((OPJFrame *)(
+                          parent->GetParent()->GetParent()))->m_textCtrlbrowse;
     CreateImageList();
 
     // Add some items to the tree
@@ -453,12 +460,13 @@ OPJMarkerTree::OPJMarkerTree(wxWindow *parent, OPJChildFrame *subframe, wxFileNa
                                   new OPJMarkerData(name));
 
     OPJParseThread *pthread = CreateParseThread(0x00, subframe);
-    if (pthread->Run() != wxTHREAD_NO_ERROR)
+    if (pthread->Run() != wxTHREAD_NO_ERROR) {
         wxLogMessage(wxT("Can't start parse thread!"));
-    else
-		wxLogMessage(wxT("New parse thread started."));
+    } else {
+        wxLogMessage(wxT("New parse thread started."));
+    }
 
-	m_childframe = subframe;
+    m_childframe = subframe;
 }
 
 void OPJMarkerTree::CreateImageList(int size)
@@ -467,10 +475,11 @@ void OPJMarkerTree::CreateImageList(int size)
         SetImageList(NULL);
         return;
     }
-    if (size == 0)
+    if (size == 0) {
         size = m_imageSize;
-    else
+    } else {
         m_imageSize = size;
+    }
 
     // Make an image list containing small icons
     wxImageList *images = new wxImageList(size, size, true);
@@ -499,7 +508,7 @@ void OPJMarkerTree::CreateImageList(int size)
 #if USE_GENERIC_TREECTRL || !defined(__WXMSW__)
 void OPJMarkerTree::CreateButtonsImageList(int size)
 {
-    if ( size == -1 ) {
+    if (size == -1) {
         SetButtonsImageList(NULL);
         return;
     }
@@ -515,9 +524,9 @@ void OPJMarkerTree::CreateButtonsImageList(int size)
     icons[2] = wxIcon(icon5_xpm);   // open
     icons[3] = wxIcon(icon5_xpm);   // open, selected
 
-    for ( size_t i = 0; i < WXSIZEOF(icons); i++ ) {
+    for (size_t i = 0; i < WXSIZEOF(icons); i++) {
         int sizeOrig = icons[i].GetWidth();
-        if ( size == sizeOrig ) {
+        if (size == sizeOrig) {
             images->Add(icons[i]);
         } else {
             images->Add(wxBitmap(wxBitmap(icons[i]).ConvertToImage().Rescale(size, size)));
@@ -533,77 +542,79 @@ void OPJMarkerTree::CreateButtonsImageList(int WXUNUSED(size))
 
 void OPJParseThread::LoadFile(wxFileName fname)
 {
-	wxTreeItemId rootid;
+    wxTreeItemId rootid;
 
-	// this is the root node
-	int image = wxGetApp().ShowImages() ? m_tree->TreeCtrlIcon_Folder : -1;
+    // this is the root node
+    int image = wxGetApp().ShowImages() ? m_tree->TreeCtrlIcon_Folder : -1;
 
-	if (this->m_parentid) {
-		// leaf of a tree
-		rootid = m_parentid;
-		m_tree->SetItemText(rootid, wxT("Parsing..."));
+    if (this->m_parentid) {
+        // leaf of a tree
+        rootid = m_parentid;
+        m_tree->SetItemText(rootid, wxT("Parsing..."));
 
-	} else {
+    } else {
 
-		// delete the existing tree hierarchy
-		m_tree->DeleteAllItems();
+        // delete the existing tree hierarchy
+        m_tree->DeleteAllItems();
 
-		// new tree
-		rootid = m_tree->AddRoot(wxT("Parsing..."),
-			image,
-			image,
-			new OPJMarkerData(fname.GetFullPath())
-			);
-		//m_tree->SetItemFont(rootid, *wxITALIC_FONT);
-		m_tree->SetItemBold(rootid);
-	}
+        // new tree
+        rootid = m_tree->AddRoot(wxT("Parsing..."),
+                                 image,
+                                 image,
+                                 new OPJMarkerData(fname.GetFullPath())
+                                );
+        //m_tree->SetItemFont(rootid, *wxITALIC_FONT);
+        m_tree->SetItemBold(rootid);
+    }
 
-	// open the file
-	wxFile m_file(fname.GetFullPath().c_str(), wxFile::read);
+    // open the file
+    wxFile m_file(fname.GetFullPath().c_str(), wxFile::read);
 
-	// parsing enabled?
-	if (wxGetApp().m_enableparse) {
+    // parsing enabled?
+    if (wxGetApp().m_enableparse) {
 
-		// what is the extension?
-		if ((fname.GetExt() == wxT("j2k")) || (fname.GetExt() == wxT("j2c"))) {
+        // what is the extension?
+        if ((fname.GetExt() == wxT("j2k")) || (fname.GetExt() == wxT("j2c"))) {
 
-			// parse the file
-			ParseJ2KFile(&m_file, 0, m_file.Length(), rootid);
+            // parse the file
+            ParseJ2KFile(&m_file, 0, m_file.Length(), rootid);
 
-		} else if ((fname.GetExt() == wxT("jp2")) || (fname.GetExt() == wxT("mj2"))) {
+        } else if ((fname.GetExt() == wxT("jp2")) || (fname.GetExt() == wxT("mj2"))) {
 
-			// parse the file
-			if (this->m_parentid) {
-				//WriteText(wxT("Only a subsection of jp2"));
-				OPJMarkerData *data = (OPJMarkerData *) m_tree->GetItemData(rootid);
-				ParseJ2KFile(&m_file, data->m_start, data->m_length, rootid);
-				m_tree->Expand(rootid);
+            // parse the file
+            if (this->m_parentid) {
+                //WriteText(wxT("Only a subsection of jp2"));
+                OPJMarkerData *data = (OPJMarkerData *) m_tree->GetItemData(rootid);
+                ParseJ2KFile(&m_file, data->m_start, data->m_length, rootid);
+                m_tree->Expand(rootid);
 
-			} else {
-				// as usual
-				ParseJP2File(&m_file, 0, m_file.Length(), rootid);
-			}
+            } else {
+                // as usual
+                ParseJP2File(&m_file, 0, m_file.Length(), rootid);
+            }
 
-		} else {
+        } else {
 
-			// unknown extension
-			WriteText(wxT("Unknown file format!"));
+            // unknown extension
+            WriteText(wxT("Unknown file format!"));
 
-		}
+        }
 
-	}
+    }
 
-	// this is the root node
-	if (this->m_parentid)
-		m_tree->SetItemText(rootid, wxT("Codestream"));
-	else
-		//m_tree->SetItemText(rootid, wxString::Format(wxT("%s (%d B)"), fname.GetFullName(), m_file.Length()));
-		m_tree->SetItemText(rootid, fname.GetFullName());
+    // this is the root node
+    if (this->m_parentid) {
+        m_tree->SetItemText(rootid, wxT("Codestream"));
+    } else
+        //m_tree->SetItemText(rootid, wxString::Format(wxT("%s (%d B)"), fname.GetFullName(), m_file.Length()));
+    {
+        m_tree->SetItemText(rootid, fname.GetFullName());
+    }
 
-	// close the file
-	m_file.Close();
+    // close the file
+    m_file.Close();
 
-	WriteText(wxT("Parsing finished!"));
+    WriteText(wxT("Parsing finished!"));
 }
 
 /*int OPJMarkerTree::OnCompareItems(const wxTreeItemId& item1,
@@ -738,19 +749,22 @@ void OPJMarkerTree::LogEvent(const wxChar *name, const wxTreeEvent& event)
 {
     wxTreeItemId item = event.GetItem();
     wxString text;
-    if ( item.IsOk() )
+    if (item.IsOk()) {
         text << wxT('"') << GetItemText(item).c_str() << wxT('"');
-    else
+    } else {
         text = wxT("invalid item");
+    }
     wxLogMessage(wxT("%s(%s)"), name, text.c_str());
 }
 
-OPJParseThread *OPJMarkerTree::CreateParseThread(wxTreeItemId parentid, OPJChildFrame *subframe)
+OPJParseThread *OPJMarkerTree::CreateParseThread(wxTreeItemId parentid,
+        OPJChildFrame *subframe)
 {
     OPJParseThread *pthread = new OPJParseThread(this, parentid);
 
-    if (pthread->Create() != wxTHREAD_NO_ERROR)
-		wxLogError(wxT("Can't create parse thread!"));
+    if (pthread->Create() != wxTHREAD_NO_ERROR) {
+        wxLogError(wxT("Can't create parse thread!"));
+    }
 
     wxCriticalSectionLocker enter(wxGetApp().m_parse_critsect);
     wxGetApp().m_parse_threads.Add(pthread);
@@ -782,114 +796,122 @@ TREE_EVENT_HANDLER(OnSelChanging)*/
 
 void OPJMarkerTree::OnItemExpanding(wxTreeEvent& event)
 {
-	wxTreeItemId item = event.GetItem();
-	OPJMarkerData* data = (OPJMarkerData *) GetItemData(item);
-	wxString text;
+    wxTreeItemId item = event.GetItem();
+    OPJMarkerData* data = (OPJMarkerData *) GetItemData(item);
+    wxString text;
 
-	if (item.IsOk())
-		text << wxT('"') << GetItemText(item).c_str() << wxT('"');
-	else
-		text = wxT("invalid item");
+    if (item.IsOk()) {
+        text << wxT('"') << GetItemText(item).c_str() << wxT('"');
+    } else {
+        text = wxT("invalid item");
+    }
 
-	if (wxStrcmp(data->GetDesc1(), wxT("INFO-CSTREAM")))
-		return;
+    if (wxStrcmp(data->GetDesc1(), wxT("INFO-CSTREAM"))) {
+        return;
+    }
 
-	wxLogMessage(wxT("Expanding... (%s -> %s, %s, %d, %d)"),
-		text.c_str(), data->GetDesc1(), data->GetDesc2(),
-		data->m_start, data->m_length);
+    wxLogMessage(wxT("Expanding... (%s -> %s, %s, %d, %d)"),
+                 text.c_str(), data->GetDesc1(), data->GetDesc2(),
+                 data->m_start, data->m_length);
 
-	// the codestream box is being asked for expansion
-	wxTreeItemIdValue cookie;
-	if (!GetFirstChild(item, cookie).IsOk()) {
-		OPJParseThread *pthread = CreateParseThread(item);
-		if (pthread->Run() != wxTHREAD_NO_ERROR)
-			wxLogMessage(wxT("Can't start parse thread!"));
-		else
-			wxLogMessage(wxT("New parse thread started."));
-	}
+    // the codestream box is being asked for expansion
+    wxTreeItemIdValue cookie;
+    if (!GetFirstChild(item, cookie).IsOk()) {
+        OPJParseThread *pthread = CreateParseThread(item);
+        if (pthread->Run() != wxTHREAD_NO_ERROR) {
+            wxLogMessage(wxT("Can't start parse thread!"));
+        } else {
+            wxLogMessage(wxT("New parse thread started."));
+        }
+    }
 }
 
 void OPJMarkerTree::OnSelChanged(wxTreeEvent& event)
 {
-	int bunch_linesize = 16;
-	int bunch_numlines = 7;
+    int bunch_linesize = 16;
+    int bunch_numlines = 7;
 
-	wxTreeItemId item = event.GetItem();
-	OPJMarkerData* data = (OPJMarkerData *) GetItemData(item);
-	wxString text;
-	int l, c, pos = 0, pre_pos;
+    wxTreeItemId item = event.GetItem();
+    OPJMarkerData* data = (OPJMarkerData *) GetItemData(item);
+    wxString text;
+    int l, c, pos = 0, pre_pos;
 
-	m_peektextCtrl->Clear();
+    m_peektextCtrl->Clear();
 
-	/*text << wxString::Format(wxT("Selected... (%s -> %s, %s, %d, %d)"),
-		text.c_str(), data->GetDesc1(), data->GetDesc2(),
-		data->m_start, data->m_length) << wxT("\n");*/
+    /*text << wxString::Format(wxT("Selected... (%s -> %s, %s, %d, %d)"),
+        text.c_str(), data->GetDesc1(), data->GetDesc2(),
+        data->m_start, data->m_length) << wxT("\n");*/
 
-	// open the file and browse a little
-	wxFile *fp = new wxFile(m_fname.GetFullPath().c_str(), wxFile::read);
+    // open the file and browse a little
+    wxFile *fp = new wxFile(m_fname.GetFullPath().c_str(), wxFile::read);
 
-	// go to position claimed
-	fp->Seek(data->m_start, wxFromStart);
+    // go to position claimed
+    fp->Seek(data->m_start, wxFromStart);
 
-	// read a bunch
-	int max_read = wxMin(wxFileOffset(bunch_linesize * bunch_numlines), data->m_length - data->m_start + 1);
-	if (data->m_desc == wxT("MARK (65380)")) {
-		/*wxLogMessage(data->m_desc);*/
-		max_read = data->m_length - data->m_start + 1;
-		bunch_numlines = (int) ceil((float) max_read / (float) bunch_linesize);
-	}
-	unsigned char *buffer = new unsigned char[bunch_linesize * bunch_numlines];
-	fp->Read(buffer, max_read);
+    // read a bunch
+    int max_read = wxMin(wxFileOffset(bunch_linesize * bunch_numlines),
+                         data->m_length - data->m_start + 1);
+    if (data->m_desc == wxT("MARK (65380)")) {
+        /*wxLogMessage(data->m_desc);*/
+        max_read = data->m_length - data->m_start + 1;
+        bunch_numlines = (int) ceil((float) max_read / (float) bunch_linesize);
+    }
+    unsigned char *buffer = new unsigned char[bunch_linesize * bunch_numlines];
+    fp->Read(buffer, max_read);
 
-	// write the file data between start and stop
-	pos = 0;
-	for (l = 0; l < bunch_numlines; l++) {
+    // write the file data between start and stop
+    pos = 0;
+    for (l = 0; l < bunch_numlines; l++) {
 
-		text << wxString::Format(wxT("%010d:"), data->m_start + pos);
+        text << wxString::Format(wxT("%010d:"), data->m_start + pos);
 
-		pre_pos = pos;
+        pre_pos = pos;
 
-		// add hex browsing text
-		for (c = 0; c < bunch_linesize; c++) {
+        // add hex browsing text
+        for (c = 0; c < bunch_linesize; c++) {
 
-			if (!(c % 8))
-				text << wxT(" ");
+            if (!(c % 8)) {
+                text << wxT(" ");
+            }
 
-			if (pos < max_read) {
-				text << wxString::Format(wxT("%02X "), buffer[pos]);
-			} else
-				text << wxT("   ");
-			pos++;
-		}
+            if (pos < max_read) {
+                text << wxString::Format(wxT("%02X "), buffer[pos]);
+            } else {
+                text << wxT("   ");
+            }
+            pos++;
+        }
 
-		text << wxT("    ");
+        text << wxT("    ");
 
-		// add char browsing text
-		for (c = 0; c < bunch_linesize; c++) {
+        // add char browsing text
+        for (c = 0; c < bunch_linesize; c++) {
 
-			if (pre_pos < max_read) {
-				if ((buffer[pre_pos] == '\n') ||
-					(buffer[pre_pos] == '\t') ||
-					(buffer[pre_pos] == '\0') ||
-					(buffer[pre_pos] == 0x0D) ||
-					(buffer[pre_pos] == 0x0B))
-					buffer[pre_pos] = ' ';
-				text << wxString::FromAscii((char) buffer[pre_pos]) << wxT(".");
-			} else
-				text << wxT("  ");
-			pre_pos++;
-		}
+            if (pre_pos < max_read) {
+                if ((buffer[pre_pos] == '\n') ||
+                        (buffer[pre_pos] == '\t') ||
+                        (buffer[pre_pos] == '\0') ||
+                        (buffer[pre_pos] == 0x0D) ||
+                        (buffer[pre_pos] == 0x0B)) {
+                    buffer[pre_pos] = ' ';
+                }
+                text << wxString::FromAscii((char) buffer[pre_pos]) << wxT(".");
+            } else {
+                text << wxT("  ");
+            }
+            pre_pos++;
+        }
 
-		text << wxT("\n");
+        text << wxT("\n");
 
-	}
+    }
 
-	// close the file
-	fp->Close();
+    // close the file
+    fp->Close();
 
-	m_peektextCtrl->WriteText(text);
+    m_peektextCtrl->WriteText(text);
 
-	delete [] buffer;
+    delete [] buffer;
 }
 
 /*void LogKeyEvent(const wxChar *name, const wxKeyEvent& event)
@@ -1148,7 +1170,7 @@ void OPJMarkerTree::OnItemMenu(wxTreeEvent& event)
     wxLogMessage(wxT("OnItemMenu for item \"%s\""), item ? item->GetDesc()
                                                          : _T(""));*/
 
-	//wxLogMessage(wxT("EEEEEEEEEE"));
+    //wxLogMessage(wxT("EEEEEEEEEE"));
 
     //event.Skip();
 }
@@ -1269,5 +1291,3 @@ void OPJMarkerData::ShowInfo(wxTreeCtrl *tree)
                  unsigned(tree->GetChildrenCount(GetId())),
                  unsigned(tree->GetChildrenCount(GetId(), false)));
 }
-
-

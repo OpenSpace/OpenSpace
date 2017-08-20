@@ -1428,7 +1428,7 @@ jpwl_esd_ms_t *jpwl_esd_create(opj_j2k_t *j2k, int comp,
         esd->data = NULL;
 
     } else {
-        /* we set the data field as the sensitivity values poinnter passed to the function */
+        /* we set the data field as the sensitivity values pointer passed to the function */
         esd->data = (unsigned char *) sensval;
     }
 

@@ -220,7 +220,7 @@ typedef struct opj_tccp {
     int numgbits;
     /** Region Of Interest shift */
     int roishift;
-    /** precinct width heigth & depth*/
+    /** precinct width height & depth*/
     int prctsiz[3][J3D_MAXRLVLS];
 } opj_tccp_t;
 
@@ -300,7 +300,7 @@ typedef struct opj_cp {
     int tdz;
     /** comment for coding */
     char *comment;
-    /** number of tiles in width, heigth and depth */
+    /** number of tiles in width, height and depth */
     int tw;
     int th;
     int tl;
@@ -352,7 +352,7 @@ typedef struct opj_tile_info {
     int end_header;
     /** end position */
     int end_pos;
-    /** precinct number for each resolution level (width, heigth and depth) */
+    /** precinct number for each resolution level (width, height and depth) */
     int prctno[3][J3D_MAXRLVLS];
     /** precinct size (in power of 2), in X for each resolution level */
     int prctsiz[3][J3D_MAXRLVLS];
@@ -425,7 +425,7 @@ typedef struct opj_j3d {
     opj_common_ptr cinfo;
     /** locate in which part of the codestream the decoder is (main header, tile header, end) */
     int state;
-    /** number of the tile curently concern by coding/decoding */
+    /** number of the tile currently concern by coding/decoding */
     int curtileno;
     /** locate the position of the end of the tile in the codestream, used to detect a truncated codestream (in j3d_read_sod)   */
     unsigned char *eot;

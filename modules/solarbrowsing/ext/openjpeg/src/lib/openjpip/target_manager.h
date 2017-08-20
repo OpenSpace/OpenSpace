@@ -39,7 +39,7 @@
 /** target parameters*/
 typedef struct target_param {
     char tid[MAX_LENOFTID];         /**< target identifier*/
-    char *targetname;               /**< local file path or URL ( URL is suported only with SERVER mode)*/
+    char *targetname;               /**< local file path or URL ( URL is supported only with SERVER mode)*/
     int fd;                         /**< file descriptor*/
 #ifdef SERVER
     char *tmpfname;                 /**< temporal file name to download a remote target file*/

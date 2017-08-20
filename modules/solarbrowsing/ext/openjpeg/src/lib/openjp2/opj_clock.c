@@ -49,7 +49,7 @@ OPJ_FLOAT64 opj_clock(void)
     /* cout << "freq = " << ((double) freq.QuadPart) << endl; */
     /* t is the high resolution performance counter (see MSDN) */
     QueryPerformanceCounter(& t) ;
-    return (t.QuadPart / (OPJ_FLOAT64) freq.QuadPart) ;
+    return ((OPJ_FLOAT64) t.QuadPart / (OPJ_FLOAT64) freq.QuadPart) ;
 #else
     /* Unix or Linux: use resource usage */
     struct rusage t;

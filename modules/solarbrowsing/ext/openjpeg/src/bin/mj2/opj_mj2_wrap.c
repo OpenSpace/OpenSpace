@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
     memset(&img, 0, sizeof(opj_image_t));
     /*
     configure the event callbacks (not required)
-    setting of each callback is optionnal
+    setting of each callback is optional
     */
     memset(&event_mgr, 0, sizeof(opj_event_mgr_t));
     event_mgr.error_handler = error_callback;
@@ -452,7 +452,7 @@ int main(int argc, char *argv[])
             if (snum == 0) { /* Could not open a single codestream */
                 fprintf(stderr, "failed to open %s for reading\n", j2kfilename);
                 return 1;
-            } else {        /* Tried to open a inexistant codestream */
+            } else {        /* Tried to open a inexistent codestream */
                 fprintf(stdout, "%d frames are being added to the MJ2 file\n", snum);
                 break;
             }

@@ -129,6 +129,7 @@ static int tga_readheader(FILE *fp, unsigned int *bits_per_pixel,
     if (fread(tga, TGA_HEADER_SIZE, 1, fp) != 1) {
         fprintf(stderr,
                 "\nError: fread return a number of element different from the expected.\n");
+        free(tga);
         return 0 ;
     }
     id_len = (unsigned char)tga[0];
@@ -561,7 +562,7 @@ typedef struct {
 typedef struct {
     DWORD biSize;         /* Size of the structure in bytes */
     DWORD biWidth;        /* Width of the image in pixels */
-    DWORD biHeight;       /* Heigth of the image in pixels */
+    DWORD biHeight;       /* Height of the image in pixels */
     WORD biPlanes;        /* 1 */
     WORD biBitCount;      /* Number of color bits by pixels */
     DWORD biCompression;      /* Type of encoding 0: none 1: RLE8 2: RLE4 */
@@ -1351,6 +1352,7 @@ opj_image_t* pgxtoimage(const char *filename, opj_cparameters_t *parameters)
                &endian2, signtmp, &prec, temp, &w, temp, &h) != 9) {
         fprintf(stderr,
                 "ERROR: Failed to read the right number of element from the fscanf() function!\n");
+        fclose(f);
         return NULL;
     }
 
@@ -1370,6 +1372,7 @@ opj_image_t* pgxtoimage(const char *filename, opj_cparameters_t *parameters)
         bigendian = 0;
     } else {
         fprintf(stderr, "Bad pgx header, please check input file\n");
+        fclose(f);
         return NULL;
     }
 
@@ -1523,6 +1526,7 @@ int imagetopgx(opj_image_t * image, const char *outfile)
                 res = fwrite(&byte, 1, 1, fdest);
                 if (res < 1) {
                     fprintf(stderr, "failed to write 1 byte for %s\n", name);
+                    fclose(fdest);
                     return 1;
                 }
             }

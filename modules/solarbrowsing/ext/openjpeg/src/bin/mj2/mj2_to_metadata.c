@@ -310,7 +310,7 @@ int main(int argc, char *argv[])
 
     /*
     configure the event callbacks (not required)
-    setting of each callback is optionnal
+    setting of each callback is optional
     */
     memset(&event_mgr, 0, sizeof(opj_event_mgr_t));
     event_mgr.error_handler = error_callback;

@@ -51,7 +51,7 @@ The functions in EVENT.C have for goal to send output messages (errors, warnings
 Write formatted data to a string and send the string to a user callback.
 @param cinfo Codec context info
 @param event_type Event type or callback to use to send the message
-@param fmt Format-control string (plus optionnal arguments)
+@param fmt Format-control string (plus optional arguments)
 @return Returns true if successful, returns false otherwise
 */
 bool opj_event_msg(opj_common_ptr cinfo, int event_type, const char *fmt, ...);

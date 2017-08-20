@@ -9,7 +9,6 @@ NR-RIC-subsampling_1.jp2-compare2base
 NR-RIC-subsampling_2.jp2-compare2base
 NR-RIC-zoo1.jp2-compare2base
 NR-RIC-zoo2.jp2-compare2base
-NR-ENC-Bretagne2.ppm-7-compare_dec-ref-out2base
 NR-DEC-_00042.j2k-2-decode-md5
 NR-DEC-buxI.j2k-9-decode-md5
 NR-DEC-CT_Phillips_JPEG2K_Decompr_Problem.j2k-13-decode-md5

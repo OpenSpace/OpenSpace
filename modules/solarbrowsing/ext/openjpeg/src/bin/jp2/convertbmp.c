@@ -56,7 +56,7 @@ typedef struct {
 typedef struct {
     OPJ_UINT32 biSize;             /* Size of the structure in bytes */
     OPJ_UINT32 biWidth;            /* Width of the image in pixels */
-    OPJ_UINT32 biHeight;           /* Heigth of the image in pixels */
+    OPJ_UINT32 biHeight;           /* Height of the image in pixels */
     OPJ_UINT16 biPlanes;           /* 1 */
     OPJ_UINT16 biBitCount;         /* Number of color bits by pixels */
     OPJ_UINT32 biCompression;      /* Type of encoding 0: none 1: RLE8 2: RLE4 */
@@ -392,6 +392,10 @@ static OPJ_BOOL bmp_read_info_header(FILE* IN, OPJ_BITMAPINFOHEADER* header)
 
     header->biBitCount  = (OPJ_UINT16)getc(IN);
     header->biBitCount |= (OPJ_UINT16)((OPJ_UINT32)getc(IN) << 8);
+    if (header->biBitCount == 0) {
+        fprintf(stderr, "Error, invalid biBitCount %d\n", 0);
+        return OPJ_FALSE;
+    }
 
     if (header->biSize >= 40U) {
         header->biCompression  = (OPJ_UINT32)getc(IN);
@@ -525,10 +529,19 @@ static OPJ_BOOL bmp_read_rle8_data(FILE* IN, OPJ_UINT8* pData,
     x = y = 0U;
     while (y < height) {
         int c = getc(IN);
+        if (c == EOF) {
+            return OPJ_FALSE;
+        }
 
         if (c) {
-            int j;
-            OPJ_UINT8 c1 = (OPJ_UINT8)getc(IN);
+            int j, c1_int;
+            OPJ_UINT8 c1;
+
+            c1_int = getc(IN);
+            if (c1_int == EOF) {
+                return OPJ_FALSE;
+            }
+            c1 = (OPJ_UINT8)c1_int;
 
             for (j = 0; (j < c) && (x < width) &&
                     ((OPJ_SIZE_T)pix < (OPJ_SIZE_T)beyond); j++, x++, pix++) {
@@ -536,6 +549,10 @@ static OPJ_BOOL bmp_read_rle8_data(FILE* IN, OPJ_UINT8* pData,
             }
         } else {
             c = getc(IN);
+            if (c == EOF) {
+                return OPJ_FALSE;
+            }
+
             if (c == 0x00) { /* EOL */
                 x = 0;
                 ++y;
@@ -544,19 +561,34 @@ static OPJ_BOOL bmp_read_rle8_data(FILE* IN, OPJ_UINT8* pData,
                 break;
             } else if (c == 0x02) { /* MOVE by dxdy */
                 c = getc(IN);
+                if (c == EOF) {
+                    return OPJ_FALSE;
+                }
                 x += (OPJ_UINT32)c;
                 c = getc(IN);
+                if (c == EOF) {
+                    return OPJ_FALSE;
+                }
                 y += (OPJ_UINT32)c;
                 pix = pData + y * stride + x;
             } else { /* 03 .. 255 */
                 int j;
                 for (j = 0; (j < c) && (x < width) &&
                         ((OPJ_SIZE_T)pix < (OPJ_SIZE_T)beyond); j++, x++, pix++) {
-                    OPJ_UINT8 c1 = (OPJ_UINT8)getc(IN);
+                    int c1_int;
+                    OPJ_UINT8 c1;
+                    c1_int = getc(IN);
+                    if (c1_int == EOF) {
+                        return OPJ_FALSE;
+                    }
+                    c1 = (OPJ_UINT8)c1_int;
                     *pix = c1;
                 }
                 if ((OPJ_UINT32)c & 1U) { /* skip padding byte */
-                    getc(IN);
+                    c = getc(IN);
+                    if (c == EOF) {
+                        return OPJ_FALSE;
+                    }
                 }
             }
         }
@@ -832,7 +864,8 @@ int imagetobmp(opj_image_t * image, const char *outfile)
     int adjustR, adjustG, adjustB;
 
     if (image->comps[0].prec < 8) {
-        fprintf(stderr, "Unsupported number of components: %d\n", image->comps[0].prec);
+        fprintf(stderr, "imagetobmp: Unsupported precision: %d\n",
+                image->comps[0].prec);
         return 1;
     }
     if (image->numcomps >= 3 && image->comps[0].dx == image->comps[1].dx
@@ -840,7 +873,9 @@ int imagetobmp(opj_image_t * image, const char *outfile)
             && image->comps[0].dy == image->comps[1].dy
             && image->comps[1].dy == image->comps[2].dy
             && image->comps[0].prec == image->comps[1].prec
-            && image->comps[1].prec == image->comps[2].prec) {
+            && image->comps[1].prec == image->comps[2].prec
+            && image->comps[0].sgnd == image->comps[1].sgnd
+            && image->comps[1].sgnd == image->comps[2].sgnd) {
 
         /* -->> -->> -->> -->>
         24 bits color
@@ -926,7 +961,9 @@ int imagetobmp(opj_image_t * image, const char *outfile)
 
             r = image->comps[0].data[w * h - ((i) / (w) + 1) * w + (i) % (w)];
             r += (image->comps[0].sgnd ? 1 << (image->comps[0].prec - 1) : 0);
-            r = ((r >> adjustR) + ((r >> (adjustR - 1)) % 2));
+            if (adjustR > 0) {
+                r = ((r >> adjustR) + ((r >> (adjustR - 1)) % 2));
+            }
             if (r > 255) {
                 r = 255;
             } else if (r < 0) {
@@ -936,7 +973,9 @@ int imagetobmp(opj_image_t * image, const char *outfile)
 
             g = image->comps[1].data[w * h - ((i) / (w) + 1) * w + (i) % (w)];
             g += (image->comps[1].sgnd ? 1 << (image->comps[1].prec - 1) : 0);
-            g = ((g >> adjustG) + ((g >> (adjustG - 1)) % 2));
+            if (adjustG > 0) {
+                g = ((g >> adjustG) + ((g >> (adjustG - 1)) % 2));
+            }
             if (g > 255) {
                 g = 255;
             } else if (g < 0) {
@@ -946,7 +985,9 @@ int imagetobmp(opj_image_t * image, const char *outfile)
 
             b = image->comps[2].data[w * h - ((i) / (w) + 1) * w + (i) % (w)];
             b += (image->comps[2].sgnd ? 1 << (image->comps[2].prec - 1) : 0);
-            b = ((b >> adjustB) + ((b >> (adjustB - 1)) % 2));
+            if (adjustB > 0) {
+                b = ((b >> adjustB) + ((b >> (adjustB - 1)) % 2));
+            }
             if (b > 255) {
                 b = 255;
             } else if (b < 0) {
@@ -973,6 +1014,10 @@ int imagetobmp(opj_image_t * image, const char *outfile)
         if (!fdest) {
             fprintf(stderr, "ERROR -> failed to open %s for writing\n", outfile);
             return 1;
+        }
+        if (image->numcomps > 1) {
+            fprintf(stderr, "imagetobmp: only first component of %d is used.\n",
+                    image->numcomps);
         }
         w = (int)image->comps[0].w;
         h = (int)image->comps[0].h;
@@ -1037,7 +1082,9 @@ int imagetobmp(opj_image_t * image, const char *outfile)
 
             r = image->comps[0].data[w * h - ((i) / (w) + 1) * w + (i) % (w)];
             r += (image->comps[0].sgnd ? 1 << (image->comps[0].prec - 1) : 0);
-            r = ((r >> adjustR) + ((r >> (adjustR - 1)) % 2));
+            if (adjustR > 0) {
+                r = ((r >> adjustR) + ((r >> (adjustR - 1)) % 2));
+            }
             if (r > 255) {
                 r = 255;
             } else if (r < 0) {

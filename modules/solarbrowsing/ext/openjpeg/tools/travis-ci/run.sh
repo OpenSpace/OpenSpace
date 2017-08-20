@@ -111,6 +111,17 @@ elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
 	else
 		echo "Compiler not supported: ${CC}"; exit 1
 	fi
+	if [ "${OPJ_CI_INSTRUCTION_SETS-:}" == "-mavx2" ]; then
+		AVX2_AVAIL=1
+		cat /proc/cpuinfo | grep avx2 >/dev/null || AVX2_AVAIL=0
+		if [[ "${AVX2_AVAIL}" == "1" ]]; then
+			echo "AVX2 available on CPU"
+		else
+			echo "AVX2 not available on CPU. Disabling tests"
+			cat /proc/cpuinfo  | grep flags | head -n 1
+			export OPJ_CI_SKIP_TESTS=1
+		fi
+        fi
 elif [ "${TRAVIS_OS_NAME}" == "windows" ]; then
 	OPJ_OS_NAME=windows
 	if which cl > /dev/null; then
@@ -129,6 +140,15 @@ elif [ "${TRAVIS_OS_NAME}" == "windows" ]; then
 			OPJ_CC_VERSION=vs2005
 		else
 			OPJ_CC_VERSION=vs????
+		fi
+	fi
+	if [ "${OPJ_CI_INSTRUCTION_SETS-:}" == "/arch:AVX2" ]; then
+		cl $PWD/tools/travis-ci/detect-avx2.c
+		if ./detect-avx2.exe; then
+			echo "AVX2 available on CPU"
+		else
+			echo "AVX2 not available on CPU. Disabling tests"
+			export OPJ_CI_SKIP_TESTS=1
 		fi
 	fi
 else
@@ -322,6 +342,12 @@ New/unknown test failure found!!!
 			OPJ_CI_RESULT=1
 		fi
 	fi
+fi
+
+if [ "${OPJ_CI_BUILD_FUZZERS:-}" == "1" ]; then
+    cd tests/fuzzers
+    make
+    cd ../..
 fi
 
 if [ "${OPJ_CI_PERF_TESTS:-}" == "1" ]; then

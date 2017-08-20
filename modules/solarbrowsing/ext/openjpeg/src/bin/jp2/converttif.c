@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #ifndef OPJ_HAVE_LIBTIFF
 # error OPJ_HAVE_LIBTIFF_NOT_DEFINED
@@ -50,6 +51,7 @@
 #include <tiffio.h>
 #include "openjpeg.h"
 #include "convert.h"
+#include "opj_inttypes.h"
 
 /* -->> -->> -->> -->>
 
@@ -564,20 +566,19 @@ static void tif_32sto16u(const OPJ_INT32* pSrc, OPJ_UINT16* pDst,
 
 int imagetotif(opj_image_t * image, const char *outfile)
 {
-    int width, height;
-    int bps, adjust, sgnd;
-    int tiPhoto;
     TIFF *tif;
     tdata_t buf;
-    tsize_t strip_size;
+    uint32 width, height;
+    uint16 bps, tiPhoto;
+    int adjust, sgnd;
+    int64_t strip_size, rowStride, TIFF_MAX;
     OPJ_UINT32 i, numcomps;
-    OPJ_SIZE_T rowStride;
     OPJ_INT32* buffer32s = NULL;
     OPJ_INT32 const* planes[4];
     convert_32s_PXCX cvtPxToCx = NULL;
     convert_32sXXx_C1R cvt32sToTif = NULL;
 
-    bps = (int)image->comps[0].prec;
+    bps = (uint16)image->comps[0].prec;
     planes[0] = image->comps[0].data;
 
     numcomps = image->numcomps;
@@ -686,33 +687,46 @@ int imagetotif(opj_image_t * image, const char *outfile)
         break;
     }
     sgnd = (int)image->comps[0].sgnd;
-    adjust = sgnd ? 1 << (image->comps[0].prec - 1) : 0;
-    width   = (int)image->comps[0].w;
-    height  = (int)image->comps[0].h;
+    adjust = sgnd ? (int)(1 << (image->comps[0].prec - 1)) : 0;
+    width   = (uint32)image->comps[0].w;
+    height  = (uint32)image->comps[0].h;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, height);
-    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, numcomps);
+    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, (uint16)numcomps);
     TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bps);
     TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
     TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, tiPhoto);
     TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
+    if (sizeof(tsize_t) == 4) {
+        TIFF_MAX = INT_MAX;
+    } else {
+        TIFF_MAX = UINT_MAX;
+    }
+    strip_size = (int64_t)TIFFStripSize(tif);
 
-    strip_size = TIFFStripSize(tif);
-    rowStride = ((OPJ_SIZE_T)width * numcomps * (OPJ_SIZE_T)bps + 7U) / 8U;
-    if (rowStride != (OPJ_SIZE_T)strip_size) {
+    if ((int64_t)width > (int64_t)(TIFF_MAX / numcomps) ||
+            (int64_t)(width * numcomps) > (int64_t)(TIFF_MAX / bps) ||
+            (int64_t)(width * numcomps) > (int64_t)(TIFF_MAX / (int64_t)sizeof(
+                        OPJ_INT32))) {
+        fprintf(stderr, "Buffer overflow\n");
+        TIFFClose(tif);
+        return 1;
+    }
+    rowStride = (int64_t)((width * numcomps * bps + 7U) / 8U);
+    if (rowStride != strip_size) {
         fprintf(stderr, "Invalid TIFF strip size\n");
         TIFFClose(tif);
         return 1;
     }
-    buf = _TIFFmalloc(strip_size);
+    buf = malloc((OPJ_SIZE_T)strip_size);
     if (buf == NULL) {
         TIFFClose(tif);
         return 1;
     }
-    buffer32s = (OPJ_INT32 *)malloc((OPJ_SIZE_T)width * numcomps * sizeof(
-                                        OPJ_INT32));
+    buffer32s = (OPJ_INT32 *)malloc((OPJ_SIZE_T)(width * numcomps * sizeof(
+                                        OPJ_INT32)));
     if (buffer32s == NULL) {
         _TIFFfree(buf);
         TIFFClose(tif);
@@ -722,7 +736,7 @@ int imagetotif(opj_image_t * image, const char *outfile)
     for (i = 0; i < image->comps[0].h; ++i) {
         cvtPxToCx(planes, buffer32s, (OPJ_SIZE_T)width, adjust);
         cvt32sToTif(buffer32s, (OPJ_BYTE *)buf, (OPJ_SIZE_T)width * numcomps);
-        (void)TIFFWriteEncodedStrip(tif, i, (void*)buf, strip_size);
+        (void)TIFFWriteEncodedStrip(tif, i, (void*)buf, (tsize_t)strip_size);
         planes[0] += width;
         planes[1] += width;
         planes[2] += width;
@@ -1235,20 +1249,18 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters)
     TIFF *tif;
     tdata_t buf;
     tstrip_t strip;
-    tsize_t strip_size;
+    int64_t strip_size, rowStride, TIFF_MAX;
     int j, currentPlane, numcomps = 0, w, h;
     OPJ_COLOR_SPACE color_space = OPJ_CLRSPC_UNKNOWN;
     opj_image_cmptparm_t cmptparm[4]; /* RGBA */
     opj_image_t *image = NULL;
-    int has_alpha = 0;
-    unsigned short tiBps, tiPhoto, tiSf, tiSpp, tiPC;
-    unsigned int tiWidth, tiHeight;
+    uint16 tiBps, tiPhoto, tiSf, tiSpp, tiPC;
+    uint32 tiWidth, tiHeight;
     OPJ_BOOL is_cinema = OPJ_IS_CINEMA(parameters->rsiz);
     convert_XXx32s_C1R cvtTifTo32s = NULL;
     convert_32s_CXPX cvtCxToPx = NULL;
     OPJ_INT32* buffer32s = NULL;
     OPJ_INT32* planes[4];
-    OPJ_SIZE_T rowStride;
 
     tif = TIFFOpen(filename, "r");
 
@@ -1269,20 +1281,33 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters)
     w = (int)tiWidth;
     h = (int)tiHeight;
 
-    if (tiBps > 16U) {
-        fprintf(stderr, "tiftoimage: Bits=%d, Only 1 to 16 bits implemented\n", tiBps);
-        fprintf(stderr, "\tAborting\n");
+    if (tiSpp == 0 || tiSpp > 4) { /* should be 1 ... 4 */
+        fprintf(stderr, "tiftoimage: Bad value for samples per pixel == %d.\n"
+                "\tAborting.\n", tiSpp);
+        TIFFClose(tif);
+        return NULL;
+    }
+    if (tiBps > 16U || tiBps == 0) {
+        fprintf(stderr, "tiftoimage: Bad values for Bits == %d.\n"
+                "\tMax. 16 Bits are allowed here.\n\tAborting.\n", tiBps);
         TIFFClose(tif);
         return NULL;
     }
     if (tiPhoto != PHOTOMETRIC_MINISBLACK && tiPhoto != PHOTOMETRIC_RGB) {
         fprintf(stderr,
-                "tiftoimage: Bad color format %d.\n\tOnly RGB(A) and GRAY(A) has been implemented\n",
+                "tiftoimage: Bad color format %d.\n\tOnly RGB(A) and GRAY(A) has been implemented\n\tAborting.\n",
                 (int) tiPhoto);
-        fprintf(stderr, "\tAborting\n");
         TIFFClose(tif);
         return NULL;
     }
+    if (tiWidth == 0 || tiHeight == 0) {
+        fprintf(stderr, "tiftoimage: Bad values for width(%u) "
+                "and/or height(%u)\n\tAborting.\n", tiWidth, tiHeight);
+        TIFFClose(tif);
+        return NULL;
+    }
+    w = (int)tiWidth;
+    h = (int)tiHeight;
 
     switch (tiBps) {
     case 1:
@@ -1331,34 +1356,6 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters)
         break;
     }
 
-    {/* From: tiff-4.0.x/libtiff/tif_getimage.c : */
-        uint16* sampleinfo;
-        uint16 extrasamples;
-
-        TIFFGetFieldDefaulted(tif, TIFFTAG_EXTRASAMPLES,
-                              &extrasamples, &sampleinfo);
-
-        if (extrasamples >= 1) {
-            switch (sampleinfo[0]) {
-            case EXTRASAMPLE_UNSPECIFIED:
-                /* Workaround for some images without correct info about alpha channel
-                 */
-                if (tiSpp > 3) {
-                    has_alpha = 1;
-                }
-                break;
-
-            case EXTRASAMPLE_ASSOCALPHA: /* data pre-multiplied */
-            case EXTRASAMPLE_UNASSALPHA: /* data not pre-multiplied */
-                has_alpha = 1;
-                break;
-            }
-        } else /* extrasamples == 0 */
-            if (tiSpp == 4 || tiSpp == 2) {
-                has_alpha = 1;
-            }
-    }
-
     /* initialize image components */
     memset(&cmptparm[0], 0, 4 * sizeof(opj_image_cmptparm_t));
 
@@ -1372,11 +1369,10 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters)
         is_cinema = 0U;
     }
 
+    numcomps = tiSpp;
     if (tiPhoto == PHOTOMETRIC_RGB) { /* RGB(A) */
-        numcomps = 3 + has_alpha;
         color_space = OPJ_CLRSPC_SRGB;
     } else if (tiPhoto == PHOTOMETRIC_MINISBLACK) { /* GRAY(A) */
-        numcomps = 1 + has_alpha;
         color_space = OPJ_CLRSPC_GRAY;
     }
 
@@ -1405,24 +1401,54 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters)
     image->y0 = (OPJ_UINT32)parameters->image_offset_y0;
     image->x1 = !image->x0 ? (OPJ_UINT32)(w - 1) * (OPJ_UINT32)subsampling_dx + 1 :
                 image->x0 + (OPJ_UINT32)(w - 1) * (OPJ_UINT32)subsampling_dx + 1;
+    if (image->x1 <= image->x0) {
+        fprintf(stderr, "tiftoimage: Bad value for image->x1(%d) vs. "
+                "image->x0(%d)\n\tAborting.\n", image->x1, image->x0);
+        TIFFClose(tif);
+        opj_image_destroy(image);
+        return NULL;
+    }
     image->y1 = !image->y0 ? (OPJ_UINT32)(h - 1) * (OPJ_UINT32)subsampling_dy + 1 :
                 image->y0 + (OPJ_UINT32)(h - 1) * (OPJ_UINT32)subsampling_dy + 1;
+    if (image->y1 <= image->y0) {
+        fprintf(stderr, "tiftoimage: Bad value for image->y1(%d) vs. "
+                "image->y0(%d)\n\tAborting.\n", image->y1, image->y0);
+        TIFFClose(tif);
+        opj_image_destroy(image);
+        return NULL;
+    }
 
     for (j = 0; j < numcomps; j++) {
         planes[j] = image->comps[j].data;
     }
     image->comps[numcomps - 1].alpha = (OPJ_UINT16)(1 - (numcomps & 1));
 
-    strip_size = TIFFStripSize(tif);
+    strip_size = (int64_t)TIFFStripSize(tif);
 
-    buf = _TIFFmalloc(strip_size);
+    buf = malloc((OPJ_SIZE_T)strip_size);
     if (buf == NULL) {
         TIFFClose(tif);
         opj_image_destroy(image);
         return NULL;
     }
-    rowStride = ((OPJ_SIZE_T)w * tiSpp * tiBps + 7U) / 8U;
-    buffer32s = (OPJ_INT32 *)malloc((OPJ_SIZE_T)w * tiSpp * sizeof(OPJ_INT32));
+    if (sizeof(tsize_t) == 4) {
+        TIFF_MAX = INT_MAX;
+    } else {
+        TIFF_MAX = UINT_MAX;
+    }
+    if ((int64_t)tiWidth > (int64_t)(TIFF_MAX / tiSpp) ||
+            (int64_t)(tiWidth * tiSpp) > (int64_t)(TIFF_MAX / tiBps) ||
+            (int64_t)(tiWidth * tiSpp) > (int64_t)(TIFF_MAX / (int64_t)sizeof(OPJ_INT32))) {
+        fprintf(stderr, "Buffer overflow\n");
+        _TIFFfree(buf);
+        TIFFClose(tif);
+        opj_image_destroy(image);
+        return NULL;
+    }
+
+    rowStride = (int64_t)((tiWidth * tiSpp * tiBps + 7U) / 8U);
+    buffer32s = (OPJ_INT32 *)malloc((OPJ_SIZE_T)(tiWidth * tiSpp * sizeof(
+                                        OPJ_INT32)));
     if (buffer32s == NULL) {
         _TIFFfree(buf);
         TIFFClose(tif);
@@ -1438,9 +1464,19 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters)
         /* Read the Image components */
         for (; (h > 0) && (strip < TIFFNumberOfStrips(tif)); strip++) {
             const OPJ_UINT8 *dat8;
-            OPJ_SIZE_T ssize;
+            int64_t ssize;
 
-            ssize = (OPJ_SIZE_T)TIFFReadEncodedStrip(tif, strip, buf, strip_size);
+            ssize = (int64_t)TIFFReadEncodedStrip(tif, strip, buf, (tsize_t)strip_size);
+
+            if (ssize < 1 || ssize > strip_size) {
+                fprintf(stderr, "tiftoimage: Bad value for ssize(%" PRId64 ") "
+                        "vs. strip_size(%" PRId64 ").\n\tAborting.\n", ssize, strip_size);
+                _TIFFfree(buf);
+                _TIFFfree(buffer32s);
+                TIFFClose(tif);
+                opj_image_destroy(image);
+                return NULL;
+            }
             dat8 = (const OPJ_UINT8*)buf;
 
             while (ssize >= rowStride) {

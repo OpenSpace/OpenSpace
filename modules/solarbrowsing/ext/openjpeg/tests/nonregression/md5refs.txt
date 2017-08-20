@@ -300,3 +300,7 @@ f3081c8e9e9a175f223382a7443b480f  issue559-eci-091-CIELab.jp2_2.pgx
 3bf91c974abc17e520c6a5efa883a58a  issue653-zero-unknownbox.jp2.png
 8d7a866d29d5c68dc540b0f0011959a5  issue726.png
 3bf91c974abc17e520c6a5efa883a58a  issue818.png
+3c7ff2e4bdae849167be36589f32bcd5  issue979.j2k_0.pgx
+f004b48eafb2e52529cc9c7b6a3ff5d2  issue979.j2k_1.pgx
+3127bd0a591d113c3c2428c8d2c14ec8  issue979.j2k_2.pgx
+dacaf60e4c430916a8c2a9ebec32e71c  issue979.j2k_3.pgx

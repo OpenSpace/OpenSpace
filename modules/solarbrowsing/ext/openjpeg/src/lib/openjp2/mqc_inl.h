@@ -36,47 +36,137 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __MQC_INL_H
-#define __MQC_INL_H
+#ifndef OPJ_MQC_INL_H
+#define OPJ_MQC_INL_H
+
+/* For internal use of opj_mqc_decode_macro() */
+#define opj_mqc_mpsexchange_macro(d, curctx, a) \
+{ \
+    if (a < (*curctx)->qeval) { \
+        d = !((*curctx)->mps); \
+        *curctx = (*curctx)->nlps; \
+    } else { \
+        d = (*curctx)->mps; \
+        *curctx = (*curctx)->nmps; \
+    } \
+}
+
+/* For internal use of opj_mqc_decode_macro() */
+#define opj_mqc_lpsexchange_macro(d, curctx, a) \
+{ \
+    if (a < (*curctx)->qeval) { \
+        a = (*curctx)->qeval; \
+        d = (*curctx)->mps; \
+        *curctx = (*curctx)->nmps; \
+    } else { \
+        a = (*curctx)->qeval; \
+        d = !((*curctx)->mps); \
+        *curctx = (*curctx)->nlps; \
+    } \
+}
+
+
 /**
-FIXME DOC
+Decode a symbol using raw-decoder. Cfr p.506 TAUBMAN
 @param mqc MQC handle
-@return
+@return Returns the decoded symbol (0 or 1)
 */
-static INLINE OPJ_INT32 opj_mqc_mpsexchange(opj_mqc_t *const mqc)
+static INLINE OPJ_UINT32 opj_mqc_raw_decode(opj_mqc_t *mqc)
 {
-    OPJ_INT32 d;
-    if (mqc->a < (*mqc->curctx)->qeval) {
-        d = (OPJ_INT32)(1 - (*mqc->curctx)->mps);
-        *mqc->curctx = (*mqc->curctx)->nlps;
-    } else {
-        d = (OPJ_INT32)(*mqc->curctx)->mps;
-        *mqc->curctx = (*mqc->curctx)->nmps;
+    OPJ_UINT32 d;
+    if (mqc->ct == 0) {
+        /* Given opj_mqc_raw_init_dec() we know that at some point we will */
+        /* have a 0xFF 0xFF artificial marker */
+        if (mqc->c == 0xff) {
+            if (*mqc->bp  > 0x8f) {
+                mqc->c = 0xff;
+                mqc->ct = 8;
+            } else {
+                mqc->c = *mqc->bp;
+                mqc->bp ++;
+                mqc->ct = 7;
+            }
+        } else {
+            mqc->c = *mqc->bp;
+            mqc->bp ++;
+            mqc->ct = 8;
+        }
     }
+    mqc->ct--;
+    d = ((OPJ_UINT32)mqc->c >> mqc->ct) & 0x01U;
 
     return d;
 }
 
-/**
-FIXME DOC
-@param mqc MQC handle
-@return
-*/
-static INLINE OPJ_INT32 opj_mqc_lpsexchange(opj_mqc_t *const mqc)
-{
-    OPJ_INT32 d;
-    if (mqc->a < (*mqc->curctx)->qeval) {
-        mqc->a = (*mqc->curctx)->qeval;
-        d = (OPJ_INT32)(*mqc->curctx)->mps;
-        *mqc->curctx = (*mqc->curctx)->nmps;
-    } else {
-        mqc->a = (*mqc->curctx)->qeval;
-        d = (OPJ_INT32)(1 - (*mqc->curctx)->mps);
-        *mqc->curctx = (*mqc->curctx)->nlps;
-    }
 
-    return d;
+#define opj_mqc_bytein_macro(mqc, c, ct) \
+{ \
+        OPJ_UINT32 l_c;  \
+        /* Given opj_mqc_init_dec() we know that at some point we will */ \
+        /* have a 0xFF 0xFF artificial marker */ \
+        l_c = *(mqc->bp + 1); \
+        if (*mqc->bp == 0xff) { \
+            if (l_c > 0x8f) { \
+                c += 0xff00; \
+                ct = 8; \
+                mqc->end_of_byte_stream_counter ++; \
+            } else { \
+                mqc->bp++; \
+                c += l_c << 9; \
+                ct = 7; \
+            } \
+        } else { \
+            mqc->bp++; \
+            c += l_c << 8; \
+            ct = 8; \
+        } \
 }
+
+/* For internal use of opj_mqc_decode_macro() */
+#define opj_mqc_renormd_macro(mqc, a, c, ct) \
+{ \
+    do { \
+        if (ct == 0) { \
+            opj_mqc_bytein_macro(mqc, c, ct); \
+        } \
+        a <<= 1; \
+        c <<= 1; \
+        ct--; \
+    } while (a < 0x8000); \
+}
+
+#define opj_mqc_decode_macro(d, mqc, curctx, a, c, ct) \
+{ \
+    /* Implements ISO 15444-1 C.3.2 Decoding a decision (DECODE) */ \
+    /* Note: alternate "J.2 - Decoding an MPS or an LPS in the */ \
+    /* software-conventions decoder" has been tried, but does not bring any */ \
+    /* improvement. See https://github.com/uclouvain/openjpeg/issues/921 */ \
+    a -= (*curctx)->qeval;  \
+    if ((c >> 16) < (*curctx)->qeval) {  \
+        opj_mqc_lpsexchange_macro(d, curctx, a);  \
+        opj_mqc_renormd_macro(mqc, a, c, ct);  \
+    } else {  \
+        c -= (*curctx)->qeval << 16;  \
+        if ((a & 0x8000) == 0) { \
+            opj_mqc_mpsexchange_macro(d, curctx, a); \
+            opj_mqc_renormd_macro(mqc, a, c, ct); \
+        } else { \
+            d = (*curctx)->mps; \
+        } \
+    } \
+}
+
+#define DOWNLOAD_MQC_VARIABLES(mqc, curctx, c, a, ct) \
+        register const opj_mqc_state_t **curctx = mqc->curctx; \
+        register OPJ_UINT32 c = mqc->c; \
+        register OPJ_UINT32 a = mqc->a; \
+        register OPJ_UINT32 ct = mqc->ct
+
+#define UPLOAD_MQC_VARIABLES(mqc, curctx, c, a, ct) \
+        mqc->curctx = curctx; \
+        mqc->c = c; \
+        mqc->a = a; \
+        mqc->ct = ct;
 
 /**
 Input a byte
@@ -84,80 +174,23 @@ Input a byte
 */
 static INLINE void opj_mqc_bytein(opj_mqc_t *const mqc)
 {
-    /* Implements ISO 15444-1 C.3.4 Compressed image data input (BYTEIN) */
-    /* Note: alternate "J.3 - Inserting a new byte into the C register in the */
-    /* software-conventions decoder" has been tried, but does not bring any */
-    /* improvement. See https://github.com/uclouvain/openjpeg/issues/921 */
-    if (mqc->bp != mqc->end) {
-        OPJ_UINT32 c;
-        if (mqc->bp + 1 != mqc->end) {
-            c = *(mqc->bp + 1);
-        } else {
-            c = 0xff;
-        }
-        if (*mqc->bp == 0xff) {
-            if (c > 0x8f) {
-                mqc->c += 0xff00;
-                mqc->ct = 8;
-            } else {
-                mqc->bp++;
-                mqc->c += c << 9;
-                mqc->ct = 7;
-            }
-        } else {
-            mqc->bp++;
-            mqc->c += c << 8;
-            mqc->ct = 8;
-        }
-    } else {
-        mqc->c += 0xff00;
-        mqc->ct = 8;
-    }
+    opj_mqc_bytein_macro(mqc, mqc->c, mqc->ct);
 }
 
 /**
 Renormalize mqc->a and mqc->c while decoding
 @param mqc MQC handle
 */
-static INLINE void opj_mqc_renormd(opj_mqc_t *const mqc)
-{
-    do {
-        if (mqc->ct == 0) {
-            opj_mqc_bytein(mqc);
-        }
-        mqc->a <<= 1;
-        mqc->c <<= 1;
-        mqc->ct--;
-    } while (mqc->a < 0x8000);
-}
+#define opj_mqc_renormd(mqc) \
+    opj_mqc_renormd_macro(mqc, mqc->a, mqc->c, mqc->ct)
 
 /**
 Decode a symbol
+@param d OPJ_UINT32 value where to store the decoded symbol
 @param mqc MQC handle
-@return Returns the decoded symbol (0 or 1)
+@return Returns the decoded symbol (0 or 1) in d
 */
-static INLINE OPJ_INT32 opj_mqc_decode(opj_mqc_t *const mqc)
-{
-    /* Implements ISO 15444-1 C.3.2 Decoding a decision (DECODE) */
-    /* Note: alternate "J.2 - Decoding an MPS or an LPS in the */
-    /* software-conventions decoder" has been tried, but does not bring any */
-    /* improvement. See https://github.com/uclouvain/openjpeg/issues/921 */
-    OPJ_INT32 d;
-    mqc->a -= (*mqc->curctx)->qeval;
-    if ((mqc->c >> 16) < (*mqc->curctx)->qeval) {
-        d = opj_mqc_lpsexchange(mqc);
-        opj_mqc_renormd(mqc);
-    } else {
-        mqc->c -= (*mqc->curctx)->qeval << 16;
-        if ((mqc->a & 0x8000) == 0) {
-            d = opj_mqc_mpsexchange(mqc);
-            opj_mqc_renormd(mqc);
-        } else {
-            d = (OPJ_INT32)(*mqc->curctx)->mps;
-        }
-    }
+#define opj_mqc_decode(d, mqc) \
+    opj_mqc_decode_macro(d, mqc, mqc->curctx, mqc->a, mqc->c, mqc->ct)
 
-    return d;
-}
-
-#endif /* __MQC_INL_H */
+#endif /* OPJ_MQC_INL_H */

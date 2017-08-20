@@ -41,6 +41,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "openjpeg.h"
 #include "convert.h"
@@ -579,13 +580,10 @@ struct tga_header {
 };
 #endif /* INFORMATION_ONLY */
 
-static unsigned short get_ushort(const unsigned char *data)
+/* Returns a ushort from a little-endian serialized value */
+static unsigned short get_tga_ushort(const unsigned char *data)
 {
-    unsigned short val = *(const unsigned short *)data;
-#ifdef OPJ_BIG_ENDIAN
-    val = ((val & 0xffU) << 8) | (val >> 8);
-#endif
-    return val;
+    return (unsigned short)(data[0] | (data[1] << 8));
 }
 
 #define TGA_HEADER_SIZE 18
@@ -612,17 +610,17 @@ static int tga_readheader(FILE *fp, unsigned int *bits_per_pixel,
     id_len = tga[0];
     /*cmap_type = tga[1];*/
     image_type = tga[2];
-    /*cmap_index = get_ushort(&tga[3]);*/
-    cmap_len = get_ushort(&tga[5]);
+    /*cmap_index = get_tga_ushort(&tga[3]);*/
+    cmap_len = get_tga_ushort(&tga[5]);
     cmap_entry_size = tga[7];
 
 
 #if 0
-    x_origin = get_ushort(&tga[8]);
-    y_origin = get_ushort(&tga[10]);
+    x_origin = get_tga_ushort(&tga[8]);
+    y_origin = get_tga_ushort(&tga[10]);
 #endif
-    image_w = get_ushort(&tga[12]);
-    image_h = get_ushort(&tga[14]);
+    image_w = get_tga_ushort(&tga[12]);
+    image_h = get_tga_ushort(&tga[14]);
     pixel_depth = tga[16];
     image_desc  = tga[17];
 
@@ -816,6 +814,25 @@ opj_image_t* tgatoimage(const char *filename, opj_cparameters_t *parameters)
         color_space = OPJ_CLRSPC_SRGB;
     }
 
+    /* If the declared file size is > 10 MB, check that the file is big */
+    /* enough to avoid excessive memory allocations */
+    if (image_height != 0 &&
+            image_width > 10000000U / image_height / (OPJ_UINT32)numcomps) {
+        char ch;
+        OPJ_UINT64 expected_file_size =
+            (OPJ_UINT64)image_width * image_height * (OPJ_UINT32)numcomps;
+        long curpos = ftell(f);
+        if (expected_file_size > (OPJ_UINT64)INT_MAX) {
+            expected_file_size = (OPJ_UINT64)INT_MAX;
+        }
+        fseek(f, (long)expected_file_size - 1, SEEK_SET);
+        if (fread(&ch, 1, 1, f) != 1) {
+            fclose(f);
+            return NULL;
+        }
+        fseek(f, curpos, SEEK_SET);
+    }
+
     subsampling_dx = parameters->subsampling_dx;
     subsampling_dy = parameters->subsampling_dy;
 
@@ -940,7 +957,7 @@ int imagetotga(opj_image_t * image, const char *outfile)
     int width, height, bpp, x, y;
     OPJ_BOOL write_alpha;
     unsigned int i;
-    int adjustR, adjustG, adjustB, fails;
+    int adjustR, adjustG = 0, adjustB = 0, fails;
     unsigned int alpha_channel;
     float r, g, b, a;
     unsigned char value;
@@ -958,10 +975,11 @@ int imagetotga(opj_image_t * image, const char *outfile)
     for (i = 0; i < image->numcomps - 1; i++) {
         if ((image->comps[0].dx != image->comps[i + 1].dx)
                 || (image->comps[0].dy != image->comps[i + 1].dy)
-                || (image->comps[0].prec != image->comps[i + 1].prec)) {
+                || (image->comps[0].prec != image->comps[i + 1].prec)
+                || (image->comps[0].sgnd != image->comps[i + 1].sgnd)) {
             fclose(fdest);
             fprintf(stderr,
-                    "Unable to create a tga file with such J2K image charateristics.");
+                    "Unable to create a tga file with such J2K image charateristics.\n");
             return 1;
         }
     }
@@ -984,8 +1002,10 @@ int imagetotga(opj_image_t * image, const char *outfile)
     scale = 255.0f / (float)((1 << image->comps[0].prec) - 1);
 
     adjustR = (image->comps[0].sgnd ? 1 << (image->comps[0].prec - 1) : 0);
-    adjustG = (image->comps[1].sgnd ? 1 << (image->comps[1].prec - 1) : 0);
-    adjustB = (image->comps[2].sgnd ? 1 << (image->comps[2].prec - 1) : 0);
+    if (image->numcomps >= 3) {
+        adjustG = (image->comps[1].sgnd ? 1 << (image->comps[1].prec - 1) : 0);
+        adjustB = (image->comps[2].sgnd ? 1 << (image->comps[2].prec - 1) : 0);
+    }
 
     for (y = 0; y < height; y++) {
         unsigned int index = (unsigned int)(y * width);
@@ -1143,6 +1163,7 @@ opj_image_t* pgxtoimage(const char *filename, opj_cparameters_t *parameters)
     opj_image_cmptparm_t cmptparm;  /* maximum of 1 component  */
     opj_image_t * image = NULL;
     int adjustS, ushift, dshift, force8;
+    OPJ_UINT64 expected_file_size;
 
     char endian1, endian2, sign;
     char signtmp[32];
@@ -1165,7 +1186,7 @@ opj_image_t* pgxtoimage(const char *filename, opj_cparameters_t *parameters)
     }
 
     fseek(f, 0, SEEK_SET);
-    if (fscanf(f, "PG%[ \t]%c%c%[ \t+-]%d%[ \t]%d%[ \t]%d", temp, &endian1,
+    if (fscanf(f, "PG%31[ \t]%c%c%31[ \t+-]%d%31[ \t]%d%31[ \t]%d", temp, &endian1,
                &endian2, signtmp, &prec, temp, &w, temp, &h) != 9) {
         fclose(f);
         fprintf(stderr,
@@ -1191,6 +1212,29 @@ opj_image_t* pgxtoimage(const char *filename, opj_cparameters_t *parameters)
         fclose(f);
         fprintf(stderr, "Bad pgx header, please check input file\n");
         return NULL;
+    }
+
+    if (w < 1 || h < 1 || prec < 1 || prec > 31) {
+        fclose(f);
+        fprintf(stderr, "Bad pgx header, please check input file\n");
+        return NULL;
+    }
+
+    expected_file_size =
+        (OPJ_UINT64)w * (OPJ_UINT64)h * (prec > 16 ? 4 : prec > 8 ? 2 : 1);
+    if (expected_file_size > 10000000U) {
+        char ch;
+        long curpos = ftell(f);
+        if (expected_file_size > (OPJ_UINT64)INT_MAX) {
+            expected_file_size = (OPJ_UINT64)INT_MAX;
+        }
+        fseek(f, (long)expected_file_size - 1, SEEK_SET);
+        if (fread(&ch, 1, 1, f) != 1) {
+            fprintf(stderr, "File too short\n");
+            fclose(f);
+            return NULL;
+        }
+        fseek(f, curpos, SEEK_SET);
     }
 
     /* initialize image component */
@@ -1731,6 +1775,15 @@ opj_image_t* pnmtoimage(const char *filename, opj_cparameters_t *parameters)
         return NULL;
     }
 
+    /* This limitation could be removed by making sure to use size_t below */
+    if (header_info.height != 0 &&
+            header_info.width > INT_MAX / header_info.height) {
+        fprintf(stderr, "pnmtoimage:Image %dx%d too big!\n",
+                header_info.width, header_info.height);
+        fclose(fp);
+        return NULL;
+    }
+
     format = header_info.format;
 
     switch (format) {
@@ -1890,6 +1943,22 @@ opj_image_t* pnmtoimage(const char *filename, opj_cparameters_t *parameters)
     return image;
 }/* pnmtoimage() */
 
+static int are_comps_similar(opj_image_t * image)
+{
+    unsigned int i;
+    for (i = 1; i < image->numcomps; i++) {
+        if (image->comps[0].dx != image->comps[i].dx ||
+                image->comps[0].dy != image->comps[i].dy ||
+                (i <= 2 &&
+                 (image->comps[0].prec != image->comps[i].prec ||
+                  image->comps[0].sgnd != image->comps[i].sgnd))) {
+            return OPJ_FALSE;
+        }
+    }
+    return OPJ_TRUE;
+}
+
+
 int imagetopnm(opj_image_t * image, const char *outfile, int force_split)
 {
     int *red, *green, *blue, *alpha;
@@ -1925,16 +1994,8 @@ int imagetopnm(opj_image_t * image, const char *outfile, int force_split)
         ncomp = 1;
     }
 
-    if ((force_split == 0) &&
-            (ncomp == 2 /* GRAYA */
-             || (ncomp > 2 /* RGB, RGBA */
-                 && image->comps[0].dx == image->comps[1].dx
-                 && image->comps[1].dx == image->comps[2].dx
-                 && image->comps[0].dy == image->comps[1].dy
-                 && image->comps[1].dy == image->comps[2].dy
-                 && image->comps[0].prec == image->comps[1].prec
-                 && image->comps[1].prec == image->comps[2].prec
-                ))) {
+    if ((force_split == 0) && ncomp >= 2 &&
+            are_comps_similar(image)) {
         fdest = fopen(outfile, "wb");
 
         if (!fdest) {
@@ -2325,7 +2386,7 @@ static int imagetoraw_common(opj_image_t * image, const char *outfile,
 {
     FILE *rawFile = NULL;
     size_t res;
-    unsigned int compno;
+    unsigned int compno, numcomps;
     int w, h, fails;
     int line, row, curr, mask;
     int *ptr;
@@ -2334,6 +2395,33 @@ static int imagetoraw_common(opj_image_t * image, const char *outfile,
 
     if ((image->numcomps * image->x1 * image->y1) == 0) {
         fprintf(stderr, "\nError: invalid raw image parameters\n");
+        return 1;
+    }
+
+    numcomps = image->numcomps;
+
+    if (numcomps > 4) {
+        numcomps = 4;
+    }
+
+    for (compno = 1; compno < numcomps; ++compno) {
+        if (image->comps[0].dx != image->comps[compno].dx) {
+            break;
+        }
+        if (image->comps[0].dy != image->comps[compno].dy) {
+            break;
+        }
+        if (image->comps[0].prec != image->comps[compno].prec) {
+            break;
+        }
+        if (image->comps[0].sgnd != image->comps[compno].sgnd) {
+            break;
+        }
+    }
+    if (compno != numcomps) {
+        fprintf(stderr,
+                "imagetoraw_common: All components shall have the same subsampling, same bit depth, same sign.\n");
+        fprintf(stderr, "\tAborting\n");
         return 1;
     }
 
@@ -2448,7 +2536,7 @@ static int imagetoraw_common(opj_image_t * image, const char *outfile,
                 }
             }
         } else if (image->comps[compno].prec <= 32) {
-            fprintf(stderr, "More than 16 bits per component no handled yet\n");
+            fprintf(stderr, "More than 16 bits per component not handled yet\n");
             goto fin;
         } else {
             fprintf(stderr, "Error: invalid precision: %d\n", image->comps[compno].prec);

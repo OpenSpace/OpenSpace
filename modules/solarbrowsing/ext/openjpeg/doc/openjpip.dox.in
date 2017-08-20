@@ -30,7 +30,7 @@
 
 /*! \page openjpippage OpenJPIP v@OPENJPEG_VERSION@ Documentation
  *
- * \section intro Introduction
+ * \section Introduction
  * This manual documents the low-level OpenJPIP C API.\n
  * OpenJPIP software is an implementation of JPEG 2000 Part9: Interactivity tools, APIs and protocols (JPIP).\n
  * ( For more info about JPIP, check the website: http://www.jpeg.org/jpeg2000/j2kpart9.html)\n
@@ -42,7 +42,7 @@
  * - opj_jpip_transcode.c  To Convert JPT/JPP-stream to JP2 or J2K
  * - opj_jpip_test.c       To test index code format of a JP2 file
  *
- * \section license License
+ * \section License
  * This software is released under the BSD license, anybody can use or modify the library, even for commercial applications.\n
  * The only restriction is to retain the copyright in the sources or the binaries documentation.\n
  * Neither the author, nor the university accept any responsibility for any kind of error or data loss which may occur during usage.
@@ -88,7 +88,7 @@
  * Before connecting to the JPIP server, every JPIP client checks local cache data of the requesting image with the image decoding server.
  * If its cache exists, the image decoding server provides ChannelID (CID), which identifies the image and its cache model on the JPIP server, and the whole system can continue the session using the CID.
  *
- *  \image html jpip_protocol.png "Message Sequence Chart of OpenJPIP impementation"
+ *  \image html jpip_protocol.png "Message Sequence Chart of OpenJPIP implementation"
  *
  * \author Kaori Hagihara UCL/SST/ICTM/ELEN
  */

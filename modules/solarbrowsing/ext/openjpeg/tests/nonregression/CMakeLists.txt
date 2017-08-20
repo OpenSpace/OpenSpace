@@ -82,6 +82,7 @@ set(BLACKLIST_JPEG2000
     issue476.jp2 #kdu_jp2info ok
     issue475.jp2 #kdu_jp2info ok
     issue413.jp2 #kdu_jp2info ok
+    issue823.jp2 #kdu_jp2info ok
    )
 
 file(GLOB_RECURSE OPJ_DATA_NR_LIST

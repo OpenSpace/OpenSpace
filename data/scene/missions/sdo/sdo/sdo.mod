@@ -9,7 +9,7 @@ return {
                 Frame = "J2000",
                 Body = "-136395",
                 Observer = "EARTH",
-                Kernels = "${OPENSPACE_DATA}/spice/SDO_EPHEM_2010123_2017104_new.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/SDO_EPHEM_2010123_2017104_new.bsp"
             },
             Color = { 1.0, 1.0, 1.0 },
             Period = 0.997319,
@@ -26,7 +26,7 @@ return {
                 Frame = "J2000",
                 Body = "-136395",
                 Observer = "EARTH",
-                Kernels = "${OPENSPACE_DATA}/spice/SDO_EPHEM_2010123_2017104_new.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/SDO_EPHEM_2010123_2017104_new.bsp"
             },
         }
     },
@@ -60,10 +60,10 @@ return {
         Parent = "SDOCoordinatesystem",
         Renderable = {
             Type = "RenderablePlane",
-            Size =  10^9.8,
+            Size =  10^10.3,
             Origin = "Center",
             Billboard = true,
-            Texture = "${OPENSPACE_DATA}/scene/missions/sdo/textures/marker_inv.png",
+            Texture = solarImageryDataRootPath .. "/markers/marker_sdo.png",
             BlendMode = "Additive"
         },
         Transform = {
@@ -82,7 +82,7 @@ return {
             --Enabled = true,
             StartResolutionLevel = 1,
             Type = "RenderableSolarImagery",
-            StartInstrument = "AIA_AIA_304",
+            StartInstrument = "AIA_AIA_193",
             --Target = "Sun",
             -- Temp
             --MagicPlaneFactor = 0.7675,
@@ -91,7 +91,7 @@ return {
             --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
 
             --RootPath = "/media/noven/BE23-1097/solarbrowsingdata/event/sdo/imagedata/2012/07/12/",
-            RootPath = solarImageryDataRootPath .. "/sdo/",
+            RootPath = solarImageryDataRootPath .. "/event/sdo/",
            -- RootPath = "/Volumes/Untitled/solarflare/SDO/2012/07/12",
             -- Optional filter on instruments, otherwise get all
             -- Instruments = {

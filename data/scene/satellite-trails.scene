@@ -96,7 +96,7 @@ function postInitialization()
 end
 
 -- Define locals
-solarImageryDataRootPath = "/media/noven/BE23-1097/solarbrowsingdata/event/"
+solarImageryDataRootPath = "C:/Users/novalain/Documents/localsolardata"
 
 return {
     ScenePath = ".",
@@ -123,8 +123,8 @@ return {
         "milkyway-eso",
         --"constellationbounds",
         "missions/sdo",
-        "missions/stereo-a",
-        "missions/stereo-b",
-        "missions/soho"
+      --  "missions/stereo-a",
+       -- "missions/stereo-b",
+       -- "missions/soho"
     }
 }

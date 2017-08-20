@@ -1618,9 +1618,12 @@ static int parse_cmdline_encoder(int argc, char **argv,
         return 1;
     }               /* mod fixed_quality */
 
+
     /* if no rate entered, lossless by default */
+    /* Note: post v2.2.0, this is no longer necessary, but for released */
+    /* versions at the time of writing, this is needed to avoid crashes */
     if (parameters->tcp_numlayers == 0) {
-        parameters->tcp_rates[0] = 0;   /* MOD antonin : losslessbug */
+        parameters->tcp_rates[0] = 0;
         parameters->tcp_numlayers++;
         parameters->cp_disto_alloc = 1;
     }
@@ -1694,7 +1697,8 @@ OPJ_FLOAT64 opj_clock(void)
     /* cout << "freq = " << ((double) freq.QuadPart) << endl; */
     /* t is the high resolution performance counter (see MSDN) */
     QueryPerformanceCounter(& t) ;
-    return freq.QuadPart ? (t.QuadPart / (OPJ_FLOAT64) freq.QuadPart) : 0 ;
+    return freq.QuadPart ? ((OPJ_FLOAT64) t.QuadPart / (OPJ_FLOAT64) freq.QuadPart)
+           : 0 ;
 #else
     /* Unix or Linux: use resource usage */
     struct rusage t;

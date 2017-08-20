@@ -54,7 +54,7 @@ set(PACKAGE_VERSION
 #   2.1   |  7
 #   2.1.1 |  7
 #   2.1.2 |  7
-#   2.2.0 |  8
+#   2.2.0 |  7
 # above is the recommendation by the OPJ team. If you really need to override this default,
 # you can specify your own OPENJPEG_SOVERSION at cmake configuration time:
 # cmake -DOPENJPEG_SOVERSION:STRING=42 /path/to/openjpeg
@@ -253,6 +253,7 @@ if(BUILD_JPIP_SERVER)
 endif()
 add_subdirectory(src/lib)
 option(BUILD_LUTS_GENERATOR "Build utility to generate t1_luts.h" OFF)
+option(BUILD_BENCH_DWT "Build bench_dwt utility (development benchmark)" OFF)
 
 #-----------------------------------------------------------------------------
 # Build Applications

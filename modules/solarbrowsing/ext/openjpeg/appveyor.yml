@@ -1,4 +1,4 @@
-version: 2.1.1.{build}
+version: 2.2.0.{build}
 branches:
   except:
   - coverity_scan
@@ -6,6 +6,9 @@ skip_tags: false
 clone_depth: 50
 environment:
   matrix:
+  - OPJ_CI_ARCH: x64
+    OPJ_CI_VSCOMNTOOLS: $(VS140COMNTOOLS)
+    OPJ_CI_INSTRUCTION_SETS: "/arch:AVX2"
   - OPJ_CI_ARCH: x86
     OPJ_CI_VSCOMNTOOLS: $(VS140COMNTOOLS)
     OPJ_CI_INCLUDE_IF_DEPLOY: 1

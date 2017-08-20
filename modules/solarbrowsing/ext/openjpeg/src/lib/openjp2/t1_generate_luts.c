@@ -12,6 +12,7 @@
  * Copyright (c) 2003-2014, Antonin Descampe
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
  * Copyright (c) 2007, Callum Lerwick <seg@haxxed.com>
+ * Copyright (c) 2012, Carl Hetherington
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,23 +39,20 @@
 
 #include "opj_includes.h"
 
-static int t1_init_ctxno_zc(unsigned int f, unsigned int orient)
+static int t1_init_ctxno_zc(OPJ_UINT32 f, OPJ_UINT32 orient)
 {
     int h, v, d, n, t, hv;
-    h = ((f & T1_SIG_W) != 0) + ((f & T1_SIG_E) != 0);
-    v = ((f & T1_SIG_N) != 0) + ((f & T1_SIG_S) != 0);
-    d = ((f & T1_SIG_NW) != 0) + ((f & T1_SIG_NE) != 0) + ((
-                f & T1_SIG_SE) != 0) + ((f & T1_SIG_SW) != 0);
     n = 0;
-    t = 0;
-    hv = 0;
+    h = ((f & T1_SIGMA_3) != 0) + ((f & T1_SIGMA_5) != 0);
+    v = ((f & T1_SIGMA_1) != 0) + ((f & T1_SIGMA_7) != 0);
+    d = ((f & T1_SIGMA_0) != 0) + ((f & T1_SIGMA_2) != 0) + ((
+                f & T1_SIGMA_8) != 0) + ((f & T1_SIGMA_6) != 0);
 
     switch (orient) {
     case 2:
         t = h;
         h = v;
         v = t;
-    /* fall through */
     case 0:
     case 1:
         if (!h) {
@@ -118,24 +116,24 @@ static int t1_init_ctxno_zc(unsigned int f, unsigned int orient)
     return (T1_CTXNO_ZC + n);
 }
 
-static int t1_init_ctxno_sc(unsigned int f)
+static int t1_init_ctxno_sc(OPJ_UINT32 f)
 {
     int hc, vc, n;
     n = 0;
 
-    hc = opj_int_min(((f & (T1_SIG_E | T1_SGN_E)) ==
-                      T1_SIG_E) + ((f & (T1_SIG_W | T1_SGN_W)) == T1_SIG_W),
-                     1) - opj_int_min(((f & (T1_SIG_E | T1_SGN_E)) ==
-                                       (T1_SIG_E | T1_SGN_E)) +
-                                      ((f & (T1_SIG_W | T1_SGN_W)) ==
-                                       (T1_SIG_W | T1_SGN_W)), 1);
+    hc = opj_int_min(((f & (T1_LUT_SIG_E | T1_LUT_SGN_E)) ==
+                      T1_LUT_SIG_E) + ((f & (T1_LUT_SIG_W | T1_LUT_SGN_W)) == T1_LUT_SIG_W),
+                     1) - opj_int_min(((f & (T1_LUT_SIG_E | T1_LUT_SGN_E)) ==
+                                       (T1_LUT_SIG_E | T1_LUT_SGN_E)) +
+                                      ((f & (T1_LUT_SIG_W | T1_LUT_SGN_W)) ==
+                                       (T1_LUT_SIG_W | T1_LUT_SGN_W)), 1);
 
-    vc = opj_int_min(((f & (T1_SIG_N | T1_SGN_N)) ==
-                      T1_SIG_N) + ((f & (T1_SIG_S | T1_SGN_S)) == T1_SIG_S),
-                     1) - opj_int_min(((f & (T1_SIG_N | T1_SGN_N)) ==
-                                       (T1_SIG_N | T1_SGN_N)) +
-                                      ((f & (T1_SIG_S | T1_SGN_S)) ==
-                                       (T1_SIG_S | T1_SGN_S)), 1);
+    vc = opj_int_min(((f & (T1_LUT_SIG_N | T1_LUT_SGN_N)) ==
+                      T1_LUT_SIG_N) + ((f & (T1_LUT_SIG_S | T1_LUT_SGN_S)) == T1_LUT_SIG_S),
+                     1) - opj_int_min(((f & (T1_LUT_SIG_N | T1_LUT_SGN_N)) ==
+                                       (T1_LUT_SIG_N | T1_LUT_SGN_N)) +
+                                      ((f & (T1_LUT_SIG_S | T1_LUT_SGN_S)) ==
+                                       (T1_LUT_SIG_S | T1_LUT_SGN_S)), 1);
 
     if (hc < 0) {
         hc = -hc;
@@ -162,23 +160,23 @@ static int t1_init_ctxno_sc(unsigned int f)
     return (T1_CTXNO_SC + n);
 }
 
-static int t1_init_spb(unsigned int f)
+static int t1_init_spb(OPJ_UINT32 f)
 {
     int hc, vc, n;
 
-    hc = opj_int_min(((f & (T1_SIG_E | T1_SGN_E)) ==
-                      T1_SIG_E) + ((f & (T1_SIG_W | T1_SGN_W)) == T1_SIG_W),
-                     1) - opj_int_min(((f & (T1_SIG_E | T1_SGN_E)) ==
-                                       (T1_SIG_E | T1_SGN_E)) +
-                                      ((f & (T1_SIG_W | T1_SGN_W)) ==
-                                       (T1_SIG_W | T1_SGN_W)), 1);
+    hc = opj_int_min(((f & (T1_LUT_SIG_E | T1_LUT_SGN_E)) ==
+                      T1_LUT_SIG_E) + ((f & (T1_LUT_SIG_W | T1_LUT_SGN_W)) == T1_LUT_SIG_W),
+                     1) - opj_int_min(((f & (T1_LUT_SIG_E | T1_LUT_SGN_E)) ==
+                                       (T1_LUT_SIG_E | T1_LUT_SGN_E)) +
+                                      ((f & (T1_LUT_SIG_W | T1_LUT_SGN_W)) ==
+                                       (T1_LUT_SIG_W | T1_LUT_SGN_W)), 1);
 
-    vc = opj_int_min(((f & (T1_SIG_N | T1_SGN_N)) ==
-                      T1_SIG_N) + ((f & (T1_SIG_S | T1_SGN_S)) == T1_SIG_S),
-                     1) - opj_int_min(((f & (T1_SIG_N | T1_SGN_N)) ==
-                                       (T1_SIG_N | T1_SGN_N)) +
-                                      ((f & (T1_SIG_S | T1_SGN_S)) ==
-                                       (T1_SIG_S | T1_SGN_S)), 1);
+    vc = opj_int_min(((f & (T1_LUT_SIG_N | T1_LUT_SGN_N)) ==
+                      T1_LUT_SIG_N) + ((f & (T1_LUT_SIG_S | T1_LUT_SGN_S)) == T1_LUT_SIG_S),
+                     1) - opj_int_min(((f & (T1_LUT_SIG_N | T1_LUT_SGN_N)) ==
+                                       (T1_LUT_SIG_N | T1_LUT_SGN_N)) +
+                                      ((f & (T1_LUT_SIG_S | T1_LUT_SGN_S)) ==
+                                       (T1_LUT_SIG_S | T1_LUT_SGN_S)), 1);
 
     if (!hc && !vc) {
         n = 0;
@@ -194,9 +192,11 @@ static void dump_array16(int array[], int size)
     int i;
     --size;
     for (i = 0; i < size; ++i) {
-        printf("0x%04x, ", array[i]);
+        printf("0x%04x,", array[i]);
         if (!((i + 1) & 0x7)) {
-            printf("\n  ");
+            printf("\n    ");
+        } else {
+            printf(" ");
         }
     }
     printf("0x%04x\n};\n\n", array[size]);
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
     unsigned int i, j;
     double u, v, t;
 
-    int lut_ctxno_zc[1024];
+    int lut_ctxno_zc[2048];
     int lut_nmsedec_sig[1 << T1_NMSEDEC_BITS];
     int lut_nmsedec_sig0[1 << T1_NMSEDEC_BITS];
     int lut_nmsedec_ref[1 << T1_NMSEDEC_BITS];
@@ -218,46 +218,52 @@ int main(int argc, char **argv)
     printf("/* This file was automatically generated by t1_generate_luts.c */\n\n");
 
     /* lut_ctxno_zc */
-    for (j = 0U; j < 4U; ++j) {
-        for (i = 0U; i < 256U; ++i) {
-            unsigned int orient = j;
-            if (orient == 2U) {
-                orient = 1U;
-            } else if (orient == 1U) {
-                orient = 2U;
+    for (j = 0; j < 4; ++j) {
+        for (i = 0; i < 512; ++i) {
+            OPJ_UINT32 orient = j;
+            if (orient == 2) {
+                orient = 1;
+            } else if (orient == 1) {
+                orient = 2;
             }
-            lut_ctxno_zc[(orient << 8) | i] = t1_init_ctxno_zc(i, j);
+            lut_ctxno_zc[(orient << 9) | i] = t1_init_ctxno_zc(i, j);
         }
     }
 
-    printf("static const OPJ_BYTE lut_ctxno_zc[1024] = {\n  ");
-    for (i = 0U; i < 1023U; ++i) {
-        printf("%i, ", lut_ctxno_zc[i]);
-        if (!((i + 1U) & 0x1fU)) {
-            printf("\n  ");
+    printf("static const OPJ_BYTE lut_ctxno_zc[2048] = {\n    ");
+    for (i = 0; i < 2047; ++i) {
+        printf("%i,", lut_ctxno_zc[i]);
+        if (!((i + 1) & 0x1f)) {
+            printf("\n    ");
+        } else {
+            printf(" ");
         }
     }
-    printf("%i\n};\n\n", lut_ctxno_zc[1023]);
+    printf("%i\n};\n\n", lut_ctxno_zc[2047]);
 
     /* lut_ctxno_sc */
-    printf("static const OPJ_BYTE lut_ctxno_sc[256] = {\n  ");
-    for (i = 0U; i < 255U; ++i) {
-        printf("0x%x, ", t1_init_ctxno_sc(i << 4));
-        if (!((i + 1U) & 0xfU)) {
-            printf("\n  ");
+    printf("static const OPJ_BYTE lut_ctxno_sc[256] = {\n    ");
+    for (i = 0; i < 255; ++i) {
+        printf("0x%x,", t1_init_ctxno_sc(i));
+        if (!((i + 1) & 0xf)) {
+            printf("\n    ");
+        } else {
+            printf(" ");
         }
     }
-    printf("0x%x\n};\n\n", t1_init_ctxno_sc(255U << 4));
+    printf("0x%x\n};\n\n", t1_init_ctxno_sc(255));
 
     /* lut_spb */
-    printf("static const OPJ_BYTE lut_spb[256] = {\n  ");
-    for (i = 0U; i < 255U; ++i) {
-        printf("%i, ", t1_init_spb(i << 4));
-        if (!((i + 1U) & 0x1fU)) {
-            printf("\n  ");
+    printf("static const OPJ_BYTE lut_spb[256] = {\n    ");
+    for (i = 0; i < 255; ++i) {
+        printf("%i,", t1_init_spb(i));
+        if (!((i + 1) & 0x1f)) {
+            printf("\n    ");
+        } else {
+            printf(" ");
         }
     }
-    printf("%i\n};\n\n", t1_init_spb(255U << 4));
+    printf("%i\n};\n\n", t1_init_spb(255));
 
     /* FIXME FIXME FIXME */
     /* fprintf(stdout,"nmsedec luts:\n"); */
@@ -289,16 +295,16 @@ int main(int argc, char **argv)
                                 T1_NMSEDEC_FRACBITS) * 8192.0));
     }
 
-    printf("static const OPJ_INT16 lut_nmsedec_sig[1U << T1_NMSEDEC_BITS] = {\n  ");
+    printf("static const OPJ_INT16 lut_nmsedec_sig[1U << T1_NMSEDEC_BITS] = {\n    ");
     dump_array16(lut_nmsedec_sig, 1U << T1_NMSEDEC_BITS);
 
-    printf("static const OPJ_INT16 lut_nmsedec_sig0[1U << T1_NMSEDEC_BITS] = {\n  ");
+    printf("static const OPJ_INT16 lut_nmsedec_sig0[1U << T1_NMSEDEC_BITS] = {\n    ");
     dump_array16(lut_nmsedec_sig0, 1U << T1_NMSEDEC_BITS);
 
-    printf("static const OPJ_INT16 lut_nmsedec_ref[1U << T1_NMSEDEC_BITS] = {\n  ");
+    printf("static const OPJ_INT16 lut_nmsedec_ref[1U << T1_NMSEDEC_BITS] = {\n    ");
     dump_array16(lut_nmsedec_ref, 1U << T1_NMSEDEC_BITS);
 
-    printf("static const OPJ_INT16 lut_nmsedec_ref0[1U << T1_NMSEDEC_BITS] = {\n  ");
+    printf("static const OPJ_INT16 lut_nmsedec_ref0[1U << T1_NMSEDEC_BITS] = {\n    ");
     dump_array16(lut_nmsedec_ref0, 1U << T1_NMSEDEC_BITS);
 
     return 0;

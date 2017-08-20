@@ -372,3 +372,18 @@ void OPJ_CALLCONV opj_destroy_cstr_info(opj_codestream_info_t *cstr_info)
         opj_free(cstr_info->numdecompos);
     }
 }
+
+void* OPJ_CALLCONV opj_image_data_alloc(size_t size)
+{
+    /* NOTE: this defers from libopenjp2 where we use opj_aligned_malloc */
+    void* ret = opj_malloc(size);
+    /* printf("opj_image_data_alloc %p\n", ret); */
+    return ret;
+}
+
+void OPJ_CALLCONV opj_image_data_free(void* ptr)
+{
+    /* NOTE: this defers from libopenjp2 where we use opj_aligned_free */
+    /* printf("opj_image_data_free %p\n", ptr); */
+    opj_free(ptr);
+}

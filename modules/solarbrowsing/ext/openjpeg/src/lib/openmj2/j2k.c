@@ -2370,7 +2370,7 @@ void j2k_setup_encoder(opj_j2k_t *j2k, opj_cparameters_t *parameters,
 #endif /* USE_JPWL */
 
 
-    /* initialize the mutiple tiles */
+    /* initialize the multiple tiles */
     /* ---------------------------- */
     cp->tcps = (opj_tcp_t*) opj_calloc(cp->tw * cp->th, sizeof(opj_tcp_t));
 

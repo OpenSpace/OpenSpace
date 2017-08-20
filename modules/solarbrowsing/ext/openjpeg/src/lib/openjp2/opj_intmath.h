@@ -34,8 +34,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __INT_H
-#define __INT_H
+#ifndef OPJ_INTMATH_H
+#define OPJ_INTMATH_H
 /**
 @file opj_intmath.h
 @brief Implementation of operations on integers (INT)
@@ -129,7 +129,7 @@ Divide an integer and round upwards
 static INLINE OPJ_INT32 opj_int_ceildiv(OPJ_INT32 a, OPJ_INT32 b)
 {
     assert(b);
-    return (a + b - 1) / b;
+    return (OPJ_INT32)(((OPJ_INT64)a + b - 1) / b);
 }
 
 /**
@@ -240,4 +240,4 @@ static INLINE OPJ_INT32 opj_int_fix_mul_t1(OPJ_INT32 a, OPJ_INT32 b)
 
 /*@}*/
 
-#endif
+#endif /* OPJ_INTMATH_H */

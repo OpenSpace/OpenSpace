@@ -8,7 +8,7 @@ set(BASELINE_NR ${OPJ_DATA_ROOT}/baseline/nonregression)
 set(INPUT_CONF ${OPJ_DATA_ROOT}/input/conformance)
 
 
-# List of components by file (normaly p0_13.j2k have 257 components but for this
+# List of components by file (normally p0_13.j2k have 257 components but for this
 #set of test we consider only 4)
 set( CP0_nbC_list "not_used;1;1;1;3;4;4;3;3;1;3;1;1;4;3;1;1")
 set( CP1_nbC_list "not_used;1;3;4;1;3;3;2")
@@ -617,7 +617,7 @@ endforeach()
 
 #--------------------------------------------------------------------------
 # Tests about dump of profile 0 file
-# try to dump image and codestream informations into a file
+# try to dump image and codestream information into a file
 # non regression comparison this file to the baseline
 
 foreach(numFileP0 RANGE 1 16)
@@ -651,7 +651,7 @@ endforeach()
 
 #--------------------------------------------------------------------------
 # Tests about dump of profile 1 file
-# try to dump image and codestream informations into a file
+# try to dump image and codestream information into a file
 # non regression comparison this file to the baseline
 
 foreach(numFileP1 RANGE 1 7)
@@ -680,7 +680,7 @@ endforeach()
 
 #--------------------------------------------------------------------------
 # Tests about dump of JP2 file
-# try to dump image and codestream informations into a file
+# try to dump image and codestream information into a file
 # non regression comparison this file to the baseline
 
 foreach(numFileJP2 RANGE 1 9)

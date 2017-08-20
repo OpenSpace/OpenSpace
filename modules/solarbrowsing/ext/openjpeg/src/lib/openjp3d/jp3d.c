@@ -862,7 +862,7 @@ static void j3d_read_com(opj_j3d_t *j3d)
 
     /*opj_event_msg(j3d->cinfo, EVT_INFO, "TRF %D ENCOD %d\n",j3d->cp->transform_format,j3d->cp->encoding_format);*/
 
-    cio_skip(cio, len - 4);  /*posible comments*/
+    cio_skip(cio, len - 4);  /*possible comments*/
 }
 
 static void j3d_write_cox(opj_j3d_t *j3d, int compno)

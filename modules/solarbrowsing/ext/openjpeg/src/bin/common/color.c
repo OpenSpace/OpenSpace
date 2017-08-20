@@ -122,9 +122,9 @@ static void sycc444_to_rgb(opj_image_t *img)
     cb = img->comps[1].data;
     cr = img->comps[2].data;
 
-    d0 = r = (int*)malloc(sizeof(int) * max);
-    d1 = g = (int*)malloc(sizeof(int) * max);
-    d2 = b = (int*)malloc(sizeof(int) * max);
+    d0 = r = (int*)opj_image_data_alloc(sizeof(int) * max);
+    d1 = g = (int*)opj_image_data_alloc(sizeof(int) * max);
+    d2 = b = (int*)opj_image_data_alloc(sizeof(int) * max);
 
     if (r == NULL || g == NULL || b == NULL) {
         goto fails;
@@ -139,19 +139,19 @@ static void sycc444_to_rgb(opj_image_t *img)
         ++g;
         ++b;
     }
-    free(img->comps[0].data);
+    opj_image_data_free(img->comps[0].data);
     img->comps[0].data = d0;
-    free(img->comps[1].data);
+    opj_image_data_free(img->comps[1].data);
     img->comps[1].data = d1;
-    free(img->comps[2].data);
+    opj_image_data_free(img->comps[2].data);
     img->comps[2].data = d2;
     img->color_space = OPJ_CLRSPC_SRGB;
     return;
 
 fails:
-    free(r);
-    free(g);
-    free(b);
+    opj_image_data_free(r);
+    opj_image_data_free(g);
+    opj_image_data_free(b);
 }/* sycc444_to_rgb() */
 
 static void sycc422_to_rgb(opj_image_t *img)
@@ -174,9 +174,9 @@ static void sycc422_to_rgb(opj_image_t *img)
     cb = img->comps[1].data;
     cr = img->comps[2].data;
 
-    d0 = r = (int*)malloc(sizeof(int) * max);
-    d1 = g = (int*)malloc(sizeof(int) * max);
-    d2 = b = (int*)malloc(sizeof(int) * max);
+    d0 = r = (int*)opj_image_data_alloc(sizeof(int) * max);
+    d1 = g = (int*)opj_image_data_alloc(sizeof(int) * max);
+    d2 = b = (int*)opj_image_data_alloc(sizeof(int) * max);
 
     if (r == NULL || g == NULL || b == NULL) {
         goto fails;
@@ -222,11 +222,11 @@ static void sycc422_to_rgb(opj_image_t *img)
         }
     }
 
-    free(img->comps[0].data);
+    opj_image_data_free(img->comps[0].data);
     img->comps[0].data = d0;
-    free(img->comps[1].data);
+    opj_image_data_free(img->comps[1].data);
     img->comps[1].data = d1;
-    free(img->comps[2].data);
+    opj_image_data_free(img->comps[2].data);
     img->comps[2].data = d2;
 
     img->comps[1].w = img->comps[2].w = img->comps[0].w;
@@ -237,9 +237,9 @@ static void sycc422_to_rgb(opj_image_t *img)
     return;
 
 fails:
-    free(r);
-    free(g);
-    free(b);
+    opj_image_data_free(r);
+    opj_image_data_free(g);
+    opj_image_data_free(b);
 }/* sycc422_to_rgb() */
 
 static void sycc420_to_rgb(opj_image_t *img)
@@ -262,9 +262,9 @@ static void sycc420_to_rgb(opj_image_t *img)
     cb = img->comps[1].data;
     cr = img->comps[2].data;
 
-    d0 = r = (int*)malloc(sizeof(int) * max);
-    d1 = g = (int*)malloc(sizeof(int) * max);
-    d2 = b = (int*)malloc(sizeof(int) * max);
+    d0 = r = (int*)opj_image_data_alloc(sizeof(int) * max);
+    d1 = g = (int*)opj_image_data_alloc(sizeof(int) * max);
+    d2 = b = (int*)opj_image_data_alloc(sizeof(int) * max);
 
     if (r == NULL || g == NULL || b == NULL) {
         goto fails;
@@ -380,11 +380,11 @@ static void sycc420_to_rgb(opj_image_t *img)
         }
     }
 
-    free(img->comps[0].data);
+    opj_image_data_free(img->comps[0].data);
     img->comps[0].data = d0;
-    free(img->comps[1].data);
+    opj_image_data_free(img->comps[1].data);
     img->comps[1].data = d1;
-    free(img->comps[2].data);
+    opj_image_data_free(img->comps[2].data);
     img->comps[2].data = d2;
 
     img->comps[1].w = img->comps[2].w = img->comps[0].w;
@@ -395,9 +395,9 @@ static void sycc420_to_rgb(opj_image_t *img)
     return;
 
 fails:
-    free(r);
-    free(g);
-    free(b);
+    opj_image_data_free(r);
+    opj_image_data_free(g);
+    opj_image_data_free(b);
 }/* sycc420_to_rgb() */
 
 void color_sycc_to_rgb(opj_image_t *img)
@@ -486,6 +486,34 @@ void color_apply_icc_profile(opj_image_t *image)
     prec = (int)image->comps[0].prec;
 
     if (out_space == cmsSigRgbData) { /* enumCS 16 */
+        unsigned int i, nr_comp = image->numcomps;
+
+        if (nr_comp > 4) {
+            nr_comp = 4;
+        }
+        for (i = 1; i < nr_comp; ++i) { /* AFL test */
+            if (image->comps[0].dx != image->comps[i].dx) {
+                break;
+            }
+
+            if (image->comps[0].dy != image->comps[i].dy) {
+                break;
+            }
+
+            if (image->comps[0].prec != image->comps[i].prec) {
+                break;
+            }
+
+            if (image->comps[0].sgnd != image->comps[i].sgnd) {
+                break;
+            }
+
+        }
+        if (i != nr_comp) {
+            cmsCloseProfile(in_prof);
+            return;
+        }
+
         if (prec <= 8) {
             in_type = TYPE_RGB_8;
             out_type = TYPE_RGB_8;
@@ -574,8 +602,8 @@ void color_apply_icc_profile(opj_image_t *image)
 
             max = max_w * max_h;
             nr_samples = (size_t)(max * 3U * sizeof(unsigned char));
-            in = inbuf = (unsigned char*)malloc(nr_samples);
-            out = outbuf = (unsigned char*)malloc(nr_samples);
+            in = inbuf = (unsigned char*)opj_image_data_alloc(nr_samples);
+            out = outbuf = (unsigned char*)opj_image_data_alloc(nr_samples);
 
             if (inbuf == NULL || outbuf == NULL) {
                 goto fails0;
@@ -605,15 +633,15 @@ void color_apply_icc_profile(opj_image_t *image)
             ok = 1;
 
 fails0:
-            free(inbuf);
-            free(outbuf);
+            opj_image_data_free(inbuf);
+            opj_image_data_free(outbuf);
         } else { /* prec > 8 */
             unsigned short *inbuf, *outbuf, *in, *out;
 
             max = max_w * max_h;
             nr_samples = (size_t)(max * 3U * sizeof(unsigned short));
-            in = inbuf = (unsigned short*)malloc(nr_samples);
-            out = outbuf = (unsigned short*)malloc(nr_samples);
+            in = inbuf = (unsigned short*)opj_image_data_alloc(nr_samples);
+            out = outbuf = (unsigned short*)opj_image_data_alloc(nr_samples);
 
             if (inbuf == NULL || outbuf == NULL) {
                 goto fails1;
@@ -643,8 +671,8 @@ fails0:
             ok = 1;
 
 fails1:
-            free(inbuf);
-            free(outbuf);
+            opj_image_data_free(inbuf);
+            opj_image_data_free(outbuf);
         }
     } else { /* image->numcomps <= 2 : GRAY, GRAYA */
         if (prec <= 8) {
@@ -653,10 +681,10 @@ fails1:
 
             max = max_w * max_h;
             nr_samples = (size_t)(max * 3 * sizeof(unsigned char));
-            in = inbuf = (unsigned char*)malloc(nr_samples);
-            out = outbuf = (unsigned char*)malloc(nr_samples);
-            g = (int*)calloc((size_t)max, sizeof(int));
-            b = (int*)calloc((size_t)max, sizeof(int));
+            in = inbuf = (unsigned char*)opj_image_data_alloc(nr_samples);
+            out = outbuf = (unsigned char*)opj_image_data_alloc(nr_samples);
+            g = (int*)opj_image_data_alloc((size_t)max * sizeof(int));
+            b = (int*)opj_image_data_alloc((size_t)max * sizeof(int));
 
             if (inbuf == NULL || outbuf == NULL || g == NULL || b == NULL) {
                 goto fails2;
@@ -703,20 +731,20 @@ fails1:
             ok = 1;
 
 fails2:
-            free(inbuf);
-            free(outbuf);
-            free(g);
-            free(b);
+            opj_image_data_free(inbuf);
+            opj_image_data_free(outbuf);
+            opj_image_data_free(g);
+            opj_image_data_free(b);
         } else { /* prec > 8 */
             unsigned short *in, *inbuf, *out, *outbuf;
             opj_image_comp_t *new_comps;
 
             max = max_w * max_h;
             nr_samples = (size_t)(max * 3U * sizeof(unsigned short));
-            in = inbuf = (unsigned short*)malloc(nr_samples);
-            out = outbuf = (unsigned short*)malloc(nr_samples);
-            g = (int*)calloc((size_t)max, sizeof(int));
-            b = (int*)calloc((size_t)max, sizeof(int));
+            in = inbuf = (unsigned short*)opj_image_data_alloc(nr_samples);
+            out = outbuf = (unsigned short*)opj_image_data_alloc(nr_samples);
+            g = (int*)opj_image_data_alloc((size_t)max * sizeof(int));
+            b = (int*)opj_image_data_alloc((size_t)max * sizeof(int));
 
             if (inbuf == NULL || outbuf == NULL || g == NULL || b == NULL) {
                 goto fails3;
@@ -763,10 +791,10 @@ fails2:
             ok = 1;
 
 fails3:
-            free(inbuf);
-            free(outbuf);
-            free(g);
-            free(b);
+            opj_image_data_free(inbuf);
+            opj_image_data_free(outbuf);
+            opj_image_data_free(g);
+            opj_image_data_free(b);
         }
     }/* if(image->numcomps > 2) */
 
@@ -781,6 +809,18 @@ fails3:
     }
 }/* color_apply_icc_profile() */
 
+static int are_comps_same_dimensions(opj_image_t * image)
+{
+    unsigned int i;
+    for (i = 1; i < image->numcomps; i++) {
+        if (image->comps[0].dx != image->comps[i].dx ||
+                image->comps[0].dy != image->comps[i].dy) {
+            return OPJ_FALSE;
+        }
+    }
+    return OPJ_TRUE;
+}
+
 void color_cielab_to_rgb(opj_image_t *image)
 {
     int *row;
@@ -792,6 +832,12 @@ void color_cielab_to_rgb(opj_image_t *image)
     if (numcomps != 3) {
         fprintf(stderr, "%s:%d:\n\tnumcomps %d not handled. Quitting.\n",
                 __FILE__, __LINE__, numcomps);
+        return;
+    }
+    if (!are_comps_same_dimensions(image)) {
+        fprintf(stderr,
+                "%s:%d:\n\tcomponents are not all of the same dimension. Quitting.\n",
+                __FILE__, __LINE__);
         return;
     }
 
@@ -863,9 +909,9 @@ void color_cielab_to_rgb(opj_image_t *image)
 
         max = image->comps[0].w * image->comps[0].h;
 
-        red = dst0 = (int*)malloc(max * sizeof(int));
-        green = dst1 = (int*)malloc(max * sizeof(int));
-        blue = dst2 = (int*)malloc(max * sizeof(int));
+        red = dst0 = (int*)opj_image_data_alloc(max * sizeof(int));
+        green = dst1 = (int*)opj_image_data_alloc(max * sizeof(int));
+        blue = dst2 = (int*)opj_image_data_alloc(max * sizeof(int));
 
         if (red == NULL || green == NULL || blue == NULL) {
             goto fails;
@@ -899,11 +945,11 @@ void color_cielab_to_rgb(opj_image_t *image)
         cmsCloseProfile(in);
         cmsCloseProfile(out);
 #endif
-        free(src0);
+        opj_image_data_free(src0);
         image->comps[0].data = dst0;
-        free(src1);
+        opj_image_data_free(src1);
         image->comps[1].data = dst1;
-        free(src2);
+        opj_image_data_free(src2);
         image->comps[2].data = dst2;
 
         image->color_space = new_space;
@@ -920,13 +966,13 @@ fails:
         cmsCloseProfile(out);
 #endif
         if (red) {
-            free(red);
+            opj_image_data_free(red);
         }
         if (green) {
-            free(green);
+            opj_image_data_free(green);
         }
         if (blue) {
-            free(blue);
+            opj_image_data_free(blue);
         }
         return;
     }
@@ -986,7 +1032,7 @@ void color_cmyk_to_rgb(opj_image_t *image)
         image->comps[2].data[i] = (int)(255.0F * Y * K); /* B */
     }
 
-    free(image->comps[3].data);
+    opj_image_data_free(image->comps[3].data);
     image->comps[3].data = NULL;
     image->comps[0].prec = 8;
     image->comps[1].prec = 8;

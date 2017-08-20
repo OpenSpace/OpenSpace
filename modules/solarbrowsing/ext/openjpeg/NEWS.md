@@ -2,6 +2,28 @@
 
 More details in the [Changelog](https://github.com/uclouvain/openjpeg/blob/master/CHANGELOG.md)
 
+## OpenJPEG 2.2.0
+
+No API/ABI break compared to v2.1.2 but additional symbols for multithreading support (hence the MINOR version bump).
+
+### Codebase improvements
+
+* Memory consumption reduction at decoding side [\#968](https://github.com/uclouvain/openjpeg/pull/968)
+* Multi-threading support at decoding side [\#786](https://github.com/uclouvain/openjpeg/pull/786)
+* Tier-1 speed optimizations (encoder and decoder) [\#945](https://github.com/uclouvain/openjpeg/pull/945)
+* Tier-1 decoder further optimization [\#783](https://github.com/uclouvain/openjpeg/pull/783)
+* Inverse 5x3 DWT speed optimization: single-pass lifting and SSE2/AVX2 implementation [\#957](https://github.com/uclouvain/openjpeg/pull/957)
+* Fixed a bug that prevented OpenJPEG to compress losslessly in some situations [\#949](https://github.com/uclouvain/openjpeg/pull/949)
+* Fixed BYPASS/LAZY, RESTART/TERMALL and PTERM mode switches
+* Many other bug fixes (including security fixes)
+
+### Maintenance improvements
+
+* Benchmarking scripts to automatically compare the speed of latest OpenJPEG build with latest release and/or Kakadu binaries [\#917](https://github.com/uclouvain/openjpeg/pull/917)
+* CPU and RAM usage profiling scripts [\#918](https://github.com/uclouvain/openjpeg/pull/918)
+* Codebase reformatting (with astyle) and scripts to automatically check that new commits comply with formatting guidelines [\#919](https://github.com/uclouvain/openjpeg/pull/919)
+* Register OpenJPEG at Google OSS Fuzz initiative, so as to automatically have OpenJPEG tested against Google fuzzer [\#965](https://github.com/uclouvain/openjpeg/issues/965)
+
 ## OpenJPEG 2.1.2
 
 * Bug fixes (including security fixes)

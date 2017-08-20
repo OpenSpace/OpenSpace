@@ -189,7 +189,7 @@ int xml_write_moov(FILE *file, FILE *xmlout, opj_mj2_t * movie,
                 "        <!-- Seconds since start of Jan. 1, 1904 UTC (Greenwich) -->\n");
     }
     /*  2082844800 = seconds between 1/1/04 and 1/1/70 */
-    /* There's still a time zone offset problem not solved... but spec is ambigous as to whether stored time
+    /* There's still a time zone offset problem not solved... but spec is ambiguous as to whether stored time
        should be local or UTC */
     if (derived) {
         fprintf(xmlout, "        <AsLocalTime>");
@@ -677,7 +677,7 @@ void xml_write_mdia(FILE* file, FILE* xmlout, mj2_tk_t *track,
                 "            <!-- Seconds since start of Jan. 1, 1904 UTC (Greenwich) -->\n");
     }
     /*  2082844800 = seconds between 1/1/04 and 1/1/70 */
-    /* There's still a time zone offset problem not solved... but spec is ambigous as to whether stored time
+    /* There's still a time zone offset problem not solved... but spec is ambiguous as to whether stored time
        should be local or UTC */
     if (derived) {
         fprintf(xmlout,  "            <AsLocalTime>");

@@ -35,8 +35,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __DWT_H
-#define __DWT_H
+#ifndef OPJ_DWT_H
+#define OPJ_DWT_H
 /**
 @file dwt.h
 @brief Implementation of a discrete wavelet transform (DWT)
@@ -122,4 +122,4 @@ void opj_dwt_calc_explicit_stepsizes(opj_tccp_t * tccp, OPJ_UINT32 prec);
 
 /*@}*/
 
-#endif /* __DWT_H */
+#endif /* OPJ_DWT_H */

@@ -187,6 +187,32 @@ static INLINE long opj_lrintf(float f)
 #   pragma intrinsic(__emul)
 #endif
 
+/* Apparently Visual Studio doesn't define __SSE__ / __SSE2__ macros */
+#if defined(_M_X64)
+/* Intel 64bit support SSE and SSE2 */
+#   ifndef __SSE__
+#       define __SSE__ 1
+#   endif
+#   ifndef __SSE2__
+#       define __SSE2__ 1
+#   endif
+#endif
+
+/* For x86, test the value of the _M_IX86_FP macro. */
+/* See https://msdn.microsoft.com/en-us/library/b0084kay.aspx */
+#if defined(_M_IX86_FP)
+#   if _M_IX86_FP >= 1
+#       ifndef __SSE__
+#           define __SSE__ 1
+#       endif
+#   endif
+#   if _M_IX86_FP >= 2
+#       ifndef __SSE2__
+#           define __SSE2__ 1
+#       endif
+#   endif
+#endif
+
 /* Type to use for bit-fields in internal headers */
 typedef unsigned int OPJ_BITFIELD;
 
@@ -207,7 +233,6 @@ typedef unsigned int OPJ_BITFIELD;
 #include "jp2.h"
 
 #include "mqc.h"
-#include "raw.h"
 #include "bio.h"
 
 #include "pi.h"

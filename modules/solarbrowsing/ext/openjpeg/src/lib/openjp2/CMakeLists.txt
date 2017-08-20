@@ -38,8 +38,6 @@ set(OPENJPEG_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/opj_clock.h
   ${CMAKE_CURRENT_SOURCE_DIR}/pi.c
   ${CMAKE_CURRENT_SOURCE_DIR}/pi.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/raw.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/raw.h
   ${CMAKE_CURRENT_SOURCE_DIR}/t1.c
   ${CMAKE_CURRENT_SOURCE_DIR}/t1.h
   ${CMAKE_CURRENT_SOURCE_DIR}/t2.c
@@ -82,14 +80,22 @@ if(NOT WIN32 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER MATCHES ".*mingw32
 endif()
 
 # Build the library
-if(WIN32)
-  if(BUILD_SHARED_LIBS)
-    add_definitions(-DOPJ_EXPORTS)
-  else()
-    add_definitions(-DOPJ_STATIC)
-  endif()
-endif()
-add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
+# if(WIN32)
+#   if(BUILD_SHARED_LIBS)
+#     add_definitions(-DOPJ_EXPORTS)
+#   else()
+#     add_definitions(-DOPJ_STATIC)
+#   endif()
+#   add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
+#   set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME})
+# else()
+  # Builds both static and dynamic libs
+  add_library(${OPENJPEG_LIBRARY_NAME} SHARED ${OPENJPEG_SRCS})
+  add_library(openjp2_static STATIC ${OPENJPEG_SRCS})
+  set_target_properties(openjp2_static PROPERTIES OUTPUT_NAME ${OPENJPEG_LIBRARY_NAME})
+  set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME} openjp2_static)
+#endif()
+
 if(UNIX)
   target_link_libraries(${OPENJPEG_LIBRARY_NAME} m)
 endif()
@@ -99,7 +105,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "2.8.11")
 endif()
 
 # Install library
-install(TARGETS ${OPENJPEG_LIBRARY_NAME}
+install(TARGETS ${INSTALL_LIBS}
   EXPORT OpenJPEGTargets
   RUNTIME DESTINATION ${OPENJPEG_INSTALL_BIN_DIR} COMPONENT Applications
   LIBRARY DESTINATION ${OPENJPEG_INSTALL_LIB_DIR} COMPONENT Libraries
@@ -185,3 +191,13 @@ endif(OPJ_USE_THREAD AND NOT Threads_FOUND)
 if(OPJ_USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
    TARGET_LINK_LIBRARIES(${OPENJPEG_LIBRARY_NAME} ${CMAKE_THREAD_LIBS_INIT})
 endif(OPJ_USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+
+if(BUILD_BENCH_DWT)
+    add_executable(bench_dwt bench_dwt.c dwt.c opj_malloc.c thread.c)
+    if(UNIX)
+        target_link_libraries(bench_dwt m)
+    endif()
+    if(OPJ_USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+        target_link_libraries(bench_dwt ${CMAKE_THREAD_LIBS_INIT})
+    endif(OPJ_USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+endif(BUILD_BENCH_DWT)

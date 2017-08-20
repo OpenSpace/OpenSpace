@@ -2,9 +2,12 @@ language: cpp
 
 matrix:
   include:
+# OSX
     - os: osx
       compiler: clang
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_INCLUDE_IF_DEPLOY=1
+
+# Test code style
     - os: linux
       compiler: clang-3.8
       env: OPJ_CI_CC=clang-3.8 OPJ_CI_CXX=clang-3.8 OPJ_CI_CHECK_STYLE=1 OPJ_CI_SKIP_TESTS=1
@@ -16,12 +19,35 @@ matrix:
           packages:
             - clang-3.8
             - flip
+
+# Performance test with GCC
     - os: linux
       compiler: g++
+      dist: precise
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_INCLUDE_IF_DEPLOY=1 OPJ_CI_PERF_TESTS=1
+
+# Test compilation with AVX2
+    - os: linux
+      # "sudo: yes" and "dist: trusty" give us a worker with the AVX2 instruction set
+      sudo: yes
+      dist: trusty
+      compiler: clang-3.8
+      env: OPJ_CI_CC=clang-3.8 OPJ_CI_CXX=clang-3.8 OPJ_CI_INSTRUCTION_SETS="-mavx2" OPJ_CI_BUILD_CONFIGURATION=Release
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-precise-3.8
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-3.8
+
+# Test multi-threading
     - os: linux
       compiler: g++
+      dist: precise
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_NUM_THREADS=2
+
+# Test 32-bit compilation
     - os: linux
       compiler: g++
       env: OPJ_CI_ARCH=i386 OPJ_CI_BUILD_CONFIGURATION=Release
@@ -30,6 +56,8 @@ matrix:
           packages:
             - gcc-multilib
             - g++-multilib
+
+# Profile code (gcc -pg)
     - os: linux
       compiler: g++
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Debug OPJ_CI_PROFILE=1
@@ -37,12 +65,16 @@ matrix:
         apt:
           packages:
             - valgrind
+
+# Test under ASAN
     - os: linux
       compiler: clang
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Debug OPJ_CI_ASAN=1
+
+# Test with CLang 3.8
     - os: linux
       compiler: clang-3.8
-      env: OPJ_CI_CC=clang-3.8 OPJ_CI_CXX=clang-3.8 OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_PERF_TESTS=1
+      env: OPJ_CI_CC=clang-3.8 OPJ_CI_CXX=clang-3.8 OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_PERF_TESTS=1 OPJ_CI_BUILD_FUZZERS=1
       addons:
         apt:
           sources:
@@ -50,6 +82,8 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - clang-3.8
+
+# Test with mingw 32 bit
     - os: linux
       compiler: x86_64-w64-mingw32-g++
       env: OPJ_CI_CC=x86_64-w64-mingw32-gcc OPJ_CI_CXX=x86_64-w64-mingw32-g++ OPJ_CI_ARCH=i386 OPJ_CI_BUILD_CONFIGURATION=Release
@@ -63,6 +97,8 @@ matrix:
             - g++-mingw-w64-i686
             - gcc-multilib
             - g++-multilib
+
+# Test with mingw 64 bit
     - os: linux
       compiler: x86_64-w64-mingw32-g++
       env: OPJ_CI_CC=x86_64-w64-mingw32-gcc OPJ_CI_CXX=x86_64-w64-mingw32-g++ OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release
@@ -74,9 +110,12 @@ matrix:
             - gcc-mingw-w64-x86-64
             - gcc-mingw-w64
             - g++-mingw-w64-x86-64
+
+# Test with gcc 4.8
     - os: linux
       compiler: g++-4.8
       env: OPJ_CI_CC=gcc-4.8 OPJ_CI_CXX=g++-4.8 OPJ_CI_ABI_CHECK=1
+      dist: precise
       addons:
         apt:
           sources:

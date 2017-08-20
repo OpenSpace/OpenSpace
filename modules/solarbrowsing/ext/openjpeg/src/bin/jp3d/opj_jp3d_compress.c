@@ -658,7 +658,7 @@ int parse_cmdline_encoder(int argc, char **argv, opj_cparameters_t *parameters)
 
         /* ------------------------------------------------------
 
-        case 'T':            // Tranformation of original data (2D-DWT/3D-DWT/3D-RLS/2D-DWT+1D-RLS)
+        case 'T':            // Transformation of original data (2D-DWT/3D-DWT/3D-RLS/2D-DWT+1D-RLS)
         {
         char transform[4];
 
@@ -857,7 +857,7 @@ int main(int argc, char **argv)
 
     /*
     configure the event callbacks (not required)
-    setting of each callback is optionnal
+    setting of each callback is optional
     */
     memset(&event_mgr, 0, sizeof(opj_event_mgr_t));
     event_mgr.error_handler = error_callback;

@@ -197,7 +197,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     auto& stateStart = stateSequenceStart.getState(OsEng.timeManager().time().j2000Seconds());
     std::shared_ptr<ImageMetadata> imStart = stateStart.contents();
     //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
-    _imageSize = imStart->fullResolution / (pow(2, _resolutionLevel));
+    _imageSize = imStart->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
 
     // Always give PBO maximum size
     //_pbo = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
@@ -244,7 +244,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
        // const double& timeObserved = state.timeObserved();
         std::shared_ptr<ImageMetadata> im = state.contents();
         //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
-        _imageSize = im->fullResolution / (pow(2, _resolutionLevel));
+        _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
         //_pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
 
         // Upload asap
@@ -283,7 +283,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
        // const double& timeObserved = state.timeObserved();
         std::shared_ptr<ImageMetadata> im = state.contents();
         //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
-        _imageSize = im->fullResolution / (pow(2, _resolutionLevel));
+        _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
 
         //_imageSize = _fullResolution / (pow(2, _resolutionLevel));
 

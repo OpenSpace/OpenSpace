@@ -162,21 +162,19 @@ void opj_bio_init_dec(opj_bio_t *bio, OPJ_BYTE *bp, OPJ_UINT32 len)
     bio->ct = 0;
 }
 
-OPJ_NOSANITIZE("unsigned-integer-overflow")
 void opj_bio_write(opj_bio_t *bio, OPJ_UINT32 v, OPJ_UINT32 n)
 {
-    OPJ_UINT32 i;
+    OPJ_INT32 i;
 
     assert((n > 0U) && (n <= 32U));
-    for (i = n - 1; i < n; i--) { /* overflow used for end-loop condition */
+    for (i = (OPJ_INT32)n - 1; i >= 0; i--) {
         opj_bio_putbit(bio, (v >> i) & 1);
     }
 }
 
-OPJ_NOSANITIZE("unsigned-integer-overflow")
 OPJ_UINT32 opj_bio_read(opj_bio_t *bio, OPJ_UINT32 n)
 {
-    OPJ_UINT32 i;
+    OPJ_INT32 i;
     OPJ_UINT32 v;
 
     assert((n > 0U) /* && (n <= 32U)*/);
@@ -187,7 +185,7 @@ OPJ_UINT32 opj_bio_read(opj_bio_t *bio, OPJ_UINT32 n)
     assert(n <= 32U);
 #endif
     v = 0U;
-    for (i = n - 1; i < n; i--) { /* overflow used for end-loop condition */
+    for (i = (OPJ_INT32)n - 1; i >= 0; i--) {
         v |= opj_bio_getbit(bio) <<
              i; /* can't overflow, opj_bio_getbit returns 0 or 1 */
     }

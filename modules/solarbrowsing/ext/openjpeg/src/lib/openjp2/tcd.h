@@ -36,8 +36,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __TCD_H
-#define __TCD_H
+#ifndef OPJ_TCD_H
+#define OPJ_TCD_H
 /**
 @file tcd.h
 @brief Implementation of a tile coder/decoder (TCD)
@@ -49,19 +49,6 @@ each other. The functions in TCD.C are used by other functions in J2K.C.
 /** @defgroup TCD TCD - Implementation of a tile coder/decoder */
 /*@{*/
 
-/**
-FIXME DOC
-*/
-typedef struct opj_tcd_seg {
-    OPJ_BYTE ** data;
-    OPJ_UINT32 dataindex;
-    OPJ_UINT32 numpasses;
-    OPJ_UINT32 real_num_passes;
-    OPJ_UINT32 len;
-    OPJ_UINT32 maxpasses;
-    OPJ_UINT32 numnewpasses;
-    OPJ_UINT32 newlen;
-} opj_tcd_seg_t;
 
 /**
 FIXME DOC
@@ -102,28 +89,57 @@ typedef struct opj_tcd_cblk_enc {
 } opj_tcd_cblk_enc_t;
 
 
+/** Chunk of codestream data that is part of a code block */
+typedef struct opj_tcd_seg_data_chunk {
+    /* Point to tilepart buffer. We don't make a copy !
+       So the tilepart buffer must be kept alive
+       as long as we need to decode the codeblocks */
+    OPJ_BYTE * data;
+    OPJ_UINT32 len;                 /* Usable length of data */
+} opj_tcd_seg_data_chunk_t;
+
+/** Segment of a code-block.
+ * A segment represent a number of consecutive coding passes, without termination
+ * of MQC or RAW between them. */
+typedef struct opj_tcd_seg {
+    OPJ_UINT32 len;      /* Size of data related to this segment */
+    /* Number of passes decoded. Including those that we skip */
+    OPJ_UINT32 numpasses;
+    /* Number of passes actually to be decoded. To be used for code-block decoding */
+    OPJ_UINT32 real_num_passes;
+    /* Maximum number of passes for this segment */
+    OPJ_UINT32 maxpasses;
+    /* Number of new passes for current packed. Transitory value */
+    OPJ_UINT32 numnewpasses;
+    /* Codestream length for this segment for current packed. Transitory value */
+    OPJ_UINT32 newlen;
+} opj_tcd_seg_t;
+
+/** Code-block for decoding */
 typedef struct opj_tcd_cblk_dec {
-    OPJ_BYTE * data;                /* Data */
     opj_tcd_seg_t* segs;            /* segments information */
-    OPJ_INT32 x0, y0, x1,
-              y1;       /* position of the code-blocks : left upper corner (x0, y0) right low corner (x1,y1) */
+    opj_tcd_seg_data_chunk_t* chunks; /* Array of chunks */
+    /* position of the code-blocks : left upper corner (x0, y0) right low corner (x1,y1) */
+    OPJ_INT32 x0, y0, x1, y1;
     OPJ_UINT32 numbps;
+    /* number of bits for len, for the current packet. Transitory value */
     OPJ_UINT32 numlenbits;
-    OPJ_UINT32 data_max_size;       /* Size of allocated data buffer */
-    OPJ_UINT32 data_current_size;   /* Size of used data buffer */
-    OPJ_UINT32 numnewpasses;        /* number of pass added to the code-blocks */
-    OPJ_UINT32 numsegs;             /* number of segments */
+    /* number of pass added to the code-blocks, for the current packet. Transitory value */
+    OPJ_UINT32 numnewpasses;
+    /* number of segments, including those of packet we skip */
+    OPJ_UINT32 numsegs;
+    /* number of segments, to be used for code block decoding */
     OPJ_UINT32 real_num_segs;
-    OPJ_UINT32 m_current_max_segs;
+    OPJ_UINT32 m_current_max_segs;  /* allocated number of segs[] items */
+    OPJ_UINT32 numchunks;           /* Number of valid chunks items */
+    OPJ_UINT32 numchunksalloc;      /* Number of chunks item allocated */
 } opj_tcd_cblk_dec_t;
 
-/**
-FIXME DOC
-*/
+/** Precinct structure */
 typedef struct opj_tcd_precinct {
-    OPJ_INT32 x0, y0, x1,
-              y1;       /* dimension of the precinct : left upper corner (x0, y0) right low corner (x1,y1) */
-    OPJ_UINT32 cw, ch;              /* number of precinct in width and height */
+    /* dimension of the precinct : left upper corner (x0, y0) right low corner (x1,y1) */
+    OPJ_INT32 x0, y0, x1, y1;
+    OPJ_UINT32 cw, ch;              /* number of code-blocks, in width and height */
     union {                         /* code-blocks information */
         opj_tcd_cblk_enc_t* enc;
         opj_tcd_cblk_dec_t* dec;
@@ -134,48 +150,54 @@ typedef struct opj_tcd_precinct {
     opj_tgt_tree_t *imsbtree;       /* IMSB tree */
 } opj_tcd_precinct_t;
 
-/**
-FIXME DOC
-*/
+/** Sub-band structure */
 typedef struct opj_tcd_band {
-    OPJ_INT32 x0, y0, x1,
-              y1;       /* dimension of the subband : left upper corner (x0, y0) right low corner (x1,y1) */
+    /* dimension of the subband : left upper corner (x0, y0) right low corner (x1,y1) */
+    OPJ_INT32 x0, y0, x1, y1;
+    /* band number: for lowest resolution level (0=LL), otherwise (1=HL, 2=LH, 3=HH) */
     OPJ_UINT32 bandno;
-    opj_tcd_precinct_t *precincts;  /* precinct information */
-    OPJ_UINT32 precincts_data_size; /* size of data taken by precincts */
+    /* precinct information */
+    opj_tcd_precinct_t *precincts;
+    /* size of data taken by precincts */
+    OPJ_UINT32 precincts_data_size;
     OPJ_INT32 numbps;
     OPJ_FLOAT32 stepsize;
 } opj_tcd_band_t;
 
-/**
-FIXME DOC
-*/
+/** Tile-component resolution structure */
 typedef struct opj_tcd_resolution {
-    OPJ_INT32 x0, y0, x1,
-              y1;       /* dimension of the resolution level : left upper corner (x0, y0) right low corner (x1,y1) */
+    /* dimension of the resolution level : left upper corner (x0, y0) right low corner (x1,y1) */
+    OPJ_INT32 x0, y0, x1, y1;
+    /* number of precincts, in width and height, for this resolution level */
     OPJ_UINT32 pw, ph;
-    OPJ_UINT32 numbands;            /* number sub-band for the resolution level */
-    opj_tcd_band_t bands[3];        /* subband information */
+    /* number of sub-bands for the resolution level (1 for lowest resolution level, 3 otherwise) */
+    OPJ_UINT32 numbands;
+    /* subband information */
+    opj_tcd_band_t bands[3];
 } opj_tcd_resolution_t;
 
-/**
-FIXME DOC
-*/
+/** Tile-component structure */
 typedef struct opj_tcd_tilecomp {
-    OPJ_INT32 x0, y0, x1,
-              y1;           /* dimension of component : left upper corner (x0, y0) right low corner (x1,y1) */
-    OPJ_UINT32 numresolutions;          /* number of resolutions level */
-    OPJ_UINT32
-    minimum_num_resolutions; /* number of resolutions level to decode (at max)*/
-    opj_tcd_resolution_t *resolutions;  /* resolutions information */
-    OPJ_UINT32
-    resolutions_size;        /* size of data for resolutions (in bytes) */
-    OPJ_INT32 *data;                    /* data of the component */
-    OPJ_BOOL  ownsData;                 /* if true, then need to free after usage, otherwise do not free */
-    OPJ_UINT32
-    data_size_needed;        /* we may either need to allocate this amount of data, or re-use image data and ignore this value */
-    OPJ_UINT32 data_size;               /* size of the data of the component */
-    OPJ_INT32 numpix;                   /* add fixed_quality */
+    /* dimension of component : left upper corner (x0, y0) right low corner (x1,y1) */
+    OPJ_INT32 x0, y0, x1, y1;
+    /* number of resolutions level */
+    OPJ_UINT32 numresolutions;
+    /* number of resolutions level to decode (at max)*/
+    OPJ_UINT32 minimum_num_resolutions;
+    /* resolutions information */
+    opj_tcd_resolution_t *resolutions;
+    /* size of data for resolutions (in bytes) */
+    OPJ_UINT32 resolutions_size;
+    /* data of the component */
+    OPJ_INT32 *data;
+    /* if true, then need to free after usage, otherwise do not free */
+    OPJ_BOOL  ownsData;
+    /* we may either need to allocate this amount of data, or re-use image data and ignore this value */
+    OPJ_UINT32 data_size_needed;
+    /* size of the data of the component */
+    OPJ_UINT32 data_size;
+    /* add fixed_quality */
+    OPJ_INT32 numpix;
 } opj_tcd_tilecomp_t;
 
 
@@ -183,8 +205,8 @@ typedef struct opj_tcd_tilecomp {
 FIXME DOC
 */
 typedef struct opj_tcd_tile {
-    OPJ_INT32 x0, y0, x1,
-              y1;       /* dimension of the tile : left upper corner (x0, y0) right low corner (x1,y1) */
+    /* dimension of the tile : left upper corner (x0, y0) right low corner (x1,y1) */
+    OPJ_INT32 x0, y0, x1, y1;
     OPJ_UINT32 numcomps;            /* number of components in tile */
     opj_tcd_tilecomp_t *comps;  /* Components information */
     OPJ_INT32 numpix;               /* add fixed_quality */
@@ -295,7 +317,8 @@ OPJ_BOOL opj_tcd_rateallocate(opj_tcd_t *tcd,
                               OPJ_BYTE *dest,
                               OPJ_UINT32 * p_data_written,
                               OPJ_UINT32 len,
-                              opj_codestream_info_t *cstr_info);
+                              opj_codestream_info_t *cstr_info,
+                              opj_event_mgr_t *p_manager);
 
 /**
  * Gets the maximum tile size that will be taken by the tile once decoded.
@@ -310,6 +333,7 @@ OPJ_UINT32 opj_tcd_get_decoded_tile_size(opj_tcd_t *p_tcd);
  * @param   p_data_written  pointer to an int that is incremented by the number of bytes really written on p_dest
  * @param   p_len           Maximum length of the destination buffer
  * @param   p_cstr_info     Codestream information structure
+ * @param   p_manager       the user event manager
  * @return  true if the coding is successful.
 */
 OPJ_BOOL opj_tcd_encode_tile(opj_tcd_t *p_tcd,
@@ -317,7 +341,8 @@ OPJ_BOOL opj_tcd_encode_tile(opj_tcd_t *p_tcd,
                              OPJ_BYTE *p_dest,
                              OPJ_UINT32 * p_data_written,
                              OPJ_UINT32 p_len,
-                             struct opj_codestream_info *p_cstr_info);
+                             struct opj_codestream_info *p_cstr_info,
+                             opj_event_mgr_t *p_manager);
 
 
 /**
@@ -375,9 +400,18 @@ OPJ_BOOL opj_tcd_copy_tile_data(opj_tcd_t *p_tcd,
  */
 OPJ_BOOL opj_alloc_tile_component_data(opj_tcd_tilecomp_t *l_tilec);
 
+/** Returns whether a sub-band is empty (i.e. whether it has a null area)
+ * @param band Sub-band handle.
+ * @return OPJ_TRUE whether the sub-band is empty.
+ */
+OPJ_BOOL opj_tcd_is_band_empty(opj_tcd_band_t* band);
+
+/** Reinitialize a segment */
+void opj_tcd_reinit_segment(opj_tcd_seg_t* seg);
+
 /* ----------------------------------------------------------------------- */
 /*@}*/
 
 /*@}*/
 
-#endif /* __TCD_H */
+#endif /* OPJ_TCD_H */

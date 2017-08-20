@@ -56,7 +56,7 @@ typedef struct opj_tcd_seg {
     int len;
     /** Data */
     unsigned char *data;
-    /** Number of passes posible for the segment */
+    /** Number of passes possible for the segment */
     int maxpasses;
     /** Number of passes added to the segment */
     int numnewpasses;
@@ -108,7 +108,7 @@ typedef struct opj_tcd_cblk {
     int numnewpasses;
     /** Number of segments */
     int numsegs;
-    /** Segments informations */
+    /** Segments information */
     opj_tcd_seg_t segs[100];
     /** Number of passes in the layer */
     int numpassesinlayers;
@@ -131,7 +131,7 @@ typedef struct opj_tcd_precinct {
     int x0, y0, z0;
     /** Dimension of the precint : right low corner (x1,y1,z1) */
     int x1, y1, z1;
-    /** Number of codeblocks in precinct in width and heigth and length*/
+    /** Number of codeblocks in precinct in width and height and length*/
     int cblkno[3];
     /** Information about the codeblocks */
     opj_tcd_cblk_t *cblks;
@@ -219,7 +219,7 @@ typedef struct opj_tcd_tile {
 Tile coder/decoder: volume instance
 */
 typedef struct opj_tcd_volume {
-    /** Number of tiles in width and heigth and length */
+    /** Number of tiles in width and height and length */
     int tw, th, tl;
     /** Tiles information */
     opj_tcd_tile_t *tiles;

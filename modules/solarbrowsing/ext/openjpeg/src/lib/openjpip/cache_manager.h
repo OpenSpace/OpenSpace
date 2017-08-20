@@ -119,7 +119,7 @@ cache_param_t * search_cacheBycsn(int csn, cachelist_param_t *cachelist);
 /**
  * search a cache by cid
  *
- * @param[in] cid        channel identifer
+ * @param[in] cid        channel identifier
  * @param[in] cachelist  cache list pointer
  * @return               found cache pointer
  */
@@ -130,7 +130,7 @@ cache_param_t * search_cacheBycid(const char cid[],
 /**
  * search a cache by tid
  *
- * @param[in] tid        target identifer
+ * @param[in] tid        target identifier
  * @param[in] cachelist  cache list pointer
  * @return               found cache pointer
  */

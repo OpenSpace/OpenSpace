@@ -47,7 +47,7 @@ typedef struct auxtrans_param {
  *
  * @param[in] tcp_auxport opening tcp auxiliary port ( 0 not to open, valid No. 49152-65535)
  * @param[in] udp_auxport opening udp auxiliary port ( 0 not to open, valid No. 49152-65535)
- * @return                intialized transport parameters
+ * @return                initialized transport parameters
  */
 auxtrans_param_t init_aux_transport(int tcp_auxport, int udp_auxport);
 

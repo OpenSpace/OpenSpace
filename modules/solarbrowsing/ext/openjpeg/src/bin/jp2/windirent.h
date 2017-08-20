@@ -285,7 +285,9 @@ extern "C" {
 static DIR *opendir(const char *dirname);
 static struct dirent *readdir(DIR *dirp);
 static int closedir(DIR *dirp);
+#ifdef unused
 static void rewinddir(DIR *dirp);
+#endif
 
 /*
  * Implement dirent interface as static functions so that the user does not
@@ -544,6 +546,7 @@ closedir(DIR *dirp)
 }
 
 
+#ifdef unused
 /*
  * <function name="rewinddir">
  * <intro>rewind directory stream to the beginning
@@ -593,7 +596,7 @@ rewinddir(DIR *dirp)
         /*EMPTY*/;
     }
 }
-
+#endif
 
 /*
  * Open native directory stream object and retrieve first file.

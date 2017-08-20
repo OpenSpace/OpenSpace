@@ -240,6 +240,7 @@ again:
                                 '-') { /* Has read next input parameter: No arg for current parameter */
                             if (opj_opterr) {
                                 fprintf(stderr, "%s: option requires an argument\n", arg);
+                                ++opj_optind;
                                 return (BADCH);
                             }
                         }
@@ -247,6 +248,7 @@ again:
                     if (!opj_optarg) {  /* missing argument */
                         if (opj_opterr) {
                             fprintf(stderr, "%s: option requires an argument\n", arg);
+                            ++opj_optind;
                             return (BADCH);
                         }
                     }

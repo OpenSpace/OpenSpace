@@ -179,7 +179,7 @@ typedef size_t   OPJ_SIZE_T;
 
 /**
  * JPEG 2000 Profiles, see Table A.10 from 15444-1 (updated in various AMD)
- * These values help chosing the RSIZ value for the J2K codestream.
+ * These values help choosing the RSIZ value for the J2K codestream.
  * The RSIZ value triggers various encoding options, as detailed in Table A.10.
  * If OPJ_PROFILE_PART2 is chosen, it has to be combined with one or more extensions
  * described hereunder.
@@ -501,6 +501,7 @@ typedef struct opj_cparameters {
 } opj_cparameters_t;
 
 #define OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG  0x0001
+#define OPJ_DPARAMETERS_DUMP_FLAG 0x0002
 
 /**
  * Decompression parameters
@@ -866,13 +867,13 @@ typedef struct opj_tccp_info {
     OPJ_UINT32 csty;
     /** number of resolutions */
     OPJ_UINT32 numresolutions;
-    /** code-blocks width */
+    /** log2 of code-blocks width */
     OPJ_UINT32 cblkw;
-    /** code-blocks height */
+    /** log2 of code-blocks height */
     OPJ_UINT32 cblkh;
     /** code-block coding style */
     OPJ_UINT32 cblksty;
-    /** discrete wavelet transform identifier */
+    /** discrete wavelet transform identifier: 0 = 9-7 irreversible, 1 = 5-3 reversible */
     OPJ_UINT32 qmfbid;
     /** quantisation style */
     OPJ_UINT32 qntsty;
@@ -1092,6 +1093,27 @@ OPJ_API void OPJ_CALLCONV opj_image_destroy(opj_image_t *image);
 */
 OPJ_API opj_image_t* OPJ_CALLCONV opj_image_tile_create(OPJ_UINT32 numcmpts,
         opj_image_cmptparm_t *cmptparms, OPJ_COLOR_SPACE clrspc);
+
+/**
+ * Allocator for opj_image_t->comps[].data
+ * To be paired with opj_image_data_free.
+ *
+ * @param   size    number of bytes to allocate
+ *
+ * @return  a new pointer if successful, NULL otherwise.
+ * @since 2.2.0
+*/
+OPJ_API void* OPJ_CALLCONV opj_image_data_alloc(OPJ_SIZE_T size);
+
+/**
+ * Destructor for opj_image_t->comps[].data
+ * To be paired with opj_image_data_alloc.
+ *
+ * @param   ptr    Pointer to free
+ *
+ * @since 2.2.0
+*/
+OPJ_API void OPJ_CALLCONV opj_image_data_free(void* ptr);
 
 /*
 ==========================================================
@@ -1477,7 +1499,7 @@ OPJ_API OPJ_BOOL OPJ_CALLCONV opj_setup_encoder(opj_codec_t *p_codec,
 /**
  * Start to compress the current image.
  * @param p_codec       Compressor handle
- * @param image         Input filled image
+ * @param p_image       Input filled image
  * @param p_stream      Input stgream
  */
 OPJ_API OPJ_BOOL OPJ_CALLCONV opj_start_compress(opj_codec_t *p_codec,
@@ -1521,7 +1543,7 @@ OPJ_API void OPJ_CALLCONV opj_destroy_cstr_info(opj_codestream_info_v2_t
  *
  * @param   p_codec         the jpeg2000 codec.
  * @param   info_flag       type of information dump.
- * @param   output_stream   output stream where dump the informations get from the codec.
+ * @param   output_stream   output stream where dump the information gotten from the codec.
  *
  */
 OPJ_API void OPJ_CALLCONV opj_dump_codec(opj_codec_t *p_codec,

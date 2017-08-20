@@ -38,6 +38,8 @@
  */
 
 #include "opj_includes.h"
+#include "opj_common.h"
+
 
 /** @defgroup T2 T2 - Implementation of a tier-2 coding */
 /*@{*/
@@ -66,6 +68,8 @@ Encode a packet of a tile to a destination buffer
 @param p_data_written   FIXME DOC
 @param len Length of the destination buffer
 @param cstr_info Codestream information structure
+@param p_t2_mode If == THRESH_CALC In Threshold calculation ,If == FINAL_PASS Final pass
+@param p_manager the user event manager
 @return
 */
 static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
@@ -75,7 +79,9 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
                                      OPJ_BYTE *dest,
                                      OPJ_UINT32 * p_data_written,
                                      OPJ_UINT32 len,
-                                     opj_codestream_info_t *cstr_info);
+                                     opj_codestream_info_t *cstr_info,
+                                     J2K_T2_MODE p_t2_mode,
+                                     opj_event_mgr_t *p_manager);
 
 /**
 Decode a packet of a tile from a source buffer
@@ -87,6 +93,7 @@ Decode a packet of a tile from a source buffer
 @param data_read   FIXME DOC
 @param max_length  FIXME DOC
 @param pack_info Packet information
+@param p_manager the user event manager
 
 @return  FIXME DOC
 */
@@ -219,7 +226,8 @@ OPJ_BOOL opj_t2_encode_packets(opj_t2_t* p_t2,
                                OPJ_UINT32 p_tp_num,
                                OPJ_INT32 p_tp_pos,
                                OPJ_UINT32 p_pino,
-                               J2K_T2_MODE p_t2_mode)
+                               J2K_T2_MODE p_t2_mode,
+                               opj_event_mgr_t *p_manager)
 {
     OPJ_BYTE *l_current_data = p_dest;
     OPJ_UINT32 l_nb_bytes = 0;
@@ -265,7 +273,10 @@ OPJ_BOOL opj_t2_encode_packets(opj_t2_t* p_t2,
                         l_nb_bytes = 0;
 
                         if (! opj_t2_encode_packet(p_tile_no, p_tile, l_tcp, l_current_pi,
-                                                   l_current_data, &l_nb_bytes, p_max_len, cstr_info)) {
+                                                   l_current_data, &l_nb_bytes,
+                                                   p_max_len, cstr_info,
+                                                   p_t2_mode,
+                                                   p_manager)) {
                             opj_pi_destroy(l_pi, l_nb_pocs);
                             return OPJ_FALSE;
                         }
@@ -303,7 +314,8 @@ OPJ_BOOL opj_t2_encode_packets(opj_t2_t* p_t2,
                 l_nb_bytes = 0;
 
                 if (! opj_t2_encode_packet(p_tile_no, p_tile, l_tcp, l_current_pi,
-                                           l_current_data, &l_nb_bytes, p_max_len, cstr_info)) {
+                                           l_current_data, &l_nb_bytes, p_max_len,
+                                           cstr_info, p_t2_mode, p_manager)) {
                     opj_pi_destroy(l_pi, l_nb_pocs);
                     return OPJ_FALSE;
                 }
@@ -593,7 +605,9 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
                                      OPJ_BYTE *dest,
                                      OPJ_UINT32 * p_data_written,
                                      OPJ_UINT32 length,
-                                     opj_codestream_info_t *cstr_info)
+                                     opj_codestream_info_t *cstr_info,
+                                     J2K_T2_MODE p_t2_mode,
+                                     opj_event_mgr_t *p_manager)
 {
     OPJ_UINT32 bandno, cblkno;
     OPJ_BYTE* c = dest;
@@ -611,9 +625,19 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
     opj_tcd_resolution_t *res = &tilec->resolutions[resno];
 
     opj_bio_t *bio = 00;    /* BIO component */
+    OPJ_BOOL packet_empty = OPJ_TRUE;
 
     /* <SOP 0xff91> */
     if (tcp->csty & J2K_CP_CSTY_SOP) {
+        if (length < 6) {
+            if (p_t2_mode == FINAL_PASS) {
+                opj_event_msg(p_manager, EVT_ERROR,
+                              "opj_t2_encode_packet(): only %u bytes remaining in "
+                              "output buffer. %u needed.\n",
+                              length, 6);
+            }
+            return OPJ_FALSE;
+        }
         c[0] = 255;
         c[1] = 145;
         c[2] = 0;
@@ -633,9 +657,15 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
     if (!layno) {
         band = res->bands;
 
-        for (bandno = 0; bandno < res->numbands; ++bandno) {
-            opj_tcd_precinct_t *prc = &band->precincts[precno];
+        for (bandno = 0; bandno < res->numbands; ++bandno, ++band) {
+            opj_tcd_precinct_t *prc;
 
+            /* Skip empty bands */
+            if (opj_tcd_is_band_empty(band)) {
+                continue;
+            }
+
+            prc = &band->precincts[precno];
             opj_tgt_reset(prc->incltree);
             opj_tgt_reset(prc->imsbtree);
 
@@ -646,7 +676,6 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
                 cblk->numpasses = 0;
                 opj_tgt_setvalue(prc->imsbtree, cblkno, band->numbps - (OPJ_INT32)cblk->numbps);
             }
-            ++band;
         }
     }
 
@@ -656,13 +685,50 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
         return OPJ_FALSE;
     }
     opj_bio_init_enc(bio, c, length);
-    opj_bio_write(bio, 1, 1);           /* Empty header bit */
+
+    /* Check if the packet is empty */
+    /* Note: we could also skip that step and always write a packet header */
+    band = res->bands;
+    for (bandno = 0; bandno < res->numbands; ++bandno, ++band) {
+        opj_tcd_precinct_t *prc;
+        /* Skip empty bands */
+        if (opj_tcd_is_band_empty(band)) {
+            continue;
+        }
+
+        prc = &band->precincts[precno];
+        l_nb_blocks = prc->cw * prc->ch;
+        cblk = prc->cblks.enc;
+        for (cblkno = 0; cblkno < l_nb_blocks; cblkno++, ++cblk) {
+            opj_tcd_layer_t *layer = &cblk->layers[layno];
+
+            /* if cblk not included, go to the next cblk  */
+            if (!layer->numpasses) {
+                continue;
+            }
+            packet_empty = OPJ_FALSE;
+            break;
+        }
+        if (!packet_empty) {
+            break;
+        }
+    }
+
+    opj_bio_write(bio, packet_empty ? 0 : 1, 1);           /* Empty header bit */
+
 
     /* Writing Packet header */
     band = res->bands;
-    for (bandno = 0; bandno < res->numbands; ++bandno)      {
-        opj_tcd_precinct_t *prc = &band->precincts[precno];
+    for (bandno = 0; !packet_empty &&
+            bandno < res->numbands; ++bandno, ++band)      {
+        opj_tcd_precinct_t *prc;
 
+        /* Skip empty bands */
+        if (opj_tcd_is_band_empty(band)) {
+            continue;
+        }
+
+        prc = &band->precincts[precno];
         l_nb_blocks = prc->cw * prc->ch;
         cblk = prc->cblks.enc;
 
@@ -745,8 +811,6 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
 
             ++cblk;
         }
-
-        ++band;
     }
 
     if (!opj_bio_flush(bio)) {
@@ -762,6 +826,15 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
 
     /* <EPH 0xff92> */
     if (tcp->csty & J2K_CP_CSTY_EPH) {
+        if (length < 2) {
+            if (p_t2_mode == FINAL_PASS) {
+                opj_event_msg(p_manager, EVT_ERROR,
+                              "opj_t2_encode_packet(): only %u bytes remaining in "
+                              "output buffer. %u needed.\n",
+                              length, 2);
+            }
+            return OPJ_FALSE;
+        }
         c[0] = 255;
         c[1] = 146;
         c += 2;
@@ -780,9 +853,15 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
 
     /* Writing the packet body */
     band = res->bands;
-    for (bandno = 0; bandno < res->numbands; bandno++) {
-        opj_tcd_precinct_t *prc = &band->precincts[precno];
+    for (bandno = 0; !packet_empty && bandno < res->numbands; bandno++, ++band) {
+        opj_tcd_precinct_t *prc;
 
+        /* Skip empty bands */
+        if (opj_tcd_is_band_empty(band)) {
+            continue;
+        }
+
+        prc = &band->precincts[precno];
         l_nb_blocks = prc->cw * prc->ch;
         cblk = prc->cblks.enc;
 
@@ -795,6 +874,12 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
             }
 
             if (layer->len > length) {
+                if (p_t2_mode == FINAL_PASS) {
+                    opj_event_msg(p_manager, EVT_ERROR,
+                                  "opj_t2_encode_packet(): only %u bytes remaining in "
+                                  "output buffer. %u needed.\n",
+                                  length, layer->len);
+                }
                 return OPJ_FALSE;
             }
 
@@ -815,7 +900,6 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
             ++cblk;
             /* INDEX >> */
         }
-        ++band;
     }
 
     assert(c >= dest);
@@ -902,7 +986,7 @@ static OPJ_BOOL opj_t2_read_packet_header(opj_t2_t* p_t2,
 
         /* reset tagtrees */
         for (bandno = 0; bandno < l_res->numbands; ++bandno) {
-            if (!((l_band->x1 - l_band->x0 == 0) || (l_band->y1 - l_band->y0 == 0))) {
+            if (!opj_tcd_is_band_empty(l_band)) {
                 opj_tcd_precinct_t *l_prc = &l_band->precincts[p_pi->precno];
                 if (!(p_pi->precno < (l_band->precincts_data_size / sizeof(
                                           opj_tcd_precinct_t)))) {
@@ -1011,11 +1095,10 @@ static OPJ_BOOL opj_t2_read_packet_header(opj_t2_t* p_t2,
     }
 
     l_band = l_res->bands;
-    for (bandno = 0; bandno < l_res->numbands; ++bandno) {
+    for (bandno = 0; bandno < l_res->numbands; ++bandno, ++l_band) {
         opj_tcd_precinct_t *l_prc = &(l_band->precincts[p_pi->precno]);
 
-        if ((l_band->x1 - l_band->x0 == 0) || (l_band->y1 - l_band->y0 == 0)) {
-            ++l_band;
+        if (opj_tcd_is_band_empty(l_band)) {
             continue;
         }
 
@@ -1080,10 +1163,19 @@ static OPJ_BOOL opj_t2_read_packet_header(opj_t2_t* p_t2,
             n = (OPJ_INT32)l_cblk->numnewpasses;
 
             do {
+                OPJ_UINT32 bit_number;
                 l_cblk->segs[l_segno].numnewpasses = (OPJ_UINT32)opj_int_min((OPJ_INT32)(
                         l_cblk->segs[l_segno].maxpasses - l_cblk->segs[l_segno].numpasses), n);
-                l_cblk->segs[l_segno].newlen = opj_bio_read(l_bio,
-                                               l_cblk->numlenbits + opj_uint_floorlog2(l_cblk->segs[l_segno].numnewpasses));
+                bit_number = l_cblk->numlenbits + opj_uint_floorlog2(
+                                 l_cblk->segs[l_segno].numnewpasses);
+                if (bit_number > 32) {
+                    opj_event_msg(p_manager, EVT_ERROR,
+                                  "Invalid bit number %d in opj_t2_read_packet_header()\n",
+                                  bit_number);
+                    opj_bio_destroy(l_bio);
+                    return OPJ_FALSE;
+                }
+                l_cblk->segs[l_segno].newlen = opj_bio_read(l_bio, bit_number);
                 JAS_FPRINTF(stderr, "included=%d numnewpasses=%d increment=%d len=%d \n",
                             l_included, l_cblk->segs[l_segno].numnewpasses, l_increment,
                             l_cblk->segs[l_segno].newlen);
@@ -1101,8 +1193,6 @@ static OPJ_BOOL opj_t2_read_packet_header(opj_t2_t* p_t2,
 
             ++l_cblk;
         }
-
-        ++l_band;
     }
 
     if (!opj_bio_inalign(l_bio)) {
@@ -1190,7 +1280,6 @@ static OPJ_BOOL opj_t2_read_packet_data(opj_t2_t* p_t2,
             if (!l_cblk->numsegs) {
                 l_seg = l_cblk->segs;
                 ++l_cblk->numsegs;
-                l_cblk->data_current_size = 0;
             } else {
                 l_seg = &l_cblk->segs[l_cblk->numsegs - 1];
 
@@ -1232,43 +1321,31 @@ static OPJ_BOOL opj_t2_read_packet_data(opj_t2_t* p_t2,
                 };
 
 #endif /* USE_JPWL */
-                /* Check possible overflow on size */
-                if ((l_cblk->data_current_size + l_seg->newlen) < l_cblk->data_current_size) {
-                    opj_event_msg(p_manager, EVT_ERROR,
-                                  "read: segment too long (%d) with current size (%d > %d) for codeblock %d (p=%d, b=%d, r=%d, c=%d)\n",
-                                  l_seg->newlen, l_cblk->data_current_size, 0xFFFFFFFF - l_seg->newlen, cblkno,
-                                  p_pi->precno, bandno, p_pi->resno, p_pi->compno);
-                    return OPJ_FALSE;
-                }
-                /* Check if the cblk->data have allocated enough memory */
-                if ((l_cblk->data_current_size + l_seg->newlen) > l_cblk->data_max_size) {
-                    OPJ_BYTE* new_cblk_data = (OPJ_BYTE*) opj_realloc(l_cblk->data,
-                                              l_cblk->data_current_size + l_seg->newlen);
-                    if (! new_cblk_data) {
-                        opj_free(l_cblk->data);
-                        l_cblk->data = NULL;
-                        l_cblk->data_max_size = 0;
-                        /* opj_event_msg(p_manager, EVT_ERROR, "Not enough memory to realloc code block cata!\n"); */
+
+                if (l_cblk->numchunks == l_cblk->numchunksalloc) {
+                    OPJ_UINT32 l_numchunksalloc = l_cblk->numchunksalloc * 2 + 1;
+                    opj_tcd_seg_data_chunk_t* l_chunks =
+                        (opj_tcd_seg_data_chunk_t*)opj_realloc(l_cblk->chunks,
+                                l_numchunksalloc * sizeof(opj_tcd_seg_data_chunk_t));
+                    if (l_chunks == NULL) {
+                        opj_event_msg(p_manager, EVT_ERROR,
+                                      "cannot allocate opj_tcd_seg_data_chunk_t* array");
                         return OPJ_FALSE;
                     }
-                    l_cblk->data_max_size = l_cblk->data_current_size + l_seg->newlen;
-                    l_cblk->data = new_cblk_data;
+                    l_cblk->chunks = l_chunks;
+                    l_cblk->numchunksalloc = l_numchunksalloc;
                 }
 
-                memcpy(l_cblk->data + l_cblk->data_current_size, l_current_data, l_seg->newlen);
-
-                if (l_seg->numpasses == 0) {
-                    l_seg->data = &l_cblk->data;
-                    l_seg->dataindex = l_cblk->data_current_size;
-                }
+                l_cblk->chunks[l_cblk->numchunks].data = l_current_data;
+                l_cblk->chunks[l_cblk->numchunks].len = l_seg->newlen;
+                l_cblk->numchunks ++;
 
                 l_current_data += l_seg->newlen;
+                l_seg->len += l_seg->newlen;
                 l_seg->numpasses += l_seg->numnewpasses;
                 l_cblk->numnewpasses -= l_seg->numnewpasses;
 
                 l_seg->real_num_passes = l_seg->numpasses;
-                l_cblk->data_current_size += l_seg->newlen;
-                l_seg->len += l_seg->newlen;
 
                 if (l_cblk->numnewpasses > 0) {
                     ++l_seg;
@@ -1333,7 +1410,6 @@ static OPJ_BOOL opj_t2_skip_packet_data(opj_t2_t* p_t2,
             if (!l_cblk->numsegs) {
                 l_seg = l_cblk->segs;
                 ++l_cblk->numsegs;
-                l_cblk->data_current_size = 0;
             } else {
                 l_seg = &l_cblk->segs[l_cblk->numsegs - 1];
 
@@ -1406,22 +1482,23 @@ static OPJ_BOOL opj_t2_init_seg(opj_tcd_cblk_dec_t* cblk,
 
     if (l_nb_segs > cblk->m_current_max_segs) {
         opj_tcd_seg_t* new_segs;
-        cblk->m_current_max_segs += OPJ_J2K_DEFAULT_NB_SEGS;
+        OPJ_UINT32 l_m_current_max_segs = cblk->m_current_max_segs +
+                                          OPJ_J2K_DEFAULT_NB_SEGS;
 
         new_segs = (opj_tcd_seg_t*) opj_realloc(cblk->segs,
-                                                cblk->m_current_max_segs * sizeof(opj_tcd_seg_t));
+                                                l_m_current_max_segs * sizeof(opj_tcd_seg_t));
         if (! new_segs) {
-            opj_free(cblk->segs);
-            cblk->segs = NULL;
-            cblk->m_current_max_segs = 0;
             /* opj_event_msg(p_manager, EVT_ERROR, "Not enough memory to initialize segment %d\n", l_nb_segs); */
             return OPJ_FALSE;
         }
         cblk->segs = new_segs;
+        memset(new_segs + cblk->m_current_max_segs,
+               0, OPJ_J2K_DEFAULT_NB_SEGS * sizeof(opj_tcd_seg_t));
+        cblk->m_current_max_segs = l_m_current_max_segs;
     }
 
     seg = &cblk->segs[index];
-    memset(seg, 0, sizeof(opj_tcd_seg_t));
+    opj_tcd_reinit_segment(seg);
 
     if (cblksty & J2K_CCP_CBLKSTY_TERMALL) {
         seg->maxpasses = 1;
@@ -1433,6 +1510,10 @@ static OPJ_BOOL opj_t2_init_seg(opj_tcd_cblk_dec_t* cblk,
                               ((seg - 1)->maxpasses == 10)) ? 2 : 1;
         }
     } else {
+        /* See paragraph "B.10.6 Number of coding passes" of the standard.
+         * Probably that 109 must be interpreted a (Mb-1)*3 + 1 with Mb=37,
+         * Mb being the maximum number of bit-planes available for the
+         * representation of coefficients in the sub-band */
         seg->maxpasses = 109;
     }
 
