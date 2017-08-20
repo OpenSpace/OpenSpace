@@ -22,73 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_IMGUI___GUI___H__
-#define __OPENSPACE_MODULE_IMGUI___GUI___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
 
-#include <modules/imgui/include/guicomponent.h>
-#include <modules/imgui/include/guifilepathcomponent.h>
-#include <modules/imgui/include/guiglobebrowsingcomponent.h>
-#include <modules/imgui/include/guihelpcomponent.h>
-#include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
-#include <modules/imgui/include/guiorigincomponent.h>
-#include <modules/imgui/include/guitimecomponent.h>
-#include <modules/imgui/include/guiiswacomponent.h>
-#include <modules/imgui/include/guiparallelcomponent.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/properties/property.h>
 
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
+#include <openspace/engine/downloadmanager.h>
+
+#include <map>
+#include <string>
+#include <vector>
 
 namespace openspace::gui {
 
-class GUI : public GuiComponent {
+class GuiGlobeBrowsingComponent : public GuiPropertyComponent {
 public:
-    GUI();
-
-    void initialize() override;
-    void deinitialize() override;
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
-    bool mouseWheelCallback(double position);
-    bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
-    bool charCallback(unsigned int character, KeyModifier modifier);
-
-    void startFrame(float deltaTime, const glm::vec2& windowSize,
-        const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
-    void endFrame();
-
+    GuiGlobeBrowsingComponent();
     void render() override;
 
-//protected:
-    GuiHelpComponent _help;
-    GuiFilePathComponent _filePath;
-    GuiGlobeBrowsingComponent _globeBrowsing;
-    GuiOriginComponent _origin;
-    GuiPerformanceComponent _performance;
-    GuiPropertyComponent _globalProperty;
-    GuiPropertyComponent _property;
-    GuiPropertyComponent _screenSpaceProperty;
-    GuiPropertyComponent _virtualProperty;
-    GuiTimeComponent _time;
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    GuiIswaComponent _iswa;
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-    GuiParallelComponent _parallel;
-
-    bool _showInternals;
-
 private:
-    void renderAndUpdatePropertyVisibility();
-
-    properties::Property::Visibility _currentVisibility;
-
+    std::string _currentNode;
+    std::string _currentServer;
 };
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_IMGUI___GUI___H__
+
+#endif // __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
