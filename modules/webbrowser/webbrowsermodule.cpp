@@ -70,7 +70,7 @@ std::string WebBrowserModule::findHelperExecutable() {
         if (!FileSys.fileExists(execLocation)) {
             LERROR("Could not find web helper executable at location: " + execLocation);
         }
-        return execLocation;
+        return FileSys.absolutePath(execLocation);
     }
     else {
         std::string subprocessName = SUBPROCESS_NAME;
