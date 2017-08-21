@@ -1,14 +1,8 @@
-local charon_radius = 0.53E5
+local hydra_radius = 0.53E5
 
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp"
-    }
-else
-    NewHorizonsKernels = {
-        "${SPICE}/NewHorizonsKernels/nh_p4p5_revised.bsp"
-    }
-end
+local NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp",
+}
 
 return {
     -- Hydra module
@@ -19,10 +13,10 @@ return {
             Type = "RenderablePlanet",
             Frame = "IAU_PLUTO",
             Body = "HYDRA",
-            Radius = charon_radius,
+            Radius = hydra_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = charon_radius,
+                Radius = hydra_radius,
                 Segments = 100
             },
             ColorTexture = "textures/gray.jpg",

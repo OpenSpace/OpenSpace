@@ -4,7 +4,7 @@ return {
         { Identifier = "newhorizons_textures", Destination = "textures", Version = 2 }
     },
     TorrentFiles = {
-        { File = "NewHorizonsKernels.torrent", Destination = "${SPICE}" },
+        { File = "new_horizons_kernels.torrent", Destination = "${SPICE}" },
         { File = "jup260.bsp.torrent", Destination = "${SPICE}" }
     }
 }

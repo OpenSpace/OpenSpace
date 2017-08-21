@@ -1,22 +1,13 @@
 local pluto_radius = 1.173E6
 
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_20170126/spk/NavPE_de433_od122.bsp",
-        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp"
-    }
-else
-    NewHorizonsKernels = {
-        "${SPICE}/NewHorizonsKernels/nh_plu017.bsp"
-    }
-end
-
-local Files = {
-    low = "textures/pluto_large.jpg",
-    med = "textures/Shenk_180.jpg",
-    high = "textures/pmap_cyl_HR_LOR_lowres.jpg"
+local NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavPE_de433_od122.bsp",
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp"
 }
-local ColorTexture = Files[TextureResolution]
+
+local ColorTexture = "textures/pluto.jpg"
+-- local ColorTexture = "textures/NH_Pluto_mosaic_16384.png"
+local HeightTexture = "textures/NH_Pluto_DTM_16384.png"
 
 return {
     -- Pluto barycenter module
@@ -45,7 +36,7 @@ return {
                 Segments = 100
             },
             ColorTexture = ColorTexture,
-            HeightTexture = "textures/pluto_shenk_heightmap.jpg",
+            HeightTexture = HeightTexture,
             Projection = {
                 Sequence       = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/images",
                 EventFile      = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",

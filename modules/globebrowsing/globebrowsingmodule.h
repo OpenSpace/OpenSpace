@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/glm.h>
 #include <memory>
+#include <future>
 
 namespace openspace::globebrowsing {
     class RenderableGlobe;
@@ -56,6 +57,30 @@ public:
     scripting::LuaLibrary luaLibrary() const override;
     globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
 
+#ifdef GLOBEBROWSING_USE_GDAL
+
+    struct Layer {
+        std::string name;
+        std::string url;
+    };
+    using Capabilities = std::vector<Layer>;
+
+    // Stores the mapping between globe to names
+    struct UrlInfo {
+        std::string name;
+        std::string url;
+    };
+
+    // Registers then user-usable name
+    void loadWMSCapabilities(std::string name, std::string globe, std::string url);
+    Capabilities capabilities(const std::string& name);
+
+    std::vector<UrlInfo> urlInfo(const std::string& globe) const;
+
+    void removeWMSServer(const std::string& name);
+
+#endif // GLOBEBROWSING_USE_GDAL
+
 protected:
     void internalInitialize() override;
 
@@ -80,6 +105,18 @@ private:
     static std::string layerTypeNamesList();
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
+
+#ifdef GLOBEBROWSING_USE_GDAL
+
+    // name -> capabilities
+    std::map<std::string, std::future<Capabilities>> _inFlightCapabilitiesMap;
+    // name -> capabilities
+    std::map<std::string, Capabilities> _capabilitiesMap;
+
+
+    std::multimap<std::string, UrlInfo> _urlList;
+
+#endif // GLOBEBROWSING_USE_GDAL
 };
 
 } // namespace openspace
