@@ -66,6 +66,13 @@ module.exports = {
           name: 'fonts/[name].[ext]',
         },
       },
+      {
+        test: /\.(png)$/,
+        loader: 'file-loader',
+        options: {
+          name: 'img/[name].[ext]',
+        },
+      },
     ],
   },
   resolve: {
