@@ -31,7 +31,7 @@ in vec2 vs_st;
 
 uniform sampler2D baseTexture;
 uniform sampler2D projectionTexture;
-uniform bool shiftMeridian;
+uniform bool _meridianShift;
 
 uniform float _projectionFading;
 
@@ -41,7 +41,7 @@ uniform vec3 sun_pos;
 
 Fragment getFragment() {
     vec2 st = vs_st;
-    if (shiftMeridian) {
+    if (_meridianShift) {
         st.s += 0.5;
     }
 

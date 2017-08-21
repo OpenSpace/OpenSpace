@@ -5,10 +5,6 @@ local NewHorizonsKernels = {
     "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp"
 }
 
-local ColorTexture = "textures/pluto.jpg"
--- local ColorTexture = "textures/NH_Pluto_mosaic_16384.png"
-local HeightTexture = "textures/NH_Pluto_DTM_16384.png"
-
 return {
     -- Pluto barycenter module
     {
@@ -33,14 +29,15 @@ return {
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = pluto_radius,
-                Segments = 100
+                Segments = 400
             },
-            ColorTexture = ColorTexture,
-            HeightTexture = HeightTexture,
+            ColorTexture = pluto_image,
+            HeightTexture = pluto_height,
+            MeridianShift = true,
             Projection = {
                 Sequence       = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/images",
                 EventFile      = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
-                SequenceType   = "hybrid",
+                SequenceType   = "image-sequence",
                 Observer       = "NEW HORIZONS",
                 Target         = "PLUTO",
                 Aberration     = "NONE",

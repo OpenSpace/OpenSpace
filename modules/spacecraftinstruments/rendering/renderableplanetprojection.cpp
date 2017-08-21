@@ -82,6 +82,15 @@ namespace {
         "potential height field. A value of '0' inhibits the height field, whereas a "
         "value of '1' uses the measured height field."
     };
+
+    static const openspace::properties::Property::PropertyInfo MeridianShiftInfo = {
+        "MeridianShift",
+        "Meridian Shift",
+        "If this value is enabled, a shift of the meridian by 180 degrees is performed. "
+        "This is a fix especially for Pluto height maps, where the definition of the "
+        "meridian has changed through the New Horizons mission and this requires this "
+        "shift."
+    };
 } // namespace
 
 namespace openspace {
@@ -127,6 +136,12 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 HeightExaggerationInfo.description
+            },
+            {
+                MeridianShiftInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                MeridianShiftInfo.description
             }
         }
     };
@@ -141,6 +156,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _baseTexture(nullptr)
     , _heightMapTexture(nullptr)
     , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 100.f)
+    , _meridianShift(MeridianShiftInfo, false)
     , _capture(false)
 {
     documentation::testSpecificationAndThrow(
@@ -177,6 +193,10 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         _heightMapTexturePath = absPath(heightMapPath);
     }
 
+    if (dictionary.hasKeyAndValue<bool>(MeridianShiftInfo.identifier)) {
+        _meridianShift = dictionary.value<bool>(MeridianShiftInfo.identifier);
+    }
+
     float radius = std::pow(10.f, 9.f);
     dictionary.getValue(KeyRadius, radius);
     setBoundingSphere(radius);
@@ -197,6 +217,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
 
     addProperty(_heightExaggeration);
+
+    addProperty(_meridianShift);
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
@@ -429,6 +451,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
+    _programObject->setUniform("_meridianShift", _meridianShift);
     _programObject->setUniform("_projectionFading", _projectionComponent.projectionFading());
 
     //_programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
@@ -491,8 +514,8 @@ bool RenderablePlanetProjection::loadTextures() {
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
-            _baseTexture->uploadTexture();
             _baseTexture->setFilter(Texture::FilterMode::Linear);
+            _baseTexture->uploadTexture();
         }
     }
 
