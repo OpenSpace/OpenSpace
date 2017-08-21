@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 
 import '../styles/base.scss';
-import styles from './App.scss';
-import Sidebar from './Sidebar/Sidebar';
-import BottomBar from './BottomBar/BottomBar';
-import Error from './common/Error/Error';
-import DisruptiveMessage from './common/DisruptiveMessage/DisruptiveMessage';
+import styles from './OnScreenGui.scss';
+import Sidebar from '../components/Sidebar/Sidebar';
+import BottomBar from '../components/BottomBar/BottomBar';
+import Error from '../components/common/Error/Error';
+import Overlay from '../components/common/Overlay/Overlay';
 import Connection from '../api/Connection';
 import DataManager from '../api/DataManager';
 
-class App extends Component {
+class OnScreenGui extends Component {
   constructor(props) {
     super(props);
 
@@ -75,11 +75,11 @@ class App extends Component {
     return (
       <div className={styles.app}>
         { this.state.connectionLost && (
-          <DisruptiveMessage>
+          <Overlay>
             <Error>
               Connection lost. Trying to reconnect again soon.
             </Error>
-          </DisruptiveMessage>
+          </Overlay>
         )}
         <section className={styles.Grid__Left}>
           <Sidebar />
@@ -92,4 +92,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default OnScreenGui;

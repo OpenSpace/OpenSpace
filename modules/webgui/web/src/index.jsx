@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 // AppContainer is a necessary wrapper component for hot module reloading
 import { AppContainer } from 'react-hot-loader';
 
-import App from './components/App';
+import App from './App';
 
 /* global document */
 
@@ -20,5 +20,5 @@ render(App);
 
 // Hot Module Replacement API
 if (module.hot) {
-  module.hot.accept('./components/App', () => render(App));
+  module.hot.accept('./App', () => render(App));
 }
