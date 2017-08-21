@@ -622,7 +622,9 @@ void main() {
                     
             renderTarget = finalRadiance;
           }      
-        } 
+        } else {
+          discard;
+        }
       } else if ( RenderableClass == RenderableGlobe) {
         // Get the ray from camera to atm in object space
         dCalculateRayRenderableGlobe(ray, planetPositionObjectCoords, cameraPositionInObject);
@@ -737,8 +739,12 @@ void main() {
             
             renderTarget = finalRadiance;
           }
-        } 
+        } else {
+          discard;
+        }
       }                     
-    } 
+    } else {
+      discard;
+    }
 }
 

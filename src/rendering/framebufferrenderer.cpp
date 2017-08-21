@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -708,69 +708,70 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         glEnable(GL_DEPTH_TEST);
 
         _hdrBackGroundProgram->deactivate();        
-    }
-    
-    for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
+      
+        for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
 
-        Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
+            Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
-        ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
+            ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
 
-        if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get() 
-            || deferredcastProgram == nullptr) {
-            deferredcastProgram = _deferredcastPrograms[deferredcaster].get();            
-        }        
+            if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get()
+                || deferredcastProgram == nullptr) {
+                deferredcastProgram = _deferredcastPrograms[deferredcaster].get();
+            }
 
-        if (deferredcastProgram) {
-            
-            deferredcastProgram->activate();
+            if (deferredcastProgram) {
 
-            // adding G-Buffer
-            ghoul::opengl::TextureUnit mainDColorTextureUnit;
-            mainDColorTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
-            deferredcastProgram->setUniform("mainColorTexture", mainDColorTextureUnit);
+                deferredcastProgram->activate();
 
-            ghoul::opengl::TextureUnit otherDataTextureUnit;
-            otherDataTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture);
-            deferredcastProgram->setUniform("otherDataTexture", otherDataTextureUnit);
+                // adding G-Buffer
+                ghoul::opengl::TextureUnit mainDColorTextureUnit;
+                mainDColorTextureUnit.activate();
+                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+                deferredcastProgram->setUniform("mainColorTexture", mainDColorTextureUnit);
 
-            ghoul::opengl::TextureUnit mainPositionTextureUnit;
-            mainPositionTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
-            deferredcastProgram->setUniform("mainPositionTexture", mainPositionTextureUnit);
+                ghoul::opengl::TextureUnit otherDataTextureUnit;
+                otherDataTextureUnit.activate();
+                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture);
+                deferredcastProgram->setUniform("otherDataTexture", otherDataTextureUnit);
 
-            ghoul::opengl::TextureUnit mainNormalTextureUnit;
-            mainNormalTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainNormalTexture);
-            deferredcastProgram->setUniform("mainNormalTexture", mainNormalTextureUnit);
+                ghoul::opengl::TextureUnit mainPositionTextureUnit;
+                mainPositionTextureUnit.activate();
+                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
+                deferredcastProgram->setUniform("mainPositionTexture", mainPositionTextureUnit);
 
-       
-            deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
-       
-            deferredcaster->preRaycast(deferredcasterTask.renderData, 
-                                       _deferredcastData[deferredcaster], 
-                                       *deferredcastProgram);
-            
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(false);
+                ghoul::opengl::TextureUnit mainNormalTextureUnit;
+                mainNormalTextureUnit.activate();
+                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainNormalTexture);
+                deferredcastProgram->setUniform("mainNormalTexture", mainNormalTextureUnit);
 
-            glBindVertexArray(_screenQuad);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glBindVertexArray(0);
 
-            glDepthMask(true);
-            glEnable(GL_DEPTH_TEST);
-            
-            deferredcaster->postRaycast(deferredcasterTask.renderData,
-                _deferredcastData[deferredcaster],
-                *deferredcastProgram);
+                deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
 
-            deferredcastProgram->deactivate();                        
+                deferredcaster->preRaycast(deferredcasterTask.renderData,
+                    _deferredcastData[deferredcaster],
+                    *deferredcastProgram);
 
-        } else {
-            LWARNING("Deferredcaster is not attached when trying to perform deferred task");
+                //glDisable(GL_DEPTH_TEST);
+                //glDepthMask(false);
+
+                glBindVertexArray(_screenQuad);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+                glBindVertexArray(0);
+
+                //glDepthMask(true);
+                //glEnable(GL_DEPTH_TEST);
+
+                deferredcaster->postRaycast(deferredcasterTask.renderData,
+                    _deferredcastData[deferredcaster],
+                    *deferredcastProgram);
+
+                deferredcastProgram->deactivate();
+
+            }
+            else {
+                LWARNING("Deferredcaster is not attached when trying to perform deferred task");
+            }
         }
     }
     
