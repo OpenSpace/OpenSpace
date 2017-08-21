@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import DataManager from '../../api/DataManager';
 import Icon from '../common/Icon/Icon';
 import Button from '../common/Input/Button/Button';
@@ -62,8 +63,11 @@ class SystemMenu extends Component {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                About OpenSpace
+                openspaceproject.com
               </a>
+              <Link to="about">
+                About
+              </Link>
             </nav>
           </Popover>
         )}

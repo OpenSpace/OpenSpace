@@ -7,6 +7,7 @@ $background-transition: background $animation-duration $animation-easing;
 $loading-animation: loading-pulse $loading-animation-duration $loading-easing infinite;
 $fade-in-animation: fade-in $animation-duration $animation-easing;
 $appear-animation: appear $animation-duration $animation-easing;
+$slide-up-animation: slide-up 1000ms $animation-easing;
 
 @keyframes loading-pulse {
   0% {
@@ -34,5 +35,16 @@ $appear-animation: appear $animation-duration $animation-easing;
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

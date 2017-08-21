@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import '../styles/base.scss';
 import styles from './OnScreenGui.scss';
 import Sidebar from '../components/Sidebar/Sidebar';
@@ -8,6 +8,8 @@ import Error from '../components/common/Error/Error';
 import Overlay from '../components/common/Overlay/Overlay';
 import Connection from '../api/Connection';
 import DataManager from '../api/DataManager';
+import About from './About/About';
+import Stack from '../components/common/Stack/Stack';
 
 class OnScreenGui extends Component {
   constructor(props) {
@@ -74,6 +76,22 @@ class OnScreenGui extends Component {
   render() {
     return (
       <div className={styles.app}>
+        <Router basename="/onscreen/">
+          <Route
+            path="/about"
+            render={() => (
+              <Overlay>
+                <Stack style={{ maxWidth: '500px' }}>
+                  <Link style={{ 'align-self': 'flex-end', color: 'white' }} to="/">
+                    Close
+                  </Link>
+                  <About />
+                </Stack>
+              </Overlay>
+            )}
+          />
+        </Router>
+
         { this.state.connectionLost && (
           <Overlay>
             <Error>
