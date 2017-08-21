@@ -9,6 +9,7 @@ import Picker from './Picker';
 import Time from '../common/Input/Time/Time';
 import { TogglePauseScript, CurrenTimeKey, ValuePlaceholder, SetDeltaTimeScript } from '../../api/keys';
 import SimulationIncrement from './SimulationIncrement';
+import styles from './TimePicker.scss';
 
 /**
  * Make sure the date string contains a time zone
@@ -118,7 +119,7 @@ class TimePicker extends Component {
     const { showPopover } = this.state;
     return (
       <div className={Picker.Wrapper}>
-        <Picker onClick={this.togglePopover} className={(showPopover ? Picker.Active : '')}>
+        <Picker onClick={this.togglePopover} className={`${styles.timePicker} ${showPopover ? Picker.Active : ''}`}>
           <div className={Picker.Title}>
             <span className={Picker.Name}>
               <LoadingString loading={!this.state.hasTime}>
@@ -128,6 +129,7 @@ class TimePicker extends Component {
             <SmallLabel>Date</SmallLabel>
           </div>
         </Picker>
+
         { showPopover && this.popover }
       </div>
     );
