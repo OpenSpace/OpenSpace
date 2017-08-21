@@ -30,7 +30,10 @@
 using nlohmann::json;
 
 namespace {
-std::string _loggerCat = "GetPropertyTopic";
+const char* _loggerCat = "GetPropertyTopic";
+const char* AllPropertiesValue = "__allProperties";
+const char* AllNodesValue = "__allNodes";
+const char* PropertyKey = "property";
 }
 
 namespace openspace {
@@ -38,19 +41,18 @@ namespace openspace {
 GetPropertyTopic::GetPropertyTopic()
         : Topic() {}
 
-
 bool GetPropertyTopic::isDone() {
     return true;
 }
 
 void GetPropertyTopic::handleJson(json j) {
-    std::string requestedKey = j.at("propertyUri").get<std::string>();
+    std::string requestedKey = j.at(PropertyKey).get<std::string>();
     LDEBUG("Getting property '" + requestedKey + "'...");
     json response;
-    if (requestedKey == "__allProperties") {
+    if (requestedKey == AllPropertiesValue) {
         response = getAllProperties();
     }
-    else if (requestedKey == "__allNodes") {
+    else if (requestedKey == AllNodesValue) {
         response = wrappedPayload(sceneGraph()->allSceneGraphNodes());
     }
     else {

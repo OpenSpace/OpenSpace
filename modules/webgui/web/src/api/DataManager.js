@@ -77,7 +77,7 @@ class DataManager {
     const message = this.wrapMessage({
       type: TOPIC_TYPES.get,
       payload: {
-        propertyUri: key,
+        property: key,
       },
     });
     const callback = (...args) => {
