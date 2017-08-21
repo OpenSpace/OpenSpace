@@ -10,7 +10,7 @@ class NumericInput extends Component {
 
     this.state = {
       value: props.value,
-      showInput: false,
+      showTextInput: false,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -38,20 +38,20 @@ class NumericInput extends Component {
     this.props.onChange(event);
   }
 
-  get showInput() {
-    return this.props.inputOnly || this.state.showInput;
+  get showTextInput() {
+    return this.props.inputOnly || this.state.showTextInput;
   }
 
   toggleInput() {
     if (this.props.disableInput) return;
 
-    this.setState({ showInput: !this.state.showInput });
+    this.setState({ showTextInput: !this.state.showTextInput });
   }
 
   render() {
     const { value } = this.state;
 
-    if (this.showInput) {
+    if (this.showTextInput) {
       return (
         <Input
           {...excludeKeys(this.props, 'disableInput inputOnly')}
@@ -69,7 +69,10 @@ class NumericInput extends Component {
     const inheritedProps = excludeKeys(this.props, doNotInclude);
 
     return (
-      <div className={`${styles.inputGroup} ${wide ? styles.wide : ''}`}>
+      <div
+        className={`${styles.inputGroup} ${wide ? styles.wide : ''}`}
+        onDoubleClick={this.toggleInput}
+      >
         <input
           {...inheritedProps}
           type="range"
@@ -81,7 +84,7 @@ class NumericInput extends Component {
         <label htmlFor={id} className={`${styles.rangeLabel}`}>
           {placeholder}
         </label>
-        <span className={styles.value} onClick={this.toggleInput}>
+        <span className={styles.value} onClick={this.toggleInput} role="button" tabIndex={0}>
           {value}
         </span>
       </div>

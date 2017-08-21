@@ -10,7 +10,6 @@
 .rangeLabel {
   @extend .label;
   display: block;
-  pointer-events: none;
 }
 
 .value {
