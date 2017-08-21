@@ -106,10 +106,10 @@ class SimulationIncrement extends Component {
     if (value !== 0) {
       this.beforeAdjust = this.beforeAdjust || this.state.deltaTime;
       const quickAdjust = (value ** 5);
-      UpdateDeltaTime(this.beforeAdjust * quickAdjust);
+      UpdateDeltaTimeNow(this.beforeAdjust * quickAdjust);
     } else {
       UpdateDeltaTime.cancel();
-      UpdateDeltaTimeNow(this.beforeAdjust);
+      UpdateDeltaTimeNow(this.beforeAdjust || 1);
       this.beforeAdjust = null;
     }
   }
@@ -128,18 +128,18 @@ class SimulationIncrement extends Component {
     return (
       <div>
         <Row>
+          <NumericInput
+            {...this.limits}
+            onChange={this.setDeltaTime}
+            placeholder={`${stepSize} / step`}
+            value={adjustedDelta}
+          />
           <Select
             direction="up"
             label="Step size"
             onChange={this.setStepSize}
             options={options}
             value={stepSize}
-          />
-          <NumericInput
-            {...this.limits}
-            onChange={this.setDeltaTime}
-            placeholder={`${stepSize} per step`}
-            value={adjustedDelta}
           />
         </Row>
         <div style={{ height: '10px' }} />
