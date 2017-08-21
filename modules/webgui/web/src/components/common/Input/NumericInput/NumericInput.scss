@@ -49,8 +49,12 @@
   margin: 0;
 
   // reset styles
-  background: transparent;
+  background: $ui-background-hover;
   -webkit-appearance: none;
+
+  &:hover {
+    background: transparent;
+  }
 
   &:focus {
     outline: 0;
