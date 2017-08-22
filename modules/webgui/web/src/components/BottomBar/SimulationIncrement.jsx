@@ -131,12 +131,12 @@ class SimulationIncrement extends Component {
           <NumericInput
             {...this.limits}
             onChange={this.setDeltaTime}
-            placeholder={`${stepSize} / step`}
+            placeholder={`${stepSize} / second`}
             value={adjustedDelta}
           />
           <Select
             direction="up"
-            label="Step size"
+            label="Display unit"
             onChange={this.setStepSize}
             options={options}
             value={stepSize}
