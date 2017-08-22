@@ -22,31 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
-
-#include <memory>
-#include <include/cef_client.h>
-#include <include/cef_life_span_handler.h>
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
-#include "webrenderhandler.h"
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+const char* _loggerCat = "DefaultBrowserLauncher";
+}
 
 namespace openspace {
 
-class BrowserClient : public CefClient {
-public:
-    BrowserClient(WebRenderHandler*);
-
-    virtual CefRefPtr<CefRenderHandler> GetRenderHandler();
-    CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler();
-
-private:
-    CefRefPtr<CefRenderHandler> _renderHandler;
-    CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
-
-    IMPLEMENT_REFCOUNTING(BrowserClient);
-};
+bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
+    const CefPopupFeatures& popupFeatures,
+    CefWindowInfo& windowInfo,
+    const CefString& url,
+    CefRefPtr<CefClient>& client,
+    CefBrowserSettings& settings) {
+    // never permit CEF popups, always launch in default browser
+    LDEBUG("Launching default browser: " + url.ToString());
+    ShellExecute(0, 0, url.ToString().c_str(), 0, 0, SW_SHOW);
+    return true;
+}
 
 } // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__

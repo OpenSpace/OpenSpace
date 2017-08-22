@@ -22,31 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
+#ifndef __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
+#define __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
 
-#include <memory>
-#include <include/cef_client.h>
 #include <include/cef_life_span_handler.h>
-#include <modules/webbrowser/include/defaultbrowserlauncher.h>
-#include "webrenderhandler.h"
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 
-class BrowserClient : public CefClient {
+class DefaultBrowserLauncher : public CefLifeSpanHandler {
 public:
-    BrowserClient(WebRenderHandler*);
-
-    virtual CefRefPtr<CefRenderHandler> GetRenderHandler();
-    CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler();
+    bool OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser, 
+        const CefPopupFeatures& popupFeatures, 
+        CefWindowInfo& windowInfo, 
+        const CefString& url, 
+        CefRefPtr<CefClient>& client, 
+        CefBrowserSettings& settings);
+    bool DoClose(CefRefPtr< CefBrowser > browser) { LDEBUGC("wat", "doclose"); return false; };
+    void OnAfterCreated(CefRefPtr< CefBrowser > browser) { LDEBUGC("wat", "onaftercreated"); };
+    void OnBeforeClose(CefRefPtr< CefBrowser > browser) { LDEBUGC("wat", "onbeforeclose"); };
+    bool RunModal(CefRefPtr< CefBrowser > browser) { LDEBUGC("wat", "runmodal"); };
 
 private:
-    CefRefPtr<CefRenderHandler> _renderHandler;
-    CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
-
-    IMPLEMENT_REFCOUNTING(BrowserClient);
+    IMPLEMENT_REFCOUNTING(DefaultBrowserLauncher);
 };
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
+#endif  // __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__

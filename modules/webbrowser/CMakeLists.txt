@@ -76,6 +76,7 @@ set(WEBBROWSER_SOURCES
     src/browserclient.cpp
     src/eventhandler.cpp
     src/webbrowserapp.cpp
+    src/defaultbrowserlauncher.cpp
     )
 set(WEBBROWSER_SOURCES_LINUX
     )
@@ -179,6 +180,7 @@ set(OPENSPACE_HEADER_FILES
     include/browserinstance.h
     include/eventhandler.h
     include/webbrowserapp.h
+    include/defaultbrowserlauncher.h
     include/cefhost.h
     )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
@@ -192,6 +194,7 @@ set(OPENSPACE_SOURCE_FILES
     src/browserinstance.cpp
     src/eventhandler.cpp
     src/webbrowserapp.cpp
+    src/defaultbrowserlauncher.cpp
     src/cefhost.cpp
     )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})

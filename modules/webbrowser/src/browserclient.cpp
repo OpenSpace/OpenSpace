@@ -24,15 +24,21 @@
 
 
 #include "include/browserclient.h"
+#include <modules/webbrowser/include/defaultbrowserlauncher.h>
 
 namespace openspace {
 
 BrowserClient::BrowserClient(WebRenderHandler* handler) {
     _renderHandler = handler;
+    _lifeSpanHandler = new DefaultBrowserLauncher;
 };
 
 CefRefPtr<CefRenderHandler> BrowserClient::GetRenderHandler() {
     return _renderHandler;
+}
+
+CefRefPtr<CefLifeSpanHandler> BrowserClient::GetLifeSpanHandler() {
+    return _lifeSpanHandler;
 }
 
 } // namespace openspace
