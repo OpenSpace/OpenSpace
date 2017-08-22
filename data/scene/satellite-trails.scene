@@ -119,7 +119,7 @@ return {
         -- "neptune",
         "stars",
         -- "stars-denver",
-        "milkyway",
+        --"milkyway",
         "milkyway-eso",
         --"constellationbounds",
         "missions/sdo",

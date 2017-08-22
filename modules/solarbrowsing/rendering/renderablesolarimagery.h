@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERY___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERY___H__
 
+#define SOLAR_BUFFER_SIZE 10
+
 // TODO(mnoven): A-Z
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -105,7 +107,7 @@ private:
     TransferFunction* _lut;
     std::unique_ptr<PixelBufferObject> _pbo;
 
-    std::array<std::unique_ptr<PixelBufferObject>, 5> _pbos;
+    std::array<std::unique_ptr<PixelBufferObject>, SOLAR_BUFFER_SIZE> _pbos;
     //std::queue<int> _enqueuedPboIds;
 
     // TODO: Remove these?
@@ -126,13 +128,12 @@ private:
     std::queue<PixelBufferObject*> _pboQueue;
     std::unordered_set<int> _busyPbos;
 
-    bool _isWithinFrustumLast = true;
     std::string _name;
     StreamBuffer<SolarImageData> _streamBuffer;
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
     std::string _currentActiveInstrument;
     std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>> _imageMetadataMap2;
-    std::unordered_set<std::string> _instrumentFilter;
+    //std::unordered_set<std::string> _instrumentFilter;
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
 
     DecodeData getDecodeDataFromOsTime(const int& osTime);

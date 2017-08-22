@@ -49,8 +49,6 @@
 #include <chrono>
 #include <math.h>
 
-#define BUFFER_SIZE 5
-
 using namespace ghoul::opengl;
 using namespace std::chrono;
 
@@ -60,6 +58,7 @@ namespace {
     static const std::string _loggerCat = "RenderableSolarImagery";
     //double HALF_SUN_RADIUS = (1391600000.0 * 0.50); // Half sun radius divided by magic factor
     const double EPSILON = std::numeric_limits<double>::epsilon();
+    bool _isWithinFrustumLast = true;
 }
 
 namespace openspace {
@@ -137,21 +136,20 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     // }
     //_fullResolution = static_cast<unsigned int>(tmpResolution);
 
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
-        ghoul::Dictionary instrumentDic = dictionary.value<ghoul::Dictionary>("Instruments");
-        for (size_t i = 1; i <= instrumentDic.size(); ++i) {
-            if (!instrumentDic.hasKeyAndValue<std::string>(std::to_string(i))) {
-                throw ghoul::RuntimeError("Instruments has to be an array-style table");
-            }
-            std::string instrument = instrumentDic.value<std::string>(std::to_string(i));
-            std::transform(instrument.begin(), instrument.end(), instrument.begin(),
-                           ::tolower);
-            _instrumentFilter.insert(instrument);
-        }
-    }
+    // if (dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
+    //     ghoul::Dictionary instrumentDic = dictionary.value<ghoul::Dictionary>("Instruments");
+    //     for (size_t i = 1; i <= instrumentDic.size(); ++i) {
+    //         if (!instrumentDic.hasKeyAndValue<std::string>(std::to_string(i))) {
+    //             throw ghoul::RuntimeError("Instruments has to be an array-style table");
+    //         }
+    //         std::string instrument = instrumentDic.value<std::string>(std::to_string(i));
+    //         std::transform(instrument.begin(), instrument.end(), instrument.begin(),
+    //                        ::tolower);
+    //         _instrumentFilter.insert(instrument);
+    //     }
+    // }
 
-
-    //SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2, _instrumentFilter);
+    //SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2);
     //saveMetadata(rootPath);
     loadMetadata(rootPath);
 
@@ -174,7 +172,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
     }
 
-    SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap, _instrumentFilter);
+    SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap);
     //std::string tfRootPath;
     //if (dictionary.getValue("TransferfunctionPath", tfRootPath)) {
         //throw ghoul::RuntimeError("TransferfunctionPath has to be specified");
@@ -182,14 +180,14 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     // Some sanity checks
     if (_imageMetadataMap2.size() == 0) {
-        if (_instrumentFilter.size() > 0) {
-            LERROR("Could not find any instruments that match specified filter");
-            for (auto& filter : _instrumentFilter) {
-                LERROR(filter);
-            }
-        } else {
+        // if (_instrumentFilter.size() > 0) {
+        //     LERROR("Could not find any instruments that match specified filter");
+        //     for (auto& filter : _instrumentFilter) {
+        //         LERROR(filter);
+        //     }
+        // } else {
             LERROR("Images map is empty! Check your path");
-        }
+       // }
     }
 
     // Get image size
@@ -202,7 +200,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     // Always give PBO maximum size
     //_pbo = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
 
-    for (int i = 0; i < BUFFER_SIZE; ++i) {
+    for (int i = 0; i < SOLAR_BUFFER_SIZE; ++i) {
         _pbos[i] = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
     }
 
@@ -690,7 +688,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         _deltaTimeLast = dt;
     }
 
-    if (/*_streamBuffer.numJobs() */_pboQueue.size() < /*_bufferSize*/ BUFFER_SIZE && (_isWithinFrustum || _initializePBO)) {
+    if (/*_streamBuffer.numJobs() */_pboQueue.size() < /*_bufferSize*/ SOLAR_BUFFER_SIZE && (_isWithinFrustum || _initializePBO)) {
         // Always add to buffer faster than pop ..
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
         // The min real time update interval doesnt make any sense
@@ -731,7 +729,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 }
 
 PixelBufferObject* RenderableSolarImagery::getAvailablePbo() {
-    for (int i = 0; i < BUFFER_SIZE; ++i) {
+    for (int i = 0; i < SOLAR_BUFFER_SIZE; ++i) {
         if (_busyPbos.count(_pbos[i]->id()) == 0) {
             _busyPbos.insert(_pbos[i]->id());
             return _pbos[i].get();

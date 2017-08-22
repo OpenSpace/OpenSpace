@@ -51,8 +51,7 @@ private:
 
 /**
  * The streambuffer is a queue for streaming frames or other
- * data that is meant to be processed in order - only 1 thread can be used using the
- * concurrent job manager for the jobs to be processed in order.
+ * data that is meant to be processed in order on multiple threads.
  * It keeps track of unique id's to never pop an already enqueud job
  * when cleared.
  */

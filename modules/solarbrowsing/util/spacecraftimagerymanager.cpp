@@ -25,7 +25,6 @@
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <ghoul/opengl/texture.h>
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
@@ -46,51 +45,50 @@ using namespace ghoul::opengl;
 namespace {
     const std::string _loggerCat = "SpacecraftImageryManager";
     // Might be needed for fits compability later
-    //std::vector<std::string> _headerKeywords = {"EXPTIME", "BITPIX", "DATAVALS"};
-    const double SUN_RADIUS = (1391600000.0 * 0.50);
+    const double SUN_RADIUS = 1391600000.0 * 0.50;
 }
 
 namespace openspace {
 
 SpacecraftImageryManager::SpacecraftImageryManager() {}
 
-void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
-                                                    const unsigned int tileWidth,
-                                                    const unsigned int tileHeight)
-{
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::Yes);
+// void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
+//                                                     const unsigned int tileWidth,
+//                                                     const unsigned int tileHeight)
+// {
+//     using RawPath = ghoul::filesystem::Directory::RawPath;
+//     using Recursive = ghoul::filesystem::Directory::RawPath;
+//     using Sort = ghoul::filesystem::Directory::Sort;
+//     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+//     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::Yes);
 
-    int limit=0;
-     for (auto seqPath : sequencePaths) {
-        if(limit++ == 10) break;
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "j2k" || extension == "jp2") {
-                    const std::string relativePath = FileSys.relativePath(seqPath);
-                    const std::string outPath = FileSys.relativePath(path + "/converted/" + currentFile.filename()).c_str();
+//     int limit=0;
+//      for (auto seqPath : sequencePaths) {
+//         if(limit++ == 10) break;
+//         if (size_t position = seqPath.find_last_of(".") + 1) {
+//             if (position != std::string::npos) {
+//                 ghoul::filesystem::File currentFile(seqPath);
+//                 std::string extension = currentFile.fileExtension();
+//                 if (extension == "j2k" || extension == "jp2") {
+//                     const std::string relativePath = FileSys.relativePath(seqPath);
+//                     const std::string outPath = FileSys.relativePath(path + "/converted/" + currentFile.filename()).c_str();
 
-                    SimpleJ2kCodec j2c;
-                    auto decodedImg = j2c.Decode(relativePath, 0);
-                    j2c.EncodeAsTiles(outPath.c_str(),
-                                      decodedImg->data,
-                                      decodedImg->w,
-                                      decodedImg->h,
-                                      /*tileWidth=*/tileWidth,
-                                      /*tileHeight=*/tileHeight,
-                                      /*numComps=*/1,
-                                      /*compPrec=*/8);
-                }
-            }
-        }
-        LDEBUG("Finished converting " << seqPath);
-    }
-}
+//                     SimpleJ2kCodec j2c;
+//                     auto decodedImg = j2c.Decode(relativePath, 0);
+//                     j2c.EncodeAsTiles(outPath.c_str(),
+//                                       decodedImg->data,
+//                                       decodedImg->w,
+//                                       decodedImg->h,
+//                                       /*tileWidth=*/tileWidth,
+//                                       /*tileHeight=*/tileHeight,
+//                                       /*numComps=*/1,
+//                                       /*compPrec=*/8);
+//                 }
+//             }
+//         }
+//         LDEBUG("Finished converting " << seqPath);
+//     }
+// }
 
 void SpacecraftImageryManager::loadTransferFunctions(
     const std::string& path,
@@ -114,14 +112,13 @@ void SpacecraftImageryManager::loadTransferFunctions(
                 std::string extension = currentFile.fileExtension();
                 if (extension == "txt") {
                     std::string key = currentFile.baseName();
-                    //std::string filterKey = key;
-                    //std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
-                      //             ::tolower);
+                    // std::string filterKey = key;
+                    // std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
+                    //                ::tolower);
 
                     // If filter is empty or value exist
-                    //if (_filter.size() == 0
-                      //  || _filter.find(filterKey) != _filter.end()) {
-                        LWARNING("loading " << key);
+                   // if (_filter.size() == 0
+                   //     || _filter.find(filterKey) != _filter.end()) {
                         _tfMap[key] = std::make_shared<TransferFunction>(seqPath);
                     //}
                 }
@@ -130,63 +127,17 @@ void SpacecraftImageryManager::loadTransferFunctions(
     }
 }
 
-void SpacecraftImageryManager::loadTransferFunctions(
-    const std::string& path,
-    std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap,
-    const std::unordered_set<std::string>& _filter)
-{
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
-
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load directory '" << sequenceDir.path() << "'");
-    }
-
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
-
-    for (auto seqPath : sequencePaths) {
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "txt") {
-                    std::string key = currentFile.baseName();
-                    std::string filterKey = key;
-                    std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
-                                   ::tolower);
-
-                    // If filter is empty or value exist
-                    if (_filter.size() == 0
-                        || _filter.find(filterKey) != _filter.end()) {
-                        _tfMap[key] = std::make_shared<TransferFunction>(seqPath);
-                    }
-                }
-            }
-        }
-    }
-}
-
 ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::File& file) {
-    auto t1 = Clock::now();
-
     ImageMetadata im;
-    // const std::string preprocessedFilename = std::string(file.fullBaseName() + ".bmp");
-    // if (FileSys.fileExists(preprocessedFilename)) {
-    //     LDEBUG("Setting pre processed " << preprocessedFilename);
-    //     im.preprocessedFilename = preprocessedFilename;
-    // } else {
-    //     im.preprocessedFilename = "";
-    // }
-
     const std::string filename = std::string(file.fullBaseName() + ".json");
 
     if (!FileSys.fileExists(filename)) {
-        LERROR(file.fullBaseName() << " had no metadata");
+        LERROR(file.fullBaseName() << " had no specified json metadata");
+        // TODO: Hardcode values here
         return im;
     }
 
+    // Parse JSON metadata
     using json = nlohmann::json;
 
     std::ifstream i(filename);
@@ -200,26 +151,25 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
 
     json value = data["TELESCOP"];
     if (value.is_null() && !value.is_string()) {
-        LERROR("Metadata did not hold information about type of spacecraft");
+        LERROR("Metadata did contain information about type of spacecraft");
         return im;
     }
     im.filename = file.path();
-   // im.spacecraftType = value;
     // TODO: value might not exist
     std::string spacecraftType = value;
 
     //int res = data["NAXIS1"];
     value = data["NAXIS1"];
     if (value.is_null()) {
-        LERROR("Metadata did not hold information about resolution");
+        LERROR("Metadata did not contain information about resolution");
     }
-    std::string sFullResolution = value;
+    const std::string sFullResolution = value;
     im.fullResolution = std::stoi(sFullResolution);
     // Special case of sdo - RSUN is given in pixels
     // For SOHO the radius of the sun is not specified - we instead use platescl
     if (spacecraftType == "SOHO") {
-        std::string sScale = data["PLATESCL"];
-        float plateScale = stof(sScale);
+        const std::string sScale = data["PLATESCL"];
+        const float plateScale = stof(sScale);
         im.scale = 1.0 / (plateScale / 2.0);
         im.isCoronaGraph = true;
     } else {
@@ -239,11 +189,8 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
             const float cdelt1 = stof(sCdelt1);
             const float sunRadiusArcsec = stof(sSunRadiusArcsec);
             sunRadiusPixels = sunRadiusArcsec / cdelt1;
-            //sunRadiusPixels = stof(sSunRadiusPixels);
             im.isCoronaGraph = false;
-        }
-        // STEREO has RSUN specified in arcsecs - need to divide by factor
-        else {
+        } else { // STEREO has RSUN specified in arcsecs - need to divide by factor
             std::string sCdelt1 = data["CDELT1"];
             const float cdelt1 = stof(sCdelt1);
             std::string sSunRadiusArcsec = data["RSUN"];
@@ -264,92 +211,23 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
 
         }
 
-        float scale = sunRadiusPixels / (im.fullResolution / 2.f); //* SUN_RADIUS;
+        float scale = sunRadiusPixels / (im.fullResolution / 2.f);
         im.scale = scale;
     }
 
-    //LDEBUG("scale " << im.scale);
+    const std::string sCenterPixelX = data["CRPIX1"];
+    const std::string sCenterPixelY = data["CRPIX2"];
 
-    //float centerpixelX = data["CRPIX1"];
-    //float centerpixelY = data["CRPIX2"];
-    std::string sCenterPixelX = data["CRPIX1"];
-    std::string sCenterPixelY = data["CRPIX2"];
+    const float centerPixelX = stof(sCenterPixelX);
+    const float centerPixelY = stof(sCenterPixelY);
+    const float halfRes = im.fullResolution / 2.f;
 
-    float centerPixelX = stof(sCenterPixelX);
-    float centerPixelY = stof(sCenterPixelY);
-    float halfRes = im.fullResolution / 2.f;
-
-    float offsetX = ((halfRes - centerPixelX) / halfRes) * SUN_RADIUS;
-    float offsetY = ((halfRes - centerPixelY) / halfRes) * SUN_RADIUS;
+    const float offsetX = ((halfRes - centerPixelX) / halfRes) * SUN_RADIUS;
+    const float offsetY = ((halfRes - centerPixelY) / halfRes) * SUN_RADIUS;
 
     im.centerPixel = glm::vec2(offsetX, offsetY);
 
-    // Measure time
-    auto t2 = Clock::now();
-  // LDEBUG("Metadata parse time "
-    //       << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
-      //     << " ms" << std::endl);
     return im;
-
-}
-
-void SpacecraftImageryManager::loadVideoMetadata(const std::string& path, std::unordered_map<std::string, VideoMetadata>& _videoMetadata)
-{
-
-    LDEBUG("Begin loading video metadata");
-
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
-
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load directory '" << sequenceDir.path() << "'");
-    }
-
-    unsigned int count = 0;
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
-
-    for (auto seqPath : sequencePaths) {
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "h265") {
-                    // // TODO(mnoven): Prettify or read metadata instead
-                    VideoMetadata vm;
-
-                    std::string fileName = currentFile.filename();
-                    std::string startTime = "2012-07-12T00:00:33.62";
-                    std::string endTime = "2012-07-12T23:59:33.62";
-                    vm.frameUpdateInterval = 15;
-                    LDEBUG("path" << vm.path);
-                    vm.path = currentFile.path();
-                    vm.startTime = OsEng.timeManager().time().convertTime(startTime);
-                    std::cout << "starttime" << vm.startTime;
-                    vm.endTime = OsEng.timeManager().time().convertTime(endTime);
-                    vm.isCoronaGraph = false;
-                    vm.scale = 0.76827;
-                    vm.resolution = 4096;
-                    //vm.centerPixel = glm::vec2(2048.5, 2048.5);
-
-                    glm::vec2 centerPixel =glm::vec2(2048.5, 2048.5);
-                    float halfRes = vm.resolution / 2.f;
-
-                    float offsetX = ((halfRes - centerPixel.x) / halfRes) * SUN_RADIUS;
-                    float offsetY = ((halfRes - centerPixel.y) / halfRes) * SUN_RADIUS;
-
-                    vm.centerPixel = glm::vec2(offsetX, offsetY);
-
-                    // Read name from text file
-                    _videoMetadata["AIA_AIA_171"] = vm;
-                }
-            }
-        }
-    }
-
-    LDEBUG("Finish loading imagery metadata");
-    LDEBUG(count << " Images loaded");
 }
 
 void SpacecraftImageryManager::loadImageMetadata(
@@ -358,6 +236,7 @@ void SpacecraftImageryManager::loadImageMetadata(
 {
 
     LDEBUG("Begin loading imagery metadata");
+
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
 
@@ -390,10 +269,12 @@ void SpacecraftImageryManager::loadImageMetadata(
                     std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
                     size_t dot = instrumentName.rfind(".");
                     instrumentName = instrumentName.substr(0, dot);
-                    // std::string filterKey = instrumentName;
-                    // std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
-                    //                ::tolower);
-
+                    //std::string filterKey = instrumentName;
+                    //std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
+                     //              ::tolower);
+                    // If filter is empty or value exist
+                    //if (_filter.size() == 0
+                    //    || _filter.find(filterKey) != _filter.end()) {
                     count++;
                     // Time
                     std::vector<std::string> tokens;
@@ -414,82 +295,7 @@ void SpacecraftImageryManager::loadImageMetadata(
                           std::move(data),
                           OsEng.timeManager().time().convertTime(time), seqPath);
                     _imageMetadataMap[instrumentName].addState(std::move(timeState));
-                }
-            }
-        }
-    }
-
-    LDEBUG("Finish loading imagery metadata");
-    LDEBUG(count << " Images loaded");
-}
-
-void SpacecraftImageryManager::loadImageMetadata(
-      const std::string& path,
-      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap,
-      const std::unordered_set<std::string>& _filter)
-{
-
-    LDEBUG("Begin loading imagery metadata");
-
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
-
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load directory '" << sequenceDir.path() << "'");
-    }
-
-    unsigned int count = 0;
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
-
-    for (auto seqPath : sequencePaths) {
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "jp2" || extension == "j2k") {
-                    // // TODO(mnoven): Prettify or read metadata instead
-                    std::string fileName = currentFile.filename();
-                    size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
-                    std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
-
-                    // Name
-                    size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
-                    std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
-
-                    // Instrument
-                    size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
-                    std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
-                    size_t dot = instrumentName.rfind(".");
-                    instrumentName = instrumentName.substr(0, dot);
-                    std::string filterKey = instrumentName;
-                    std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
-                                   ::tolower);
-                    // If filter is empty or value exist
-                    if (_filter.size() == 0
-                        || _filter.find(filterKey) != _filter.end()) {
-                        count++;
-                        // Time
-                        std::vector<std::string> tokens;
-                        std::stringstream ss;
-                        ss.str(currentFile.filename());
-                        std:: string item;
-                        while (std::getline(ss, item, '_')) {
-                            tokens.push_back(item);
-                        }
-                        std::string time = tokens[0] + "-" + tokens[1] + "-" +
-                                           tokens[2] + "T" + tokens[4] + ":" +
-                                           tokens[5] + ":" + tokens[6] + "." + tokens[7];
-
-                        //auto t = OsEng.timeManager();
-                        const ImageMetadata im = parseMetadata(currentFile);
-                        std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
-                        TimedependentState<ImageMetadata> timeState(
-                              std::move(data),
-                              OsEng.timeManager().time().convertTime(time), seqPath);
-                        _imageMetadataMap[instrumentName].addState(std::move(timeState));
-                    }
+                    //}
                 }
             }
         }

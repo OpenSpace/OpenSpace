@@ -46,18 +46,12 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
 
-    # Video
-    #${CMAKE_CURRENT_SOURCE_DIR}/util/h265decoder.h
-
     ${CMAKE_CURRENT_SOURCE_DIR}/util/streambuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/streambuffer.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.inl
-    #${CMAKE_CURRENT_SOURCE_DIR}/util/videoplayer.h
-    #${CMAKE_CURRENT_SOURCE_DIR}/util/kakaduwrapper.h
 
-    #${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarvideo.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.h
@@ -67,7 +61,7 @@ set(HEADER_FILES
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.h
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.inl
     # Kakadu Headers
-    D:/solarbrowsingdata/kakadu/all_includes
+    #D:/solarbrowsingdata/kakadu/all_includes
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -101,7 +95,7 @@ set(MODULE_NAME openspace-module-solarbrowsing)
 #find_library(KDU_LIB kdu_v79R /home/noven/workspace/Kakadu/)
 #find_library(KDU_LIA kdu_a79R /home/noven/workspace/Kakadu/)
 #target_link_libraries(kdu_v79R "${KDU_LIB_PATH}")
-target_link_libraries(${MODULE_NAME} D:/solarbrowsingdata/kakadu/windows/kdu_v79R.lib D:/solarbrowsingdata/kakadu/windows/kdu_a79R.lib)
+#target_link_libraries(${MODULE_NAME} D:/solarbrowsingdata/kakadu/windows/kdu_v79R.lib D:/solarbrowsingdata/kakadu/windows/kdu_a79R.lib)
 include_external_library(${MODULE_NAME} openjp2 ${OPENJPEG_ROOT_DIR})
 #target_link_libraries(${MODULE_NAME} ${GROK_LIBRARY_NAME} ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${HEADER_FILES})

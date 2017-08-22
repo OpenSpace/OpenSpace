@@ -26,7 +26,7 @@ namespace openspace {
 
 template<typename T>
 StreamBuffer<T>::StreamBuffer()
-    : _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
+    : _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(4))
 {}
 
 template<typename T>
@@ -77,7 +77,6 @@ std::shared_ptr<T> StreamBuffer<T>::popFinishedJob() {
             _finishedJobs.erase(queueFrontId);
             return finishedJob->product();
         }
-        //return job->product();
     }
     return nullptr;
 }

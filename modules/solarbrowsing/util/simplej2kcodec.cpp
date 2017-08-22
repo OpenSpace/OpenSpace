@@ -529,7 +529,7 @@ void SimpleJ2kCodec::SetupDecoder(const int resolutionLevel, const int numQualit
 
     // NOTE: Broken internal multithreading
     // if (opj_has_thread_support()) {
-    //     if (!opj_codec_set_threads(_decoder, 2)) {
+    //     if (!opj_codec_set_threads(_decoder, 4)) {
     //         std::cerr << "Failed to set multi-threads threads" << std::endl;
     //     };
     // }
