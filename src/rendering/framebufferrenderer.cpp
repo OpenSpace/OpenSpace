@@ -752,15 +752,15 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                     _deferredcastData[deferredcaster],
                     *deferredcastProgram);
 
-                //glDisable(GL_DEPTH_TEST);
-                //glDepthMask(false);
+                glDisable(GL_DEPTH_TEST);
+                glDepthMask(false);
 
                 glBindVertexArray(_screenQuad);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
                 glBindVertexArray(0);
 
-                //glDepthMask(true);
-                //glEnable(GL_DEPTH_TEST);
+                glDepthMask(true);
+                glEnable(GL_DEPTH_TEST);
 
                 deferredcaster->postRaycast(deferredcasterTask.renderData,
                     _deferredcastData[deferredcaster],
