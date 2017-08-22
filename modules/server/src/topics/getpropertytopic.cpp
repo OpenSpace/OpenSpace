@@ -64,9 +64,7 @@ void GetPropertyTopic::handleJson(json j) {
 json GetPropertyTopic::getAllProperties() {
     json jsonProps = json::array();
     for (const auto &prop : allProperties()) {
-        const std::string &jsonString = prop->toJson();
-        json propAsJson = json::parse(jsonString);
-        jsonProps.push_back(propAsJson);
+        jsonProps.push_back(prop);
     }
     json payload{{ "value", jsonProps }};
     return wrappedPayload(payload);

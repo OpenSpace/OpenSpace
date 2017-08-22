@@ -24,6 +24,7 @@
 
 #include <openspace/query/query.h>
 #include <openspace/properties/property.h>
+#include <modules/server/include/jsonconverters.h>
 #include "include/subscriptiontopic.h"
 
 namespace {
@@ -62,8 +63,7 @@ void SubscriptionTopic::handleJson(json j) {
         _requestedResourceIsSubscribable = true;
         auto onChange = [this, key]() {
             LDEBUG("Updating subscription '" + key + "'.");
-            json payload = json::parse(_prop->toJson());
-            _connection->sendJson(wrappedPayload(payload));
+            _connection->sendJson(wrappedPayload(_prop));
         };
         _onChangeHandle = _prop->onChange(onChange);
 
