@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014-2015                                                               #
+# Copyright (c) 2014-2017                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -22,64 +22,56 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-set(APPLICATION_NAME Launcher)
-set(APPLICATION_LINK_TO_OPENSPACE ON)
-
-if (WIN32)
-    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/Launcher/openspace.rc)
-endif ()
-
+include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/support_macros.cmake)
-
-set(application_path ${OPENSPACE_APPS_DIR}/Launcher)
 
 set(SOURCE_FILES
-    ${application_path}/main.cpp
-    ${application_path}/infowidget.cpp
-    ${application_path}/mainwindow.cpp
-    ${application_path}/shortcutwidget.cpp
-    ${application_path}/syncwidget.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/infowidget.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mainwindow.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/shortcutwidget.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/syncwidget.cpp
 )
 
 set(HEADER_FILES
-    ${application_path}/infowidget.h
-    ${application_path}/mainwindow.h
-    ${application_path}/shortcutwidget.h
-    ${application_path}/syncwidget.h
-) 
+    ${CMAKE_CURRENT_SOURCE_DIR}/infowidget.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/mainwindow.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/shortcutwidget.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/syncwidget.h
+)
 
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Network REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Network REQUIRED)
 
-set(MOC_FILES "")
 qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
-set(RESOURCE_FILES "")
-qt5_add_resources(RESOURCE_FILES ${application_path}/files.qrc)
+qt5_add_resources(RESOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/files.qrc)
 
-add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
+create_new_application(
+    Launcher
+    MACOSX_BUNDLE
     ${SOURCE_FILES}
     ${HEADER_FILES}
+    ${OPENSPACE_APPS_DIR}/Launcher/openspace.rc
     ${MOC_FILES}
-    ${RESOURCE_FILE}
     ${RESOURCE_FILES}
 )
 
-set_compile_settings(${APPLICATION_NAME})
-
-target_link_libraries(${APPLICATION_NAME}
+target_link_libraries(
+    Launcher
+    libOpenSpace
     Qt5::Widgets
     Qt5::Network
 )
 
-#if (APPLE)
-#    INSTALL(CODE "
-#       include(BundleUtilities)
-#       fixup_bundle(\"${application_path}/bin/openspace/Debug/Launcher.app/Contents/MacOS/Launcher\"   \"${application_path}/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
-#       " COMPONENT Runtime)
-#endif ()
-
+#####
 # Libtorrent
-include_external_library(${APPLICATION_NAME} libtorrent ${application_path}/ext/libtorrent)
-target_include_directories(${APPLICATION_NAME} SYSTEM PUBLIC ${application_path}/ext/libtorrent/include)
+#####
+include_external_library(
+    Launcher
+    libtorrent
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent
+)
+target_include_directories(
+    Launcher
+    SYSTEM PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent/include
+)

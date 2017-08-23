@@ -44,7 +44,7 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double);
+REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double)
 
 } // namespace openspace::properties
 

@@ -86,6 +86,7 @@ private:
     std::string _basePath;
     int _preCacheLevel;
     bool _performPreProcessing;
+    bool _padTiles;
 };
 
 } // namespace openspace::globebrowsing::tileprovider

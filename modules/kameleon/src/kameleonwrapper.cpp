@@ -220,23 +220,20 @@ float* KameleonWrapper::getUniformSampledValues(
     };
     
     //ProgressBar pb(static_cast<int>(outDimensions.x));
-    for (int x = 0; x < outDimensions.x; ++x) {
-        //pb.print(x);
-        
-        for (int y = 0; y < outDimensions.y; ++y) {
-            for (int z = 0; z < outDimensions.z; ++z) {
-                
+    for (int x = 0; x < static_cast<int>(outDimensions.x); ++x) {
+        for (int y = 0; y < static_cast<int>(outDimensions.y); ++y) {
+            for (int z = 0; z < static_cast<int>(outDimensions.z); ++z) {
                 unsigned int index = static_cast<unsigned int>(x + y*outDimensions.x + z*outDimensions.x*outDimensions.y);
                 
                 if (_gridType == GridType::Spherical) {
                     // Put r in the [0..sqrt(3)] range
-                    double rNorm = sqrt(3.0)*(double)x/(double)(outDimensions.x-1);
+                    double rNorm = sqrt(3.0) * static_cast<double>(x) / static_cast<double>(outDimensions.x - 1);
                     
                     // Put theta in the [0..PI] range
-                    double thetaNorm = M_PI*(double)y/(double)(outDimensions.y-1);
+                    double thetaNorm = M_PI * static_cast<double>(y) / static_cast<double>(outDimensions.y - 1);
                     
                     // Put phi in the [0..2PI] range
-                    double phiNorm = 2.0*M_PI*(double)z/(double)(outDimensions.z-1);
+                    double phiNorm = 2.0 * M_PI * static_cast<double>(z) / static_cast<double>(outDimensions.z - 1);
                     
                     // Go to physical coordinates before sampling
                     double rPh = _xMin + rNorm*(_xMax-_xMin);
@@ -401,9 +398,9 @@ float* KameleonWrapper::getUniformSliceValues(
     
     float missingValue = _model->getMissingValue();
 
-    for (int x = 0; x < outDimensions.x; ++x) {
-        for (int y = 0; y < outDimensions.y; ++y) {
-            for(int z = 0; z < outDimensions.z; ++z){
+    for (int x = 0; x < static_cast<int>(outDimensions.x); ++x) {
+        for (int y = 0; y < static_cast<int>(outDimensions.y); ++y) {
+            for(int z = 0; z < static_cast<int>(outDimensions.z); ++z){
 
                 float xi = (!xSlice)? x : slice;
                 float yi = (!ySlice)? y : slice;
@@ -414,16 +411,16 @@ float* KameleonWrapper::getUniformSliceValues(
                 if(_gridType == GridType::Spherical) {
                         // int z = zSlice; 
                         // Put r in the [0..sqrt(3)] range
-                        double rNorm = sqrt(3.0)*(double)xi/(double)(xDim);
+                        double rNorm = sqrt(3.0) * static_cast<double>(xi) / static_cast<double>(xDim);
                         
                         // Put theta in the [0..PI] range
-                        double thetaNorm = M_PI*(double)yi/(double)(yDim);
+                        double thetaNorm = M_PI * static_cast<double>(yi) / static_cast<double>(yDim);
                         
                         // Put phi in the [0..2PI] range
-                        double phiNorm = 2.0*M_PI*(double)zi/(double)(zDim);
+                        double phiNorm = 2.0 * M_PI * static_cast<double>(zi) / static_cast<double>(zDim);
                         
                         // Go to physical coordinates before sampling
-                        double rPh = _xMin + rNorm*(_xMax-_xMin);
+                        double rPh = _xMin + rNorm * (_xMax-_xMin);
                         double thetaPh = thetaNorm;
                         // phi range needs to be mapped to the slightly different model
                         // range to avoid gaps in the data Subtract a small term to
@@ -794,7 +791,9 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
         k1.y = _interpolator->interpolate(yID, pos.x, pos.y, pos.z);
         k1.z = _interpolator->interpolate(zID, pos.x, pos.y, pos.z);
         k1 = (float)direction*glm::normalize(k1);
-        stepX=stepX*stepSize, stepY=stepY*stepSize, stepZ=stepZ*stepSize;
+        stepX=stepX*stepSize;
+        stepY=stepY*stepSize;
+        stepZ=stepZ*stepSize;
         k2.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);
         k2.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);
         k2.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);

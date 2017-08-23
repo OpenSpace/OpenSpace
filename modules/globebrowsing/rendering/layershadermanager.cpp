@@ -116,17 +116,6 @@ LayerShaderManager::LayerShaderPreprocessingData
     );
     pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
 
-    pairs.emplace_back("tilePaddingStart",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.start.x) + "," +
-        std::to_string(RawTileDataReader::padding.start.y) + ")"
-    );
-    pairs.emplace_back("tilePaddingSizeDiff",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
-        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
-    );
-
     return preprocessingData;
 }
 

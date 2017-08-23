@@ -49,7 +49,7 @@ public:
     using PerformPreprocessing = ghoul::Boolean;
 
     RawTileDataReader(const TileTextureInitData& initData,
-        PerformPreprocessing preprocess = PerformPreprocessing::No);
+                      PerformPreprocessing preprocess = PerformPreprocessing::No);
     virtual ~RawTileDataReader() = default;
 
     /**
@@ -75,6 +75,7 @@ public:
     virtual float noDataValueAsFloat() const = 0;
     virtual int rasterXSize() const = 0;
     virtual int rasterYSize() const = 0;
+    virtual int dataSourceNumRasters() const = 0;
     virtual float depthOffset() const;
     virtual float depthScale() const;
     PixelRegion fullPixelRegion() const;
@@ -83,9 +84,6 @@ public:
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
     std::shared_ptr<RawTile> defaultTileData() const;
-    
-    /// Padding around all tiles to read to make sure edge blending works.
-    const static PixelRegion padding; // same as the two above
 
 protected:
 
@@ -94,11 +92,6 @@ protected:
      * <code>_dataLayout</code> and <code>_depthTransform</code>.
      */
     virtual void initialize() = 0;
-
-    /**
-     * Call this in the constructor of the class extending <code>RawTileDataReader</code>
-     */
-    //void ensureInitialized();
 
     /**
      * The function returns a transform to map
@@ -112,13 +105,19 @@ protected:
      * \param <code>worstError</code> should be set to the error code returned when
      * reading the data.
      */
-    virtual void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const = 0;
+    void readImageData(
+        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const;
+
+    /**
+     * The default does not affect the IODescription but this function can be used for
+     * example to flip the y axis.
+     */
+    virtual IODescription adjustIODescription(const IODescription& io) const;
 
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;
 
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const = 0;
+    IODescription getIODescription(const TileIndex& tileIndex) const;
 
     /**
      * Get the pixel corresponding to a specific position on the globe defined by the

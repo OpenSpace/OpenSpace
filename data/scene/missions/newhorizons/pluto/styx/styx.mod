@@ -1,14 +1,8 @@
 local styx_radius = 0.75E4
 
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp"
-    }
-else
-    NewHorizonsKernels = {
-        "${SPICE}/NewHorizonsKernels/nh_p4p5_revised.bsp"
-    }
-end
+NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp"
+}
 
 return {
     -- Styx module

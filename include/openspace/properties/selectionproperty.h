@@ -51,7 +51,7 @@ public:
 
 private:
     static const std::string OptionsKey;
-    std::string generateAdditionalDescription() const;
+    std::string generateAdditionalDescription() const override;
 
     /// The list of options which have been registered with this OptionProperty
     std::vector<Option> _options;

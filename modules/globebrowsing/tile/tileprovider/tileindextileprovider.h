@@ -37,7 +37,7 @@ public:
     TileIndexTileProvider(const ghoul::Dictionary& dict);
     
     virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
+        const TileIndex& tileIndex) const override;
 };
 
 } // namespace openspace::globebrowsing::tileprovider

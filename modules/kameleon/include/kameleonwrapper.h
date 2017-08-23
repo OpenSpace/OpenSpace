@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__
 #define __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/std_based_type.hpp>
 
 #include <tuple>

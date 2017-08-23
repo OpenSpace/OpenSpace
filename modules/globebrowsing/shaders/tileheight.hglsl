@@ -43,13 +43,13 @@ uniform Layer HeightLayers[NUMLAYERS_HEIGHTMAP];
 uniform float heightScale;
 #endif // USE_HEIGHTMAP
 
-#if USE_ACCURATE_NORMALS
+#if USE_ACCURATE_NORMALS && USE_HEIGHTMAP
 uniform float deltaTheta0;
 uniform float deltaTheta1;
 uniform float deltaPhi0;
 uniform float deltaPhi1;
 uniform float tileDelta;
-#endif //USE_ACCURATE_NORMALS
+#endif //USE_ACCURATE_NORMALS && USE_HEIGHTMAP
 
 float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights) {
     float height = CHUNK_DEFAULT_HEIGHT;
@@ -97,9 +97,7 @@ vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCamer
                    vec3 ellipsoidTangentThetaCameraSpace,
                    vec3 ellipsoidTangentPhiCameraSpace)
 {
-    return ellipsoidNormalCameraSpace;
-
-#if USE_ACCURATE_NORMALS
+#if USE_ACCURATE_NORMALS && USE_HEIGHTMAP
     float deltaPhi = mix(deltaPhi0, deltaPhi1, uv.x);
     float deltaTheta = mix(deltaTheta0, deltaTheta1, uv.y);
 
@@ -114,7 +112,9 @@ vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCamer
     vec3 diffPhi = deltaPhiVec + ellipsoidNormalCameraSpace * (height01 - height00);
 
     return normalize(cross(diffTheta, diffPhi));
-#endif // USE_ACCURATE_NORMALS
+#else // USE_ACCURATE_NORMALS && USE_HEIGHTMAP
+    return ellipsoidNormalCameraSpace;
+#endif
 }
 
 #endif // TILE_HEIGHT_HGLSL

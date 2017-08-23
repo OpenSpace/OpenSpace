@@ -37,7 +37,7 @@ namespace openspace {
 
 struct UpdateData;
 
-namespace documentation { struct Documentation; };
+namespace documentation { struct Documentation; }
 
 class Scale : public properties::PropertyOwner {
 public:
@@ -45,6 +45,7 @@ public:
 
     Scale();
     virtual ~Scale() = default;
+
     virtual bool initialize();
     virtual double scaleValue() const = 0;
     virtual void update(const UpdateData& data);

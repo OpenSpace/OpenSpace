@@ -1,7 +1,23 @@
-UseAccurateNewHorizonsKernels = false
--- TextureResolution = "low"
-TextureResolution = "med"
--- TextureResolution = "high"
+-- These values specify the textures that are used for Pluto and Charon
+-- The paths are relative to data/scene/missions/newhorizons/pluto/pluto and
+-- data/scene/missions/newhorizons/pluto/charon respectively
+
+-- Each image is provided at a lower resolution for lower spec systems
+
+-- pluto_image = "textures/NH_Pluto_mosaic_8192.png"
+-- pluto_image = "textures/NH_Pluto_mosaic_16384.png"
+pluto_image = "textures/pmap_cyl_k201.jpg"
+-- pluto_image = "textures/pmap_cyl_k201_4096.jpg"
+
+-- pluto_height = "textures/NH_Pluto_DTM_8192.png"
+pluto_height = "textures/NH_Pluto_DTM_16384.png"
+
+
+charon_image = "textures/NH_Charon_mosaic.png"
+-- charon_image = "textures/NH_Charon_mosaic_8192.png"
+
+charon_height = "textures/NH_Charon_DTM.png"
+-- charon_height = "textures/NH_Charon_DTM_8192.png"
 
 function preInitialization()
     --[[
@@ -14,7 +30,7 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2015-07-14T10:05:00.00")
+    openspace.time.setTime("2015-07-14T08:00:00.00")
 
     -- Load the common helper functions
     dofile(openspace.absPath('${SCRIPTS}/common.lua'))
@@ -28,79 +44,79 @@ function preInitialization()
 
     openspace.bindKey(
         "a",
-        "openspace.setPropertyValue('Interaction.origin', 'NewHorizons')",
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'NewHorizons')",
         "Sets the focus of the camera on 'NewHorizons'."
     )
     openspace.bindKey(
         "s",
-        "openspace.setPropertyValue('Interaction.origin', 'Pluto')",
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'Pluto')",
         "Sets the focus of the camera on 'Pluto'"
     )
     openspace.bindKey(
         "d",
-        "openspace.setPropertyValue('Interaction.origin', 'Charon')",
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'Charon')",
         "Sets the focus of the camera on 'Charon'."
     )
     openspace.bindKey(
         "z",
-        "openspace.setPropertyValue('Interaction.origin', 'JupiterProjection')",
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'JupiterProjection')",
         "Sets the focus of the camera on 'Jupiter'."
     )
     openspace.bindKey(
         "x",
-        "openspace.setPropertyValue('Interaction.origin', 'Europa')",
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'Europa')",
         "Sets the focus of the camera on 'Europa'."
     )
 
     openspace.bindKey(
         "F8",
-        "openspace.setPropertyValue('Pluto.renderable.ProjectionComponent.clearAllProjections', true);" ..
-        "openspace.setPropertyValue('Charon.renderable.ProjectionComponent.clearAllProjections', true);",
+        "openspace.setPropertyValue('Pluto.renderable.ProjectionComponent.ClearAllProjections', true);" ..
+        "openspace.setPropertyValue('Charon.renderable.ProjectionComponent.ClearAllProjections', true);",
         "Removes all image projections from Pluto and Charon."
     )
 
     openspace.bindKey(
         "F9",
         "openspace.time.setTime('2015-07-14T09:00:00.00');" ..
-        "openspace.setPropertyValue('Pluto.renderable.clearAllProjections', true);" ..
-        "openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);",
+        "openspace.setPropertyValue('Pluto.renderable.ClearAllProjections', true);" ..
+        "openspace.setPropertyValue('Charon.renderable.ClearAllProjections', true);",
         "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections."
     )
 
     openspace.bindKey(
         "KP_8",
-        helper.property.increment('Pluto.renderable.heightExaggeration', 0.1),
+        helper.property.increment('Pluto.renderable.HeightExaggeration', 5000000),
         "Increases the height map exaggeration on Pluto."
     )
     openspace.bindKey(
         "KP_2",
-        helper.property.decrement('Pluto.renderable.heightExaggeration', 0.1),
+        helper.property.decrement('Pluto.renderable.HeightExaggeration', 5000000),
         "Decreases the height map exaggeration on Pluto."
     )
     openspace.bindKey(
         "KP_9",
-        helper.property.increment('Charon.renderable.heightExaggeration', 2),
+        helper.property.increment('Charon.renderable.HeightExaggeration', 5000000),
         "Increases the height map exaggeration on Charon."
     )
     openspace.bindKey(
         "KP_3",
-        helper.property.decrement('Charon.renderable.heightExaggeration', 2),
+        helper.property.decrement('Charon.renderable.HeightExaggeration', 5000000),
         "Decreases the height map exaggeration on Charon."
     )
 
     openspace.bindKey(
         "q",
-        helper.property.invert('SunMarker.renderable.enabled'),
+        helper.property.invert('SunMarker.renderable.Enabled'),
         "Toggles the visibility of the text marking the location of the Sun."
     )
     openspace.bindKey(
         "e",
-        helper.property.invert('EarthMarker.renderable.enabled'),
+        helper.property.invert('EarthMarker.renderable.Enabled'),
         "Toggles the visibility of the text marking the location of the Earth."
     )
     openspace.bindKey(
         "o",
-        helper.property.invert('PlutoTrail.renderable.enabled'),
+        helper.property.invert('PlutoTrail.renderable.Enabled'),
         "Toggles the visibility of the trail behind Pluto."
     )
 
@@ -119,17 +135,17 @@ function preInitialization()
     )
 
     openspace.bindKey("m",
-        helper.property.invert('NH_LORRI.renderable.solidDraw') ..
-        helper.property.invert('NH_RALPH_LEISA.renderable.solidDraw') ..
-        helper.property.invert('NH_RALPH_MVIC_PAN1.renderable.solidDraw') ..
-        helper.property.invert('NH_RALPH_MVIC_PAN2.renderable.solidDraw') ..
-        helper.property.invert('NH_RALPH_MVIC_RED.renderable.solidDraw') ..
-        helper.property.invert('NH_RALPH_MVIC_BLUE.renderable.solidDraw') ..
-        helper.property.invert('NH_RALPH_MVIC_FT.renderable.solidDraw') ..
-        helper.property.invert('NH_RALPH_MVIC_METHANE.renderable.solidDraw') ..
-        helper.property.invert('NH_RALPH_MVIC_NIR.renderable.solidDraw') ..
-        helper.property.invert('NH_ALICE_AIRGLOW.renderable.solidDraw') ..
-        helper.property.invert('NH_ALICE_SOC.renderable.solidDraw'),
+        helper.property.invert('NH_LORRI.renderable.SolidDraw') ..
+        helper.property.invert('NH_RALPH_LEISA.renderable.SolidDraw') ..
+        helper.property.invert('NH_RALPH_MVIC_PAN1.renderable.SolidDraw') ..
+        helper.property.invert('NH_RALPH_MVIC_PAN2.renderable.SolidDraw') ..
+        helper.property.invert('NH_RALPH_MVIC_RED.renderable.SolidDraw') ..
+        helper.property.invert('NH_RALPH_MVIC_BLUE.renderable.SolidDraw') ..
+        helper.property.invert('NH_RALPH_MVIC_FT.renderable.SolidDraw') ..
+        helper.property.invert('NH_RALPH_MVIC_METHANE.renderable.SolidDraw') ..
+        helper.property.invert('NH_RALPH_MVIC_NIR.renderable.SolidDraw') ..
+        helper.property.invert('NH_ALICE_AIRGLOW.renderable.SolidDraw') ..
+        helper.property.invert('NH_ALICE_SOC.renderable.SolidDraw'),
         "Draws the instrument field of views in a solid color or as lines."
     )
 
@@ -139,16 +155,16 @@ function preInitialization()
         "Toggles the visibility of the shadow visualization of Pluto and Charon."
     )
 
-    openspace.bindKey("p",
-        helper.property.invert('JupiterProjection.renderable.performProjection') ..
-        helper.property.invert('Io.renderable.performProjection') .. 
-        helper.property.invert('Ganymede.renderable.performProjection') ..
-        helper.property.invert('Europa.renderable.performProjection') .. 
-        helper.property.invert('Callisto.renderable.performProjection') ..
-        helper.property.invert('Pluto.renderable.performProjection') .. 
-        helper.property.invert('Charon.renderable.performProjection'),
-        "Enables or disables the image projection on the different available objects."
-    )
+    -- openspace.bindKey("p",
+    --     helper.property.invert('JupiterProjection.renderable.PerformProjection') ..
+    --     helper.property.invert('Io.renderable.PerformProjection') .. 
+    --     helper.property.invert('Ganymede.renderable.PerformProjection') ..
+    --     helper.property.invert('Europa.renderable.PerformProjection') .. 
+    --     helper.property.invert('Callisto.renderable.PerformProjection') ..
+    --     helper.property.invert('Pluto.renderable.PerformProjection') .. 
+    --     helper.property.invert('Charon.renderable.PerformProjection'),
+    --     "Enables or disables the image projection on the different available objects."
+    -- )
 end
 
 function postInitialization()
@@ -185,6 +201,7 @@ return {
         "venus",
         "earth",
         "mars",
+        "jupiter/jupiter",
         "saturn/saturn",
         "uranus",
         "neptune",
@@ -193,7 +210,7 @@ return {
         "milkyway/digitaluniverse",
         --"milkyway/eso",
         "missions/newhorizons/pluto",
-        "missions/newhorizons/jupiter",
+        -- "missions/newhorizons/jupiter",
         "missions/newhorizons/newhorizons",
         "missions/newhorizons/newhorizonsfov"
     }

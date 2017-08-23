@@ -43,6 +43,7 @@ public:
     //VoxelType get(const glm::ivec3& coordinates) const; // TODO: Implement this
     //VoxelType get(const size_t index) const; // TODO: Implement this
     std::unique_ptr<RawVolume<VoxelType>> read();
+
 private:
     size_t coordsToIndex(const glm::uvec3& cartesian) const;
     glm::uvec3 indexToCoords(size_t linear) const;

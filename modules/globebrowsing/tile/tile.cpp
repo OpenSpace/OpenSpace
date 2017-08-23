@@ -27,10 +27,6 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-namespace {
-    const char* _loggerCat = "Tile";
-} // namespace
-
 namespace openspace::globebrowsing {
 
 const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);
@@ -41,27 +37,5 @@ Tile::Tile(ghoul::opengl::Texture* texture,
     , _metaData(metaData)
     , _status(status)
 { }
-
-glm::vec2 Tile::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
-                                                glm::uvec2 resolution, glm::vec2 tileUV)
-{
-    glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
-    glm::vec2 currentSize = glm::vec2(resolution);
-    glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
-    tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
-    return tileUV;
-}
-
-glm::vec2 Tile::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                              glm::vec2 tileUV, glm::uvec2 resolution)
-{
-    glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
-    uv = compensateSourceTextureSampling(
-        TileTextureInitData::tilePixelStartOffset,
-        TileTextureInitData::tilePixelSizeDifference,
-        resolution,
-        uv);
-    return uv;
-}
 
 } // namespace openspace::globebrowsing
