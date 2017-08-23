@@ -194,20 +194,7 @@ std::string Property::toJson() const {
 }
 
 std::string Property::jsonValue() const {
-    std::string jsonString = "";
-    for (char c : getStringValue()) {
-        switch (c) {
-            case '\t':
-                jsonString += "\\t";
-                break;
-            case '\\':
-                jsonString += "\\\\";
-                break;
-            default:
-                jsonString += c;
-        }
-    }
-    return jsonString;
+    return getStringValue();
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
@@ -253,8 +240,6 @@ void Property::notifyListener() {
     }
 }
 
-// This was used in the old version of Property::Description but was never used. Is this
-// still useful? ---abock
 std::string Property::generateBaseDescription() const {
     std::string result = "{ ";
     result += "\"" + std::string(TypeKey) + "\": \"" + className() + "\", ";
