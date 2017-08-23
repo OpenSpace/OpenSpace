@@ -23,14 +23,14 @@ class ToggleContent extends Component {
     const { children, title } = this.props;
     const { toggled } = this.state;
 
-    return (
+    return children.length !== 0 ? (
       <div className={styles.toggleContent}>
         <ToggleHeader title={title} onClick={this.toggleExpanded} toggled={toggled} />
         <div className={styles.content}>
           { toggled && children }
         </div>
       </div>
-    );
+    ) : null;
   }
 }
 
