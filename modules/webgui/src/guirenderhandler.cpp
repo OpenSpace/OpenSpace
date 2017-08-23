@@ -65,9 +65,9 @@ void GUIRenderHandler::initializeGL() {
 }
 
 void GUIRenderHandler::draw(void) {
-	if (_programObject->isDirty()) {
-		_programObject->rebuildFromFile();
-	}
+    if (_programObject->isDirty()) {
+        _programObject->rebuildFromFile();
+    }
 
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
