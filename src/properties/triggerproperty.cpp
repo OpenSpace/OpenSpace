@@ -50,4 +50,8 @@ std::string TriggerProperty::toJson() const {
     return result;
 }
 
+std::string TriggerProperty::jsonValue() const {
+    return "";
+}
+
 } // namespace openspace::properties

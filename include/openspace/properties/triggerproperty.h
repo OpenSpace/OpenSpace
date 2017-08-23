@@ -67,6 +67,8 @@ public:
     void set(ghoul::any value);
 
     std::string toJson() const override;
+
+    std::string jsonValue() const override;
 };
 
 } // namespace openspace::properties
