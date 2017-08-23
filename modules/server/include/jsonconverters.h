@@ -37,6 +37,8 @@ namespace openspace::properties {
 
 void to_json(json &j, const Property &p);
 void to_json(json &j, const Property* pP);
+void to_json(json &j, const PropertyOwner &p);
+void to_json(json &j, const PropertyOwner *p);
 
 } // namespace openspace::properties
 

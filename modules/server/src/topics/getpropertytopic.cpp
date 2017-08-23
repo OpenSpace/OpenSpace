@@ -24,6 +24,12 @@
 
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/properties/property.h>
+#include <openspace/interaction/luaconsole.h>
+#include <openspace/network/parallelconnection.h>
+#include <openspace/engine/settingsengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/scene/scene.h>
 #include <modules/server/include/getpropertytopic.h>
 
@@ -62,11 +68,18 @@ void GetPropertyTopic::handleJson(json j) {
 }
 
 json GetPropertyTopic::getAllProperties() {
-    json jsonProps = json::array();
-    for (const auto &prop : allProperties()) {
-        jsonProps.push_back(prop);
-    }
-    json payload{{ "value", jsonProps }};
+    json payload{
+        { "value", {
+            OsEng.renderEngine(),
+            OsEng.console(),
+            OsEng.parallelConnection(),
+            OsEng.settingsEngine(),
+            OsEng.windowWrapper(),
+            OsEng.navigationHandler(),
+            OsEng.globalPropertyOwner(),
+            OsEng.virtualPropertyManager()
+        }}
+    };
     return wrappedPayload(payload);
 }
 

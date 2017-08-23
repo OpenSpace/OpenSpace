@@ -44,6 +44,18 @@ void to_json(json &j, const Property* pP) {
     j = *pP;
 }
 
+void to_json(json &j, const PropertyOwner &p) {
+    j = {
+        { "name", p.name() },
+        { "description", p.description() },
+        { "properties", p.properties() }
+    };
+}
+
+void to_json(json &j, const PropertyOwner* p) {
+    j = *p;
+}
+
 } // namespace openspace::properties
 
 namespace openspace {

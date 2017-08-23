@@ -37,12 +37,10 @@ using nlohmann::json;
 
 namespace openspace {
 
-SubscriptionTopic::SubscriptionTopic()
+    SubscriptionTopic::SubscriptionTopic()
         : Topic()
         , _requestedResourceIsSubscribable(false)
-        , _onChangeHandle(-1) {
-    LDEBUG("Starting new subscription");
-}
+        , _onChangeHandle(-1) {}
 
 SubscriptionTopic::~SubscriptionTopic() {
     if (_onChangeHandle != UNSET_ONCHANGE_HANDLE) {
