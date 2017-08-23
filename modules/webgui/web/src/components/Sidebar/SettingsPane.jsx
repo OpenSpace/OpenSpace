@@ -4,10 +4,10 @@ import Pane from './Pane';
 import LoadingString from '../common/LoadingString/LoadingString';
 import FilterList from '../common/FilterList/FilterList';
 import DataManager from '../../api/DataManager';
+import { AllPropertiesKey } from '../../api/keys';
+import PropertyCollection from './Properties/PropertyCollection';
 
 import styles from './SettingsPane.scss';
-
-const PROPERTIES_KEY = '__allProperties';
 
 class SettingsPane extends Component {
   constructor(props) {
@@ -18,21 +18,16 @@ class SettingsPane extends Component {
   }
 
   componentDidMount() {
-    // subscribe to data
-    DataManager.getValue(PROPERTIES_KEY, this.receiveData);
+    DataManager.getValue(AllPropertiesKey, this.receiveData);
   }
 
   receiveData({ value }) {
     this.setState({ properties: value, hasData: true });
   }
 
-  get properties() {
-    return this.state.properties
-      .map(prop => Object.assign(prop, { key: prop.Description.Identifier }));
-  }
-
   render() {
-    const { properties } = this;
+    const properties = this.state.properties
+      .map(prop => Object.assign(prop, { key: prop.name }));
 
     return (
       <Pane title="Settings" closeCallback={this.props.closeCallback}>
@@ -43,7 +38,11 @@ class SettingsPane extends Component {
         )}
 
         { properties.length > 0 && (
-          <FilterList data={properties} className={styles.list} />
+          <FilterList
+            data={properties}
+            className={styles.list}
+            viewComponent={PropertyCollection}
+          />
         )}
       </Pane>
     );

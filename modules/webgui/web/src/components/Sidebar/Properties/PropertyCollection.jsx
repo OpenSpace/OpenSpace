@@ -9,16 +9,16 @@ const types = {
   BoolProperty,
   StringProperty: Property,
   FloatProperty: NumericProperty,
-  defaultProp: Property,
+  defaultProperty: Property,
 };
 
 const PropertyCollection = ({ name, properties }) => (
   <ToggleContent title={name}>
     { properties.map((prop) => {
       const { Description } = prop;
-      const Type = types[Description.Type] || types.defaultProp;
+      const Type = types[Description.Type] || types.defaultProperty;
       return (
-        <Type key={Description.Identifier} {...prop} />
+        <Type key={Description.Identifier} {...prop} subscribe />
       );
     }) }
   </ToggleContent>
@@ -34,3 +34,5 @@ PropertyCollection.defaultProps = {
 };
 
 export default PropertyCollection;
+export const Types = types;
+export const GetType = type => types[type] || types.defaultProperty;
