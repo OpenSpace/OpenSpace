@@ -385,15 +385,6 @@ public:
      */
     virtual std::string jsonValue() const;
 
-protected:
-    static const char* IdentifierKey;
-    static const char* NameKey;
-    static const char* TypeKey;
-    static const char* DescriptionKey;
-    static const char* JsonValueKey;
-    static const char* MetaDataKey;
-    static const char* AdditionalDataKey;
-
     /**
      * Creates the information that is general to every Property and adds the
      * <code>Identifier</code>, <code>Name</code>, <code>Type</code>, and
@@ -423,8 +414,17 @@ protected:
      * <code>generateAdditionalDescription()}</code>, which #generateMetaDataDescription
      * and this method being the override points to customize the behavior.
      * \return The information specific to each subclass of Property
-     */ 
+     */
     virtual std::string generateAdditionalDescription() const;
+
+protected:
+    static const char* IdentifierKey;
+    static const char* NameKey;
+    static const char* TypeKey;
+    static const char* DescriptionKey;
+    static const char* JsonValueKey;
+    static const char* MetaDataKey;
+    static const char* AdditionalDataKey;
 
     /**
      * This method must be called by all subclasses whenever the encapsulated value has
