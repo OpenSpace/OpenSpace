@@ -14,11 +14,15 @@ class Property extends Component {
   }
 
   componentDidMount() {
-    DataManager.subscribe(this.uri, this.updateValue);
+    if (this.props.subscribe) {
+      this.subscribeIfNeeded();
+    }
   }
 
   componentWillUnmount() {
-    DataManager.unsubscribe(this.uri, this.updateValue);
+    if (this.isSubscribed) {
+      DataManager.unsubscribe(this.uri, this.updateValue);
+    }
   }
 
   onChange(event) {
@@ -44,10 +48,18 @@ class Property extends Component {
     }
   }
 
+  subscribeIfNeeded() {
+    if (!this.isSubscribed) {
+      DataManager.subscribe(this.uri, this.updateValue);
+      this.isSubscribed = true;
+    }
+  }
+
   /**
    * Send value to OpenSpace
    */
   saveValue(value) {
+    this.subscribeIfNeeded();
     DataManager.setValue(this.uri, value);
   }
 
@@ -71,8 +83,12 @@ class Property extends Component {
 
 Property.propTypes = {
   Description: PropTypes.object,
+  subscribe: PropTypes.bool,
   Value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
+Property.defaultProps = {
+  subscribe: false,
+};
 
 export default Property;
