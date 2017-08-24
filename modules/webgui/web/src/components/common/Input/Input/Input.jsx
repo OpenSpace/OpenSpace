@@ -115,7 +115,7 @@ Input.propTypes = {
   clearable: PropTypes.bool,
   id: PropTypes.string,
   loading: PropTypes.bool,
-  placeholder: PropTypes.string.isRequired,
+  placeholder: PropTypes.node.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   wide: PropTypes.bool,
 };

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Input from '../../common/Input/Input/Input';
 import DataManager from '../../../api/DataManager';
+import InfoBox from '../../common/InfoBox/InfoBox';
 
 class Property extends Component {
   constructor(props) {
@@ -48,6 +49,11 @@ class Property extends Component {
     }
   }
 
+  get descriptionPopup() {
+    const { description } = this.props.Description;
+    return description ? (<InfoBox text={description} />) : '';
+  }
+
   subscribeIfNeeded() {
     if (!this.isSubscribed) {
       DataManager.subscribe(this.uri, this.updateValue);
@@ -75,14 +81,27 @@ class Property extends Component {
     const { Description } = this.props;
     const { value } = this.state;
     const PropInput = this.inputType;
+    const placeholder = (<span>
+      { Description.Name } { this.descriptionPopup }
+    </span>);
     return (
-      <PropInput value={value} placeholder={Description.Name} onChange={this.onChange} />
+      <PropInput
+        value={value}
+        placeholder={placeholder}
+        onChange={this.onChange}
+        disabled={Description.MetaData.isReadOnly}
+      />
     );
   }
 }
 
 Property.propTypes = {
-  Description: PropTypes.object,
+  Description: PropTypes.shape({
+    Identifier: PropTypes.string,
+    Name: PropTypes.string,
+    MetaData: PropTypes.object,
+    description: PropTypes.string,
+  }).isRequired,
   subscribe: PropTypes.bool,
   Value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
