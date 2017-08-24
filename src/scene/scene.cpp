@@ -254,11 +254,10 @@ const glm::dmat4 Scene::currentMatrixTransformation(const std::string & cameraPa
 
         std::vector<const SceneGraphNode*> cameraPath;
         std::vector<const SceneGraphNode*> targetPath;
-        std::vector<const SceneGraphNode*> commonParentPath;
-
+        
         const SceneGraphNode* cameraParentNode = sceneGraphNode(cameraParent);
+        const SceneGraphNode * targetNode      = sceneGraphNode(target->name());
 
-        const SceneGraphNode * targetNode = sceneGraphNode(target->name());
         cameraPath = pathTo(cameraParentNode);
         targetPath = pathTo(targetNode);
 
@@ -269,7 +268,6 @@ const glm::dmat4 Scene::currentMatrixTransformation(const std::string & cameraPa
         }
         
         // Collects the cancatenated matrices which will compose the final transformation
-        // matrix.
         glm::dmat4 collectorCamera(matrixCollector(cameraPath, commonParentNode->name(), false));
         glm::dmat4 collectorTarget(matrixCollector(targetPath, commonParentNode->name(), true));
 
@@ -342,7 +340,7 @@ glm::dvec3 Scene::pathCollector(const std::vector<const SceneGraphNode*> & path,
 
     return collector;
 }
-
+/*
 glm::dmat4 Scene::matrixCollector(const std::vector<const SceneGraphNode*> & path, const std::string & commonParentName,
     const bool inverse) const {
    
@@ -398,6 +396,30 @@ glm::dmat4 Scene::matrixCollector(const std::vector<const SceneGraphNode*> & pat
         }
     }
     
+
+    return collector;
+}
+*/
+glm::dmat4 Scene::matrixCollector(const std::vector<const SceneGraphNode*> & path, const std::string & commonParentName,
+    const bool inverse) const {
+
+    if (path.empty() || commonParentName.empty()) {
+        LERROR("Empty path or common parent name passed to matrixCollector method.");
+        return glm::dmat4(1.0);
+    }
+
+    glm::dmat4 collector = glm::dmat4(1.0);
+
+    for (const auto node : path) {
+        if (inverse) {
+            if (node->name() == commonParentName)
+                break;
+            collector = glm::inverse(node->modelTransform()) * collector;
+        }
+        else {
+            collector = collector * node->modelTransform();            
+        }        
+    }
 
     return collector;
 }
