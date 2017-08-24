@@ -45,10 +45,6 @@ T* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size) {
     return std::move(data);
 }
 
-// void PixelBufferObject::setSize(const unsigned int& size) {
-//     _size = size;
-// }
-
 const GLuint& PixelBufferObject::id() {
     return _id;
 }

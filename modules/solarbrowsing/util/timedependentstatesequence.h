@@ -32,6 +32,13 @@
 // TODO(mnoven): How to include loggercat in template class?
 #include <iostream>
 
+/**
+ * The purpose of this class is to be able to map the openspace time to a state,
+   it hold a vector with a sequence of states that should be sorted by by time
+   and performs lookup in logarithmic time. It also has helper functions that helps
+   determine if the state has changed or not.
+ */
+
 namespace openspace {
 
 template<typename T>

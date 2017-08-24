@@ -25,29 +25,16 @@
 #define __OPENSPACE_MODULE_SOLARBROWSING___DECODEJOB___H__
 
 #include <modules/solarbrowsing/util/streambuffer.h>
-//#include <modules/solarbrowsing/util/kakaduwrapper.h>
 
 namespace openspace {
 
 struct SolarImageData {
-    //unsigned char* data;
     unsigned char* data;
     std::shared_ptr<ImageMetadata> im;
-    // ~SolarImageData() {
-    //     if (data) {
-    //         delete[] data;
-    //     }
-    // }
-    //unsigned int dataSize;
-    //std::string name;
     double timeObserved;
 };
 
 struct DecodeData {
-    //unsigned int totalImageSize;
-    //std::string path;
-    //unsigned int resolutionLevel;
-    //bool verboseMode;
     std::shared_ptr<ImageMetadata> im;
     unsigned int resolutionLevel;
     double timeObserved;
@@ -61,29 +48,12 @@ public:
     { }
 
     virtual void execute() final {
-        //SolarImageData imd{new unsigned char[_decodeData.totalImageSize],
-        //                   _decodeData.totalImageSize, _decodeData.path,
-         //                  _decodeData.timeObserved};
         SolarImageData imd {_data,
                             _decodeData.im,
                             _decodeData.timeObserved};
-
-        // imd.pbo->activate();
-        // const unsigned int totalImageSize
-        //       = (_decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1)) * _decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1);
-        // unsigned char* pboBufferData = _pbo->mapToClientMemory<unsigned char>(true, totalImageSize); // sizeof char
         SimpleJ2kCodec j2c(_decodeData.verboseMode);
         j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
-        //KakaduWrapper w(_decodeData.verboseMode);
-        //w.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
-      /*  if (imd.im->preprocessedFilename != "") {
-            j2c.DecodeBMPIntoBuffer(imd.im->preprocessedFilename, imd.data);
-        } else {*/
-        //}
-        //imd.pbo->releaseMappedBuffer();
-        //imd.pbo->deactivate();
         _solarImageData = std::make_shared<SolarImageData>(imd);
-        //imd.data = nullptr;
     }
 
     virtual std::shared_ptr<SolarImageData> product() final {

@@ -114,7 +114,7 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
 }
 
 // This is pretty annoying, the read method is not derived from the HDU class
-// in CCfits - need to explicitly cast to the sub classes to access read
+// in CCfits - need to explicitly cast to the sub classes to access read / MN
 template<typename T>
 const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& image) {
    try {

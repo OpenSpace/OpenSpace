@@ -126,6 +126,6 @@ return {
         "missions/sdo",
       --  "missions/stereo-a",
        -- "missions/stereo-b",
-        "missions/soho"
+       -- "missions/soho"
     }
 }

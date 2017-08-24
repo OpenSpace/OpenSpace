@@ -26,11 +26,6 @@
 const int MAX_SPACECRAFT_OBSERVATORY = 7;
 
 uniform mat4 modelViewProjectionTransform;
-uniform dmat4 viewTransform;
-uniform mat4 projectionTransform;
-uniform dmat4 modelTransform;
-//uniform dmat4 sunToSpacecraftReferenceFrame[6];
-//uniform int numSpacecraftCameraPlanes;
 uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
 uniform bool isEnabled[MAX_SPACECRAFT_OBSERVATORY];
 uniform dmat4 sunToSpacecraftReferenceFrame[MAX_SPACECRAFT_OBSERVATORY];
@@ -50,19 +45,16 @@ void main() {
     // Transform the damn psc to homogenous coordinate
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
 
+    // Transform the positions to the reference frame of the spacecraft to get tex coords
     for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
-        if (isCoronaGraph[i] || !isEnabled[i]) continue;
+        if (isCoronaGraph[i] || !isEnabled[i])  {
+            continue;
+        };
         vUv[i] = vec3(sunToSpacecraftReferenceFrame[i] * dvec4(position)).xyz;
     }
-    //vUv= vec3(sunToSpacecraftReferenceFrame * dvec4(position)).xyz;
 
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     clipSpace = positionClipSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;
-
-    //vec4 res = vec4 ( (  dvec4(in_st.x - 0.5,  in_st.y - 0.5, 0.0, 1.0) * modelTransform));
-    //vec2 temp = res.xy;
-    //float w = res.w;
-    vs_st = in_st;//temp.xy + 0.5;
 }

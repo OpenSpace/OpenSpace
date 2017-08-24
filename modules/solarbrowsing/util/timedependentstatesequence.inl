@@ -54,7 +54,8 @@ void TimedependentStateSequence<T>::displayStateTimes() {
     for (auto& state : _states) {
         const double& time = state.timeObserved();
         const std::string& dateString = SpiceManager::ref().dateFromEphemerisTime(time);
-        std::cout << "State " << state.id() << " Time Observed: " << dateString << "\n";
+        // TODO: loggerCat
+        std::cerr << "State " << state.id() << " Time Observed: " << dateString << "\n";
     }
 }
 

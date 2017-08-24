@@ -43,11 +43,6 @@ public:
      */
     template<typename T>
     T* mapToClientMemory(bool shouldOrphanData, int size);
-    /**
-     * Size can be set dynamically to be able to get a smaller block than the
-     * full size PBO when getting the mapped pointer/
-     */
-    //void setSize(const unsigned int& size);
     void releaseMappedBuffer();
     void activate();
     void deactivate();

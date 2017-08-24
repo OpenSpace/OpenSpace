@@ -48,7 +48,6 @@ template<typename T>
 void StreamBuffer<T>::enqueueJob(std::shared_ptr<StreamJob<T>> job) {
     _queue.push(job->id());
     _enqueuedJobIds.insert(job->id());
-    //_enqueuedJobs[job->id()] = job;
     _concurrentJobManager.enqueueJob(job);
 }
 

@@ -35,13 +35,11 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <memory>
 #include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <unordered_set>
-
 
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 
@@ -72,48 +70,29 @@ public:
     float getGammaValue() { return _gammaValue; }
     float getImageResolutionFactor() { return _imageSize; }
     glm::vec2 getCenterPixel() { return _currentCenterPixel; }
+    float getScale() { return _currentScale; }
     bool isCoronaGraph() { return _isCoronaGraph; }
-
-    //TODO: Remove
-    //float _magicPlaneFactor = 0;
-    //glm::dvec2 _magicPlaneOffset = glm::dvec2();
-    //properties::FloatProperty _sharpenValue;
-    properties::FloatProperty _contrastValue;
-    properties::FloatProperty _gammaValue;
-    // 4096, 2048 , ...
-    unsigned int _imageSize;
-
-    float _currentScale;
-    glm::vec2 _currentCenterPixel;
-    bool _isCoronaGraph;
-    //std::shared_ptr<SolarImageData> _currentSolarImageData;
-
-    //bool _shouldRenderPlane = true;
 
 private:
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
-  //  properties::IntProperty _bufferSize;
     properties::FloatProperty _planeOpacity;
     properties::BoolProperty _enableBorder;
     properties::BoolProperty _enableFrustum;
-    //properties::BoolProperty _displayTimers;
-    //properties::BoolProperty _lazyBuffering;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
     properties::IntProperty _resolutionLevel;
-    //properties::BoolProperty _useBuffering;
+    properties::FloatProperty _contrastValue;
+    properties::FloatProperty _gammaValue;
     properties::BoolProperty _usePBO;
     properties::BoolProperty _verboseMode;
-    //properties::DoubleProperty _planeSize;
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     TransferFunction* _lut;
-    //std::unique_ptr<PixelBufferObject> _pbo;
+
     std::array<std::unique_ptr<PixelBufferObject>, SOLAR_BUFFER_SIZE> _pbos;
-    //std::queue<int> _enqueuedPboIds;
 
     // TODO: Remove these?
     //bool _updatingCurrentActiveChannel = false;
@@ -121,9 +100,8 @@ private:
     bool _initializePBO = true;
     bool _pboIsDirty = false;
     bool _timeToUpdateTexture = false;
-    float _offset = 0.0;
+    float _imagePlaneOffset = 0.0;
 
-    //unsigned int _fullResolution;
     double _deltaTimeLast = 0.0;
     double _realTimeDiff;
     double _currentActiveImageTime;
@@ -131,6 +109,12 @@ private:
     bool _isWithinFrustum = false;
     bool _isWithinFrustumLast = true;
     unsigned int _bufferCountOffset = 1;
+
+    unsigned int _imageSize;
+
+    float _currentScale;
+    glm::vec2 _currentCenterPixel;
+    bool _isCoronaGraph;
 
     // For debugging
     unsigned int _frameSkipCount = 0;
@@ -150,6 +134,7 @@ private:
     void uploadImageDataToPBO();
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
     void fillBuffer(const double& dt);
+    void listen();
     void loadMetadata(const std::string& rootPath);
     PixelBufferObject* getAvailablePbo();
 

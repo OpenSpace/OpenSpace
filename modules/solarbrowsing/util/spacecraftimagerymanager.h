@@ -46,7 +46,7 @@ namespace openspace {
 
 class TransferFunction;
 
-// Assume everythign in arcsec to minimize metadata
+// Assume everything in arcsec to minimize metadata
 struct ImageMetadata {
     std::string filename;
     int fullResolution;
@@ -63,25 +63,15 @@ public:
     void loadTransferFunctions(
           const std::string& path,
           std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
-    // void loadTransferFunctions(
-    //       const std::string& path,
-    //       std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
-    //std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
-    void loadMetadataFromDisk(const std::string& rootPath,
-                        std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
-    void saveMetadataToDisk(const std::string& rootPath, std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
     void loadImageMetadata(
       const std::string& path,
       std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
-    //void loadImageMetadata(
-     // const std::string& path,
-      //std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
 private:
-    ImageMetadata parseMetadata(const ghoul::filesystem::File& file);
+    ImageMetadata parseMetadata(const ghoul::filesystem::File& file, const std::string& instrumantName);
     std::string ISO8601(std::string& datetime);
-    //void fetchServerImages(std::string type);
-    //void fillImageryInfo(std::string buffer, std::string type);
-    //void createLUT();
+    bool loadMetadataFromDisk(const std::string& rootPath,
+                        std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
+    void saveMetadataToDisk(const std::string& rootPath, std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
 };
 
 } //namespace openspace

@@ -57,14 +57,13 @@ typedef std::chrono::high_resolution_clock Clock;
 namespace {
     static const std::string _loggerCat = "RenderableSolarImagery";
     const double EPSILON = std::numeric_limits<double>::epsilon();
-
+    const unsigned int MAX_IMAGE_RESOLUTION = 4096;
 }
 
 namespace openspace {
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    //, _sharpenValue("sharpenValue", "Sharpen", 0.0, 0.0, 1.0)
     , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
     , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
     , _enableFrustum("enableFrustum", "Enable Frustum", false)
@@ -72,55 +71,15 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    //, _bufferSize("bufferSize", "Buffer Size", 5, 1, 150)
-    //, _displayTimers("displayTimers", "Display Timers", false)
-    //, _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 65, 0, 300)
     , _moveFactor("moveFactor", "Move Factor" , 1.0, 0.0, 1.0)
-    , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
-   // , _useBuffering("useBuffering", "Use Buffering", true)
+    , _resolutionLevel("resolutionlevel", "Level of detail", 2, 0, 5)
     , _usePBO("usePBO", "Use PBO", true)
-    //, _planeSize("planeSize", "Plane Size", 50.0, 0.0, 1.0)
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
-    // std::string target;
-    // if (dictionary.getValue("Target", target)) {
-    //     _target = target;
-    // }
-
-    _enabled = false;
-    bool startEnabled;
-    if (dictionary.getValue("Enabled", startEnabled)) {
-        _enabled = startEnabled;
-    }
-
-    float gamma;
-    if (dictionary.getValue("StartGamma", gamma)) {
-        _gammaValue = gamma;
-    }
 
     if (!dictionary.getValue("Name", _nodeName)) {
         throw ghoul::RuntimeError("Nodename has to be specified");
-    }
-
-    // glm::dvec2 magicPlaneOffset;
-    // if (dictionary.getValue("MagicOffsetFromCenter", magicPlaneOffset)) {
-    //     _magicPlaneOffset = magicPlaneOffset;
-    // }
-
-    float tmpStartResolutionLevel;
-    if (!dictionary.getValue("StartResolutionLevel", tmpStartResolutionLevel)) {
-        throw ghoul::RuntimeError("Plane must have a starting resolution level");
-    }
-    _resolutionLevel = static_cast<int>(tmpStartResolutionLevel);
-
-    // if (!dictionary.getValue("MagicPlaneFactor", _magicPlaneFactor)) {
-    //     throw ghoul::RuntimeError("Plane must at the moment have a magic factor");
-    // }
-
-    float offset;
-    if (dictionary.getValue("Offset", offset)) {
-        _offset = offset;
     }
 
     std::string rootPath;
@@ -128,83 +87,39 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         throw ghoul::RuntimeError("RootPath has to be specified");
     }
 
-    //TODO(mnoven): Can't pass in an int to dictionary?
-    // float tmpResolution;
-    // if (!dictionary.getValue("Resolution", tmpResolution)){
-    //     throw ghoul::RuntimeError("Resolution has to be specified");
-    // }
-    //_fullResolution = static_cast<unsigned int>(tmpResolution);
+    float imagePlaneOffset;
+    if (dictionary.getValue("imagePlaneOffset", imagePlaneOffset)) {
+        _imagePlaneOffset = imagePlaneOffset;
+    }
 
-    // if (dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
-    //     ghoul::Dictionary instrumentDic = dictionary.value<ghoul::Dictionary>("Instruments");
-    //     for (size_t i = 1; i <= instrumentDic.size(); ++i) {
-    //         if (!instrumentDic.hasKeyAndValue<std::string>(std::to_string(i))) {
-    //             throw ghoul::RuntimeError("Instruments has to be an array-style table");
-    //         }
-    //         std::string instrument = instrumentDic.value<std::string>(std::to_string(i));
-    //         std::transform(instrument.begin(), instrument.end(), instrument.begin(),
-    //                        ::tolower);
-    //         _instrumentFilter.insert(instrument);
-    //     }
-    // }
-
-    //SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap);
-    //saveMetadata(rootPath);
-    //loadMetadata(rootPath);
-    SpacecraftImageryManager::ref().loadMetadataFromDisk(rootPath, _imageMetadataMap);
+    SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap);
     SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap);
 
     // Add GUI names
     unsigned int i = 0;
     for (auto& el : _imageMetadataMap) {
-       // if (el.first.find("304") != std::string::npos) {
-         //   _activeInstruments.addOption(0, el.first);
-        //} else {
-            _activeInstruments.addOption(i++, el.first);
-       // }
+        _activeInstruments.addOption(i++, el.first);
     }
 
-    // std::string startInstrument;
-    // if (dictionary.getValue("StartInstrument", startInstrument)) {
-    //     _currentActiveInstrument = startInstrument;
-
-    //} else {
-        _currentActiveInstrument
-            = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
-    //}
-
-    //std::string tfRootPath;
-    //if (dictionary.getValue("TransferfunctionPath", tfRootPath)) {
-        //throw ghoul::RuntimeError("TransferfunctionPath has to be specified");
-    //}
+    _currentActiveInstrument
+        = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
 
     // Some sanity checks
     if (_imageMetadataMap.size() == 0) {
-        // if (_instrumentFilter.size() > 0) {
-        //     LERROR("Could not find any instruments that match specified filter");
-        //     for (auto& filter : _instrumentFilter) {
-        //         LERROR(filter);
-        //     }
-        // } else {
-            LERROR("Images map is empty! Check your path");
-       // }
+        LERROR("Images map is empty! Check your path");
     }
 
-    // Get image size
+    // Initialize PBO's
+    for (int i = 0; i < SOLAR_BUFFER_SIZE; ++i) {
+        _pbos[i] = std::make_unique<PixelBufferObject>(MAX_IMAGE_RESOLUTION * MAX_IMAGE_RESOLUTION * sizeof(IMG_PRECISION));
+    }
+
+    // Get first image size
     auto& stateSequenceStart = _imageMetadataMap[_currentActiveInstrument];
     auto& stateStart = stateSequenceStart.getState(OsEng.timeManager().time().j2000Seconds());
     std::shared_ptr<ImageMetadata> imStart = stateStart.contents();
-    //_imageSize = _imageMetadataMap[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
     _imageSize = imStart->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
 
-    // Always give PBO maximum size
-    //_pbo = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
-
-    for (int i = 0; i < SOLAR_BUFFER_SIZE; ++i) {
-        _pbos[i] = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
-    }
-
-    // TODO(mnoven): Faster to send GL_RGBA32F as internal format - GPU Pads anyways?
     _texture =  std::make_unique<Texture>(
                     nullptr,
                     glm::size3_t(_imageSize, _imageSize, 1),
@@ -222,162 +137,69 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
-     _enableFrustum.onChange([this]() {
-        if (_enableFrustum) {
-            _enableBorder = true;
-        } else {
-            _enableBorder = false;
-        }
-     });
-
-    _activeInstruments.onChange([this]() {
-        //_updatingCurrentActiveChannel = true;
-        _pboIsDirty = false;
-        _currentActiveInstrument
-               = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
-
-        // Update image size
-        auto& stateSequence = _imageMetadataMap[_currentActiveInstrument];
-        auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
-       // const double& timeObserved = state.timeObserved();
-        std::shared_ptr<ImageMetadata> im = state.contents();
-        //_imageSize = _imageMetadataMap[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
-        _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
-        //_pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
-
-        // Upload asap
-        updateTextureGPU(/*asyncUpload=*/false);
-        //if (_useBuffering) {
-            //double oktime = OsEng.timeManager().time().deltaTime();
-            //TimeManager& lel = OsEng.timeManager();
-            // _currentActiveImageTime
-            //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-            //                   .timeObserved;
-            clearBuffer();
-            // _streamBuffer.clear();
-            // _frameSkipCount = 0;
-            // _bufferCountOffset = 1;
-            //fillBuffer(OsEng.timeManager().time().deltaTime());
-        //} else {
-        //    uploadImageDataToPBO();
-       // }
-
-        //_updatingCurrentActiveChannel = false;
-    });
-
-    _minRealTimeUpdateInterval.onChange([this]() {
-        // _streamBuffer.clear();
-        // _frameSkipCount = 0;
-        // _bufferCountOffset = 1;
-        clearBuffer();
-    });
-
-    _resolutionLevel.onChange([this]() {
-        //_updatingCurrentLevelOfResolution = true;
-        _pboIsDirty = false;
-
-        auto& stateSequence = _imageMetadataMap[_currentActiveInstrument];
-        auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
-       // const double& timeObserved = state.timeObserved();
-        std::shared_ptr<ImageMetadata> im = state.contents();
-        //_imageSize = _imageMetadataMap[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
-        _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
-
-        //_imageSize = _fullResolution / (pow(2, _resolutionLevel));
-
-        //_pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
-        updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
-       // if (_useBuffering) {
-
-           // LDEBUG("image size" << _imageSize);
-
-            // _currentActiveImageTime
-            //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-            //                   .timeObserved;
-            clearBuffer();
-            // _streamBuffer.clear();
-            // _frameSkipCount = 0;
-            // _bufferCountOffset = 1;
-            //fillBuffer(OsEng.timeManager().time().deltaTime());
-       // } /*else {
-            uploadImageDataToPBO();
-       // }*/
-       //_updatingCurrentLevelOfResolution = false;
-    });
-
-    _moveFactor.onChange([this]() {
-        //updatePlane();
-        _spacecraftCameraPlane->createPlaneAndFrustum(_moveFactor);
-    });
-
-    _deltaTimeLast = 1.0;
-
-    // if (_useBuffering) {
-    //     fillBuffer(OsEng.timeManager().time().deltaTime());
-    // }
-
-
-
-
-    // _currentActiveImageTime
-    //       = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-    //               .timeObserved;
-
-   // LDEBUG("Init current active image time " <<  SpiceManager::ref().dateFromEphemerisTime(OsEng.timeManager().time().j2000Seconds()));
-    //LDEBUG("Init current active image time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
-
-    // If no buffer is used this is needed
-
-    // Initialize PBO - not needed since buffer is filled async anyways
-    // if (_usePBO) {
-    //     LDEBUG("Initializing PBO with image " << _currentActiveImage);
-    //     uploadImageDataToPBO(_currentActiveImage); // Begin fill PBO 1
-    // }
-
     performImageTimestep(OsEng.timeManager().time().j2000Seconds());
+    listen();
 
     addProperty(_planeOpacity);
     addProperty(_enableBorder);
     addProperty(_enableFrustum);
     addProperty(_activeInstruments);
-    //addProperty(_sharpenValue);
     addProperty(_gammaValue);
     addProperty(_contrastValue);
-    //addProperty(_bufferSize);
-   // addProperty(_displayTimers);
-   // addProperty(_planeSize);
     addProperty(_resolutionLevel);
-    //addProperty(_lazyBuffering);
     addProperty(_minRealTimeUpdateInterval);
-    //addProperty(_asyncUploadPBO);
-  //  addProperty(_useBuffering);
     addProperty(_usePBO);
     addProperty(_moveFactor);
     addProperty(_verboseMode);
 }
 
-// MUST do this conversion before passing in the spice manager again - WTF.
-// std::string RenderableSolarImagery::ISO8601(std::string& datetime) {
-//     std::string month = datetime.substr(5, 3);
+void RenderableSolarImagery::listen() {
+    _enableFrustum.onChange([this]() {
+        if (_enableFrustum) {
+            _enableBorder = true;
+        } else {
+            _enableBorder = false;
+        }
+    });
 
-//     std::string MM = "";
-//     if (month == "JAN") MM = "01";
-//     else if (month == "FEB") MM = "02";
-//     else if (month == "MAR") MM = "03";
-//     else if (month == "APR") MM = "04";
-//     else if (month == "MAY") MM = "05";
-//     else if (month == "JUN") MM = "06";
-//     else if (month == "JUL") MM = "07";
-//     else if (month == "AUG") MM = "08";
-//     else if (month == "SEP") MM = "09";
-//     else if (month == "OCT") MM = "10";
-//     else if (month == "NOV") MM = "11";
-//     else if (month == "DEC") MM = "12";
-//     else ghoul_assert(false, "Bad month");
+    _activeInstruments.onChange([this]() {
+        _pboIsDirty = false;
+        _currentActiveInstrument
+               = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
+        // Update image size
+        auto& stateSequence = _imageMetadataMap[_currentActiveInstrument];
+        auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
+        std::shared_ptr<ImageMetadata> im = state.contents();
+        _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
 
-//     datetime.replace(4, 5, "-" + MM + "-");
-//     return datetime;
-// }
+        // Upload asap
+        updateTextureGPU(/*asyncUpload=*/false);
+        clearBuffer();
+    });
+
+    _minRealTimeUpdateInterval.onChange([this]() {
+        clearBuffer();
+    });
+
+    _resolutionLevel.onChange([this]() {
+        _pboIsDirty = false;
+        // Update image size
+        auto& stateSequence = _imageMetadataMap[_currentActiveInstrument];
+        auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
+        std::shared_ptr<ImageMetadata> im = state.contents();
+        _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
+
+        // Upload asap
+        updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
+        clearBuffer();
+    });
+
+    _moveFactor.onChange([this]() {
+        _spacecraftCameraPlane->createPlaneAndFrustum(_moveFactor);
+    });
+
+    _deltaTimeLast = 1.0;
+}
 
 void RenderableSolarImagery::clearBuffer() {
     _pboIsDirty = false;
@@ -396,40 +218,17 @@ DecodeData RenderableSolarImagery::getDecodeDataFromOsTime(const int& osTime) {
     auto& state = stateSequence.getState(osTime);
     const double& timeObserved = state.timeObserved();
     std::shared_ptr<ImageMetadata> im = state.contents();
-    //const std::string stateFilename = state.contents()->filename;
-    //DecodeData decodeData {_imageSize * _imageSize, stateFilename, _resolutionLevel, _verboseMode, timeObserved};
 
     DecodeData decodeData {std::move(im), static_cast<unsigned int>(_resolutionLevel), timeObserved, _verboseMode};
     return decodeData;
 }
-
-// void RenderableSolarImagery::fillBuffer(const double& dt) {
-//     _streamBuffer.clear();
-//     if (_verboseMode) {
-//         LDEBUG("Refilling Buffer. dt: " << dt);
-//     }
-//     const double& osTime = OsEng.timeManager().time().j2000Seconds();
-//     const double& startTime = getDecodeDataFromOsTime(osTime).timeObserved;
-
-//     for (int i = 1; i < _bufferSize; i++) {
-//         const double& time = startTime + (dt * i) * (static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
-//         DecodeData decodeData = getDecodeDataFromOsTime(time);
-//         auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(_imageSize));
-//         _streamBuffer.enqueueJob(job);
-//         if (_verboseMode) {
-//             LDEBUG("Enqueueing " << decodeData.im->filename);
-//         }
-//     }
-//     //_initializePBO = true;
-// }
 
 bool RenderableSolarImagery::isReady() const {
     return _spacecraftCameraPlane->isReady() && _texture != nullptr;
 }
 
 bool RenderableSolarImagery::initialize() {
-    _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(
-          /*_magicPlaneOffset, _magicPlaneFactor,*/ _moveFactor);
+    _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(_moveFactor);
     return isReady();
 }
 
@@ -438,28 +237,7 @@ bool RenderableSolarImagery::deinitialize() {
 }
 
 void RenderableSolarImagery::uploadImageDataToPBO() {
-  //  _pbo->activate();
-  //  IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true, _imageSize * _imageSize * sizeof(IMG_PRECISION));
-
-   // if (!_useBuffering) {
-        //const std::string filename = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds()).im->filename;
-        //decode(_pboBufferData, filename);
-        //_pboIsDirty = true;
-    //} else {
-        // WARNING - this can be an old job - but looks smoother - bug or feature?
-        // const double& osTime = OsEng.timeManager().time().j2000Seconds();
-        // std::shared_ptr<SolarImageData> _solarImageData = nullptr;
-        // while (_streamBuffer._concurrentJobManager.numFinishedJobs() > 0) {
-        //     _solarImageData = _streamBuffer.popFinishedJob();
-        //     if (osTime <= _solarImageData->timeObserved) {
-        //         break;
-        //     }
-        // }
-
     std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
-    //int pboId = _streamBuffer.numJobs();
-
-    //LDEBUG("Popping job from PBO " << pboId);
 
     if (_solarImageData) {
         _currentActiveImageTime = _solarImageData->timeObserved;
@@ -467,30 +245,12 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
         _currentCenterPixel = _solarImageData->im->centerPixel;
         _isCoronaGraph = _solarImageData->im->isCoronaGraph;
 
-        //_currentSolarImageData = std::move(_solarImageData);
-
-       // auto t1 = Clock::now();
-       // std::memcpy(_pboBufferData, _solarImageData->data, _imageSize * _imageSize * sizeof(unsigned char));
-       // auto t2 = Clock::now();
-
-       // _uploadData = _solarImageData->data;
-        _currentPbo = _pboQueue.front(); //_pbos[pboId].get();
-        //LDEBUG("Popping job to pbo" << _currentPbo->id());
-
-
-        // if (_displayTimers) {
-        //     LDEBUG("Memcpy time "
-        //            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-        //                     .count()
-        //            << " ms" << std::endl);
-        // }
-
+        _currentPbo = _pboQueue.front();
         _initializePBO = false;
         _pboIsDirty = true;
 
         if (_verboseMode)  {
             LDEBUG("Popped image" << _solarImageData->im->filename);
-            //LDEBUG("Adding work from PBO " << decodeData.im->filename);
         }
     } else {
         if (_verboseMode) {
@@ -498,9 +258,6 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
             _frameSkipCount++;
         }
     }
-   // }
-    //_pbo->releaseMappedBuffer();
-    //_pbo->deactivate();
 }
 
 void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged) {
@@ -514,53 +271,41 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
 
         _busyPbos.erase(_currentPbo->id());
         _pboQueue.pop();
-        _pboIsDirty = false;
-    } else {
+    } else { // Synchronous "normal" texture upload
         unsigned char* data
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
-
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
         const auto& decodeData = getDecodeDataFromOsTime(osTime);
-        //const auto& decodeData = getDecodeDataFromOsTime(_currentActiveImageTime);
         decode(data, decodeData.im->filename);
 
         _currentScale = decodeData.im->scale;
         _currentCenterPixel = decodeData.im->centerPixel;
 
         _texture->bind();
-        // if (!resChanged) {
-        //     glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-        //                     GLint(_texture->format()), _texture->dataType(), data);
-        // } else {
-            glTexImage2D(_texture->type(), 0, _texture->internalFormat(), _imageSize,
-                         _imageSize, 0, GLint(_texture->format()), _texture->dataType(),
-                         data);
-       // }
+        glTexImage2D(_texture->type(), 0, _texture->internalFormat(), _imageSize,
+                     _imageSize, 0, GLint(_texture->format()), _texture->dataType(),
+                     data);
         delete[] data;
     }
+     _pboIsDirty = false;
 }
 
-void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename)
-{
+void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename) {
     SimpleJ2kCodec j2c(_verboseMode);
     j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
-    //KakaduWrapper w(_verboseMode);
-    //w.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
 }
 
 void RenderableSolarImagery::performImageTimestep(const double& osTime) {
-    if (_pboIsDirty || !_usePBO) {
+    if (_pboIsDirty) {
         updateTextureGPU();
     }
-
     const bool stateChanged = _imageMetadataMap[_currentActiveInstrument].hasStateChanged(osTime);
-    // Time to pop from buffer !!! - And refill with buffer offset
+
+    // Time to pop from buffer!
     if (stateChanged || _initializePBO) {
-        // Refill PBO
-        // if (_verboseMode) {
-        //     LDEBUG("Time to update image! ");
-        // }
-        if (_usePBO /*&& !_initializePBO*/) {
+        if (!_usePBO) {
+            updateTextureGPU();
+        } else { // Refill PBO
             uploadImageDataToPBO();
         }
     }
@@ -585,52 +330,35 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
-    //if (_useBuffering) {
-        const double& dt = OsEng.timeManager().time().deltaTime();
-        // Delta time changed, need to refill buffer
-        if ((std::abs(_deltaTimeLast - dt)) > EPSILON) {
-            _pboIsDirty = false;
-           // fillBuffer(dt);
-            clearBuffer();
-            // _frameSkipCount = 0;
-            // _streamBuffer.clear();
-            // _bufferCountOffset = 1;
-            //LDEBUG("Clearing ... dt : " << dt);
-            // _currentActiveImageTime
-            //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-            //                   .timeObserved;
-      //  }
+    const double& dt = OsEng.timeManager().time().deltaTime();
+
+    // Delta time changed, need to refill buffer
+    if ((std::abs(_deltaTimeLast - dt)) > EPSILON) {
+        _pboIsDirty = false;
+        clearBuffer();
         _deltaTimeLast = dt;
     }
 
-    if (/*_streamBuffer.numJobs() */_pboQueue.size() < /*_bufferSize*/ SOLAR_BUFFER_SIZE && (_isWithinFrustum || _initializePBO)) {
+    // Continuously fill buffer
+    if (_usePBO && _pboQueue.size() < SOLAR_BUFFER_SIZE && (_isWithinFrustum || _initializePBO)) {
         // Always add to buffer faster than pop ..
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
-        // The min real time update interval doesnt make any sense
-        DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_bufferCountOffset /** _streamBuffer.numJobs()*/) * (OsEng.timeManager().time().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval)/1000.0));
-        //LDEBUG("Current active time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
-        //LDEBUG("dt" << (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime()));
+        DecodeData decodeData = getDecodeDataFromOsTime(osTime + _bufferCountOffset * (OsEng.timeManager().time().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval)/1000.0));
         const std::string hash = decodeData.im->filename + std::to_string(_imageSize);
 
         // If job does not exist already and last popped time is not the same as the job trying to be enqueued
         if (!_streamBuffer.hasJob(hash) && _currentActiveImageTime != decodeData.timeObserved) {
-            //LINFO("Pushing hash  " << hash);
-            //LINFO("Pushing delta time  " << SpiceManager::ref().dateFromEphemerisTime(decodeData.timeObserved));
-
-            //_pboQueue.push(_stream)
             // Get a free PBO, and add to Queue
-            PixelBufferObject* pboToPush = getAvailablePbo(); //_pbos[_streamBuffer.numJobs()].get();
+            PixelBufferObject* pboToPush = getAvailablePbo();
             pboToPush->activate();
             IMG_PRECISION* _pboBufferData = pboToPush->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true, _imageSize * _imageSize * sizeof(IMG_PRECISION));
 
-            // Give it a ready PBO
             auto job = std::make_shared<DecodeJob>(_pboBufferData, decodeData, decodeData.im->filename + std::to_string(_imageSize));
             _streamBuffer.enqueueJob(job);
 
             _pboQueue.push(pboToPush);
             pboToPush->releaseMappedBuffer();
             pboToPush->deactivate();
-            //_bufferCountOffset = 0;
         } else {
             _bufferCountOffset++;
         }
@@ -658,48 +386,24 @@ void RenderableSolarImagery::render(const RenderData& data) {
         return;
     }
 
-    // if (!_isWithinFrustum) {
-    //     _shouldRenderPlane = false;
-    // } else {
-    //     _shouldRenderPlane = true;
-    // }
-
      _isWithinFrustum = checkBoundaries(data);
     if (_isWithinFrustumLast != _isWithinFrustum) {
-        //_pboIsDirty = false;
-        //fillBuffer(OsEng.timeManager().time().j2000Seconds());
-        // _currentActiveImageTime
-        //               = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-        //                       .timeObserved;
         clearBuffer();
-        // _streamBuffer.clear();
-        // _bufferCountOffset = 1;
-        // _frameSkipCount = 0;
-        // if (!_isWithinFrustum) {
-        //     _enableBorder = true;
-        //     _enableFrustum = true;
-        // } else {
-        //     _enableBorder = false;
-        //     _enableFrustum = false;
-        // }
     }
     _isWithinFrustumLast = _isWithinFrustum;
 
     // Update texture
-    // The bool blockers might probably not be needed now
     if (_timeToUpdateTexture /*&& !_updatingCurrentLevelOfResolution
         && !_updatingCurrentActiveChannel */ && (_isWithinFrustum || _initializePBO || _pboIsDirty)) {
         performImageTimestep(OsEng.timeManager().time().j2000Seconds());
         _lastUpdateRealTime = _realTime;
     }
 
-    // TODO: We want to create sun imagery node from within the module
     const glm::dvec3& sunPositionWorld
           = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
-
     _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
                                    _contrastValue, _gammaValue, _enableBorder,
-                                   _enableFrustum, _currentCenterPixel, _currentScale, _offset, _isCoronaGraph);
+                                   _enableFrustum, _currentCenterPixel, _currentScale, _imagePlaneOffset, _isCoronaGraph);
 }
 
 } // namespace openspace

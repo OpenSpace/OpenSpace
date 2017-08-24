@@ -23,40 +23,25 @@
  ****************************************************************************************/
 const int MAX_SPACECRAFT_OBSERVATORY = 7;
 
-in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
 in vec4 clipSpace;
 in vec3 vUv[MAX_SPACECRAFT_OBSERVATORY];
 
+uniform int numSpacecraftCameraPlanes;
 uniform dvec3 planePositionSpacecraft[MAX_SPACECRAFT_OBSERVATORY];
 uniform sampler1D lut[MAX_SPACECRAFT_OBSERVATORY];
 uniform sampler2D imageryTexture[MAX_SPACECRAFT_OBSERVATORY];
-//uniform sampler2D magnetogram;
-uniform int numSpacecraftCameraPlanes;
 uniform bool hasLut[MAX_SPACECRAFT_OBSERVATORY];
-
-//uniform float sharpenValue[MAX_SPACECRAFT_OBSERVATORY];
 uniform float contrastValue[MAX_SPACECRAFT_OBSERVATORY];
 uniform float opacityValue[MAX_SPACECRAFT_OBSERVATORY];
 uniform float gammaValue[MAX_SPACECRAFT_OBSERVATORY];
 uniform float imageSize[MAX_SPACECRAFT_OBSERVATORY];
-
-//uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
-//uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
 uniform bool isEnabled[MAX_SPACECRAFT_OBSERVATORY];
-
 uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
 uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
 uniform vec2 centerPixel[MAX_SPACECRAFT_OBSERVATORY];
 
-const float SUN_RADIUS = (1391600000 * 0.5);
-
-// TODO(mnoven): Uniform
-//const float FULL_PLANE_SIZE = (1391600000 * 0.5) / magicPlaneFactor[0];
-//const float FULL_PLANE_SIZE_STEREO = (1391600000 * 0.5) / magicPlaneFactor[1];
-// TODO(mnoven): Metadata
-const float magnetogramMin = -2265.132812;
-const float magnetogramMax = 2417.483887;
+const float SUN_RADIUS = 1391600000 * 0.5;
 
 #include "fragment.glsl"
 
@@ -69,7 +54,6 @@ Fragment getFragment() {
     bool renderSurface = true;
 
     for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
-
         if (isCoronaGraph[i] || !isEnabled[i]) {
             continue;
         }
@@ -96,12 +80,12 @@ Fragment getFragment() {
             res.g = pow(res.g, gammaValue[i]);
             res.b = pow(res.b, gammaValue[i]);
 
-            // If black
+            // Not initialized
             if (outColor == vec4(0)) {
                 float factor2 = smoothstep(0.5, uv.x, uv.z);
                 outColor = mix(res, res, factor2);
-                //outColor = vec4(1.0, 0.0, 0.0, 1.0);
             } else {
+                // Blend between
                 float factor = smoothstep(0.5, 1.0 - uv.x, uv.z);
                 float factor2 = smoothstep(0.5, uv.x, uv.z);
                 outColor = mix(outColor, res, factor + factor2);
@@ -111,9 +95,7 @@ Fragment getFragment() {
     }
 
     if (renderSurface) {
-        //float intensity = texture(magnetogram, vs_st).r;
-        //intensity = (intensity - magnetogramMin) / (magnetogramMax - magnetogramMin);
-        //outColor = vec4(intensity, intensity, intensity, 1.0);
+        // Yellow-ish. Could discard to get the standard sun texture
         outColor = vec4(0.93, 0.96, 0.3, 1.0);
     }
 
