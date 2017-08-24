@@ -116,7 +116,7 @@ return {
         --"saturn",
         --"uranus",
         --"neptune",
-        "stars/digitaluniverse",
+        --"stars/digitaluniverse",
         -- "stars/denver",
         "milkyway/digitaluniverse",
         --"milkyway/eso",
