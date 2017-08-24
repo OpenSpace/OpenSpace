@@ -38,6 +38,7 @@ void to_json(json &j, const Property &p) {
         { "Description", json::parse(p.generateBaseDescription()) },
         { "Value", p.jsonValue() }
     };
+    j["Description"]["description"] = p.description();
 }
 
 void to_json(json &j, const Property* pP) {
