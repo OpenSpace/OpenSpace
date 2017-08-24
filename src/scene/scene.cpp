@@ -258,18 +258,18 @@ const glm::dmat4 Scene::currentMatrixTransformation(const std::string & cameraPa
 
         const SceneGraphNode* cameraParentNode = sceneGraphNode(cameraParent);
 
-        //Find common parent for camera and object
-        std::string commonParentName(cameraParent);  // initiates to camera parent in case 
-                                                     // other path is not found
         const SceneGraphNode * targetNode = sceneGraphNode(target->name());
         cameraPath = pathTo(cameraParentNode);
         targetPath = pathTo(targetNode);
 
         const SceneGraphNode* commonParentNode = sceneGraphNode(commonParent(cameraPath, targetPath));
-        commonParentPath = pathTo(commonParentNode);
-
-        //Find the path from the camera to the common parent
-
+        
+        if (commonParentNode->name() == cameraParent) {
+            return glm::dmat4(1.0);
+        }
+        
+        // Collects the cancatenated matrices which will compose the final transformation
+        // matrix.
         glm::dmat4 collectorCamera(matrixCollector(cameraPath, commonParentNode->name(), false));
         glm::dmat4 collectorTarget(matrixCollector(targetPath, commonParentNode->name(), true));
 

@@ -92,11 +92,19 @@ end
 return {
     ScenePath = ".",
     CommonFolder = "common",
+    --[[
     Camera = {
         Focus = "Earth",
         Position = {0, 0, 0},
         Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
+    },]]--
+    -- Focus on Sun
+    Camera = {
+        Focus = "Sun",
+        Position = {4319068178.004544, 4917370297.650615, -7687434598.843674},
+        Rotation = {0.303304, -0.915442, 0.206586, -0.165209},
     },
+
     Modules = {
         "sun",
         --"mercury",

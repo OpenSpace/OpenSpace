@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -142,7 +142,7 @@ public:
     const glm::dvec3 currentDisplacementPosition(const std::string & cameraParent,
         const SceneGraphNode* target) const;
 
-    const glm::dmat4 currentMatrixTransformation(const std::string & cameraParnt,
+    const glm::dmat4 currentMatrixTransformation(const std::string & cameraParent,
         const SceneGraphNode* target) const;
 
     std::vector<const SceneGraphNode*> pathTo(const SceneGraphNode* node) const;
