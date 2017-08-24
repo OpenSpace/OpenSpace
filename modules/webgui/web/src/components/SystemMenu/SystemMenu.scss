@@ -22,6 +22,7 @@
 
 .popover {
   bottom: unquote("calc(#{$bottom-bar-height} + #{$popover-arrow-size})");
+  font-size: 0.9 * $font-size;
   left: 0;
   position: absolute;
   width: 170px;

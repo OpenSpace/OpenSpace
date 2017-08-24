@@ -49,24 +49,24 @@ class SystemMenu extends Component {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Help
+                <Icon icon="help" /> Help
               </a>
               <a
                 href="https://github.com/OpenSpace/OpenSpace/issues/new"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Report a problem
+                <Icon icon="report_problem" /> Report a problem
               </a>
               <a
                 href="http://openspaceproject.com/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                openspaceproject.com
+                <Icon icon="public" /> openspaceproject.com
               </a>
               <Link to="about">
-                About
+                <Icon icon="info" /> About
               </Link>
             </nav>
           </Popover>
