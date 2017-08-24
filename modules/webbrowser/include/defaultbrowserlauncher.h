@@ -26,11 +26,12 @@
 #define __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
 
 #include <include/cef_life_span_handler.h>
+#include <include/cef_request_handler.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 
-class DefaultBrowserLauncher : public CefLifeSpanHandler {
+class DefaultBrowserLauncher : public CefLifeSpanHandler, public CefRequestHandler {
 public:
     bool OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser, 
         const CefPopupFeatures& popupFeatures, 
@@ -38,12 +39,14 @@ public:
         const CefString& url, 
         CefRefPtr<CefClient>& client, 
         CefBrowserSettings& settings);
-    bool DoClose(CefRefPtr< CefBrowser > browser) { LDEBUGC("wat", "doclose"); return false; };
-    void OnAfterCreated(CefRefPtr< CefBrowser > browser) { LDEBUGC("wat", "onaftercreated"); };
-    void OnBeforeClose(CefRefPtr< CefBrowser > browser) { LDEBUGC("wat", "onbeforeclose"); };
-    bool RunModal(CefRefPtr< CefBrowser > browser) { LDEBUGC("wat", "runmodal"); };
+    bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, 
+        CefRefPtr<CefFrame> frame, 
+        const CefString& target_url, 
+        CefRequestHandler::WindowOpenDisposition target_disposition, 
+        bool user_gesture);
 
 private:
+    void launchBrowser(const std::string &url) const;
     IMPLEMENT_REFCOUNTING(DefaultBrowserLauncher);
 };
 

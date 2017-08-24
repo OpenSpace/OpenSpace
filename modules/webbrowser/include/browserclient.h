@@ -39,10 +39,12 @@ public:
 
     virtual CefRefPtr<CefRenderHandler> GetRenderHandler();
     CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler();
+    CefRefPtr<CefRequestHandler> GetRequestHandler();
 
 private:
     CefRefPtr<CefRenderHandler> _renderHandler;
     CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
+    CefRefPtr<CefRequestHandler> _requestHandler;
 
     IMPLEMENT_REFCOUNTING(BrowserClient);
 };

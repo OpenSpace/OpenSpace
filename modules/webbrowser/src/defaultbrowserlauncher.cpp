@@ -38,9 +38,23 @@ bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
     CefRefPtr<CefClient>& client,
     CefBrowserSettings& settings) {
     // never permit CEF popups, always launch in default browser
-    LDEBUG("Launching default browser: " + url.ToString());
-    ShellExecute(0, 0, url.ToString().c_str(), 0, 0, SW_SHOW);
+    launchBrowser(url.ToString());
     return true;
+}
+
+bool DefaultBrowserLauncher::OnOpenURLFromTab(CefRefPtr<CefBrowser> browser,
+    CefRefPtr<CefFrame> frame,
+    const CefString& url,
+    CefRequestHandler::WindowOpenDisposition target_disposition,
+    bool user_gesture) {
+    launchBrowser(url.ToString());
+    // block url opening
+    return true;
+}
+
+void DefaultBrowserLauncher::launchBrowser(const std::string &url) const {
+    LDEBUG("Launching default browser: " + url);
+    ShellExecute(0, 0, url.c_str(), 0, 0, SW_SHOW);
 }
 
 } // namespace openspace

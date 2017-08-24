@@ -30,7 +30,9 @@ namespace openspace {
 
 BrowserClient::BrowserClient(WebRenderHandler* handler) {
     _renderHandler = handler;
-    _lifeSpanHandler = new DefaultBrowserLauncher;
+    auto *browserLauncher = new DefaultBrowserLauncher;
+    _lifeSpanHandler = browserLauncher;
+    _requestHandler = browserLauncher;
 };
 
 CefRefPtr<CefRenderHandler> BrowserClient::GetRenderHandler() {
@@ -39,6 +41,10 @@ CefRefPtr<CefRenderHandler> BrowserClient::GetRenderHandler() {
 
 CefRefPtr<CefLifeSpanHandler> BrowserClient::GetLifeSpanHandler() {
     return _lifeSpanHandler;
+}
+
+CefRefPtr<CefRequestHandler> BrowserClient::GetRequestHandler() {
+    return _requestHandler;
 }
 
 } // namespace openspace
