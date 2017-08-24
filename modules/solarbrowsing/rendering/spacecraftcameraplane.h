@@ -40,7 +40,7 @@ public:
                 const float& planeOpacity, const float& contrastValue,
                 const float& gammaValue, const bool& enableBorder,
                 const bool& enableFrustum, const glm::vec2& currentCenterPixel,
-                const float& currentScale, const float& multipleImageryOffset);
+                const float& currentScale, const float& multipleImageryOffset, const bool& isCoronaGraph);
     void update();
     void createPlaneAndFrustum(const double& moveDistance);
     // TODO(mnoven) : Pre process image, no need to set uniforms

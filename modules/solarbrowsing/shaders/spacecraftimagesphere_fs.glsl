@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-const int MAX_SPACECRAFT_OBSERVATORY = 12;
+const int MAX_SPACECRAFT_OBSERVATORY = 7;
 
 in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
@@ -31,25 +31,25 @@ in vec3 vUv[MAX_SPACECRAFT_OBSERVATORY];
 uniform dvec3 planePositionSpacecraft[MAX_SPACECRAFT_OBSERVATORY];
 uniform sampler1D lut[MAX_SPACECRAFT_OBSERVATORY];
 uniform sampler2D imageryTexture[MAX_SPACECRAFT_OBSERVATORY];
-uniform sampler2D magnetogram;
+//uniform sampler2D magnetogram;
 uniform int numSpacecraftCameraPlanes;
 uniform bool hasLut[MAX_SPACECRAFT_OBSERVATORY];
 
-uniform float sharpenValue[MAX_SPACECRAFT_OBSERVATORY];
+//uniform float sharpenValue[MAX_SPACECRAFT_OBSERVATORY];
 uniform float contrastValue[MAX_SPACECRAFT_OBSERVATORY];
 uniform float opacityValue[MAX_SPACECRAFT_OBSERVATORY];
 uniform float gammaValue[MAX_SPACECRAFT_OBSERVATORY];
 uniform float imageSize[MAX_SPACECRAFT_OBSERVATORY];
 
-uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
-uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
+//uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
+//uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
 uniform bool isEnabled[MAX_SPACECRAFT_OBSERVATORY];
 
 uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
 uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
 uniform vec2 centerPixel[MAX_SPACECRAFT_OBSERVATORY];
 
-const float HALF_SUN_RADIUS = (1391600000 * 0.5);
+const float SUN_RADIUS = (1391600000 * 0.5);
 
 // TODO(mnoven): Uniform
 //const float FULL_PLANE_SIZE = (1391600000 * 0.5) / magicPlaneFactor[0];
@@ -66,7 +66,7 @@ float contrast(float intensity, int i) {
 
 Fragment getFragment() {
     vec4 outColor = vec4(0);
-    bool renderMagnetoGram = true;
+    bool renderSurface = true;
 
     for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
 
@@ -76,11 +76,11 @@ Fragment getFragment() {
 
         if (planePositionSpacecraft[i].z < vUv[i].z) {
             vec3 uv = vUv[i].xyz;
-            uv /= ( (HALF_SUN_RADIUS / scale[i]) * 2);
+            uv /= ( (SUN_RADIUS / scale[i]) * 2);
             uv += 0.5;
 
-            uv.x += ((centerPixel[i].x) / HALF_SUN_RADIUS) / 2.0;
-            uv.y -= ((centerPixel[i].y) /  HALF_SUN_RADIUS) / 2.0;
+            uv.x += ((centerPixel[i].x) / SUN_RADIUS) / 2.0;
+            uv.y -= ((centerPixel[i].y) /  SUN_RADIUS) / 2.0;
 
             float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
             intensityOrg = contrast(intensityOrg, i);
@@ -96,20 +96,25 @@ Fragment getFragment() {
             res.g = pow(res.g, gammaValue[i]);
             res.b = pow(res.b, gammaValue[i]);
 
+            // If black
             if (outColor == vec4(0)) {
-                outColor = res;
+                float factor2 = smoothstep(0.5, uv.x, uv.z);
+                outColor = mix(res, res, factor2);
+                //outColor = vec4(1.0, 0.0, 0.0, 1.0);
             } else {
-                float factor = smoothstep(0.5, 0.65, uv.z);
-                outColor = mix(outColor, res, factor);
+                float factor = smoothstep(0.5, 1.0 - uv.x, uv.z);
+                float factor2 = smoothstep(0.5, uv.x, uv.z);
+                outColor = mix(outColor, res, factor + factor2);
             }
-            renderMagnetoGram = false;
+            renderSurface = false;
         }
     }
 
-    if (renderMagnetoGram) {
-        float intensity = texture(magnetogram, vs_st).r;
-        intensity = (intensity - magnetogramMin) / (magnetogramMax - magnetogramMin);
-        outColor = vec4(intensity, intensity, intensity, 1.0);
+    if (renderSurface) {
+        //float intensity = texture(magnetogram, vs_st).r;
+        //intensity = (intensity - magnetogramMin) / (magnetogramMax - magnetogramMin);
+        //outColor = vec4(intensity, intensity, intensity, 1.0);
+        outColor = vec4(0.93, 0.96, 0.3, 1.0);
     }
 
     Fragment frag;

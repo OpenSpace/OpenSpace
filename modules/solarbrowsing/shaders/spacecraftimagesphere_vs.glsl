@@ -23,7 +23,7 @@
  ****************************************************************************************/
 #version __CONTEXT__
 
-const int MAX_SPACECRAFT_OBSERVATORY = 12;
+const int MAX_SPACECRAFT_OBSERVATORY = 7;
 
 uniform mat4 modelViewProjectionTransform;
 uniform dmat4 viewTransform;

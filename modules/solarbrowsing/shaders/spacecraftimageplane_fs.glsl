@@ -29,6 +29,7 @@ uniform float contrastValue;
 uniform float gammaValue;
 uniform float planeOpacity;
 uniform bool hasLut;
+uniform bool isCoronaGraph;
 
 in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
@@ -57,7 +58,10 @@ Fragment getFragment() {
     if (planeOpacity == 0.0)
         discard;
 
-    //if (length(outColor.xyz)  < 0.0001) discard;
+    float absy = abs(0.5 - vs_st.y);
+    float absx = abs(0.5 - vs_st.x);
+
+    if (isCoronaGraph && length(outColor.xyz) < 0.10 && ( (absy * absy + absx * absx) > 0.25)) discard;
 
     outColor = vec4(outColor.xyz, planeOpacity);
 

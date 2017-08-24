@@ -96,7 +96,8 @@ function postInitialization()
 end
 
 -- Define locals
-solarImageryDataRootPath = "C:/Users/novalain/Documents/localsolardata"
+--solarImageryDataRootPath = "C:/Users/novalsain/Documents/localsolardata"
+solarImageryDataRootPath = "D:/solarbrowsingdata"
 
 return {
     ScenePath = ".",
@@ -125,6 +126,6 @@ return {
         "missions/sdo",
       --  "missions/stereo-a",
        -- "missions/stereo-b",
-       -- "missions/soho"
+        "missions/soho"
     }
 }

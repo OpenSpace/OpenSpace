@@ -178,7 +178,7 @@ void SpacecraftCameraPlane::render(
       TransferFunction* lut, const glm::dvec3& sunPositionWorld,
       const float& planeOpacity, const float& contrastValue, const float& gammaValue,
       const bool& enableBorder, const bool& enableFrustum,
-      const glm::vec2& currentCenterPixel, const float& currentScale, const float& multipleImageryOffset)
+      const glm::vec2& currentCenterPixel, const float& currentScale, const float& multipleImageryOffset, const bool& isCoronaGraph)
 {
     glEnable(GL_CULL_FACE);
 
@@ -218,7 +218,7 @@ void SpacecraftCameraPlane::render(
     imageUnit.activate();
     imageryTexture.bind();
 
-
+    _planeShader->setUniform("isCoronaGraph", isCoronaGraph);
     _planeShader->setUniform("scale", currentScale);
     _planeShader->setUniform("centerPixel", currentCenterPixel);
     _planeShader->setUniform("imageryTexture", imageUnit);

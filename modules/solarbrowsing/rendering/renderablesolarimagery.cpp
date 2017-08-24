@@ -699,7 +699,7 @@ void RenderableSolarImagery::render(const RenderData& data) {
 
     _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
                                    _contrastValue, _gammaValue, _enableBorder,
-                                   _enableFrustum, _currentCenterPixel, _currentScale, _offset);
+                                   _enableFrustum, _currentCenterPixel, _currentScale, _offset, _isCoronaGraph);
 }
 
 } // namespace openspace

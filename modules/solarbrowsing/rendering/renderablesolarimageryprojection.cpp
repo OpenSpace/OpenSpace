@@ -47,6 +47,7 @@ using namespace ghoul::opengl;
 namespace {
     static const std::string _loggerCat = "RendearbleSpacecraftCameraSphere";
     const char* keyRadius = "Radius";
+     const int MAX_SPACECRAFT_OBSERVATORY = 7;
     // const std::vector<std::pair<int, std::pair<std::string, std::string>>> loopTimes
     //       = {
     //          {3600, {"2012-07-12T15:00:00.00", "2012-07-12T18:00:00.00"}},
@@ -131,16 +132,16 @@ bool RenderableSolarImageryProjection::initialize() {
    // }
 
     //const glm::size3_t imageSize(sizeX, sizeY, 1);
-    _magnetogramTexture = std::make_unique<Texture>(
-        data,
-        glm::size3_t(3600, 1440, 1),
-        ghoul::opengl::Texture::Red,
-        GL_R32F,
-        GL_FLOAT,
-        Texture::FilterMode::Linear,
-        Texture::WrappingMode::ClampToEdge
-    );
-    _magnetogramTexture->uploadTexture();
+    // _magnetogramTexture = std::make_unique<Texture>(
+    //     data,
+    //     glm::size3_t(3600, 1440, 1),
+    //     ghoul::opengl::Texture::Red,
+    //     GL_R32F,
+    //     GL_FLOAT,
+    //     Texture::FilterMode::Linear,
+    //     Texture::WrappingMode::ClampToEdge
+    // );
+    // _magnetogramTexture->uploadTexture();
 
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
@@ -171,7 +172,7 @@ bool RenderableSolarImageryProjection::deinitialize() {
 }
 
 bool RenderableSolarImageryProjection::isReady() const {
-    return _shader && _sphere && _magnetogramTexture;
+    return _shader && _sphere; /*&& _magnetogramTexture;*/
 }
 
 void RenderableSolarImageryProjection::update(const UpdateData& data) {
@@ -250,7 +251,6 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
     );
 
     const int numPlanes = _solarImageryDependencies.size();
-    const int MAX_SPACECRAFT_OBSERVATORY = 12;
     int solarImageryCount = 0;
 
     ghoul::opengl::TextureUnit txUnits[MAX_SPACECRAFT_OBSERVATORY];
@@ -319,10 +319,10 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
         _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
     }
 
-    ghoul::opengl::TextureUnit imageUnit;
-    imageUnit.activate();
-    _magnetogramTexture->bind();
-    _shader->setUniform("magnetogram", imageUnit);
+    // ghoul::opengl::TextureUnit imageUnit;
+    // imageUnit.activate();
+    // _magnetogramTexture->bind();
+    // _shader->setUniform("magnetogram", imageUnit);
 
     _shader->setUniform("numSpacecraftCameraPlanes", numPlanes);
 
