@@ -23,13 +23,10 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
-#include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <ghoul/opengl/texture.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem>
-#include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/timemanager.h>
 #include <string>

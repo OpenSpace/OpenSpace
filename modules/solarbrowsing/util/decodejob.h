@@ -25,6 +25,7 @@
 #define __OPENSPACE_MODULE_SOLARBROWSING___DECODEJOB___H__
 
 #include <modules/solarbrowsing/util/streambuffer.h>
+#include <modules/solarbrowsing/util/j2kcodec.h>
 
 namespace openspace {
 
@@ -51,8 +52,8 @@ public:
         SolarImageData imd {_data,
                             _decodeData.im,
                             _decodeData.timeObserved};
-        SimpleJ2kCodec j2c(_decodeData.verboseMode);
-        j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
+        J2kCodec j2c(_decodeData.verboseMode);
+        j2c.decodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
         _solarImageData = std::make_shared<SolarImageData>(imd);
     }
 

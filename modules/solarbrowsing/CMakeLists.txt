@@ -44,7 +44,7 @@ set(HEADER_FILES
 
     # Other
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/j2kcodec.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/util/streambuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/streambuffer.inl
@@ -60,17 +60,14 @@ set(HEADER_FILES
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/threadpool.h
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.h
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.inl
-    # Kakadu Headers
-    #D:/solarbrowsingdata/kakadu/all_includes
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/j2kcodec.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarvideo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.cpp

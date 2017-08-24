@@ -30,7 +30,6 @@
 #include <vector>
 #include <valarray>
 #include <unordered_map>
-#include <unordered_set>
 #include <modules/solarbrowsing/util/timedependentstatesequence.h>
 
 #include <ext/json/json.hpp>

@@ -27,25 +27,22 @@
 
 #define SOLAR_BUFFER_SIZE 10
 
-// TODO(mnoven): A-Z
-#include <modules/base/rendering/renderableplane.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringproperty.h>
+
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <memory>
-#include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <unordered_set>
-
-#include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
-
 #include <modules/solarbrowsing/util/streambuffer.h>
 #include <modules/solarbrowsing/util/pixelbufferobject.h>
 #include <modules/solarbrowsing/util/decodejob.h>
+#include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
@@ -74,24 +71,23 @@ public:
     bool isCoronaGraph() { return _isCoronaGraph; }
 
 private:
-    properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
-    properties::FloatProperty _planeOpacity;
+    properties::FloatProperty _contrastValue;
     properties::BoolProperty _enableBorder;
     properties::BoolProperty _enableFrustum;
+    properties::FloatProperty _gammaValue;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
+    properties::FloatProperty _planeOpacity;
     properties::IntProperty _resolutionLevel;
-    properties::FloatProperty _contrastValue;
-    properties::FloatProperty _gammaValue;
     properties::BoolProperty _usePBO;
     properties::BoolProperty _verboseMode;
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    TransferFunction* _lut;
 
+    TransferFunction* _lut;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::array<std::unique_ptr<PixelBufferObject>, SOLAR_BUFFER_SIZE> _pbos;
 
     // TODO: Remove these?
@@ -109,7 +105,6 @@ private:
     bool _isWithinFrustum = false;
     bool _isWithinFrustumLast = true;
     unsigned int _bufferCountOffset = 1;
-
     unsigned int _imageSize;
 
     float _currentScale;

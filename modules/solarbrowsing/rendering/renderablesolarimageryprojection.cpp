@@ -19,18 +19,12 @@
  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+     * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <modules/space/rendering/planetgeometry.h>
-#include <openspace/util/time.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
@@ -66,7 +60,6 @@ bool RenderableSolarImageryProjection::initialize() {
           = OsEng.renderEngine().scene()->allSceneGraphNodes();
     for (auto node : allNodes) {
         if (dynamic_cast<RenderableSolarImagery*>(node->renderable())) {
-           // SceneGraphNode* tmp2 = const_cast<SceneGraphNode*>(node);
             auto thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
             thisNode->addDependency(*node);
         }

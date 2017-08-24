@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERYPROJECTION___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -67,11 +66,6 @@ private:
 
     std::vector<SceneGraphNode*> _solarImageryDependencies;
     std::string _nodeName;
-    //std::string _path;
-    //std::unique_ptr<ghoul::opengl::Texture> _magnetogramTexture;
-    //properties::BoolProperty _activateLooping;
-    //properties::IntProperty _loopId;
-    //float _planetRadius;
 };
 
 } // namespace openspace

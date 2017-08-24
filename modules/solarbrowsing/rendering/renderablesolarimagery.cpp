@@ -27,24 +27,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/rendering/renderengine.h>
-
-// TODO(mnoven) CLEAN REDUNDANT STUFF
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-
-#include <ghoul/filesystem/filesystem.h>
-
-#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/scene/scene.h>
-
-#include <openspace/util/spicemanager.h>
-
-#include <fstream>
+#include <modules/solarbrowsing/util/j2kcodec.h>
 
 #include <chrono>
 #include <math.h>
@@ -64,15 +49,14 @@ namespace openspace {
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
-    , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
-    , _enableFrustum("enableFrustum", "Enable Frustum", false)
-    , _enableBorder("enableBorder", "Enable Border", false)
-    , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
-    , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
+    , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
+    , _enableBorder("enableBorder", "Enable Border", false)
+    , _enableFrustum("enableFrustum", "Enable Frustum", false)
+    , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 65, 0, 300)
     , _moveFactor("moveFactor", "Move Factor" , 1.0, 0.0, 1.0)
+    , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 2, 0, 5)
     , _usePBO("usePBO", "Use PBO", true)
     , _verboseMode("verboseMode", "Verbose Mode", false)
@@ -291,8 +275,8 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
 }
 
 void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename) {
-    SimpleJ2kCodec j2c(_verboseMode);
-    j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
+    J2kCodec j2c(_verboseMode);
+    j2c.decodeIntoBuffer(filename, buffer, _resolutionLevel);
 }
 
 void RenderableSolarImagery::performImageTimestep(const double& osTime) {
@@ -348,7 +332,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 
         // If job does not exist already and last popped time is not the same as the job trying to be enqueued
         if (!_streamBuffer.hasJob(hash) && _currentActiveImageTime != decodeData.timeObserved) {
-            // Get a free PBO, and add to Queue
+            // Get an available PBO, and add to Queue
             PixelBufferObject* pboToPush = getAvailablePbo();
             pboToPush->activate();
             IMG_PRECISION* _pboBufferData = pboToPush->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true, _imageSize * _imageSize * sizeof(IMG_PRECISION));
