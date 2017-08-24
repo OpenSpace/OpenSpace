@@ -67,80 +67,89 @@ public:
 
     TransferFunction* getTransferFunction() { return _lut; }
     const std::unique_ptr<ghoul::opengl::Texture>& getImageryTexture() { return _texture; }
-    const SpacecraftCameraPlane& cameraPlane() {return *_spacecraftCameraPlane; };
+    const SpacecraftCameraPlane& getCameraPlane() { return *_spacecraftCameraPlane; }
+    float getContrastValue() { return _contrastValue; }
+    float getGammaValue() { return _gammaValue; }
+    float getImageResolutionFactor() { return _imageSize; }
+    glm::vec2 getCenterPixel() { return _currentCenterPixel; }
+    bool isCoronaGraph() { return _isCoronaGraph; }
 
     //TODO: Remove
-    float _magicPlaneFactor = 0;
-    glm::dvec2 _magicPlaneOffset = glm::dvec2();
-    properties::FloatProperty _sharpenValue;
+    //float _magicPlaneFactor = 0;
+    //glm::dvec2 _magicPlaneOffset = glm::dvec2();
+    //properties::FloatProperty _sharpenValue;
     properties::FloatProperty _contrastValue;
     properties::FloatProperty _gammaValue;
+    // 4096, 2048 , ...
     unsigned int _imageSize;
 
     float _currentScale;
     glm::vec2 _currentCenterPixel;
-    SolarImageData _currentSolarImageData;
-    double _currentActiveImageTime;
     bool _isCoronaGraph;
-    bool _shouldRenderPlane = true;
+    //std::shared_ptr<SolarImageData> _currentSolarImageData;
+
+    //bool _shouldRenderPlane = true;
 
 private:
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
-    properties::IntProperty _bufferSize;
+  //  properties::IntProperty _bufferSize;
     properties::FloatProperty _planeOpacity;
     properties::BoolProperty _enableBorder;
     properties::BoolProperty _enableFrustum;
-    properties::BoolProperty _displayTimers;
-    properties::BoolProperty _lazyBuffering;
+    //properties::BoolProperty _displayTimers;
+    //properties::BoolProperty _lazyBuffering;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
     properties::IntProperty _resolutionLevel;
-    properties::BoolProperty _useBuffering;
+    //properties::BoolProperty _useBuffering;
     properties::BoolProperty _usePBO;
     properties::BoolProperty _verboseMode;
-    properties::DoubleProperty _planeSize;
+    //properties::DoubleProperty _planeSize;
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     TransferFunction* _lut;
-    std::unique_ptr<PixelBufferObject> _pbo;
-
+    //std::unique_ptr<PixelBufferObject> _pbo;
     std::array<std::unique_ptr<PixelBufferObject>, SOLAR_BUFFER_SIZE> _pbos;
     //std::queue<int> _enqueuedPboIds;
 
     // TODO: Remove these?
-    bool _updatingCurrentActiveChannel = false;
-    bool _updatingCurrentLevelOfResolution = false;
-    bool _initializePBO;
+    //bool _updatingCurrentActiveChannel = false;
+    //bool _updatingCurrentLevelOfResolution = false;
+    bool _initializePBO = true;
     bool _pboIsDirty = false;
     bool _timeToUpdateTexture = false;
     float _offset = 0.0;
 
-    unsigned int _fullResolution;
+    //unsigned int _fullResolution;
     double _deltaTimeLast = 0.0;
     double _realTimeDiff;
-    unsigned int _frameSkipCount = 0;
+    double _currentActiveImageTime;
+
     bool _isWithinFrustum = false;
+    bool _isWithinFrustumLast = true;
     unsigned int _bufferCountOffset = 1;
+
+    // For debugging
+    unsigned int _frameSkipCount = 0;
+
     PixelBufferObject* _currentPbo;
     std::queue<PixelBufferObject*> _pboQueue;
     std::unordered_set<int> _busyPbos;
 
-    std::string _name;
+    std::string _nodeName;
     StreamBuffer<SolarImageData> _streamBuffer;
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
     std::string _currentActiveInstrument;
-    std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>> _imageMetadataMap2;
-    //std::unordered_set<std::string> _instrumentFilter;
+    std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>> _imageMetadataMap;
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
 
     DecodeData getDecodeDataFromOsTime(const int& osTime);
     void uploadImageDataToPBO();
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
     void fillBuffer(const double& dt);
-    void saveMetadata(const std::string& rootPath);
     void loadMetadata(const std::string& rootPath);
     PixelBufferObject* getAvailablePbo();
 

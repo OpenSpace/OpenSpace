@@ -47,15 +47,15 @@ using namespace ghoul::opengl;
 namespace {
     static const std::string _loggerCat = "RendearbleSpacecraftCameraSphere";
     const char* keyRadius = "Radius";
-    const std::vector<std::pair<int, std::pair<std::string, std::string>>> loopTimes
-          = {
-             {3600, {"2012-07-12T15:00:00.00", "2012-07-12T18:00:00.00"}},
-             {3600, {"2012-07-12T15:00:00.00", "2012-07-13T03:00:00.00"}},
-             {21600, {"2012-07-08T00:00:00.00", "2012-07-13T00:00:00.00"}},
-             {7200, {"2012-07-17T12:45:00.00", "2012-07-19T17:00:00.00"}},
-             {7200, {"2012-07-17T06:00:00.00", "2012-07-19T17:00:00.00"}},
-             {7200, {"2012-07-23T00:00:00.00", "2012-07-23T16:00:00.00"}}
-            };
+    // const std::vector<std::pair<int, std::pair<std::string, std::string>>> loopTimes
+    //       = {
+    //          {3600, {"2012-07-12T15:00:00.00", "2012-07-12T18:00:00.00"}},
+    //          {3600, {"2012-07-12T15:00:00.00", "2012-07-13T03:00:00.00"}},
+    //          {21600, {"2012-07-08T00:00:00.00", "2012-07-13T00:00:00.00"}},
+    //          {7200, {"2012-07-17T12:45:00.00", "2012-07-19T17:00:00.00"}},
+    //          {7200, {"2012-07-17T06:00:00.00", "2012-07-19T17:00:00.00"}},
+    //          {7200, {"2012-07-23T00:00:00.00", "2012-07-23T16:00:00.00"}}
+    //         };
 }
 
 namespace openspace {
@@ -63,26 +63,26 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _shader(nullptr)
-    , _loopId("loopId", "Loop Id", 0, 0, 5)
-    , _activateLooping("activateLooping", "Activate Looping", false)
+    //, _loopId("loopId", "Loop Id", 0, 0, 5)
+    //, _activateLooping("activateLooping", "Activate Looping", false)
     , _sphere(nullptr)
 {
     if (!dictionary.getValue("Name", _nodeName)) {
         throw ghoul::RuntimeError("Nodename has to be specified");
     }
     //std::string path;
-    if (!dictionary.getValue("hmipath", path)) {
-        throw ghoul::RuntimeError("HMIPath has to be specified");
-    }
+    // if (!dictionary.getValue("hmipath", path)) {
+    //     throw ghoul::RuntimeError("HMIPath has to be specified");
+    // }
 
-    _activateLooping.onChange([this]() {
-        if (_activateLooping) {
-            auto& time = OsEng.timeManager().time();
-            const auto& timePair = loopTimes[_loopId.value()];
-            time.setTime(timePair.second.first);
-            time.setDeltaTime(timePair.first);
-        }
-    });
+    // _activateLooping.onChange([this]() {
+    //     if (_activateLooping) {
+    //         auto& time = OsEng.timeManager().time();
+    //         const auto& timePair = loopTimes[_loopId.value()];
+    //         time.setTime(timePair.second.first);
+    //         time.setDeltaTime(timePair.first);
+    //     }
+    // });
 
     // _startLoop1.onChange([this]() {
     //     if (_startLoop1) {
@@ -100,8 +100,8 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
     //     }
     // });
 
-    addProperty(_activateLooping);
-    addProperty(_loopId);
+    //addProperty(_activateLooping);
+    //a/ddProperty(_loopId);
     //addProperty(_startLoop1);
     //addProperty(_startLoop2);
 }
@@ -179,19 +179,19 @@ void RenderableSolarImageryProjection::update(const UpdateData& data) {
         _shader->rebuildFromFile();
     }
 
-    if (_activateLooping) {
-        auto& time = OsEng.timeManager().time();
-        const auto& timePair = loopTimes[_loopId.value()];
-        auto endTime = time.convertTime(timePair.second.second);
-        if (time.j2000Seconds() > endTime) {
-            time.setTime(timePair.second.first);
-            for (int i = 0; i < _solarImageryDependencies.size(); ++i) {
-                auto* solarImagery = static_cast<RenderableSolarImagery*>(
-                      _solarImageryDependencies[i]->renderable());
-                solarImagery->clearBuffer();
-            }
-        }
-    }
+    // if (_activateLooping) {
+    //     auto& time = OsEng.timeManager().time();
+    //     const auto& timePair = loopTimes[_loopId.value()];
+    //     auto endTime = time.convertTime(timePair.second.second);
+    //     if (time.j2000Seconds() > endTime) {
+    //         time.setTime(timePair.second.first);
+    //         for (int i = 0; i < _solarImageryDependencies.size(); ++i) {
+    //             auto* solarImagery = static_cast<RenderableSolarImagery*>(
+    //                   _solarImageryDependencies[i]->renderable());
+    //             solarImagery->clearBuffer();
+    //         }
+    //     }
+    // }
 
 
     // if (_startLoop1) {
@@ -265,7 +265,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
         bool isCoronaGraph = solarImagery->_isCoronaGraph;
         bool enabled = solarImagery->isEnabled();
 
-        const SpacecraftCameraPlane& plane = solarImagery->cameraPlane();
+        const SpacecraftCameraPlane& plane = solarImagery->getCameraPlane();
         const glm::dvec3 planePos = plane.worldPosition();
         const glm::dmat4 planeRot = plane.worldRotation();
 

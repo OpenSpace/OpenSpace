@@ -67,6 +67,9 @@ public:
     //       const std::string& path,
     //       std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
     //std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
+    void loadMetadataFromDisk(const std::string& rootPath,
+                        std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
+    void saveMetadataToDisk(const std::string& rootPath, std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
     void loadImageMetadata(
       const std::string& path,
       std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
@@ -75,6 +78,7 @@ public:
       //std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
 private:
     ImageMetadata parseMetadata(const ghoul::filesystem::File& file);
+    std::string ISO8601(std::string& datetime);
     //void fetchServerImages(std::string type);
     //void fillImageryInfo(std::string buffer, std::string type);
     //void createLUT();

@@ -90,6 +90,28 @@ SpacecraftImageryManager::SpacecraftImageryManager() {}
 //     }
 // }
 
+std::string SpacecraftImageryManager::ISO8601(std::string& datetime) {
+    std::string month = datetime.substr(5, 3);
+
+    std::string MM = "";
+    if (month == "JAN") MM = "01";
+    else if (month == "FEB") MM = "02";
+    else if (month == "MAR") MM = "03";
+    else if (month == "APR") MM = "04";
+    else if (month == "MAY") MM = "05";
+    else if (month == "JUN") MM = "06";
+    else if (month == "JUL") MM = "07";
+    else if (month == "AUG") MM = "08";
+    else if (month == "SEP") MM = "09";
+    else if (month == "OCT") MM = "10";
+    else if (month == "NOV") MM = "11";
+    else if (month == "DEC") MM = "12";
+    else ghoul_assert(false, "Bad month");
+
+    datetime.replace(4, 5, "-" + MM + "-");
+    return datetime;
+}
+
 void SpacecraftImageryManager::loadTransferFunctions(
     const std::string& path,
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap)
@@ -124,6 +146,92 @@ void SpacecraftImageryManager::loadTransferFunctions(
                 }
             }
         }
+    }
+}
+
+void SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
+                        std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap) {
+
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    ghoul::filesystem::Directory sequenceDir(rootPath, RawPath::Yes);
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load directory '" << sequenceDir.path() << "' , remember to run the preprocessing step first!");
+    }
+
+    using Recursive = ghoul::filesystem::Directory::RawPath;
+    using Sort = ghoul::filesystem::Directory::Sort;
+
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::No);
+
+    LDEBUG("Begin reading from files");
+    for (auto& seqPath : sequencePaths) {
+        if (size_t position = seqPath.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(seqPath);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "txt") {
+                    LDEBUG("Loading instrument: " << currentFile.baseName());
+                    std::ifstream myfile(currentFile.path());
+                    if (!myfile.is_open()) {
+                        LERROR("Failed to open metadata file");
+                    }
+
+                    int numStates;
+                    myfile >> numStates;
+
+                    for (int i = 0; i < numStates; i++) {
+                        ImageMetadata im;
+
+                        myfile >> std::ws; // skip the rest of the line
+                        std::string date;
+                        std::getline(myfile, date);
+                        double timeObserved = SpiceManager::ref().ephemerisTimeFromDate(ISO8601(date));
+
+                        std::string relPath;
+                        myfile >> relPath;
+                        im.filename = rootPath + relPath;
+
+                        myfile >> im.fullResolution;
+                        myfile >> im.scale;
+
+                        float x, y;
+                        myfile >> x >> y;
+                        im.centerPixel = glm::vec2(x,y);
+                        myfile >> im.isCoronaGraph;
+                        std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+                        TimedependentState<ImageMetadata> timeState(
+                                      std::move(data), timeObserved, im.filename);
+                        _imageMetadataMap[currentFile.baseName()].addState(std::move(timeState));
+                    }
+                    myfile.close();
+                }
+            }
+        }
+    }
+}
+
+void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath, std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap) {
+    for (auto& instrument : _imageMetadataMap) {
+        std::ofstream ofs(rootPath + instrument.first + ".txt");
+        if (!ofs.is_open()) {
+            LERROR("Failed to open file");
+        }
+        auto &sequence = instrument.second;
+        ofs << sequence.getNumStates() << "\n";
+        for (const auto& metadata : sequence.getStates()) {
+                ofs << SpiceManager::ref().dateFromEphemerisTime(metadata.timeObserved()) << "\n";
+                auto im = metadata.contents();
+
+                size_t filenamePos = im->filename.find("imagedata");
+                std::string fname = im->filename.substr(filenamePos);
+                ofs << fname << "\n";
+                ofs << im->fullResolution << "\n";
+                ofs << im->scale << "\n";
+                ofs << im->centerPixel.x << "\n";
+                ofs << im->centerPixel.y << "\n";
+                ofs << im->isCoronaGraph << "\n";
+        }
+        ofs.close();
     }
 }
 

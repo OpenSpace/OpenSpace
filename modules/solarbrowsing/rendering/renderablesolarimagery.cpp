@@ -56,16 +56,15 @@ typedef std::chrono::high_resolution_clock Clock;
 
 namespace {
     static const std::string _loggerCat = "RenderableSolarImagery";
-    //double HALF_SUN_RADIUS = (1391600000.0 * 0.50); // Half sun radius divided by magic factor
     const double EPSILON = std::numeric_limits<double>::epsilon();
-    bool _isWithinFrustumLast = true;
+
 }
 
 namespace openspace {
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _sharpenValue("sharpenValue", "Sharpen", 0.0, 0.0, 1.0)
+    //, _sharpenValue("sharpenValue", "Sharpen", 0.0, 0.0, 1.0)
     , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
     , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
     , _enableFrustum("enableFrustum", "Enable Frustum", false)
@@ -73,15 +72,15 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    , _bufferSize("bufferSize", "Buffer Size", 5, 1, 150)
-    , _displayTimers("displayTimers", "Display Timers", false)
-    , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
+    //, _bufferSize("bufferSize", "Buffer Size", 5, 1, 150)
+    //, _displayTimers("displayTimers", "Display Timers", false)
+    //, _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 65, 0, 300)
     , _moveFactor("moveFactor", "Move Factor" , 1.0, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
-    , _useBuffering("useBuffering", "Use Buffering", true)
+   // , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
-    , _planeSize("planeSize", "Plane Size", 50.0, 0.0, 1.0)
+    //, _planeSize("planeSize", "Plane Size", 50.0, 0.0, 1.0)
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     // std::string target;
@@ -100,7 +99,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _gammaValue = gamma;
     }
 
-    if (!dictionary.getValue("Name", _name)) {
+    if (!dictionary.getValue("Name", _nodeName)) {
         throw ghoul::RuntimeError("Nodename has to be specified");
     }
 
@@ -149,13 +148,15 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     //     }
     // }
 
-    //SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2);
+    //SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap);
     //saveMetadata(rootPath);
-    loadMetadata(rootPath);
+    //loadMetadata(rootPath);
+    SpacecraftImageryManager::ref().loadMetadataFromDisk(rootPath, _imageMetadataMap);
+    SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap);
 
     // Add GUI names
     unsigned int i = 0;
-    for (auto& el : _imageMetadataMap2) {
+    for (auto& el : _imageMetadataMap) {
        // if (el.first.find("304") != std::string::npos) {
          //   _activeInstruments.addOption(0, el.first);
         //} else {
@@ -163,23 +164,22 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
        // }
     }
 
-    std::string startInstrument;
-    if (dictionary.getValue("StartInstrument", startInstrument)) {
-        _currentActiveInstrument = startInstrument;
+    // std::string startInstrument;
+    // if (dictionary.getValue("StartInstrument", startInstrument)) {
+    //     _currentActiveInstrument = startInstrument;
 
-    } else {
+    //} else {
         _currentActiveInstrument
             = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
-    }
+    //}
 
-    SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap);
     //std::string tfRootPath;
     //if (dictionary.getValue("TransferfunctionPath", tfRootPath)) {
         //throw ghoul::RuntimeError("TransferfunctionPath has to be specified");
     //}
 
     // Some sanity checks
-    if (_imageMetadataMap2.size() == 0) {
+    if (_imageMetadataMap.size() == 0) {
         // if (_instrumentFilter.size() > 0) {
         //     LERROR("Could not find any instruments that match specified filter");
         //     for (auto& filter : _instrumentFilter) {
@@ -191,10 +191,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     }
 
     // Get image size
-    auto& stateSequenceStart = _imageMetadataMap2[_currentActiveInstrument];
+    auto& stateSequenceStart = _imageMetadataMap[_currentActiveInstrument];
     auto& stateStart = stateSequenceStart.getState(OsEng.timeManager().time().j2000Seconds());
     std::shared_ptr<ImageMetadata> imStart = stateStart.contents();
-    //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
+    //_imageSize = _imageMetadataMap[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
     _imageSize = imStart->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
 
     // Always give PBO maximum size
@@ -231,23 +231,23 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
      });
 
     _activeInstruments.onChange([this]() {
-        _updatingCurrentActiveChannel = true;
+        //_updatingCurrentActiveChannel = true;
         _pboIsDirty = false;
         _currentActiveInstrument
                = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
 
         // Update image size
-        auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+        auto& stateSequence = _imageMetadataMap[_currentActiveInstrument];
         auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
        // const double& timeObserved = state.timeObserved();
         std::shared_ptr<ImageMetadata> im = state.contents();
-        //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
+        //_imageSize = _imageMetadataMap[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
         _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
         //_pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
 
         // Upload asap
         updateTextureGPU(/*asyncUpload=*/false);
-        if (_useBuffering) {
+        //if (_useBuffering) {
             //double oktime = OsEng.timeManager().time().deltaTime();
             //TimeManager& lel = OsEng.timeManager();
             // _currentActiveImageTime
@@ -258,11 +258,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             // _frameSkipCount = 0;
             // _bufferCountOffset = 1;
             //fillBuffer(OsEng.timeManager().time().deltaTime());
-        } /*else {
-            uploadImageDataToPBO();
-        }*/
+        //} else {
+        //    uploadImageDataToPBO();
+       // }
 
-        _updatingCurrentActiveChannel = false;
+        //_updatingCurrentActiveChannel = false;
     });
 
     _minRealTimeUpdateInterval.onChange([this]() {
@@ -273,21 +273,21 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     });
 
     _resolutionLevel.onChange([this]() {
-        _updatingCurrentLevelOfResolution = true;
+        //_updatingCurrentLevelOfResolution = true;
         _pboIsDirty = false;
 
-        auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+        auto& stateSequence = _imageMetadataMap[_currentActiveInstrument];
         auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
        // const double& timeObserved = state.timeObserved();
         std::shared_ptr<ImageMetadata> im = state.contents();
-        //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
+        //_imageSize = _imageMetadataMap[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
         _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
 
         //_imageSize = _fullResolution / (pow(2, _resolutionLevel));
 
         //_pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
         updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
-        if (_useBuffering) {
+       // if (_useBuffering) {
 
            // LDEBUG("image size" << _imageSize);
 
@@ -299,10 +299,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             // _frameSkipCount = 0;
             // _bufferCountOffset = 1;
             //fillBuffer(OsEng.timeManager().time().deltaTime());
-        } /*else {
+       // } /*else {
             uploadImageDataToPBO();
-        }*/
-       _updatingCurrentLevelOfResolution = false;
+       // }*/
+       //_updatingCurrentLevelOfResolution = false;
     });
 
     _moveFactor.onChange([this]() {
@@ -327,7 +327,6 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     //LDEBUG("Init current active image time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
 
     // If no buffer is used this is needed
-    _initializePBO = true;
 
     // Initialize PBO - not needed since buffer is filled async anyways
     // if (_usePBO) {
@@ -341,44 +340,44 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     addProperty(_enableBorder);
     addProperty(_enableFrustum);
     addProperty(_activeInstruments);
-    addProperty(_sharpenValue);
+    //addProperty(_sharpenValue);
     addProperty(_gammaValue);
     addProperty(_contrastValue);
     //addProperty(_bufferSize);
-    addProperty(_displayTimers);
-    addProperty(_planeSize);
+   // addProperty(_displayTimers);
+   // addProperty(_planeSize);
     addProperty(_resolutionLevel);
-    addProperty(_lazyBuffering);
+    //addProperty(_lazyBuffering);
     addProperty(_minRealTimeUpdateInterval);
     //addProperty(_asyncUploadPBO);
-    addProperty(_useBuffering);
+  //  addProperty(_useBuffering);
     addProperty(_usePBO);
     addProperty(_moveFactor);
     addProperty(_verboseMode);
 }
 
 // MUST do this conversion before passing in the spice manager again - WTF.
-std::string RenderableSolarImagery::ISO8601(std::string& datetime) {
-    std::string month = datetime.substr(5, 3);
+// std::string RenderableSolarImagery::ISO8601(std::string& datetime) {
+//     std::string month = datetime.substr(5, 3);
 
-    std::string MM = "";
-    if (month == "JAN") MM = "01";
-    else if (month == "FEB") MM = "02";
-    else if (month == "MAR") MM = "03";
-    else if (month == "APR") MM = "04";
-    else if (month == "MAY") MM = "05";
-    else if (month == "JUN") MM = "06";
-    else if (month == "JUL") MM = "07";
-    else if (month == "AUG") MM = "08";
-    else if (month == "SEP") MM = "09";
-    else if (month == "OCT") MM = "10";
-    else if (month == "NOV") MM = "11";
-    else if (month == "DEC") MM = "12";
-    else ghoul_assert(false, "Bad month");
+//     std::string MM = "";
+//     if (month == "JAN") MM = "01";
+//     else if (month == "FEB") MM = "02";
+//     else if (month == "MAR") MM = "03";
+//     else if (month == "APR") MM = "04";
+//     else if (month == "MAY") MM = "05";
+//     else if (month == "JUN") MM = "06";
+//     else if (month == "JUL") MM = "07";
+//     else if (month == "AUG") MM = "08";
+//     else if (month == "SEP") MM = "09";
+//     else if (month == "OCT") MM = "10";
+//     else if (month == "NOV") MM = "11";
+//     else if (month == "DEC") MM = "12";
+//     else ghoul_assert(false, "Bad month");
 
-    datetime.replace(4, 5, "-" + MM + "-");
-    return datetime;
-}
+//     datetime.replace(4, 5, "-" + MM + "-");
+//     return datetime;
+// }
 
 void RenderableSolarImagery::clearBuffer() {
     _pboIsDirty = false;
@@ -392,94 +391,8 @@ void RenderableSolarImagery::clearBuffer() {
     }
 }
 
-void RenderableSolarImagery::loadMetadata(const std::string& rootPath) {
-
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(rootPath, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load directory '" << sequenceDir.path() << "'");
-    }
-
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::No);
-
-    LDEBUG("Begin reading from files");
-    for (auto& seqPath : sequencePaths) {
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "txt") {
-                    LDEBUG("Loading instrument: " << currentFile.baseName());
-                    std::ifstream myfile(currentFile.path());
-                    if (!myfile.is_open()) {
-                        LERROR("Failed to open metadata file");
-                    }
-                  //  std::string ca;
-                    int numStates;
-                    myfile >> numStates;
-
-                    for (int i = 0; i < numStates; i++) {
-                        ImageMetadata im;
-
-                        myfile >> std::ws; // skip the rest of the line
-                        std::string date;
-                        std::getline(myfile, date);
-                        double timeObserved = SpiceManager::ref().ephemerisTimeFromDate(ISO8601(date));
-
-                        std::string relPath;
-                        myfile >> relPath;
-                        im.filename = rootPath + relPath;
-
-                        myfile >> im.fullResolution;
-                        myfile >> im.scale;
-
-                        float x, y;
-                        myfile >> x >> y;
-                        im.centerPixel = glm::vec2(x,y);
-                        myfile >> im.isCoronaGraph;
-                        std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
-                        TimedependentState<ImageMetadata> timeState(
-                                      std::move(data), timeObserved, im.filename);
-                        _imageMetadataMap2[currentFile.baseName()].addState(std::move(timeState));
-                    }
-                    myfile.close();
-                }
-            }
-        }
-    }
-}
-
-void RenderableSolarImagery::saveMetadata(const std::string& rootPath) {
-    for (auto& instrument : _imageMetadataMap2) {
-        std::ofstream ofs(rootPath + instrument.first + ".txt");
-        if (!ofs.is_open()) {
-            LERROR("Failed to open file");
-        }
-        auto &sequence = instrument.second;
-       // ofs << instrument.first << "\n";
-        ofs << sequence.getNumStates() << "\n";
-        for (const auto& metadata : sequence.getStates()) {
-                ofs << SpiceManager::ref().dateFromEphemerisTime(metadata.timeObserved()) << "\n";
-                auto im = metadata.contents();
-
-                size_t filenamePos = im->filename.find("imagedata");
-                std::string fname = im->filename.substr(filenamePos);
-                ofs << fname << "\n";
-                ofs << im->fullResolution << "\n";
-                ofs << im->scale << "\n";
-                ofs << im->centerPixel.x << "\n";
-                ofs << im->centerPixel.y << "\n";
-                ofs << im->isCoronaGraph << "\n";
-        }
-        ofs.close();
-    }
-}
-
 DecodeData RenderableSolarImagery::getDecodeDataFromOsTime(const int& osTime) {
-    auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+    auto& stateSequence = _imageMetadataMap[_currentActiveInstrument];
     auto& state = stateSequence.getState(osTime);
     const double& timeObserved = state.timeObserved();
     std::shared_ptr<ImageMetadata> im = state.contents();
@@ -528,11 +441,11 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
   //  _pbo->activate();
   //  IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true, _imageSize * _imageSize * sizeof(IMG_PRECISION));
 
-    if (!_useBuffering) {
+   // if (!_useBuffering) {
         //const std::string filename = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds()).im->filename;
         //decode(_pboBufferData, filename);
         //_pboIsDirty = true;
-    } else {
+    //} else {
         // WARNING - this can be an old job - but looks smoother - bug or feature?
         // const double& osTime = OsEng.timeManager().time().j2000Seconds();
         // std::shared_ptr<SolarImageData> _solarImageData = nullptr;
@@ -543,47 +456,49 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
         //     }
         // }
 
-        std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
-        //int pboId = _streamBuffer.numJobs();
+    std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
+    //int pboId = _streamBuffer.numJobs();
 
-        //LDEBUG("Popping job from PBO " << pboId);
+    //LDEBUG("Popping job from PBO " << pboId);
 
-        if (_solarImageData) {
-            _currentActiveImageTime = _solarImageData->timeObserved;
-            _currentScale = _solarImageData->im->scale;
-            _currentCenterPixel = _solarImageData->im->centerPixel;
-            _isCoronaGraph = _solarImageData->im->isCoronaGraph;
+    if (_solarImageData) {
+        _currentActiveImageTime = _solarImageData->timeObserved;
+        _currentScale = _solarImageData->im->scale;
+        _currentCenterPixel = _solarImageData->im->centerPixel;
+        _isCoronaGraph = _solarImageData->im->isCoronaGraph;
 
-           // auto t1 = Clock::now();
-           // std::memcpy(_pboBufferData, _solarImageData->data, _imageSize * _imageSize * sizeof(unsigned char));
-           // auto t2 = Clock::now();
+        //_currentSolarImageData = std::move(_solarImageData);
 
-           // _uploadData = _solarImageData->data;
-            _currentPbo = _pboQueue.front(); //_pbos[pboId].get();
-            //LDEBUG("Popping job to pbo" << _currentPbo->id());
+       // auto t1 = Clock::now();
+       // std::memcpy(_pboBufferData, _solarImageData->data, _imageSize * _imageSize * sizeof(unsigned char));
+       // auto t2 = Clock::now();
+
+       // _uploadData = _solarImageData->data;
+        _currentPbo = _pboQueue.front(); //_pbos[pboId].get();
+        //LDEBUG("Popping job to pbo" << _currentPbo->id());
 
 
-            // if (_displayTimers) {
-            //     LDEBUG("Memcpy time "
-            //            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-            //                     .count()
-            //            << " ms" << std::endl);
-            // }
+        // if (_displayTimers) {
+        //     LDEBUG("Memcpy time "
+        //            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+        //                     .count()
+        //            << " ms" << std::endl);
+        // }
 
-            _initializePBO = false;
-            _pboIsDirty = true;
+        _initializePBO = false;
+        _pboIsDirty = true;
 
-            if (_verboseMode)  {
-                LDEBUG("Popped image" << _solarImageData->im->filename);
-                //LDEBUG("Adding work from PBO " << decodeData.im->filename);
-            }
-        } else {
-            if (_verboseMode) {
-                LWARNING(_name << " -> Nothing to update, buffer is not ready, missing frames " << _frameSkipCount);
-                _frameSkipCount++;
-            }
+        if (_verboseMode)  {
+            LDEBUG("Popped image" << _solarImageData->im->filename);
+            //LDEBUG("Adding work from PBO " << decodeData.im->filename);
+        }
+    } else {
+        if (_verboseMode) {
+            LWARNING(_nodeName << " -> Nothing to update, buffer is not ready, missing frames " << _frameSkipCount);
+            _frameSkipCount++;
         }
     }
+   // }
     //_pbo->releaseMappedBuffer();
     //_pbo->deactivate();
 }
@@ -638,7 +553,7 @@ void RenderableSolarImagery::performImageTimestep(const double& osTime) {
         updateTextureGPU();
     }
 
-    bool stateChanged = _imageMetadataMap2[_currentActiveInstrument].hasStateChanged(osTime);
+    const bool stateChanged = _imageMetadataMap[_currentActiveInstrument].hasStateChanged(osTime);
     // Time to pop from buffer !!! - And refill with buffer offset
     if (stateChanged || _initializePBO) {
         // Refill PBO
@@ -670,7 +585,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
-    if (_useBuffering) {
+    //if (_useBuffering) {
         const double& dt = OsEng.timeManager().time().deltaTime();
         // Delta time changed, need to refill buffer
         if ((std::abs(_deltaTimeLast - dt)) > EPSILON) {
@@ -684,7 +599,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
             // _currentActiveImageTime
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
             //                   .timeObserved;
-        }
+      //  }
         _deltaTimeLast = dt;
     }
 
@@ -706,7 +621,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
             // Get a free PBO, and add to Queue
             PixelBufferObject* pboToPush = getAvailablePbo(); //_pbos[_streamBuffer.numJobs()].get();
             pboToPush->activate();
-            IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true, _imageSize * _imageSize * sizeof(IMG_PRECISION));
+            IMG_PRECISION* _pboBufferData = pboToPush->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true, _imageSize * _imageSize * sizeof(IMG_PRECISION));
 
             // Give it a ready PBO
             auto job = std::make_shared<DecodeJob>(_pboBufferData, decodeData, decodeData.im->filename + std::to_string(_imageSize));
@@ -772,8 +687,8 @@ void RenderableSolarImagery::render(const RenderData& data) {
 
     // Update texture
     // The bool blockers might probably not be needed now
-    if (_timeToUpdateTexture && !_updatingCurrentLevelOfResolution
-        && !_updatingCurrentActiveChannel && (_isWithinFrustum || _initializePBO || _pboIsDirty)) {
+    if (_timeToUpdateTexture /*&& !_updatingCurrentLevelOfResolution
+        && !_updatingCurrentActiveChannel */ && (_isWithinFrustum || _initializePBO || _pboIsDirty)) {
         performImageTimestep(OsEng.timeManager().time().j2000Seconds());
         _lastUpdateRealTime = _realTime;
     }
