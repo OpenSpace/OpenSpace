@@ -1,0 +1,14 @@
+@import "../../../styles/all";
+
+.infobox:hover:after {
+  background: $ui-background-solid;
+  color: $text-color-focus;
+  content: attr(data-title);
+  display: block;
+  font-size: 0.8 * $font-size;
+  line-height: 1.4;
+  padding: $base-padding / 2;
+  position: absolute;
+  width: 180px;
+  z-index: 20;
+}
