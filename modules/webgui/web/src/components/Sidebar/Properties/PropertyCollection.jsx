@@ -4,9 +4,11 @@ import ToggleContent from '../../common/ToggleContent/ToggleContent';
 import Property from './Property';
 import BoolProperty from './BoolProperty';
 import NumericProperty from './NumericProperty';
+import OptionProperty from './OptionProperty';
 
 const types = {
   BoolProperty,
+  OptionProperty,
   StringProperty: Property,
   FloatProperty: NumericProperty,
   defaultProperty: Property,
