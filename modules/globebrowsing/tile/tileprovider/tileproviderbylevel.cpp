@@ -100,11 +100,11 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         }
             
         // map this level to the tile provider index
-        _providerIndices[maxLevel] = _levelTileProviders.size() - 1;
+        _providerIndices[maxLevel] = static_cast<int>(_levelTileProviders.size()) - 1;
     }
 
     // Fill in the gaps (value -1) in provider indices, from back to end
-    for (int i = _providerIndices.size() - 2; i >= 0; --i) {
+    for (int i = static_cast<int>(_providerIndices.size()) - 2; i >= 0; --i) {
         if(_providerIndices[i] == -1){
             _providerIndices[i] = _providerIndices[i+1];
         }
@@ -151,7 +151,7 @@ void TileProviderByLevel::reset() {
 }
 
 int TileProviderByLevel::maxLevel() {
-    return _providerIndices.size()-1;
+    return static_cast<int>(_providerIndices.size() - 1);
 }
 
 int TileProviderByLevel::providerIndex(int level) const {

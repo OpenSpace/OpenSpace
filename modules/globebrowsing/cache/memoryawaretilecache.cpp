@@ -294,8 +294,8 @@ void MemoryAwareTileCache::update() {
 
     const size_t ByteToMegaByte = 1024 * 1024;
 
-    _cpuAllocatedTileData.setValue(dataSizeCPU / ByteToMegaByte);
-    _gpuAllocatedTileData.setValue(dataSizeGPU / ByteToMegaByte);
+    _cpuAllocatedTileData.setValue(static_cast<int>(dataSizeCPU / ByteToMegaByte));
+    _gpuAllocatedTileData.setValue(static_cast<int>(dataSizeGPU / ByteToMegaByte));
 }
 
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {

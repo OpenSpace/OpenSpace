@@ -39,7 +39,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
 {
     // First create empty layer groups in case not all are specified
     _layerGroups.resize(layergroupid::NUM_LAYER_GROUPS);
-    for (int i = 0; i < _layerGroups.size(); ++i) {
+    for (unsigned long i = 0; i < _layerGroups.size(); ++i) {
         ghoul::Dictionary emptyDict;
         _layerGroups[i] = std::make_shared<LayerGroup>(
             static_cast<layergroupid::GroupID>(i), emptyDict
@@ -49,8 +49,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     std::vector<std::string> layerGroupNamesInDict = layerGroupsDict.keys();
 
     // Create all the layer groups
-    for (const std::string groupName : layerGroupNamesInDict) {
-
+    for (const std::string& groupName : layerGroupNamesInDict) {
         layergroupid::GroupID groupId = layergroupid::getGroupIDFromName(groupName);
         
         if (groupId != layergroupid::GroupID::Unknown) {
