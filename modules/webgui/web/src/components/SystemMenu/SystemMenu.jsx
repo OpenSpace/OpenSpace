@@ -39,6 +39,7 @@ class SystemMenu extends Component {
               <hr className={Popover.styles.delimiter} />
 
               <button onClick={SystemMenu.quit}>
+                <Icon icon="exit_to_app" className={styles.linkIcon} />
                 Quit OpenSpace <span className={styles.shortcut}>ESC</span>
               </button>
 
@@ -49,24 +50,28 @@ class SystemMenu extends Component {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Icon icon="help" /> Help
+                <Icon icon="help" className={styles.linkIcon} />
+                Help
               </a>
               <a
                 href="https://github.com/OpenSpace/OpenSpace/issues/new"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Icon icon="report_problem" /> Report a problem
+                <Icon icon="bug_report" className={styles.linkIcon} />
+                Report a problem
               </a>
               <a
                 href="http://openspaceproject.com/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Icon icon="public" /> openspaceproject.com
+                <Icon icon="public" className={styles.linkIcon} />
+                openspaceproject.com
               </a>
               <Link to="about">
-                <Icon icon="info" /> About
+                <Icon icon="info" className={styles.linkIcon} />
+                About
               </Link>
             </nav>
           </Popover>

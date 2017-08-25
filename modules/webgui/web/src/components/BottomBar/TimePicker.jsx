@@ -69,11 +69,13 @@ class TimePicker extends Component {
           <Time time={time} onChange={this.setDate} />
         </div>
         <hr className={Popover.styles.delimiter} />
-        <div className={Popover.styles.title}>Simulation increment</div>
+
+        <div className={Popover.styles.title}>Simulation speed</div>
         <div className={Popover.styles.content}>
           <SimulationIncrement />
         </div>
         <hr className={Popover.styles.delimiter} />
+
         <div className={`${Popover.styles.row} ${Popover.styles.content}`}>
           <Button block smalltext onClick={TimePicker.togglePause}>
             Pause
