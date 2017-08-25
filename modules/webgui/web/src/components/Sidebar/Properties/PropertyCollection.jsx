@@ -5,12 +5,16 @@ import Property from './Property';
 import BoolProperty from './BoolProperty';
 import NumericProperty from './NumericProperty';
 import OptionProperty from './OptionProperty';
+import TriggerProperty from './TriggerProperty';
 
 const types = {
   BoolProperty,
   OptionProperty,
+  TriggerProperty,
   StringProperty: Property,
+  NumericProperty,
   FloatProperty: NumericProperty,
+  IntProperty: NumericProperty,
   defaultProperty: Property,
 };
 
