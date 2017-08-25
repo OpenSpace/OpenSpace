@@ -40,7 +40,6 @@ namespace openspace {
 void TriggerPropertyTopic::handleJson(nlohmann::json json) {
     try {
         auto propertyKey = json.at(PropertyKey).get<std::string>();
-        auto value = json.at(ValueKey).get<std::string>();
 
         auto prop = property(propertyKey);
         if (prop != nullptr) {
