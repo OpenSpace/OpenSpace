@@ -35,4 +35,6 @@ Pane.defaultProps = {
   title: null,
 };
 
+Pane.styles = styles;
+
 export default Pane;

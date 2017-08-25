@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Pane from './Pane';
-import LoadingString from '../common/LoadingString/LoadingString';
+import LoadingBlocks from '../common/LoadingBlock/LoadingBlocks';
 import FilterList from '../common/FilterList/FilterList';
 import DataManager from '../../api/DataManager';
 import { AllPropertiesKey, AllScreenSpaceRenderablesKey } from '../../api/keys';
@@ -33,9 +33,7 @@ class SettingsPane extends Component {
     return (
       <Pane title="Settings" closeCallback={this.props.closeCallback}>
         { !this.state.hasData && (
-          <LoadingString loading>
-            Loading...
-          </LoadingString>
+          <LoadingBlocks className={Pane.styles.loading} />
         )}
 
         { properties.length > 0 && (

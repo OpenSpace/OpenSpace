@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Pane from './Pane';
-import LoadingString from '../common/LoadingString/LoadingString';
 import DataManager from '../../api/DataManager';
 import FilterList from '../common/FilterList/FilterList';
 import SceneGraphNode from './SceneGraphNode';
+import LoadingBlocks from '../common/LoadingBlock/LoadingBlocks';
 
 const NODES_KEY = '__allNodes';
 
@@ -35,9 +35,7 @@ class ViewPane extends Component {
     return (
       <Pane title="View" closeCallback={this.props.closeCallback}>
         { !this.state.hasData && (
-          <LoadingString loading>
-            Loading...
-          </LoadingString>
+          <LoadingBlocks className={Pane.styles.loading} />
         )}
 
         { nodes.length > 0 && (

@@ -6,14 +6,11 @@ import LoadingString from './LoadingString';
 /* globals module */
 
 storiesOf('LoadingString', module)
-  .add('Loading', () => (
-    <div style={{ background: 'blue' }}>
-      <LoadingString loading>With text</LoadingString>
+  .addDecorator(story => (
+    <div style={{ background: '#252525', padding: '20px', color: 'white' }}>
+      { story() }
     </div>
   ))
-  .add('Loading with default text content', () => (
-    <div style={{ background: 'blue' }}>
-      <LoadingString loading />
-    </div>
-  ))
+  .add('Loading', () => (<LoadingString loading>With text</LoadingString>))
+  .add('Loading with default text content', () => (<LoadingString loading />))
   .add('loaded', () => (<LoadingString>Animates in!</LoadingString>));
