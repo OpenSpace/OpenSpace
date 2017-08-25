@@ -30,6 +30,7 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/engine/virtualpropertymanager.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <modules/server/include/getpropertytopic.h>
 
@@ -39,6 +40,7 @@ namespace {
 const char* _loggerCat = "GetPropertyTopic";
 const char* AllPropertiesValue = "__allProperties";
 const char* AllNodesValue = "__allNodes";
+const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
 const char* PropertyKey = "property";
 }
 
@@ -60,6 +62,9 @@ void GetPropertyTopic::handleJson(json j) {
     }
     else if (requestedKey == AllNodesValue) {
         response = wrappedPayload(sceneGraph()->allSceneGraphNodes());
+    }
+    else if (requestedKey == AllScreenSpaceRenderablesValue) {
+        response = wrappedPayload({ { "value", OsEng.renderEngine().screenSpaceRenderables() } });
     }
     else {
         response = getPropertyFromKey(requestedKey);

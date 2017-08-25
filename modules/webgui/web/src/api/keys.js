@@ -6,6 +6,7 @@ export const OriginKey = 'NavigationHandler.Origin';
 export const SceneGraphKey = '__allNodes';
 // key to get all properties in openspace engine
 export const AllPropertiesKey = '__allProperties';
+export const AllScreenSpaceRenderablesKey = '__screenSpaceRenderables';
 // script to toggle pause
 export const TogglePauseScript = 'openspace.time.togglePause()';
 // key for getting current time subscription

@@ -4,7 +4,7 @@ import Pane from './Pane';
 import LoadingString from '../common/LoadingString/LoadingString';
 import FilterList from '../common/FilterList/FilterList';
 import DataManager from '../../api/DataManager';
-import { AllPropertiesKey } from '../../api/keys';
+import { AllPropertiesKey, AllScreenSpaceRenderablesKey } from '../../api/keys';
 import PropertyCollection from './Properties/PropertyCollection';
 
 import styles from './SettingsPane.scss';
@@ -12,21 +12,22 @@ import styles from './SettingsPane.scss';
 class SettingsPane extends Component {
   constructor(props) {
     super(props);
-    this.state = { properties: [], hasData: false };
+    this.state = { properties: [], screenSpaceRenderables: [], hasData: false };
 
     this.receiveData = this.receiveData.bind(this);
   }
 
   componentDidMount() {
-    DataManager.getValue(AllPropertiesKey, this.receiveData);
+    DataManager.getValue(AllPropertiesKey, this.receiveData('properties'));
+    DataManager.getValue(AllScreenSpaceRenderablesKey, this.receiveData('screenSpaceRenderables'));
   }
 
-  receiveData({ value }) {
-    this.setState({ properties: value, hasData: true });
+  receiveData(prop) {
+    return ({ value }) => this.setState({ [prop]: value, hasData: true });
   }
 
   render() {
-    const properties = this.state.properties
+    const properties = this.state.properties.concat(this.state.screenSpaceRenderables)
       .map(prop => Object.assign(prop, { key: prop.name }));
 
     return (
