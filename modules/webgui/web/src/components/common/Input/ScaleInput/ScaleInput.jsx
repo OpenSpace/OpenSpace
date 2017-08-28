@@ -3,12 +3,16 @@ import PropTypes from 'prop-types';
 import { excludeKeys } from '../../../../utils/helpers';
 
 import styles from './ScaleInput.scss';
+import Input from '../Input/Input';
 
 class ScaleInput extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { value: props.defaultValue };
+    this.state = {
+      value: props.defaultValue,
+      id: `scale-${Input.nextId}`,
+    };
 
     this.onChange = this.onChange.bind(this);
     this.reset = this.reset.bind(this);
@@ -48,6 +52,7 @@ class ScaleInput extends Component {
 
   render() {
     const { leftLabel, rightLabel, label, wide } = this.props;
+    const { id } = this.state;
     const inheritedProps = excludeKeys(this.props,
       'rightLabel leftLabel label onChange wide centerMarker defaultValue leftTicks rightTicks');
 
@@ -57,6 +62,7 @@ class ScaleInput extends Component {
 
         <input
           {...inheritedProps}
+          id={id}
           value={this.state.value}
           onChange={this.onChange}
           onMouseUp={this.reset}
@@ -66,7 +72,7 @@ class ScaleInput extends Component {
         />
         <div className={styles.labels}>
           <span className={styles.leftLabel}>{ leftLabel }</span>
-          <label htmlFor={this.props.id}>{ label }</label>
+          <label htmlFor={id}>{ label }</label>
           <span className={styles.rightLabel}>{ rightLabel }</span>
         </div>
       </div>
@@ -74,12 +80,9 @@ class ScaleInput extends Component {
   }
 }
 
-ScaleInput.idCounter = 0;
-
 ScaleInput.propTypes = {
   centerMarker: PropTypes.bool,
   defaultValue: PropTypes.number,
-  id: PropTypes.string,
   label: PropTypes.string,
   leftLabel: PropTypes.string,
   leftTicks: PropTypes.number,
@@ -95,7 +98,6 @@ ScaleInput.propTypes = {
 ScaleInput.defaultProps = {
   centerMarker: true,
   defaultValue: 0,
-  id: `scale-${ScaleInput.idCounter++}`,
   label: '',
   leftLabel: '-',
   leftTicks: 5,

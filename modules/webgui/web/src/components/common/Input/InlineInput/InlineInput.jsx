@@ -7,6 +7,7 @@ import styles from './InlineInput.scss';
 const InlineInput = props => (
   <AutosizeInput
     {...props}
+    id={props.id || `inlineinput-${Input.nextId}`}
     value={props.value}
     onChange={this.onChange}
     className={`${styles.input} ${props.className}`}
@@ -23,7 +24,7 @@ InlineInput.propTypes = {
 
 InlineInput.defaultProps = {
   className: '',
-  id: `input-${Input.nextId}`,
+  id: null,
   onChange: () => {},
   type: 'text',
   value: '',

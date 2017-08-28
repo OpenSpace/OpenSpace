@@ -14,7 +14,7 @@ class Input extends Component {
 
     this.state = {
       value: props.value,
-      id: props.id,
+      id: `input-${Input.nextId}`,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -107,13 +107,12 @@ class Input extends Component {
   }
 }
 
-Input.idCounter = 0;
+Input.idCounter = Input.idCounter || 1;
 
 Input.propTypes = {
   onChange: PropTypes.func,
   className: PropTypes.string,
   clearable: PropTypes.bool,
-  id: PropTypes.string,
   loading: PropTypes.bool,
   placeholder: PropTypes.node.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -124,7 +123,6 @@ Input.defaultProps = {
   onChange: () => {},
   className: '',
   clearable: false,
-  id: `input-${Input.nextId}`,
   loading: false,
   value: '',
   wide: true,

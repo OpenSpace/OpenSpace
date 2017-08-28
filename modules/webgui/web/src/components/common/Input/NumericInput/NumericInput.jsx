@@ -11,6 +11,7 @@ class NumericInput extends Component {
     this.state = {
       value: props.value,
       showTextInput: false,
+      id: `numericinput-${Input.nextId}`,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -49,7 +50,7 @@ class NumericInput extends Component {
   }
 
   render() {
-    const { value } = this.state;
+    const { value, id } = this.state;
 
     if (this.showTextInput) {
       return (
@@ -64,7 +65,7 @@ class NumericInput extends Component {
       );
     }
 
-    const { placeholder, className, wide, id, min, max } = this.props;
+    const { placeholder, className, wide, min, max } = this.props;
     const doNotInclude = 'wide onChange value className type disableInput inputOnly';
     const inheritedProps = excludeKeys(this.props, doNotInclude);
 
@@ -75,6 +76,7 @@ class NumericInput extends Component {
       >
         <input
           {...inheritedProps}
+          id={id}
           type="range"
           value={value}
           className={`${className} ${styles.range}`}
@@ -92,26 +94,22 @@ class NumericInput extends Component {
   }
 }
 
-NumericInput.idCounter = 0;
-
 NumericInput.propTypes = {
   className: PropTypes.string,
   disableInput: PropTypes.bool,
-  id: PropTypes.string.isRequired,
   inputOnly: PropTypes.bool,
   max: PropTypes.number,
   min: PropTypes.number,
   onChange: PropTypes.func,
   placeholder: PropTypes.string.isRequired,
   step: PropTypes.number,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   wide: PropTypes.bool,
 };
 
 NumericInput.defaultProps = {
   className: '',
   disableInput: false,
-  id: `numericinput-${NumericInput.idCounter++}`,
   inputOnly: false,
   max: 100,
   min: 0,

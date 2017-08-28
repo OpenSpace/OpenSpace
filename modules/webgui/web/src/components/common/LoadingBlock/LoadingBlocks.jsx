@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import LoadingBlock from './LoadingBlock';
+import { excludeKeys } from '../../../utils/helpers';
 
 // eslint-disable-next-line no-mixed-operators
 const rand = (min, max) => Math.random() * (max - min) + min;
@@ -8,10 +9,11 @@ const rand = (min, max) => Math.random() * (max - min) + min;
 const LoadingBlocks = (props) => {
   const { min, max, fixed } = props;
   const count = fixed || Math.round(rand(min, max));
+  const inherit = excludeKeys(props, 'fixed max min loading');
   return (
-    <div {...props}>
-      { Array.from(new Array(count), () => (
-        <LoadingBlock style={{ width: `${rand(50, 100)}%` }} />
+    <div {...inherit}>
+      { Array.from(new Array(count), (_, key) => (
+        <LoadingBlock key={`loading-${key}`} style={{ width: `${rand(50, 100)}%` }} />
       )) }
     </div>
   );
