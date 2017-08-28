@@ -65,7 +65,7 @@ class NumericInput extends Component {
       );
     }
 
-    const { placeholder, className, wide, min, max } = this.props;
+    const { placeholder, className, label, wide, min, max } = this.props;
     const doNotInclude = 'wide onChange value className type disableInput inputOnly';
     const inheritedProps = excludeKeys(this.props, doNotInclude);
 
@@ -84,7 +84,7 @@ class NumericInput extends Component {
           style={{ '--min': min, '--max': max, '--value': value }}
         />
         <label htmlFor={id} className={`${styles.rangeLabel}`}>
-          {placeholder}
+          { label || placeholder }
         </label>
         <span className={styles.value} onClick={this.toggleInput} role="button" tabIndex={0}>
           {value}
@@ -98,6 +98,7 @@ NumericInput.propTypes = {
   className: PropTypes.string,
   disableInput: PropTypes.bool,
   inputOnly: PropTypes.bool,
+  label: PropTypes.node,
   max: PropTypes.number,
   min: PropTypes.number,
   onChange: PropTypes.func,
@@ -111,6 +112,7 @@ NumericInput.defaultProps = {
   className: '',
   disableInput: false,
   inputOnly: false,
+  label: null,
   max: 100,
   min: 0,
   onChange: () => {},

@@ -18,5 +18,7 @@ storiesOf('Input/Input', module)
   .add('disabled', () => (<Input placeholder="Input" value="value" disabled />))
   .add('clearable', () => (<Input placeholder="Input" value="value" clearable />))
   .add('loading', () => (<Input placeholder="Input" value="value" loading />))
+  .add('label + placeholder', () =>
+    (<Input label="Special label" placeholder="Input placeholder!" value="remove this to see" />))
   .add('with callback', () =>
     (<Input placeholder="Input" value="change me" onChange={action('input')} />));

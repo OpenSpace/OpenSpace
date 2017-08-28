@@ -74,7 +74,7 @@ class Input extends Component {
   }
 
   render() {
-    const { placeholder, className, wide, loading, clearable } = this.props;
+    const { placeholder, className, wide, loading, clearable, label } = this.props;
     const { value, id } = this.state;
     return (
       <div className={`${styles.group} ${wide ? styles.wide : ''}`}>
@@ -90,7 +90,7 @@ class Input extends Component {
           ref={this.setInputRef}
         />
         <label htmlFor={id} className={`${styles.label} ${this.hasInput && styles.hasinput}`}>
-          {placeholder}
+          { label || placeholder }
         </label>
         { clearable && (
           <Icon
@@ -113,8 +113,9 @@ Input.propTypes = {
   onChange: PropTypes.func,
   className: PropTypes.string,
   clearable: PropTypes.bool,
+  label: PropTypes.node,
   loading: PropTypes.bool,
-  placeholder: PropTypes.node.isRequired,
+  placeholder: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   wide: PropTypes.bool,
 };
@@ -123,6 +124,7 @@ Input.defaultProps = {
   onChange: () => {},
   className: '',
   clearable: false,
+  label: null,
   loading: false,
   value: '',
   wide: true,
