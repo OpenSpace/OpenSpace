@@ -5,7 +5,7 @@ import Row from '../../common/Row/Row';
 
 class VecProperty extends Property {
   static jsonToLua(json) {
-    return json.replace('[', '{').replace(']', '}');
+    return json.replace('[', '').replace(']', '');
   }
 
   onChange(index) {
@@ -24,16 +24,20 @@ class VecProperty extends Property {
   render() {
     const { Description } = this.props;
     const { SteppingValue, MaximumValue, MinimumValue } = Description.AdditionalData;
-    const { value } = this.state;
     const firstLabel = (<span>
       { Description.Name } { this.descriptionPopup }
     </span>);
 
+    // eslint-disable-next-line react/no-array-index-key
+    const values = JSON.parse(this.state.value)
+      .map((value, index) => ({ key: `${Description.Name}-${index}`, value }));
+
     return (
       <Row>
-        { JSON.parse(value).map((component, index) => (
+        { values.map((component, index) => (
           <NumericInput
-            value={component}
+            key={component.key}
+            value={component.value}
             placeholder={index === 0 ? firstLabel : ' '}
             onChange={this.onChange(index)}
             step={SteppingValue[index]}
