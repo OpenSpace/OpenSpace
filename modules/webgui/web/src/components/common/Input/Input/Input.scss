@@ -77,6 +77,8 @@ $padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
   position: absolute;
   top: $label-margin;
   transition: color $animation-duration $animation-easing;
+  white-space: nowrap;
+  z-index: 10;
 }
 
 .label.hasinput {
