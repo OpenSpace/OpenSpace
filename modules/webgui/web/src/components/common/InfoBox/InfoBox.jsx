@@ -1,19 +1,54 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Icon from '../Icon/Icon';
 import styles from './InfoBox.scss';
 
-// There is a problem that the small popup wont overflow the containing parents.
-// A solution would be to use proper elements with a static position or elements
-// with an arbitrary parent, instead of the pseudo elements used here.
-const InfoBox = (props) => {
-  const { icon, text } = props;
-  return (
-    <span className={styles.infobox} data-title={text}>
-      <Icon icon={icon} />
-    </span>
-  );
-};
+class InfoBox extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = { showPopup: false };
+
+    this.setRef = this.setRef.bind(this);
+    this.togglePopup = this.togglePopup.bind(this);
+  }
+
+  setRef(what) {
+    return (element) => {
+      this[what] = element;
+    };
+  }
+
+  get position() {
+    if (!this.wrapper) return { top: '0px', left: '0px' };
+    const { top, left } = this.wrapper.getBoundingClientRect();
+    return { top: `${top}px`, left: `${left}px` };
+  }
+
+  togglePopup() {
+    this.setState({ showPopup: !this.state.showPopup });
+  }
+
+  render() {
+    const { icon, text } = this.props;
+    const { showPopup } = this.state;
+    return (
+      <span
+        className={styles.infobox}
+        ref={this.setRef('wrapper')}
+        onMouseEnter={this.togglePopup}
+        onMouseLeave={this.togglePopup}
+      >
+        <Icon icon={icon} />
+        { showPopup && (
+          <div className={styles.popup} style={this.position}>
+            { text }
+          </div>
+        )}
+      </span>
+    );
+  }
+}
 
 InfoBox.propTypes = {
   icon: PropTypes.string,

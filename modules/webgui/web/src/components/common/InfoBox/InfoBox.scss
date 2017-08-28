@@ -1,6 +1,6 @@
 @import "../../../styles/all";
 
-.infobox:hover::after {
+.popup {
   background: $ui-background-solid;
   color: $text-color-focus;
   content: attr(data-title);
@@ -8,7 +8,7 @@
   font-size: 0.8 * $font-size;
   line-height: 1.4;
   padding: $base-padding / 2;
-  position: absolute;
+  position: fixed;
   white-space: normal;
   width: 180px;
   z-index: 20;
