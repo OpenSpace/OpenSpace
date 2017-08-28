@@ -38,11 +38,13 @@ class VecProperty extends Property {
           <NumericInput
             key={component.key}
             value={component.value}
-            placeholder={index === 0 ? firstLabel : ' '}
+            label={index === 0 ? firstLabel : ' '}
+            placeholder={`Value ${index}`}
             onChange={this.onChange(index)}
             step={SteppingValue[index]}
             max={MaximumValue[index]}
             min={MinimumValue[index]}
+            disabled={this.disabled}
           />
         ))}
       </Row>

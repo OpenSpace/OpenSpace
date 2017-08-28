@@ -14,8 +14,7 @@ class TriggerProperty extends Property {
       <div>
         <Button onClick={this.onChange}>
           { Name }
-        </Button>
-        { this.descriptionPopup }
+        </Button> { this.descriptionPopup }
       </div>
     );
   }

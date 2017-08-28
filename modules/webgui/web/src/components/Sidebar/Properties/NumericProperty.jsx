@@ -19,11 +19,13 @@ class NumericProperty extends Property {
     return (
       <NumericInput
         value={value}
+        label={(<span>{Description.Name} {this.descriptionPopup}</span>)}
         placeholder={Description.Name}
         onChange={this.onChange}
         step={SteppingValue}
         max={MaximumValue}
         min={MinimumValue}
+        disabled={this.disabled}
       />
     );
   }

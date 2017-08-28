@@ -26,7 +26,7 @@ Select.propTypes = {
   clearable: PropTypes.bool,
   direction: PropTypes.oneOf(['up', 'down']),
   id: PropTypes.string,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.node.isRequired,
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string,

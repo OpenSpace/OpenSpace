@@ -4,9 +4,6 @@ import Select from '../../common/Input/Select/Select';
 
 class OptionProperty extends Property {
   onChange({ value }) {
-    // const options = Description.AdditionalData.Options;
-    // const valueText = options[value];
-
     this.saveValue(value);
     this.setState({ value });
   }
@@ -26,6 +23,7 @@ class OptionProperty extends Property {
         options={options}
         value={this.state.value}
         onChange={this.onChange}
+        disabled={this.disabled}
       />
     );
   }

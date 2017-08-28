@@ -15,7 +15,12 @@ class BoolProperty extends Property {
     const { Description } = this.props;
     const { value } = this.state;
     return (
-      <Checkbox checked={value === 'true'} label={Description.Name} onChange={this.onChange} />
+      <Checkbox
+        checked={value === 'true'}
+        label={(<span>{Description.Name} {this.descriptionPopup}</span>)}
+        onChange={this.onChange}
+        disabled={this.disabled}
+      />
     );
   }
 }

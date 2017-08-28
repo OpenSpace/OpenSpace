@@ -50,7 +50,7 @@ class Checkbox extends Component {
 Checkbox.propTypes = {
   checked: PropTypes.bool,
   onChange: PropTypes.func,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.node.isRequired,
   left: PropTypes.bool,
   value: PropTypes.bool,
   wide: PropTypes.bool,

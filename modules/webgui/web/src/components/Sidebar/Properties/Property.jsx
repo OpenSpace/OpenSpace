@@ -54,6 +54,10 @@ class Property extends Component {
     return description ? (<InfoBox text={description} />) : '';
   }
 
+  get disabled() {
+    return this.props.Description.MetaData.isReadOnly;
+  }
+
   subscribeIfNeeded() {
     if (!this.isSubscribed) {
       DataManager.subscribe(this.uri, this.updateValue);
@@ -87,9 +91,10 @@ class Property extends Component {
     return (
       <PropInput
         value={value}
-        placeholder={placeholder}
+        label={placeholder}
+        placeholder={Description.Name}
         onChange={this.onChange}
-        disabled={Description.MetaData.isReadOnly}
+        disabled={this.disabled}
       />
     );
   }
@@ -99,7 +104,9 @@ Property.propTypes = {
   Description: PropTypes.shape({
     Identifier: PropTypes.string,
     Name: PropTypes.string,
-    MetaData: PropTypes.object,
+    MetaData: PropTypes.shape({
+      isReadOnly: PropTypes.bool,
+    }),
     description: PropTypes.string,
   }).isRequired,
   subscribe: PropTypes.bool,
