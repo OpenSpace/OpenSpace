@@ -107,8 +107,8 @@ namespace openspace::properties {
             for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
                 outValue += std::to_string(inValue[i][j]) + ",";                         \
             }                                                                            \
-            outValue.pop_back();                                                         \
         }                                                                                \
+        outValue.pop_back();                                                             \
         return true;                                                                     \
     }
 
