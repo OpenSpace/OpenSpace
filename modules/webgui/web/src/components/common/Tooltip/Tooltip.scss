@@ -1,0 +1,57 @@
+@import "../../../styles/all";
+
+$arrow-size: 3px;
+$background: $ui-background-solid;
+
+.tooltip {
+  background: $background;
+  line-height: 1;
+  border-radius: $arrow-size;
+  padding: $arrow-size (2 * $arrow-size) (1.5 * $arrow-size);
+  position: absolute;
+}
+
+// placement
+.top {
+  bottom: unquote("calc(100% + #{$arrow-size})");
+  transform: translateX(-50%);
+}
+
+.bottom {
+  top: unquote("calc(100% + #{$arrow-size})");
+  transform: translateX(-50%);
+}
+
+.right {
+  left: unquote("calc(100% + #{$arrow-size})");
+  transform: translateY(-50%);
+}
+
+.left {
+  right: unquote("calc(100% + #{$arrow-size})");
+  transform: translateY(-50%);
+}
+
+.static {
+  position: static !important;
+}
+
+// arrow style
+.tooltip::after {
+  border-color: transparent;
+  border-style: solid;
+  border-width: $arrow-size;
+  content: " ";
+  height: 0;
+  margin-left: -$arrow-size;
+  pointer-events: none;
+  position: absolute;
+  width: 0;
+}
+
+// arrow placement style
+.top::after {
+  top: 100%;
+  left: 50%;
+  border-top-color: $background;
+}
