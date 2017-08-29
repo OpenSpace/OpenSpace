@@ -1,17 +1,20 @@
 @import "../../../../styles/all";
 @import "../Input/Input";
 
+// wrapper element
 .inputGroup {
   position: relative;
   box-sizing: border-box;
   height: $input-total-height;
 }
 
+// the descriptive label
 .rangeLabel {
   @extend .label;
   display: block;
 }
 
+// display value
 .value {
   position: absolute;
   bottom: $padding-bottom;
@@ -23,6 +26,17 @@
   width: 100%;
 }
 
+// mouse-tracking hover event
+.hoverHint {
+  background: rgba($blue, 0.3);
+  height: 100%;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+}
+
+// state changes
 .inputGroup {
   .range:focus + .rangeLabel {
     color: $green;
@@ -37,9 +51,9 @@
   }
 }
 
-// consider using something like https://github.com/darlanrod/input-range-scss
+// TODO: consider using something like https://github.com/darlanrod/input-range-scss for cross-browser support
 .range {
-  // calculate the width of the background bar
+  // calculate the width of the background bar using variables set in the component
   --normalized-value: calc(var(--value) - var(--min));
   --normalized-max: calc(var(--max) - var(--min));
   --bg-width: calc(100% * var(--normalized-value) / var(--normalized-max));
@@ -60,7 +74,7 @@
     background: $ui-background-hover;
   }
 
-  // this cannot be completely hidden, as that destroys the input
+  // this cannot be completely removed, as that breaks the input. 
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
     height: 100%;
