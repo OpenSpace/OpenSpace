@@ -1,6 +1,7 @@
 import React from 'react';
 import Property from './Property';
 import NumericInput from '../../common/Input/NumericInput/NumericInput';
+import InfoBox from '../../common/InfoBox/InfoBox';
 
 class NumericProperty extends Property {
   onChange(event) {
@@ -10,6 +11,13 @@ class NumericProperty extends Property {
 
     // optimistic UI change!
     this.setState({ value: parseFloat(value) });
+  }
+
+  get descriptionPopup() {
+    let { Description } = this.props;
+    const { MaximumValue, MinimumValue } = Description.AdditionalData;
+    const description = `${Description.description}\nMin: ${MinimumValue}, max: ${MaximumValue}`;
+    return description ? (<InfoBox text={description} />) : '';
   }
 
   render() {
