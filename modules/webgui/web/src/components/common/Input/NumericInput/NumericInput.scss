@@ -74,7 +74,7 @@
     background: $ui-background-hover;
   }
 
-  // this cannot be completely removed, as that breaks the input. 
+  // this cannot be completely removed, as that breaks the input.
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
     height: 100%;

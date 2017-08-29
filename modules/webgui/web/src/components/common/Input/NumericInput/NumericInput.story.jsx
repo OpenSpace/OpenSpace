@@ -12,12 +12,13 @@ storiesOf('Input/NumericInput', module)
       { story() }
     </div>
   ))
-  .add('default', () => (<NumericInput placeholder="NumericInput" value={52} />))
-  .add('no input', () => (<NumericInput placeholder="NumericInput" />))
-  .add('unwide', () => (<NumericInput placeholder="NumericInput" wide={false} />))
-  .add('disabled', () => (<NumericInput placeholder="NumericInput" value={33.3} disabled />))
-  .add('inputOnly ', () => (<NumericInput placeholder="NumericInput" value={33.3} inputOnly />))
-  .add('noHoverHint ', () => (<NumericInput placeholder="NumericInput" value={33.3} noHoverHint />))
-  .add('disableInput ', () => (<NumericInput placeholder="NumericInput" value={33.3} disableInput />))
+  .add('default', () => (<NumericInput placeholder="Number!" value={52} />))
+  .add('no input', () => (<NumericInput placeholder="Number!" />))
+  .add('unwide', () => (<NumericInput placeholder="Number!" value={12} wide={false} />))
+  .add('disabled', () => (<NumericInput placeholder="Number!" value={33.3} disabled />))
+  .add('inputOnly ', () => (<NumericInput placeholder="Number!" value={33.3} inputOnly />))
+  .add('noHoverHint ', () => (<NumericInput placeholder="Number!" value={33.3} noHoverHint />))
+  .add('noTooltip ', () => (<NumericInput placeholder="Number!" value={33.3} noTooltip />))
+  .add('disableInput ', () => (<NumericInput placeholder="Number!" value={33.3} disableInput />))
   .add('with callback', () =>
     (<NumericInput placeholder="Input" value="change me" onChange={action('input')} />));

@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { excludeKeys } from '../../../../utils/helpers';
 import styles from './NumericInput.scss';
 import Input from '../Input/Input';
+import Tooltip from '../../Tooltip/Tooltip';
+import { round10 } from '../../../../utils/rounding';
+import { clamp } from 'lodash/number';
 
 class NumericInput extends Component {
   constructor(props) {
@@ -43,14 +46,14 @@ class NumericInput extends Component {
   }
 
   onHover(event) {
-    if (this.props.noHoverHint || this.props.disabled) {
+    if (this.props.disabled) {
       return;
     }
 
     // get bounds for input to calc hover percentage
     const { left, right } = event.currentTarget.getBoundingClientRect();
     const { clientX } = event;
-    const hoverHint = (clientX - left) / (right - left);
+    const hoverHint = clamp((clientX - left) / (right - left), 0, 1);
     this.setState({ hoverHint });
   }
 
@@ -65,7 +68,7 @@ class NumericInput extends Component {
   toggleInput() {
     if (this.props.disableInput) return;
 
-    this.setState({ showTextInput: !this.state.showTextInput });
+    this.setState({ showTextInput: !this.state.showTextInput, hoverHint: null });
   }
 
   render() {
@@ -74,7 +77,7 @@ class NumericInput extends Component {
     if (this.showTextInput) {
       return (
         <Input
-          {...excludeKeys(this.props, 'disableInput inputOnly')}
+          {...excludeKeys(this.props, 'disableInput inputOnly noHoverHint noTooltip')}
           type="number"
           value={value}
           onChange={this.onChange}
@@ -85,7 +88,8 @@ class NumericInput extends Component {
     }
 
     const { placeholder, className, label, wide, min, max } = this.props;
-    const doNotInclude = 'wide onChange value className type disableInput inputOnly';
+    const doNotInclude = 'wide onChange value className type ' +
+                         'disableInput inputOnly label noHoverHint noTooltip';
     const inheritedProps = excludeKeys(this.props, doNotInclude);
 
     return (
@@ -95,8 +99,13 @@ class NumericInput extends Component {
         onMouseMove={this.onHover}
         onMouseLeave={this.onLeave}
       >
-        { hoverHint !== null && (
+        { !this.props.noHoverHint && hoverHint !== null && (
           <div className={styles.hoverHint} style={{ width: `${100 * hoverHint}%` }} />
+        )}
+        { !this.props.noTooltip && hoverHint !== null && (
+          <Tooltip style={{ left: `${100 * hoverHint}%` }}>
+            { round10(min + hoverHint * (max - min), Math.log10(this.props.step)) }
+          </Tooltip>
         )}
         <input
           {...inheritedProps}
@@ -127,6 +136,7 @@ NumericInput.propTypes = {
   max: PropTypes.number,
   min: PropTypes.number,
   noHoverHint: PropTypes.bool,
+  noTooltip: PropTypes.bool,
   onChange: PropTypes.func,
   placeholder: PropTypes.string.isRequired,
   step: PropTypes.number,
@@ -143,6 +153,7 @@ NumericInput.defaultProps = {
   max: 100,
   min: 0,
   noHoverHint: false,
+  noTooltip: false,
   onChange: () => {},
   step: 1,
   value: 0,
