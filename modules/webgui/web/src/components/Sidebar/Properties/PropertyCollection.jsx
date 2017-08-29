@@ -7,6 +7,7 @@ import NumericProperty from './NumericProperty';
 import OptionProperty from './OptionProperty';
 import TriggerProperty from './TriggerProperty';
 import VecProperty from './VecProperty';
+import MatrixProperty from './MatrixProperty';
 
 const types = {
   BoolProperty,
@@ -19,6 +20,8 @@ const types = {
   Vec2Property: VecProperty,
   Vec3Property: VecProperty,
   Vec4Property: VecProperty,
+  MatrixProperty,
+  DMat4Property: MatrixProperty,
   defaultProperty: Property,
 };
 
