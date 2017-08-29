@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Icon from '../Icon/Icon';
-import styles from './InfoBox.scss';
+import Tooltip from '../Tooltip/Tooltip';
 
 class InfoBox extends Component {
   constructor(props) {
@@ -21,8 +21,8 @@ class InfoBox extends Component {
 
   get position() {
     if (!this.wrapper) return { top: '0px', left: '0px' };
-    const { top, left } = this.wrapper.getBoundingClientRect();
-    return { top: `${top}px`, left: `${left}px` };
+    const { top, right } = this.wrapper.getBoundingClientRect();
+    return { top: `${top}px`, left: `${right}px` };
   }
 
   togglePopup() {
@@ -34,16 +34,15 @@ class InfoBox extends Component {
     const { showPopup } = this.state;
     return (
       <span
-        className={styles.infobox}
         ref={this.setRef('wrapper')}
         onMouseEnter={this.togglePopup}
         onMouseLeave={this.togglePopup}
       >
         <Icon icon={icon} />
         { showPopup && (
-          <div className={styles.popup} style={this.position}>
+          <Tooltip fixed placement="right" style={this.position}>
             { text }
-          </div>
+          </Tooltip>
         )}
       </span>
     );
