@@ -6,7 +6,7 @@ import BoolProperty from './BoolProperty';
 import NumericProperty from './NumericProperty';
 import OptionProperty from './OptionProperty';
 import TriggerProperty from './TriggerProperty';
-import VecProperty from './VecProperty';
+import VecProperty from './VectorProperty';
 import MatrixProperty from './MatrixProperty';
 
 const types = {

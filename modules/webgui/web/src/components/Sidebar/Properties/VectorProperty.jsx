@@ -2,8 +2,9 @@ import React from 'react';
 import Property from './Property';
 import NumericInput from '../../common/Input/NumericInput/NumericInput';
 import Row from '../../common/Row/Row';
+import styles from './Property.scss';
 
-class VecProperty extends Property {
+class VectorProperty extends Property {
   static jsonToLua(json) {
     return json.replace('[', '').replace(']', '');
   }
@@ -14,7 +15,7 @@ class VecProperty extends Property {
       const { value } = event.currentTarget;
       stateValue[index] = parseFloat(value);
 
-      this.saveValue(VecProperty.jsonToLua(JSON.stringify(stateValue)));
+      this.saveValue(VectorProperty.jsonToLua(JSON.stringify(stateValue)));
 
       // optimistic UI change!
       this.setState({ value: JSON.stringify(stateValue) });
@@ -33,7 +34,7 @@ class VecProperty extends Property {
       .map((value, index) => ({ key: `${Description.Name}-${index}`, value }));
 
     return (
-      <Row>
+      <Row className={styles.vectorProperty}>
         { values.map((component, index) => (
           <NumericInput
             key={component.key}
@@ -52,4 +53,4 @@ class VecProperty extends Property {
   }
 }
 
-export default VecProperty;
+export default VectorProperty;
