@@ -93,6 +93,7 @@ Scene::Scene()
         },
         JsFilename        
     ),
+    _dsgAttachedNode(nullptr),
     _dsgAttachedNodeName(MostProbableAttachedNode)
 {}
 
@@ -151,21 +152,22 @@ void Scene::setDsgAttachedNodeName(const std::string & attachedNodeName) {
     _dsgAttachedNodeName = attachedNodeName;
 }
 
-void Scene::updateDsgAttachedNode(const Camera* camera) {
-    _dsgAttachedNodeName = currentDsgAttachedNode(camera, _dsgAttachedNodeName);
+const SceneGraphNode * Scene::dsgAttachedNode() const {
+    return _dsgAttachedNode;
 }
 
-std::string Scene::currentDsgAttachedNode(const Camera* camera, const std::string & dsgAttachedNodeName) const {
-    if (camera == nullptr || dsgAttachedNodeName.empty()) {
-        LERROR("Camera object not allocated or empty name scene passed to the method.");
-        return MostProbableAttachedNode; // This choice is controversal. Better to avoid a crash.
-    }
-    const SceneGraphNode* node = sceneGraphNode(dsgAttachedNodeName);
+void Scene::updateDsgAttachedNode(const Camera* camera) {
+    _dsgAttachedNode = currentDsgAttachedNode(camera, _dsgAttachedNode);
+    _dsgAttachedNodeName = _dsgAttachedNode->name();
+}
 
-    if (node == nullptr) {
-        LERROR("There is no scenegraph node with name: " << dsgAttachedNodeName);
-        return MostProbableAttachedNode;
+const SceneGraphNode* Scene::currentDsgAttachedNode(const Camera* camera, const SceneGraphNode* previousDsgAttachedNode) const {
+    if (camera == nullptr || previousDsgAttachedNode == nullptr) {
+        LERROR("Camera object not allocated or empty scenegraph node passed to the method.");
+        return sceneGraphNode(MostProbableAttachedNode); // This choice is controversal. Better to avoid a crash.
     }
+
+    const SceneGraphNode* node = previousDsgAttachedNode;
 
     // Starts in the last sphere of influency we know we were in, check if we are still inside it 
     // if not, check its parent and continue until we are inside a scene
@@ -209,61 +211,46 @@ std::string Scene::currentDsgAttachedNode(const Camera* camera, const std::strin
         }
     }
 
-    return node->name();
+    return node;
 }
 
-const glm::dvec3 Scene::currentDisplacementPosition(const std::string & cameraParent,
+const glm::dvec3 Scene::currentDisplacementPosition(const SceneGraphNode* cameraParentNode,
     const SceneGraphNode* target) const {
-    if (target != nullptr) {
+    if (target != nullptr && cameraParentNode != nullptr) {
 
         std::vector<const SceneGraphNode*> cameraPath;
         std::vector<const SceneGraphNode*> targetPath;
-        std::vector<const SceneGraphNode*> commonParentPath;
-
-        const SceneGraphNode* cameraParentNode = sceneGraphNode(cameraParent);             
-
-        //Find common parent for camera and object
-        std::string commonParentName(cameraParent);  // initiates to camera parent in case 
-                                                     // other path is not found
-        const SceneGraphNode * targetNode = sceneGraphNode(target->name());
+        
+        const SceneGraphNode * targetNode = target;
         cameraPath = pathTo(cameraParentNode);
         targetPath = pathTo(targetNode);
 
         const SceneGraphNode* commonParentNode = sceneGraphNode(commonParent(cameraPath, targetPath)); 
-        commonParentPath = pathTo(commonParentNode);
-
+        
         //Find the path from the camera to the common parent
-
         glm::dvec3 collectorCamera(pathCollector(cameraPath, commonParentNode->name(), true));
         glm::dvec3 collectorTarget(pathCollector(targetPath, commonParentNode->name(), false));
-
-        /*glm::dvec3 collectorCamera(pathCollector(cameraPath, commonParentNode->name(), false));
-        glm::dvec3 collectorTarget(pathCollector(targetPath, commonParentNode->name(), true));*/
-
+        
         return collectorTarget + collectorCamera;
     }
     else {
-        LERROR("Target scenegraph node is null.");
         return glm::dvec3(0.0);
     }
 }
 
-const glm::dmat4 Scene::currentMatrixTransformation(const std::string & cameraParent,
-    const SceneGraphNode* target) const {
-    if (target != nullptr) {
+const glm::dmat4 Scene::currentMatrixTransformation(const SceneGraphNode* cameraParentNode,
+    const SceneGraphNode* targetNode) const {
+    if (targetNode != nullptr) {
 
-        std::vector<const SceneGraphNode*> cameraPath;
-        std::vector<const SceneGraphNode*> targetPath;
+        std::vector<const SceneGraphNode*> cameraPath(pathTo(cameraParentNode));
+        std::vector<const SceneGraphNode*> targetPath(pathTo(targetNode));
         
-        const SceneGraphNode* cameraParentNode = sceneGraphNode(cameraParent);
-        const SceneGraphNode * targetNode      = sceneGraphNode(target->name());
-
-        cameraPath = pathTo(cameraParentNode);
-        targetPath = pathTo(targetNode);
+        //cameraPath = pathTo(cameraParentNode);
+        //targetPath = pathTo(targetNode);
 
         const SceneGraphNode* commonParentNode = sceneGraphNode(commonParent(cameraPath, targetPath));
         
-        if (commonParentNode->name() == cameraParent) {
+        if (commonParentNode == cameraParentNode) {
             return glm::dmat4(1.0);
         }
         

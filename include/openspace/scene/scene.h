@@ -134,16 +134,18 @@ public:
     */
     void setDsgAttachedNodeName(const std::string & attachedNodeName);
 
+    const SceneGraphNode * dsgAttachedNode() const;
+
     void updateDsgAttachedNode(const Camera* camera);
 
     /**
     * Calculates the world position of target from the common node between camera's parent and target.
     */
-    const glm::dvec3 currentDisplacementPosition(const std::string & cameraParent,
+    const glm::dvec3 currentDisplacementPosition(const SceneGraphNode* cameraParentNode,
         const SceneGraphNode* target) const;
 
-    const glm::dmat4 currentMatrixTransformation(const std::string & cameraParent,
-        const SceneGraphNode* target) const;
+    const glm::dmat4 currentMatrixTransformation(const SceneGraphNode* cameraParentNode,
+        const SceneGraphNode* targetNode) const;
 
     std::vector<const SceneGraphNode*> pathTo(const SceneGraphNode* node) const;
 
@@ -191,8 +193,9 @@ private:
     * Finds out the current attached node (new camera's node parent) based on the camera's position
     * and the former attached node name.
     */
-    std::string currentDsgAttachedNode(const Camera* camera, const std::string & dsgAttachedNodeName) const;
+    const SceneGraphNode* currentDsgAttachedNode(const Camera* camera, const SceneGraphNode* previousDsgAttachedNode) const;
 
+    const SceneGraphNode* _dsgAttachedNode;
     std::string _dsgAttachedNodeName;
 
     std::unique_ptr<SceneGraphNode> _root;

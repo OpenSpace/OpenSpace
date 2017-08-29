@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -211,7 +211,7 @@ namespace openspace {
 
         return Mat4(viewRotationMatrix()) * 
             glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)))
-            * OsEng.renderEngine().scene()->currentMatrixTransformation(this->_parent->name(), node);
+            * OsEng.renderEngine().scene()->currentMatrixTransformation(this->_parent, node);
     }
 
     glm::dmat4 Camera::cameraMatrix() const {

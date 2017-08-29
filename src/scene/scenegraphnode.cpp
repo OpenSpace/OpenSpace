@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -555,8 +555,8 @@ double SceneGraphNode::worldScale() const
 
 glm::dvec3 SceneGraphNode::dynamicWorldPosition() const
 {
-    const Scene * scene = OsEng.renderEngine().scene();
-    glm::dvec3 currentDynamicPosition = scene->currentDisplacementPosition(scene->dsgAttachedNodeName(), this);
+    const Scene* scene = OsEng.renderEngine().scene();
+    glm::dvec3 currentDynamicPosition = scene->currentDisplacementPosition(scene->dsgAttachedNode(), this);
     // The next line is not necessary, the position is measured from the parent's node.
     //currentDynamicPosition -= camera.displacementVector();
     return currentDynamicPosition;
