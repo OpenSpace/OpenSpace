@@ -1220,6 +1220,7 @@ void OpenSpaceEngine::postDraw() {
 
     if (isGuiWindow) {
         _renderEngine->renderScreenLog();
+        _renderEngine->renderVersionInformation();
         _console->render();
     }
 
