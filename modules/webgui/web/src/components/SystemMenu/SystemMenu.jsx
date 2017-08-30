@@ -31,7 +31,7 @@ class SystemMenu extends Component {
       <div className={styles.SystemMenu}>
         { this.state.showMenu && (
           <Popover className={styles.popover} arrow="arrow bottom leftside">
-            <nav className={styles.links}>
+            <nav className={styles.links} onClick={this.toggleMenu}>
               <button onClick={SystemMenu.console}>
                 Toggle console <span className={styles.shortcut}>~</span>
               </button>
