@@ -1,7 +1,15 @@
 @import "../../../styles/all";
 
+$icon-size: 48px;
+
 .Icon {
-  font-size: 48px;
+  font-size: $icon-size;
+  margin-right: ($base-padding / 2);
+}
+
+.iconImage {
+  animation: $appear-animation;
+  height: $icon-size - 8px;
   margin-right: ($base-padding / 2);
 }
 

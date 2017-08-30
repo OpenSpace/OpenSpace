@@ -10,7 +10,12 @@ import DataManager from '../../../api/DataManager';
 import { OriginKey, SceneGraphKey } from '../../../api/keys';
 import FocusEntry from './FocusEntry';
 
+import Earth from './images/earth.png';
 import styles from './OriginPicker.scss';
+
+const icons = {
+  Earth,
+};
 
 // tag that each focusable node must have
 const REQUIRED_TAGS = ['planet_solarSystem'];
@@ -51,7 +56,12 @@ class OriginPicker extends Component {
   }
 
   get icon() {
-    // return this.state.origin ? null : (<Icon icon="language" className="extralarge" />);
+    const icon = icons[this.state.origin];
+    if (icon) {
+      return (
+        <img src={icon} className={styles.iconImage} alt={this.state.origin} />
+      );
+    }
     return (<Icon icon="language" className={styles.Icon} />);
   }
 
