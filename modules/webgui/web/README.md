@@ -13,6 +13,38 @@ npm start
 open http://localhost:8080
 ```
 
+### Components
+
+There are several useful and reusable components to make it easier for you as the developer. Most of 
+these general-purpose components are in [`src/comoponents/common`](src/components/common). To see
+some of them, [Storybook](https://github.com/storybooks/storybook) is a useful tool. It allows you
+to see them and try them out. When you are developing common-use components, please add stories for 
+them. 
+
+#### Using Storybook
+
+To start storybook, run 
+
+```sh
+npm run storybook
+open http://localhost:9001
+``` 
+
+in your favourite terminal. This will start Storybook and open it up in your browser.
+
+To add stories, add a file called `WhateverYourComponentNameIs.story.jsx`. It will get picked up by
+Storybook. The `.story.jsx` ending is the important part of the file name, as this is what the 
+Storybook config is looking for. See the [Storybook documentation](https://storybook.js.org/basics/introduction/) 
+for instructions on how to build stories. 
+
+Using Storybook, you will help 
+
+* your fellow developers understand how a component may be used, and
+* yourself in writing a clear, friendly API for your components.
+
+Please try and declare every special case in your stories, as that will further improve the 
+usefulness of the tool.
+
 ### Types
 
 This is something you hear quite often:
