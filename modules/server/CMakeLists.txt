@@ -30,7 +30,7 @@ set(HEADER_FILES
     include/connection.h
     include/jsonconverters.h
     include/topic.h
-    include/authenticationtopic.h
+    include/authorizationtopic.h
     include/getpropertytopic.h
     include/luascripttopic.h
     include/subscriptiontopic.h
@@ -46,7 +46,7 @@ set(SOURCE_FILES
     src/connection.cpp
     src/jsonconverters.cpp
     src/topics/topic.cpp
-    src/topics/authenticationtopic.cpp
+    src/topics/authorizationtopic.cpp
     src/topics/getpropertytopic.cpp
     src/topics/luascripttopic.cpp
     src/topics/subscriptiontopic.cpp

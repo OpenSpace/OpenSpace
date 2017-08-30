@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/authenticationtopic.h"
+#include "include/authorizationtopic.h"
 
 namespace {
 std::string _loggerCat = "AuthorizationTopic";

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/server/include/connection.h>
-#include <modules/server/include/authenticationtopic.h>
+#include <modules/server/include/authorizationtopic.h>
 #include <modules/server/include/getpropertytopic.h>
 #include <modules/server/include/luascripttopic.h>
 #include <modules/server/include/setpropertytopic.h>
