@@ -160,6 +160,10 @@ public:
     static const std::string KeyCheckOpenGLState;
     /// The part of the key storing whether each OpenGL call should be logged
     static const std::string KeyLogEachOpenGLCall;
+    /// Password to limit server access
+    static const std::string KeyServerPasskey;
+    /// Whitelist of client addresses that won't need autorization
+    static const std::string KeyServerClientAddressWhitelist;
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the
@@ -172,7 +176,7 @@ public:
      * \throw ghoul::RuntimeError If the configuration could not be found
      */
     static std::string findConfiguration(const std::string& filename);
-    
+
     /**
      * Load the provided configuration file (\p filename) into this Dictionary. All paths
      * that are specified in the configuration file will automatically be registered in

@@ -68,11 +68,8 @@ void ServerModule::preSync() {
     // Set up new connections.
     for (auto& server : _servers) {
         std::shared_ptr<ghoul::io::Socket> socket;
-
-		// TODO(klas): might this block unintentionally? So that the TCP server waits until it has a 
-		// socket, which prevents the WebSocket to be connected?
         while ((socket = server->nextPendingSocket())) {
-            std::unique_ptr<Connection> connection = std::make_unique<Connection>(socket);
+            std::unique_ptr<Connection> connection = std::make_unique<Connection>(socket, server->address());
             Connection* c = connection.get();
             connection->thread = std::thread([this, c] () { handleConnection(c); });
             _connections.push_back(std::move(connection));

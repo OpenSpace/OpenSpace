@@ -50,7 +50,7 @@ struct MethodAndValue {
 
 class Connection {
 public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s);
+    Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &address);
 
     void handleMessage(std::string message);
     void sendMessage(const std::string& message);
@@ -58,16 +58,18 @@ public:
     void sendJson(const nlohmann::json& json);
     void refresh();
     void addRefreshCall(std::function<nlohmann::json()>, const TopicId topicId);
+    void setAuthorized(const bool status);
 
     ghoul::TemplateFactory<Topic> _topicFactory;
     std::map<TopicId, std::unique_ptr<Topic>> _topics;
     std::shared_ptr<ghoul::io::Socket> socket;
     std::thread thread;
-    bool needsToBeAuthenticated();
+    bool isAuthorized();
     bool active;
 
 private:
-    bool _requireAuthentication, _isAuthenticated;
+    std::string _address;
+    bool _requireAuthorization, _isAuthorized;
     std::map <TopicId, std::string> _messageQueue;
     std::map <TopicId, std::chrono::system_clock::time_point> _sentMessages;
     std::vector<MethodAndValue> _refreshCalls;
@@ -75,6 +77,7 @@ private:
     void placeInMessageQueue(const std::string &message, const TopicId topicId);
     void placeInMessageQueue(const nlohmann::json &j, const TopicId topicId);
     void flushQueue();
+    bool isWhitelisted();
 };
 
 }

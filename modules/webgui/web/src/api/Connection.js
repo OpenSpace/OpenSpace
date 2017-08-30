@@ -25,7 +25,6 @@ class Connection {
   }
 
   reconnect() {
-    // TODO: restart topics/subscriptions
     this.connect();
   }
 
@@ -64,6 +63,8 @@ class Connection {
       console.error(`Could not find topic ${topicId}. Dropping message.`, event);
     } else {
       // consider this some sort of broadcast from the server
+      // eslint-disable-next-line no-console
+      console.log('Unknown message from server', message, event);
     }
   }
 

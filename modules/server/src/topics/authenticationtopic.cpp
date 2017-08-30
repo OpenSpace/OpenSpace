@@ -30,15 +30,12 @@ std::string _loggerCat = "AuthenticationTopic";
 
 namespace openspace {
 
-AuthenticationTopic::AuthenticationTopic()
+    AuthenticationTopic::AuthenticationTopic()
         : Topic()
-        , _key(randomNumber())
-        , _isAuthenticated(false) {
-    LINFO(fmt::format("Ready to authorize socket Client using key: {}", _key));
-};
+        , _isAuthenticated(false) {};
 
 bool AuthenticationTopic::isDone() {
-    return _key > 0 && _isAuthenticated;
+    return _isAuthenticated;
 }
 
 void AuthenticationTopic::handleJson(nlohmann::json json) {
@@ -46,9 +43,10 @@ void AuthenticationTopic::handleJson(nlohmann::json json) {
         _connection->sendJson(message("Already authorized.", Statuses::OK));
     } else {
         try {
-            int providedKey = json.at("key").get<int>();
+            auto providedKey = json.at("key").get<std::string>();
             if (authorize(providedKey)) {
                 _connection->sendJson(message("Authorization OK.", Statuses::Accepted));
+                _connection->setAuthorized(true);
                 LINFO("Client successfully authorized.");
             } else {
                 _connection->sendJson(message("Invalid key", Statuses::NotAcceptable));
@@ -61,19 +59,24 @@ void AuthenticationTopic::handleJson(nlohmann::json json) {
     }
 };
 
-bool AuthenticationTopic::authorize(const int key) {
-    _isAuthenticated = key == _key;
+bool AuthenticationTopic::authorize(const std::string key) {
+    _isAuthenticated = key == getKey();
     return _isAuthenticated;
 }
 
-int AuthenticationTopic::randomNumber(int min, int max) {
-    assert(max > min);
-    std::srand(std::time(0));
-    return std::rand() % (max - min) + min;
+const std::string AuthenticationTopic::getKey() const {
+    const bool hasConfigPassword = OsEng.configurationManager().hasKeyAndValue<std::string>(
+        ConfigurationManager::KeyServerPasskey);
+    if (hasConfigPassword) {
+        return OsEng.configurationManager().value<std::string>(
+            ConfigurationManager::KeyServerPasskey);
+    }
+
+    return "17308";
 }
 
 nlohmann::json AuthenticationTopic::message(const std::string &message, const int &statusCode) {
-    nlohmann::json error = {{"error", message}, {"code", statusCode}};
+    nlohmann::json error = {{"message", message}, {"code", statusCode}};
     return error;
 }
 

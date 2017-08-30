@@ -208,6 +208,19 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "get or set information. Defaults to `true`."
         },
         {
+            ConfigurationManager::KeyServerPasskey,
+                new StringVerifier,
+                Optional::Yes,
+                "Passkey to limit server access. Used to authorize incoming connections."
+        },
+        {
+            ConfigurationManager::KeyServerClientAddressWhitelist,
+                new StringVerifier,
+                Optional::Yes,
+                "String containing white listed client IP addresses that won't need to be"
+                "authorized with the server. Space separated"
+        },
+        {
             ConfigurationManager::KeyWebHelperLocation,
             new StringVerifier,
             Optional::Yes,

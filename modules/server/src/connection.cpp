@@ -38,40 +38,43 @@ const char* MessageKeyType = "type";
 const char* MessageKeyPayload = "payload";
 const char* MessageKeyTopic = "topic";
 
+const char* AuthenticationTopicKey = "authorize";
+const char* GetPropertyTopicKey = "get";
+const char* LuaScriptTopicKey = "luascript";
+const char* SetPropertyTopicKey = "set";
+const char* SubscriptionTopicKey = "subscribe";
+const char* TimeTopicKey = "time";
+const char* TriggerPropertyTopicKey = "trigger";
+const char* BounceTopicKey = "bounce";
+
 const int ThrottleMessageWaitInMs = 100;
 }
 
 namespace openspace {
 
-Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
-        : socket(s), active(true), _isAuthenticated(false) {
-    _topicFactory.registerClass<AuthenticationTopic>("authorize");
-    _topicFactory.registerClass<GetPropertyTopic>("get");
-    _topicFactory.registerClass<LuaScriptTopic>("luascript");
-    _topicFactory.registerClass<SetPropertyTopic>("set");
-    _topicFactory.registerClass<SubscriptionTopic>("subscribe");
-    _topicFactory.registerClass<TimeTopic>("time");
-    _topicFactory.registerClass<TriggerPropertyTopic>("trigger");
-    _topicFactory.registerClass<BounceTopic>("bounce");
+Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &address)
+        : socket(s), active(true), _isAuthorized(false), _address(address) {
+    _topicFactory.registerClass<AuthenticationTopic>(AuthenticationTopicKey);
+    _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
+    _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
+    _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
+    _topicFactory.registerClass<SubscriptionTopic>(SubscriptionTopicKey);
+    _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
+    _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
+    _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
 
     // see if the default config for requiring auth (on) is overwritten
     const bool hasAuthenticationConfiguration = OsEng.configurationManager().hasKeyAndValue<bool>(
             ConfigurationManager::KeyRequireSocketAuthentication);
     if (hasAuthenticationConfiguration) {
-        _requireAuthentication = OsEng.configurationManager().value<bool>(
+        _requireAuthorization = OsEng.configurationManager().value<bool>(
                 ConfigurationManager::KeyRequireSocketAuthentication);
     } else {
-        _requireAuthentication = true;
+        _requireAuthorization = true;
     }
 }
 
 void Connection::handleMessage(std::string message) {
-    // We want exceptions when debugging, but we don't want incoming messages
-    // to cause crashes on Release.
-#if (defined(NDEBUG) || !defined(DEBUG))
-    nlohmann::json j = nlohmann::json::parse(message.c_str());
-    handleJson(j);
-#else
     try {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
@@ -83,7 +86,6 @@ void Connection::handleMessage(std::string message) {
     } catch (...) {
         LERROR("Could not parse JSON: " + message);
     }
-#endif
 }
 
 void Connection::handleJson(nlohmann::json j) {
@@ -113,6 +115,12 @@ void Connection::handleJson(nlohmann::json j) {
             return;
         }
         std::string type = *typeJson;
+
+        if (!isAuthorized() && type != AuthenticationTopicKey) {
+            LERROR("Connection isn't authorized.");
+            return;
+        }
+
         std::unique_ptr<Topic> topic = _topicFactory.create(type);
         topic->initialize(this, topicId);
         topic->handleJson(*payloadJson);
@@ -120,6 +128,11 @@ void Connection::handleJson(nlohmann::json j) {
             _topics.emplace(topicId, std::move(topic));
         }
     } else {
+        if (!isAuthorized()) {
+            LERROR("Connection isn't authorized.");
+            return;
+        }
+
         // Dispatch the message to the existing topic.
         std::unique_ptr<Topic> &topic = topicIt->second;
         topic->handleJson(*payloadJson);
@@ -137,9 +150,9 @@ void Connection::sendJson(const nlohmann::json &j) {
     sendMessage(j.dump());
 }
 
-bool Connection::needsToBeAuthenticated() {
+bool Connection::isAuthorized() {
     // require either auth to be disabled or client to be authenticated
-    return !_requireAuthentication || _isAuthenticated;
+    return !_requireAuthorization || isWhitelisted() || _isAuthorized;
 }
 
 void Connection::refresh() {
@@ -195,6 +208,26 @@ void Connection::flushQueue() {
     for (auto &topic : toRemove) {
         _messageQueue.erase(topic);
     }
+}
+
+void Connection::setAuthorized(const bool status) {
+    _isAuthorized = status;
+}
+
+bool Connection::isWhitelisted() {
+    const bool hasWhitelist = OsEng.configurationManager().hasKeyAndValue<std::string>(
+        ConfigurationManager::KeyServerClientAddressWhitelist);
+    if (hasWhitelist) {
+        // get whitelist from config
+        auto whitelist = OsEng.configurationManager().value<std::string>(
+            ConfigurationManager::KeyServerClientAddressWhitelist);
+        // search and compare
+        auto search = whitelist.find(_address);
+        return search != std::string::npos;
+    }
+
+    // no whitelist found!
+    return false;
 }
 
 } // namespace openspace

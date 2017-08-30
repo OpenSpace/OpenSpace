@@ -56,11 +56,10 @@ public:
         };
     };
 private:
-    int _key;
     bool _isAuthenticated;
 
-    bool authorize(const int key);
-    int randomNumber(int min = 1000, int max = 9999);
+    const std::string getKey() const;
+    bool authorize(const std::string key);
     nlohmann::json message(const std::string &message, const int &statusCode = Statuses::NotImplemented);
 };
 

@@ -103,9 +103,10 @@ const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier"
 const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
 const string ConfigurationManager::KeyCheckOpenGLState = "CheckOpenGLState";
 const string ConfigurationManager::KeyLogEachOpenGLCall = "LogEachOpenGLCall";
-
+const string ConfigurationManager::KeyServerPasskey = "ServerPasskey";
 const string ConfigurationManager::KeyWebHelperLocation = "WebHelperLocation";
 const string ConfigurationManager::KeyWebGuiUrl = "WebGuiUrl";
+const string ConfigurationManager::KeyServerClientAddressWhitelist = "ClientWhitelist";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
