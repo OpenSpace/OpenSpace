@@ -25,20 +25,20 @@
 #include "include/authenticationtopic.h"
 
 namespace {
-std::string _loggerCat = "AuthenticationTopic";
+std::string _loggerCat = "AuthorizationTopic";
 }
 
 namespace openspace {
 
-    AuthenticationTopic::AuthenticationTopic()
+    AuthorizationTopic::AuthorizationTopic()
         : Topic()
         , _isAuthenticated(false) {};
 
-bool AuthenticationTopic::isDone() {
+bool AuthorizationTopic::isDone() {
     return _isAuthenticated;
 }
 
-void AuthenticationTopic::handleJson(nlohmann::json json) {
+void AuthorizationTopic::handleJson(nlohmann::json json) {
     if (isDone()) {
         _connection->sendJson(message("Already authorized.", Statuses::OK));
     } else {
@@ -59,12 +59,12 @@ void AuthenticationTopic::handleJson(nlohmann::json json) {
     }
 };
 
-bool AuthenticationTopic::authorize(const std::string key) {
+bool AuthorizationTopic::authorize(const std::string key) {
     _isAuthenticated = key == getKey();
     return _isAuthenticated;
 }
 
-const std::string AuthenticationTopic::getKey() const {
+const std::string AuthorizationTopic::getKey() const {
     const bool hasConfigPassword = OsEng.configurationManager().hasKeyAndValue<std::string>(
         ConfigurationManager::KeyServerPasskey);
     if (hasConfigPassword) {
@@ -75,7 +75,7 @@ const std::string AuthenticationTopic::getKey() const {
     return "17308";
 }
 
-nlohmann::json AuthenticationTopic::message(const std::string &message, const int &statusCode) {
+nlohmann::json AuthorizationTopic::message(const std::string &message, const int &statusCode) {
     nlohmann::json error = {{"message", message}, {"code", statusCode}};
     return error;
 }

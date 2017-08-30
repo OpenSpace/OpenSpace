@@ -54,7 +54,7 @@ namespace openspace {
 
 Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &address)
         : socket(s), active(true), _isAuthorized(false), _address(address) {
-    _topicFactory.registerClass<AuthenticationTopic>(AuthenticationTopicKey);
+    _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);

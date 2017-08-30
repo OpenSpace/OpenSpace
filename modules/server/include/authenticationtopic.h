@@ -35,10 +35,10 @@
 
 namespace openspace {
 
-class AuthenticationTopic : public Topic {
+class AuthorizationTopic : public Topic {
 public:
-    AuthenticationTopic();
-    ~AuthenticationTopic() {};
+    AuthorizationTopic();
+    ~AuthorizationTopic() {};
     void handleJson(nlohmann::json json);
     bool isDone();
 
