@@ -163,6 +163,8 @@ if (OS_WINDOWS)
     add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
     SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
     add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
+    # Logical target used to link the libcef library.
+    ADD_CEF_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
     target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     # Add the custom manifest files to the executable.
     ADD_WINDOWS_CEF_MANIFEST("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
@@ -209,3 +211,5 @@ create_new_module(
 
 # Display CEF configuration settings.
 PRINT_CEF_CONFIG()
+
+target_include_directories(${webbrowser_module} PUBLIC ${CEF_ROOT})

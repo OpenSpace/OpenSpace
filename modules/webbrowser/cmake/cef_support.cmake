@@ -121,3 +121,15 @@ macro(ADD_WINDOWS_CEF_MANIFEST target_dir manifest_path target extension)
         COMMENT "Adding manifest..."
     )
 endmacro()
+
+
+# Add a logical target that can be used to link the specified libraries into an
+# executable target.
+macro(ADD_CEF_LOGICAL_TARGET target debug_lib release_lib)
+  add_library(${target} ${CEF_LIBTYPE} IMPORTED GLOBAL)
+  set_target_properties(${target} PROPERTIES
+    IMPORTED_LOCATION "${release_lib}"
+    IMPORTED_LOCATION_DEBUG "${debug_lib}"
+    IMPORTED_LOCATION_RELEASE "${release_lib}"
+    )
+endmacro()

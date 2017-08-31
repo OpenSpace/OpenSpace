@@ -34,9 +34,6 @@ function(set_cef_targets cef_root main_target)
 
     # main CEF executable target
     set(CEF_TARGET ${main_target} PARENT_SCOPE)
-
-    # Logical target used to link the libcef library.
-    ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
 endfunction()
 
 function(run_cef_platform_config cef_root cef_target module_path)
@@ -107,11 +104,11 @@ function(run_cef_macosx_config CEF_ROOT module_path)
     endif()
 endfunction()
 
-function(run_cef_windows_config cef_target cef_root module_path)
+function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
     # Executable target.
     add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
     target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-    include_directories(${cef_root})
+    include_directories(${CEF_ROOT})
 
     add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
 
@@ -124,7 +121,7 @@ function(run_cef_windows_config cef_target cef_root module_path)
 
     # Add the custom manifest files to the executable.
     SET_OPENSPACE_CEF_TARGET_OUT_DIR()
-    ADD_WINDOWS_CEF_MANIFEST("${CEF_TARGET_OUT_DIR}" "${module_path}" "${CEF_TARGET}" "exe")
+    ADD_WINDOWS_CEF_MANIFEST("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
 
     # Copy binary and resource files to the target output directory.
     copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
