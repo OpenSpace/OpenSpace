@@ -91,8 +91,7 @@ json GetPropertyTopic::getAllProperties() {
 json GetPropertyTopic::getPropertyFromKey(const std::string& key) {
     properties::Property* prop = property(key);
     if (prop != nullptr) {
-        json propJson = json::parse(prop->toJson());
-        return wrappedPayload(propJson);
+        return wrappedPayload(prop);
     }
 
     return wrappedError(fmt::format("property '{}' not found", key), 404);
