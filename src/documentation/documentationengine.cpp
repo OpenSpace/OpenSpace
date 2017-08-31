@@ -50,13 +50,13 @@ namespace openspace::documentation {
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
-                    Documentation documentation)
+                    Documentation doc)
     : ghoul::RuntimeError(fmt::format(
         "Duplicate Documentation with name '{}' and id '{}'",
-        documentation.name,
-        documentation.id
+        doc.name,
+        doc.id
     ))
-    , documentation(std::move(documentation))
+    , documentation(std::move(doc))
 {}
 
 DocumentationEngine::DocumentationEngine()

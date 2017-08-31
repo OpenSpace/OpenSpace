@@ -37,7 +37,8 @@ class StaticScale : public Scale {
 public:
     StaticScale();
     StaticScale(const ghoul::Dictionary& dictionary);
-    double scaleValue() const;
+
+    double scaleValue() const override;
 
     static documentation::Documentation Documentation();
 

@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
+#include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
@@ -147,19 +148,19 @@ int goToChunk(lua_State* L) {
 
     OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToChunk(x, y, level);
 
-    return 0;
+return 0;
 }
 
 int goToGeo(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    
+
     int nArguments = lua_gettop(L);
     if (nArguments != 2 && nArguments != 3) {
         return luaL_error(L, "Expected 2 or 3 arguments.");
     }
-    
-    double latitude = static_cast<int>(lua_tonumber(L, 1));
-    double longitude = static_cast<int>(lua_tonumber(L, 2));
+
+    double latitude = static_cast<double>(lua_tonumber(L, 1));
+    double longitude = static_cast<double>(lua_tonumber(L, 2));
 
     if (nArguments == 2) {
         OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
@@ -167,10 +168,103 @@ int goToGeo(lua_State* L) {
     else if (nArguments == 3) {
         double altitude = static_cast<int>(lua_tonumber(L, 3));
         OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude,
-                                                                   altitude);
+            altitude);
     }
-    
+
     return 0;
+}
+
+int getGeoPosition(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
+
+    RenderableGlobe* globe =
+        OsEng.moduleEngine().module<GlobeBrowsingModule>()->castFocusNodeRenderableToGlobe();
+    if (!globe) {
+        return luaL_error(L, "Focus node must be a RenderableGlobe");
+    }
+
+    glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
+    glm::dmat4 inverseModelTransform =
+        OsEng.navigationHandler().focusNode()->inverseModelTransform();
+    glm::dvec3 cameraPositionModelSpace =
+        inverseModelTransform * glm::dvec4(cameraPosition, 1.0);
+    SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
+        cameraPositionModelSpace);
+
+    Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(posHandle.centerToReferenceSurface);
+    double altitude = glm::length(cameraPositionModelSpace - posHandle.centerToReferenceSurface);
+
+    lua_pushnumber(L, Angle<double>::fromRadians(geo2.lat).asDegrees());
+    lua_pushnumber(L, Angle<double>::fromRadians(geo2.lon).asDegrees());
+    lua_pushnumber(L, altitude);
+
+    return 3;
+}
+
+int loadWMSCapabilities(lua_State* L) {
+    int nArguments = lua_gettop(L);
+
+    if (nArguments != 3) {
+        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
+    }
+
+    std::string name = lua_tostring(L, -3);
+    std::string globe = lua_tostring(L, -2);
+    std::string url = lua_tostring(L, -1);
+
+    OsEng.moduleEngine().module<GlobeBrowsingModule>()->loadWMSCapabilities(
+        std::move(name),
+        std::move(globe),
+        std::move(url)
+    );
+
+    return 0;
+}
+
+int removeWMSServer(lua_State* L) {
+    int nArguments = lua_gettop(L);
+
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    std::string name = lua_tostring(L, -1);
+    OsEng.moduleEngine().module<GlobeBrowsingModule>()->removeWMSServer(name);
+    return 0;
+}
+
+int capabilities(lua_State* L) {
+    int nArguments = lua_gettop(L);
+
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    std::string name = lua_tostring(L, -1);
+    GlobeBrowsingModule::Capabilities cap =
+        OsEng.moduleEngine().module<GlobeBrowsingModule>()->capabilities(name);
+
+    lua_newtable(L);
+    for (int i = 0; i < cap.size(); ++i) {
+        const GlobeBrowsingModule::Layer& l = cap[i];
+        
+        lua_newtable(L);
+
+        lua_pushstring(L, "Name");
+        lua_pushstring(L, l.name.c_str());
+        lua_settable(L, -3);
+
+        lua_pushstring(L, "URL");
+        lua_pushstring(L, l.url.c_str());
+        lua_settable(L, -3);
+
+        lua_rawseti(L, -2, i + 1);
+    }
+
+    return 1;
 }
 
 } // namespace openspace::globebrowsing::luascriptfunctions

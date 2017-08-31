@@ -119,19 +119,19 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, LevelWeights levelWeights,
     
     // All tile layers are the same. Sample from texture
 #if (#{#{layerGroup}#{i}LayerType} == 0) // DefaultTileLayer
-    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 1) // SingleImageTileLayer
-    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 2) // SizeReferenceTileLayer
-    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 3) // TemporalTileLayer
-    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 4) // TileIndexTileLayer
-    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 5) // ByIndexTileLayer
-    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 6) // ByLevelTileLayer
-    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);  
+    color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 7) // SolidColor
     color.rgb = #{layerGroup}[#{i}].color;
 #endif
@@ -296,8 +296,12 @@ vec4 calculateDebugColor(vec2 uv, vec4 fragPos, vec2 vertexResolution) {
 }
 
 float tileResolution(vec2 tileUV, ChunkTile chunkTile) {
+    PixelPadding padding;
+    padding.startOffset = ivec2(0);
+    padding.sizeDifference = ivec2(0);
+
     vec2 heightResolution = textureSize(chunkTile.textureSampler, 0);
-    vec2 uv = TileUVToTextureSamplePosition(chunkTile, tileUV);
+    vec2 uv = TileUVToTextureSamplePosition(chunkTile, tileUV, padding);
     return gridDots(uv, heightResolution);
 }
 

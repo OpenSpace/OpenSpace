@@ -85,11 +85,11 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
 
     // Transform position and rotation based on focus node rotation (if following rotation)
     if (prevPose.followFocusNodeRotation) {
-        prevKeyframeCameraRotation = prevFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(prevPose.rotation));
+        prevKeyframeCameraRotation = glm::dquat(prevFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(prevPose.rotation)));
         prevKeyframeCameraPosition = prevFocusNode->worldRotationMatrix() * prevPose.position;
     }
     if (nextPose.followFocusNodeRotation) {
-        nextKeyframeCameraRotation = nextFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(nextPose.rotation));
+        nextKeyframeCameraRotation = glm::dquat(nextFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(nextPose.rotation)));
         nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() * nextPose.position;
     }
 

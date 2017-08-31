@@ -32,23 +32,66 @@ return {
             Layers = {
                 ColorLayers = {
                     {
-                        Name = "Viking",
+                        Name = "MOC WA AMNH Color",
+                        FilePath = "map_datasets/mars_COL_v006_mars2000_rgb.vrt",
+                        Enabled = true
+                    },
+                    {
+                        Name = "Viking MDIM",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
-                        Enabled = true,
+                        Fallback =  {
+                            Name = "Mars Texture",
+                            FilePath = "textures/mars.jpg",
+                            Enabled = true
+                        }
                     },
                     {
                         Name = "MOLA Pseudo Color",
-                        FilePath = "map_service_configs/Utah/MolaPseudoColor.xml"
+                        FilePath = "map_service_configs/Utah/Mola_PseudoColor.xml"
                     },
                     {
-                        Name = "CTX Mosaic [Europe]",
-                        FilePath = "map_service_configs/CTX_Mosaic.xml",
+                        Name = "Viking MDIM [Utah]",
+                        FilePath = "map_service_configs/Utah/Mdim.xml"
+                    },
+                    {
+                        Name = "Viking MDIM [AWS]",
+                        FilePath = "map_service_configs/AWS/Mdim.wms"
+                    },
+                    {
+                        Name = "MOLA Pseudo Color [AWS]",
+                        FilePath = "map_service_configs/AWS/Mola_PseudoColor.wms"
+                    },
+                    {
+                        Name = "CTX Mosaic [LiU]",
+                        FilePath = "map_service_configs/LiU/CTX.xml",
                         BlendMode = "Color"
                     },
                     {
                         Name = "CTX Mosaic [Utah]",
-                        FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
+                        FilePath = "map_service_configs/Utah/CTX.xml",
                         BlendMode = "Color"
+                    },
+                    {
+                        Name = "CTX Mosaic [AWS]",
+                        FilePath = "map_service_configs/AWS/CTX.wms",
+                        BlendMode = "Color"
+                    },
+                    {
+                        Name = "Themis IR Day [Utah]",
+                        FilePath = "map_service_configs/Utah/Themis_IR_Day.xml"
+                    },
+                    {
+                        Name = "Themis IR Night [Utah]",
+                        FilePath = "map_service_configs/Utah/Themis_IR_Night.xml"
+                    },
+
+                    {
+                        Name = "Themis IR Day [AWS]",
+                        FilePath = "map_service_configs/AWS/Themis_IR_Day.wms"
+                    },
+                    {
+                        Name = "Themis IR Night [AWS]",
+                        FilePath = "map_service_configs/AWS/Themis_IR_Night.wms"
                     }
                 },
                 Overlays = {
@@ -64,11 +107,26 @@ return {
                 },
                 HeightLayers = {
                     {
+                        Name = "Mola Elevation",
+                        FilePath = "map_service_configs/Mars_MGS_MOLA_DEM.xml",
+                        TilePixelSize = 90
+                    },
+                    {
                         Name = "Mola Elevation [Europe]",
-                        FilePath = "map_service_configs/Mola_Elevation.xml",
+                        FilePath = "map_service_configs/LiU/Mola_Elevation.xml",
                         Enabled = true,
                         TilePixelSize = 90
-                    }
+                    },
+                    {
+                        Name = "Mola Elevation [Utah]",
+                        FilePath = "map_service_configs/Utah/Mola_Elevation.xml",
+                        TilePixelSize = 90
+                    },
+                    {
+                        Name = "Mola Elevation [AWS]",
+                        FilePath = "map_service_configs/AWS/Mola_Elevation.wms",
+                        TilePixelSize = 90
+                    },
                 }
             }
         },

@@ -29,6 +29,8 @@
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
 
+#include <openspace/modulepath.h>
+
 #include <algorithm>
 
 namespace {
@@ -89,13 +91,20 @@ std::string OpenSpaceModule::modulePath() const {
         [](char v) { return static_cast<char>(tolower(v)); }
     );
 
+    // First try the internal module directory
     if (FileSys.directoryExists("${MODULES}/" + moduleName)) {
         return absPath("${MODULES}/" + moduleName);
     }
+    else { // Otherwise, it might be one of the external directories
+        for (const char* dir : ModulePaths) {
+            const std::string path = std::string(dir) + '/' + moduleName;
+            if (FileSys.directoryExists(path)) {
+                return absPath(path);
+            }
+        }
+    }
 
-#ifdef EXTERNAL_MODULES_PATHS
-
-#endif
+    // If we got this far, neither the internal module nor any of the external modules fit
     throw ghoul::RuntimeError(
         "Could not resolve path for module '" + name() + "'",
         "OpenSpaceModule"

@@ -27,9 +27,9 @@
 namespace openspace::interaction {
 
 MouseState::MouseState(double scaleFactor)
-    : velocity(scaleFactor, 1)
-    , previousPosition(0.0, 0.0)
-{ }
+    : previousPosition(0.0, 0.0)
+    , velocity(scaleFactor, 1)
+{}
 
 void MouseState::setFriction(double friction) {
     velocity.setFriction(friction);

@@ -965,16 +965,16 @@ void OpenSpaceEngine::initializeGL() {
                     "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
                 switch (severity) {
                     case Severity::High:
-                        LERRORC(category, std::string(message));
+                        LERRORC(category, message);
                         break;
                     case Severity::Medium:
-                        LWARNINGC(category, std::string(message));
+                        LWARNINGC(category, message);
                         break;
                     case Severity::Low:
-                        LINFOC(category, std::string(message));
+                        LINFOC(category, message);
                         break;
                     case Severity::Notification:
-                        LDEBUGC(category, std::string(message));
+                        LDEBUGC(category, message);
                         break;
                     default:
                         throw ghoul::MissingCaseException();
@@ -1220,6 +1220,7 @@ void OpenSpaceEngine::postDraw() {
 
     if (isGuiWindow) {
         _renderEngine->renderScreenLog();
+        _renderEngine->renderVersionInformation();
         _console->render();
     }
 

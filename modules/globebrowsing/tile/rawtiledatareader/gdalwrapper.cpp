@@ -130,6 +130,10 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         "CPL_TMPDIR",
         absPath("${BASE_PATH}").c_str()
     );
+    CPLSetConfigOption(
+        "GDAL_HTTP_UNSAFESSL",
+        "YES"
+    );
     setGdalProxyConfiguration();
     CPLSetErrorHandler(gdalErrorHandler);
   

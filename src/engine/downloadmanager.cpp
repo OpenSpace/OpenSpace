@@ -268,6 +268,8 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+
         // Will fail when response status is 400 or above
         curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
             
@@ -290,7 +292,11 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             return file;
         } else {
             std::string err = curl_easy_strerror(res);
-            errorCallback(err);
+            if (errorCallback) {
+                errorCallback(err);
+            } else {
+                LWARNING("Error downloading '" << url << "': " << err);
+            }
             curl_easy_cleanup(curl);
             // Throw an error and use try-catch around call to future.get()
             //throw std::runtime_error( err );
@@ -310,8 +316,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 std::vector<std::shared_ptr<DownloadManager::FileFuture>>
 DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,
-    int version, bool overrideFiles, DownloadFinishedCallback finishedCallback,
-    DownloadProgressCallback progressCallback)
+    int version, bool overrideFiles, DownloadFinishedCallback, DownloadProgressCallback)
 {
     std::vector<std::shared_ptr<FileFuture>> futures;
     FileSys.createDirectory(destination, ghoul::filesystem::FileSystem::Recursive::Yes);

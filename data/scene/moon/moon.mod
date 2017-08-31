@@ -22,11 +22,13 @@ return {
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
+                    -- LMMP based servers
                     {
-                        Name = "OnMoonColorGrayscale",
+                        Name = "LRO WAC Mosaic [OnMoon]",
                         FilePath = "map_service_configs/OnMoonColor.xml",
                         Enabled = true,
                     },
+                    -- Utah based servers
                     {
                         Name = "ClemUvvis",
                         FilePath = "map_service_configs/Utah/ClemUvvis.wms"
@@ -41,6 +43,15 @@ return {
                     }
                 },
                 HeightLayers = {
+                    -- LMMP based servers
+                    -- {
+                    --     Name = "Lunar Elevation [OnMoon]",
+                    --     FilePath = "map_service_configs/OnMoonHeight.xml",
+                    --     Enabled = true,
+                    --     TilePixelSize = 64,
+                    --     -- Settings = { Multiplier = 0.5 },
+                    -- },
+                    -- Utah based servers
                     {
                         Name = "LolaDem",
                         FilePath = "map_service_configs/Utah/LolaDem.wms",

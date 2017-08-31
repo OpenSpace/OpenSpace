@@ -31,7 +31,7 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(Vec4Property, glm::vec4);
+REGISTER_NUMERICALPROPERTY_HEADER(Vec4Property, glm::vec4)
 
 } // namespace openspace::properties
 

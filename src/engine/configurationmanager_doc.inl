@@ -455,7 +455,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
         }
         }
     };
-};
+}
 
 
 } // namespace openspace

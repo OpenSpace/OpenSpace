@@ -44,7 +44,7 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(UShortProperty, unsigned short);
+REGISTER_NUMERICALPROPERTY_HEADER(UShortProperty, unsigned short)
 
 } // namespace openspace::properties
 

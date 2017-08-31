@@ -62,7 +62,7 @@ protected:
     static const std::string MaximumValueKey;
     static const std::string SteppingValueKey;
 
-    std::string generateAdditionalDescription() const;
+    std::string generateAdditionalDescription() const override;
 
     /**
      * convert a lua formatted value to a JSON formatted value

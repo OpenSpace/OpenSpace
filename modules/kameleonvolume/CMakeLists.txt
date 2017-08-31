@@ -45,5 +45,6 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 create_new_module(
     "KameleonVolume"
     kameleonvolume_module
+    STATIC
     ${HEADER_FILES} ${SOURCE_FILES}
 )

@@ -2,7 +2,7 @@ return {
     FileRequest = {
         { Identifier = "newhorizons_plutoencounter_pluto_assets", Destination = "assets", Version = 1 },
         { Identifier = "newhorizons_plutoencounter_pluto_textures", Destination = "textures", Version = 4 },
-        { Identifier = "pluto_textures", Destination = "textures", Version = 4 },
+        { Identifier = "pluto_textures", Destination = "textures", Version = 5 },
         { Identifier = "newhorizons_plutoencounter_pluto_images", Destination = "images", Version = 1 }
     },
 }
