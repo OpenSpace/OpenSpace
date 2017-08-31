@@ -8,27 +8,40 @@
 }
 
 .select {
-  background: $ui-background-hover;
   font-family: $font-family;
   font-size: $input-font-size;
   height: 100%;
   width: 100%;
 
+  // if input isn't disabled, apply background and highlight interaction
+  &:not(:global(.is-disabled)) {
+    background: $ui-background-hover;
+
+    &:focus,
+    &:active,
+    &:global(.is-open),
+    &:global(.is-focused) {
+      background: $ui-background-solid;
+
+      + .selectlabel {
+        color: $green;
+      }
+    }
+  }
+
   &:hover {
     background: $ui-background-selected;
   }
 
-  &:focus,
-  &:active,
-  &:global(.is-open),
-  &:global(.is-focused) {
-    background: $ui-background-solid;
+  &:global(.is-disabled) {
+    :global(.Select-value-label) {
+      color: $text-color-blur !important;
+    }
 
-    + .selectlabel {
-      color: $green;
+    > :global(.Select-control) {
+      background-color: transparent;
     }
   }
-
 }
 
 .selectlabel {
@@ -44,6 +57,7 @@
     background: transparent;
     border: 0;
     border-radius: 0;
+    box-shadow: none;
     margin: 0;
     padding: 0;
   }
