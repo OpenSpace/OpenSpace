@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PropertyCollection from './Properties/PropertyCollection';
+import PropertyOwner from './Properties/PropertyCollection';
 import ToggleContent from '../common/ToggleContent/ToggleContent';
 import Button from '../common/Input/Button/Button';
 import Icon from '../common/Icon/Icon';
@@ -28,7 +28,7 @@ class SceneGraphNode extends Component {
           <Icon icon="gps_fixed" /> Focus
         </Button>
         { subproperties.map(sub => (
-          <PropertyCollection
+          <PropertyOwner
             key={sub.name}
             {...sub}
           />

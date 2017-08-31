@@ -25,10 +25,10 @@ const types = {
   defaultProperty: Property,
 };
 
-const PropertyCollection = ({ name, properties, subowners }) => (
+const PropertyOwner = ({ name, properties, subowners }) => (
   <ToggleContent title={name}>
     { subowners.map(subowner => (
-      <PropertyCollection {...subowner} key={subowner.name} />
+      <PropertyOwner {...subowner} key={subowner.name} />
     )) }
     { properties.map((prop) => {
       const { Description } = prop;
@@ -40,7 +40,7 @@ const PropertyCollection = ({ name, properties, subowners }) => (
   </ToggleContent>
 );
 
-PropertyCollection.propTypes = {
+PropertyOwner.propTypes = {
   name: PropTypes.string.isRequired,
   properties: PropTypes.arrayOf(PropTypes.object),
   subowners: PropTypes.arrayOf(PropTypes.shape({
@@ -50,11 +50,11 @@ PropertyCollection.propTypes = {
   })),
 };
 
-PropertyCollection.defaultProps = {
+PropertyOwner.defaultProps = {
   properties: [],
   subowners: [],
 };
 
-export default PropertyCollection;
+export default PropertyOwner;
 export const Types = types;
 export const GetType = type => types[type] || types.defaultProperty;
