@@ -30,7 +30,7 @@
 #include <fmt/format.h>
 #include <include/openspace/engine/openspaceengine.h>
 #include <ghoul/logging/logmanager.h>
-#include "include/webbrowserapp.h"
+#include <modules/webbrowser/include/webbrowserapp.h>
 
 namespace openspace {
 

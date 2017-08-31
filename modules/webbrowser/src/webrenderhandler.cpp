@@ -62,7 +62,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::
 
 bool WebRenderHandler::hasContent(int x, int y) {
     int index = x + (_width * y);
-    index = std::clamp(index, (int) 0, (int) _alphaMask.size() - 1);
+    index = glm::clamp(index, (int) 0, (int) _alphaMask.size() - 1);
     return _alphaMask[index];
 }
 

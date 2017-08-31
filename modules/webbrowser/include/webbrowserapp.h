@@ -38,8 +38,8 @@ class WebBrowserApp : public CefApp, public CefRenderProcessHandler {
 public:
     WebBrowserApp();
 
-    CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler();
-    void OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>);
+    CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override;
+    void OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>) override;
 
 private:
     IMPLEMENT_REFCOUNTING(WebBrowserApp);
