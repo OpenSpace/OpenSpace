@@ -5,7 +5,7 @@ import LoadingBlocks from '../common/LoadingBlock/LoadingBlocks';
 import FilterList from '../common/FilterList/FilterList';
 import DataManager from '../../api/DataManager';
 import { AllPropertiesKey, AllScreenSpaceRenderablesKey } from '../../api/keys';
-import PropertyOwner from './Properties/PropertyCollection';
+import PropertyOwner from './Properties/PropertyOwner';
 
 import styles from './SettingsPane.scss';
 
