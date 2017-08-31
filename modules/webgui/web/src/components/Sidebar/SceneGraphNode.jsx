@@ -21,14 +21,19 @@ class SceneGraphNode extends Component {
   }
 
   render() {
-    const { name, renderable } = this.props;
+    const { name, subproperties } = this.props;
 
     return (
       <ToggleContent title={name}>
         <Button onClick={this.focusOnThis}>
           <Icon icon="gps_fixed" /> Focus
         </Button>
-        { renderable && (<PropertyCollection name="Renderable" properties={renderable.properties} />) }
+        { subproperties.map(sub => (
+          <PropertyCollection
+            key={sub.name}
+            {...sub}
+          />
+        )) }
       </ToggleContent>
     );
   }
@@ -37,12 +42,16 @@ class SceneGraphNode extends Component {
 SceneGraphNode.propTypes = {
   name: PropTypes.string.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  renderable: PropTypes.object,
+  subproperties: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string,
+    description: PropTypes.string,
+    properties: PropTypes.arrayOf(PropTypes.object),
+  })),
 };
 
 SceneGraphNode.defaultProps = {
   properties: [],
-  renderable: {},
+  subproperties: [],
 };
 
 export default SceneGraphNode;
