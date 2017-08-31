@@ -6,7 +6,6 @@ import Button from '../common/Input/Button/Button';
 import Icon from '../common/Icon/Icon';
 import DataManager from '../../api/DataManager';
 import { OriginKey } from '../../api/keys';
-import styles from './SceneGraphNode.scss';
 
 class SceneGraphNode extends Component {
   constructor(props) {
