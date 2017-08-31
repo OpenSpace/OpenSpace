@@ -1331,17 +1331,23 @@ void RenderEngine::renderVersionInformation() {
         OPENSPACE_VERSION_STRING_FULL
     );
 
-    FR::defaultRenderer().render(
-        *_fontInfo,
-        glm::vec2(
-            fontResolution().x - commitBox.boundingBox.x - 10.f,
-            versionBox.boundingBox.y + 5.f
-        ),
-        glm::vec4(0.5, 0.5, 0.5, 1.f),
-        "%s@%s",
-        OPENSPACE_GIT_BRANCH,
-        OPENSPACE_GIT_COMMIT
-    );
+    // If a developer hasn't placed the Git command in the path, this variable will be
+    // empty
+    if (!std::string(OPENSPACE_GIT_COMMIT).empty()) {
+        // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
+        // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
+        // checking for that is a bit brittle)
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            glm::vec2(
+                fontResolution().x - commitBox.boundingBox.x - 10.f,
+                versionBox.boundingBox.y + 5.f
+            ),
+            glm::vec4(0.5, 0.5, 0.5, 1.f),
+            "%s",
+            OPENSPACE_GIT_FULL
+        );
+    }
 }
 
 void RenderEngine::renderScreenLog() {

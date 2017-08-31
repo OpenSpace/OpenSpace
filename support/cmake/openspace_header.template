@@ -41,6 +41,7 @@ constexpr const char* OPENSPACE_VERSION_STRING_FULL = "@OPENSPACE_VERSION_MAJOR@
 
 constexpr const char* OPENSPACE_GIT_BRANCH = "@OPENSPACE_GIT_BRANCH@";
 constexpr const char* OPENSPACE_GIT_COMMIT = "@OPENSPACE_GIT_COMMIT@";
+constexpr const char* OPENSPACE_GIT_FULL = "@OPENSPACE_GIT_BRANCH@@@OPENSPACE_GIT_COMMIT@";
 
 } // namespace openspace
 
