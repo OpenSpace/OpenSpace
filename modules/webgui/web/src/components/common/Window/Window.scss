@@ -1,0 +1,10 @@
+@import "../../../styles/all";
+
+.window {
+  background: $ui-background-solid;
+}
+
+.window > header {
+  display: flex;
+  justify-content: space-between;
+}
