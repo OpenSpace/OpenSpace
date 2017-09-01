@@ -45,10 +45,6 @@
 
 #include <algorithm>
 
-namespace {
-    const char* _loggerCat = "GdalRawTileDataReader";
-}
-
 namespace openspace::globebrowsing {
 
 std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
@@ -191,9 +187,9 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
         dataDest,                       // Where to put data
         io.write.region.numPixels.x,    // width to write x in destination
         io.write.region.numPixels.y,    // width to write y in destination
-        _gdalDatasetMetaDataCached.dataType,                      // Type
-        _initData.bytesPerPixel(),      // Pixel spacing
-        -io.write.bytesPerLine          // Line spacing
+        _gdalDatasetMetaDataCached.dataType,         // Type
+        static_cast<int>(_initData.bytesPerPixel()), // Pixel spacing
+        static_cast<int>(-io.write.bytesPerLine)     // Line spacing
     );
   
     // Convert error to RawTile::ReadError

@@ -27,8 +27,6 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* _loggerCat = "TileProviderByIndex";
-    
     const char* KeyDefaultProvider = "DefaultProvider";
     const char* KeyProviders = "IndexTileProviders";
     const char* KeyTileIndex = "TileIndex";

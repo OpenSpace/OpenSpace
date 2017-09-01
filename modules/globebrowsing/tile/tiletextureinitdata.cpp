@@ -36,8 +36,8 @@ TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum glT
                                          ShouldAllocateDataOnCPU shouldAllocateDataOnCPU)
     : _glType(glType)
     , _ghoulTextureFormat(textureFormat)
-    , _padTiles(padTiles)
     , _shouldAllocateDataOnCPU(shouldAllocateDataOnCPU)
+    , _padTiles(padTiles)
 {
     _tilePixelStartOffset = padTiles ? TilePixelStartOffset : glm::ivec2(0);
     _tilePixelSizeDifference = padTiles ? TilePixelSizeDifference : glm::ivec2(0);

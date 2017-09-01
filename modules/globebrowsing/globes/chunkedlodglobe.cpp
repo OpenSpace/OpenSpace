@@ -334,7 +334,7 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
             clippingSpaceCorners[i] = clippingSpaceCorner;
 
             glm::vec3 screenSpaceCorner =
-                (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
+                glm::vec3((1.0f / clippingSpaceCorner.w) * clippingSpaceCorner);
             screenSpaceBounds.expand(screenSpaceCorner);
         }
 
