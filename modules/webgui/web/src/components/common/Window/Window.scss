@@ -1,7 +1,8 @@
 @import "../../../styles/all";
+@import "../Popover/Popover";
 
 .window {
-  background: $ui-background-solid;
+  @extend .popover;
 }
 
 .window > header {
