@@ -24,8 +24,7 @@ window.onload = function () {
 
   var data = {
     keybindings: keybindings,
-    version: version,
-    generationTime: generationTime
+    version: version
   }
 
   var contents = mainTemplate(data);
