@@ -433,15 +433,15 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) 
         switch (unit) {
             case 'y':
                 value *= 365;
-                [[fallthrough]]
+                [[fallthrough]];
             case 'd':
                 value *= 24.0;
                 [[fallthrough]]
             case 'h': value *= 60.0;
-                [[fallthrough]]
+                [[fallthrough]];
             case 'm':
                 value *= 60.0;
-                [[fallthrough]]
+                [[fallthrough]];
             case 's':
                 value *= 1.0;
                 break;
