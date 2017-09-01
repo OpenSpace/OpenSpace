@@ -436,7 +436,7 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) 
                 [[fallthrough]];
             case 'd':
                 value *= 24.0;
-                [[fallthrough]]
+                [[fallthrough]];
             case 'h': value *= 60.0;
                 [[fallthrough]];
             case 'm':
