@@ -431,12 +431,20 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) 
         // convert value to seconds, based on unit.
         // The switch statment has intentional fall throughs
         switch (unit) {
-        case 'y': value *= 365;
-        case 'd': value *= 24.0;
-        case 'h': value *= 60.0;
-        case 'm': value *= 60.0;
-        case 's': value *= 1.0;
-            break;
+            case 'y':
+                value *= 365;
+                [[fallthrough]];
+            case 'd':
+                value *= 24.0;
+                [[fallthrough]];
+            case 'h': value *= 60.0;
+                [[fallthrough]];
+            case 'm':
+                value *= 60.0;
+                [[fallthrough]];
+            case 's':
+                value *= 1.0;
+                break;
         default:
             throw ghoul::RuntimeError("Invalid unit format '" + std::string(1, unit) +
                 "'. Expected 'y', 'd', 'h', 'm' or 's'.");

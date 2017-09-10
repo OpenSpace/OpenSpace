@@ -29,6 +29,7 @@
 #endif
 #include <openspace/util/syncdata.h>
 
+#include <openspace/openspace.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -127,6 +128,13 @@ namespace {
         "log."
     };
 
+    static const openspace::properties::Property::PropertyInfo ShowVersionInfo = {
+        "ShowVersion",
+        "Shows the version on-screen information",
+        "This value determines whether the GIT version information (branch and commit ) "
+        "hash are shown on the screen."
+    };
+
     static const openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
         "TakeScreenshot",
         "Take Screenshot",
@@ -197,6 +205,7 @@ RenderEngine::RenderEngine()
     , _showDate(ShowDateInfo, true)
     , _showInfo(ShowInfoInfo, true)
     , _showLog(ShowLogInfo, true)
+    , _showVersionInfo(ShowVersionInfo, true)
     , _takeScreenshot(TakeScreenshotInfo)
     , _shouldTakeScreenshot(false)
     , _applyWarping(ApplyWarpingInfo, false)
@@ -248,6 +257,7 @@ RenderEngine::RenderEngine()
     addProperty(_showDate);
     addProperty(_showInfo);
     addProperty(_showLog);
+    addProperty(_showVersionInfo);
     
     _nAaSamples.onChange([this](){
         if (_renderer) {
@@ -1284,6 +1294,59 @@ void RenderEngine::renderInformation() {
             }
 #endif
         }
+    }
+}
+
+void RenderEngine::renderVersionInformation() {
+    if (!_showVersionInfo) {
+        return;
+    }
+
+    using FR = ghoul::fontrendering::FontRenderer;
+
+    FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s",
+        OPENSPACE_VERSION_STRING_FULL
+    );
+
+    FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s@%s",
+        OPENSPACE_GIT_BRANCH,
+        OPENSPACE_GIT_COMMIT
+    );
+
+
+    
+
+    FR::defaultRenderer().render(
+        *_fontInfo,
+        glm::vec2(
+            fontResolution().x - versionBox.boundingBox.x - 10.f,
+            5.f
+        ),
+        glm::vec4(0.5, 0.5, 0.5, 1.f),
+        "%s",
+        OPENSPACE_VERSION_STRING_FULL
+    );
+
+    // If a developer hasn't placed the Git command in the path, this variable will be
+    // empty
+    if (!std::string(OPENSPACE_GIT_COMMIT).empty()) {
+        // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
+        // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
+        // checking for that is a bit brittle)
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            glm::vec2(
+                fontResolution().x - commitBox.boundingBox.x - 10.f,
+                versionBox.boundingBox.y + 5.f
+            ),
+            glm::vec4(0.5, 0.5, 0.5, 1.f),
+            "%s",
+            OPENSPACE_GIT_FULL
+        );
     }
 }
 

@@ -77,7 +77,7 @@ public:
     virtual float noDataValueAsFloat() const override;
     virtual int rasterXSize() const override;
     virtual int rasterYSize() const override;
-    virtual int dataSourceNumRasters() const;
+    virtual int dataSourceNumRasters() const override;
     virtual float depthOffset() const override;
     virtual float depthScale() const override;
 

@@ -164,7 +164,7 @@ void TileProvider::initializeDefaultTile() {
     TileTextureInitData initData(8, 8, GL_UNSIGNED_BYTE, Texture::Format::RGBA,
                                  false,
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
-    int numBytes = initData.totalNumBytes();
+    size_t numBytes = initData.totalNumBytes();
     char* pixels = new char[numBytes];
     memset(pixels, 0, numBytes);
 

@@ -95,6 +95,7 @@ public:
         const glm::mat4& projectionMatrix);
 
     void renderScreenLog();
+    void renderVersionInformation();
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
@@ -200,6 +201,7 @@ private:
     properties::BoolProperty _showDate;
     properties::BoolProperty _showInfo;
     properties::BoolProperty _showLog;
+    properties::BoolProperty _showVersionInfo;
     
     properties::TriggerProperty _takeScreenshot;
     bool _shouldTakeScreenshot;

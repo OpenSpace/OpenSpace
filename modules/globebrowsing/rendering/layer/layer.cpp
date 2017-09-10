@@ -101,7 +101,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _remove(RemoveInfo)
     , _tileProvider(nullptr)
     , _otherTypesProperties({
-        { ColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f) }
+        { ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f) }
     })
     , _layerGroupId(id)
 {
@@ -367,7 +367,6 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
         }
         default:
             throw ghoul::RuntimeError("Unable to create layer. Unknown type.");
-            break;
     }
 }
 
@@ -380,13 +379,16 @@ void Layer::addVisibleProperties() {
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
         case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer: {
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }
             break;
-        case layergroupid::TypeID::SolidColor:
+        }
+        case layergroupid::TypeID::SolidColor: {
             addProperty(_otherTypesProperties.color);
+            break;
+        }
         default:
             break;
     }

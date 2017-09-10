@@ -50,7 +50,7 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
         glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
         clippingSpaceCorners[i] = cornerClippingSpace;
 
-        glm::dvec3 ndc = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+        glm::dvec3 ndc = glm::dvec3((1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace);
         bounds.expand(ndc);
     }
         

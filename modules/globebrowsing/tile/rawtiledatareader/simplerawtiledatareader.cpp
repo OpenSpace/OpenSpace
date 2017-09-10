@@ -37,10 +37,6 @@
 
 #include <ghoul/io/texture/texturereader.h>
 
-namespace {
-    const char* _loggerCat = "SimpleRawTileDataReader";
-} // namespace
-
 namespace openspace::globebrowsing {
 
 SimpleRawTileDataReader::SimpleRawTileDataReader(const std::string& filePath,
