@@ -111,6 +111,19 @@ namespace {
         std::string sceneName;
         std::string cacheFolder;
     } commandlineArgumentPlaceholders;
+
+
+    static const openspace::properties::Property::PropertyInfo VersionInfo = {
+        "VersionInfo",
+        "Version Information",
+        "This value contains the full string identifying this OpenSpace Version"
+    };
+
+    static const openspace::properties::Property::PropertyInfo SourceControlInfo = {
+        "SCMInfo",
+        "Source Control Management Information",
+        "This value contains information from the SCM, such as commit hash and branch"
+    };
 } // namespace
 
 namespace openspace {
@@ -144,6 +157,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
+    , _versionInformation{
+        properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
+        properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
+    }
     , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
@@ -159,6 +176,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
     _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
     _globalPropertyNamespace->addPropertySubOwner(_console.get());
+
+
+    _versionInformation.versionString.setReadOnly(true);
+    _globalPropertyNamespace->addProperty(_versionInformation.versionString);
+    _versionInformation.sourceControlInformation.setReadOnly(true);
+    _globalPropertyNamespace->addProperty(_versionInformation.sourceControlInformation);
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -1162,6 +1185,7 @@ void OpenSpaceEngine::postDraw() {
 
     if (isGuiWindow) {
         _renderEngine->renderScreenLog();
+        _renderEngine->renderVersionInformation();
         _console->render();
     }
 

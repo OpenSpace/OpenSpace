@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
@@ -206,6 +207,11 @@ private:
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+
+    struct {
+        properties::StringProperty versionString;
+        properties::StringProperty sourceControlInformation;
+    } _versionInformation;
     
     bool _scheduledSceneSwitch;
     std::string _scenePath;

@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
@@ -71,6 +72,13 @@ namespace {
         "local cache for this layer and will trigger a fresh load of all tiles."
     };
 
+    static const openspace::properties::Property::PropertyInfo RemoveInfo = {
+        "Remove",
+        "Remove",
+        "If this value is triggered, a script will be executed that will remove this "
+        "layer before the next frame."
+    };
+
     static const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
@@ -79,18 +87,21 @@ namespace {
     };
 } // namespace
 
-Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
+Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
+             LayerGroup& parent)
     : properties::PropertyOwner({
         layerDict.value<std::string>(keyName),
         layerDict.hasKey(keyDescription) ? layerDict.value<std::string>(keyDescription) : ""
     })
+    , _parent(parent)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _blendModeOption(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _enabled(EnabledInfo, false)
     , _reset(ResetInfo)
+    , _remove(RemoveInfo)
     , _tileProvider(nullptr)
     , _otherTypesProperties({
-        { ColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f) }
+        { ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f) }
     })
     , _layerGroupId(id)
 {
@@ -160,6 +171,14 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         }
     });
 
+    _remove.onChange([&](){
+        if (_tileProvider) {
+            _tileProvider->reset();
+        }
+
+        _parent.deleteLayer(name());
+    });
+
     _typeOption.onChange([&](){
         removeVisibleProperties();
         _type = static_cast<layergroupid::TypeID>(_typeOption.value());
@@ -190,6 +209,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     addProperty(_blendModeOption);
     addProperty(_enabled);
     addProperty(_reset);
+    addProperty(_remove);
 
     _otherTypesProperties.color.setViewOption(properties::Property::ViewOptions::Color);
 
@@ -347,7 +367,6 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
         }
         default:
             throw ghoul::RuntimeError("Unable to create layer. Unknown type.");
-            break;
     }
 }
 
@@ -360,13 +379,16 @@ void Layer::addVisibleProperties() {
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
         case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer: {
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }
             break;
-        case layergroupid::TypeID::SolidColor:
+        }
+        case layergroupid::TypeID::SolidColor: {
             addProperty(_otherTypesProperties.color);
+            break;
+        }
         default:
             break;
     }

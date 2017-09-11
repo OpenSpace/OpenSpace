@@ -131,7 +131,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         glm::vec3 directionToSunWorldSpace =
             glm::normalize(-data.modelTransform.translation);
         glm::vec3 directionToSunCameraSpace =
-            (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+            glm::vec3(viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
         programObject.setUniform(
             "lightDirectionCameraSpace", -directionToSunCameraSpace);
     }

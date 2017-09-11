@@ -95,7 +95,7 @@ void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
         LERROR("'Name' must be specified for layer.");
         return;
     }
-    auto layer = std::make_shared<Layer>(_groupId, layerDict);
+    auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);
     layer->onChange(_onChangeCallback);
     if (hasPropertySubOwner(layer->name())) {
         LINFO("Layer with name " + layer->name() + " already exists.");

@@ -257,5 +257,5 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
             ${GDAL_LIBRARY}
         )
     endif () # WIN32
-    target_compile_definitions(openspace-module-globebrowsing PRIVATE GLOBEBROWSING_USE_GDAL)
+    target_compile_definitions(openspace-module-globebrowsing PUBLIC GLOBEBROWSING_USE_GDAL)
 endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL

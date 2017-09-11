@@ -41,6 +41,8 @@ uniform bool _hasHeightMap;
 uniform float _heightExaggeration;
 uniform sampler2D heightTexture;
 
+uniform bool _meridianShift;
+
 void main() {
     vs_st = in_st;
 
@@ -52,7 +54,11 @@ void main() {
     
 
     if (_hasHeightMap) {
-        float height = texture(heightTexture, in_st).s;
+        vec2 st = vs_st;
+        if (_meridianShift) {
+            st += vec2(0.5, 0.0);
+        }
+        float height = texture(heightTexture, st).s;
         vec3 displacementDirection = (normalize(tmp.xyz));
         float displacementFactor = height * _heightExaggeration / 750.0;
         tmp.xyz += displacementDirection * displacementFactor;

@@ -56,6 +56,10 @@ function preInitialization()
         "openspace.setPropertyValue('*Trail.renderable.Enabled', false)",
         "Disables visibility of the trails"
     )
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${OPENSPACE_DATA}/globebrowsing_servers.lua")
+    )
 end
 
 function postInitialization()

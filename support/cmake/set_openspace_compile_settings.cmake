@@ -68,6 +68,9 @@ function (set_openspace_compile_settings project)
         "/w44988"   # 'symbol': variable declared outside class/function scope
         "/std:c++latest"
         "/permissive-"
+        "/Zc:twoPhase-"  # Used to prevent C:\Program Files (x86)\Windows Kits\8.1\Include\um\combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here
+                         # This is a bug in Visual Studio 15.3 and can be removed with the next version:
+                         # https://developercommunity.visualstudio.com/content/problem/94419/vs-2017-153-with-permissive-shows-error-c2187-in-c.html
         "/Zc:strictStrings-"    # Windows header don't adhere to this
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)

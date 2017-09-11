@@ -5,12 +5,6 @@ local NewHorizonsKernels = {
     "${SPICE}/new_horizons/spk/NavPE_de433_od122.bsp",
 }
 
--- Loading the smaller version for higher compatability
--- if we have a good way to measure GPU memory, we can make this dynamic
-local ColorTexture = "textures/NH_Charon_mosaic_8192.png"
-local HeightTexture = "textures/NH_Charon_DTM_8192.png"
-
-
 return {
     -- CharonProjection module
     {   
@@ -22,10 +16,10 @@ return {
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = charon_radius,
-                Segments = 100
+                Segments = 350
             },
-            ColorTexture = ColorTexture,
-            HeightTexture = HeightTexture,
+            ColorTexture = charon_image,
+            HeightTexture = charon_height,
             Projection = {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",

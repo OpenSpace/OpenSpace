@@ -74,6 +74,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
     properties::FloatProperty _heightExaggeration;
+    properties::BoolProperty _meridianShift;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     
