@@ -61,7 +61,7 @@ namespace {
         "Transparency",
         "Transparency",
         "This value is a multiplicative factor that is applied to the transparency of "
-        "all point."
+        "all points."
     };
 
     static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {

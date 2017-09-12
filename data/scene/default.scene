@@ -81,6 +81,9 @@ function postInitialization()
     -- DU Objects
     openspace.setPropertyValue("Quasars.renderable.Enabled", false)
     openspace.setPropertyValue("WMAP.renderable.Enabled", false)
+    openspace.setPropertyValue("Pulsars.renderable.Enabled", false)
+    openspace.setPropertyValue("Kepler Planetary Candidates.renderable.Enabled", false)
+    openspace.setPropertyValue("Globular Clusters.renderable.Enabled", false)
 
     openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
     
@@ -115,7 +118,7 @@ return {
         "mercury",
         "venus",
         "earth",
-        --"moon",
+        "moon",
         "mars",
         "jupiter",
         "saturn",
@@ -129,7 +132,10 @@ return {
         "constellationbounds",
         "grids",
         "quasars/digitaluniverse",
-        "backgroundradiation/digitaluniverse"
+        "pulsars/digitaluniverse",
+        "backgroundradiation/digitaluniverse",
+        "globularclusters/digitaluniverse",
+        "kepler/digitaluniverse"
     }
 }
 
