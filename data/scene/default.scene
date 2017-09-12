@@ -77,7 +77,11 @@ function postInitialization()
 
     openspace.setPropertyValue("SunGlare.renderable.Enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
-    
+
+    -- DU Objects
+    openspace.setPropertyValue("Quasars.renderable.Enabled", false)
+    openspace.setPropertyValue("WMAP.renderable.Enabled", false)
+
     openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
     
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
@@ -111,7 +115,7 @@ return {
         "mercury",
         "venus",
         "earth",
-        "moon",
+        --"moon",
         "mars",
         "jupiter",
         "saturn",
@@ -123,7 +127,9 @@ return {
         --"milkyway/eso",
         -- "satellites"
         "constellationbounds",
-        "grids"
+        "grids",
+        "quasars/digitaluniverse",
+        "backgroundradiation/digitaluniverse"
     }
 }
 
