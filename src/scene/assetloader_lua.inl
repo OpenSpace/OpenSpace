@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,29 +26,29 @@
 namespace openspace {
 namespace luascriptfunctions {
 
-int loadAsset(lua_State* state) {
-    AssetLoader *assetLoader = (AssetLoader*)lua_touserdata(state, lua_upvalueindex(1));
+int importAsset(lua_State* state) {
+    AssetLoader *assetLoader =
+        reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
 
     int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("loadAsset", state, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("importAsset", state, 1, nArguments);
 
     std::string assetName = luaL_checkstring(state, -1);
 
-    assetLoader->loadAsset(assetName);
+    assetLoader->importAsset(assetName);
     return 0;
 }
 
-int unloadAsset(lua_State* state) {
-    AssetLoader *assetLoader = (AssetLoader*)lua_touserdata(state, lua_upvalueindex(1));
+int unimportAsset(lua_State* state) {
+    AssetLoader *assetLoader =
+        reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
 
     int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("unloadAsset", state, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("unimportAsset", state, 1, nArguments);
 
     std::string assetName = luaL_checkstring(state, -1);
 
-    assetLoader->unloadAsset(assetName);
-    return 0;
-
+    assetLoader->unimportAsset(assetName);
     return 0;
 }
 

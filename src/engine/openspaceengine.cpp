@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -54,11 +54,12 @@
 #include <openspace/util/resourcesynchronization.h>
 
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/task.h>
 #include <openspace/util/openspacemodule.h>
+#include <openspace/util/resourcesynchronizer.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/transformationmanager.h>
 
 #include <ghoul/ghoul.h>
@@ -144,6 +145,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _networkEngine(new NetworkEngine)
     , _parallelConnection(new ParallelConnection)
     , _renderEngine(new RenderEngine)
+    , _resourceSynchronizer(new ResourceSynchronizer(8))
     , _settingsEngine(new SettingsEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
@@ -409,7 +411,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Set up asset loader and scene loader
     _engine->_assetLoader = std::make_unique<AssetLoader>(
-        OsEng.scriptEngine().luaState(), "${ASSETS}", "${SYNC}");
+        *OsEng.scriptEngine().luaState(), OsEng.resourceSynchronizer(), "${ASSETS}", "${SYNC}");
     _engine->_sceneLoader = std::make_unique<SceneLoader>(_engine->_assetLoader.get());
     _engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
@@ -1471,6 +1473,11 @@ WindowWrapper& OpenSpaceEngine::windowWrapper() {
 AssetLoader & OpenSpaceEngine::assetLoader() {
     ghoul_assert(_assetLoader, "Asset loader must not be nullptr");
     return *_assetLoader;
+}
+
+ResourceSynchronizer & OpenSpaceEngine::resourceSynchronizer() {
+    ghoul_assert(_resourceSynchronizer, "Resource Synchronizer must not be nullptr");
+    return *_resourceSynchronizer;
 }
 
 ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {

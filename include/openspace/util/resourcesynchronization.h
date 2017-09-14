@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,12 +32,6 @@
 
 namespace openspace {
 
-struct SynchronizationProduct {
-    ghoul::filesystem::Directory destination;
-    std::string folderName;
-};
-
-using SynchronizationJob = Job<SynchronizationProduct>;
 
 class ResourceSynchronization {
 public:
@@ -45,7 +39,6 @@ public:
 
     ResourceSynchronization() = default;
     virtual bool needsSync() = 0;
-    virtual std::shared_ptr<SynchronizationJob> createSynchronizationJob() = 0;
 };
 
 

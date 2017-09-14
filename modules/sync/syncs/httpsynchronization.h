@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -36,17 +36,8 @@ class HttpSynchronization : public ResourceSynchronization {
 public:
     HttpSynchronization(const ghoul::Dictionary& dict);
     bool needsSync() override;
-    std::shared_ptr<SynchronizationJob> createSynchronizationJob() override;
+    void start();
     static documentation::Documentation Documentation();
-};
-
-class HttpSynchronizationJob : public SynchronizationJob {
-public:
-	HttpSynchronizationJob();
-	virtual ~HttpSynchronizationJob();
-
-	void execute() override;
-	std::shared_ptr<SynchronizationProduct> product() override;
 };
 
 } // namespace openspace

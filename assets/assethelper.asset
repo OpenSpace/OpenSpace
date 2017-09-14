@@ -1,3 +1,12 @@
+asset.registerSynchronizations = function (asset, syncs)
+    local oldSync = asset.onSync;
+    asset.onSynchronize = function()
+        for i, sync in ipairs(syncs) do
+            openspace.addSynchronization(asset, sync)
+        end
+    end
+end
+
 asset.registerSceneGraphNodes = function (sceneAsset, nodes)
     local oldInit = sceneAsset.onInitialize;
     sceneAsset.onInitialize = function ()

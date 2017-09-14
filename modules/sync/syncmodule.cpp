@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -39,7 +39,9 @@
 
 namespace openspace {
 
-SyncModule::SyncModule() : OpenSpaceModule(Name) {}
+SyncModule::SyncModule()
+    : OpenSpaceModule(Name)
+{}
 
 void SyncModule::internalInitialize() {
 

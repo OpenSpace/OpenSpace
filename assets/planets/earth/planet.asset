@@ -1,15 +1,12 @@
 local assetHelper = asset.import("assethelper")
 local transforms = asset.import("./transforms")
 
-asset.data = {
-    FileRequest = {
-        {
-            Destination = asset.syncedResource("textures"),
-            Identifier = "earth_textures",
-            Version = 2
-        }
+assetHelper.registerSynchronization(asset, {
+    {
+        Type = "HTTPSynchronization",
+        --- todo...
     }
-}
+})
 
 asset.Earth = {
     Name = "Earth",

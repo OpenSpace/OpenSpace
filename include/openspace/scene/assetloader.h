@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,9 +28,7 @@
 #include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/properties/property.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/util/resourcesynchronizer.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/luastate.h>
@@ -43,109 +41,79 @@
 
 namespace openspace {
 
+class Asset;
+
 namespace assetloader {
-int importAsset(lua_State* state);
-int importAssetToggle(lua_State* state);
+int importDependency(lua_State* state);
+int importOptional(lua_State* state);
 int resolveLocalResource(lua_State* state);
 int resolveSyncedResource(lua_State* state);
 } // namespace assetloader
 
 class AssetLoader {
 public:
-    class Asset;
+    /**
+     * Constructor
+     */
+    AssetLoader(
+        ghoul::lua::LuaState& luaState,
+        ResourceSynchronizer& resourceSynchronizer,
+        std::string assetRoot,
+        std::string syncRoot
+    );
 
-    using InitializationRequirement = ghoul::Boolean;
-    using Dependency = std::pair<Asset*, InitializationRequirement>;
-
-    class DependencyToggle : public properties::PropertyOwner {
-    public:
-        DependencyToggle(Asset* dependency, Asset* dependant, bool enabled = false);
-    private:
-        properties::BoolProperty _enabled;
-        Asset* _dependant;
-        Asset* _dependency;
-    };
-
-    class Asset : public properties::PropertyOwner {
-    public:
-        Asset(AssetLoader* loader, ghoul::filesystem::Directory directory);
-        Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, std::string assetPath);
-        std::string id();
-        std::string assetFilePath();
-        std::string assetName();
-        std::string assetDirectory();
-        AssetLoader* loader();
-        ghoul::Dictionary syncDictionary();
-        std::string syncDirectory();
-        bool isInitialized();
-        bool hasLuaTable();
-        void initialize();
-        void deinitialize();
-
-        bool hasDependency(Asset* asset, InitializationRequirement initReq);
-        void addDependency(Asset* asset, bool togglableInitReq, InitializationRequirement initReq);
-        void setInitializationRequirement(Asset* dependency, InitializationRequirement initReq);
-        void removeDependency(Asset* asset);
-        void removeDependency(const std::string& assetId);
-        void dependantDidInitialize(Asset* dependant);
-        void dependantWillDeinitialize(Asset* dependant);
-
-        bool hasInitializedDependants(InitializationRequirement initReq);
-        bool hasDependant(InitializationRequirement initReq);
-    private:
-        std::string resolveLocalResource(std::string resourceName);
-        std::string resolveSyncedResource(std::string resourceName);
-
-        // lua methods
-        friend int assetloader::resolveLocalResource(lua_State* state);
-        int resolveLocalResourceLua();
-
-        friend int assetloader::resolveSyncedResource(lua_State* state);
-        int resolveSyncedResourceLua();
-
-        bool _hasLuaTable;
-        bool _initialized;
-        AssetLoader* _loader;
-
-        // Base name of .asset file
-        std::string _assetName;
-
-        // Asbolute path to directory with the .asset file
-        std::string _assetDirectory;
-
-        // Other assets that this asset depend on
-        std::vector<Dependency> _dependencies;
-
-        // Other assets that depend on this asset
-        std::vector<Asset*> _dependants;
-
-        std::vector<std::unique_ptr<DependencyToggle>> _dependencyToggles;
-        // Other assets that this asset may toggle
-        //std::vector<Asset*> _toggles;
-
-        // Other assets that may toggle this asset
-        //std::vector<Asset*> _togglers;
-    };
-
-    AssetLoader(ghoul::lua::LuaState* _luaState, std::string assetRoot, std::string syncRoot);
+    /**
+     * Destructor
+     */
     ~AssetLoader() = default;
 
+    /**
+     * Import an asset
+     * Add the asset as an optional on the root asset
+     */
+    void importAsset(const std::string& identifier);
 
-    void loadAsset(const std::string& identifier);
-    void unloadAsset(const std::string& identifier);
+    /**
+     * Unimport an asset
+     * Remove the asset as an optional on the root asset
+     */
+    void unimportAsset(const std::string& identifier);
 
+    /**
+     * Return the lua library
+     */
     scripting::LuaLibrary luaLibrary();
     
+    /**
+     * Return the lua state
+     */
     ghoul::lua::LuaState* luaState();
-    ghoul::filesystem::Directory currentDirectory();
+
+    /**
+     * Return the root asset
+     */
     Asset* rootAsset();
-    const std::string& syncRoot();
+
+    /**
+     * Return the sync root directory
+     */
+    const std::string& syncRootDirectory();
+
+
+    void callOnInitialize(Asset* asset);
+
+    void callOnDeinitialize(Asset* asset);
+
+    void callOnDependantInitialize(Asset* asset, Asset* dependant);
+
+    void callOnDependantDeinitialize(Asset* asset, Asset* dependant);
 
 private:
-    Asset* importAsset(
-        const std::string& identifier,
-        bool togglableInitializationRequirement = false,
-        bool toggleOn = true);
+    Asset* importDependency(const std::string& identifier);
+    Asset* importOptional(const std::string& identifier, bool enabled = true);
+    Asset* loadAsset(std::string name);
+    Asset* getAsset(std::string name);
+    ghoul::filesystem::Directory currentDirectory();
 
     void pushAsset(Asset* asset);
     void popAsset();
@@ -155,10 +123,11 @@ private:
     std::map<std::string, std::unique_ptr<Asset>> _importedAssets;
     std::vector<Asset*> _assetStack;
 
-    std::string _syncRoot;
+    ResourceSynchronizer* _resourceSynchronizer;
+    std::string _syncRootDirectory;
 
-    friend int assetloader::importAsset(lua_State* state);
-    friend int assetloader::importAssetToggle(lua_State* state);
+    friend int assetloader::importDependency(lua_State* state);
+    friend int assetloader::importOptional(lua_State* state);
     int importAssetLua(
         std::string assetName,
         bool togglableInitializationRequirement = false,

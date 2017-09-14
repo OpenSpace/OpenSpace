@@ -240,6 +240,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "loadWMSCapabilities",
                 &globebrowsing::luascriptfunctions::loadWMSCapabilities,
+                {},
                 "string, string, string",
                 "Loads and parses the WMS capabilities xml file from a remote server. "
                 "The first argument is the name of the capabilities that can be used to "
@@ -250,6 +251,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "removeWMSServer",
                 &globebrowsing::luascriptfunctions::removeWMSServer,
+                {},
                 "string",
                 "Removes the WMS server identified by the first argument from the list "
                 "of available servers. The parameter corrsponds to the first argument in "
@@ -258,6 +260,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "capabilitiesWMS",
                 &globebrowsing::luascriptfunctions::capabilities,
+                {},
                 "string",
                 "Returns an array of tables that describe the available layers that are "
                 "supported by the WMS server identified by the provided name. The 'URL'"

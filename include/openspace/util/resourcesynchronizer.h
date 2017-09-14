@@ -22,25 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SYNCMODULE___H__
-#define __OPENSPACE_MODULE_SPACE___SYNCMODULE___H__
+#ifndef __OPENSPACE_CORE___RESOURCESYNCHRONIZER___H__
+#define __OPENSPACE_CORE___RESOURCESYNCHRONIZER___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/util/resourcesynchronization.h>
+#include <openspace/util/concurrentjobmanager.h>
 
 namespace openspace {
 
-class SyncModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Sync";
+class ResourceSynchronizer {
 
-    SyncModule();
-    virtual ~SyncModule() = default;
-    std::vector<documentation::Documentation> documentations() const override;
-
-protected:
-    void internalInitialize() override;
 };
+
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___SYNCMODULE___H__
+#endif // __OPENSPACE_CORE___RESOURCESYNCHRONIZER___H__

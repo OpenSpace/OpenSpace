@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,13 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___RESOURCESYNCHRONIZATION___H__
-#define __OPENSPACE_MODULE_SYNC___RESOURCESYNCHRONIZATION___H__
+#include <openspace/util/resourcesynchronizer.h>
 
 namespace openspace {
 
 
-
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SYNC___RESOURCESYNCHRONIZATION___H__

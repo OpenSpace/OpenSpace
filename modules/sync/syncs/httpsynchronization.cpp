@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,40 +24,23 @@
 
 #include "httpsynchronization.h"
 
+#include <openspace/util/asynchttprequest.h>
+
+
 namespace openspace {
 
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict)
     : openspace::ResourceSynchronization()
 {
-        
+
 }
 
 bool HttpSynchronization::needsSync() {
 	return true;
 }
 
-std::shared_ptr<SynchronizationJob> HttpSynchronization::createSynchronizationJob() {
-	return std::make_shared<HttpSynchronizationJob>();
-}
-
 documentation::Documentation HttpSynchronization::Documentation() {
     return {};
-}
-
-HttpSynchronizationJob::HttpSynchronizationJob() {
-
-}
-
-HttpSynchronizationJob::~HttpSynchronizationJob() {
-
-}
-
-void HttpSynchronizationJob::execute() {
-
-}
-
-std::shared_ptr<SynchronizationProduct> HttpSynchronizationJob::product() {
-	return nullptr;
 }
 
 } // namespace openspace

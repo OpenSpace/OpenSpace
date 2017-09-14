@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/scene/asset.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/sceneloader.h>
 #include <openspace/scene/scene.h>
@@ -89,6 +90,14 @@ void SceneLoader::loadScene(Scene* scene, const std::string& path) {
         std::string assetName = assetDictionary.value<std::string>(key);
         _assetLoader->loadAsset(assetName);
     }
+
+    // Sync all resources from assets that are dependencies of root asset.
+    // whenever an asset has all its resources synced: init the asset.
+    //_assetLoader->rootAsset()->getSynchronizations();
+
+    // also show 
+    
+
     try {
         _assetLoader->rootAsset()->initialize();
     } catch (const ghoul::RuntimeError& e) {

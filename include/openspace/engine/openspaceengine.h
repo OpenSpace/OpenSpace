@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -42,6 +42,7 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
+class AssetLoader;
 class ConfigurationManager;
 class DownloadManager;
 class GUI;
@@ -50,14 +51,13 @@ class ModuleEngine;
 class NetworkEngine;
 class ParallelConnection;
 class RenderEngine;
-class SettingsEngine;
-class VirtualPropertyManager;
+class ResourceSynchronizer;
 class Scene;
-class AssetLoader;
 class SceneLoader;
-
 class SyncEngine;
+class SettingsEngine;
 class TimeManager;
+class VirtualPropertyManager;
 class WindowWrapper;
 
 namespace interaction {
@@ -122,6 +122,7 @@ public:
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
     AssetLoader& assetLoader();
+    ResourceSynchronizer& resourceSynchronizer();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::NavigationHandler& navigationHandler();
     interaction::KeyBindingManager& keyBindingManager();
@@ -201,6 +202,7 @@ private:
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
     std::unique_ptr<interaction::NavigationHandler> _navigationHandler;
     std::unique_ptr<interaction::KeyBindingManager> _keyBindingManager;
+    std::unique_ptr<ResourceSynchronizer> _resourceSynchronizer;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
