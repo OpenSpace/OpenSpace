@@ -39,12 +39,13 @@ class AssetLoader;
 
 class Asset : public properties::PropertyOwner {
 public:
-    struct Optional : public properties::PropertyOwner {
+    class Optional : public properties::PropertyOwner {
     public:
         Optional(Asset* asset, Asset* owner, bool enabled = false);
     private:
         properties::BoolProperty _enabled;
-        Asset* asset;
+        Asset* _asset;
+        Asset* _owner;
     };
 
     enum class ReadyState : unsigned int {
@@ -64,29 +65,30 @@ public:
     */
     Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, std::string assetPath);
 
-    std::string id();
-    std::string assetFilePath();
-    std::string assetName();
-    std::string assetDirectory();
-    AssetLoader* loader();
-    std::string syncDirectory();
-    ReadyState readyState();
+    std::string id() const;
+    std::string assetFilePath() const;
+    std::string assetName() const;
+    std::string assetDirectory() const;
+    AssetLoader* loader() const;
+    std::string syncDirectory() const;
+    ReadyState readyState() const;
     bool isInitReady() const;
     void initialize();
     void deinitialize();
 
-    bool hasDependency(Asset* asset);
+    bool hasDependency(const Asset* asset) const;
     void addDependency(Asset* asset);
     void removeDependency(Asset* asset);
     void removeDependency(const std::string& assetId);
 
-    bool hasDependants();
-    bool hasInitializedDependants();
+    bool hasDependants() const;
+    bool hasInitializedDependants() const;
 
-    bool hasOptional(Asset* asset);
-    bool setOptionalEnabled(Asset* asset, bool enabled);
-    bool addOptional(Asset* asset, bool enabled);
-    bool removeOptional(Asset* asset);
+    bool hasOptional(Asset* asset) const;
+    bool optionalIsEnabled(Asset* asset) const;
+    void setOptionalEnabled(Asset* asset, bool enabled);
+    void addOptional(Asset* asset, bool enabled);
+    void removeOptional(Asset* asset);
 
     void dependantDidInitialize(Asset* dependant);
     void dependantWillDeinitialize(Asset* dependant);
@@ -96,9 +98,13 @@ public:
 
     bool shouldSynchronize();
     bool shouldInitialize();
-private:
+
     std::string resolveLocalResource(std::string resourceName);
     std::string resolveSyncedResource(std::string resourceName);
+
+    static std::string generateAssetId(std::string directory, std::string name);
+private:
+
 
     ReadyState _readyState;
     AssetLoader* _loader;
@@ -108,6 +114,9 @@ private:
 
     // Asbolute path to directory with the .asset file
     std::string _assetDirectory;
+
+    // Asset id
+    std::string _id;
 
     // Asset dependencies
     std::vector<Asset*> _dependencies;

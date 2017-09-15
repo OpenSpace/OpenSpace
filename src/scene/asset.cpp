@@ -39,6 +39,8 @@ namespace {
         }
         return false;
     };
+
+    const char* AssetFileSuffix = "asset";
 }
 
 namespace openspace {
@@ -48,7 +50,7 @@ std::string Asset::resolveLocalResource(std::string resourceName) {
     return currentAssetDirectory + ghoul::filesystem::FileSystem::PathSeparator + resourceName;
 }
 
-std::string Asset::syncDirectory() {
+std::string Asset::syncDirectory() const {
     std::string currentAssetDirectory = assetDirectory();
     std::string rootAssetDirectory = loader()->rootAsset()->assetDirectory();
     std::string relativePath = FileSys.relativePath(currentAssetDirectory, rootAssetDirectory);
@@ -60,7 +62,7 @@ std::string Asset::syncDirectory() {
         assetName();
 }
 
-Asset::ReadyState Asset::readyState() {
+Asset::ReadyState Asset::readyState() const {
     return _readyState;
 }
 
@@ -138,7 +140,9 @@ Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory directory)
     , _assetDirectory(directory)
     , _loader(loader)
     , _readyState(Asset::ReadyState::Loaded)
-{}
+{
+    _id = generateAssetId(directory, "");
+}
 
 Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, std::string assetPath)
     : PropertyOwner({ assetPath, assetPath })
@@ -167,36 +171,41 @@ Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, st
         _assetDirectory = assetFile.directoryName();
         _assetName = assetFile.baseName();
     }
+    _id = generateAssetId(_assetDirectory, _assetName);
 }
 
-std::string Asset::assetFilePath() {
-    ghoul::filesystem::File dir(_assetDirectory);
+std::string Asset::assetFilePath() const {
+    //ghoul::filesystem::File dir(_assetDirectory);
     return _assetDirectory + ghoul::filesystem::FileSystem::PathSeparator + _assetName + "." + AssetFileSuffix;
 }
 
-std::string Asset::assetName() {
+std::string Asset::generateAssetId(std::string directory, std::string name) {
+    return directory + ghoul::filesystem::FileSystem::PathSeparator + name;
+}
+
+std::string Asset::assetName() const {
     return _assetName;
 }
 
-std::string Asset::assetDirectory() {
+std::string Asset::assetDirectory() const {
     return _assetDirectory;
 }
 
-std::string Asset::id() {
-    return assetFilePath();
+std::string Asset::id() const {
+    return _id;
 }
 
-AssetLoader* Asset::loader() {
+AssetLoader* Asset::loader() const {
     return _loader;
 }
 
-bool Asset::hasDependency(Asset* asset) {
-    auto it = std::find(_dependencies.begin(), _dependencies.end(), dependency);
+bool Asset::hasDependency(const Asset* asset) const {
+    const auto it = std::find(_dependencies.begin(), _dependencies.end(), asset);
     return it != _dependencies.end();
 }
 
 void Asset::addDependency(Asset* dependency) {
-    if (readyState == Initialized) {
+    if (_readyState == Asset::ReadyState::Initialized) {
         // TODO: Throw: cannot add dep while asset is initialized.
         return;
     }
@@ -230,11 +239,11 @@ void Asset::removeDependency(Asset* dependency) {
 }
 
 void Asset::removeDependency(const std::string& assetId) {
-    auto dep = std::find_if(_dependencies.begin(), _dependencies.end(), [&assetId](const Asset& d) {
-        return d.id() == assetId;
+    auto dep = std::find_if(_dependencies.begin(), _dependencies.end(), [&assetId](const Asset* d) {
+        return d->id() == assetId;
     });
     if (dep != _dependencies.end()) {
-        removeDependency(dep);
+       removeDependency(*dep);
     } else {
         LERROR("No such dependency '" << assetId << "'");
     }
@@ -248,9 +257,9 @@ void Asset::dependantWillDeinitialize(Asset* dependant) {
     loader()->callOnDependantDeinitialize(this, dependant);
 }
 
-bool Asset::hasDependants() {
+bool Asset::hasDependants() const {
     bool foundDep = false;
-    for (auto& dependant : _dependants) {
+    for (const auto& dependant : _dependants) {
         if (dependant->hasDependency(this)) {
             foundDep = true;
         }
@@ -258,10 +267,10 @@ bool Asset::hasDependants() {
     return foundDep;
 }
 
-bool Asset::hasInitializedDependants() {
+bool Asset::hasInitializedDependants() const {
     bool foundInitializedDep = false;
-    for (auto& dependant : _dependants) {
-        if (dependant->isInitialized() && dependant->hasDependency(this)) {
+    for (const auto& dependant : _dependants) {
+        if (dependant->readyState() == Asset::ReadyState::Initialized && dependant->hasDependency(this)) {
             foundInitializedDep = true;
         }
     }
@@ -270,7 +279,7 @@ bool Asset::hasInitializedDependants() {
 
 // Dependency toggle
 Asset::Optional::Optional(Asset* asset, Asset* owner, bool enabled)
-    : PropertyOwner({ dependency->name(), dependency->name() })
+    : PropertyOwner({ asset->name(), asset->name() })
     , _enabled({ "enabled", "Enabled", "Enable optional" }, enabled)
     , _asset(asset)
     , _owner(owner)
@@ -279,7 +288,7 @@ Asset::Optional::Optional(Asset* asset, Asset* owner, bool enabled)
     addPropertySubOwner(asset);
     _enabled.onChange([this]() {
         _owner->setOptionalEnabled(
-            asset,
+            _asset,
             _enabled
         );
     });

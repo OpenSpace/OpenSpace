@@ -92,7 +92,7 @@ public:
     /**
      * Return the root asset
      */
-    Asset* rootAsset();
+    Asset* rootAsset() const;
 
     /**
      * Return the sync root directory
@@ -126,14 +126,18 @@ private:
     ResourceSynchronizer* _resourceSynchronizer;
     std::string _syncRootDirectory;
 
-    friend int assetloader::importDependency(lua_State* state);
-    friend int assetloader::importOptional(lua_State* state);
-    int importAssetLua(
-        std::string assetName,
-        bool togglableInitializationRequirement = false,
-        bool toggleOn = true);
+    int importDependencyLua(std::string assetName);
+    int importOptionalLua(std::string assetName, bool enabled);
+    int resolveLocalResourceLua(Asset* asset);
+    int resolveSyncedResourceLua(Asset* asset);
+    int createLuaTableEntries(const Asset* importer, const Asset* importedAsset);
 
     ghoul::lua::LuaState* _luaState;
+
+    friend int assetloader::importDependency(lua_State* state);
+    friend int assetloader::importOptional(lua_State* state);
+    friend int assetloader::resolveLocalResource(lua_State* state);
+    friend int assetloader::resolveSyncedResource(lua_State* state);
 };
 
 

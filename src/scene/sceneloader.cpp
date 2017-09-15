@@ -88,7 +88,7 @@ void SceneLoader::loadScene(Scene* scene, const std::string& path) {
 
     for (const std::string& key : keys) {
         std::string assetName = assetDictionary.value<std::string>(key);
-        _assetLoader->loadAsset(assetName);
+        _assetLoader->importAsset(assetName);
     }
 
     // Sync all resources from assets that are dependencies of root asset.

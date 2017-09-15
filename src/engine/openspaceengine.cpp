@@ -45,12 +45,13 @@
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/scene/asset.h>
+#include <openspace/scene/assetloader.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/sceneloader.h>
-#include <openspace/scene/assetloader.h>
 #include <openspace/util/resourcesynchronization.h>
 
 #include <openspace/util/factorymanager.h>
@@ -145,7 +146,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _networkEngine(new NetworkEngine)
     , _parallelConnection(new ParallelConnection)
     , _renderEngine(new RenderEngine)
-    , _resourceSynchronizer(new ResourceSynchronizer(8))
+    , _resourceSynchronizer(new ResourceSynchronizer)
     , _settingsEngine(new SettingsEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
