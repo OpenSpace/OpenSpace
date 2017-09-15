@@ -39,13 +39,11 @@ class AssetLoader;
 
 class Asset : public properties::PropertyOwner {
 public:
-    class Optional : public properties::PropertyOwner {
-    public:
+    struct Optional : public properties::PropertyOwner {
         Optional(Asset* asset, Asset* owner, bool enabled = false);
-    private:
-        properties::BoolProperty _enabled;
-        Asset* _asset;
-        Asset* _owner;
+        properties::BoolProperty enabled;
+        Asset* const asset;
+        Asset* const owner;
     };
 
     enum class ReadyState : unsigned int {
@@ -84,6 +82,7 @@ public:
     bool hasDependants() const;
     bool hasInitializedDependants() const;
 
+    std::vector<Asset*> optionals() const;
     bool hasOptional(Asset* asset) const;
     bool optionalIsEnabled(Asset* asset) const;
     void setOptionalEnabled(Asset* asset, bool enabled);

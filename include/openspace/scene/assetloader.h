@@ -68,6 +68,13 @@ public:
     ~AssetLoader() = default;
 
     /**
+     * Load single asset.
+     *  - Import one asset
+     *  - Unimport all other assets
+     */
+    void loadSingleAsset(const std::string& identifier);
+
+    /**
      * Import an asset
      * Add the asset as an optional on the root asset
      */

@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -73,12 +73,12 @@ void SettingsEngine::initialize() {
     // Set interaction to change ConfigurationManager and schedule the load
     _scenes.onChange([this, nScenes, sceneDir]() {
         if (_scenes == nScenes) {
-            OsEng.scheduleLoadScene("");
+            OsEng.scheduleLoadSingleAsset("");
         } else {
             std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
             OsEng.configurationManager().setValue(
-                ConfigurationManager::KeyConfigScene, sceneFile);
-            OsEng.scheduleLoadScene(sceneDir + "/" + sceneFile);
+                ConfigurationManager::KeyConfigAsset, sceneFile);
+            OsEng.scheduleLoadSingleAsset(sceneDir + "/" + sceneFile);
         }
     }
     );

@@ -278,20 +278,19 @@ bool Asset::hasInitializedDependants() const {
 }
 
 // Dependency toggle
-Asset::Optional::Optional(Asset* asset, Asset* owner, bool enabled)
+Asset::Optional::Optional(Asset* a, Asset* o, bool enable)
     : PropertyOwner({ asset->name(), asset->name() })
-    , _enabled({ "enabled", "Enabled", "Enable optional" }, enabled)
-    , _asset(asset)
-    , _owner(owner)
+    , enabled({ "enabled", "Enabled", "Enable optional" }, enable)
+    , asset(a)
+    , owner(o)
 {
-    addProperty(_enabled);
-    addPropertySubOwner(asset);
-    _enabled.onChange([this]() {
-        _owner->setOptionalEnabled(
-            _asset,
-            _enabled
+    addProperty(enabled);
+    addPropertySubOwner(a);
+    enabled.onChange([this]() {
+        owner->setOptionalEnabled(
+            asset,
+            enabled
         );
     });
 }
-
 }

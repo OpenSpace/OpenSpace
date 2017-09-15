@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -42,7 +42,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "settings that are being used when OpenSpace is started."
         },
         {
-            ConfigurationManager::KeyConfigScene,
+            ConfigurationManager::KeyConfigAsset,
             new StringAnnotationVerifier(
                 "A valid scene file as described in the Scene documentation"
             ),

@@ -51,7 +51,6 @@
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
-#include <openspace/scene/sceneloader.h>
 #include <openspace/util/resourcesynchronization.h>
 
 #include <openspace/util/factorymanager.h>
@@ -164,8 +163,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
         properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
     }
-    , _scheduledSceneSwitch(false)
-    , _scenePath("")
     , _runTime(0.0)
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
@@ -339,7 +336,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     }
     if (hasCacheConfiguration) {
         std::string scene = _engine->configurationManager().value<std::string>(
-            ConfigurationManager::KeyConfigScene
+            ConfigurationManager::KeyConfigAsset
         );
         cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
     }
@@ -410,10 +407,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
     sgctArguments.insert(sgctArguments.begin() + 1, SgctConfigArgumentCommand);
     sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
 
-    // Set up asset loader and scene loader
+    // Set up asset loader
     _engine->_assetLoader = std::make_unique<AssetLoader>(
         *OsEng.scriptEngine().luaState(), OsEng.resourceSynchronizer(), "${ASSETS}", "${SYNC}");
-    _engine->_sceneLoader = std::make_unique<SceneLoader>(_engine->_assetLoader.get());
     _engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
 
@@ -543,7 +539,7 @@ void OpenSpaceEngine::initialize() {
 
     if (!commandlineArgumentPlaceholders.sceneName.empty()) {
         configurationManager().setValue(
-            ConfigurationManager::KeyConfigScene,
+            ConfigurationManager::KeyConfigAsset,
             commandlineArgumentPlaceholders.sceneName
         );
     }
@@ -558,8 +554,6 @@ void OpenSpaceEngine::initialize() {
     // Load a light and a monospaced font
     loadFonts();
 
-    std::string scenePath = "";
-    configurationManager().getValue(ConfigurationManager::KeyConfigScene, scenePath);
 
     _renderEngine->initialize();
 
@@ -567,18 +561,19 @@ void OpenSpaceEngine::initialize() {
         func();
     }
 
-    scheduleLoadScene(scenePath);
+    std::string assetPath = "";
+    configurationManager().getValue(ConfigurationManager::KeyConfigAsset, assetPath);
+    scheduleLoadSingleAsset(assetPath);
 
     LTRACE("OpenSpaceEngine::initialize(end)");
 
 }
 
-void OpenSpaceEngine::scheduleLoadScene(std::string scenePath) {
-    _scheduledSceneSwitch = true;
-    _scenePath = std::move(scenePath);
+void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
+    _scheduledAssetPathToLoad = assetPath;
 }
 
-void OpenSpaceEngine::loadScene(const std::string& scenePath) {
+void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     LTRACE("OpenSpaceEngine::loadScene(begin)");
 
     windowWrapper().setBarrier(false);
@@ -589,9 +584,8 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
             windowWrapper().setBarrier(true);
         }
     );
-    
 
-    if (scenePath != "") {
+    if (assetPath != "") {
         try {
             if (_scene) {
                 _syncEngine->removeSyncables(_timeManager->getSyncables());
@@ -604,33 +598,24 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
             _scene = std::make_unique<Scene>();
             _renderEngine->setScene(_scene.get());
-            _sceneLoader->loadScene(_scene.get(), scenePath);
-        }
-        catch (const ghoul::FileNotFoundError& e) {
+            _assetLoader->loadSingleAsset(assetPath);        
+        } catch (const ghoul::FileNotFoundError& e) {
             LERRORC(e.component, e.message);
             return;
-        }
-        catch (const Scene::InvalidSceneError& e) {
+        } catch (const Scene::InvalidSceneError& e) {
             LERRORC(e.component, e.message);
             return;
-        }
-        catch (const ghoul::RuntimeError& e) {
+        } catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
             return;
-        }
-        catch (const std::exception& e) {
+        } catch (const std::exception& e) {
             LERROR(e.what());
             return;
-        }
-        catch (...) {
+        } catch (...) {
             LERROR("Unknown error loading the scene");
             return;
         }
     }
-
-    
-
-    // Initialize the RenderEngine
 
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
@@ -1061,17 +1046,17 @@ void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
     FileSys.triggerFilesystemEvents();
 
-    if (_scheduledSceneSwitch) {
-        loadScene(_scenePath);
-        _scheduledSceneSwitch = false;
+    if (_scheduledAssetPathToLoad.has_value()) {
+        loadSingleAsset(_scheduledAssetPathToLoad.value());
+        _scheduledAssetPathToLoad.reset();
     }
 
     if (_isFirstRenderingFirstFrame) {
         _windowWrapper->setSynchronization(false);
     }
-    
+
     bool master = _windowWrapper->isMaster();
-    
+
     _syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         double dt = _windowWrapper->averageDeltaTime();

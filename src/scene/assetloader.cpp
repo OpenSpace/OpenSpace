@@ -204,6 +204,18 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() {
     return _assetStack.back()->assetDirectory();
 }
 
+void AssetLoader::loadSingleAsset(const std::string& identifier) {
+    Asset* imported = importOptional(identifier, true);
+    std::vector<Asset*> optionals = _rootAsset->optionals();
+
+    // Remove all other optionals
+    for (auto& optional : optionals) {
+        if (optional != imported) {
+            _rootAsset->removeOptional(optional);
+        }
+    }
+}
+
 void AssetLoader::importAsset(const std::string & identifier) {
     ghoul_assert(_assetStack.size() == 1, "Can only import an asset from the root asset");
     try {

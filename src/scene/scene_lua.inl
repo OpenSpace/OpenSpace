@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -337,7 +337,7 @@ int loadScene(lua_State* L) {
 
     std::string sceneFile = luaL_checkstring(L, -1);
     
-    OsEng.scheduleLoadScene(sceneFile);
+    OsEng.scheduleLoadSingleAsset(sceneFile);
     return 0;
 }
 

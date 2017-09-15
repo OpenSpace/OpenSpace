@@ -28,9 +28,9 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-
 #include <ghoul/glm.h>
 
+#include <optional>
 #include <functional>
 #include <memory>
 #include <string>
@@ -53,7 +53,6 @@ class ParallelConnection;
 class RenderEngine;
 class ResourceSynchronizer;
 class Scene;
-class SceneLoader;
 class SyncEngine;
 class SettingsEngine;
 class TimeManager;
@@ -102,7 +101,7 @@ public:
     void encode();
     void decode();
 
-    void scheduleLoadScene(std::string scenePath);
+    void scheduleLoadSingleAsset(std::string assetPath);
 
     void enableBarrier();
     void disableBarrier();
@@ -178,7 +177,7 @@ private:
     OpenSpaceEngine(std::string programName,
         std::unique_ptr<WindowWrapper> windowWrapper);
 
-    void loadScene(const std::string& scenePath);
+    void loadSingleAsset(const std::string& assetPath);
     void gatherCommandlineArguments();
     void loadFonts();
     void configureLogging();
@@ -187,7 +186,6 @@ private:
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetLoader> _assetLoader;
-    std::unique_ptr<SceneLoader> _sceneLoader;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
@@ -215,8 +213,7 @@ private:
         properties::StringProperty sourceControlInformation;
     } _versionInformation;
     
-    bool _scheduledSceneSwitch;
-    std::string _scenePath;
+    std::optional<std::string> _scheduledAssetPathToLoad;
 
     struct {
         std::vector<std::function<void()>> initialize;
