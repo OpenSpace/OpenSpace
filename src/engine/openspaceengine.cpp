@@ -410,7 +410,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Set up asset loader
     _engine->_assetLoader = std::make_unique<AssetLoader>(
         *OsEng.scriptEngine().luaState(), OsEng.resourceSynchronizer(), "${ASSETS}", "${SYNC}");
-    _engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
+    //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
 
 void OpenSpaceEngine::destroy() {

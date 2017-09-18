@@ -25,10 +25,6 @@
 #ifndef __OPENSPACE_CORE___ASSET___H__
 #define __OPENSPACE_CORE___ASSET___H__
 
-#include <openspace/properties/property.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <string>
 #include <vector>
@@ -37,14 +33,9 @@ namespace openspace {
 
 class AssetLoader;
 
-class Asset : public properties::PropertyOwner {
+class Asset {
 public:
-    struct Optional : public properties::PropertyOwner {
-        Optional(Asset* asset, Asset* owner, bool enabled = false);
-        properties::BoolProperty enabled;
-        Asset* const asset;
-        Asset* const owner;
-    };
+    using Optional = std::pair<Asset*, bool>;
 
     enum class ReadyState : unsigned int {
         Loaded,
@@ -82,9 +73,9 @@ public:
     bool hasDependants() const;
     bool hasInitializedDependants() const;
 
-    std::vector<Asset*> optionals() const;
-    bool hasOptional(Asset* asset) const;
-    bool optionalIsEnabled(Asset* asset) const;
+    std::vector<Asset*> optionalAssets() const;
+    bool hasOptional(const Asset* asset) const;
+    bool hasEnabledOptional(const Asset* asset) const;
     void setOptionalEnabled(Asset* asset, bool enabled);
     void addOptional(Asset* asset, bool enabled);
     void removeOptional(Asset* asset);
@@ -92,11 +83,11 @@ public:
     void dependantDidInitialize(Asset* dependant);
     void dependantWillDeinitialize(Asset* dependant);
 
-    void optionalDidInitialize(Asset* optional);
-    void optionalWillDeinitialize(Asset* optional);
+    //void optionalDidInitialize(Asset* optional);
+    //void optionalWillDeinitialize(Asset* optional);
 
-    bool shouldSynchronize();
-    bool shouldInitialize();
+    //bool shouldSynchronize();
+    //bool shouldInitialize();
 
     std::string resolveLocalResource(std::string resourceName);
     std::string resolveSyncedResource(std::string resourceName);
@@ -124,7 +115,7 @@ private:
     std::vector<Asset*> _dependants;
 
     // Optional sub-assets
-    std::vector<Optional> _optionalAssets;
+    std::vector<Optional> _optionals;
 
     // Assets that refers to this asset as an optional
     std::vector<Asset*> _optionalOwners;

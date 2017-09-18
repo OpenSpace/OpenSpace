@@ -206,7 +206,7 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() {
 
 void AssetLoader::loadSingleAsset(const std::string& identifier) {
     Asset* imported = importOptional(identifier, true);
-    std::vector<Asset*> optionals = _rootAsset->optionals();
+    std::vector<Asset*> optionals = _rootAsset->optionalAssets();
 
     // Remove all other optionals
     for (auto& optional : optionals) {

@@ -25,6 +25,8 @@
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetloader.h>
 
+#include <ghoul/logging/logmanager.h>
+
 #include <algorithm>
 
 namespace {
@@ -136,8 +138,8 @@ std::string Asset::resolveSyncedResource(std::string resourceName) {
 }
 
 Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory directory)
-    : PropertyOwner({ "RootAsset", "Root asset" })
-    , _assetDirectory(directory)
+    //: PropertyOwner({ "RootAsset", "Root asset" })
+    : _assetDirectory(directory)
     , _loader(loader)
     , _readyState(Asset::ReadyState::Loaded)
 {
@@ -145,8 +147,8 @@ Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory directory)
 }
 
 Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, std::string assetPath)
-    : PropertyOwner({ assetPath, assetPath })
-    , _readyState(Asset::ReadyState::Loaded)
+    //: PropertyOwner({ assetPath, assetPath })
+    : _readyState(Asset::ReadyState::Loaded)
     , _loader(loader)
 {
     if (isRelative(assetPath)) {
@@ -219,7 +221,7 @@ void Asset::addDependency(Asset* dependency) {
     _dependencies.push_back(dependency);
     dependency->_dependants.push_back(this);
 
-    addPropertySubOwner(dependency);
+    //addPropertySubOwner(dependency);
 }
 
 void Asset::removeDependency(Asset* dependency) {
@@ -267,6 +269,41 @@ bool Asset::hasDependants() const {
     return foundDep;
 }
 
+std::vector<Asset*> Asset::optionalAssets() const {
+    std::vector<Asset*> assets(_optionals.size());
+    std::transform(
+        _optionals.begin(),
+        _optionals.end(),
+        assets.begin(),
+        [](const Optional& o) {
+            return o.first;
+        }
+    );
+    return assets;
+}
+
+bool Asset::hasOptional(const Asset* asset) const {
+    auto it = std::find_if(
+        _optionals.begin(),
+        _optionals.end(),
+        [&asset](const Optional& o) {
+            return o.first == asset;
+        }
+    );
+    return it != _optionals.end();
+}
+
+bool Asset::hasEnabledOptional(const Asset* asset) const {
+        auto it = std::find_if(
+            _optionals.begin(),
+            _optionals.end(),
+        [&asset](const Optional& o) {
+            return o.first == asset && o.second;
+        }
+    );
+    return it != _optionals.end();
+}
+
 bool Asset::hasInitializedDependants() const {
     bool foundInitializedDep = false;
     for (const auto& dependant : _dependants) {
@@ -277,20 +314,37 @@ bool Asset::hasInitializedDependants() const {
     return foundInitializedDep;
 }
 
-// Dependency toggle
-Asset::Optional::Optional(Asset* a, Asset* o, bool enable)
-    : PropertyOwner({ asset->name(), asset->name() })
-    , enabled({ "enabled", "Enabled", "Enable optional" }, enable)
-    , asset(a)
-    , owner(o)
-{
-    addProperty(enabled);
-    addPropertySubOwner(a);
-    enabled.onChange([this]() {
-        owner->setOptionalEnabled(
-            asset,
-            enabled
-        );
-    });
+void Asset::setOptionalEnabled(Asset* asset, bool enabled) {
+    auto it = std::find_if(
+        _optionals.begin(),
+        _optionals.end(),
+        [&asset](const Optional& o) {
+            return o.first == asset;
+        }
+    );
+
+    if (it != _optionals.end()) {
+        it->second = enabled;
+    }
 }
+
+void Asset::removeOptional(Asset* asset) {
+    _optionals.erase(
+        std::remove_if(
+            _optionals.begin(),
+            _optionals.end(),
+            [&asset](Optional& o) {
+                return o.first == asset;
+            }
+        ),
+        _optionals.end()
+    );
+    // TODO: Update and validate
+}
+
+void Asset::addOptional(Asset* asset, bool enabled) {
+    _optionals.push_back(std::make_pair(asset, enabled));
+    // TODO: Update and validate
+}
+
 }

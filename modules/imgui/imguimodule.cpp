@@ -71,7 +71,6 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                         &(OsEng.renderEngine()),
                         &(OsEng.parallelConnection()),
                         &(OsEng.console()),
-                        OsEng.assetLoader().rootAsset()
                     };
                     return res;
                 }
