@@ -26,10 +26,15 @@
 
 #include <openspace/scene/scenegraphnode.h>
 
+#include <ghoul/filesystem/filesystem.h>
+
+using std::string;
+
 namespace {
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
     const char* KEY_INPUT_FILE_TYPE         = "InputFileType";   // [STRING]
+    const char* KEY_SOURCE_FOLDER           = "SourceFolder";    // [STRING]
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     const char* VALUE_INPUT_FILE_TYPE_CDF   = "cdf";
@@ -42,16 +47,43 @@ namespace openspace {
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary) {
 
-    std::string name;
+    string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
 
     _loggerCat += " [" + name + "]";
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
-    std::string inputFileType;
+    string inputFileType;
     if(!dictionary.getValue(KEY_INPUT_FILE_TYPE, inputFileType)) {
         LERRORC("FieldlinesSequence",
-                "The field " + std::string(KEY_INPUT_FILE_TYPE) + " is missing!");
+                "The field " + string(KEY_INPUT_FILE_TYPE) + " is missing!");
+        return;
+    }
+
+    string sourceFolderPath;
+    if(!dictionary.getValue(KEY_SOURCE_FOLDER, sourceFolderPath)) {
+        LERRORC("FieldlinesSequence",
+                "The field " + string(KEY_SOURCE_FOLDER) + " is missing!");
+        return;
+    }
+
+    // Ensure that the source folder exists and then extract
+    // the files with the same extension as <inputFileType>
+    ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
+    if (FileSys.directoryExists(sourceFolder)) {
+        // Extract all file paths from the provided folder (Non-recursively! Sorted!)
+        _sourceFiles = sourceFolder.readFiles(ghoul::Boolean::No, ghoul::Boolean::Yes);
+
+        // Remove all files that don't have <inputFileType> as extension
+        _sourceFiles.erase(std::remove_if(_sourceFiles.begin(), _sourceFiles.end(),
+            [inputFileType] (string str) {
+                const size_t EXT_LENGTH = inputFileType.length();
+                string sub = str.substr(str.length() - EXT_LENGTH, EXT_LENGTH);
+                std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
+                return sub != inputFileType;
+            }), _sourceFiles.end());
+    } else {
+        LERRORC("FieldlinesSequence", sourceFolderPath + " is not a valid directory!");
         return;
     }
 }

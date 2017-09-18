@@ -47,6 +47,8 @@ private:
     std::string _loggerCat = "RenderableFieldlinesSequence";
 
     std::vector<FieldlinesState> _states;
+    std::vector<std::string>     _sourceFiles;
+
 };
 
 } // namespace openspace
