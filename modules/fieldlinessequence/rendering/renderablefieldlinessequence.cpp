@@ -26,6 +26,17 @@
 
 #include <openspace/scene/scenegraphnode.h>
 
+namespace {
+    // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
+    // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
+    const char* KEY_INPUT_FILE_TYPE         = "InputFileType";   // [STRING]
+
+    // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
+    const char* VALUE_INPUT_FILE_TYPE_CDF   = "cdf";
+    const char* VALUE_INPUT_FILE_TYPE_JSON  = "json";
+    const char* VALUE_INPUT_FILE_TYPE_OSFLS = "osfls";
+} // namespace
+
 namespace openspace {
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
@@ -35,6 +46,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     dictionary.getValue(SceneGraphNode::KeyName, name);
 
     _loggerCat += " [" + name + "]";
+
+    // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
+    std::string inputFileType;
+    if(!dictionary.getValue(KEY_INPUT_FILE_TYPE, inputFileType)) {
+        LERRORC("FieldlinesSequence",
+                "The field " + std::string(KEY_INPUT_FILE_TYPE) + " is missing!");
+        return;
+    }
 }
 
 void RenderableFieldlinesSequence::initialize() {
