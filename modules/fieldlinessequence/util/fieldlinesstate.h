@@ -22,33 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEFIELDLINESSEQUENCE___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEFIELDLINESSEQUENCE___H__
-
-#include <openspace/rendering/renderable.h>
-
-#include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
 
 namespace openspace {
 
-class RenderableFieldlinesSequence : public Renderable {
+class FieldlinesState {
 public:
-    RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
-    // ~RenderableFieldlinesSequence();
-
-    void initialize() override;
-    void deinitialize() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    FieldlinesState();
 private:
-    std::string _loggerCat = "RenderableFieldlinesSequence";
-
-    std::vector<FieldlinesState> _states;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEFIELDLINESSEQUENCE___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
