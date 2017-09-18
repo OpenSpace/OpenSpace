@@ -1,9 +1,24 @@
 asset.registerSynchronizations = function (asset, syncs)
     local oldSync = asset.onSync;
-    asset.onSynchronize = function()
-        for i, sync in ipairs(syncs) do
-            openspace.addSynchronization(asset, sync)
+    asset.onSynchronize = function (onFinish)
+        local nSyncs = #syncs + 1
+        local nSynced = 0
+
+        local onOneFinish = function(success)
+            if not success then
+                onFinish(false)
+            end
+            nSynced = nSynced + 1
+            if nSynced == nSyncs then
+                onFinish(true)
+            end
         end
+
+        for i, sync in ipairs(syncs) do
+            print(sync)
+            openspace.synchronizeResource(sync, onOneFinish)
+        end
+        oldSync(onOneFinish)
     end
 end
 

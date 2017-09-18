@@ -1,7 +1,7 @@
 local assetHelper = asset.import("assethelper")
 local transforms = asset.import("./transforms")
 
-assetHelper.registerSynchronization(asset, {
+assetHelper.registerSynchronizations(asset, {
     {
         Type = "HTTPSynchronization",
         --- todo...

@@ -31,21 +31,24 @@
 
 namespace {
     const char* _loggerCat = "Asset";
-
-    bool isRelative(std::string path) {
-        if (path.size() > 2) {
-            if (path[0] == '.' && path[1] == '/') return true;
-        }
-        if (path.size() > 3) {
-            if (path[0] == '.' && path[1] == '.' && path[2] == '/') return true;
-        }
-        return false;
-    };
-
-    const char* AssetFileSuffix = "asset";
 }
 
 namespace openspace {
+
+Asset::Asset(AssetLoader* loader)
+    //: PropertyOwner({ "RootAsset", "Root asset" })
+    : _readyState(Asset::ReadyState::Loaded)
+    , _loader(loader)
+    , _assetName("Root Asset")
+
+{}
+
+Asset::Asset(AssetLoader* loader, ghoul::filesystem::File assetPath)
+    //: PropertyOwner({ assetPath, assetPath })
+    : _readyState(Asset::ReadyState::Loaded)
+    , _loader(loader)
+    , _assetPath(assetPath)
+{}
 
 std::string Asset::resolveLocalResource(std::string resourceName) {
     std::string currentAssetDirectory = assetDirectory();
@@ -54,7 +57,7 @@ std::string Asset::resolveLocalResource(std::string resourceName) {
 
 std::string Asset::syncDirectory() const {
     std::string currentAssetDirectory = assetDirectory();
-    std::string rootAssetDirectory = loader()->rootAsset()->assetDirectory();
+    std::string rootAssetDirectory = loader()->syncRootDirectory();
     std::string relativePath = FileSys.relativePath(currentAssetDirectory, rootAssetDirectory);
 
     return loader()->syncRootDirectory() +
@@ -82,6 +85,36 @@ bool Asset::isInitReady() const {
     return true;
 }
 
+
+void Asset::synchronizeEnabledRecursive() {
+    synchronize();
+    for (Asset* a : _dependencies) {
+        a->synchronizeEnabledRecursive();
+    }
+    for (Optional& o : _optionals) {
+        if (o.second) {
+            o.first->synchronizeEnabledRecursive();
+        }        
+    }
+}
+
+void Asset::synchronize() {
+    LDEBUG("Synchronizing asset " << id());
+
+    if (_readyState != Asset::ReadyState::Loaded) {
+        // Already synchronized or synchronizing
+        return;
+    }
+
+    // Initialize dependencies
+    for (auto& dependency : _dependencies) {
+        dependency->synchronize();
+    }
+
+    loader()->callOnSynchronize(this);
+
+}
+
 void Asset::initialize() {
     LDEBUG("Initializing asset " << id());
     if (_readyState == Asset::ReadyState::Initialized) {
@@ -90,6 +123,7 @@ void Asset::initialize() {
 
     if (!isInitReady()) {
         // TODO: THROW
+        return;
     }
 
     // Initialize dependencies
@@ -137,65 +171,27 @@ std::string Asset::resolveSyncedResource(std::string resourceName) {
         resourceName;
 }
 
-Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory directory)
-    //: PropertyOwner({ "RootAsset", "Root asset" })
-    : _assetDirectory(directory)
-    , _loader(loader)
-    , _readyState(Asset::ReadyState::Loaded)
-{
-    _id = generateAssetId(directory, "");
-}
-
-Asset::Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, std::string assetPath)
-    //: PropertyOwner({ assetPath, assetPath })
-    : _readyState(Asset::ReadyState::Loaded)
-    , _loader(loader)
-{
-    if (isRelative(assetPath)) {
-        ghoul::filesystem::File assetFile =
-            static_cast<std::string>(baseDirectory) + 
-            ghoul::filesystem::FileSystem::PathSeparator +
-            assetPath +
-            "." +
-            AssetFileSuffix;
-
-        _assetDirectory = assetFile.directoryName();
-        _assetName = assetFile.baseName();
-    } else {
-        std::string assetRoot = ghoul::filesystem::Directory(loader->rootAsset()->assetDirectory());
-        ghoul::filesystem::File assetFile =
-            assetRoot +
-            ghoul::filesystem::FileSystem::PathSeparator +
-            assetPath +
-            "." +
-            AssetFileSuffix;
-
-        _assetDirectory = assetFile.directoryName();
-        _assetName = assetFile.baseName();
-    }
-    _id = generateAssetId(_assetDirectory, _assetName);
+std::string Asset::id() const {
+    return _assetPath.has_value() ? _assetPath.value() : "";
 }
 
 std::string Asset::assetFilePath() const {
-    //ghoul::filesystem::File dir(_assetDirectory);
-    return _assetDirectory + ghoul::filesystem::FileSystem::PathSeparator + _assetName + "." + AssetFileSuffix;
+    return _assetPath.value();
 }
 
-std::string Asset::generateAssetId(std::string directory, std::string name) {
-    return directory + ghoul::filesystem::FileSystem::PathSeparator + name;
+bool Asset::hasAssetFile() const {
+    return _assetPath.has_value();
+}
+
+std::string Asset::assetDirectory() const {
+    return ghoul::filesystem::File(_assetPath.value()).directoryName();
 }
 
 std::string Asset::assetName() const {
     return _assetName;
 }
 
-std::string Asset::assetDirectory() const {
-    return _assetDirectory;
-}
 
-std::string Asset::id() const {
-    return _id;
-}
 
 AssetLoader* Asset::loader() const {
     return _loader;

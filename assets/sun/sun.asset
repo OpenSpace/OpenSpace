@@ -34,7 +34,7 @@ asset.Sun = {
         },
         Textures = {
             Type = "simple",
-            Color = texturesPath + "/sun.jpg"),
+            Color = texturesPath .. "/sun.jpg",
         },
         PerformShading = false,
     }
@@ -49,7 +49,7 @@ asset.SunGlare = {
         Size = 1.3*10^10.5,
         Origin = "Center",
         Billboard = true,
-        Texture = texturesPath + "/sun-glare.png"),
+        Texture = texturesPath .. "/sun-glare.png",
         BlendMode = "Additive"
     }
 }
@@ -63,7 +63,7 @@ asset.SunMarker = {
         Size = 3.0E11,
         Origin = "Center",
         Billboard = true,
-        Texture = texturesPath + "/marker.png"),
+        Texture = texturesPath .. "/marker.png",
         BlendMode = "Additive"
     },
     Transformation = {

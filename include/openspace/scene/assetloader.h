@@ -48,6 +48,7 @@ int importDependency(lua_State* state);
 int importOptional(lua_State* state);
 int resolveLocalResource(lua_State* state);
 int resolveSyncedResource(lua_State* state);
+int onFinishSynchronization(lua_State* state);
 } // namespace assetloader
 
 class AssetLoader {
@@ -66,6 +67,11 @@ public:
      * Destructor
      */
     ~AssetLoader() = default;
+
+    /**
+     * Start synchronization recursively
+     */
+    void synchronizeEnabledAssets();
 
     /**
      * Load single asset.
@@ -106,6 +112,7 @@ public:
      */
     const std::string& syncRootDirectory();
 
+    void callOnSynchronize(Asset* asset);
 
     void callOnInitialize(Asset* asset);
 
@@ -114,6 +121,10 @@ public:
     void callOnDependantInitialize(Asset* asset, Asset* dependant);
 
     void callOnDependantDeinitialize(Asset* asset, Asset* dependant);
+
+    void synchronizeResource(const ghoul::Dictionary& d, std::function<void(bool)> onFinish);
+
+    std::string generateAssetPath(const std::string& baseDirectory, const std::string& path) const;
 
 private:
     Asset* importDependency(const std::string& identifier);
@@ -131,12 +142,14 @@ private:
     std::vector<Asset*> _assetStack;
 
     ResourceSynchronizer* _resourceSynchronizer;
+    std::string _assetRootDirectory;
     std::string _syncRootDirectory;
 
     int importDependencyLua(std::string assetName);
     int importOptionalLua(std::string assetName, bool enabled);
     int resolveLocalResourceLua(Asset* asset);
     int resolveSyncedResourceLua(Asset* asset);
+    int onFinishSynchronizationLua(Asset* asset);
     int createLuaTableEntries(const Asset* importer, const Asset* importedAsset);
 
     ghoul::lua::LuaState* _luaState;
@@ -145,6 +158,7 @@ private:
     friend int assetloader::importOptional(lua_State* state);
     friend int assetloader::resolveLocalResource(lua_State* state);
     friend int assetloader::resolveSyncedResource(lua_State* state);
+    friend int assetloader::onFinishSynchronization(lua_State* state);
 };
 
 

@@ -26,8 +26,10 @@
 #define __OPENSPACE_CORE___ASSET___H__
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace openspace {
 
@@ -47,23 +49,30 @@ public:
     /**
      * Root asset constructor
      */
-    Asset(AssetLoader* loader, ghoul::filesystem::Directory directory);
+    Asset(AssetLoader* loader);
 
     /**
     * Dependency or Optional constructor
     */
-    Asset(AssetLoader* loader, ghoul::filesystem::Directory baseDirectory, std::string assetPath);
+    Asset(AssetLoader* loader, ghoul::filesystem::File assetPath);
 
     std::string id() const;
     std::string assetFilePath() const;
-    std::string assetName() const;
+    bool hasAssetFile() const;
     std::string assetDirectory() const;
+    std::string assetName() const;
     AssetLoader* loader() const;
     std::string syncDirectory() const;
     ReadyState readyState() const;
+
+    void synchronize();
+    void synchronizeEnabledRecursive();
+
     bool isInitReady() const;
     void initialize();
     void deinitialize();
+
+
 
     bool hasDependency(const Asset* asset) const;
     void addDependency(Asset* asset);
@@ -91,22 +100,17 @@ public:
 
     std::string resolveLocalResource(std::string resourceName);
     std::string resolveSyncedResource(std::string resourceName);
-
-    static std::string generateAssetId(std::string directory, std::string name);
 private:
 
 
     ReadyState _readyState;
     AssetLoader* _loader;
 
-    // Base name of .asset file
+    // The name of the asset
     std::string _assetName;
 
-    // Asbolute path to directory with the .asset file
-    std::string _assetDirectory;
-
-    // Asset id
-    std::string _id;
+    // Absolute path to asset file
+    std::optional<std::string> _assetPath;
 
     // Asset dependencies
     std::vector<Asset*> _dependencies;

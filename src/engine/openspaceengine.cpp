@@ -617,6 +617,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         }
     }
 
+    _assetLoader->synchronizeEnabledAssets();
+
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
