@@ -99,6 +99,51 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
+    // This node shouldn't do anything if its been disabled from the gui!
+    if (_enabled) {
+        const double CURRENT_TIME = data.time.j2000Seconds();
+        // Check if current time in OpenSpace is within sequence interval
+        if (isWithinSequenceInterval(CURRENT_TIME)) {
+            const int NEXT_IDX = _activeStateIndex + 1;
+            if (_activeStateIndex < 0                                                // true => Previous frame was not within the sequence interval
+                || CURRENT_TIME < _startTimes[_activeStateIndex]                     // true => OpenSpace has stepped back    to a time represented by another state
+                || (NEXT_IDX < _nStates && CURRENT_TIME >= _startTimes[NEXT_IDX])) { // true => OpenSpace has stepped forward to a time represented by another state
+
+                updateActiveStateIndex(CURRENT_TIME);
+                _needsUpdate = true;
+            } // else {we're still in same state as previous frame (no changes needed)}
+        } else {
+            // Not in interval => set everything to false
+            _activeStateIndex = -1;
+            _needsUpdate      = false;
+        }
+
+        if (_needsUpdate) {
+            // Update States
+            // ...
+            // ...
+            // Everything is set and ready for rendering!
+            _needsUpdate = false;
+        }
+    }
+}
+
+inline bool RenderableFieldlinesSequence::isWithinSequenceInterval(const double CURRENT_TIME) {
+    return (CURRENT_TIME >= _startTimes[0]) && (CURRENT_TIME < _sequenceEndTime);
+}
+
+// Assumes we already know that CURRENT_TIME is within the sequence interval
+void RenderableFieldlinesSequence::updateActiveStateIndex(const double CURRENT_TIME) {
+    auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), CURRENT_TIME);
+    if (iter != _startTimes.end()) {
+        if ( iter != _startTimes.begin()) {
+            _activeStateIndex = std::distance(_startTimes.begin(), iter) - 1;
+        } else {
+            _activeStateIndex = 0;
+        }
+    } else {
+        _activeStateIndex = _nStates - 1;
+    }
 }
 
 bool RenderableFieldlinesSequence::extractInfoFromDictionary(

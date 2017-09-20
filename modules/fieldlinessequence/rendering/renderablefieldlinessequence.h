@@ -51,6 +51,8 @@ private:
         INVALID
     };
 
+    int            _activeStateIndex         = -1;
+    bool           _needsUpdate              = false; // If still in same state as previous frame == false
     bool           _isLoadingStatesAtRuntime = false;  // False => loading osfls at runtime
     size_t         _nStates                  = 0;
     double         _sequenceEndTime;
@@ -62,6 +64,8 @@ private:
 
     void computeSequenceEndTime();
     bool extractInfoFromDictionary(const ghoul::Dictionary& dictionary);
+    inline bool isWithinSequenceInterval(const double CURRENT_TIME);
+    inline void updateActiveStateIndex(const double CURRENT_TIME);
 };
 
 } // namespace openspace
