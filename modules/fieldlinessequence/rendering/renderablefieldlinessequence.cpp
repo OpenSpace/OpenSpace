@@ -24,9 +24,14 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
+
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/programobject.h>
 
 using std::string;
 
@@ -86,9 +91,36 @@ void RenderableFieldlinesSequence::initialize() {
     }
 
     computeSequenceEndTime();
+
+    // Setup shader program
+    _shaderProgram = OsEng.renderEngine().buildRenderProgram(
+        "FieldlinesSequence",
+        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl",
+        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl"
+    );
+
+    if (!_shaderProgram) {
+        LERROR("Shader program failed initialization!");
+        _sourceFileType = INVALID;
+    }
+
+    //------------------ Initialize OpenGL VBOs and VAOs-------------------------------//
+    glGenVertexArrays(1, &_vertexArrayObject);
+    glGenBuffers(1, &_vertexPositionBuffer);
 }
 
 void RenderableFieldlinesSequence::deinitialize() {
+    glDeleteVertexArrays(1, &_vertexArrayObject);
+    _vertexArrayObject = 0;
+
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shaderProgram) {
+        renderEngine.removeRenderProgram(_shaderProgram);
+        _shaderProgram = nullptr;
+    }
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
@@ -96,9 +128,38 @@ bool RenderableFieldlinesSequence::isReady() const {
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
+    if (_activeStateIndex != -1) {
+        _shaderProgram->activate();
+
+        const glm::dmat4 ROTATION_TRANSFORM = glm::dmat4(data.modelTransform.rotation);
+        // const glm::mat4 SCALE_TRANSFORM = glm::mat4(1.0); // TODO remove if no use
+        const glm::dmat4 MODEL_TRANSFORM =
+                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+                ROTATION_TRANSFORM *
+                glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        const glm::dmat4 MODEL_VIEW_TRANSFORM = data.camera.combinedViewMatrix() * MODEL_TRANSFORM;
+
+        _shaderProgram->setUniform("modelViewProjection",
+                    data.camera.sgctInternal.projectionMatrix() * glm::mat4(MODEL_VIEW_TRANSFORM));
+
+        glBindVertexArray(_vertexArrayObject);
+        glMultiDrawArrays(
+                GL_LINE_STRIP, //_drawingOutputType,
+                _states[_activeStateIndex].lineStart().data(),
+                _states[_activeStateIndex].lineCount().data(),
+                static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
+        );
+
+        glBindVertexArray(0);
+        _shaderProgram->deactivate();
+    }
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
+    if (_shaderProgram->isDirty()) {
+        _shaderProgram->rebuildFromFile();
+    }
+
     // This node shouldn't do anything if its been disabled from the gui!
     if (_enabled) {
         const double CURRENT_TIME = data.time.j2000Seconds();
@@ -119,9 +180,22 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         }
 
         if (_needsUpdate) {
-            // Update States
-            // ...
-            // ...
+            glBindVertexArray(_vertexArrayObject);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
+            const std::vector<glm::vec3>& VERTEX_POS_VEC =
+                    _states[_activeStateIndex].vertexPositions();
+
+            glBufferData(GL_ARRAY_BUFFER, VERTEX_POS_VEC.size() * sizeof(glm::vec3),
+                    &VERTEX_POS_VEC.front(), GL_STATIC_DRAW);
+
+            glEnableVertexAttribArray(_vertAttrVertexPos);
+            glVertexAttribPointer(_vertAttrVertexPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+            // UNBIND
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+
             // Everything is set and ready for rendering!
             _needsUpdate = false;
         }

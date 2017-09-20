@@ -58,9 +58,18 @@ private:
     double         _sequenceEndTime;
     SourceFileType _sourceFileType;
 
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+
     std::vector<double>          _startTimes;
     std::vector<FieldlinesState> _states;
     std::vector<std::string>     _sourceFiles;                // Stored in RAM if files are loaded at runtime, else emptied after initialization
+
+    GLuint _vertexArrayObject       = 0;
+    GLuint _vertexPositionBuffer    = 0;
+
+    // THESE MUST CORRESPOND TO THE SHADER PROGRAM
+    // TODO: THIS CAN BE DETERMINED BY ASKING THE SHADER PROGRAM TOO
+    GLuint _vertAttrVertexPos = 0;
 
     void computeSequenceEndTime();
     bool extractInfoFromDictionary(const ghoul::Dictionary& dictionary);
