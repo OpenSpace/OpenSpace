@@ -44,10 +44,20 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 private:
+    enum SourceFileType : int {
+        CDF = 0,
+        JSON,
+        OSFLS,
+        INVALID
+    };
+
+    bool           _isLoadingStatesAtRuntime = false;  // False => loading osfls at runtime
+    SourceFileType _sourceFileType;
 
     std::vector<FieldlinesState> _states;
-    std::vector<std::string>     _sourceFiles;
+    std::vector<std::string>     _sourceFiles;                // Stored in RAM if files are loaded at runtime, else emptied after initialization
 
+    bool extractInfoFromDictionary(const ghoul::Dictionary& dictionary);
 };
 
 } // namespace openspace

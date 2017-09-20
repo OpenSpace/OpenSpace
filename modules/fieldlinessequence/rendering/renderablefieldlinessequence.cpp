@@ -38,6 +38,9 @@ namespace {
     const char* KEY_INPUT_FILE_TYPE         = "InputFileType";   // [STRING]
     const char* KEY_SOURCE_FOLDER           = "SourceFolder";    // [STRING]
 
+    // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
+    const char* KEY_OSLFS_LOAD_AT_RUNTIME   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
+
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     const char* VALUE_INPUT_FILE_TYPE_CDF   = "cdf";
     const char* VALUE_INPUT_FILE_TYPE_JSON  = "json";
@@ -49,6 +52,44 @@ namespace openspace {
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary) {
 
+    if(!extractInfoFromDictionary(dictionary)) {
+        _sourceFileType = INVALID;
+    }
+
+}
+
+void RenderableFieldlinesSequence::initialize() {
+    switch (_sourceFileType) {
+        case CDF:
+            LERROR("CDF NOT YET IMPLEMENTED!");
+            break;
+        case JSON:
+            LERROR("JSON NOT YET IMPLEMENTED!");
+            break;
+        case OSFLS:
+            LERROR("OSFLS NOT YET IMPLEMENTED!");
+            break;
+        default:
+            break;
+    }
+}
+
+void RenderableFieldlinesSequence::deinitialize() {
+}
+
+bool RenderableFieldlinesSequence::isReady() const {
+    return true;
+}
+
+void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
+}
+
+void RenderableFieldlinesSequence::update(const UpdateData& data) {
+}
+
+bool RenderableFieldlinesSequence::extractInfoFromDictionary(
+        const ghoul::Dictionary& dictionary) {
+
     string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
     name += ": ";
@@ -57,13 +98,29 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     string inputFileTypeValue;
     if(!dictionary.getValue(KEY_INPUT_FILE_TYPE, inputFileTypeValue)) {
         LERROR(name << "The field " << string(KEY_INPUT_FILE_TYPE) << " is missing!");
-        return;
+        return false;
+    } else {
+        std::transform(inputFileTypeValue.begin(), inputFileTypeValue.end(),
+                       inputFileTypeValue.begin(), ::tolower);
+        // Verify that the input type is correct
+        if (inputFileTypeValue == VALUE_INPUT_FILE_TYPE_CDF) {
+            _sourceFileType = CDF;
+        } else if (inputFileTypeValue == VALUE_INPUT_FILE_TYPE_JSON) {
+            _sourceFileType = JSON;
+        } else if (inputFileTypeValue == VALUE_INPUT_FILE_TYPE_OSFLS) {
+            _sourceFileType = OSFLS;
+        } else {
+            LERROR(name << inputFileTypeValue << " is not a recognised "
+                        << KEY_INPUT_FILE_TYPE);
+            _sourceFileType = INVALID;
+            return false;
+        }
     }
 
     string sourceFolderPath;
     if(!dictionary.getValue(KEY_SOURCE_FOLDER, sourceFolderPath)) {
         LERROR(name << "The field " << string(KEY_SOURCE_FOLDER) << " is missing!");
-        return;
+        return false;
     }
 
     // Ensure that the source folder exists and then extract
@@ -81,27 +138,37 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
                 std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
                 return sub != inputFileTypeValue;
             }), _sourceFiles.end());
+        // Ensure that there are available and valid source files left
+        if (_sourceFiles.empty()) {
+            LERROR(name << sourceFolderPath << " contains no ." << inputFileTypeValue
+                        << " files!");
+            return false;
+        }
     } else {
         LERROR(name << "FieldlinesSequence" << sourceFolderPath
                     << " is not a valid directory!");
-        return;
+        return false;
     }
-}
 
-void RenderableFieldlinesSequence::initialize() {
-}
-
-void RenderableFieldlinesSequence::deinitialize() {
-}
-
-bool RenderableFieldlinesSequence::isReady() const {
-    return true;
-}
-
-void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
-}
-
-void RenderableFieldlinesSequence::update(const UpdateData& data) {
+    switch (_sourceFileType) {
+        case CDF:
+            LERROR(name << "CDF NOT YET IMPLEMENTED!");
+            break;
+        case JSON:
+            LERROR(name << "JSON NOT YET IMPLEMENTED!");
+            break;
+        case OSFLS: {
+                bool shouldLoadInRealtime = false;
+                if (dictionary.getValue(KEY_OSLFS_LOAD_AT_RUNTIME, shouldLoadInRealtime)) {
+                    _isLoadingStatesAtRuntime = shouldLoadInRealtime;
+                } else {
+                    LWARNING(name << KEY_OSLFS_LOAD_AT_RUNTIME <<
+                        " isn't specified! Fieldline states will be stored in RAM");
+                }
+            } break;
+        default:
+            break;
+    }
 }
 
 } // namespace openspace
