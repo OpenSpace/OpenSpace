@@ -44,7 +44,6 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 private:
-    std::string _loggerCat = "RenderableFieldlinesSequence";
 
     std::vector<FieldlinesState> _states;
     std::vector<std::string>     _sourceFiles;
