@@ -27,6 +27,9 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec4property.h>
+
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
 namespace openspace {
@@ -70,6 +73,18 @@ private:
     // THESE MUST CORRESPOND TO THE SHADER PROGRAM
     // TODO: THIS CAN BE DETERMINED BY ASKING THE SHADER PROGRAM TOO
     GLuint _vertAttrVertexPos = 0;
+
+    // ----------------------------- Properties -----------------------------
+    properties::Vec4Property  _lineColor;           // Uniform Field Line Color
+
+    properties::PropertyOwner _flowGroup;
+    properties::BoolProperty  _flowEnabled;         // Toggle flow [ON/OFF]
+    properties::BoolProperty  _flowReversed;        // Toggle flow direction [FORWARDS/BACKWARDS]
+    properties::IntProperty   _flowParticleSize;    // Size of simulated flow particles
+    properties::IntProperty   _flowParticleSpacing; // Size of simulated flow particles
+    properties::IntProperty   _flowSpeed;           // Speed of simulated flow
+    properties::Vec4Property  _flowColor;           // Simulated particles' color
+
 
     void computeSequenceEndTime();
     bool extractInfoFromDictionary(const ghoul::Dictionary& dictionary);

@@ -50,12 +50,44 @@ namespace {
     const char* VALUE_INPUT_FILE_TYPE_CDF   = "cdf";
     const char* VALUE_INPUT_FILE_TYPE_JSON  = "json";
     const char* VALUE_INPUT_FILE_TYPE_OSFLS = "osfls";
+
+    static const openspace::properties::Property::PropertyInfo LineColorInfo = {
+        "lineColor", "Line Color", "Color of lines."
+    };
+    static const openspace::properties::Property::PropertyInfo EnableFlowInfo = {
+        "Enable", "ON/OFF",
+        "Toggles the rendering of moving particles along the lines. Can e.g. illustrate magnetic flow."
+    };
+    static const openspace::properties::Property::PropertyInfo ReverseFlowInfo = {
+        "reversed", "Reversed Flow", "Toggle to make the flow move in the opposite direction."
+    };
+    static const openspace::properties::Property::PropertyInfo ParticleSizeInfo = {
+        "particleSize", "Particle Size", "Size of the particles."
+    };
+    static const openspace::properties::Property::PropertyInfo ParticleSpacingInfo = {
+        "particleSpacing", "Particle Spacing", "Spacing inbetween particles."
+    };
+    static const openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
+        "speed", "Speed", "Speed of the flow."
+    };
+    static const openspace::properties::Property::PropertyInfo FlowColorInfo = {
+        "color", "Color", "Color of particles."
+    };
 } // namespace
 
 namespace openspace {
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary) {
+    : Renderable(dictionary),
+      _lineColor(LineColorInfo, glm::vec4(0.75f, 0.5f, 0.0f, 0.5f), glm::vec4(0.f), glm::vec4(1.f)),
+      _flowGroup({ "Flow" }),
+      _flowEnabled(EnableFlowInfo, true),
+      _flowReversed(ReverseFlowInfo, false),
+      _flowParticleSize(ParticleSizeInfo, 5, 0, 500),
+      _flowParticleSpacing(ParticleSpacingInfo, 60, 0, 500),
+      _flowSpeed(FlowSpeedInfo, 20, 0, 1000),
+      _flowColor(FlowColorInfo, glm::vec4(0.8f, 0.7f, 0.0f, 0.6f),
+                                   glm::vec4(0.f), glm::vec4(1.f)) {
 
     if(!extractInfoFromDictionary(dictionary)) {
         _sourceFileType = INVALID;
@@ -92,6 +124,16 @@ void RenderableFieldlinesSequence::initialize() {
 
     computeSequenceEndTime();
 
+    // HANDLE PROPERTIES
+    addProperty(_lineColor);
+    addPropertySubOwner(_flowGroup);
+    _flowGroup.addProperty(_flowEnabled);
+    _flowGroup.addProperty(_flowReversed);
+    _flowGroup.addProperty(_flowColor);
+    _flowGroup.addProperty(_flowParticleSize);
+    _flowGroup.addProperty(_flowParticleSpacing);
+    _flowGroup.addProperty(_flowSpeed);
+
     // Setup shader program
     _shaderProgram = OsEng.renderEngine().buildRenderProgram(
         "FieldlinesSequence",
@@ -124,23 +166,32 @@ void RenderableFieldlinesSequence::deinitialize() {
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
-    return true;
+    return _sourceFileType != INVALID;
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
     if (_activeStateIndex != -1) {
         _shaderProgram->activate();
 
-        const glm::dmat4 ROTATION_TRANSFORM = glm::dmat4(data.modelTransform.rotation);
+        const glm::dmat4 ROT_MAT = glm::dmat4(data.modelTransform.rotation);
         // const glm::mat4 SCALE_TRANSFORM = glm::mat4(1.0); // TODO remove if no use
-        const glm::dmat4 MODEL_TRANSFORM =
+        const glm::dmat4 MODEL_MAT =
                 glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-                ROTATION_TRANSFORM *
-                glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
-        const glm::dmat4 MODEL_VIEW_TRANSFORM = data.camera.combinedViewMatrix() * MODEL_TRANSFORM;
+                ROT_MAT *
+                glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+        const glm::dmat4 MODEL_VIEW_MAT = data.camera.combinedViewMatrix() * MODEL_MAT;
 
         _shaderProgram->setUniform("modelViewProjection",
-                    data.camera.sgctInternal.projectionMatrix() * glm::mat4(MODEL_VIEW_TRANSFORM));
+                    data.camera.sgctInternal.projectionMatrix() * glm::mat4(MODEL_VIEW_MAT));
+
+        _shaderProgram->setUniform("lineColor", _lineColor);
+        // Flow/Particles
+        _shaderProgram->setUniform("usingParticles", _flowEnabled);
+        _shaderProgram->setUniform("flowColor", _flowColor);
+        _shaderProgram->setUniform("particleSize", _flowParticleSize);
+        _shaderProgram->setUniform("particleSpeed", _flowSpeed);
+        _shaderProgram->setUniform("particleSpacing", _flowParticleSpacing);
+        _shaderProgram->setUniform("time", OsEng.runTime() * (_flowReversed ? -1 : 1));
 
         glBindVertexArray(_vertexArrayObject);
         glMultiDrawArrays(
@@ -216,7 +267,7 @@ void RenderableFieldlinesSequence::updateActiveStateIndex(const double CURRENT_T
             _activeStateIndex = 0;
         }
     } else {
-        _activeStateIndex = _nStates - 1;
+        _activeStateIndex = static_cast<int>(_nStates) - 1;
     }
 }
 

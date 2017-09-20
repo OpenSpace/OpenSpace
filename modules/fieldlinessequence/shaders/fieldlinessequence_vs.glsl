@@ -24,7 +24,14 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjection;
+uniform mat4   modelViewProjection;
+uniform bool   usingParticles;
+uniform double time;
+uniform int    particleSize;
+uniform int    particleSpeed;
+uniform int    particleSpacing;
+uniform vec4   flowColor;
+uniform vec4   lineColor;
 
 layout(location = 0) in vec3 in_position; // in meters
 
@@ -33,8 +40,25 @@ out float vs_depth;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
+bool isPartOfParticle(const double TIME, const int VERTEX_ID, const int PARTICLE_SIZE,
+                      const int PARTICLE_SPEED, const int PARTICLE_SPACING) {
+    const int MODULUS_RESULT = int(double(PARTICLE_SPEED) * TIME + VERTEX_ID) % PARTICLE_SPACING;
+    return MODULUS_RESULT > 0 && MODULUS_RESULT <= PARTICLE_SIZE;
+}
+
 void main() {
-	vs_color = vec4(0.75, 0.5, 0.0, 0.75);
+
+    const bool IS_PARTICLE = usingParticles && isPartOfParticle(time, gl_VertexID,
+                                                                particleSize,
+                                                                particleSpeed,
+                                                                particleSpacing);
+
+    if (IS_PARTICLE) {
+        vs_color = flowColor;
+    } else {
+        vs_color = lineColor;
+    }
+
     vec4 position_in_meters = vec4(in_position, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
     gl_Position = z_normalization(positionClipSpace);
