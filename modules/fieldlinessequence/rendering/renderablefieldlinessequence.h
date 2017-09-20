@@ -52,11 +52,15 @@ private:
     };
 
     bool           _isLoadingStatesAtRuntime = false;  // False => loading osfls at runtime
+    size_t         _nStates                  = 0;
+    double         _sequenceEndTime;
     SourceFileType _sourceFileType;
 
+    std::vector<double>          _startTimes;
     std::vector<FieldlinesState> _states;
     std::vector<std::string>     _sourceFiles;                // Stored in RAM if files are loaded at runtime, else emptied after initialization
 
+    void computeSequenceEndTime();
     bool extractInfoFromDictionary(const ghoul::Dictionary& dictionary);
 };
 

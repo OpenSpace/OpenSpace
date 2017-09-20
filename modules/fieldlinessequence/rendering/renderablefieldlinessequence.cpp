@@ -67,11 +67,25 @@ void RenderableFieldlinesSequence::initialize() {
             LERROR("JSON NOT YET IMPLEMENTED!");
             break;
         case OSFLS:
-            LERROR("OSFLS NOT YET IMPLEMENTED!");
+            if (_isLoadingStatesAtRuntime) {
+                LERROR("OSFLS LOAD AT RUNTIME NOT YET IMPLEMENTED!");
+            } else {
+                for (string filePath : _sourceFiles) {
+                    FieldlinesState newState;
+                    bool loadedSuccessfully = newState.loadStateFromOsfls(filePath);
+                    if (loadedSuccessfully) {
+                        _states.push_back(newState);
+                        _startTimes.push_back(newState.triggerTime());
+                        _nStates++;
+                    }
+                }
+            }
             break;
         default:
             break;
     }
+
+    computeSequenceEndTime();
 }
 
 void RenderableFieldlinesSequence::deinitialize() {
@@ -168,6 +182,19 @@ bool RenderableFieldlinesSequence::extractInfoFromDictionary(
             } break;
         default:
             break;
+    }
+}
+
+// Calculate expected end time.
+void RenderableFieldlinesSequence::computeSequenceEndTime() {
+    if (_nStates > 1) {
+        const double LAST_TRIGGER_TIME      = _startTimes[_nStates - 1];
+        const double SEQUENCE_DURATION      = LAST_TRIGGER_TIME - _startTimes[0];
+        const double AVERAGE_STATE_DURATION = SEQUENCE_DURATION / (static_cast<double>(_nStates) - 1.0);
+        _sequenceEndTime = LAST_TRIGGER_TIME + AVERAGE_STATE_DURATION;
+    } else {
+        // If there's just one state it should never disappear!
+        _sequenceEndTime = DBL_MAX;
     }
 }
 
