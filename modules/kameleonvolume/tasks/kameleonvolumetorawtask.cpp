@@ -158,46 +158,52 @@ documentation::Documentation KameleonVolumeToRawTask::documentation() {
             {
                 "Type",
                 new StringEqualVerifier("KameleonVolumeToRawTask"),
-                "The type of this task"
+                Optional::No,
+                "The type of this task",
             },
             {
                 KeyInput,
                 new StringAnnotationVerifier("A file path to a cdf file"),
-                "The cdf file to extract data from"
+                Optional::No,
+                "The cdf file to extract data from",
             },
             {
                 KeyRawVolumeOutput,
                 new StringAnnotationVerifier("A valid filepath"),
-                "The raw volume file to export data to"
+                Optional::No,
+                "The raw volume file to export data to",
             },
             {
                 KeyDictionaryOutput,
                 new StringAnnotationVerifier("A valid filepath"),
-                "The lua dictionary file to export metadata to"
+                Optional::No,
+                "The lua dictionary file to export metadata to",
             },
             {
                 KeyVariable,
                 new StringAnnotationVerifier("A valid kameleon variable"),
-                "The variable name to read from the kameleon dataset"
+                Optional::No,
+                "The variable name to read from the kameleon dataset",
             },
             {
                 KeyDimensions,
                 new DoubleVector3Verifier,
-                "A vector representing the number of cells in each dimension"
+                Optional::No,
+                "A vector representing the number of cells in each dimension",
             },
             {
                 KeyLowerDomainBound,
                 new DoubleVector3Verifier,
+                Optional::Yes,
                 "A vector representing the lower bound of the domain, "
                 "in the native kameleon grid units",
-                Optional::Yes
             },
             {
                 KeyUpperDomainBound,
                 new DoubleVector3Verifier,
+                Optional::Yes,
                 "A vector representing the lower bound of the domain, "
                 "in the native kameleon grid units",
-                Optional::Yes
             }
         }
     };

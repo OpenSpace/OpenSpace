@@ -48,8 +48,8 @@ public:
     RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
     ~RenderableTimeVaryingVolume();
     
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;

@@ -72,20 +72,20 @@ namespace volume {
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _clipPlanes(nullptr)
-    , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
-    , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
-    , _secondsBefore("secondsBefore", "Seconds before", 0.0, 0.01, SecondsInOneDay)
-    , _secondsAfter("secondsAfter", "Seconds after", 0.0, 0.01, SecondsInOneDay)
-    , _sourceDirectory("sourceDirectory", "Source Directory")
-    , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
-    , _triggerTimeJump("triggerTimeJump", "Jump")
-    , _jumpToTimestep("jumpToTimestep", "Jump to timestep", 0, 0, 256)
-    , _currentTimestep("currentTimestep", "Current timestep", 0, 0, 256)
-    , _opacity("opacity", "Opacity", 10.0f, 0.0f, 50.0f)
-    , _rNormalization("rNormalization", "Radius normalization", 0.0f, 0.0f, 2.0f)
-    , _rUpperBound("rUpperBound", "Radius upper bound", 1.0f, 0.0f, 2.0f)
-    , _lowerValueBound("lowerValueBound", "Lower value bound", 0.0f, 0.0f, 1000000.0f)
-    , _upperValueBound("upperValueBound", "Upper value bound", 0.0f, 0.0f, 1000000.0f)
+    , _stepSize({ "stepSize", "Step Size", "" }, 0.02, 0.01, 1)
+    , _gridType({ "gridType", "Grid Type", "" }, properties::OptionProperty::DisplayType::Dropdown)
+    , _secondsBefore({ "secondsBefore", "Seconds before", "" }, 0.0, 0.01, SecondsInOneDay)
+    , _secondsAfter({ "secondsAfter", "Seconds after", "" }, 0.0, 0.01, SecondsInOneDay)
+    , _sourceDirectory({ "sourceDirectory", "Source Directory", "" })
+    , _transferFunctionPath({"transferFunctionPath", "Transfer Function Path", "" })
+    , _triggerTimeJump({"triggerTimeJump", "Jump", "" })
+    , _jumpToTimestep({"jumpToTimestep", "Jump to timestep", "" }, 0, 0, 256)
+    , _currentTimestep({"currentTimestep", "Current timestep", "" }, 0, 0, 256)
+    , _opacity({"opacity", "Opacity", "" }, 10.0f, 0.0f, 50.0f)
+    , _rNormalization({"rNormalization", "Radius normalization", "" }, 0.0f, 0.0f, 2.0f)
+    , _rUpperBound({"rUpperBound", "Radius upper bound", "" }, 1.0f, 0.0f, 2.0f)
+    , _lowerValueBound({"lowerValueBound", "Lower value bound", "" }, 0.0f, 0.0f, 1000000.0f)
+    , _upperValueBound({"upperValueBound", "Upper value bound", "" }, 0.0f, 0.0f, 1000000.0f)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
 {
@@ -124,14 +124,14 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
-bool RenderableTimeVaryingVolume::initialize() {
+void RenderableTimeVaryingVolume::initialize() {
 
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
 
     if (!FileSys.directoryExists(sequenceDir)) {
         LERROR("Could not load sequence directory '" << sequenceDir.path() << "'");
-        return false;
+        return;
     }
 
     using Recursive = ghoul::filesystem::Directory::Recursive;
@@ -219,8 +219,6 @@ bool RenderableTimeVaryingVolume::initialize() {
     _gridType.onChange([this] {
         _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
     });
-
-    return true;
 }
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
@@ -362,12 +360,11 @@ bool RenderableTimeVaryingVolume::isReady() const {
 }
 
 
-bool RenderableTimeVaryingVolume::deinitialize() {
+void RenderableTimeVaryingVolume::deinitialize() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
-    return true;
 }
 
 documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
@@ -379,47 +376,47 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
             {
                 KeySourceDirectory,
                 new StringVerifier,
-                "Specifies the path to load timesteps from",
-                Optional::No
+                Optional::No,
+                "Specifies the path to load timesteps from"
             },
             {
                 KeyTransferFunction,
                 new StringVerifier,
+                Optional::No,
                 "Specifies the transfer function file path",
-                Optional::No
             },
             {
                 KeyLowerValueBound,
                 new DoubleVerifier,
+                Optional::No,
                 "Specifies the lower value bound."
                 "This number will be mapped to 0 before uploadin to the GPU.",
-                Optional::No
             },
             {
                 KeyUpperValueBound,
                 new DoubleVerifier,
+                Optional::No,
                 "Specifies the lower value bound."
-                "This number will be mapped to 0 before uploadin to the GPU.",
-                Optional::No
+                "This number will be mapped to 0 before uploadin to the GPU."
             },
             {
                 KeyGridType,
                 new StringInListVerifier({"Cartesian", "Spherical"}),
-                "Specifies the grid type",
-                Optional::Yes
+                Optional::Yes,
+                "Specifies the grid type"
             },
             {
                 KeySecondsBefore,
                 new DoubleVerifier,
+                Optional::Yes,
                 "Specifies the number of seconds to show the the first timestep before its actual time."
                 "The default value is 0.",
-                Optional::Yes
             },
             {
                 KeySecondsAfter,
                 new DoubleVerifier,
+                Optional::No,
                 "Specifies the number of seconds to show the the last timestep after its actual time",
-                Optional::No
             },
         }
     };
@@ -435,35 +432,37 @@ documentation::Documentation RenderableTimeVaryingVolume::TimestepDocumentation(
             {
                 KeyLowerDomainBound,
                 new Vector3Verifier<float>,
+                Optional::No,
                 "Specifies the lower domain bounds in the model coordinate system",
-                Optional::No
             },
             {
                 KeyUpperDomainBound,
                 new Vector3Verifier<float>,
+                Optional::No,
                 "Specifies the upper domain bounds in the model coordinate system",
-                Optional::No
             },
             {
                 KeyDimensions,
                 new Vector3Verifier<float>,
+                Optional::No,
                 "Specifies the number of grid cells in each dimension",
-                Optional::No
             },
             {
                 KeyTime,
                 new StringVerifier,
+                Optional::No,
                 "Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z",
-                Optional::No
             },
             {
                 KeyMinValue,
                 new DoubleVerifier,
+                Optional::No,
                 "Specifies the minimum value stored in the volume"
             },
             {
                 KeyMaxValue,
                 new DoubleVerifier,
+                Optional::No,
                 "Specifies the maximum value stored in the volume"
             }
         }

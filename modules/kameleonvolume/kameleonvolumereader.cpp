@@ -109,22 +109,6 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         return interpolate(variable, volumeCoords);
     };
 
-    // TODO: Handle more cases like subtraction etc, or better: parse expression and automaticly evaluate expression.
-    int indexOfDivision = variable.find('/');
-    if (indexOfDivision == -1) {
-        _model->loadVariable(variable);
-    } else {
-        std::string numerator = variable.substr(0, indexOfDivision);
-        std::string denominator = variable.substr(indexOfDivision + 1);
-
-        sample = [this, &numerator, &denominator, &interpolate] (glm::vec3 volumeCoords) {
-            return interpolate(numerator, volumeCoords) /
-                interpolate(denominator, volumeCoords);
-        };
-        _model->loadVariable(numerator);
-        _model->loadVariable(denominator);
-    }
-
     float* data = volume->data();
     for (size_t index = 0; index < volume->nCells(); index++) {
         glm::vec3 coords = volume->indexToCoords(index);

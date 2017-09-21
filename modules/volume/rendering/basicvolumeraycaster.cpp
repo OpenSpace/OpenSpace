@@ -147,7 +147,7 @@ void BasicVolumeRaycaster::preRaycast(
     program.setUniform("valueRemapping_" + id, _valueRemapping);
 }
     
-void KameleonVolumeRaycaster::postRaycast(const RaycastData&,
+void BasicVolumeRaycaster::postRaycast(const RaycastData&,
                                           ghoul::opengl::ProgramObject&)
 {
     // For example: release texture units
