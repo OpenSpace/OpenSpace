@@ -105,8 +105,19 @@ void RenderableFieldlinesSequence::initialize() {
             break;
         case OSFLS:
             if (_isLoadingStatesAtRuntime) {
-                LERROR("OSFLS LOAD AT RUNTIME NOT YET IMPLEMENTED!");
+                extractTriggerTimesFromFileNames();
+                FieldlinesState newState;
+                bool loadedSuccessfully = newState.loadStateFromOsfls(_sourceFiles[0]);
+                if (loadedSuccessfully) {
+                    _states.push_back(newState);
+                    _nStates = _startTimes.size();
+                    _activeStateIndex = 0;
+                } else {
+                    LERROR("The provided .osfls files seem to be corrupt!");
+                    _sourceFileType = INVALID;
+                }
             } else {
+                // Load states into RAM!
                 for (string filePath : _sourceFiles) {
                     FieldlinesState newState;
                     bool loadedSuccessfully = newState.loadStateFromOsfls(filePath);
@@ -120,6 +131,11 @@ void RenderableFieldlinesSequence::initialize() {
             break;
         default:
             break;
+    }
+
+    // No need to store source paths in memory if their states are already in RAM!
+    if (!_isLoadingStatesAtRuntime) {
+        _sourceFiles.clear();
     }
 
     computeSequenceEndTime();
@@ -163,6 +179,11 @@ void RenderableFieldlinesSequence::deinitialize() {
         renderEngine.removeRenderProgram(_shaderProgram);
         _shaderProgram = nullptr;
     }
+
+    // Stall main thread until thread that's loading states is done!
+    while (/*!_newStateIsReady &&*/ _isLoadingStateFromDisk) {
+        LWARNING("TRYING TO DESTROY CLASS WHEN A THREAD USING IT IS STILL ACTIVE");
+    }
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
@@ -170,7 +191,7 @@ bool RenderableFieldlinesSequence::isReady() const {
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
-    if (_activeStateIndex != -1) {
+    if (_activeTriggerTimeIndex != -1) {
         _shaderProgram->activate();
 
         const glm::dmat4 ROT_MAT = glm::dmat4(data.modelTransform.rotation);
@@ -216,21 +237,44 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         const double CURRENT_TIME = data.time.j2000Seconds();
         // Check if current time in OpenSpace is within sequence interval
         if (isWithinSequenceInterval(CURRENT_TIME)) {
-            const int NEXT_IDX = _activeStateIndex + 1;
-            if (_activeStateIndex < 0                                                // true => Previous frame was not within the sequence interval
-                || CURRENT_TIME < _startTimes[_activeStateIndex]                     // true => OpenSpace has stepped back    to a time represented by another state
+            const int NEXT_IDX = _activeTriggerTimeIndex + 1;
+            if (_activeTriggerTimeIndex < 0                                          // true => Previous frame was not within the sequence interval
+                || CURRENT_TIME < _startTimes[_activeTriggerTimeIndex]               // true => OpenSpace has stepped back    to a time represented by another state
                 || (NEXT_IDX < _nStates && CURRENT_TIME >= _startTimes[NEXT_IDX])) { // true => OpenSpace has stepped forward to a time represented by another state
 
-                updateActiveStateIndex(CURRENT_TIME);
-                _needsUpdate = true;
+                updateActiveTriggerTimeIndex(CURRENT_TIME);
+
+                if (_isLoadingStatesAtRuntime) {
+                    _mustLoadNewStateFromDisk = true;
+                } else {
+                    _needsUpdate = true;
+                    _activeStateIndex = _activeTriggerTimeIndex;
+                }
             } // else {we're still in same state as previous frame (no changes needed)}
         } else {
             // Not in interval => set everything to false
-            _activeStateIndex = -1;
-            _needsUpdate      = false;
+            _activeTriggerTimeIndex   = -1;
+            _mustLoadNewStateFromDisk = false;
+            _needsUpdate              = false;
         }
 
-        if (_needsUpdate) {
+        if (_mustLoadNewStateFromDisk) {
+            if (!_isLoadingStateFromDisk && !_newStateIsReady) {
+                    _isLoadingStateFromDisk    = true;
+                    _mustLoadNewStateFromDisk  = false;
+                    const std::string FILEPATH = _sourceFiles[_activeTriggerTimeIndex];
+                    std::thread readBinaryThread([this, FILEPATH] {
+                        this->readNewState(FILEPATH);
+                    });
+                    readBinaryThread.detach();
+            }
+        }
+
+        if (_needsUpdate || _newStateIsReady) {
+            if (_isLoadingStatesAtRuntime) {
+                _states[0] = std::move(_newState);
+            }
+
             glBindVertexArray(_vertexArrayObject);
             glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
@@ -249,6 +293,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
             // Everything is set and ready for rendering!
             _needsUpdate = false;
+            _newStateIsReady = false;
         }
     }
 }
@@ -258,17 +303,28 @@ inline bool RenderableFieldlinesSequence::isWithinSequenceInterval(const double 
 }
 
 // Assumes we already know that CURRENT_TIME is within the sequence interval
-void RenderableFieldlinesSequence::updateActiveStateIndex(const double CURRENT_TIME) {
+void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(const double CURRENT_TIME) {
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), CURRENT_TIME);
     if (iter != _startTimes.end()) {
         if ( iter != _startTimes.begin()) {
-            _activeStateIndex = std::distance(_startTimes.begin(), iter) - 1;
+            _activeTriggerTimeIndex = std::distance(_startTimes.begin(), iter) - 1;
         } else {
-            _activeStateIndex = 0;
+            _activeTriggerTimeIndex = 0;
         }
     } else {
-        _activeStateIndex = static_cast<int>(_nStates) - 1;
+        _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
     }
+}
+
+// Reading state from disk. Thread safe!
+void RenderableFieldlinesSequence::readNewState(const std::string& FILEPATH) {
+    FieldlinesState newState;
+
+    bool isSuccessful = newState.loadStateFromOsfls(FILEPATH);
+    _newState = std::move(newState);
+
+    _newStateIsReady        = true;
+    _isLoadingStateFromDisk = false;
 }
 
 bool RenderableFieldlinesSequence::extractInfoFromDictionary(
@@ -347,7 +403,7 @@ bool RenderableFieldlinesSequence::extractInfoFromDictionary(
                     _isLoadingStatesAtRuntime = shouldLoadInRealtime;
                 } else {
                     LWARNING(name << KEY_OSLFS_LOAD_AT_RUNTIME <<
-                        " isn't specified! Fieldline states will be stored in RAM");
+                        " isn't specified! OSFLS files will be loaded during runtime!");
                 }
             } break;
         default:
@@ -365,6 +421,28 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
     } else {
         // If there's just one state it should never disappear!
         _sequenceEndTime = DBL_MAX;
+    }
+}
+
+// Extract J2000 time from file names
+// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
+void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
+    const size_t FILENAME_SIZE = 23; // number of  characters in filename (excluding '.osfls')
+    const size_t EXT_SIZE      = 6;  // size(".osfls")
+
+    for (const std::string& FILEPATH : _sourceFiles) {
+        const size_t STR_LENGTH = FILEPATH.size();
+        // Extract the filename from the path (without extension)
+        std::string timeString = FILEPATH.substr(STR_LENGTH - FILENAME_SIZE - EXT_SIZE,
+                                                FILENAME_SIZE - 1);
+        // Ensure the separators are correct
+        timeString.replace( 4, 1, "-");
+        timeString.replace( 7, 1, "-");
+        timeString.replace(13, 1, ":");
+        timeString.replace(16, 1, ":");
+        timeString.replace(19, 1, ".");
+        const double TRIGGER_TIME = Time::convertTime(timeString);
+        _startTimes.push_back(TRIGGER_TIME);
     }
 }
 

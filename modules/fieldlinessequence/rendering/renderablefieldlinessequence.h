@@ -32,6 +32,8 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+#include <atomic>
+
 namespace openspace {
 
 class RenderableFieldlinesSequence : public Renderable {
@@ -54,12 +56,19 @@ private:
         INVALID
     };
 
-    int            _activeStateIndex         = -1;
-    bool           _needsUpdate              = false; // If still in same state as previous frame == false
-    bool           _isLoadingStatesAtRuntime = false;  // False => loading osfls at runtime
-    size_t         _nStates                  = 0;
-    double         _sequenceEndTime;
-    SourceFileType _sourceFileType;
+    int             _activeStateIndex         = -1;
+    int             _activeTriggerTimeIndex   = -1;
+    bool            _isLoadingStatesAtRuntime = true;  // False => loading osfls at runtime
+    bool            _mustLoadNewStateFromDisk = false; // If still in same state as previous frame == false
+    bool            _needsUpdate              = false; // If still in same state as previous frame == false
+    FieldlinesState _newState;
+    size_t          _nStates                  = 0;
+    double          _sequenceEndTime;
+    SourceFileType  _sourceFileType;
+
+    std::atomic<bool> _isLoadingStateFromDisk{false};
+    std::atomic<bool> _newStateIsReady{false};
+
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
@@ -88,8 +97,11 @@ private:
 
     void computeSequenceEndTime();
     bool extractInfoFromDictionary(const ghoul::Dictionary& dictionary);
+    void extractTriggerTimesFromFileNames();
+    void readNewState(const std::string& FILEPATH);
+
     inline bool isWithinSequenceInterval(const double CURRENT_TIME);
-    inline void updateActiveStateIndex(const double CURRENT_TIME);
+    inline void updateActiveTriggerTimeIndex(const double CURRENT_TIME);
 };
 
 } // namespace openspace
