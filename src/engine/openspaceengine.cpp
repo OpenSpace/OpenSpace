@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -112,13 +112,24 @@ namespace {
         std::string sceneName;
         std::string cacheFolder;
     } commandlineArgumentPlaceholders;
-}
+
+
+    static const openspace::properties::Property::PropertyInfo VersionInfo = {
+        "VersionInfo",
+        "Version Information",
+        "This value contains the full string identifying this OpenSpace Version"
+    };
+
+    static const openspace::properties::Property::PropertyInfo SourceControlInfo = {
+        "SCMInfo",
+        "Source Control Management Information",
+        "This value contains information from the SCM, such as commit hash and branch"
+    };
+} // namespace
 
 namespace openspace {
 
-namespace properties {
-    class Property;
-}
+namespace properties { class Property; }
 
 class Scene;
 
@@ -146,7 +157,11 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
-    , _globalPropertyNamespace(new properties::PropertyOwner(""))
+    , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
+    , _versionInformation{
+        properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
+        properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
+    }
     , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
@@ -162,6 +177,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
     _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
     _globalPropertyNamespace->addPropertySubOwner(_console.get());
+
+
+    _versionInformation.versionString.setReadOnly(true);
+    _globalPropertyNamespace->addProperty(_versionInformation.versionString);
+    _versionInformation.sourceControlInformation.setReadOnly(true);
+    _globalPropertyNamespace->addProperty(_versionInformation.sourceControlInformation);
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -325,6 +346,15 @@ void OpenSpaceEngine::create(int argc, char** argv,
         );
     }
 
+    // Create directories that doesn't exist
+    auto tokens = FileSys.tokens();
+    for (const std::string& token : tokens) {
+        if (!FileSys.directoryExists(token)) {
+            std::string p = absPath(token);
+            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
+        }
+    }
+
     // Initialize the requested logs from the configuration file
     _engine->configureLogging();
 
@@ -334,16 +364,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
         OPENSPACE_VERSION_PATCH <<
         " (" << OPENSPACE_VERSION_STRING << ")"
     );
-
-    // Create directories that doesn't exist
-    auto tokens = FileSys.tokens();
-    for (const std::string& token : tokens) {
-        if (!FileSys.directoryExists(token)) {
-            std::string p = absPath(token);
-            LDEBUG("Directory '" << p << "' does not exist, creating.");
-            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
-        }
-    }
 
     // Register modules
     _engine->_moduleEngine->initialize();
@@ -968,16 +988,16 @@ void OpenSpaceEngine::initializeGL() {
                     "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
                 switch (severity) {
                     case Severity::High:
-                        LERRORC(category, std::string(message));
+                        LERRORC(category, message);
                         break;
                     case Severity::Medium:
-                        LWARNINGC(category, std::string(message));
+                        LWARNINGC(category, message);
                         break;
                     case Severity::Low:
-                        LINFOC(category, std::string(message));
+                        LINFOC(category, message);
                         break;
                     case Severity::Notification:
-                        LDEBUGC(category, std::string(message));
+                        LDEBUGC(category, message);
                         break;
                     default:
                         throw ghoul::MissingCaseException();
@@ -1223,6 +1243,7 @@ void OpenSpaceEngine::postDraw() {
 
     if (isGuiWindow) {
         _renderEngine->renderScreenLog();
+        _renderEngine->renderVersionInformation();
         _console->render();
     }
 
@@ -1308,7 +1329,7 @@ void OpenSpaceEngine::decode() {
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,
-                                              int clientId)
+                                              int /*clientId*/)
 {
     if (size == 0) {
         return;
@@ -1357,7 +1378,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
-                "type, name, identifier, [value, minimumValue, maximumValue]",
+                "type, name, identifier, description,"
+                "[value, minimumValue, maximumValue]",
                 "Adds a virtual property that will set a group of properties"
             },
             {

@@ -34,8 +34,7 @@
 
 #include <functional>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
     
 struct LayerGroup;
 
@@ -60,7 +59,8 @@ public:
     void reset(bool includingDisabled = false);
 
     static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
-        size_t preferredTileSize = 0);
+                                                      bool padTiles,
+                                                      size_t preferredTileSize = 0);
 
     static bool shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id);
     void onChange(std::function<void(void)> callback);
@@ -69,7 +69,6 @@ private:
     std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__

@@ -26,19 +26,19 @@
 
 #include <functional>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 template <typename T>
 Interpolator<T>::Interpolator()
-: _transferFunction([](float t){ return t; })
-, _t(0.0)
-, _interpolationTime(1.0) {};
+    : _transferFunction([](float t){ return t; })
+    , _t(0.0)
+    , _interpolationTime(1.0)
+{}
 
 template <typename T>
 void Interpolator<T>::start() {
     _t = 0.0;
-};
+}
 
 template <typename T>
 void Interpolator<T>::end() {
@@ -81,5 +81,4 @@ bool Interpolator<T>::isInterpolating() const {
     return _t < 1.0 && _t >= 0.0;
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

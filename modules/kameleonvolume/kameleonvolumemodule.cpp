@@ -53,9 +53,8 @@ void KameleonVolumeModule::internalInitialize() {
     fTask->registerClass<KameleonVolumeToRawTask>("KameleonVolumeToRawTask");
 }
 
-std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const
-{
-    return std::vector<documentation::Documentation>{KameleonMetadataToJsonTask::documentation()};
+std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const {
+    return { KameleonMetadataToJsonTask::documentation() };
 }
 
 } // namespace openspace

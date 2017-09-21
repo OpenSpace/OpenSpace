@@ -54,13 +54,13 @@
 #include "scenegraphnode_doc.inl"
 
 namespace {
-    const std::string _loggerCat = "SceneGraphNode";
-    const std::string KeyRenderable = "Renderable";
+    const char* _loggerCat = "SceneGraphNode";
+    const char* KeyRenderable = "Renderable";
 
-    const std::string keyTransformTranslation = "Transform.Translation";
-    const std::string keyTransformRotation = "Transform.Rotation";
-    const std::string keyTransformScale = "Transform.Scale";
-}
+    const char* keyTransformTranslation = "Transform.Translation";
+    const char* keyTransformRotation = "Transform.Rotation";
+    const char* keyTransformScale = "Transform.Scale";
+} // namespace
 
 namespace openspace {
 
@@ -102,8 +102,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
         dictionary.getValue(keyTransformTranslation, translationDictionary);
-        result->_transform.translation = 
-            std::unique_ptr<Translation>(Translation::createFromDictionary(translationDictionary));
+        result->_transform.translation = Translation::createFromDictionary(
+            translationDictionary
+        );
         if (result->_transform.translation == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
                 << result->name() << "'");
@@ -116,8 +117,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
     if (dictionary.hasKey(keyTransformRotation)) {
         ghoul::Dictionary rotationDictionary;
         dictionary.getValue(keyTransformRotation, rotationDictionary);
-        result->_transform.rotation =
-            std::unique_ptr<Rotation>(Rotation::createFromDictionary(rotationDictionary));
+        result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
         if (result->_transform.rotation == nullptr) {
             LERROR("Failed to create rotation for SceneGraphNode '"
                 << result->name() << "'");
@@ -130,8 +130,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
     if (dictionary.hasKey(keyTransformScale)) {
         ghoul::Dictionary scaleDictionary;
         dictionary.getValue(keyTransformScale, scaleDictionary);
-        result->_transform.scale =
-            std::unique_ptr<Scale>(Scale::createFromDictionary(scaleDictionary));
+        result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
         if (result->_transform.scale == nullptr) {
             LERROR("Failed to create scale for SceneGraphNode '"
                 << result->name() << "'");
@@ -166,7 +165,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
 }
 
 SceneGraphNode::SceneGraphNode()
-    : properties::PropertyOwner("")
+    : properties::PropertyOwner({ "" })
     , _parent(nullptr)
     , _scene(nullptr)
     , _performanceRecord({0, 0, 0, 0, 0})
@@ -182,7 +181,7 @@ SceneGraphNode::~SceneGraphNode() {
     deinitialize();
 }
 
-bool SceneGraphNode::initialize() {
+void SceneGraphNode::initialize() {
     if (_renderable) {
         _renderable->initialize();
     }
@@ -197,11 +196,9 @@ bool SceneGraphNode::initialize() {
     if (_transform.scale) {
         _transform.scale->initialize();
     }
-
-    return true;
 }
 
-bool SceneGraphNode::deinitialize() {
+void SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
 
     if (_renderable) {
@@ -210,10 +207,7 @@ bool SceneGraphNode::deinitialize() {
     }
     _children.clear();
 
-    // reset variables
     _parent = nullptr;
-
-    return true;
 }
 
 void SceneGraphNode::traversePreOrder(std::function<void(SceneGraphNode*)> fn) {
@@ -484,11 +478,11 @@ SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
     }
     else {
-		return {
-			glm::dvec3(0.0, 0.0, 0.0),
-			glm::normalize(targetModelSpace),
-			0.0
-		};
+        return {
+            glm::dvec3(0.0, 0.0, 0.0),
+            glm::normalize(targetModelSpace),
+            0.0
+        };
     }
 }
 

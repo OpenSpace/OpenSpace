@@ -28,19 +28,20 @@
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/glm.h>
 #include <memory>
+#include <future>
+
+namespace openspace::globebrowsing {
+    class RenderableGlobe;
+    struct TileIndex;
+    struct Geodetic2;
+    struct Geodetic3;
+
+    namespace cache { class MemoryAwareTileCache; }
+} // namespace openspace::globebrowsing
 
 namespace openspace {
-    class Camera;
-namespace globebrowsing {
-    class RenderableGlobe;
-    class TileIndex;
-    class Geodetic2;
-    class Geodetic3;
 
-namespace cache {
-    class MemoryAwareTileCache;
-}
-}
+class Camera;
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
@@ -54,6 +55,32 @@ public:
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
+    globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
+
+#ifdef GLOBEBROWSING_USE_GDAL
+
+    struct Layer {
+        std::string name;
+        std::string url;
+    };
+    using Capabilities = std::vector<Layer>;
+
+    // Stores the mapping between globe to names
+    struct UrlInfo {
+        std::string name;
+        std::string url;
+    };
+
+    // Registers then user-usable name
+    void loadWMSCapabilities(std::string name, std::string globe, std::string url);
+    Capabilities capabilities(const std::string& name);
+
+    std::vector<UrlInfo> urlInfo(const std::string& globe) const;
+
+    void removeWMSServer(const std::string& name);
+
+#endif // GLOBEBROWSING_USE_GDAL
+
 protected:
     void internalInitialize() override;
 
@@ -66,7 +93,6 @@ private:
     void goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3,
                        bool resetCameraDirection);
     void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
-    globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
 
     /**
      \return a comma separated list of layer group names.
@@ -79,6 +105,18 @@ private:
     static std::string layerTypeNamesList();
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
+
+#ifdef GLOBEBROWSING_USE_GDAL
+
+    // name -> capabilities
+    std::map<std::string, std::future<Capabilities>> _inFlightCapabilitiesMap;
+    // name -> capabilities
+    std::map<std::string, Capabilities> _capabilitiesMap;
+
+
+    std::multimap<std::string, UrlInfo> _urlList;
+
+#endif // GLOBEBROWSING_USE_GDAL
 };
 
 } // namespace openspace

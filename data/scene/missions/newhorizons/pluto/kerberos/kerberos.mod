@@ -1,12 +1,8 @@
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
-    }
-else
-    NewHorizonsKernels = {
-        "${SPICE}/NewHorizonsKernels/nh_p4p5_revised.bsp"
-    }
-end
+local kerberos_radius = 0.1E5
+
+local NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp",
+}
 
 return {
     -- Styx module
@@ -17,20 +13,18 @@ return {
             Type = "RenderablePlanet",
             Frame = "IAU_PLUTO",
             Body = "KERBEROS",
+            Radius = kerberos_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.1 , 5 },
+                Radius = kerberos_radius,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.jpg",
-            }
+            ColorTexture = "textures/gray.jpg",
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "KERBEROS",
+                Target = "KERBEROS",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -66,7 +60,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "KERBEROS",
+                Target = "KERBEROS",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},

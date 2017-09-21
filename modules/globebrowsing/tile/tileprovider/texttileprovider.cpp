@@ -40,19 +40,17 @@
 
 using namespace ghoul::fontrendering;
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
     
 TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t fontSize)
     : _initData(initData)
     , _fontSize(fontSize)
 {
     _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
-    _font = OsEng.fontManager().font("Mono", _fontSize);
+    _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
         
     _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
-    _fontRenderer->setFramebufferSize(_initData.dimensionsWithPadding());
+    _fontRenderer->setFramebufferSize(glm::vec2(_initData.dimensions()));
     
     glGenFramebuffers(1, &_fbo);
 }
@@ -136,6 +134,4 @@ TileIndex::TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) cons
     return tileIndex.hashKey();
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

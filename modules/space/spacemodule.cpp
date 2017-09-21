@@ -86,7 +86,8 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableStars::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        planetgeometry::PlanetGeometry::Documentation()
+        planetgeometry::PlanetGeometry::Documentation(),
+        planetgeometry::SimpleSphereGeometry::Documentation()
     };
 }
 

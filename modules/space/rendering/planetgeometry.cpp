@@ -30,12 +30,10 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string _loggerCat = "PlanetGeometry";
     const char* KeyType = "Type";
-}
+} // namespace
 
-namespace openspace {
-namespace planetgeometry {
+namespace openspace::planetgeometry {
 
 documentation::Documentation PlanetGeometry::Documentation() {
     using namespace documentation;
@@ -46,14 +44,15 @@ documentation::Documentation PlanetGeometry::Documentation() {
             {
                 KeyType,
                 new StringVerifier,
-                "The type of the PlanetGeometry that will can be constructed.",
-                Optional::No
+                Optional::No,
+                "The type of the PlanetGeometry that will can be constructed."
             }
         }
     };
 }
 
-std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
+std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -74,7 +73,7 @@ std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(const ghoul
 }
 
 PlanetGeometry::PlanetGeometry()
-    : properties::PropertyOwner("PlanetGeometry")
+    : properties::PropertyOwner({ "PlanetGeometry" })
     , _parent(nullptr)
 {}
 
@@ -87,5 +86,4 @@ bool PlanetGeometry::initialize(Renderable* parent) {
 
 void PlanetGeometry::deinitialize() {}
 
-}  // namespace planetgeometry
-}  // namespace openspace
+}  // namespace openspace::planetgeometry

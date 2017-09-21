@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <modules/globebrowsing/other/patchcoverageprovider.h>
 
 #define _USE_MATH_DEFINES

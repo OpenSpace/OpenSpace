@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <openspace/scripting/scriptscheduler.h>
 
 // This include should be removed after the time class is not dependent on

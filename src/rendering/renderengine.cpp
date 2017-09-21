@@ -24,11 +24,12 @@
 
 #include <openspace/rendering/renderengine.h> 
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-#include <modules/newhorizons/util/imagesequencer.h>
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
 #endif
 #include <openspace/util/syncdata.h>
 
+#include <openspace/openspace.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -74,10 +75,6 @@
 #include <array>
 #include <stack>
 
-// ABuffer defines
-#define RENDERER_FRAMEBUFFER 0
-#define RENDERER_ABUFFER 1
-
 #include "renderengine_lua.inl"
 
 namespace {
@@ -90,44 +87,136 @@ namespace {
     
     const char* KeyFontMono = "Mono";
     const char* KeyFontLight = "Light";
+
+    static const openspace::properties::Property::PropertyInfo PerformanceInfo = {
+        "PerformanceMeasurements",
+        "Performance Measurements",
+        "If this value is enabled, detailed performance measurements about the updates "
+        "and rendering of the scene graph nodes are collected each frame. These values "
+        "provide some information about the impact of individual nodes on the overall "
+        "performance."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FrametimeInfo = {
+        "FrametimeType",
+        "Type of the frame time display",
+        "This value determines the units in which the frame time is displayed."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowDateInfo = {
+        "ShowDate",
+        "Show Date Information",
+        "This values determines whether the date will be printed in the top left corner "
+        "of the rendering window if a regular rendering window is used (as opposed to a "
+        "fisheye rendering, for example)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowInfoInfo = {
+        "ShowInfo",
+        "Show Rendering Information",
+        "This value determines whether the rendering info, which is the delta time and "
+        "the frame time, is shown in the top left corner of the rendering window if a "
+        "regular rendering window is used (as opposed to a fisheye rendering, for "
+        "example)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowLogInfo = {
+        "ShowLog",
+        "Show the on-screen log",
+        "This value determines whether the on-screen log will be shown or hidden. Even "
+        "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
+        "log."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowVersionInfo = {
+        "ShowVersion",
+        "Shows the version on-screen information",
+        "This value determines whether the GIT version information (branch and commit ) "
+        "hash are shown on the screen."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
+        "TakeScreenshot",
+        "Take Screenshot",
+        "If this property is triggered, a screenshot is taken and stored in the current "
+        "working directory (which is the same directory where the OpenSpace.exe) is "
+        "located in most cases. The images are prefixed with 'SGCT' and postfixed with "
+        "the number of frames. This function will silently overwrite images that are "
+        "already present in the folder."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
+        "ApplyWarpingScreenshot",
+        "Apply Warping to Screenshots",
+        "This value determines whether a warping should be applied before taking a "
+        "screenshot. If it is enabled, all post processing is applied as well, which "
+        "includes everything rendered on top of the rendering, such as the user "
+        "interface."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
+        "ShowFrameNumber",
+        "Show Frame Number",
+        "If this value is enabled, the current frame number is rendered into the window."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableMasterInfo = {
+        "DisableMasterRendering",
+        "Disable Master Rendering",
+        "If this value is enabled, the rendering on the master node will be disabled. "
+        "Every other aspect of the application will be unaffected by this and it will "
+        "still respond to user input. This setting is reasonably only useful in the case "
+        "of multi-pipeline environments, such as planetariums, where the output of the "
+        "master node is not required and performance can be gained by disabling it."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableTranslationInfo = {
+        "DisableSceneTranslationOnMaster",
+        "Disable Scene Translation on Master",
+        "If this value is enabled, any scene translations such as specified in, for "
+        "example an SGCT configuration, is disabled for the master node. This setting "
+        "can be useful if a planetarium environment requires a scene translation to be "
+        "applied, which would otherwise make interacting through the master node "
+        "difficult."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AaSamplesInfo = {
+        "AaSamples",
+        "Number of Anti-aliasing samples",
+        "This value determines the number of anti-aliasing samples to be used in the "
+        "rendering for the MSAA method."
+    };
 } // namespace
 
 
 namespace openspace {
 
 RenderEngine::RenderEngine()
-    : properties::PropertyOwner("RenderEngine")
+    : properties::PropertyOwner({ "RenderEngine" })
     , _camera(nullptr)
     , _scene(nullptr)
     , _raycasterManager(nullptr)
-    , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
+    , _performanceMeasurements(PerformanceInfo)
     , _performanceManager(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _log(nullptr)
-    , _frametimeType(
-        "frametimeType",
-        "Type of the frametime display",
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _showDate("showDate", "Show Date Information", true)
-    , _showInfo("showInfo", "Show Render Information", true)
-    , _showLog("showLog", "Show the OnScreen log", true)
-    , _takeScreenshot("takeScreenshot", "Take Screenshot")
+    , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _showDate(ShowDateInfo, true)
+    , _showInfo(ShowInfoInfo, true)
+    , _showLog(ShowLogInfo, true)
+    , _showVersionInfo(ShowVersionInfo, true)
+    , _takeScreenshot(TakeScreenshotInfo)
     , _shouldTakeScreenshot(false)
-    , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
-    , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
-    , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
-    , _disableSceneTranslationOnMaster(
-        "disableSceneTranslationOnMaster",
-        "Disable Scene Translation on Master",
-        false
-    )
+    , _applyWarping(ApplyWarpingInfo, false)
+    , _showFrameNumber(ShowFrameNumberInfo, false)
+    , _disableMasterRendering(DisableMasterInfo, false)
+    , _disableSceneTranslationOnMaster(DisableTranslationInfo, false)
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
-    , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
+    , _nAaSamples(AaSamplesInfo, 8, 1, 16)
     , _frameNumber(0)
 {
     _performanceMeasurements.onChange([this](){
@@ -168,6 +257,7 @@ RenderEngine::RenderEngine()
     addProperty(_showDate);
     addProperty(_showInfo);
     addProperty(_showLog);
+    addProperty(_showVersionInfo);
     
     _nAaSamples.onChange([this](){
         if (_renderer) {
@@ -246,7 +336,7 @@ void RenderEngine::initialize() {
     _raycasterManager = std::make_unique<RaycasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
-    LINFO("Seting renderer from string: " << renderingMethod);
+    LINFO("Setting renderer from string: " << renderingMethod);
     setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL
@@ -941,7 +1031,7 @@ void RenderEngine::renderInformation() {
         }
 
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
         double currentTime = OsEng.timeManager().time().j2000Seconds();
 
@@ -954,7 +1044,7 @@ void RenderEngine::renderInformation() {
                     //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
                     static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
                     static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
-                    static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+                    // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
                     static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
                     // Add spacing
@@ -1159,19 +1249,19 @@ void RenderEngine::renderInformation() {
                         "Active Instruments:"
                         );
 
-                    for (auto t : activeMap) {
-                        if (t.second == false) {
+                    for (auto m : activeMap) {
+                        if (m.second == false) {
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "| |"
-                                );
+                            );
                             RenderFontCr(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "    %5s",
-                                t.first.c_str()
-                                );
+                                m.first.c_str()
+                            );
 
                         }
                         else {
@@ -1179,31 +1269,84 @@ void RenderEngine::renderInformation() {
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "|"
-                                );
-                            if (t.first == "NH_LORRI") {
+                            );
+                            if (m.first == "NH_LORRI") {
                                 RenderFont(*_fontInfo,
                                     penPosition,
                                     firing,
                                     " + "
-                                    );
+                                );
                             }
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "  |"
-                                );
+                            );
                             RenderFontCr(*_fontInfo,
                                 penPosition,
                                 active,
                                 "    %5s",
-                                t.first.c_str()
-                                );
+                                m.first.c_str()
+                            );
                         }
                     }
                 }
             }
-        }
 #endif
+        }
+    }
+}
+
+void RenderEngine::renderVersionInformation() {
+    if (!_showVersionInfo) {
+        return;
+    }
+
+    using FR = ghoul::fontrendering::FontRenderer;
+
+    FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s",
+        OPENSPACE_VERSION_STRING_FULL
+    );
+
+    FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s@%s",
+        OPENSPACE_GIT_BRANCH,
+        OPENSPACE_GIT_COMMIT
+    );
+
+
+    
+
+    FR::defaultRenderer().render(
+        *_fontInfo,
+        glm::vec2(
+            fontResolution().x - versionBox.boundingBox.x - 10.f,
+            5.f
+        ),
+        glm::vec4(0.5, 0.5, 0.5, 1.f),
+        "%s",
+        OPENSPACE_VERSION_STRING_FULL
+    );
+
+    // If a developer hasn't placed the Git command in the path, this variable will be
+    // empty
+    if (!std::string(OPENSPACE_GIT_COMMIT).empty()) {
+        // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
+        // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
+        // checking for that is a bit brittle)
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            glm::vec2(
+                fontResolution().x - commitBox.boundingBox.x - 10.f,
+                versionBox.boundingBox.y + 5.f
+            ),
+            glm::vec4(0.5, 0.5, 0.5, 1.f),
+            "%s",
+            OPENSPACE_GIT_FULL
+        );
     }
 }
 
@@ -1288,13 +1431,13 @@ void RenderEngine::renderScreenLog() {
         //                    const float font_with_light = 5;
         RenderFont(
             *_fontLog,
-            glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 39 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             color * alpha,
             "%s",                                    // Format
             lvl.c_str());        // Pad category with "..." if exceeds category_length
 
         RenderFont(*_fontLog,
-            glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 53 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             White * alpha,
             "%s",                                    // Format
             message.c_str());        // Pad category with "..." if exceeds category_length

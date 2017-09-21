@@ -30,8 +30,8 @@ namespace volume {
 template <typename VoxelType>
 RawVolumeReader<VoxelType>::RawVolumeReader(const std::string& path,
                                             const glm::uvec3& dimensions)
-    : _path(path)
-    , _dimensions(dimensions)
+    : _dimensions(dimensions)
+    , _path(path)
 {}
 
 template <typename VoxelType>

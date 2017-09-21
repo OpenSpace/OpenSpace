@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,11 +46,9 @@ uniform float rNormalization_#{id} = 0.0;
 
 uniform float rUpperBound_#{id} = 1.0;
 
-void sample#{id}(vec3 samplePos,
-             vec3 dir,
-             inout vec3 accumulatedColor,
-             inout vec3 accumulatedAlpha,
-             inout float stepSize) {
+void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
+                 inout vec3 accumulatedAlpha, inout float stepSize)
+{
 
     vec3 transformedPos = samplePos;
     if (gridType_#{id} == 1) {

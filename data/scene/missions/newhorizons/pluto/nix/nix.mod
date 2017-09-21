@@ -1,12 +1,8 @@
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
-    }
-else
-    NewHorizonsKernels = {
-        "${SPICE}/NewHorizonsKernels/nh_p4p5_revised.bsp"
-    }
-end
+local nix_radius = 0.45E5
+
+local NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp",
+}
 
 return {
     -- Nix module
@@ -17,20 +13,18 @@ return {
             Type = "RenderablePlanet",
             Frame = "IAU_PLUTO",
             Body = "NIX",
+            Radius = nix_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 0.45E5,
+                Radius = nix_radius,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.jpg",
-            }
+            ColorTexture = "textures/gray.jpg",
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NIX",
+                Target = "NIX",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -60,7 +54,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "NIX",
+                Target = "NIX",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},

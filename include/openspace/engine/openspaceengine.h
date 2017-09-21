@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
@@ -35,14 +36,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    
-class Dictionary;
-
-namespace cmdparser { class CommandlineParser; }
-namespace fontrendering { class FontManager; }
-
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
+namespace ghoul::cmdparser { class CommandlineParser; }
+namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
@@ -209,6 +205,11 @@ private:
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+
+    struct {
+        properties::StringProperty versionString;
+        properties::StringProperty sourceControlInformation;
+    } _versionInformation;
     
     bool _scheduledSceneSwitch;
     std::string _scenePath;

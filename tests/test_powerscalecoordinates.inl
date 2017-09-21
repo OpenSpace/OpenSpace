@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <openspace/scene/scene.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
@@ -31,10 +29,10 @@
 
 class PowerscaleCoordinatesTest : public testing::Test {
 protected:
-	PowerscaleCoordinatesTest() {
+    PowerscaleCoordinatesTest() {
     }
 
-	~PowerscaleCoordinatesTest() {
+    ~PowerscaleCoordinatesTest() {
     }
 
     void reset() {

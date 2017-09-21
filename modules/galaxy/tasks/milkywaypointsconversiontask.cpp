@@ -42,7 +42,7 @@ namespace openspace {
     : _inFilename(inFilename)
     , _outFilename(outFilename) {}*/
 
-MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary & dictionary) {}
+MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
 
 MilkywayPointsConversionTask::~MilkywayPointsConversionTask() {}
 
@@ -64,7 +64,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback & progre
     std::vector<float> pointData(nFloats);
 
     float x, y, z, r, g, b, a;
-    for (size_t i = 0; i < nPoints; ++i) {
+    for (int64_t i = 0; i < nPoints; ++i) {
         in >> x >> y >> z >> r >> g >> b >> a;
         if (in.good()) {
             pointData[i * 7 + 0] = x;

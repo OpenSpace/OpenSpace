@@ -34,8 +34,7 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 void KeyframeNavigator::updateCamera(Camera& camera) {
     double now = OsEng.runTime();
@@ -86,11 +85,11 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
 
     // Transform position and rotation based on focus node rotation (if following rotation)
     if (prevPose.followFocusNodeRotation) {
-        prevKeyframeCameraRotation = prevFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(prevPose.rotation));
+        prevKeyframeCameraRotation = glm::dquat(prevFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(prevPose.rotation)));
         prevKeyframeCameraPosition = prevFocusNode->worldRotationMatrix() * prevPose.position;
     }
     if (nextPose.followFocusNodeRotation) {
-        nextKeyframeCameraRotation = nextFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(nextPose.rotation));
+        nextKeyframeCameraRotation = glm::dquat(nextFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(nextPose.rotation)));
         nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() * nextPose.position;
     }
 
@@ -123,5 +122,4 @@ size_t KeyframeNavigator::nKeyframes() const {
     return _cameraPoseTimeline.nKeyframes();
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

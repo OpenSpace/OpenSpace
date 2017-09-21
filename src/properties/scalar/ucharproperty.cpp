@@ -31,8 +31,7 @@
 
 using std::numeric_limits;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
     [](lua_State* state, bool& success) -> TYPE {                                        \
@@ -52,8 +51,8 @@ namespace properties {
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
-    [](std::string value, bool& success) -> TYPE {                                       \
-        std::stringstream s(value);                                                      \
+    [](std::string val, bool& success) -> TYPE {                                         \
+        std::stringstream s(val);                                                        \
         TYPE v;                                                                          \
         s >> v;                                                                          \
         success = !s.fail();                                                             \
@@ -61,7 +60,7 @@ namespace properties {
             return v;                                                                    \
         }                                                                                \
         else {                                                                           \
-            throw ghoul::RuntimeError("Conversion error for string: " + value);          \
+            throw ghoul::RuntimeError("Conversion error for string: " + val);            \
         }                                                                                \
     }
 
@@ -80,5 +79,4 @@ REGISTER_NUMERICALPROPERTY_SOURCE(UCharProperty, unsigned char, 0,
                                   DEFAULT_TO_STRING_LAMBDA(unsigned char),
                                   LUA_TNUMBER);
 
-}  // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

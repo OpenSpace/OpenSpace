@@ -36,16 +36,12 @@
 #include <openspace/rendering/renderer.h>
 #include <openspace/util/updatestructures.h>
 
-namespace ghoul {
-    class Dictionary;
-    
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace ghoul { class Dictionary; }
+namespace ghoul::filesystem { class File; }
+
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
 }
 
 namespace openspace {
@@ -79,8 +75,8 @@ public:
     virtual void updateRendererData() override;
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
-private:
 
+private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _exitPrograms;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _raycastPrograms;

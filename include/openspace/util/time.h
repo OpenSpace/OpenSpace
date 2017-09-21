@@ -54,7 +54,6 @@ namespace openspace {
  *
  * The synchronization of the simulation time requires 
  */
-
 class Time {
 public:
     /**

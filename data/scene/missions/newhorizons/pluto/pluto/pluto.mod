@@ -1,20 +1,9 @@
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_kernels/spk/NavPE_de433_od122.bsp",
-        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
-    }
-else
-    NewHorizonsKernels = {
-        "${SPICE}/NewHorizonsKernels/nh_plu017.bsp"
-    }
-end
+local pluto_radius = 1.173E6
 
-Files = {
-    low = "textures/pluto_large.jpg",
-    med = "textures/Shenk_180.jpg",
-    high = "textures/pmap_cyl_HR_LOR_lowres.jpg"
+local NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavPE_de433_od122.bsp",
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp"
 }
-ColorTexture = Files[TextureResolution]
 
 return {
     -- Pluto barycenter module
@@ -24,7 +13,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PLUTO BARYCENTER",
+                Target = "PLUTO BARYCENTER",
                 Observer = "SUN",
                 Kernels = NewHorizonsKernels
             },
@@ -36,19 +25,19 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
+            Radius = pluto_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 1.173E6,
-                Segments = 100
+                Radius = pluto_radius,
+                Segments = 400
             },
-            Textures = {
-                Color = ColorTexture,
-                Height = "textures/pluto_shenk_heightmap.jpg",
-            },
+            ColorTexture = pluto_image,
+            HeightTexture = pluto_height,
+            MeridianShift = true,
             Projection = {
                 Sequence       = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/images",
                 EventFile      = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
-                SequenceType   = "hybrid",
+                SequenceType   = "image-sequence",
                 Observer       = "NEW HORIZONS",
                 Target         = "PLUTO",
                 Aberration     = "NONE",
@@ -156,7 +145,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PLUTO",
+                Target = "PLUTO",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -205,7 +194,7 @@ return {
         Parent = "Pluto",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 6.4},
+            Size = 10.0^6.4,
             Origin = "Center",
             Billboard = true,
             ProjectionListener = false,
@@ -228,7 +217,6 @@ return {
             Observer = "NEW HORIZONS",
             Body = "PLUTO",
             BodyFrame = "IAU_PLUTO",
-            MainFrame = "GALACTIC",
             Aberration = "NONE",
         },
     },
@@ -240,7 +228,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PLUTO",
+                Target = "PLUTO",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},
@@ -256,7 +244,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PLUTO BARYCENTER",
+                Target = "PLUTO BARYCENTER",
                 Observer = "SUN",
             },
             Color = { 0.3, 0.7, 0.3 },

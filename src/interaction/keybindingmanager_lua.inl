@@ -22,16 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
+namespace openspace::luascriptfunctions {
 
-namespace luascriptfunctions {
 /**
-* \ingroup LuaScripts
-* bindKey():
-* Binds a key to Lua command to both execute locally
-* and broadcast to all clients if this node is hosting
-* a parallel connection.
-*/
+ * \ingroup LuaScripts
+ * bindKey():
+ * Binds a key to Lua command to both execute locally
+ * and broadcast to all clients if this node is hosting
+ * a parallel connection.
+ */
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
@@ -136,6 +135,4 @@ int clearKeys(lua_State* L) {
     return 0;
 }
 
-} // namespace luascriptfunctions
-
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

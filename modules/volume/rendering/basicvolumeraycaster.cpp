@@ -55,8 +55,8 @@ BasicVolumeRaycaster::BasicVolumeRaycaster(
     , _rNormalization(0.0)
     , _rUpperBound(1.0)
     , _valueRemapping(0.0, 1.0)
-    {}
-    
+{}
+
 BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
 
 void BasicVolumeRaycaster::initialize() {
@@ -136,7 +136,7 @@ void BasicVolumeRaycaster::preRaycast(
 
     std::vector<glm::vec3> clipNormals = _clipPlanes->normals();
     std::vector<glm::vec2> clipOffsets = _clipPlanes->offsets();
-    int nClips = clipNormals.size();
+    int nClips = static_cast<int>(clipNormals.size());
 
     program.setUniform("nClips_" + id, nClips);
     program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);
@@ -147,9 +147,8 @@ void BasicVolumeRaycaster::preRaycast(
     program.setUniform("valueRemapping_" + id, _valueRemapping);
 }
     
-void BasicVolumeRaycaster::postRaycast(
-    const RaycastData& data,
-    ghoul::opengl::ProgramObject& program)
+void KameleonVolumeRaycaster::postRaycast(const RaycastData&,
+                                          ghoul::opengl::ProgramObject&)
 {
     // For example: release texture units
     _textureUnit = nullptr;

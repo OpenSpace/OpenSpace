@@ -31,28 +31,28 @@
 
 #include <string>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * All information needed to create a texture used for a Tile.
  */
-class TileTextureInitData
-{
+class TileTextureInitData {
 public:
     using HashKey = unsigned long long;
     using ShouldAllocateDataOnCPU = ghoul::Boolean;
     using Format = ghoul::opengl::Texture::Format;
 
     TileTextureInitData(size_t width, size_t height, GLenum glType, Format textureFormat,
-        ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
+           bool padTiles,
+           ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original);
 
     ~TileTextureInitData() = default;
 
-    glm::ivec3 dimensionsWithPadding() const;
-    glm::ivec3 dimensionsWithoutPadding() const;
+    glm::ivec3 dimensions() const;
+    glm::ivec2 tilePixelStartOffset() const;
+    glm::ivec2 tilePixelSizeDifference() const;
     size_t nRasters() const;
     size_t bytesPerDatum() const;
     size_t bytesPerPixel() const;
@@ -64,16 +64,18 @@ public:
     bool shouldAllocateDataOnCPU() const;
     HashKey hashKey() const;
 
-    const static glm::ivec2 tilePixelStartOffset;
-    const static glm::ivec2 tilePixelSizeDifference;
+    const static glm::ivec2 TilePixelStartOffset;
+    const static glm::ivec2 TilePixelSizeDifference;
 
 private:
+
     void calculateHashKey();
     unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
 
     HashKey _hashKey;
-    glm::ivec3 _dimensionsWithPadding;
-    glm::ivec3 _dimensionsWithoutPadding;
+    glm::ivec3 _dimensions;
+    glm::ivec2 _tilePixelStartOffset;
+    glm::ivec2 _tilePixelSizeDifference;
     GLenum _glType;
     Format _ghoulTextureFormat;
     GLenum _glTextureFormat;
@@ -83,9 +85,9 @@ private:
     size_t _bytesPerLine;
     size_t _totalNumBytes;
     bool _shouldAllocateDataOnCPU;
+    bool _padTiles;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,26 +24,22 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
-//layout(location = 3) in vec2 in_nightTex;
-
 
 out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
 out vec4 vs_posWorld;
-out float s;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-void main()
-{
-    // set variables
+
+void main() {
     vs_st = in_st;
     vs_position = in_position;
     vec4 tmp = in_position;
@@ -56,9 +52,8 @@ void main()
     vec4 position = pscTransform(tmp, ModelTransform);
 
     vec3 local_vertex_pos = mat3(ModelTransform) * in_position.xyz;
-    vec4 vP = psc_addition(vec4(local_vertex_pos,in_position.w),objpos);
-    vec4 conv = vec4(vP.xyz * pow(10,vP.w), 1.0);
-    vs_posWorld = conv;
+    vec4 vP = psc_addition(vec4(local_vertex_pos, in_position.w), objpos);
+    vs_posWorld = vec4(vP.xyz * pow(10, vP.w), 1.0);
     
     vs_position = tmp;
     // Now is transforming from view position to SGCT projection

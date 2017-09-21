@@ -28,8 +28,8 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const std::string _loggerCat = "DataPlane";
-}
+    const char* _loggerCat = "DataPlane";
+} // namespace
 
 namespace openspace {
 
@@ -43,20 +43,20 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
 DataPlane::~DataPlane(){}
 
-bool DataPlane::initialize(){
+void DataPlane::initialize() {
     IswaCygnet::initialize();
 
-    if(_group){
+    if (_group) {
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
-    }else{
+    } else {
         _dataProcessor = std::make_shared<DataProcessorText>();
 
         //If autofiler is on, background values property should be hidden
-        _autoFilter.onChange([this](){
+        _autoFilter.onChange([this]() {
             // If autofiler is selected, use _dataProcessor to set backgroundValues 
             // and unregister backgroundvalues property.
-            if(_autoFilter.value()){
+            if (_autoFilter.value()) {
                 _backgroundValues.setValue(_dataProcessor->filterValues());
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
@@ -73,8 +73,6 @@ bool DataPlane::initialize(){
     setPropertyCallbacks();
 
     _autoFilter.setValue(true);
-
-    return true;
 }
 
 bool DataPlane::createGeometry() {
@@ -86,9 +84,9 @@ bool DataPlane::createGeometry() {
     // ============================
     // GLfloat x,y, z;
     float s = _data->spatialScale.x;
-    const GLfloat x = s*_data->scale.x/2.0;
-    const GLfloat y = s*_data->scale.y/2.0;
-    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat x = s*_data->scale.x/2.f;
+    const GLfloat y = s*_data->scale.y/2.f;
+    const GLfloat z = s*_data->scale.z/2.f;
     const GLfloat w = _data->spatialScale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)

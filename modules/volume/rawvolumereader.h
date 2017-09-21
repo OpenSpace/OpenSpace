@@ -31,10 +31,11 @@
 namespace openspace {
 namespace volume {
 
-template <typename Voxel>
+template <typename Type>
 class RawVolumeReader {
 public:
-    typedef Voxel VoxelType;
+    using VoxelType = Type;
+
     RawVolumeReader(const std::string& path, const glm::uvec3& dimensions);
     glm::uvec3 dimensions() const;
     std::string path() const;
@@ -43,6 +44,7 @@ public:
     //VoxelType get(const glm::ivec3& coordinates) const; // TODO: Implement this
     //VoxelType get(const size_t index) const; // TODO: Implement this
     std::unique_ptr<RawVolume<VoxelType>> read();
+
 private:
     size_t coordsToIndex(const glm::uvec3& cartesian) const;
     glm::uvec3 indexToCoords(size_t linear) const;

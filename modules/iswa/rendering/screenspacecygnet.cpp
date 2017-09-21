@@ -30,8 +30,8 @@
 #include <openspace/engine/openspaceengine.h>
 
 namespace {
-    const std::string _loggerCat = "ScreenSpaceCygnet";
-}
+    const char* _loggerCat = "ScreenSpaceCygnet";
+} // namespace
 
 namespace openspace {
 

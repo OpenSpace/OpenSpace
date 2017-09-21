@@ -32,8 +32,7 @@
 
 using std::numeric_limits;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(__TYPE__, __CONVFUNC__, __TESTFUNC__)                    \
     [](lua_State * state, bool& success) -> __TYPE__ {                                   \
@@ -70,9 +69,9 @@ namespace properties {
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(__TYPE__)                                             \
-    [](std::string value, bool& success) -> __TYPE__ {                                   \
+    [](std::string val, bool& success) -> __TYPE__ {                                     \
         __TYPE__ result;                                                                 \
-        std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');             \
+        std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');               \
         if (tokens.size() != static_cast<size_t>(result.length())) {                     \
             success = false;                                                             \
             return result;                                                               \
@@ -105,11 +104,6 @@ namespace properties {
     }
 
 
-// Forcing value from int to bool is acceptable here (line 48)
-#ifdef WIN32
-#pragma warning(disable : 4800)
-#endif
-
 REGISTER_TEMPLATEPROPERTY_SOURCE(BVec4Property, glm::bvec4, glm::bvec4(false),
                                  DEFAULT_FROM_LUA_LAMBDA(glm::bvec4, lua_toboolean,
                                                          lua_isboolean),
@@ -118,9 +112,4 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BVec4Property, glm::bvec4, glm::bvec4(false),
                                  DEFAULT_TO_STRING_LAMBDA(glm::bvec4),
                                  LUA_TTABLE);
 
-#ifdef WIN32
-#pragma warning(default : 4800)
-#endif
-
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

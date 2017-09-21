@@ -33,16 +33,11 @@
 
 #include <memory>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-namespace chunklevelevaluator {
-    class Evaluator;
-} // namespace chunklevelevaluator
+namespace chunklevelevaluator { class Evaluator; }
     
-namespace culling {
-    class ChunkCuller;
-} // namespace culling
+namespace culling { class ChunkCuller; }
 
 class Chunk;
 class ChunkNode;
@@ -57,11 +52,9 @@ public:
         std::shared_ptr<LayerManager> layerManager);
     ~ChunkedLodGlobe();
     
-    bool initialize() override;
-    bool deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     /**
@@ -107,7 +100,17 @@ public:
      */
     float getHeight(glm::dvec3 position) const;
 
+    /**
+     * Notifies the renderer to recompile its shaders the next time the render function is
+     * called. The actual shader recompilation takes place in the render function because
+     * properties that the shader depends on need to be properly synced.
+     */
     void notifyShaderRecompilation();
+
+    /**
+     * Directly recompile the shaders of the renderer.
+     */
+    void recompileShaders();
 
     const int minSplitDepth;
     const int maxSplitDepth;
@@ -145,7 +148,6 @@ private:
     bool _shadersNeedRecompilation;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKED_LOD_GLOBE___H__

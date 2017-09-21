@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -24,45 +24,85 @@
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 namespace {
     const char* _loggerCat = "Layer";
 
     const char* keyName = "Name";
+    const char* keyDescription = "Description";
     const char* keyEnabled = "Enabled";
     const char* keyLayerGroupID = "LayerGroupID";
     const char* keySettings = "Settings";
     const char* keyAdjustment = "Adjustment";
     const char* KeyBlendMode = "BlendMode";
-}
+    const char* KeyPadTiles = "PadTiles";
 
-Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
-    : properties::PropertyOwner(layerDict.value<std::string>(keyName))
-    , _typeOption(
-        "type",
+    static const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _blendModeOption(
-        "blendMode",
+        "Type",
+        "The type of this Layer. This value is a read-only property and thus cannot be "
+        "changed."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+        "BlendMode",
         "Blend Mode",
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _enabled(properties::BoolProperty("enabled", "Enabled", false))
-    , _reset("reset", "Reset")
-    , _tileProvider(nullptr)
-    , _otherTypesProperties{
-        properties::Vec3Property (
-        "color",
+        "This value specifies the blend mode that is applied to this layer. The blend "
+        "mode determines how this layer is added to the underlying layers beneath."
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "If this value is enabled, the layer will be used for the final composition of "
+        "the planet. If this value is disabled, the layer will be ignored in the "
+        "composition."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ResetInfo = {
+        "Reset",
+        "Reset",
+        "If this value is triggered, this layer will be reset. This will delete the "
+        "local cache for this layer and will trigger a fresh load of all tiles."
+    };
+
+    static const openspace::properties::Property::PropertyInfo RemoveInfo = {
+        "Remove",
+        "Remove",
+        "If this value is triggered, a script will be executed that will remove this "
+        "layer before the next frame."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f))
-    }
+        "Color",
+        "If the 'Type' of this layer is a solid color, this value determines what this "
+        "solid color is."
+    };
+} // namespace
+
+Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
+             LayerGroup& parent)
+    : properties::PropertyOwner({
+        layerDict.value<std::string>(keyName),
+        layerDict.hasKey(keyDescription) ? layerDict.value<std::string>(keyDescription) : ""
+    })
+    , _parent(parent)
+    , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _blendModeOption(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _enabled(EnabledInfo, false)
+    , _reset(ResetInfo)
+    , _remove(RemoveInfo)
+    , _tileProvider(nullptr)
+    , _otherTypesProperties({
+        { ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f) }
+    })
     , _layerGroupId(id)
 {
     layergroupid::TypeID typeID = parseTypeIdFromDictionary(layerDict);
@@ -75,6 +115,14 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     bool enabled = false; // defaults to false if unspecified
     layerDict.getValue(keyEnabled, enabled);
     _enabled.setValue(enabled);
+
+    bool padTiles = true;
+    layerDict.getValue<bool>(KeyPadTiles, padTiles);
+    
+    TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId,
+                                                                        padTiles);
+    _padTilePixelStartOffset = initData.tilePixelStartOffset();
+    _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
 
     // Initialize settings
     ghoul::Dictionary settingsDict;
@@ -123,6 +171,14 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         }
     });
 
+    _remove.onChange([&](){
+        if (_tileProvider) {
+            _tileProvider->reset();
+        }
+
+        _parent.deleteLayer(name());
+    });
+
     _typeOption.onChange([&](){
         removeVisibleProperties();
         _type = static_cast<layergroupid::TypeID>(_typeOption.value());
@@ -153,6 +209,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     addProperty(_blendModeOption);
     addProperty(_enabled);
     addProperty(_reset);
+    addProperty(_remove);
 
     _otherTypesProperties.color.setViewOption(properties::Property::ViewOptions::Color);
 
@@ -189,12 +246,11 @@ Tile::Status Layer::getTileStatus(const TileIndex& index) const {
 
 layergroupid::TypeID Layer::type() const {
     return _type;
-};
+}
 
 layergroupid::BlendModeID Layer::blendMode() const {
     return static_cast<layergroupid::BlendModeID>(_blendModeOption.value());
-};
-
+}
 
 TileDepthTransform Layer::depthTransform() const {
     if (_tileProvider) {
@@ -235,6 +291,36 @@ void Layer::update() {
     }
 }
 
+glm::ivec2 Layer::tilePixelStartOffset() const {
+    return _padTilePixelStartOffset;
+}
+
+glm::ivec2 Layer::tilePixelSizeDifference() const {
+    return _padTilePixelSizeDifference;
+}
+
+glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
+                                                 glm::uvec2 resolution, glm::vec2 tileUV)
+{
+    glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
+    glm::vec2 currentSize = glm::vec2(resolution);
+    glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
+    tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
+    return tileUV;
+}
+
+glm::vec2 Layer::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
+                                               glm::vec2 tileUV, glm::uvec2 resolution)
+{
+    glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
+    uv = compensateSourceTextureSampling(
+        tilePixelStartOffset(),
+        tilePixelSizeDifference(),
+        resolution,
+        uv);
+    return uv;
+}
+
 layergroupid::TypeID Layer::parseTypeIdFromDictionary(
     const ghoul::Dictionary& initDict) const
 {
@@ -271,11 +357,16 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
             );
             break;
         }
-        case layergroupid::TypeID::SolidColor:
+        case layergroupid::TypeID::SolidColor: {
+            if (initDict.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
+                glm::vec3 color;
+                initDict.getValue(ColorInfo.identifier, color);
+                _otherTypesProperties.color.setValue(color);
+            }
             break;
+        }
         default:
             throw ghoul::RuntimeError("Unable to create layer. Unknown type.");
-            break;
     }
 }
 
@@ -288,13 +379,16 @@ void Layer::addVisibleProperties() {
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
         case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer: {
             if (_tileProvider) {
                 addPropertySubOwner(*_tileProvider);
             }
             break;
-        case layergroupid::TypeID::SolidColor:
+        }
+        case layergroupid::TypeID::SolidColor: {
             addProperty(_otherTypesProperties.color);
+            break;
+        }
         default:
             break;
     }
@@ -322,5 +416,4 @@ void Layer::removeVisibleProperties() {
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

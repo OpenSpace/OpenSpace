@@ -44,9 +44,7 @@
 
 struct CPLXMLNode;
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
     
 /**
  * Interface for stringifying OpenSpace Time instances.
@@ -319,13 +317,13 @@ private:
   
     bool readFilePath();
 
+    // Used for creation of time specific instances of CachingTileProvider
+    ghoul::Dictionary _initDict;
     properties::StringProperty _filePath;
     std::string _gdalXmlTemplate;
 
     std::unordered_map<TimeKey, std::shared_ptr<TileProvider>> _tileProviderMap;
 
-    // Used for creation of time specific instances of CachingTileProvider
-    ghoul::Dictionary _initDict;
 
     std::shared_ptr<TileProvider> _currentTileProvider;
         
@@ -334,9 +332,7 @@ private:
     bool _successfulInitialization;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // GLOBEBROWSING_USE_GDAL
 

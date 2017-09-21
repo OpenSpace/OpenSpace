@@ -31,9 +31,9 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string KeyStart = "Start";
-    const std::string KeyEnd = "End";
-}
+    const char* KeyStart = "Start";
+    const char* KeyEnd = "End";
+} // namespace
 
 namespace openspace {
 
@@ -46,17 +46,16 @@ documentation::Documentation TimeRange::Documentation() {
             {
                 KeyStart,
                 new StringAnnotationVerifier("A string representing a valid date"),
-                "The start date of the time range",
-                Optional::No
+                Optional::No,
+                "The start date of the time range"
             },
             {
                 KeyEnd,
                 new StringAnnotationVerifier("A string representing a valid date"),
-                "The end date of the time range",
-                Optional::No
+                Optional::No,
+                "The end date of the time range"
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -95,14 +94,14 @@ bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRang
     }
 }
 
-void TimeRange::include(double val){
+void TimeRange::include(double val) {
     if (start > val) {
         start = val;
     }
     if (end < val) {
         end = val;
     }
-};
+}
 
 void TimeRange::include(const TimeRange& other) {
     if (other.start < start) {

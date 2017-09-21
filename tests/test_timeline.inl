@@ -22,25 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
-
-using namespace openspace;
 
 class TimelineTest : public testing::Test {};
 
 TEST_F(TimelineTest, AddAndCountKeyframes) {
-    Timeline<Time> timeline;
-    timeline.addKeyframe(0.0, Time::now());
-    timeline.addKeyframe(1.0, Time::now());
+    openspace::Timeline<openspace::Time> timeline;
+    timeline.addKeyframe(0.0, openspace::Time::now());
+    timeline.addKeyframe(1.0, openspace::Time::now());
 
     ASSERT_EQ(timeline.nKeyframes(), 2);
 }
 
 TEST_F(TimelineTest, QueryKeyframes) {
-    Timeline<float> timeline;
+    openspace::Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
 
@@ -56,7 +52,7 @@ TEST_F(TimelineTest, QueryKeyframes) {
 }
 
 TEST_F(TimelineTest, RemoveKeyframes) {
-    Timeline<float> timeline;
+    openspace::Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
 
@@ -80,7 +76,7 @@ TEST_F(TimelineTest, RemoveKeyframes) {
 }
 
 TEST_F(TimelineTest, RemoveKeyframesInRange) {
-    Timeline<float> timeline;
+    openspace::Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
     timeline.addKeyframe(2.0, 2.f);

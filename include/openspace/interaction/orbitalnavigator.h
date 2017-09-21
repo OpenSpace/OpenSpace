@@ -34,16 +34,16 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace openspace {
+    class SceneGraphNode;
+    class Camera;
+    struct SurfacePositionHandle;
+} // namespace
 
-class SceneGraphNode;
-class Camera;
-class SurfacePositionHandle;
-
-namespace interaction {
+namespace openspace::interaction {
 
 class OrbitalNavigator : public properties::PropertyOwner  {
 public:
@@ -64,14 +64,21 @@ private:
         glm::dquat globalRotation;
     };
 
-    // Properties
-    properties::BoolProperty _rotationalFriction;
-    properties::BoolProperty _horizontalFriction;
-    properties::BoolProperty _verticalFriction;
+    struct Friction : public properties::PropertyOwner {
+        Friction();
+
+        properties::BoolProperty roll;
+        properties::BoolProperty rotational;
+        properties::BoolProperty zoom;
+
+        properties::FloatProperty friction;
+    };
+
+    Friction _friction;
+
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _sensitivity;
-    properties::FloatProperty _motionLag;
 
     MouseStates _mouseStates;
 
@@ -90,11 +97,9 @@ private:
      * from the global to the current total rotation so that
      * <code>cameraRotation = globalRotation * localRotation</code>. 
      */
-    CameraRotationDecomposition decomposeCameraRotation(
-                                                   const glm::dvec3& cameraPosition,
-                                                   const glm::dquat& cameraRotation,
-                                                   const glm::dvec3& cameraLookUp,
-                                                   const glm::dvec3& cameraViewDirection);
+    CameraRotationDecomposition decomposeCameraRotation(const glm::dvec3& cameraPosition,
+        const glm::dquat& cameraRotation, const glm::dvec3& cameraLookUp,
+        const glm::dvec3& cameraViewDirection);
 
     /*
      * Perform a camera roll on the local camera rotation
@@ -191,7 +196,6 @@ private:
         const glm::dvec3 cameraPositionWorldSpace);
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___ORBITALNAVIGATOR___H__

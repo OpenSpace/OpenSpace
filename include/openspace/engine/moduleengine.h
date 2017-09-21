@@ -33,13 +33,7 @@
 #include <ghoul/misc/assert.h>
 #include <algorithm>
 
-namespace ghoul {
-namespace systemcapabilities {
-
-struct Version;
-
-} // namespace systemcapabilities
-} // namespace ghoul
+namespace ghoul::systemcapabilities { struct Version; }
 
 namespace openspace {
 
@@ -96,8 +90,8 @@ public:
     template <class ModuleSubClass>
     ModuleSubClass* module() const {
         auto it = std::find_if(_modules.begin(), _modules.end(),
-            [](const std::unique_ptr<OpenSpaceModule>& module) {
-                return module->name() == ModuleSubClass::Name;
+            [](const std::unique_ptr<OpenSpaceModule>& m) {
+                return m->name() == ModuleSubClass::Name;
             });
         if (it != _modules.end()) {
             return dynamic_cast<ModuleSubClass*>(it->get());

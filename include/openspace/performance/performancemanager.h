@@ -33,15 +33,11 @@
 #include <memory>
 #include <vector>
 
-namespace ghoul {
-    class SharedMemory;
-}
+namespace ghoul { class SharedMemory; }
 
-namespace openspace {
+namespace openspace { class SceneGraphNode; }
 
-class SceneGraphNode;
-
-namespace performance {
+namespace openspace::performance {
 
 class PerformanceManager {
 public:
@@ -76,6 +72,7 @@ public:
     bool loggingEnabled() const;
 
     PerformanceLayout* performanceData();
+
 private:
     bool _doPerformanceMeasurements;
     bool _loggingEnabled;
@@ -95,7 +92,6 @@ private:
     bool createLogDir();
 };
 
-} // namespace performance
-} // namespace openspace
+} // namespace openspace::performance
 
 #endif // __OPENSPACE_CORE___PERFORMANCEMANAGER___H__

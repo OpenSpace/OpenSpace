@@ -45,16 +45,8 @@ public:
     
     void setModules(const std::vector<OpenSpaceModule*>& modules);
 
-    bool busyWaitForDecode();
-    bool logSGCTOutOfOrderErrors();
-    bool useDoubleBuffering();
-
 private:
     properties::OptionProperty _scenes;
-    properties::BoolProperty _busyWaitForDecode;
-    properties::BoolProperty _logSGCTOutOfOrderErrors;
-    properties::BoolProperty _useDoubleBuffering;
-    properties::BoolProperty _spiceUseExceptions;
 };
 
 } // namespace openspace

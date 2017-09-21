@@ -34,7 +34,6 @@ namespace volume {
     
 template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
 class LruCache {
-    typedef KeyType K;
 public:
     LruCache(size_t capacity) {
         _capacity = capacity;

@@ -37,8 +37,8 @@ class StaticTranslation : public Translation {
 public:
     StaticTranslation();
     StaticTranslation(const ghoul::Dictionary& dictionary);
-    virtual glm::dvec3 position() const;
-    virtual void update(const UpdateData& data) override;
+
+    virtual glm::dvec3 position() const override;
 
     static documentation::Documentation Documentation();
 

@@ -1,19 +1,9 @@
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
-    }
-else
-    NewHorizonsKernels = {
-        "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-    }
-end
+local charon_radius = 6.035E5
 
-Files = {
-    low = "textures/charon_highres.jpg",
-    med = "textures/charon_highres.jpg",
-    high = "textures/cpmap_cyl_HR_0e.jpg"
+local NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp",
+    "${SPICE}/new_horizons/spk/NavPE_de433_od122.bsp",
 }
-ColorTexture = Files[TextureResolution]
 
 return {
     -- CharonProjection module
@@ -22,15 +12,14 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
+            Radius = charon_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 6.035E5,
-                Segments = 100
+                Radius = charon_radius,
+                Segments = 350
             },
-            Textures = {
-                Color = ColorTexture,
-                Height = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
-            },
+            ColorTexture = charon_image,
+            HeightTexture = charon_height,
             Projection = {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",
@@ -56,7 +45,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHARON",
+                Target = "CHARON",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -95,7 +84,6 @@ return {
             Observer = "NEW HORIZONS",
             Body = "CHARON",
             BodyFrame = "IAU_CHARON",
-            MainFrame = "GALACTIC",
             Aberration = "NONE",
         },
     },    
@@ -107,7 +95,7 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHARON",
+                Target = "CHARON",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},

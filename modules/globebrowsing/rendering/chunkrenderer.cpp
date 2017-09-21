@@ -33,8 +33,7 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/util/updatestructures.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
                              std::shared_ptr<LayerManager> layerManager)
@@ -132,7 +131,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         glm::vec3 directionToSunWorldSpace =
             glm::normalize(-data.modelTransform.translation);
         glm::vec3 directionToSunCameraSpace =
-            (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+            glm::vec3(viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
         programObject.setUniform(
             "lightDirectionCameraSpace", -directionToSunCameraSpace);
     }
@@ -143,7 +142,9 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
             chunk.owner().generalProperties().orenNayarRoughness);
     }
 
-    if (chunk.owner().generalProperties().useAccurateNormals) {
+    if (chunk.owner().generalProperties().useAccurateNormals &&
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty()) 
+    {
         glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::SOUTH_WEST));
         glm::dvec3 corner10 = chunk.owner().ellipsoid().cartesianSurfacePosition(
@@ -177,12 +178,6 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         programObject.setUniform("deltaPhi1", glm::length(deltaPhi1));
         programObject.setUniform("tileDelta", tileDelta);
     }
-
-    if (chunk.owner().generalProperties().performShading) {
-        programObject.setUniform(
-            "orenNayarRoughness",
-            chunk.owner().generalProperties().orenNayarRoughness);
-    }
 }
 
 void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
@@ -203,8 +198,9 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
         glm::dvec3 cameraPosition = glm::dvec3(
             inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
-        float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
-            ellipsoid.minimumRadius();
+        float distanceScaleFactor = static_cast<float>(
+            chunk.owner().generalProperties().lodScaleFactor * ellipsoid.minimumRadius()
+        );
         programObject->setUniform("cameraPosition", glm::vec3(cameraPosition));
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
         programObject->setUniform("chunkLevel", chunk.tileIndex().level);
@@ -238,7 +234,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     }
     
     if (chunk.owner().generalProperties().useAccurateNormals &&
-        _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0)
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
@@ -278,8 +274,11 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
 
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
-        float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
-            chunk.owner().ellipsoid().minimumRadius();
+        float distanceScaleFactor = static_cast<float>(
+            chunk.owner().generalProperties().lodScaleFactor *
+            chunk.owner().ellipsoid().minimumRadius()
+        );
+
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
         programObject->setUniform("chunkLevel", chunk.tileIndex().level);
     }
@@ -336,5 +335,4 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     programObject->deactivate();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace:;globebrowsing

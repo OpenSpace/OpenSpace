@@ -54,10 +54,9 @@ namespace {
     };
     
     const char* LocalSharedMemoryNameBase = "PerformanceMeasurement_";
-}
+} // namespace
 
-namespace openspace {
-namespace performance {
+namespace openspace::performance {
 
 // The Performance Manager will use a level of indirection in order to support multiple
 // PerformanceManagers running in parallel:
@@ -132,16 +131,15 @@ void PerformanceManager::destroyGlobalSharedMemory() {
 }
     
 PerformanceManager::PerformanceManager()
-    : _performanceMemory(nullptr)
-    , _tick(0)
-    , _loggingEnabled(false)
+    : _loggingEnabled(false)
     , _logDir(absPath("${BASE_PATH}"))
     , _prefix("PM-")
     , _ext("log")
+    , _performanceMemory(nullptr)
+    , _tick(0)
 {
     PerformanceManager::createGlobalSharedMemory();
-    
-    
+
     ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
     sharedMemory.acquireLock();
     OnExit([&](){sharedMemory.releaseLock();});
@@ -214,7 +212,7 @@ void PerformanceManager::outputLogs() {
     const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _tick;
 
     // Log function performance
-    for (size_t n = 0; n < layout->nFunctionEntries; n++) {
+    for (int16_t n = 0; n < layout->nFunctionEntries; n++) {
         const auto function = layout->functionEntries[n];
         const std::string filename = formatLogName(function.name);
         std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
@@ -228,7 +226,7 @@ void PerformanceManager::outputLogs() {
     }
 
     // Log scene object performance
-    for (size_t n = 0; n < layout->nScaleGraphEntries; n++) {
+    for (int16_t n = 0; n < layout->nScaleGraphEntries; n++) {
         const auto node = layout->sceneGraphEntries[n];
 
         // Open file
@@ -442,5 +440,4 @@ void PerformanceManager::storeScenePerformanceMeasurements(
     tick();
 }
 
-} // namespace performance
-} // namespace openspace
+} // namespace openspace::performance

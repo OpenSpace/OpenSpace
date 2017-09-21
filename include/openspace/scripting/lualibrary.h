@@ -30,8 +30,7 @@
 #include <string>
 #include <vector>
 
-namespace openspace {
-namespace scripting {
+namespace openspace::scripting {
 
 /**
 * This structure represents a Lua library, itself consisting of a unique #name and
@@ -58,7 +57,7 @@ struct LuaLibrary {
     /// The list of all C-based callback functions for this library
     std::vector<Function> functions;
     /// A list of script files that are executed for each Lua state
-    std::vector<std::string> scripts;
+    std::vector<std::string> scripts = std::vector<std::string>();
 
     /// This struct contains information about a function or constant that is defined in
     /// a Lua script
@@ -72,13 +71,12 @@ struct LuaLibrary {
     };
     /// The list of documentations will be populated automatically by parsing the Lua
     /// scripts
-    std::vector<Documentation> documentations;
+    std::vector<Documentation> documentations = std::vector<Documentation>();
 
     /// Comparison function that compares two LuaLibrary%s name
     bool operator<(const LuaLibrary& rhs) const;
 };
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting
 
 #endif // __OPENSPACE_CORE___LUALIBRARY___H__

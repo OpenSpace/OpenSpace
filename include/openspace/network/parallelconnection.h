@@ -25,20 +25,16 @@
 #ifndef __OPENSPACE_CORE___PARALLELCONNECTION___H__
 #define __OPENSPACE_CORE___PARALLELCONNECTION___H__
 
-//openspace includes
 #include <openspace/network/messagestructures.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/numericalproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-//glm includes
 #include <glm/gtx/quaternion.hpp>
 
-//ghoul includes
 #include <ghoul/designpattern/event.h>
 
-//std includes
 #include <string>
 #include <vector>
 #include <deque>
@@ -47,8 +43,6 @@
 #include <mutex>
 #include <map>
 #include <condition_variable>
-
-
 
 #if defined(WIN32) || defined(__MING32__) || defined(__MING64__)
 typedef size_t _SOCKET;

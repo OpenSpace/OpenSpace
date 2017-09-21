@@ -28,12 +28,21 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
+#endif // WIN32
+
 #include <ccmc/Kameleon.h>
 #include <ccmc/Model.h>
 #include <ccmc/Interpolator.h>
 #include <ccmc/BATSRUS.h>
 #include <ccmc/ENLIL.h>
 #include <ccmc/CCMCTime.h>
+
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -211,23 +220,20 @@ float* KameleonWrapper::getUniformSampledValues(
     };
     
     //ProgressBar pb(static_cast<int>(outDimensions.x));
-    for (int x = 0; x < outDimensions.x; ++x) {
-        //pb.print(x);
-        
-        for (int y = 0; y < outDimensions.y; ++y) {
-            for (int z = 0; z < outDimensions.z; ++z) {
-                
+    for (int x = 0; x < static_cast<int>(outDimensions.x); ++x) {
+        for (int y = 0; y < static_cast<int>(outDimensions.y); ++y) {
+            for (int z = 0; z < static_cast<int>(outDimensions.z); ++z) {
                 unsigned int index = static_cast<unsigned int>(x + y*outDimensions.x + z*outDimensions.x*outDimensions.y);
                 
                 if (_gridType == GridType::Spherical) {
                     // Put r in the [0..sqrt(3)] range
-                    double rNorm = sqrt(3.0)*(double)x/(double)(outDimensions.x-1);
+                    double rNorm = sqrt(3.0) * static_cast<double>(x) / static_cast<double>(outDimensions.x - 1);
                     
                     // Put theta in the [0..PI] range
-                    double thetaNorm = M_PI*(double)y/(double)(outDimensions.y-1);
+                    double thetaNorm = M_PI * static_cast<double>(y) / static_cast<double>(outDimensions.y - 1);
                     
                     // Put phi in the [0..2PI] range
-                    double phiNorm = 2.0*M_PI*(double)z/(double)(outDimensions.z-1);
+                    double phiNorm = 2.0 * M_PI * static_cast<double>(z) / static_cast<double>(outDimensions.z - 1);
                     
                     // Go to physical coordinates before sampling
                     double rPh = _xMin + rNorm*(_xMax-_xMin);
@@ -392,9 +398,9 @@ float* KameleonWrapper::getUniformSliceValues(
     
     float missingValue = _model->getMissingValue();
 
-    for (int x = 0; x < outDimensions.x; ++x) {
-        for (int y = 0; y < outDimensions.y; ++y) {
-            for(int z = 0; z < outDimensions.z; ++z){
+    for (int x = 0; x < static_cast<int>(outDimensions.x); ++x) {
+        for (int y = 0; y < static_cast<int>(outDimensions.y); ++y) {
+            for(int z = 0; z < static_cast<int>(outDimensions.z); ++z){
 
                 float xi = (!xSlice)? x : slice;
                 float yi = (!ySlice)? y : slice;
@@ -405,16 +411,16 @@ float* KameleonWrapper::getUniformSliceValues(
                 if(_gridType == GridType::Spherical) {
                         // int z = zSlice; 
                         // Put r in the [0..sqrt(3)] range
-                        double rNorm = sqrt(3.0)*(double)xi/(double)(xDim);
+                        double rNorm = sqrt(3.0) * static_cast<double>(xi) / static_cast<double>(xDim);
                         
                         // Put theta in the [0..PI] range
-                        double thetaNorm = M_PI*(double)yi/(double)(yDim);
+                        double thetaNorm = M_PI * static_cast<double>(yi) / static_cast<double>(yDim);
                         
                         // Put phi in the [0..2PI] range
-                        double phiNorm = 2.0*M_PI*(double)zi/(double)(zDim);
+                        double phiNorm = 2.0 * M_PI * static_cast<double>(zi) / static_cast<double>(zDim);
                         
                         // Go to physical coordinates before sampling
-                        double rPh = _xMin + rNorm*(_xMax-_xMin);
+                        double rPh = _xMin + rNorm * (_xMax-_xMin);
                         double thetaPh = thetaNorm;
                         // phi range needs to be mapped to the slightly different model
                         // range to avoid gaps in the data Subtract a small term to
@@ -463,7 +469,7 @@ float* KameleonWrapper::getUniformSliceValues(
 
                 if(value != missingValue){
                     doubleData[index] = value;
-                    data[index] = value;
+                    data[index] = static_cast<float>(value);
                     // if(value > maxValue){
                     //     maxValue = value;
                     // }
@@ -636,7 +642,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getFieldLines(
 
 KameleonWrapper::Fieldlines KameleonWrapper::getLorentzTrajectories(
     const std::vector<glm::vec3>& seedPoints, 
-    const glm::vec4& color, 
+    const glm::vec4& /*color*/, 
     float stepsize) 
 {
     LINFO("Creating " << seedPoints.size() << " Lorentz force trajectories");
@@ -785,7 +791,9 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
         k1.y = _interpolator->interpolate(yID, pos.x, pos.y, pos.z);
         k1.z = _interpolator->interpolate(zID, pos.x, pos.y, pos.z);
         k1 = (float)direction*glm::normalize(k1);
-        stepX=stepX*stepSize, stepY=stepY*stepSize, stepZ=stepZ*stepSize;
+        stepX=stepX*stepSize;
+        stepY=stepY*stepSize;
+        stepZ=stepZ*stepSize;
         k2.x = _interpolator->interpolate(xID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);
         k2.y = _interpolator->interpolate(yID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);
         k2.z = _interpolator->interpolate(zID, pos.x+(stepX/2.0f)*k1.x, pos.y+(stepY/2.0f)*k1.y, pos.z+(stepZ/2.0f)*k1.z);
@@ -940,9 +948,24 @@ void KameleonWrapper::getGridVariables(std::string& x, std::string& y, std::stri
     y = tokens.at(1);
     z = tokens.at(2);
 
-    std::transform(x.begin(), x.end(), x.begin(), ::tolower);
-    std::transform(y.begin(), y.end(), y.begin(), ::tolower);
-    std::transform(z.begin(), z.end(), z.begin(), ::tolower);
+    std::transform(
+        x.begin(),
+        x.end(),
+        x.begin(),
+        [](char c) { return static_cast<char>(tolower(c)); }
+    );
+    std::transform(
+        y.begin(),
+        y.end(),
+        y.begin(),
+        [](char c) { return static_cast<char>(tolower(c)); }
+    );
+    std::transform(
+        z.begin(),
+        z.end(),
+        z.begin(),
+        [](char c) { return static_cast<char>(tolower(c)); }
+    );
 }
 
 KameleonWrapper::GridType KameleonWrapper::getGridType(

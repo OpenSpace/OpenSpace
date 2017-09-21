@@ -39,12 +39,10 @@
 
 #include <modules/volume/volumegridtype.h>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-        class ProgramObject;
-        class TextureUnit;
-    }
+namespace ghoul::opengl {
+    class Texture;
+    class ProgramObject;
+    class TextureUnit;
 }
 
 namespace openspace {
@@ -56,12 +54,10 @@ namespace volume {
 
 class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
-
     BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
         std::shared_ptr<TransferFunction> transferFunction, 
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
-
     virtual ~BasicVolumeRaycaster();
     void initialize();
     void deinitialize();
@@ -91,6 +87,7 @@ public:
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
+    
 private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 

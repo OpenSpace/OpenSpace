@@ -28,8 +28,7 @@
 
 #include <algorithm>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
 void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
     if (action == KeyAction::Press) {
@@ -93,5 +92,4 @@ bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
         mouseButton) != _mouseButtonsDown.end();
 }
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction

@@ -32,8 +32,7 @@
 
 using std::numeric_limits;
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(__TYPE__)                                                \
     [](lua_State* state, bool& success) -> __TYPE__ {                                    \
@@ -72,9 +71,9 @@ namespace properties {
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(__TYPE__)                                             \
-    [](std::string value, bool& success) -> __TYPE__ {                                   \
+    [](std::string v, bool& success) -> __TYPE__ {                                       \
         __TYPE__ result;                                                                 \
-        std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');             \
+        std::vector<std::string> tokens = ghoul::tokenizeString(v, ',');                 \
         if (tokens.size() !=                                                             \
             (ghoul::glm_rows<__TYPE__>::value * ghoul::glm_cols<__TYPE__>::value))       \
         {                                                                                \
@@ -147,5 +146,4 @@ REGISTER_NUMERICALPROPERTY_SOURCE(Mat3Property, glm::mat3x3, glm::mat3x3(0),
                                   DEFAULT_TO_STRING_LAMBDA(glm::mat3x3),
                                   LUA_TTABLE);
 
-}  // namespace properties
-}  // namespace openspace
+}  // namespace openspace::properties

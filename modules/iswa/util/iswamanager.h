@@ -33,8 +33,21 @@
 #include <future>
 #include <ghoul/glm.h>
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+
+
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
+#endif // WIN32
+
 #include <ccmc/Kameleon.h>
+
+#ifdef WIN32
+#pragma warning (pop)
 #endif
+
+#endif
+
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/downloadmanager.h>
@@ -44,12 +57,12 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/properties/selectionproperty.h>
-#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 
 
 namespace openspace {
+
 class IswaBaseGroup;
 class IswaCygnet; 
 
@@ -138,6 +151,7 @@ private:
 
     ghoul::Event<> _iswaEvent;
 
+    std::string _baseUrl;
 };
 
 } //namespace openspace

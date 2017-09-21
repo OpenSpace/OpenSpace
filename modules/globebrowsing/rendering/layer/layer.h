@@ -37,12 +37,11 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vectorproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-namespace tileprovider {
-    class TileProvider;
-}
+struct LayerGroup;
+
+namespace tileprovider { class TileProvider; }
 
 class Layer : public properties::PropertyOwner {
 public:
@@ -54,7 +53,7 @@ public:
         properties::Vec3Property color;
     };
 
-    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict);
+    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     Tile::Status getTileStatus(const TileIndex& index) const;
@@ -72,16 +71,26 @@ public:
     
     void update();
 
+    glm::ivec2 tilePixelStartOffset() const;
+    glm::ivec2 tilePixelSizeDifference() const;
+    glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
+                                              glm::uvec2 resolution, glm::vec2 tileUV);
+    glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
+                                            glm::vec2 tileUV, glm::uvec2 resolution);
+
 private:
     layergroupid::TypeID parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const;
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
     void addVisibleProperties();
     void removeVisibleProperties();
+
+    LayerGroup& _parent;
     
     properties::OptionProperty _typeOption;
     properties::OptionProperty _blendModeOption;
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
+    properties::TriggerProperty _remove;
 
     layergroupid::TypeID _type;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
@@ -89,12 +98,14 @@ private:
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
 
+    glm::ivec2 _padTilePixelStartOffset;
+    glm::ivec2 _padTilePixelSizeDifference;
+
     const layergroupid::GroupID _layerGroupId;
   
     std::function<void(void)> _onChangeCallback;
   };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__

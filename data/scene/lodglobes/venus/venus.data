@@ -1,5 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "venus_textures", Destination = "textures", Version = 1 }
-    },
-}

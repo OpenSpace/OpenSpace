@@ -27,8 +27,7 @@
 #include <fmt/format.h>
 #include <ctime>
 
-namespace openspace {
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 /**
  * \ingroup LuaScripts
@@ -186,6 +185,4 @@ int time_currentWallTime(lua_State* L) {
     return 1;
 }
 
-} // namespace luascriptfunctions
-
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

@@ -46,10 +46,10 @@ protected:
     // Allowing SyncEngine synchronization methods and at the same time hiding them
     // from the used of implementations of the interface
     friend class SyncEngine;
-    virtual void presync(bool isMaster) {};
-    virtual void encode(SyncBuffer* syncBuffer) = 0;
-    virtual void decode(SyncBuffer* syncBuffer) = 0;
-    virtual void postsync(bool isMaster) {};
+    virtual void presync(bool /*isMaster*/) {};
+    virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
+    virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
+    virtual void postsync(bool /*isMaster*/) {};
 };
 
 /**
@@ -97,19 +97,19 @@ public:
     }
 
 protected:
-    virtual void encode(SyncBuffer* syncBuffer) {
+    virtual void encode(SyncBuffer* syncBuffer) override {
         _mutex.lock();
         syncBuffer->encode(data);
         _mutex.unlock();
     }
 
-    virtual void decode(SyncBuffer* syncBuffer) {
+    virtual void decode(SyncBuffer* syncBuffer) override {
         _mutex.lock();
         syncBuffer->decode(doubleBufferedData);
         _mutex.unlock();
     }
 
-    virtual void postsync(bool isMaster) {
+    virtual void postsync(bool isMaster) override {
         // apply synced update
         if (!isMaster) {
             _mutex.lock();
@@ -121,7 +121,6 @@ protected:
     T data;
     T doubleBufferedData;
     std::mutex _mutex;
-
 };
 
 } // namespace openspace

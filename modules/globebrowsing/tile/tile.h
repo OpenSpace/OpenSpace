@@ -30,12 +30,9 @@
 
 #include <memory>
 
-namespace ghoul { namespace opengl {
-    class Texture;
-}}
+namespace ghoul::opengl { class Texture; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct TileMetaData;
 struct TileUvTransform;
@@ -88,10 +85,6 @@ public:
         return _texture;
     };
 
-    static glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, 
-        glm::vec2 sizeDiff, glm::uvec2 resolution, glm::vec2 tileUV);
-    static glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-        glm::vec2 tileUV, glm::uvec2 resolution);
     /**
     * A tile with status unavailable that any user can return to
     * indicate that a tile was unavailable.
@@ -104,8 +97,7 @@ private:
     Status _status;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__

@@ -74,9 +74,8 @@ public:
     void preRaycast(const RaycasterTask& raycasterTask);
     void postRaycast(const RaycasterTask& raycasterTask);
 
-    void update();
+    void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
-
 
     /**
      * Update render data
@@ -84,6 +83,7 @@ public:
      */
     virtual void updateRendererData() override;
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
+
 private:
 
     void clear();

@@ -34,18 +34,18 @@ namespace openspace {
 class SpiceTranslation : public Translation {
 public:
     SpiceTranslation(const ghoul::Dictionary& dictionary);
-    glm::dvec3 position() const;
+    
+    glm::dvec3 position() const override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 private:
     properties::StringProperty _target;
-    properties::StringProperty _origin;
+    properties::StringProperty _observer;
     properties::StringProperty _frame;
 
     glm::dvec3 _position;
-    bool _kernelsLoadedSuccessfully;
 };
     
 } // namespace openspace

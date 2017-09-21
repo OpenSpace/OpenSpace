@@ -32,22 +32,18 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
-
 namespace ghoul {
-namespace fontrendering {
-    class Font;
+    class Dictionary;
+    class SharedMemory;
 }
-namespace opengl {
-    class ProgramObject;
-}
-class Dictionary;
-class SharedMemory;
-} // namespace ghoul
+namespace ghoul::fontrendering { class Font; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace performance { class PerformanceManager; }
 namespace scripting { struct LuaLibrary; }
+
 class Camera;
 class RaycasterManager;
 class Renderer;
@@ -99,6 +95,7 @@ public:
         const glm::mat4& projectionMatrix);
 
     void renderScreenLog();
+    void renderVersionInformation();
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
@@ -204,6 +201,7 @@ private:
     properties::BoolProperty _showDate;
     properties::BoolProperty _showInfo;
     properties::BoolProperty _showLog;
+    properties::BoolProperty _showVersionInfo;
     
     properties::TriggerProperty _takeScreenshot;
     bool _shouldTakeScreenshot;

@@ -32,10 +32,9 @@
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 
-
 namespace openspace {
 
-namespace documentation { struct Documentation;  }
+namespace documentation { struct Documentation; }
 
 /**
  * Converts a set of exr image slices to a raw volume
@@ -58,6 +57,6 @@ private:
     glm::ivec3 _outDimensions;
 };
 
-}
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GALAXY___MILKYWAYCONVERSIONTASK___H__

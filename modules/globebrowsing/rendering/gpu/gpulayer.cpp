@@ -26,13 +26,11 @@
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                         const TileIndex& tileIndex, int pileSize)
 {
-    ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
     gpuRenderSettings.setValue(programObject, layer.renderSettings());
     gpuLayerAdjustment.setValue(programObject, layer.layerAdjustment());
     
@@ -44,9 +42,13 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
         case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer: {
+            ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
             gpuChunkTilePile.setValue(programObject, chunkTilePile);
+            paddingStartOffset.setValue(programObject, layer.tilePixelStartOffset());
+            paddingSizeDifference.setValue(programObject, layer.tilePixelSizeDifference());
             break;
+        }
         case layergroupid::TypeID::SolidColor:
             gpuColor.setValue(programObject, layer.otherTypesProperties().color.value());
             break;
@@ -69,9 +71,12 @@ void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& la
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
         case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer: {
             gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
+            paddingStartOffset.bind(programObject, nameBase + "padding.startOffset");
+            paddingSizeDifference.bind(programObject, nameBase + "padding.sizeDifference");
             break;
+        }
         case layergroupid::TypeID::SolidColor:
             gpuColor.bind(programObject, nameBase + "color");
             break;
@@ -84,5 +89,4 @@ void GPULayer::deactivate() {
     gpuChunkTilePile.deactivate();
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing
