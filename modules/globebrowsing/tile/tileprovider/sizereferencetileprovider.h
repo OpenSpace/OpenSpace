@@ -40,9 +40,9 @@ public:
     SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
     virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
+        const TileIndex& tileIndex) const override;
 
-    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
+    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const override;
 
 private:
     int roundedLongitudalLength(const TileIndex& tileIndex) const;

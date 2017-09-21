@@ -31,6 +31,7 @@ class VolumeRaycaster;
 
 class RaycasterListener {
 public:
+    virtual ~RaycasterListener() = default;
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) = 0;
 };
 

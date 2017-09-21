@@ -74,6 +74,7 @@ public:
     void setStepSize(float stepSize);
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
+    
 private:
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;

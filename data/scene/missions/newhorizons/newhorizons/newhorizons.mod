@@ -1,71 +1,35 @@
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_20170126/spk/nh_pred_20141201_20190301_od122.bsp",
-        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp",
-        "${SPICE}/nh_20170126/spk/NavPE_de433_od122.bsp",
+NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/nh_pred_20141201_20190301_od122.bsp",
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp",
+    "${SPICE}/new_horizons/spk/NavPE_de433_od122.bsp",
 
-        "${SPICE}/jup260.bsp",
+    "${SPICE}/jup260.bsp",
 
-        "${SPICE}/nh_20170126/ck/nh_scispi_2015_pred.bc",
-        "${SPICE}/nh_20170126/ck/nh_scispi_2015_recon.bc",
-        "${SPICE}/nh_20170126/ck/nh_lorri_wcs.bc",
-        
-        "${SPICE}/nh_20170126/smithed_pc_and_sp/PLU_LORRI_ALL_161216.bc",
+    "${SPICE}/new_horizons/ck/nh_scispi_2015_pred.bc",
+    "${SPICE}/new_horizons/ck/nh_scispi_2015_recon.bc",
+    "${SPICE}/new_horizons/ck/nh_lorri_wcs.bc",
+    
+    "${SPICE}/new_horizons/smithed_pc_and_sp/PLU_LORRI_ALL_161216.bc",
 
-        "${SPICE}/nh_20170126/sclk/new-horizons_1121.tsc",
+    "${SPICE}/new_horizons/sclk/new-horizons_1121.tsc",
 
-        "${SPICE}/nh_20170126/pck/nh_targets_v001.tpc",
-        "${SPICE}/nh_20170126/pck/nh_pcnh_005.tpc",
+    "${SPICE}/new_horizons/pck/nh_targets_v001.tpc",
+    "${SPICE}/new_horizons/pck/nh_pcnh_005.tpc",
 
-        "${SPICE}/nh_20170126/fk/nh_v220.tf",
-        "${SPICE}/nh_20170126/ik/nh_allinstruments_v002.ti",
-        "${SPICE}/nh_20170126/ik/nh_alice_v200.ti",
-        "${SPICE}/nh_20170126/ik/nh_lorri_v201.ti",
-        "${SPICE}/nh_20170126/ik/nh_pepssi_v110.ti",
-        "${SPICE}/nh_20170126/ik/nh_ralph_v100.ti",
-        "${SPICE}/nh_20170126/ik/nh_rex_v100.ti",
-        "${SPICE}/nh_20170126/ik/nh_sdc_v101.ti",
-        "${SPICE}/nh_20170126/ik/nh_swap_v100.ti",
-        "${SPICE}/nh_20170126/ik/nh_astr_v000.ti",
-        "${SPICE}/nh_20170126/ik/nh_fss_v000.ti",
-        "${SPICE}/nh_20170126/fk/nh_soc_misc_v001.tf",
-        "${SPICE}/nh_20170126/spk/nh_stars.bsp",
-    }
-else
-    NewHorizonsKernels = {
-        --SCLK
-
-        "${SPICE}/NewHorizonsKernels/new_horizons_413.tsc",
-
-        "${SPICE}/NewHorizonsKernels/nhops_CORE_v9g_cdh2.bc",
-        "${SPICE}/NewHorizonsKernels/nh_ref_20080710_20160101_od059B.bsp",
-
-        "${SPICE}/de430_1850-2150.bsp",
-        -- CK
-        "${SPICE}/NewHorizonsKernels/merged_nhpc_2006_v011.bc",
-        "${SPICE}/NewHorizonsKernels/merged_nhpc_2007_v006.bc",
-        -- FK       
-        "${SPICE}/NewHorizonsKernels/nh_v200.tf",
-        -- IK       
-        "${SPICE}/NewHorizonsKernels/nh_alice_v110.ti",
-        "${SPICE}/NewHorizonsKernels/nh_lorri_v100.ti",
-        "${SPICE}/NewHorizonsKernels/nh_pepssi_v110.ti",
-        "${SPICE}/NewHorizonsKernels/nh_ralph_v100.ti",
-        "${SPICE}/NewHorizonsKernels/nh_rex_v100.ti",
-        "${SPICE}/NewHorizonsKernels/nh_sdc_v101.ti",
-        "${SPICE}/NewHorizonsKernels/nh_swap_v100.ti",
-        -- PCK      
-
-        -- SPK      
-        "${SPICE}/jup260.bsp",
-        "${SPICE}/NewHorizonsKernels/de413.bsp",
-        "${SPICE}/NewHorizonsKernels/nh_nep_ura_000.bsp",
-        "${SPICE}/NewHorizonsKernels/nh_recon_e2j_v1.bsp",
-        "${SPICE}/NewHorizonsKernels/nh_recon_j2sep07_prelimv1.bsp",
-        "${SPICE}/NewHorizonsKernels/sb_2002jf56_2.bsp",
-        "${SPICE}/NewHorizonsKernels/nh_plu017.bsp",
-    }
-end
+    "${SPICE}/new_horizons/fk/nh_v220.tf",
+    "${SPICE}/new_horizons/ik/nh_allinstruments_v002.ti",
+    "${SPICE}/new_horizons/ik/nh_alice_v200.ti",
+    "${SPICE}/new_horizons/ik/nh_lorri_v201.ti",
+    "${SPICE}/new_horizons/ik/nh_pepssi_v110.ti",
+    "${SPICE}/new_horizons/ik/nh_ralph_v100.ti",
+    "${SPICE}/new_horizons/ik/nh_rex_v100.ti",
+    "${SPICE}/new_horizons/ik/nh_sdc_v101.ti",
+    "${SPICE}/new_horizons/ik/nh_swap_v100.ti",
+    "${SPICE}/new_horizons/ik/nh_astr_v000.ti",
+    "${SPICE}/new_horizons/ik/nh_fss_v000.ti",
+    "${SPICE}/new_horizons/fk/nh_soc_misc_v001.tf",
+    "${SPICE}/new_horizons/spk/nh_stars.bsp",
+}
 
 return {
     {
@@ -87,8 +51,6 @@ return {
     },
     {
         Name = "NewHorizons",
-        -- Parent = "PlutoBarycenter", 
-        -- Parent = "JupiterBarycenter", 
         Parent = "NewHorizonsPosition", 
         Renderable = {
             Type = "RenderableModel",

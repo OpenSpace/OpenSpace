@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -36,8 +37,6 @@
 #include <ghoul/misc/clipboard.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
-
-#include <glm/gtc/matrix_transform.hpp>
 
 #include <fstream>
 #include <string>
@@ -252,7 +251,7 @@ void LuaConsole::initialize() {
         GL_FLOAT,
         GL_FALSE,
         2 * sizeof(GLfloat),
-        reinterpret_cast<void*>(0)
+        nullptr
     );
 
     glBindVertexArray(0);

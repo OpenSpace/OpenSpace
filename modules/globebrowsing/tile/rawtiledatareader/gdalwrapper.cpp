@@ -65,7 +65,7 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-void gdalErrorHandler(CPLErr eErrClass, int errNo, const char *msg) {
+void gdalErrorHandler(CPLErr eErrClass, int, const char *msg) {
     if (GdalWrapper::ref().logGdalErrors()) {
         switch (eErrClass) {
             case CE_None: break;
@@ -113,9 +113,9 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     , _logGdalErrors(LogGdalErrorInfo, true)
     , _gdalMaximumCacheSize (
         GdalMaximumCacheInfo,
-        maximumCacheSize / (1024 * 1024),           // Default
+        static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL)), // Default
         0,                                          // Minimum: No caching
-        maximumMaximumCacheSize / (1024 * 1024),    // Maximum
+        static_cast<int>(maximumMaximumCacheSize / (1024ULL * 1024ULL)), // Maximum
         1                                           // Step: One MB
     ) {
     addProperty(_logGdalErrors);
@@ -129,6 +129,10 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     CPLSetConfigOption(
         "CPL_TMPDIR",
         absPath("${BASE_PATH}").c_str()
+    );
+    CPLSetConfigOption(
+        "GDAL_HTTP_UNSAFESSL",
+        "YES"
     );
     setGdalProxyConfiguration();
     CPLSetErrorHandler(gdalErrorHandler);

@@ -43,7 +43,8 @@ namespace {
 namespace openspace::globebrowsing::tileprovider {
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers))
+    : TextTileProvider(
+        LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
     , _backgroundTile(Tile::TileUnavailable)
 {
     _fontSize = 50;
@@ -73,7 +74,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
     textPosition.x = 0;
     textPosition.y = aboveEquator ?
         _fontSize / 2.f :
-        _initData.dimensionsWithPadding().y - 3.f * _fontSize / 2.f;
+        _initData.dimensions().y - 3.f * _fontSize / 2.f;
     glm::vec4 color(1.0, 1.0, 1.0, 1.0);
 
     fontRenderer.render(

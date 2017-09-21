@@ -1,22 +1,9 @@
 local charon_radius = 6.035E5
 
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_20170126/spk/NavSE_plu047_od122.bsp",
-        "${SPICE}/nh_20170126/spk/NavPE_de433_od122.bsp",
-    }
-else
-    NewHorizonsKernels = {
-        "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-    }
-end
-
-local Files = {
-    low = "textures/charon_highres.jpg",
-    med = "textures/charon_highres.jpg",
-    high = "textures/cpmap_cyl_HR_0e.jpg"
+local NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp",
+    "${SPICE}/new_horizons/spk/NavPE_de433_od122.bsp",
 }
-local ColorTexture = Files[TextureResolution]
 
 return {
     -- CharonProjection module
@@ -29,10 +16,10 @@ return {
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = charon_radius,
-                Segments = 100
+                Segments = 350
             },
-            ColorTexture = ColorTexture,
-            HeightTexture = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
+            ColorTexture = charon_image,
+            HeightTexture = charon_height,
             Projection = {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",

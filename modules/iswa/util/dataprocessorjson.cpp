@@ -29,7 +29,6 @@
 #include <modules/iswa/ext/json.h>
 
 namespace {
-    const char* _loggerCat = "DataProcessorJson";
     using json = nlohmann::json;
 } // namespace
 

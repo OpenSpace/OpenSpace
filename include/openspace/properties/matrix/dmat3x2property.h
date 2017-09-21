@@ -31,7 +31,7 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(DMat3x2Property, glm::dmat3x2);
+REGISTER_NUMERICALPROPERTY_HEADER(DMat3x2Property, glm::dmat3x2)
 
 } // namespace openspace::properties
 

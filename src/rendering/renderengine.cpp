@@ -24,11 +24,12 @@
 
 #include <openspace/rendering/renderengine.h> 
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-#include <modules/newhorizons/util/imagesequencer.h>
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
 #endif
 #include <openspace/util/syncdata.h>
 
+#include <openspace/openspace.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -73,10 +74,6 @@
 
 #include <array>
 #include <stack>
-
-// ABuffer defines
-#define RENDERER_FRAMEBUFFER 0
-#define RENDERER_ABUFFER 1
 
 #include "renderengine_lua.inl"
 
@@ -129,6 +126,13 @@ namespace {
         "This value determines whether the on-screen log will be shown or hidden. Even "
         "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
         "log."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowVersionInfo = {
+        "ShowVersion",
+        "Shows the version on-screen information",
+        "This value determines whether the GIT version information (branch and commit ) "
+        "hash are shown on the screen."
     };
 
     static const openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
@@ -201,6 +205,7 @@ RenderEngine::RenderEngine()
     , _showDate(ShowDateInfo, true)
     , _showInfo(ShowInfoInfo, true)
     , _showLog(ShowLogInfo, true)
+    , _showVersionInfo(ShowVersionInfo, true)
     , _takeScreenshot(TakeScreenshotInfo)
     , _shouldTakeScreenshot(false)
     , _applyWarping(ApplyWarpingInfo, false)
@@ -252,6 +257,7 @@ RenderEngine::RenderEngine()
     addProperty(_showDate);
     addProperty(_showInfo);
     addProperty(_showLog);
+    addProperty(_showVersionInfo);
     
     _nAaSamples.onChange([this](){
         if (_renderer) {
@@ -1025,7 +1031,7 @@ void RenderEngine::renderInformation() {
         }
 
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
         double currentTime = OsEng.timeManager().time().j2000Seconds();
 
@@ -1038,7 +1044,7 @@ void RenderEngine::renderInformation() {
                     //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
                     static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
                     static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
-                    static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+                    // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
                     static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
                     // Add spacing
@@ -1243,19 +1249,19 @@ void RenderEngine::renderInformation() {
                         "Active Instruments:"
                         );
 
-                    for (auto t : activeMap) {
-                        if (t.second == false) {
+                    for (auto m : activeMap) {
+                        if (m.second == false) {
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "| |"
-                                );
+                            );
                             RenderFontCr(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "    %5s",
-                                t.first.c_str()
-                                );
+                                m.first.c_str()
+                            );
 
                         }
                         else {
@@ -1263,31 +1269,84 @@ void RenderEngine::renderInformation() {
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "|"
-                                );
-                            if (t.first == "NH_LORRI") {
+                            );
+                            if (m.first == "NH_LORRI") {
                                 RenderFont(*_fontInfo,
                                     penPosition,
                                     firing,
                                     " + "
-                                    );
+                                );
                             }
                             RenderFont(*_fontInfo,
                                 penPosition,
                                 glm::vec4(0.3, 0.3, 0.3, 1),
                                 "  |"
-                                );
+                            );
                             RenderFontCr(*_fontInfo,
                                 penPosition,
                                 active,
                                 "    %5s",
-                                t.first.c_str()
-                                );
+                                m.first.c_str()
+                            );
                         }
                     }
                 }
             }
-        }
 #endif
+        }
+    }
+}
+
+void RenderEngine::renderVersionInformation() {
+    if (!_showVersionInfo) {
+        return;
+    }
+
+    using FR = ghoul::fontrendering::FontRenderer;
+
+    FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s",
+        OPENSPACE_VERSION_STRING_FULL
+    );
+
+    FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s@%s",
+        OPENSPACE_GIT_BRANCH,
+        OPENSPACE_GIT_COMMIT
+    );
+
+
+    
+
+    FR::defaultRenderer().render(
+        *_fontInfo,
+        glm::vec2(
+            fontResolution().x - versionBox.boundingBox.x - 10.f,
+            5.f
+        ),
+        glm::vec4(0.5, 0.5, 0.5, 1.f),
+        "%s",
+        OPENSPACE_VERSION_STRING_FULL
+    );
+
+    // If a developer hasn't placed the Git command in the path, this variable will be
+    // empty
+    if (!std::string(OPENSPACE_GIT_COMMIT).empty()) {
+        // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
+        // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
+        // checking for that is a bit brittle)
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            glm::vec2(
+                fontResolution().x - commitBox.boundingBox.x - 10.f,
+                versionBox.boundingBox.y + 5.f
+            ),
+            glm::vec4(0.5, 0.5, 0.5, 1.f),
+            "%s",
+            OPENSPACE_GIT_FULL
+        );
     }
 }
 
@@ -1372,13 +1431,13 @@ void RenderEngine::renderScreenLog() {
         //                    const float font_with_light = 5;
         RenderFont(
             *_fontLog,
-            glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 39 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             color * alpha,
             "%s",                                    // Format
             lvl.c_str());        // Pad category with "..." if exceeds category_length
 
         RenderFont(*_fontLog,
-            glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 53 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             White * alpha,
             "%s",                                    // Format
             message.c_str());        // Pad category with "..." if exceeds category_length

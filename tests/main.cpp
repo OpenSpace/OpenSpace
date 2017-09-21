@@ -22,16 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef WIN32
+#if defined(WIN32)
 #pragma warning (push)
 #pragma warning (disable : 4619) // #pragma warning: there is no warning number '4800'
-#endif // WIN32
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundef"
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+#pragma clang diagnostic ignored "-Wshift-sign-overflow"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundef"
+#pragma GCC diagnostic ignored "-Wmissing-noreturn" 
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+#endif // __GNUC__
 
 #include "gtest/gtest.h"
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
 
 // When running the unit tests we don't want to be asked what to do in the case of an
 // assertion
@@ -126,3 +134,11 @@ int main(int argc, char** argv) {
 
     return b;
 }
+
+#ifdef WIN32
+#pragma warning (pop)
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif // __GNUC__

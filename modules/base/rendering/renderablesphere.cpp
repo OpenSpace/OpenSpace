@@ -31,14 +31,12 @@
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 namespace {
     enum Orientation {
@@ -228,7 +226,7 @@ void RenderableSphere::deinitialize() {
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glm::mat4 transform = glm::mat4(1.0);
 
-    transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+    transform = glm::rotate(transform, glm::half_pi<float>(), glm::vec3(1, 0, 0));
 
     // Activate shader
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;

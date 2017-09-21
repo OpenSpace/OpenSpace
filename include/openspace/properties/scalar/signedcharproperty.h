@@ -44,7 +44,7 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char);
+REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char)
 
 } // namespace openspace::properties
 

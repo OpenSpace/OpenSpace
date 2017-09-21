@@ -187,7 +187,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             return 0;
         }
 
-        glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
+        glm::vec2 transformedUv = layer->TileUvToTextureSamplePosition(
             uvTransform,
             patchUV,
             glm::uvec2(tileTexture->dimensions())
@@ -271,6 +271,11 @@ void ChunkedLodGlobe::notifyShaderRecompilation() {
     _shadersNeedRecompilation = true;
 }
 
+void ChunkedLodGlobe::recompileShaders() {
+    _renderer->recompileShaders(_owner);
+    _shadersNeedRecompilation = false;
+}
+
 void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     stats.startNewRecord();
     if (_shadersNeedRecompilation) {
@@ -329,7 +334,7 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
             clippingSpaceCorners[i] = clippingSpaceCorner;
 
             glm::vec3 screenSpaceCorner =
-                (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
+                glm::vec3((1.0f / clippingSpaceCorner.w) * clippingSpaceCorner);
             screenSpaceBounds.expand(screenSpaceCorner);
         }
 

@@ -52,9 +52,7 @@ window.onload = function () {
 
   var data = {
     propertyOwners: propertyOwners,
-    version: version,
-    // sceneFilename: sceneFilename,
-    generationTime: generationTime
+    version: version
   }
 
   var contents = mainTemplate(data);

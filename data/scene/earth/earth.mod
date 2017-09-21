@@ -74,17 +74,25 @@ return {
                                     Name = "Temporal VIIRS SNPP",
                                     Type = "TemporalTileLayer",
                                     FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
+                                    PadTiles = false,
                                 }
                             },
                             {
                                 MaxLevel = 22,
                                 TileProvider = {
                                     Name = "ESRI Imagery World 2D",
-                                    FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms"
+                                    FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
+                                    PadTiles = false,
                                 }
                             },
                         },
                         Enabled = true,
+                        PadTiles = false,
+                        Fallback = {
+                            Name = "Blue Marble",
+                            FilePath = "textures/earth_bluemarble.jpg",
+                            Enabled = true,
+                        }
                     },
                     {
                         Name = "ESRI Imagery World 2D",
@@ -139,6 +147,16 @@ return {
                             Gamma = 1.5,
                             Multiplier = 15.0,
                         },
+                        Fallback = {
+                            Name = "Earth Night",
+                            FilePath = "textures/earth_night.jpg",
+                            Enabled = true,
+                            Settings = {
+                                Opacity = 1.0,
+                                Gamma = 1.5,
+                                Multiplier = 15.0,
+                            },
+                        }
                     },
                     {
                         Name = "Temporal Earth at Night",
@@ -186,6 +204,11 @@ return {
                         FilePath = "map_service_configs/ESRI/TERRAIN.wms",
                         Enabled = true,
                         TilePixelSize = 64,
+                        Fallback = {
+                            Name = "Earth Bluemarble Height",
+                            FilePath = "textures/earth_bluemarble_height.jpg",
+                            Enabled = true,
+                        }
                     }
                 }
             }
