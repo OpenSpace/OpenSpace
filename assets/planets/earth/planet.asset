@@ -8,6 +8,10 @@ assetHelper.registerSynchronizations(asset, {
     }
 })
 
+--asset.onSynchronize = function (onFinish)
+--    onFinish(true)
+--end
+
 asset.Earth = {
     Name = "Earth",
     Parent = transforms.EarthIau.Name,

@@ -72,8 +72,6 @@ public:
     void initialize();
     void deinitialize();
 
-
-
     bool hasDependency(const Asset* asset) const;
     void addDependency(Asset* asset);
     void removeDependency(Asset* asset);
@@ -101,8 +99,6 @@ public:
     std::string resolveLocalResource(std::string resourceName);
     std::string resolveSyncedResource(std::string resourceName);
 private:
-
-
     ReadyState _readyState;
     AssetLoader* _loader;
 
@@ -112,17 +108,17 @@ private:
     // Absolute path to asset file
     std::optional<std::string> _assetPath;
 
-    // Asset dependencies
-    std::vector<Asset*> _dependencies;
+    // Required dependencies
+    std::vector<Asset*> _requiredDependencies;
 
-    // Asset dependants
-    std::vector<Asset*> _dependants;
+    // Assets that refers to this asset as an required dependency
+    std::vector<Asset*> _requiredDependants;
 
-    // Optional sub-assets
-    std::vector<Optional> _optionals;
+    // Optional dependencies
+    std::vector<Optional> _optionalDependencies;
 
-    // Assets that refers to this asset as an optional
-    std::vector<Asset*> _optionalOwners;
+    // Assets that refers to this asset as an optional dependency
+    std::vector<Asset*> _optionalDependants;
 };
 
 } // namespace openspace

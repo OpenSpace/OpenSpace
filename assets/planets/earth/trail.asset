@@ -1,7 +1,7 @@
 local assetHelper = asset.import('assethelper')
 local sunTransforms = asset.import('sun/transforms')
 
-asset.EarthTrail = {
+local EarthTrail = {
     Name = "EarthTrail",
     Parent = sunTransforms.SolarSystemBarycenter.Name,
     Renderable = {
@@ -20,5 +20,7 @@ asset.EarthTrail = {
 }
 
 assetHelper.registerSceneGraphNodes(asset, {
-    asset.EarthTrail
+    EarthTrail
 })
+
+asset.export("EarthTrail", EarthTrail)

@@ -73,11 +73,11 @@ Asset::ReadyState Asset::readyState() const {
 
 bool Asset::isInitReady() const {
     // An asset is ready for initialization if it is synchronized
-    // and all its dependencies are ready for initialization.
+    // and all its required dependencies are ready for initialization.
     if (_readyState != Asset::ReadyState::Synchronized) {
         return false;
     }
-    for (const auto& dependency : _dependencies) {
+    for (const auto& dependency : _requiredDependencies) {
         if (!dependency->isInitReady()) {
             return false;
         }
@@ -88,10 +88,10 @@ bool Asset::isInitReady() const {
 
 void Asset::synchronizeEnabledRecursive() {
     synchronize();
-    for (Asset* a : _dependencies) {
+    for (Asset* a : _requiredDependencies) {
         a->synchronizeEnabledRecursive();
     }
-    for (Optional& o : _optionals) {
+    for (Optional& o : _optionalDependencies) {
         if (o.second) {
             o.first->synchronizeEnabledRecursive();
         }        
@@ -99,15 +99,15 @@ void Asset::synchronizeEnabledRecursive() {
 }
 
 void Asset::synchronize() {
-    LDEBUG("Synchronizing asset " << id());
-
     if (_readyState != Asset::ReadyState::Loaded) {
-        // Already synchronized or synchronizing
+        // Already synchronized or currently synchronizing
         return;
     }
+    LDEBUG("Synchronizing asset " << id());
+    _readyState = Asset::ReadyState::Synchronizing;
 
-    // Initialize dependencies
-    for (auto& dependency : _dependencies) {
+    // Synchronize dependencies
+    for (auto& dependency : _requiredDependencies) {
         dependency->synchronize();
     }
 
@@ -127,7 +127,7 @@ void Asset::initialize() {
     }
 
     // Initialize dependencies
-    for (auto& dependency : _dependencies) {
+    for (auto& dependency : _requiredDependencies) {
         dependency->initialize();
     }
 
@@ -137,7 +137,7 @@ void Asset::initialize() {
     loader()->callOnInitialize(this);
 
     // Notify dependencies
-    for (auto& dependency : _dependencies) {
+    for (auto& dependency : _requiredDependencies) {
         dependency->dependantDidInitialize(this);
     }
 }
@@ -148,7 +148,7 @@ void Asset::deinitialize() {
     }
 
     // Notify dependencies
-    for (auto& dependency : _dependencies) {
+    for (auto& dependency : _requiredDependencies) {
         dependency->dependantWillDeinitialize(this);
     }
 
@@ -158,7 +158,7 @@ void Asset::deinitialize() {
     _readyState = Asset::ReadyState::Synchronized;
 
     // Make sure no dependencies are left dangling
-    for (auto& dependency : _dependencies) {
+    for (auto& dependency : _requiredDependencies) {
         if (!dependency->hasInitializedDependants()) {
             dependency->deinitialize();
         }
@@ -198,8 +198,8 @@ AssetLoader* Asset::loader() const {
 }
 
 bool Asset::hasDependency(const Asset* asset) const {
-    const auto it = std::find(_dependencies.begin(), _dependencies.end(), asset);
-    return it != _dependencies.end();
+    const auto it = std::find(_requiredDependencies.begin(), _requiredDependencies.end(), asset);
+    return it != _requiredDependencies.end();
 }
 
 void Asset::addDependency(Asset* dependency) {
@@ -209,23 +209,23 @@ void Asset::addDependency(Asset* dependency) {
     }
 
     // Do nothing if the dependency already exists.
-    auto it = std::find(_dependencies.begin(), _dependencies.end(), dependency);
-    if (it != _dependencies.end()) {
+    auto it = std::find(_requiredDependencies.begin(), _requiredDependencies.end(), dependency);
+    if (it != _requiredDependencies.end()) {
         return;
     }
 
-    _dependencies.push_back(dependency);
-    dependency->_dependants.push_back(this);
+    _requiredDependencies.push_back(dependency);
+    dependency->_requiredDependants.push_back(this);
 
     //addPropertySubOwner(dependency);
 }
 
 void Asset::removeDependency(Asset* dependency) {
-    _dependencies.erase(
-        std::remove(_dependencies.begin(), _dependencies.end(), dependency),
-        _dependencies.end()
+    _requiredDependencies.erase(
+        std::remove(_requiredDependencies.begin(), _requiredDependencies.end(), dependency),
+        _requiredDependencies.end()
     );
-    std::vector<Asset*>& dependants = dependency->_dependants;
+    std::vector<Asset*>& dependants = dependency->_requiredDependants;
     dependants.erase(
         std::remove(dependants.begin(), dependants.end(), this),
         dependants.end()
@@ -237,10 +237,10 @@ void Asset::removeDependency(Asset* dependency) {
 }
 
 void Asset::removeDependency(const std::string& assetId) {
-    auto dep = std::find_if(_dependencies.begin(), _dependencies.end(), [&assetId](const Asset* d) {
+    auto dep = std::find_if(_requiredDependencies.begin(), _requiredDependencies.end(), [&assetId](const Asset* d) {
         return d->id() == assetId;
     });
-    if (dep != _dependencies.end()) {
+    if (dep != _requiredDependencies.end()) {
        removeDependency(*dep);
     } else {
         LERROR("No such dependency '" << assetId << "'");
@@ -257,7 +257,7 @@ void Asset::dependantWillDeinitialize(Asset* dependant) {
 
 bool Asset::hasDependants() const {
     bool foundDep = false;
-    for (const auto& dependant : _dependants) {
+    for (const auto& dependant : _requiredDependants) {
         if (dependant->hasDependency(this)) {
             foundDep = true;
         }
@@ -266,10 +266,10 @@ bool Asset::hasDependants() const {
 }
 
 std::vector<Asset*> Asset::optionalAssets() const {
-    std::vector<Asset*> assets(_optionals.size());
+    std::vector<Asset*> assets(_optionalDependencies.size());
     std::transform(
-        _optionals.begin(),
-        _optionals.end(),
+        _optionalDependencies.begin(),
+        _optionalDependencies.end(),
         assets.begin(),
         [](const Optional& o) {
             return o.first;
@@ -280,29 +280,29 @@ std::vector<Asset*> Asset::optionalAssets() const {
 
 bool Asset::hasOptional(const Asset* asset) const {
     auto it = std::find_if(
-        _optionals.begin(),
-        _optionals.end(),
+        _optionalDependencies.begin(),
+        _optionalDependencies.end(),
         [&asset](const Optional& o) {
             return o.first == asset;
         }
     );
-    return it != _optionals.end();
+    return it != _optionalDependencies.end();
 }
 
 bool Asset::hasEnabledOptional(const Asset* asset) const {
         auto it = std::find_if(
-            _optionals.begin(),
-            _optionals.end(),
+            _optionalDependencies.begin(),
+            _optionalDependencies.end(),
         [&asset](const Optional& o) {
             return o.first == asset && o.second;
         }
     );
-    return it != _optionals.end();
+    return it != _optionalDependencies.end();
 }
 
 bool Asset::hasInitializedDependants() const {
     bool foundInitializedDep = false;
-    for (const auto& dependant : _dependants) {
+    for (const auto& dependant : _requiredDependants) {
         if (dependant->readyState() == Asset::ReadyState::Initialized && dependant->hasDependency(this)) {
             foundInitializedDep = true;
         }
@@ -312,34 +312,34 @@ bool Asset::hasInitializedDependants() const {
 
 void Asset::setOptionalEnabled(Asset* asset, bool enabled) {
     auto it = std::find_if(
-        _optionals.begin(),
-        _optionals.end(),
+        _optionalDependencies.begin(),
+        _optionalDependencies.end(),
         [&asset](const Optional& o) {
             return o.first == asset;
         }
     );
 
-    if (it != _optionals.end()) {
+    if (it != _optionalDependencies.end()) {
         it->second = enabled;
     }
 }
 
 void Asset::removeOptional(Asset* asset) {
-    _optionals.erase(
+    _optionalDependencies.erase(
         std::remove_if(
-            _optionals.begin(),
-            _optionals.end(),
+            _optionalDependencies.begin(),
+            _optionalDependencies.end(),
             [&asset](Optional& o) {
                 return o.first == asset;
             }
         ),
-        _optionals.end()
+        _optionalDependencies.end()
     );
     // TODO: Update and validate
 }
 
 void Asset::addOptional(Asset* asset, bool enabled) {
-    _optionals.push_back(std::make_pair(asset, enabled));
+    _optionalDependencies.push_back(std::make_pair(asset, enabled));
     // TODO: Update and validate
 }
 

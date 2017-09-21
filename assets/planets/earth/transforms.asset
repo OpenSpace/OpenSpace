@@ -1,7 +1,7 @@
 local assetHelper = asset.import('assethelper')
 local sunTransforms = asset.import('sun/transforms')
 
-asset.EarthBarycenter = {
+local EarthBarycenter = {
     Name = "EarthBarycenter",
     Parent = sunTransforms.SolarSystemBarycenter.Name,
     Transform = {
@@ -13,7 +13,7 @@ asset.EarthBarycenter = {
     }
 }
 
-asset.EarthInertial = {
+local EarthInertial = {
     -- The default reference frame for Earth-orbiting satellites
     Name = "EarthInertial",
     Parent = asset.EarthBarycenter.Name,
@@ -26,7 +26,7 @@ asset.EarthInertial = {
     },
 }
 
-asset.EarthIau = {
+local EarthIau = {
     Name = "EarthIau",
     Parent = asset.EarthBarycenter.Name,
     Transform = {
@@ -39,7 +39,11 @@ asset.EarthIau = {
 }
 
 assetHelper.registerSceneGraphNodes(asset, {
-    asset.EarthBarycenter,
-    asset.EarthInertial,
-    asset.EarthIau
+    EarthBarycenter,
+    EarthInertial,
+    EarthIau
 })
+
+asset.export("EarthBarycenter", EarthBarycenter)
+asset.export("EarthInertial", EarthInertial)
+asset.export("EarthIau", EarthIau)

@@ -1,28 +1,27 @@
 local sunTransforms = asset.import('sun/transforms')
+local assetHelper = asset.import('assethelper')
 
-asset.sync = { 
-        {
-            Type = "ResourceSynchronization"
-            Destination = asset.syncedResource("textures"),
-            Identifier = "milkyway_textures",
-            Version = 2
-        }
-    },
-}
+local textureFolder = asset.syncedResource("textures")
 
-asset.MilkyWay =
-{
+local MilkyWay = {
     Name = "MilkyWay",
     Parent = sunTransforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableSphere",
         Size = 10E22,
         Segments = 40,
-        Texture = asset.syncedResource("textures/DarkUniverse_mellinger_8k.jpg"),
+        Texture = textureFolder .. "/DarkUniverse_mellinger_8k.jpg",
         Orientation = "Inside/Outside"
     }
 }
 
-assetHelper.registerSceneGraphNodes(asset, {
-    asset.MilkyWay
-})
+asset.export("MilkyWay", MilkyWay);
+
+asset.addSynchronization({
+    Type = "ResourceSynchronization"
+    Destination = textureFolder,
+    Identifier = "milkyway_textures",
+    Version = 2
+});
+
+assetHelper.registerSceneGraphNodes(asset, {MilkyWay})

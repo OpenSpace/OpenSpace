@@ -1,6 +1,7 @@
-asset.registerSynchronizations = function (asset, syncs)
-    local oldSync = asset.onSync;
-    asset.onSynchronize = function (onFinish)
+local registerSynchronizations = function (syncAsset, syncs)
+    local oldSync = syncAsset.onSynchronize;
+    syncAsset.onSynchronize = function (onFinish)
+        print("helper synchronize")
         local nSyncs = #syncs + 1
         local nSynced = 0
 
@@ -22,7 +23,7 @@ asset.registerSynchronizations = function (asset, syncs)
     end
 end
 
-asset.registerSceneGraphNodes = function (sceneAsset, nodes)
+local registerSceneGraphNodes = function (sceneAsset, nodes)
     local oldInit = sceneAsset.onInitialize;
     sceneAsset.onInitialize = function ()
         for i, node in ipairs(nodes) do
@@ -41,7 +42,7 @@ asset.registerSceneGraphNodes = function (sceneAsset, nodes)
     end
 end
 
-asset.registerSpiceKernels = function (spiceAsset, kernels)
+local registerSpiceKernels = function (spiceAsset, kernels)
     local oldInit = spiceAsset.onInitialize;
     spiceAsset.onInitialize = function ()
         print "loading spice kernels...."
@@ -60,3 +61,7 @@ asset.registerSpiceKernels = function (spiceAsset, kernels)
         oldDeinit()
     end
 end
+
+asset.export("registerSceneGraphNodes", registerSceneGraphNodes);
+asset.export("registerSpiceKernels", registerSpiceKernels);
+asset.export("registerSynchronizations", registerSynchronizations);

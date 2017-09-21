@@ -1,6 +1,6 @@
 local transforms = asset.import('./transforms')
 
-asset.EarthMarker = {
+local EarthMarker = {
     Name = "EarthMarker",
     Parent = transforms.EarthIAU.Name,
     Renderable = {
@@ -12,3 +12,6 @@ asset.EarthMarker = {
         BlendMode = "Additive"
     }
 }
+
+
+asset.export("EarthMarker", EarthMarker)

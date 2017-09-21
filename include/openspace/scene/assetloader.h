@@ -81,14 +81,24 @@ public:
     void loadSingleAsset(const std::string& identifier);
 
     /**
+     * Synchronize, mark as synchronized,
+     * initialize and deinitialize dependencies
+     * based on state of the assets.
+     * Update asset ready states.
+     */
+    void update();
+
+    /**
      * Import an asset
      * Add the asset as an optional on the root asset
+     * The asset is imported synchronously
      */
     void importAsset(const std::string& identifier);
 
     /**
      * Unimport an asset
      * Remove the asset as an optional on the root asset
+     * The asset is unimported synchronously
      */
     void unimportAsset(const std::string& identifier);
 
@@ -127,8 +137,8 @@ public:
     std::string generateAssetPath(const std::string& baseDirectory, const std::string& path) const;
 
 private:
-    Asset* importDependency(const std::string& identifier);
-    Asset* importOptional(const std::string& identifier, bool enabled = true);
+    Asset* importRequiredDependency(const std::string& identifier);
+    Asset* importOptionalDependency(const std::string& identifier, bool enabled = true);
     Asset* loadAsset(std::string name);
     Asset* getAsset(std::string name);
     ghoul::filesystem::Directory currentDirectory();
@@ -145,8 +155,8 @@ private:
     std::string _assetRootDirectory;
     std::string _syncRootDirectory;
 
-    int importDependencyLua(std::string assetName);
-    int importOptionalLua(std::string assetName, bool enabled);
+    int importRequiredDependencyLua(std::string assetName);
+    int importOptionalDependencyLua(std::string assetName, bool enabled);
     int resolveLocalResourceLua(Asset* asset);
     int resolveSyncedResourceLua(Asset* asset);
     int onFinishSynchronizationLua(Asset* asset);
@@ -154,8 +164,8 @@ private:
 
     ghoul::lua::LuaState* _luaState;
 
-    friend int assetloader::importDependency(lua_State* state);
-    friend int assetloader::importOptional(lua_State* state);
+    friend int assetloader::importRequiredDependency(lua_State* state);
+    friend int assetloader::importOptionalDependency(lua_State* state);
     friend int assetloader::resolveLocalResource(lua_State* state);
     friend int assetloader::resolveSyncedResource(lua_State* state);
     friend int assetloader::onFinishSynchronization(lua_State* state);

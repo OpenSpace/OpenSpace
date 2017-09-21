@@ -1,7 +1,7 @@
 local transforms = asset.import('./transforms')
 local earthEllipsoid = {6378137.0, 6378137.0, 6356752.314245} -- Earth's radii
 
-asset.Earth = {
+local Earth = {
     Name = "Earth",
     Parent = transforms.EarthIau.Name,
     Renderable = {
@@ -115,6 +115,6 @@ asset.Earth = {
 }
 
 
-assetHelper.registerSceneGraphNodes(asset, {
-    asset.Earth
-})
+assetHelper.registerSceneGraphNodes(asset, {Earth})
+
+asset.export("Earth", Earth)

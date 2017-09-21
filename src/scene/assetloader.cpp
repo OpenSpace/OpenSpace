@@ -36,17 +36,19 @@
 
 #include "assetloader_lua.inl"
 
+
+
 namespace {
     const char* AssetGlobalVariableName = "asset";
 
-    const char* SyncTableName = "sync";
-    const char* ImportFunctionName = "import";
-    const char* ImportOptionalFunctionName = "importOptional";
+    const char* ImportRequiredDependencyFunctionName = "import";
+    const char* ImportOptionalDependencyFunctionName = "importOptional";
+    const char* ExportFunctionName = "export";
 
     const char* SyncedResourceFunctionName = "syncedResource";
     const char* LocalResourceFunctionName = "localResource";
 
-    const char* OnSynchronizeFunctionName = "onSynchronize";
+    const char* AddSynchronizationFunctionName = "addSynchronization";
 
     const char* OnInitializeFunctionName = "onInitialize";
     const char* OnDeinitializeFunctionName = "onDeinitialize";
@@ -73,7 +75,7 @@ namespace openspace {
 
 namespace assetloader {
 
-int importDependency(lua_State* state) {
+int importRequiredDependency(lua_State* state) {
     AssetLoader *assetLoader =
         reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
 
@@ -85,7 +87,7 @@ int importDependency(lua_State* state) {
     std::string assetName = luaL_checkstring(state, 1);
 
     try {
-        return assetLoader->importDependencyLua(assetName);
+        return assetLoader->importRequiredDependencyLua(assetName);
     } catch (const ghoul::RuntimeError& e) {
         return luaL_error(
             state,
@@ -97,7 +99,7 @@ int importDependency(lua_State* state) {
     }
 }
 
-int importOptional(lua_State* state) {
+int importOptionalDependency(lua_State* state) {
     AssetLoader *assetLoader =
         reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
 
@@ -110,7 +112,7 @@ int importOptional(lua_State* state) {
     bool enabled = lua_toboolean(state, 2);
     
     try {
-        return assetLoader->importOptionalLua(assetName, enabled);
+        return assetLoader->importOptionalDependencyLua(assetName, enabled);
     } catch (const ghoul::RuntimeError& e) {
         return luaL_error(
             state,
@@ -144,9 +146,13 @@ int noOperation(lua_State* state) {
 }
 
 int noSynchronization(lua_State* state) {
-
     int nArguments = lua_gettop(state);
-    // Todo: call onFinish.
+    SCRIPT_CHECK_ARGUMENTS("noSynchronization", state, 1, nArguments);
+
+    // Call onFinish function with success = true
+    lua_pushboolean(state, 1);
+    lua_pcall(state, 1, 0, 0);
+
     return 0;
 }
 
@@ -238,7 +244,7 @@ Asset* AssetLoader::getAsset(std::string name) {
     return loaded ? it->second.get() : loadAsset(path);
 }
 
-Asset* AssetLoader::importDependency(const std::string& name) {
+Asset* AssetLoader::importRequiredDependency(const std::string& name) {
     Asset* asset = getAsset(name);
     if (!asset) {
         // TODO: Throw
@@ -249,7 +255,7 @@ Asset* AssetLoader::importDependency(const std::string& name) {
     return asset;
 }
 
-Asset* AssetLoader::importOptional(const std::string& name, bool enabled) {
+Asset* AssetLoader::importOptionalDependency(const std::string& name, bool enabled) {
     Asset* asset = getAsset(name);
     if (!asset) {
         // TODO: Throw
@@ -273,7 +279,7 @@ void AssetLoader::synchronizeEnabledAssets() {
 }
 
 void AssetLoader::loadSingleAsset(const std::string& identifier) {
-    Asset* imported = importOptional(identifier, true);
+    Asset* imported = importOptionalDependency(identifier, true);
     std::vector<Asset*> optionals = _rootAsset->optionalAssets();
 
     // Remove all other optionals
@@ -284,10 +290,14 @@ void AssetLoader::loadSingleAsset(const std::string& identifier) {
     }
 }
 
+void AssetLoader::update() {
+    // 1. synchronize assets 
+}
+
 void AssetLoader::importAsset(const std::string & identifier) {
     ghoul_assert(_assetStack.size() == 1, "Can only import an asset from the root asset");
     try {
-        importOptional(identifier);
+        importOptionalDependency(identifier);
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR("Error loading asset '" << identifier << "': " << e.message);
@@ -315,6 +325,7 @@ const std::string& AssetLoader::syncRootDirectory() {
     return _syncRootDirectory;
 }
 
+/*
 void AssetLoader::callOnSynchronize(Asset* asset) {
     if (asset == _rootAsset.get()) {
         return;
@@ -332,8 +343,9 @@ void AssetLoader::callOnSynchronize(Asset* asset) {
     if (status != LUA_OK) {
         throw ghoul::lua::LuaExecutionException(lua_tostring(*_luaState, -1));
     }
-}
+}*/
 
+/*
 void AssetLoader::callOnInitialize(Asset * asset) {
     if (asset == _rootAsset.get()) {
         return;
@@ -358,8 +370,9 @@ void AssetLoader::callOnDeinitialize(Asset* asset) {
     if (status != LUA_OK) {
         throw ghoul::lua::LuaExecutionException(lua_tostring(*_luaState, -1));
     }
-}
+}*/
 
+/*
 void AssetLoader::callOnDependantInitialize(Asset* asset, Asset* dependant) {
     if (asset == _rootAsset.get()) {
         return;
@@ -390,8 +403,9 @@ void AssetLoader::callOnDependantDeinitialize(Asset* asset, Asset* dependant) {
         throw ghoul::lua::LuaLoadingException(lua_tostring(*_luaState, -1));
     }
 }
-
+*/
 void AssetLoader::synchronizeResource(const ghoul::Dictionary & d, std::function<void(bool)> onFinish) {
+    LINFO("DUMMY SYNC RESOURCE CALL");
     onFinish(true);
 }
 
@@ -443,41 +457,40 @@ void AssetLoader::pushAsset(Asset* asset) {
     int assetTableIndex = lua_gettop(*_luaState);
 
     // Register local resource function
+    // string localResource(string path)
     lua_pushlightuserdata(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::resolveLocalResource, 1);
     lua_setfield(*_luaState, assetTableIndex, LocalResourceFunctionName);
 
     // Register synced resource function
+    // string syncedResource(string path)
     lua_pushlightuserdata(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::resolveSyncedResource, 1);
     lua_setfield(*_luaState, assetTableIndex, SyncedResourceFunctionName);
 
     // Register import-dependency function
+    // Asset, Dependency import(string path)
     lua_pushlightuserdata(*_luaState, this);
-    lua_pushcclosure(*_luaState, &assetloader::importDependency, 1);
-    lua_setfield(*_luaState, assetTableIndex, ImportFunctionName);
+    lua_pushcclosure(*_luaState, &assetloader::importRequiredDependency, 1);
+    lua_setfield(*_luaState, assetTableIndex, ImportRequiredDependencyFunctionName);
 
     // Register import-optional function
+    // Asset, Dependency importOptional(string path)
     lua_pushlightuserdata(*_luaState, this);
-    lua_pushcclosure(*_luaState, &assetloader::importOptional, 1);
-    lua_setfield(*_luaState, assetTableIndex, ImportOptionalFunctionName);
+    lua_pushcclosure(*_luaState, &assetloader::importOptionalDependency, 1);
+    lua_setfield(*_luaState, assetTableIndex, ImportOptionalDependencyFunctionName);
 
-    // Register default onSynchronize function
+    // Register onInitialize function
+    // void onInitialize(function<void()> initializationFunction)
     lua_pushlightuserdata(*_luaState, this);
-    lua_pushcclosure(*_luaState, &assetloader::noSynchronization, 1);
-    lua_setfield(*_luaState, assetTableIndex, OnSynchronizeFunctionName);
-
-    // Register default onInitialize function
-    lua_pushcfunction(*_luaState, &assetloader::noOperation);
+    lua_pushcclosure(*_luaState, &assetloader::onInitialize, 1);
     lua_setfield(*_luaState, assetTableIndex, OnInitializeFunctionName);
 
-    // Register default onDeinitialize function
-    lua_pushcfunction(*_luaState, &assetloader::noOperation);
+    // Register onDeinitialize function
+    // void onInitialize(function<void()> deinitializationFunction)
+    lua_pushlightuserdata(*_luaState, this);
+    lua_pushcclosure(*_luaState, &assetloader::onDeinitialize, 1);
     lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
-
-    // Register empty sync table on imported asset
-    lua_newtable(*_luaState);
-    lua_setfield(*_luaState, assetTableIndex, SyncTableName);
 
     // Register empty dependant table on imported asset.
     // (importer => dependant object)
@@ -504,27 +517,25 @@ void AssetLoader::updateLuaGlobals() {
     lua_setglobal(*_luaState, AssetGlobalVariableName);
 }
 
-int AssetLoader::importDependencyLua(std::string assetName) {
+int AssetLoader::importRequiredDependencyLua(std::string assetName) {
     Asset* importer = _assetStack.back();
 
-    Asset* importedAsset = importDependency(assetName);
+    Asset* importedAsset = importRequiredDependency(assetName);
     if (!importedAsset) {
         return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());
     }
     return createLuaTableEntries(importer, importedAsset);
 }
 
-int AssetLoader::importOptionalLua(std::string assetName, bool enabled) {
+int AssetLoader::importOptionalDependencyLua(std::string assetName, bool enabled) {
     Asset* importer = _assetStack.back();
 
-    Asset* importedAsset = importOptional(assetName, enabled);
+    Asset* importedAsset = importOptionalDependency(assetName, enabled);
     if (!importedAsset) {
         return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());
     }
     return createLuaTableEntries(importer, importedAsset);
 }
-
-
 
 int AssetLoader::createLuaTableEntries(const Asset* importer, const Asset* importedAsset) {
     const std::string importerId = importer->id();
