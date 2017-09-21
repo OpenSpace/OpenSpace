@@ -41,15 +41,15 @@ namespace openspace {
 class TSP {
 public:
     struct Header {
-        unsigned int gridType_;
-        unsigned int numOrigTimesteps_;
-        unsigned int numTimesteps_;
-        unsigned int xBrickDim_;
-        unsigned int yBrickDim_;
-        unsigned int zBrickDim_;
-        unsigned int xNumBricks_;
-        unsigned int yNumBricks_;
-        unsigned int zNumBricks_;
+        size_t gridType_;
+        size_t numOrigTimesteps_;
+        size_t numTimesteps_;
+        size_t xBrickDim_;
+        size_t yBrickDim_;
+        size_t zBrickDim_;
+        size_t xNumBricks_;
+        size_t yNumBricks_;
+        size_t zNumBricks_;
 
     };
 
