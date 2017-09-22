@@ -51,25 +51,19 @@ namespace {
     const char* KeyMaxValue = "MaxValue";
 
     const char* _loggerCat = "KameleonVolumeToRawTask";
-}
+} // namespace
 
 namespace openspace {
 namespace kameleonvolume {
 
-KameleonVolumeToRawTask::KameleonVolumeToRawTask(
-    const ghoul::Dictionary& dictionary)
+KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary)
     : _autoDomainBounds(false)
 {
-    try {
-        openspace::documentation::testSpecificationAndThrow(
-            documentation(),
-            dictionary,
-            "KameleonVolumeToRawTask"
-        );
-    } catch (const ghoul::RuntimeError& e) {
-        LERROR("Error when reading specification. " << e.message << " " << e.component);
-        return;
-    }
+    openspace::documentation::testSpecificationAndThrow(
+        documentation(),
+        dictionary,
+        "KameleonVolumeToRawTask"
+    );
 
     _inputPath = absPath(dictionary.value<std::string>(KeyInput));
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));

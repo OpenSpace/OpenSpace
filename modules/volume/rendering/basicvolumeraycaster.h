@@ -87,7 +87,7 @@ public:
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
-    
+
 private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 

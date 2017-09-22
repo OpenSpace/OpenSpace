@@ -182,11 +182,11 @@ int main(int argc, char** argv) {
         LINFO("Task root: " << tasksRoot);
         FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath(tasksRoot)));
     }
-    
-    while (true) {
-        std::cout << "TASK >";
-        std::cin >> tasksPath;
+
+    std::cout << "TASK >";
+    while (std::cin >> tasksPath) {
         performTasks(tasksPath);
+        std::cout << "TASK >";
     }
 
     return 0;

@@ -25,17 +25,17 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
 #define __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
 
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/boxgeometry.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/transferfunction.h>
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
-
 #include <modules/volume/rendering/volumeclipplanes.h>
+
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/rendering/transferfunction.h>
+#include <openspace/util/boxgeometry.h>
 
 namespace openspace {
 
@@ -56,6 +56,7 @@ public:
 
     static documentation::Documentation Documentation();
     static documentation::Documentation TimestepDocumentation();
+
 private:
     struct Timestep {
         std::string baseName;

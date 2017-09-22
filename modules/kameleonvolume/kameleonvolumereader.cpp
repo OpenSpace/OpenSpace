@@ -252,14 +252,19 @@ std::string KameleonVolumeReader::simulationStart() const {
             switch (numChars) {
                 case 10 : // YYYY-MM-DD        => YYYY-MM-DDTHH
                     startTime += "T00";
+                    [[fallthrough]];
                 case 13 : // YYYY-MM-DDTHH     => YYYY-MM-DDTHH:
                     startTime += ":";
+                    [[fallthrough]];
                 case 14 : // YYYY-MM-DDTHH:    => YYYY-MM-DDTHH:MM
                     startTime += "00";
+                    [[fallthrough]];
                 case 16 : // YYYY-MM-DDTHH:MM  => YYYY-MM-DDTHH:MM:
                     startTime += ":";
+                    [[fallthrough]];
                 case 17 : // YYYY-MM-DDTHH:MM: => YYYY-MM-DDTHH:MM:SS
                     startTime += "00";
+                    break;
                 default :
                     break;
             }
@@ -272,7 +277,7 @@ std::string KameleonVolumeReader::simulationStart() const {
             _model->getGlobalAttribute("tim_crstart_cal").getAttributeString();
     }
 
-    if (startTime.length() == 19){
+    if (startTime.length() == 19) {
         startTime += ".000Z";
     }
 

@@ -34,10 +34,10 @@
 #include <openspace/rendering/renderable.h>
 
 namespace {
-    const char* GlslRaycastPath = "${MODULES}/volume/shaders/raycast.glsl";
-    const char* GlslHelperPath = "${MODULES}/volume/shaders/helper.glsl";
-    const char* GlslBoundsVsPath = "${MODULES}/volume/shaders/boundsvs.glsl";
-    const char* GlslBoundsFsPath = "${MODULES}/volume/shaders/boundsfs.glsl";
+    const char* GlslRaycastPath = "${MODULE_VOLUME}/shaders/raycast.glsl";
+    const char* GlslHelperPath = "${MODULE_VOLUME}/shaders/helper.glsl";
+    const char* GlslBoundsVsPath = "${MODULE_VOLUME}/shaders/boundsvs.glsl";
+    const char* GlslBoundsFsPath = "${MODULE_VOLUME}/shaders/boundsfs.glsl";
 }
 
 namespace openspace {
@@ -147,8 +147,7 @@ void BasicVolumeRaycaster::preRaycast(
     program.setUniform("valueRemapping_" + id, _valueRemapping);
 }
     
-void BasicVolumeRaycaster::postRaycast(const RaycastData&,
-                                          ghoul::opengl::ProgramObject&)
+void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&)
 {
     // For example: release texture units
     _textureUnit = nullptr;
