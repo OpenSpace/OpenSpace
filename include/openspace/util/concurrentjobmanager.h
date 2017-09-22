@@ -22,15 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
+#ifndef __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__
+#define __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__
 
-#include <modules/globebrowsing/other/concurrentqueue.h>
-#include <modules/globebrowsing/other/threadpool.h>
+#include <openspace/util/concurrentqueue.h>
+#include <openspace/util/threadpool.h>
 
 #include <mutex>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 // Templated abstract base class representing a job to be done.
 // Client code derive from this class and implement the virtual execute() method
@@ -66,8 +66,8 @@ private:
     ThreadPool threadPool;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #include "concurrentjobmanager.inl"
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
+#endif // __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__

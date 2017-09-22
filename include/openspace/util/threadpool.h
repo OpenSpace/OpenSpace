@@ -22,52 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::globebrowsing {
+#ifndef __OPENSPACE_CORE___THREAD_POOL___H__
+#define __OPENSPACE_CORE___THREAD_POOL___H__
 
-template <typename T>
-T ConcurrentQueue<T>::pop() {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    while (_queue.empty()) {
-        _cond.wait(mlock);
-    }
-    auto item = _queue.front();
-    _queue.pop();
-    return item;
-}
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+#include <atomic>
 
-template <typename T>
-void ConcurrentQueue<T>::pop(T& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    while (_queue.empty()) {
-        _cond.wait(mlock);
-    }
-    item = _queue.front();
-    _queue.pop();
-}
+// Implementatin based on http://progsch.net/wordpress/?p=81
 
-template <typename T>
-void ConcurrentQueue<T>::push(const T& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    _queue.push(item);
-    mlock.unlock();
-    _cond.notify_one();
-}
+namespace openspace {
 
-template <typename T>
-void ConcurrentQueue<T>::push(T&& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    _queue.push(std::move(item));
-    mlock.unlock();
-    _cond.notify_one();
-}
+class ThreadPool;
 
-template <typename T>
-size_t ConcurrentQueue<T>::size() const {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    size_t s = _queue.size();
-    mlock.unlock();
-    _cond.notify_one();
-    return s;
-}
+class Worker {
+public: 
+    Worker(ThreadPool& pool);
+    void operator()();
+private:
+    ThreadPool& pool;
+};
 
-} // namespace openspace::globebrowsing
+class ThreadPool {
+public:
+    ThreadPool(size_t numThreads);
+    ThreadPool(const ThreadPool& toCopy);
+    ~ThreadPool();
+
+    void enqueue(std::function<void()> f);
+    void clearTasks();
+
+private:
+    friend class Worker;
+
+    std::vector<std::thread> workers;
+
+    std::deque<std::function<void()>> tasks;
+
+    std::mutex queue_mutex;
+    std::condition_variable condition;
+
+    bool stop;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___THREAD_POOL___H__
