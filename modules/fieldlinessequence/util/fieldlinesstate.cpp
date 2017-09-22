@@ -75,21 +75,21 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) 
     _lineStart.resize(numLines);
     _lineCount.resize(numLines);
     _vertexPositions.resize(numPoints);
-    _extraVariables.resize(numExtras);
-    _extraVariableNames.reserve(numExtras);
+    _extraQuantities.resize(numExtras);
+    _extraQuantityNames.reserve(numExtras);
 
     // Read vertex position data
     ifs.read( reinterpret_cast<char*>(_lineStart.data()), sizeof(GLint)*numLines);
     ifs.read( reinterpret_cast<char*>(_lineCount.data()), sizeof(GLsizei)*numLines);
     ifs.read( reinterpret_cast<char*>(_vertexPositions.data()), sizeof(glm::vec3)*numPoints);
 
-    // Read all extra variables
-    for (std::vector<float>& vec : _extraVariables) {
+    // Read all extra quantities
+    for (std::vector<float>& vec : _extraQuantities) {
         vec.resize(numPoints);
         ifs.read( reinterpret_cast<char*>(vec.data()), sizeof(float) * numPoints);
     }
 
-    // Read all extra variables' names. Stored as multiple c-strings
+    // Read all extra quantities' names. Stored as multiple c-strings
     std::string allNamesInOne;
     char* s = new char[byteSizeAllNames];
     ifs.read(s, byteSizeAllNames);
@@ -102,19 +102,19 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) 
         endOfVarName -= offset;
         std::string varName = allNamesInOne.substr(offset, endOfVarName);
         offset += varName.size() + 1;
-        _extraVariableNames.push_back(varName);
+        _extraQuantityNames.push_back(varName);
     }
 
     return true;
 }
 
-// Returns one of the extra variable vectors, _extraVariables[INDEX].
+// Returns one of the extra quantity vectors, _extraQuantities[INDEX].
 // If INDEX is out of scope an empty vector is returned and the referenced bool will be false.
-const vector<float>&  FieldlinesState::extraVariable(const size_t INDEX,
+const vector<float>&  FieldlinesState::extraQuantity(const size_t INDEX,
                                                      bool& isSuccessful) const {
-    if (INDEX < _extraVariables.size()) {
+    if (INDEX < _extraQuantities.size()) {
         isSuccessful = true;
-        return _extraVariables[INDEX];
+        return _extraQuantities[INDEX];
     }
     isSuccessful = false;
     // return empty vector which goes out of scope hence unusable!

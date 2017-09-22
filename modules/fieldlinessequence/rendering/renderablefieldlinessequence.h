@@ -96,7 +96,7 @@ private:
     // ----------------------------- Properties -----------------------------
     properties::PropertyOwner  _colorGroup;          // Group to hold the color properties
     properties::OptionProperty _colorMethod;         // Uniform/transfer function/topology?
-    properties::OptionProperty _colorQuantity;       // Index of the extra variable to color lines by
+    properties::OptionProperty _colorQuantity;       // Index of the extra quantity to color lines by
     properties::StringProperty _colorQuantityMin;    // Color table/transfer function min
     properties::StringProperty _colorQuantityMax;    // Color table/transfer function max
     properties::StringProperty _colorTablePath;      // Color table/transfer function for "By Quantity" coloring

@@ -54,10 +54,10 @@ namespace {
     const char* VALUE_INPUT_FILE_TYPE_OSFLS = "osfls";
 
     static const openspace::properties::Property::PropertyInfo ColorMethodInfo = {
-        "colorMethod", "Color Method", "Color lines uniformly or using color tables based on extra variables like e.g. temperature or particle density."
+        "colorMethod", "Color Method", "Color lines uniformly or using color tables based on extra quantities like e.g. temperature or particle density."
     };
     static const openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
-        "colorQuantity", "Quantity to Color By", "Quantity/variable used to color lines if the \"By Quantity\" color method is selected."
+        "colorQuantity", "Quantity to Color By", "Quantity used to color lines if the \"By Quantity\" color method is selected."
     };
     static const openspace::properties::Property::PropertyInfo ColorQuantityMinInfo = {
         "colorQuantityMin", "ColorTable Min Value", "Value to map to the lowest end of the color table."
@@ -194,10 +194,10 @@ void RenderableFieldlinesSequence::initialize() {
     _colorMethod.addOption(ColorMethod::BY_QUANTITY, "By Quantity");
 
     // Add option for each extra quantity. We assume that there are just as many names to
-    // extra variables as there are extra variables. We also assume that all states in the
-    // given sequence have the same extra variables!
-    const size_t N_EXTRA_QUANTITIES = _states[0].nExtraVariables();
-    auto EXTRA_VARIABLE_NAMES_VEC = _states[0].extraVariableNames();
+    // extra quantities as there are extra quantities. We also assume that all states in
+    // the given sequence have the same extra quantities!
+    const size_t N_EXTRA_QUANTITIES = _states[0].nExtraQuantities();
+    auto EXTRA_VARIABLE_NAMES_VEC = _states[0].extraQuantityNames();
     for (size_t i = 0; i < N_EXTRA_QUANTITIES; ++i) {
         _colorQuantity.addOption(i, EXTRA_VARIABLE_NAMES_VEC[i]);
     }
@@ -337,8 +337,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         // Check if current time in OpenSpace is within sequence interval
         if (isWithinSequenceInterval(CURRENT_TIME)) {
             const int NEXT_IDX = _activeTriggerTimeIndex + 1;
-            if (_activeTriggerTimeIndex < 0                                                // true => Previous frame was not within the sequence interval
-                || CURRENT_TIME < _startTimes[_activeTriggerTimeIndex]                     // true => OpenSpace has stepped back    to a time represented by another state
+            if (_activeTriggerTimeIndex < 0                                          // true => Previous frame was not within the sequence interval
+                || CURRENT_TIME < _startTimes[_activeTriggerTimeIndex]               // true => OpenSpace has stepped back    to a time represented by another state
                 || (NEXT_IDX < _nStates && CURRENT_TIME >= _startTimes[NEXT_IDX])) { // true => OpenSpace has stepped forward to a time represented by another state
 
                 updateActiveTriggerTimeIndex(CURRENT_TIME);
@@ -376,7 +376,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
             updateVertexPositionBuffer();
 
-            if (_states[_activeStateIndex].nExtraVariables() > 0) {
+            if (_states[_activeStateIndex].nExtraQuantities() > 0) {
                 _shouldUpdateColorBuffer = true;
             } else {
                 _colorMethod = ColorMethod::UNIFORM;
@@ -451,7 +451,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
 
     bool isSuccessful;
     const std::vector<float>& QUANTITY_VEC =
-            _states[_activeStateIndex].extraVariable(_colorQuantity, isSuccessful);
+            _states[_activeStateIndex].extraQuantity(_colorQuantity, isSuccessful);
 
     if (isSuccessful) {
         glBufferData(GL_ARRAY_BUFFER, QUANTITY_VEC.size() * sizeof(float),

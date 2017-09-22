@@ -49,17 +49,17 @@ public:
     bool   loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE);
 
     // ------------------------------GETTERS-----------------------------------------//
-    const vector<vector<float>>& extraVariables()     const { return _extraVariables; }
-    const vector<std::string>&   extraVariableNames() const { return _extraVariableNames; }
+    const vector<vector<float>>& extraQuantities()    const { return _extraQuantities; }
+    const vector<std::string>&   extraQuantityNames() const { return _extraQuantityNames; }
     const vector<GLsizei>&       lineCount()          const { return _lineCount; }
     const vector<GLint>&         lineStart()          const { return _lineStart; }
-    size_t                       nExtraVariables()    const { return _extraVariables.size(); }
+    size_t                       nExtraQuantities()   const { return _extraQuantities.size(); }
     Model                        model()              const { return _model; }
     double                       triggerTime()        const { return _triggerTime; }
     const vector<glm::vec3>&     vertexPositions()    const { return _vertexPositions; }
 
-    // Special getter. Returns extraVariables[INDEX].
-    const vector<float>&       extraVariable(const size_t INDEX, bool& isSuccesful) const;
+    // Special getter. Returns extraQuantities[INDEX].
+    const vector<float>&       extraQuantity(const size_t INDEX, bool& isSuccesful) const;
 
 private:
     bool    _isMorphable = false;
@@ -69,8 +69,8 @@ private:
     vector<glm::vec3>          _vertexPositions;
     vector<GLint>              _lineStart;
     vector<GLsizei>            _lineCount;
-    vector<vector<float>>      _extraVariables;
-    vector<std::string>        _extraVariableNames;
+    vector<vector<float>>      _extraQuantities;
+    vector<std::string>        _extraQuantityNames;
     // TODO: Maybe introduce a vector containing seed point indices
 };
 
