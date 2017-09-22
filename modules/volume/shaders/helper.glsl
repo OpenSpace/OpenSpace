@@ -35,8 +35,8 @@ vec3 volume_cartesianToSpherical(vec3 zeroToOneCoords) {
     float phi = 0.0;
 
     if (r != 0.0) {
-        theta = acos(cartesian.z / r) / KAMELEON_PI;
-        phi = (KAMELEON_PI + atan(cartesian.y, cartesian.x)) / (2.0 * KAMELEON_PI );
+        theta = acos(cartesian.z / r) / VOLUME_PI;
+        phi = (VOLUME_PI + atan(cartesian.y, cartesian.x)) / (2.0 * VOLUME_PI );
     }
-    return vec3(r * KAMELEON_SQRT1_3, theta, phi);
+    return vec3(r * VOLUME_SQRT1_3, theta, phi);
 }
