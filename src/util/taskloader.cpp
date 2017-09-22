@@ -46,7 +46,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(const ghoul::
         std::string taskName;
         ghoul::Dictionary subTask;
         if (tasksDictionary.getValue(key, taskName)) {
-            std::string path = "${TASKS}/" + taskName + ".task";
+            std::string path = taskName + ".task";
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
         } else if (tasksDictionary.getValue(key, subTask)) {
@@ -75,10 +75,10 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         ghoul::lua::loadDictionaryFromFile(
             absTasksFile,
             tasksDictionary
-            );
-    } catch (...) {
+        );
+    } catch (const ghoul::RuntimeError& e) {
         LERROR("Could not load tasks file '" << absTasksFile << "'. " <<
-            "Lua parse error");
+            "Lua error: " << e.message << ": " << e.component);
         return std::vector<std::unique_ptr<Task>>();
     }
     return tasksFromDictionary(tasksDictionary);

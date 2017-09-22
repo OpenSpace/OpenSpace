@@ -59,7 +59,7 @@ const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
 const string ConfigurationManager::KeyDocumentation = "Documentation";
 const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
 const string ConfigurationManager::KeyConfigScene = "Scene";
-const string ConfigurationManager::KeyConfigTask = "Task";
+const string ConfigurationManager::KeyConfigTasksRoot = "TasksRoot";
 
 const string ConfigurationManager::KeyLogging = "Logging";
 const string ConfigurationManager::PartLogDir = "LogDir";

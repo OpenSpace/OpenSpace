@@ -22,82 +22,88 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
-#define __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
+#define __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
+
+#include <openspace/rendering/renderable.h>
+
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rendering/basicvolumeraycaster.h>
+#include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/util/boxgeometry.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
-
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/volume/rawvolume.h>
-#include <modules/volume/rendering/basicvolumeraycaster.h>
-
-#include <modules/volume/rendering/volumeclipplanes.h>
+#include <openspace/util/boxgeometry.h>
 
 namespace openspace {
 
 struct RenderData;
 
-namespace kameleonvolume {
+namespace volume {
 
-class RenderableKameleonVolume : public Renderable {
+class RenderableTimeVaryingVolume : public Renderable {
 public:
-    RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableKameleonVolume();
+    RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
+    ~RenderableTimeVaryingVolume();
     
     void initialize() override;
     void deinitialize() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
-    bool cachingEnabled();
+
+    static documentation::Documentation Documentation();
+    static documentation::Documentation TimestepDocumentation();
 
 private:
-    void load();
-    void loadFromPath(const std::string& path);
-    void loadRaw(const std::string& path);
-    void loadCdf(const std::string& path);
-    void storeRaw(const std::string& path);
+    struct Timestep {
+        std::string baseName;
+        double time;
+        float minValue;
+        float maxValue;
+        glm::uvec3 dimensions;
+        glm::vec3 lowerDomainBound;
+        glm::vec3 upperDomainBound;
+        bool inRam;
+        bool onGpu;
+        std::unique_ptr<RawVolume<float>> rawVolume;
+        std::shared_ptr<ghoul::opengl::Texture> texture;
+    };
 
-    std::string cacheSuffix();
-    void updateTextureFromVolume();
-    void updateRaycasterModelTransform();
+    Timestep* currentTimestep();
+    int timestepIndex(const Timestep* t) const;
+    Timestep* timestepFromIndex(int index);
+    void jumpToTimestep(int i);
 
-    properties::UVec3Property _dimensions;
-    properties::StringProperty _variable;
-    properties::Vec3Property _lowerDomainBound;
-    properties::Vec3Property _upperDomainBound;
-    properties::Vec3Property _domainScale;
-    bool _autoDomainBounds;
-
-    properties::FloatProperty _lowerValueBound;
-    properties::FloatProperty _upperValueBound;
-    bool _autoValueBounds;
+    void loadTimestepMetadata(const std::string& path);
 
     properties::OptionProperty _gridType;
-    bool _autoGridType;
-
-    std::shared_ptr<volume::VolumeClipPlanes> _clipPlanes;
+    std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
-    properties::StringProperty _sourcePath;
+    properties::FloatProperty _opacity;
+    properties::FloatProperty _rNormalization;
+    properties::FloatProperty _rUpperBound;
+    properties::FloatProperty _secondsBefore;
+    properties::FloatProperty _secondsAfter;
+    properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
-    properties::BoolProperty _cache;
+    properties::FloatProperty _lowerValueBound;
+    properties::FloatProperty _upperValueBound;
 
+    properties::TriggerProperty _triggerTimeJump;
+    properties::IntProperty _jumpToTimestep;
+    properties::IntProperty _currentTimestep;
 
-    std::unique_ptr<volume::RawVolume<float>> _rawVolume;
-    std::unique_ptr<volume::RawVolume<GLfloat>> _normalizedVolume;
-    std::unique_ptr<volume::BasicVolumeRaycaster> _raycaster;
+    std::map<double, Timestep> _volumeTimesteps;
+    std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
-    std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
 };
 
-} // namespace kameleonvolume
+} // namespace volume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__

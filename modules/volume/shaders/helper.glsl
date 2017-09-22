@@ -22,56 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float maxStepSize#{id} = 0.02;
-uniform sampler3D volumeTexture_#{id};
-uniform sampler1D transferFunction_#{id};
-uniform int gridType_#{id} = 0;
+#define VOLUME_PI      3.14159265358979323846  /* pi */
+#define VOLUME_SQRT1_3 0.57735026919           /* 1/sqrt(3) */
 
-uniform int nClips_#{id};
-uniform vec3 clipNormals_#{id}[8];
-uniform vec2 clipOffsets_#{id}[8];
+vec3 volume_cartesianToSpherical(vec3 zeroToOneCoords) {
+    // Put cartesian in [-1..1] range first
+    vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
 
+    float r = length(cartesian);
 
-void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
-                 inout vec3 accumulatedAlpha, inout float stepSize)
-{
+    float theta = 0.0;
+    float phi = 0.0;
 
-    vec3 transformedPos = samplePos;
-    if (gridType_#{id} == 1) {
-        transformedPos = kameleon_cartesianToSpherical(samplePos);
+    if (r != 0.0) {
+        theta = acos(cartesian.z / r) / VOLUME_PI;
+        phi = (VOLUME_PI + atan(cartesian.y, cartesian.x)) / (2.0 * VOLUME_PI );
     }
-
-    float clipAlpha = 1.0;
-    vec3 centerToPos = transformedPos - vec3(0.5);
-
-
-    for (int i = 0; i < nClips_#{id} && i < 8; i++) {
-        vec3 clipNormal = clipNormals_#{id}[i];
-        float clipBegin = clipOffsets_#{id}[i].x;
-        float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
-        clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
-    }
-
-    if (clipAlpha > 0) {
-        float val = texture(volumeTexture_#{id}, transformedPos).r;
-        vec4 color = texture(transferFunction_#{id}, val);
-        vec3 backColor = color.rgb;
-        vec3 backAlpha = color.aaa;
-
-        backColor *= stepSize * clipAlpha;
-        backAlpha *= stepSize * clipAlpha;
-
-        backColor = clamp(backColor, 0.0, 1.0);
-        backAlpha = clamp(backAlpha, 0.0, 1.0);
-
-        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
-        accumulatedColor += oneMinusFrontAlpha * backColor;
-        accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
-    }
-
-    stepSize = maxStepSize#{id};
-}
-
-float stepSize#{id}(vec3 samplePos, vec3 dir) {
-    return maxStepSize#{id};
+    return vec3(r * VOLUME_SQRT1_3, theta, phi);
 }

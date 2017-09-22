@@ -22,32 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __OPENSPACE_CORE___THREAD_POOL___H__
+#define __OPENSPACE_CORE___THREAD_POOL___H__
 
-#include <openspace/util/concurrentqueue.h>
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+#include <atomic>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+// Implementatin based on http://progsch.net/wordpress/?p=81
 
-class ConcurrentQueueTest : public testing::Test {};
+namespace openspace {
 
-TEST_F(ConcurrentQueueTest, Basic) {
-    using namespace openspace;
+class ThreadPool;
 
-    ConcurrentQueue<int> q1;
-    q1.push(4);
-    int val = q1.pop();
-    std::cout << val << std::endl;
-}
+class Worker {
+public: 
+    Worker(ThreadPool& pool);
+    void operator()();
+private:
+    ThreadPool& pool;
+};
 
-/*
-TEST_F(ConcurrentQueueTest, SharedPtr) {
-    ConcurrentQueue<std::shared_ptr<int>> q1;
-    std::shared_ptr<int> i1 = std::shared_ptr<int>(new int(1337));
+class ThreadPool {
+public:
+    ThreadPool(size_t numThreads);
+    ThreadPool(const ThreadPool& toCopy);
+    ~ThreadPool();
 
-    q1.push(i1);
-    auto val = q1.pop();
-    std::cout << *val << std::endl;
-}
-*/
+    void enqueue(std::function<void()> f);
+    void clearTasks();
+
+private:
+    friend class Worker;
+
+    std::vector<std::thread> workers;
+
+    std::deque<std::function<void()>> tasks;
+
+    std::mutex queue_mutex;
+    std::condition_variable condition;
+
+    bool stop;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___THREAD_POOL___H__
