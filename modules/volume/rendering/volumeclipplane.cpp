@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -28,6 +27,7 @@
 
 
 namespace openspace {
+namespace volume {
 
 VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" }) // @TODO Missing name
@@ -66,4 +66,5 @@ glm::vec2 VolumeClipPlane::offsets() {
     return _offsets;
 }
 
+} // namespace volume
 } // namespace openspace

@@ -47,23 +47,37 @@
 namespace ccmc { class Model; }
 
 namespace openspace {
+namespace kameleonvolume {
 
 class KameleonVolumeReader {
 public:
     KameleonVolumeReader(const std::string& path);
-    //KameleonMetaData readMetaData();
 
-    std::unique_ptr<RawVolume<float>> readFloatVolume(
+    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
+        const glm::uvec3& dimensions,
+        const std::string& variable,
+        const glm::vec3& lowerDomainBound,
+        const glm::vec3& upperDomainBound) const;
+
+    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
         const glm::uvec3& dimensions,
         const std::string& variable,
         const glm::vec3& lowerBound,
-        const glm::vec3& upperBound) const;
+        const glm::vec3& upperBound,
+        float& minValue,
+        float& maxValue) const;
+
     ghoul::Dictionary readMetaData() const;
-    float minValue(const std::string& variable) const;
-    float maxValue(const std::string& variable) const;
+
+    std::string time() const;
+    std::string simulationStart() const;
+    std::string simulationEnd() const;
+    float elapsedTime() const;
+
+    double minValue(const std::string& variable) const;
+    double maxValue(const std::string& variable) const;
 
     std::vector<std::string> gridVariableNames() const;
-    std::vector<std::string> gridUnits() const;
     std::vector<std::string> variableNames() const;
     std::vector<std::string> variableAttributeNames() const;
     std::vector<std::string> globalAttributeNames() const;
@@ -77,6 +91,7 @@ private:
 
 };
 
+} // namespace kameleonvolume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,29 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
-#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
+#define VOLUME_PI      3.14159265358979323846  /* pi */
+#define VOLUME_SQRT1_3 0.57735026919           /* 1/sqrt(3) */
 
-#include <openspace/util/task.h>
+vec3 volume_cartesianToSpherical(vec3 zeroToOneCoords) {
+    // Put cartesian in [-1..1] range first
+    vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
 
-#include <string>
+    float r = length(cartesian);
 
-namespace openspace {
-namespace kameleonvolume {
+    float theta = 0.0;
+    float phi = 0.0;
 
-class KameleonMetadataToJsonTask : public Task {
-public:
-    KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation documentation();
-    
-private:
-    std::string _inputPath;
-    std::string _outputPath;
-};
-
-} // namespace kameleonvolume
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
+    if (r != 0.0) {
+        theta = acos(cartesian.z / r) / KAMELEON_PI;
+        phi = (KAMELEON_PI + atan(cartesian.y, cartesian.x)) / (2.0 * KAMELEON_PI );
+    }
+    return vec3(r * KAMELEON_SQRT1_3, theta, phi);
+}

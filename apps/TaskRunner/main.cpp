@@ -31,12 +31,15 @@
 #include <ghoul/io/texture/texturereaderdevil.h>
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/directory.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
 #include <ghoul/ghoul.h>
+#include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/singlecommand.h>
 
 #include <openspace/scripting/scriptengine.h>
-
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/util/progressbar.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
@@ -62,10 +65,54 @@ void initTextureReaders() {
     #endif // GHOUL_USE_FREEIMAGE
 }
 
+void performTasks(const std::string& path) {
+    using namespace openspace;
+
+    TaskLoader taskLoader;
+    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(path);
+
+    size_t nTasks = tasks.size();
+    if (nTasks == 1) {
+        LINFO("Task queue has 1 item");
+    }
+    else {
+        LINFO("Task queue has " << tasks.size() << " items");
+    }
+
+    for (size_t i = 0; i < tasks.size(); i++) {
+        Task& task = *tasks[i].get();
+        LINFO("Performing task " << (i + 1) << " out of " << tasks.size() << ": " << task.description());
+        ProgressBar progressBar(100);
+        auto onProgress = [&progressBar](float progress) {
+            progressBar.print(progress * 100);
+        };
+        task.perform(onProgress);
+    }
+    std::cout << "Done performing tasks." << std::endl;
+}
+
 int main(int argc, char** argv) {
     using namespace openspace;
 
     ghoul::initialize();
+
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Debug,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
+    LogMgr.addLog(std::make_unique< ghoul::logging::ConsoleLog>());
+
+    LDEBUG("Initialize FileSystem");
+
+    ghoul::filesystem::Directory launchDirectory = FileSys.currentDirectory();
+
+#ifdef __APPLE__
+    ghoul::filesystem::File app(argv[0]);
+    std::string dirName = app.directoryName();
+    LINFO("Setting starting directory to '" << dirName << "'");
+    FileSys.setCurrentDirectory(dirName);
+#endif
+
     initTextureReaders();
 
     FactoryManager::initialize();
@@ -98,34 +145,49 @@ int main(int argc, char** argv) {
 
     ModuleEngine moduleEngine;
     moduleEngine.initialize();
-
-    std::string tasksPath;
-    configuration.getValue(ConfigurationManager::KeyConfigTask, tasksPath);
-
     LINFO("Initialization done.");
 
-    TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(tasksPath);
-    
-    size_t nTasks = tasks.size();
-    if (nTasks == 1) {
-        LINFO("Task queue has 1 item");
-    } else {
-        LINFO("Task queue has " << tasks.size() << " items");
+    // Parse commandline arguments
+    std::vector<std::string> args(argv, argv + argc);
+
+    ghoul::cmdparser::CommandlineParser commandlineParser(
+        "OpenSpace TaskRunner",
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    );
+
+    std::string tasksPath = "";
+    commandlineParser.addCommand(
+        std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+            &tasksPath,
+            "--task",
+            "-t",
+            "Provides the path to a task file to execute"
+            )
+    );
+
+    commandlineParser.setCommandLine(args);
+    commandlineParser.execute();
+
+    FileSys.setCurrentDirectory(launchDirectory);
+
+    if (tasksPath != "") {
+        performTasks(tasksPath);
+        return 0;
     }
 
-    for (size_t i = 0; i < tasks.size(); i++) {
-        Task& task = *tasks[i].get();
-        LINFO("Performing task " << (i+1) << " out of " << tasks.size() << ": " << task.description());
-        ProgressBar progressBar(100);
-        auto onProgress = [&progressBar](float progress) {
-            progressBar.print(progress * 100);
-        };
-        task.perform(onProgress);
+    // If no task file was specified in as argument, run in CLI mode.
+
+    std::string tasksRoot;
+    if (configuration.getValue(ConfigurationManager::KeyConfigTasksRoot, tasksRoot)) {
+        LINFO("Task root: " << tasksRoot);
+        FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath(tasksRoot)));
     }
 
-    std::cout << "Done performing tasks." << std::endl;
+    std::cout << "TASK >";
+    while (std::cin >> tasksPath) {
+        performTasks(tasksPath);
+        std::cout << "TASK >";
+    }
 
-    std::cin.get();
     return 0;
 };

@@ -28,17 +28,17 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/kameleonvolumereader.h
   ${CMAKE_CURRENT_SOURCE_DIR}/kameleonvolumereader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablekameleonvolume.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonvolumeraycaster.h
   ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleondocumentationtask.h
   ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonmetadatatojsontask.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonvolumetorawtask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablekameleonvolume.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonvolumeraycaster.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleondocumentationtask.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonmetadatatojsontask.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonvolumetorawtask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

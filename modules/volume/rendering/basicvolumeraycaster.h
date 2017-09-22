@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER___H__
-#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__
+#define __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__
 
 #include <string>
 #include <vector>
@@ -50,16 +50,18 @@ namespace openspace {
 struct RenderData;
 struct RaycastData;
 
-class KameleonVolumeRaycaster : public VolumeRaycaster {
+namespace volume {
+
+class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
-    KameleonVolumeRaycaster(
+    BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
         std::shared_ptr<TransferFunction> transferFunction, 
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
-
-    virtual ~KameleonVolumeRaycaster();
+    virtual ~BasicVolumeRaycaster();
     void initialize();
     void deinitialize();
+
     void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
     void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
     void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
@@ -71,23 +73,42 @@ public:
     std::string getRaycastPath() const override;
     std::string getHelperPath() const override;
 
+    void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
+    std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
+    void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
     void setStepSize(float stepSize);
+    float opacity() const;
+    void setOpacity(float opacity);
+    float rNormalization() const;
+    void setRNormalization(float rNormalization);
+    float rUpperBound() const;
+    void setRUpperBound(float rNormalization);
+    void setValueRemapping(float mapZeroTo, float mapOneTo);
+    VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
-    
+
 private:
+    glm::dmat4 modelViewTransform(const RenderData& data);
+
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform;
+    float _opacity;
+    float _rNormalization;
+    float _rUpperBound;
+    glm::vec2 _valueRemapping;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
     float _stepSize;
 };
 
+} // namespace volume
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER___H__ 
+
+#endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__ 
