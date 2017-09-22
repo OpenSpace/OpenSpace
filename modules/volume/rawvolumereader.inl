@@ -25,12 +25,13 @@
 #include <fstream>
 
 namespace openspace {
+namespace volume {
 
 template <typename VoxelType>
 RawVolumeReader<VoxelType>::RawVolumeReader(const std::string& path,
                                             const glm::uvec3& dimensions)
-    : _path(path)
-    , _dimensions(dimensions)
+    : _dimensions(dimensions)
+    , _path(path)
 {}
 
 template <typename VoxelType>
@@ -69,12 +70,12 @@ VoxelType RawVolumeReader<VoxelType>::get(size_t index) const {
 
 template <typename VoxelType>
 size_t RawVolumeReader<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
-    return volumeutils::coordsToIndex(cartesian, dimensions());
+    return coordsToIndex(cartesian, dimensions());
 }
 
 template <typename VoxelType>
 glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
-    return volumeutils::indexToCoords(linear, dimensions());
+    return indexToCoords(linear, dimensions());
 }
 
 
@@ -95,4 +96,5 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
     return volume;
 }
 
+} // namepsace volume
 } // namespace openspace

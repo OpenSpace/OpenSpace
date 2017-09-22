@@ -46,7 +46,6 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-class RenderableVolume;
 class Camera;
 class Scene;
     
@@ -76,8 +75,8 @@ public:
     virtual void updateRendererData() override;
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
-private:
 
+private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _exitPrograms;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _raycastPrograms;

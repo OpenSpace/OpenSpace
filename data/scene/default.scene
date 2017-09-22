@@ -1,6 +1,11 @@
 -- Add folders to this list that contain .info files describing HiRISE patches
 local mars_folders = {
     -- Add a folder here whose contents will be automatically added to the Mars globe
+    -- If multiple folders are added, the results will be added sequentially, meaning that
+    -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
+    -- CTX will stomp over the HiRISE
+    --
+    -- tl;dr:  Specify CTX folders first, then HiRISE 
 }
 
 function preInitialization()
@@ -51,6 +56,10 @@ function preInitialization()
         "openspace.setPropertyValue('*Trail.renderable.Enabled', false)",
         "Disables visibility of the trails"
     )
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${OPENSPACE_DATA}/globebrowsing_servers.lua")
+    )
 end
 
 function postInitialization()
@@ -82,7 +91,7 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
-    -- Add the HiRISE patches described at the top of this file
+    -- Add the CTX and HiRISE patches described at the top of this file
     for _, file in pairs(mars_folders) do
         openspace.globebrowsing.addBlendingLayersFromDirectory(file, "Mars")
     end

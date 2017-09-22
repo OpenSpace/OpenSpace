@@ -426,7 +426,7 @@ struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
 
     using OperatorVerifier<T, std::less<typename T::Type>>::OperatorVerifier;
 
-    std::string documentation() const;
+    std::string documentation() const override;
 
     using OperatorVerifier<T, std::less<typename T::Type>>::value;
 };

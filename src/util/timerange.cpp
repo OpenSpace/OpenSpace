@@ -94,14 +94,14 @@ bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRang
     }
 }
 
-void TimeRange::include(double val){
+void TimeRange::include(double val) {
     if (start > val) {
         start = val;
     }
     if (end < val) {
         end = val;
     }
-};
+}
 
 void TimeRange::include(const TimeRange& other) {
     if (other.start < start) {

@@ -280,9 +280,9 @@ std::string ReferencingVerifier::documentation() const {
     return "Referencing Documentation: '"s + identifier + "'";
 }
 
-AndVerifier::AndVerifier(Verifier* lhs, Verifier* rhs)
-    : lhs(lhs)
-    , rhs(rhs)
+AndVerifier::AndVerifier(Verifier* l, Verifier* r)
+    : lhs(l)
+    , rhs(r)
 {
     ghoul_assert(lhs, "lhs must not be nullptr");
     ghoul_assert(rhs, "rhs must not be nullptr");
@@ -315,9 +315,9 @@ std::string AndVerifier::documentation() const {
     return lhs->documentation() + " and " + rhs->documentation();
 }
 
-OrVerifier::OrVerifier(Verifier* lhs, Verifier* rhs)
-    : lhs(lhs)
-    , rhs(rhs)
+OrVerifier::OrVerifier(Verifier* l, Verifier* r)
+    : lhs(l)
+    , rhs(r)
 {
     ghoul_assert(lhs, "lhs must not be nullptr");
     ghoul_assert(rhs, "rhs must not be nullptr");

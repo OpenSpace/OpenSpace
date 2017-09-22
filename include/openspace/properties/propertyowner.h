@@ -54,7 +54,7 @@ public:
 
     struct PropertyOwnerInfo {
         std::string name;
-        std::string description;
+        std::string description = "";
     };
     
     /// The constructor initializing the PropertyOwner's name to <code>""</code>

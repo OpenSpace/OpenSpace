@@ -69,6 +69,13 @@ openspace.globebrowsing.documentation = {
             "info files are then added to the RenderableGlobe identified by name passed " ..
             "to the second argument." ..
             "Usage: openspace.globebrowsing.addBlendingLayersFromDirectory(directory, \"Earth\")"
+    },
+    {
+        Name = "loadWMSServersFromFile",
+        Arguments = "string",
+        Documentation =
+            "Loads all WMS servers from the provided file and passes them to the " ..
+            "'openspace.globebrowsing.loadWMSCapabilities' file."
     }
 }
 
@@ -183,4 +190,20 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
             openspace.globebrowsing.addLayer(node_name, "HeightLayers", h)
         end
     end
+end
+
+openspace.globebrowsing.loadWMSServersFromFile = function (file_path)
+    local servers = dofile(file_path)
+
+    for key, value in pairs(servers) do
+        local globe = key
+        for _,val in pairs(value) do
+            openspace.globebrowsing.loadWMSCapabilities(
+                val["Name"],
+                globe,
+                val["URL"]
+            )
+        end
+    end
+
 end

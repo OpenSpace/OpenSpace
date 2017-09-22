@@ -51,8 +51,8 @@ namespace openspace::properties {
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
-    [](std::string value, bool& success) -> TYPE {                                       \
-        std::stringstream s(value);                                                      \
+    [](std::string val, bool& success) -> TYPE {                                         \
+        std::stringstream s(val);                                                        \
         TYPE v;                                                                          \
         s >> v;                                                                          \
         success = !s.fail();                                                             \

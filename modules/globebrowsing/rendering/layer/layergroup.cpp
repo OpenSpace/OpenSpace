@@ -28,7 +28,7 @@
 
 namespace {
     const char* _loggerCat = "LayerGroup";
-
+    const char* KeyFallback = "Fallback";
     static const openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",
@@ -37,7 +37,6 @@ namespace {
         "and more visually pleasing.",
         openspace::properties::Property::Visibility::Hidden
     };
-
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -62,6 +61,19 @@ LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
+
+            if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyFallback)) {
+                LWARNING("Unable to create layer. Initializing fallback layer.");
+                ghoul::Dictionary fallbackLayerDict =
+                layerDict.value<ghoul::Dictionary>(KeyFallback);
+                try {
+                    addLayer(fallbackLayerDict);
+                }
+                catch (const ghoul::RuntimeError& e) {
+                    LERRORC(e.component, e.message);
+                    continue;
+                }
+            }
             continue;
         }
     }
@@ -83,7 +95,7 @@ void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
         LERROR("'Name' must be specified for layer.");
         return;
     }
-    auto layer = std::make_shared<Layer>(_groupId, layerDict);
+    auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);
     layer->onChange(_onChangeCallback);
     if (hasPropertySubOwner(layer->name())) {
         LINFO("Layer with name " + layer->name() + " already exists.");

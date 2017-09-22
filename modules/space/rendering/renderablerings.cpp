@@ -222,7 +222,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -326,7 +326,7 @@ void RenderableRings::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VertexData),
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(

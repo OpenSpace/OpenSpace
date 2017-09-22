@@ -168,9 +168,9 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _renderingModes(RenderingModeInfo, properties::OptionProperty::DisplayType::Dropdown
     )
 {
-    _translation = std::unique_ptr<Translation>(Translation::createFromDictionary(
+    _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
-    ));
+    );
     addPropertySubOwner(_translation.get());
 
     _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
@@ -246,7 +246,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 

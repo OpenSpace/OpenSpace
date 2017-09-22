@@ -74,7 +74,7 @@ int walkCommon(lua_State* L, Func func) {
     // Copy values into the lua_State
     lua_newtable(L);
 
-    for (int i = 0; i < result.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(result.size()); ++i) {
         lua_pushstring(L, result[i].c_str());
         lua_rawseti(L, -2, i + 1);
     }
@@ -102,6 +102,7 @@ int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
         case LUA_TTHREAD:
             LOGC(level, "print", "Function parameter was of type '" <<
                     luaTypeToString(type) << "'");
+            break;
         case LUA_TNIL:
             break;
         case LUA_TBOOLEAN:

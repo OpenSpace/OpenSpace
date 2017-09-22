@@ -188,7 +188,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
@@ -212,7 +212,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->deactivate();
 }
 
-void RenderableModel::update(const UpdateData& data) {
+void RenderableModel::update(const UpdateData&) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
     }

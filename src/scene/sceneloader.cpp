@@ -40,12 +40,12 @@ namespace {
     const char* KeyPathScene = "ScenePath";
     const char* KeyModules = "Modules";
     const char* ModuleExtension = ".mod";
-    const char* KeyPathModule = "ModulePath";
+    //const char* KeyPathModule = "ModulePath";
 
-    const char* RootNodeName = "Root";
+    //const char* RootNodeName = "Root";
     const char* KeyName = "Name";
     const char* KeyParentName = "Parent";
-    const char* KeyDependencies = "Dependencies";
+    //const char* KeyDependencies = "Dependencies";
     const char* KeyCamera = "Camera";
     const char* KeyCameraFocus = "Focus";
     const char* KeyCameraPosition = "Position";

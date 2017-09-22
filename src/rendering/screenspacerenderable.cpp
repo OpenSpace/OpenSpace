@@ -285,7 +285,7 @@ void ScreenSpaceRenderable::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     
     glEnableVertexAttribArray(1);

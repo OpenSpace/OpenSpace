@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -458,6 +458,13 @@ void RenderableMultiresVolume::initialize() {
         histoBinsMax = maxInitialBudget,
         histoBinsStep = 1;
 
+    _histogramBins = properties::IntProperty(
+        HistogramBinsInfo,
+        histoBins,
+        histoBinsMin,
+        histoBinsMax,
+        histoBinsStep
+    );
     _currentTime = properties::IntProperty(
         CurrentTimeInfo,
         0,

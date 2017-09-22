@@ -26,21 +26,22 @@
 #include <modules/volume/volumeutils.h>
 
 namespace openspace {
+namespace volume {
 
 template <typename VoxelType>
-    RawVolumeWriter<VoxelType>::RawVolumeWriter(std::string path, size_t bufferSize)
+RawVolumeWriter<VoxelType>::RawVolumeWriter(std::string path, size_t bufferSize)
     : _path(path)
     , _bufferSize(bufferSize)
-    {}
+{}
 
 template <typename VoxelType>
 size_t RawVolumeWriter<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
-    return volumeutils::coordsToIndex(cartesian, dimensions());
+    return coordsToIndex(cartesian, dimensions());
 }
 
 template <typename VoxelType>
 glm::ivec3 RawVolumeWriter<VoxelType>::indexToCoords(size_t linear) const {
-    return volumeutils::indexToCoords(linear, dimensions());
+    return indexToCoords(linear, dimensions());
 }
 
 template <typename VoxelType>
@@ -52,7 +53,6 @@ template <typename VoxelType>
 glm::uvec3 RawVolumeWriter<VoxelType>::dimensions() const {
     return _dimensions;
 }
-
 
 template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::uvec3&)>& fn,
@@ -88,7 +88,6 @@ void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::
 template <typename VoxelType>    
 void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     setDimensions(volume.dimensions());
-    reinterpret_cast<const char*>(volume.data());
 
     const char* const buffer = reinterpret_cast<const char*>(volume.data());
     size_t length = volume.nCells() * sizeof(VoxelType);
@@ -98,4 +97,5 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     file.close();
 }
 
+} // namespace volume
 } // namespace openspace

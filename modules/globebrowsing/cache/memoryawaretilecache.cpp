@@ -143,7 +143,7 @@ void MemoryAwareTileCache::clear() {
 void MemoryAwareTileCache::createDefaultTextureContainers() {
     for (int id = 0; id < layergroupid::NUM_LAYER_GROUPS; id++) {
         TileTextureInitData initData =
-            LayerManager::getTileTextureInitData(layergroupid::GroupID(id));
+            LayerManager::getTileTextureInitData(layergroupid::GroupID(id), true);
         assureTextureContainerExists(initData);
     }
 }
@@ -294,8 +294,8 @@ void MemoryAwareTileCache::update() {
 
     const size_t ByteToMegaByte = 1024 * 1024;
 
-    _cpuAllocatedTileData.setValue(dataSizeCPU / ByteToMegaByte);
-    _gpuAllocatedTileData.setValue(dataSizeGPU / ByteToMegaByte);
+    _cpuAllocatedTileData.setValue(static_cast<int>(dataSizeCPU / ByteToMegaByte));
+    _gpuAllocatedTileData.setValue(static_cast<int>(dataSizeGPU / ByteToMegaByte));
 }
 
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {

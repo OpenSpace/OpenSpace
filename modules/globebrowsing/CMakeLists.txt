@@ -59,19 +59,14 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffercontainer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffercontainer.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
 
@@ -157,7 +152,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp
@@ -228,6 +222,7 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 create_new_module(
     "GlobeBrowsing"
     globebrowsing_module
+    STATIC
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
@@ -247,7 +242,7 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
             openspace-module-globebrowsing
             ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
         )
-        set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal202.dll" PARENT_SCOPE)
+        register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal202.dll")
     else (WIN32)
         find_package(GDAL REQUIRED)
 
@@ -262,5 +257,5 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
             ${GDAL_LIBRARY}
         )
     endif () # WIN32
-    target_compile_definitions(openspace-module-globebrowsing PRIVATE GLOBEBROWSING_USE_GDAL)
+    target_compile_definitions(openspace-module-globebrowsing PUBLIC GLOBEBROWSING_USE_GDAL)
 endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL

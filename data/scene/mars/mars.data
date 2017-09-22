@@ -3,6 +3,7 @@ return {
         { Identifier = "mars_textures", Destination = "textures", Version = 1 }
     },
     TorrentFiles = {
+        { File = "map_datasets.torrent", Destination = "." }
         -- { File = "MAR063.BSP.torrent", Destination = "${SPICE}" }
     }
 }
