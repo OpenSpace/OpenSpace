@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,41 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
+#version __CONTEXT__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
+layout(points) in;
+//layout(points, max_vertices = 13) out;
+layout(line_strip, max_vertices = 13) out;
 
-#include <ghoul/misc/assert.h>
+in float vs_screenSpaceDepth[];
+in float vs_scaleFactor[];
+in vec4 colorMap[]
 
-#include <modules/digitaluniverse/rendering/renderablepoints.h>
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
-//#include <modules/digitaluniverse/rendering/renderablepointssprite.h>
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
+uniform int sides;
 
-#include <ghoul/filesystem/filesystem>
+out float gs_screenSpaceDepth;
 
-namespace openspace {
+const float PI = 3.1415926;
 
-DigitalUniverseModule::DigitalUniverseModule() : OpenSpaceModule(DigitalUniverseModule::Name) {}
+void main()
+{
+    gs_screenSpaceDepth = vs_screenSpaceDepth[0];
+    
+    for (int i = 0; i <= sides; i++) {
+        // Angle between each side in radians
+        float ang = PI * 2.0 / float(sides) * i;
 
-void DigitalUniverseModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+        // Offset from center of point (0.3 to accomodate for aspect ratio)
+        //vec4 offset = vec4(cos(ang) * 0.003, -sin(ang) * 0.004, 0.0, 0.0);
+        //gl_Position = gl_in[0].gl_Position + offset;
 
-    fRenderable->registerClass<RenderablePoints>("RenderablePoints");
-    fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
-    //fRenderable->registerClass<RenderablePointsSprite>("RenderablePointsSprite");
-    fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
+        vec4 offset = vec4(cos(ang) * gl_in[0].gl_Position[0], -sin(ang) * gl_in[0].gl_Position[1],
+                            gl_in[0].gl_Position[2] , gl_in[0].gl_Position[3]);
+        gl_Position = offset;
+        
+        EmitVertex();
+    }
+    
+    //gl_Position = gl_in[0].gl_Position;// + offset;
+    //EmitVertex();
+
+    EndPrimitive();
 }
-
-std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
-    return {
-        RenderablePoints::Documentation()
-        //RenderablePointsSprinte::Documentation()       
-    };
-}
-
-} // namespace openspace

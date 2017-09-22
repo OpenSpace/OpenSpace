@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,41 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
+#version __CONTEXT__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
+layout(location = 0) in vec4 in_position;
 
-#include <ghoul/misc/assert.h>
-
-#include <modules/digitaluniverse/rendering/renderablepoints.h>
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
-//#include <modules/digitaluniverse/rendering/renderablepointssprite.h>
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
-
-#include <ghoul/filesystem/filesystem>
-
-namespace openspace {
-
-DigitalUniverseModule::DigitalUniverseModule() : OpenSpaceModule(DigitalUniverseModule::Name) {}
-
-void DigitalUniverseModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
-
-    fRenderable->registerClass<RenderablePoints>("RenderablePoints");
-    fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
-    //fRenderable->registerClass<RenderablePointsSprite>("RenderablePointsSprite");
-    fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
+void main() {
+    gl_Position = in_position;
 }
-
-std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
-    return {
-        RenderablePoints::Documentation()
-        //RenderablePointsSprinte::Documentation()       
-    };
-}
-
-} // namespace openspace

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/rendering/renderablepoints.h>
+#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -36,6 +36,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 
 #include <array>
 #include <fstream>
@@ -44,7 +46,7 @@
 #include <string>
 
 namespace {
-    const char* _loggerCat        = "RenderablePoints";
+    const char* _loggerCat        = "RenderableBillboardsCloud";
     const char* KeyFile           = "File";
     const char* keyColor          = "Color";
     const char* keyUnit           = "Unit";
@@ -90,19 +92,25 @@ namespace {
         "Color Map File",
         "The path to the color map file of the astronomical onject."
     };
+
+    static const openspace::properties::Property::PropertyInfo PolygonSidesInfo = {
+        "PolygonSides",
+        "Polygon Sides",
+        "The number of sides for the polygon used to represent the astronomical onject."
+    };
 }  // namespace
 
 namespace openspace {
 
-    documentation::Documentation RenderablePoints::Documentation() {
+    documentation::Documentation RenderableBillboardsCloud::Documentation() {
         using namespace documentation;
         return {
-            "RenderablePoints",
-            "digitaluniverse_renderablepoints",
+            "RenderableBillboardsCloud",
+            "digitaluniverse_RenderableBillboardsCloud",
             {
                 {
                     "Type",
-                    new StringEqualVerifier("RenderablePoints"),
+                    new StringEqualVerifier("RenderableBillboardsCloud"),
                     Optional::No
                 },
                 {
@@ -142,22 +150,33 @@ namespace openspace {
                     Optional::Yes,
                     ColorMapInfo.description
                 },
+                {
+                    PolygonSidesInfo.identifier,
+                    new IntVerifier,
+                    Optional::Yes,
+                    PolygonSidesInfo.description
+                },
 
             }
         };
     }
 
 
-    RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
+    RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
         , _dataIsDirty(true)
         , _hasSpriteTexture(false)
         , _spriteTextureIsDirty(true)
         , _hasColorMapFile(false)
+        , _hasPolygon(false)
+        , _polygonSides(0)
+        , _pTexture(0)
+        , _tTexture(0)
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
+        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
         , _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
         , _spriteTexturePath(SpriteTextureInfo)
+        , _polygonTexture(nullptr)
         , _spriteTexture(nullptr)
         , _program(nullptr)
         , _speckFile("")
@@ -172,7 +191,7 @@ namespace openspace {
         documentation::testSpecificationAndThrow(
             Documentation(),
             dictionary,
-            "RenderablePoints"
+            "RenderableBillboardsCloud"
         );
         
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
@@ -201,7 +220,7 @@ namespace openspace {
                 _unit = GigalightYears;
             }
             else {
-                LWARNING("No unit given for RenderablePoints. Using meters as units.");
+                LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units.");
                 _unit = Meter;
             }
         }
@@ -247,33 +266,38 @@ namespace openspace {
         }
         addProperty(_scaleFactor);
 
+        if (dictionary.hasKey(PolygonSidesInfo.identifier)) {
+            _polygonSides = static_cast<float>(
+                dictionary.value<double>(PolygonSidesInfo.identifier)
+                );
+            _hasPolygon = true;
+        }
+
     }
 
-    bool RenderablePoints::isReady() const {
+    bool RenderableBillboardsCloud::isReady() const {
         return (_program != nullptr) && (!_fullData.empty());
     }
 
-    void RenderablePoints::initialize() {
+    void RenderableBillboardsCloud::initialize() {
         RenderEngine& renderEngine = OsEng.renderEngine();
-        if (_hasSpriteTexture) {
-            _program = renderEngine.buildRenderProgram("RenderablePoints",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl");
-        }
-        else {
-            _program = renderEngine.buildRenderProgram("RenderablePoints",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl");// ,
-                //"${MODULE_DIGITALUNIVERSE}/shaders/points_gs.glsl");
-        }
         
+        _program = renderEngine.buildRenderProgram("RenderableBillboardsCloud",
+            "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl",
+            "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl",
+            "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl");
+                
         bool success = loadData();
         if (!success) {
             throw ghoul::RuntimeError("Error loading data");
         }
+
+        if (_hasPolygon) {
+            createPolygonTexture();
+        }
     }
 
-    void RenderablePoints::deinitialize() {
+    void RenderableBillboardsCloud::deinitialize() {
         glDeleteBuffers(1, &_vbo);
         _vbo = 0;
         glDeleteVertexArrays(1, &_vao);
@@ -288,30 +312,87 @@ namespace openspace {
         if (_hasSpriteTexture) {
             _spriteTexture = nullptr;
         }
+
+        if (_hasPolygon) {
+            _polygonTexture = nullptr;
+            glDeleteTextures(1, &_pTexture);
+        }
     }
 
-    void RenderablePoints::render(const RenderData& data, RendererTasks&) {
+    void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glDepthMask(false);
+
+        // Saving current OpenGL state
+        GLboolean blendEnabled = glIsEnabled(GL_BLEND);
+        GLenum blendEquationRGB;
+        GLenum blendEquationAlpha;
+        GLenum blendDestAlpha;
+        GLenum blendDestRGB;
+        GLenum blendSrcAlpha;
+        GLenum blendSrcRGB;
+        
+        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+        
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
         _program->activate();
 
-        glm::dmat4 modelMatrix = glm::dmat4(1.0);
-        
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _program->setUniform("modelViewProjectionTransform", glm::dmat4(data.camera.projectionMatrix()) * 
-            data.camera.combinedViewMatrix() * modelMatrix);
+        
+        /*glm::dmat4 modelMatrix = glm::dmat4(1.0);*/
 
+        glm::dmat4 modelMatrix =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+        glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+        glm::mat4 viewMatrix = data.camera.viewMatrix();
+        glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+
+        _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
+        _program->setUniform("projection", projectionMatrix);
+        _program->setUniform("modelViewTransform", modelViewMatrix);
+        _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
+        //_program->setUniform("campos", data.camera.positionVec3());
+
+        _program->setUniform("minBillboardSize", 1.f); // in pixels
         _program->setUniform("color", _pointColor);
         _program->setUniform("sides", 4);
         _program->setUniform("alphaValue", _alphaValue);
         _program->setUniform("scaleFactor", _scaleFactor);
+
+        glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+        glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+        glm::vec3 right = glm::cross(viewDirection, lookup);
+        glm::vec3 up = glm::cross(right, viewDirection);
+
+        glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+        _program->setUniform("up", glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0))));
+        _program->setUniform("right", glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))));
         
-        if (_hasSpriteTexture) {
-            ghoul::opengl::TextureUnit spriteTextureUnit;
+        ghoul::opengl::TextureUnit spriteTextureUnit;
+        if (_hasSpriteTexture) {            
             spriteTextureUnit.activate();
             _spriteTexture->bind();
             _program->setUniform("spriteTexture", spriteTextureUnit);
         }
+
+        ghoul::opengl::TextureUnit polygonTextureUnit;
+        if (_hasPolygon) {
+            polygonTextureUnit.activate();
+            glBindTexture(GL_TEXTURE_2D, _pTexture);
+            _program->setUniform("polygonTexture", polygonTextureUnit);
+            _program->setUniform("hasPolygon", _hasPolygon);
+        }
+
 
         if (_hasColorMapFile) {
             _program->setUniform("hasColorMap", true);
@@ -320,21 +401,27 @@ namespace openspace {
             _program->setUniform("hasColorMap", false);
         }
      
-        glEnable(GL_PROGRAM_POINT_SIZE);
         glBindVertexArray(_vao);
         const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() / _nValuesPerAstronomicalObject);
         glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
         
-        glDisable(GL_PROGRAM_POINT_SIZE);
         glBindVertexArray(0);
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::No);
         _program->deactivate();
 
+        // Restores blending state
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+        
+        if (!blendEnabled) {
+            glDisable(GL_BLEND);            
+        }
+                   
         glDepthMask(true);
     }
 
-    void RenderablePoints::update(const UpdateData&) {  
+    void RenderableBillboardsCloud::update(const UpdateData&) {  
         if (_dataIsDirty) {
             LDEBUG("Regenerating data");
 
@@ -355,43 +442,46 @@ namespace openspace {
             glBindBuffer(GL_ARRAY_BUFFER, _vbo);
             glBufferData(
                 GL_ARRAY_BUFFER,
-                size * sizeof(double),
+                size * sizeof(float),
                 &_slicedData[0],
                 GL_STATIC_DRAW
             );
             GLint positionAttrib = _program->attributeLocation("in_position");
-
+            
             if (_hasColorMapFile) {
                 
                 const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
                 const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-                GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
+                GLsizei stride = static_cast<GLsizei>(sizeof(float) * nValues);
                 
                 glEnableVertexAttribArray(positionAttrib);
-                glVertexAttribLPointer(
+                glVertexAttribPointer(
                     positionAttrib,
                     4,
-                    GL_DOUBLE,
-                    sizeof(double)*8,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    sizeof(float)*8,
                     nullptr
                 );
 
                 GLint colorMapAttrib = _program->attributeLocation("in_colormap");
                 glEnableVertexAttribArray(colorMapAttrib);
-                glVertexAttribLPointer(
+                glVertexAttribPointer(
                     colorMapAttrib,
                     4,
-                    GL_DOUBLE,
-                    sizeof(double) * 8,
-                    reinterpret_cast<void*>(sizeof(double)*4)
+                    GL_FLOAT,
+                    GL_FALSE,
+                    sizeof(float) * 8,
+                    reinterpret_cast<void*>(sizeof(float)*4)
                 );
             }
             else {                                                
                 glEnableVertexAttribArray(positionAttrib);
-                glVertexAttribLPointer(
+                glVertexAttribPointer(
                     positionAttrib,
                     4,
-                    GL_DOUBLE,
+                    GL_FLOAT,
+                    GL_FALSE,
                     0,
                     nullptr
                 );
@@ -423,7 +513,7 @@ namespace openspace {
         }
     }
 
-    bool RenderablePoints::loadData() {
+    bool RenderableBillboardsCloud::loadData() {
         std::string _file = _speckFile;
         std::string cachedFile = FileSys.cacheManager()->cachedFilename(
             _file,
@@ -467,7 +557,7 @@ namespace openspace {
         return success;
     }
 
-    bool RenderablePoints::readSpeckFile() {
+    bool RenderableBillboardsCloud::readSpeckFile() {
         std::string _file = _speckFile;
         std::ifstream file(_file);
         if (!file.good()) {
@@ -520,6 +610,10 @@ namespace openspace {
             std::vector<float> values(_nValuesPerAstronomicalObject);
 
             std::getline(file, line);
+            
+            if (line.size() == 0)
+                continue;
+            
             std::stringstream str(line);
 
             for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
@@ -532,7 +626,7 @@ namespace openspace {
         return true;
     }
 
-    bool RenderablePoints::readColorMapFile() {
+    bool RenderableBillboardsCloud::readColorMapFile() {
         std::string _file = _colorMapFile;
         std::ifstream file(_file);
         if (!file.good()) {
@@ -581,7 +675,7 @@ namespace openspace {
         return true;
     }
 
-    bool RenderablePoints::loadCachedFile(const std::string& file) {
+    bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
         std::ifstream fileStream(file, std::ifstream::binary);
         if (fileStream.good()) {
             int8_t version = 0;
@@ -610,7 +704,7 @@ namespace openspace {
         }
     }
 
-    bool RenderablePoints::saveCachedFile(const std::string& file) const {
+    bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
         std::ofstream fileStream(file, std::ofstream::binary);
         if (fileStream.good()) {
             fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
@@ -638,7 +732,7 @@ namespace openspace {
         }
     }
     
-    void RenderablePoints::createDataSlice() {
+    void RenderableBillboardsCloud::createDataSlice() {
         _slicedData.clear();
         if (_hasColorMapFile) {
             _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
@@ -649,8 +743,9 @@ namespace openspace {
 
         int colorIndex = 0;
         for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-            glm::dvec3 p = glm::dvec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-
+            glm::vec3 p = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
+         
+            /*
             // Converting untis
             if (_unit == Kilometer) {
                 p *= 1E3;
@@ -670,8 +765,10 @@ namespace openspace {
             else if (_unit == GigalightYears) {
                 p *= 306391534.73091 * PARSEC;
             }
+            */
 
-            glm::dvec4 position(p, 1.0);
+            glm::vec4 position(p, static_cast<float>(_unit));
+            //glm::dvec4 position(p, 1.0);
 
             if (_hasColorMapFile) {
                 for (auto j = 0; j < 4; ++j) {
@@ -688,6 +785,241 @@ namespace openspace {
             }
             
             colorIndex = (colorIndex == (_colorMapData.size() - 1)) ? 0 : colorIndex + 1;
+        }
+    }
+
+    void RenderableBillboardsCloud::createPolygonTexture() {
+        LDEBUG("Creating Polygon Texture");
+
+        glGenTextures(1, &_pTexture);
+        glBindTexture(GL_TEXTURE_2D, _pTexture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256,
+            256, 0, GL_RGBA, GL_BYTE, nullptr);
+
+        renderToTexture(std::bind(&openspace::RenderableBillboardsCloud::loadPolygonGeometryForRendering, 
+            this),
+            std::bind(&openspace::RenderableBillboardsCloud::renderPolygonGeometry, 
+            this, std::placeholders::_1),
+            _pTexture, 256, 256);          
+    }
+
+    void RenderableBillboardsCloud::createTextTexture() {
+        glGenTextures(1, &_tTexture);
+        glBindTexture(GL_TEXTURE_2D, _pTexture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256,
+            256, 0, GL_RGBA, GL_BYTE, nullptr);
+
+        renderToTexture(std::bind(&openspace::RenderableBillboardsCloud::loadTextGeometryForRendering,
+            this),
+            std::bind(&openspace::RenderableBillboardsCloud::renderTextgonGeometry,
+                this, std::placeholders::_1),
+            _pTexture, 256, 256);
+    }
+
+    void RenderableBillboardsCloud::renderToTexture(
+        std::function<GLuint(void)> geometryLoadingFunction,
+        std::function<void(GLuint)> renderFunction,
+        GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight) {
+        LDEBUG("Rendering to Texture");
+        
+        // Saves initial Application's OpenGL State
+        GLint defaultFBO;
+        GLint viewport[4];
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        GLuint calcFBO;
+        glGenFramebuffers(1, &calcFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
+        GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, drawBuffers);
+
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
+        if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR("Framework not built. Polygon Texture");
+            GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            switch (fbErr) {
+            case GL_FRAMEBUFFER_UNDEFINED:
+                LERROR("Indefined framebuffer.");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                LERROR("Incomplete, missing attachement.");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                LERROR("Framebuffer doesn't have at least one image attached to it.");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                LERROR("Returned if the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE \
+                        for any color attachment point(s) named by GL_DRAW_BUFFERi.");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                LERROR("Returned if GL_READ_BUFFER is not GL_NONE and the value of \
+                        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color attachment point \
+                        named by GL_READ_BUFFER.");
+                break;
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                LERROR("Returned if the combination of internal formats of the attached images \
+                        violates an implementation - dependent set of restrictions.");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                LERROR("Returned if the value of GL_RENDERBUFFE_r_samples is not the same for all \
+                        attached renderbuffers; if the value of GL_TEXTURE_SAMPLES is the not same for all \
+                        attached textures; or , if the attached images are a mix of renderbuffers and textures, \
+                        the value of GL_RENDERBUFFE_r_samples does not match the value of GL_TEXTURE_SAMPLES.");
+                LERROR("Returned if the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not the same \
+                        for all attached textures; or , if the attached images are a mix of renderbuffers and \
+                        textures, the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached textures.");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                LERROR("Returned if any framebuffer attachment is layered, and any populated attachment \
+                        is not layered, or if all populated color attachments are not from textures of the same target.");
+                break;
+            default:
+                LDEBUG("No error found checking framebuffer: Polygon Texture");
+                std::cout << "=== OK ===" << std::endl;
+                break;
+            }
+        }
+        glViewport(0, 0, textureWidth, textureHeight);
+
+        RenderEngine& renderEngine = OsEng.renderEngine();
+
+       
+        GLuint pointVao = geometryLoadingFunction();
+        renderFunction(pointVao);
+        
+        // Restores Applications' OpenGL State
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+        //glDeleteBuffers(1, &pointVbo);
+        glDeleteVertexArrays(1, &pointVao);
+        glDeleteFramebuffers(1, &calcFBO);
+    }
+
+    GLuint RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
+        GLuint pointVao, pointVbo;
+        glGenVertexArrays(1, &pointVao);
+        glGenBuffers(1, &pointVbo);
+        glBindVertexArray(pointVao);
+        glBindBuffer(GL_ARRAY_BUFFER, pointVbo);
+
+        const GLfloat vertex_data[] = {
+            //      x      y     z     w
+            0.0f, 0.0f, 0.0f, 1.0f,
+        };
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<GLvoid*>(0));
+        glEnableVertexAttribArray(0);
+        glBindVertexArray(0);
+
+        return pointVao;
+    }
+
+    void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+
+        std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
+            "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl",
+            "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl",
+            "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl");
+
+        program->activate();
+        static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        glClearBufferfv(GL_COLOR, 0, black);
+
+        program->setUniform("sides", _polygonSides);
+        program->setUniform("polygonColor", _pointColor);
+
+        glBindVertexArray(vao);
+        glDrawArrays(GL_POINTS, 0, 1);
+        glBindVertexArray(0);
+
+        if (true) {
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("polygon_texture.ppm"),
+                256, 256);
+
+        }
+        program->deactivate();
+    }
+
+    GLuint RenderableBillboardsCloud::loadTextGeometryForRendering() {
+        GLuint textVao = 0;
+        return textVao;
+    }
+
+    void RenderableBillboardsCloud::renderTextgonGeometry(GLuint vao) {
+       /* size_t _fontSize = 50;
+        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
+        _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(ghoul::fontrendering::FontRenderer::createDefault());
+        _fontRenderer->setFramebufferSize(glm::vec2(256.0f,256.0f));
+        
+        std::string unit = "m";        
+        glm::vec2 textPosition;
+        textPosition.x = 0;
+        textPosition.y = _fontSize / 2.f;
+        
+        glm::vec4 color(1.0, 1.0, 1.0, 1.0);
+
+        ;
+
+        _fontRenderer->render(
+            *_font,
+            textPosition,
+            color,
+            " %.0f %s",
+            10.0, unit.c_str()
+        );*/
+    }
+
+    void RenderableBillboardsCloud::saveTextureToPPMFile(const GLenum color_buffer_attachment,
+        const std::string & fileName, const int width, const int height) const {
+        std::fstream ppmFile;
+
+        ppmFile.open(fileName.c_str(), std::fstream::out);
+        if (ppmFile.is_open()) {
+            unsigned char * pixels = new unsigned char[width*height * 3];
+            for (int t = 0; t < width*height * 3; ++t)
+                pixels[t] = 255;
+
+            if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
+                glReadBuffer(color_buffer_attachment);
+                glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+            }
+            else {
+                glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixels);
+            }
+
+            ppmFile << "P3" << std::endl;
+            ppmFile << width << " " << height << std::endl;
+            ppmFile << "255" << std::endl;
+
+            std::cout << "\n\nFILE\n\n";
+            int k = 0;
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    ppmFile << (unsigned int)pixels[k] << " " << (unsigned int)pixels[k + 1] << " " << (unsigned int)pixels[k + 2] << " ";
+                    k += 3;
+                }
+                ppmFile << std::endl;
+            }
+            delete[] pixels;
+
+            ppmFile.close();
         }
     }
     

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,41 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
+#include "fragment.glsl"
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
+//in vec4 gs_colorMap;
+in float gs_screenSpaceDepth;
+in vec2 texCoord;
 
-#include <ghoul/misc/assert.h>
+//uniform bool hasColorMap;
+uniform float alphaValue;
+uniform vec3 color;
+uniform sampler2D spriteTexture;
 
-#include <modules/digitaluniverse/rendering/renderablepoints.h>
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
-//#include <modules/digitaluniverse/rendering/renderablepointssprite.h>
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
+Fragment getFragment() {      
+   
+    vec4 textureColor = texture(spriteTexture, texCoord);
+    vec4 fullColor = vec4(0.0);
 
-#include <ghoul/filesystem/filesystem>
+    //if (hasColorMap) {
+    //    fullColor = vec4(gs_colorMap.rgb * textureColor.rgb, textureColor.a);
+   // }
+    //else {
+        fullColor = vec4(color.rgb * textureColor.rgb, textureColor.a);
+   // }
 
-namespace openspace {
+    //fullColor.a *= alphaValue;
 
-DigitalUniverseModule::DigitalUniverseModule() : OpenSpaceModule(DigitalUniverseModule::Name) {}
+    //if (fullColor.a == 0) {
+    //    discard;
+    //}
+    
+    //fullColor = vec4(textureColor.rgb, 1.0);
+    fullColor = vec4(1.0);
 
-void DigitalUniverseModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    Fragment frag;
+    frag.color = fullColor;
+    frag.depth = gs_screenSpaceDepth;
 
-    fRenderable->registerClass<RenderablePoints>("RenderablePoints");
-    fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
-    //fRenderable->registerClass<RenderablePointsSprite>("RenderablePointsSprite");
-    fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
+    return frag;
 }
-
-std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
-    return {
-        RenderablePoints::Documentation()
-        //RenderablePointsSprinte::Documentation()       
-    };
-}
-
-} // namespace openspace

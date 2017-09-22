@@ -24,28 +24,87 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "PowerScaling/powerScalingMath.hglsl"
 
-in dvec4 in_position;
-in dvec4 in_colormap;
+layout(points) in;
+layout(triangle_strip, max_vertices = 6) out;
 
 uniform dmat4 modelViewProjectionTransform;
 uniform float scaleFactor;
+uniform vec3 up;
+uniform vec3 right;
 
+
+in vec4 colorMap[];
+
+out vec4 gs_colorMap;
+out vec2 texCoord;
 out float vs_screenSpaceDepth;
-out float vs_scaleFactor;
-out vec4 colorMap;
+
+const double PARSEC = 0.308567756e17LF;
+
+const vec2 corners[4] = vec2[4]( 
+    vec2(0.0, 0.0),
+    vec2(1.0, 0.0), 
+    vec2(1.0, 1.0),
+    vec2(0.0, 1.0)     
+);
+
 
 void main() {
-    vec4 positionClipSpace = vec4(modelViewProjectionTransform * in_position);
-    // positionClipSpace = vec4( modelViewProjectionTransform * 
-    // vec4(0,0,0,1));
-    vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
+    vec4 pos = gl_in[0].gl_Position;
+    gs_colorMap = colorMap[0];
+    
+    // Temp:
+    double scaleMultiply = exp(scaleFactor/10);
+    dvec3 scaledRight = scaleMultiply * right/2.0f;
+    dvec3 scaledUp = scaleMultiply * up/2.0f;
 
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    vs_scaleFactor = scaleFactor;
-    colorMap = vec4(in_colormap);
+    double unit = PARSEC;
 
-    gl_PointSize = scaleFactor;
-    gl_Position = positionScreenSpace;
+    // Must be the same as the enum in RenderableBillboardsCloud.h
+    if (pos.w == 1.f) {
+        unit = 1E3;
+    } else if (pos.w == 2.f) {
+        unit = PARSEC;
+    } else if (pos.w == 3.f) {
+        unit = 1E3 * PARSEC;
+    } else if (pos.w == 4.f) {
+        unit = 1E6 * PARSEC;
+    } else if (pos.w == 5.f) {
+        unit = 1E9 * PARSEC;
+    } else if (pos.w == 6.f) {
+        unit = 306391534.73091 * PARSEC;
+    }
+   
+    dvec4 dpos = dvec4(dvec3(pos.xyz) * unit, 1.0); 
+    
+    texCoord = corners[0];
+    vec4 initialPosition = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+    vs_screenSpaceDepth = initialPosition.w;
+    gl_Position = initialPosition;
+    EmitVertex();
+
+    texCoord = corners[1];
+    gl_Position = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+    EmitVertex();
+
+    texCoord = corners[2];
+    vec4 crossCorner = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+    gl_Position = crossCorner;
+    EmitVertex();
+    EndPrimitive(); // First Triangle
+
+    texCoord = corners[0];
+    gl_Position = initialPosition;
+    EmitVertex();
+
+    texCoord = corners[2];
+    gl_Position = crossCorner;
+    EmitVertex();
+    
+    texCoord = corners[3];
+    gl_Position = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+    EmitVertex();
+    EndPrimitive(); // Second Triangle
 }

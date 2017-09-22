@@ -28,21 +28,34 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointssprite.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepoints.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointssprite.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepoints.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.cpp 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointssprite_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointssprite_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_sprite_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_gs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_gs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard2_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard2_gs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard2_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_gs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_fs.glsl    
 )

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
+#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEBILLBOARDSCLOUD___H__
+#define __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEBILLBOARDSCLOUD___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -34,6 +34,8 @@
 #include <openspace/properties/vector/vec3property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+
+#include <functional>
 
 namespace ghoul::filesystem { 
     class File; 
@@ -48,10 +50,10 @@ namespace openspace {
 
     namespace documentation { struct Documentation; }
 
-    class RenderablePoints : public Renderable {
+    class RenderableBillboardsCloud : public Renderable {
     public:
-        explicit RenderablePoints(const ghoul::Dictionary& dictionary);
-        ~RenderablePoints() = default;
+        explicit RenderableBillboardsCloud(const ghoul::Dictionary& dictionary);
+        ~RenderableBillboardsCloud() = default;
 
         void initialize() override;
         void deinitialize() override;
@@ -77,33 +79,51 @@ namespace openspace {
         };
 
         void createDataSlice();
+        void createPolygonTexture();
+        void createTextTexture();
+        void renderToTexture(std::function<GLuint(void)> geometryLoadingFunction,
+            std::function<void(GLuint)> renderFunction,
+            GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight);
+        GLuint loadPolygonGeometryForRendering();
+        void renderPolygonGeometry(GLuint vao);
+        GLuint loadTextGeometryForRendering();
+        void renderTextgonGeometry(GLuint vao);
 
         bool loadData();
         bool readSpeckFile();
         bool readColorMapFile();
         bool loadCachedFile(const std::string& file);
         bool saveCachedFile(const std::string& file) const;
+        void saveTextureToPPMFile(const GLenum color_buffer_attachment,
+            const std::string & fileName, const int width, const int height) const;
 
         bool _dataIsDirty;
         bool _hasSpriteTexture;
         bool _spriteTextureIsDirty;
         bool _hasColorMapFile;
+        bool _hasPolygon;
+
+        int _polygonSides;
+        GLuint _pTexture;
+        GLuint _tTexture;
 
         properties::FloatProperty _alphaValue;
         properties::FloatProperty _scaleFactor;
         properties::Vec3Property _pointColor;
         properties::StringProperty _spriteTexturePath;
         
+        std::unique_ptr<ghoul::opengl::Texture> _polygonTexture;
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
         std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+        //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
 
         std::string _speckFile;
         std::string _colorMapFile;
 
         Unit _unit;
 
-        std::vector<double> _slicedData;
+        std::vector<float> _slicedData;
         std::vector<float> _fullData;
         std::vector<glm::vec4> _colorMapData;
 
@@ -116,4 +136,4 @@ namespace openspace {
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEPOINTS___H__
+#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEBILLBOARDSCLOUD___H__

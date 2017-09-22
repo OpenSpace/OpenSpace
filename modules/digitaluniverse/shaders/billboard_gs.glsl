@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,41 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/digitaluniverse/digitaluniversemodule.h>
+#version __CONTEXT__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
+#include "PowerScaling/powerScalingMath.hglsl"
 
-#include <ghoul/misc/assert.h>
+layout(points) in;
+layout(triangle_strip, max_vertices = 4) out;
+//layout(points, max_vertices = 1) out;
 
-#include <modules/digitaluniverse/rendering/renderablepoints.h>
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
-//#include <modules/digitaluniverse/rendering/renderablepointssprite.h>
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
+in vec4 orig_position[];
+//in vec4 colorMap[];
+in float vs_screenSpaceDepth[];
 
-#include <ghoul/filesystem/filesystem>
+out vec2 texCoord;
+out float billboardSize;
+out float gs_screenSpaceDepth;
+//out vec4 gs_colorMap;
 
-namespace openspace {
+uniform mat4 projection;
+uniform float scaleFactor;
+uniform float minBillboardSize;
+uniform vec2 screenSize;
 
-DigitalUniverseModule::DigitalUniverseModule() : OpenSpaceModule(DigitalUniverseModule::Name) {}
+const vec2 corners[4] = vec2[4]( 
+    vec2(0.0, 1.0), 
+    vec2(0.0, 0.0), 
+    vec2(1.0, 1.0), 
+    vec2(1.0, 0.0) 
+);
 
-void DigitalUniverseModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
 
-    fRenderable->registerClass<RenderablePoints>("RenderablePoints");
-    fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
-    //fRenderable->registerClass<RenderablePointsSprite>("RenderablePointsSprite");
-    fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
+void main() {
+    gs_screenSpaceDepth = vs_screenSpaceDepth[0];
+    //gs_colorMap = colorMap[0];
+
+    // if ((orig_position[0].x == 0.0) &&
+    //     (orig_position[0].y == 0.0) &&
+    //     (orig_position[0].z == 0.0))
+    // {
+    //     return;
+    // }
+
+    //float modifiedSpriteSize = exp((-30.623 - 0.5) * 1.0) * scaleFactor * 2000;
+
+    float modifiedSpriteSize =
+        exp((-30.623 - (-5.0)) * 0.462) * 1.0 * 2000;
+
+    vec4 projPos[4];
+    for (int i = 0; i < 4; ++i) {
+        vec4 p1 = gl_in[0].gl_Position;
+        p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
+        projPos[i] = projection * p1;
+    }
+
+    // Calculate the positions of the lower left and upper right corners of the
+    // billboard in screen-space
+    vec2 ll = (((projPos[1].xy / projPos[1].w) + 1.0) / 2.0) * screenSize;
+    vec2 ur = (((projPos[2].xy / projPos[2].w) + 1.0) / 2.0) * screenSize;
+
+    // The billboard is smaller than one pixel, we can discard it
+    float sizeInPixels = length(ll - ur);
+    //if (sizeInPixels < minBillboardSize) {
+    //    return;
+    //}
+
+    for (int i = 0; i < 4; i++) {
+        gl_Position = projPos[i];
+        texCoord = corners[i];
+        billboardSize = sizeInPixels;
+        EmitVertex();
+    }
+    
+    EndPrimitive();
 }
-
-std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
-    return {
-        RenderablePoints::Documentation()
-        //RenderablePointsSprinte::Documentation()       
-    };
-}
-
-} // namespace openspace

@@ -77,16 +77,29 @@ function postInitialization()
 
     openspace.setPropertyValue("SunGlare.renderable.Enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
-
-    -- DU Objects
-    openspace.setPropertyValue("Quasars.renderable.Enabled", false)
-    openspace.setPropertyValue("WMAP.renderable.Enabled", false)
-    openspace.setPropertyValue("Pulsars.renderable.Enabled", false)
-    openspace.setPropertyValue("Kepler Planetary Candidates.renderable.Enabled", false)
-    openspace.setPropertyValue("Globular Clusters.renderable.Enabled", false)
-
-    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
     
+    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
+
+
+    -- Digital Universe
+    openspace.setPropertyValue("WMAP.renderable.Enabled", false)
+    openspace.setPropertyValue("Quasars.renderable.Enabled", false)
+    openspace.setPropertyValue("Pulsars.renderable.Enabled", false)
+    openspace.setPropertyValue("Globular Clusters.renderable.Enabled", false)
+    openspace.setPropertyValue("Kepler Planetary Candidates.renderable.Enabled", false)
+    openspace.setPropertyValue("Local Dwarf Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValue("Exoplanets.renderable.Enabled", false)
+    openspace.setPropertyValue("Sloan Digital Sky Survey Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValue("Planetary Nebulae.renderable.Enabled", false)
+    openspace.setPropertyValue("OB Associations.renderable.Enabled", false)
+    openspace.setPropertyValue("Open Star Clusters.renderable.Enabled", false)
+    openspace.setPropertyValue("Supernova Remnants.renderable.Enabled", false)
+    openspace.setPropertyValue("HII Regions.renderable.Enabled", false)
+    openspace.setPropertyValue("Abell Galaxy Clusters.renderable.Enabled", false)
+    openspace.setPropertyValue("2MASS Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValue("6dF Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValue("2dF Galaxies.renderable.Enabled", false)
+
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
 
@@ -132,10 +145,22 @@ return {
         "constellationbounds",
         "grids",
         "quasars/digitaluniverse",
-        "pulsars/digitaluniverse",
         "backgroundradiation/digitaluniverse",
         "globularclusters/digitaluniverse",
-        "kepler/digitaluniverse"
+        "kepler/digitaluniverse",
+        "pulsars/digitaluniverse",
+        "localdwarfs/digitaluniverse",
+        "exoplanets/digitaluniverse",
+        "sloandss/digitaluniverse",
+        "openclusters/digitaluniverse",
+        "obassociations/digitaluniverse",
+        "planetarynebulae/digitaluniverse",
+        "supernovaremnants/digitaluniverse",
+        "h2regions/digitaluniverse",
+        "abell/digitaluniverse",
+        "2mass/digitaluniverse",
+        "6dF/digitaluniverse",
+        "2dF/digitaluniverse",
     }
 }
 

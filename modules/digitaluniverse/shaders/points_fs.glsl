@@ -24,11 +24,13 @@
 
 #include "fragment.glsl"
 
+//in float gs_screenSpaceDepth;
 in float vs_screenSpaceDepth;
-flat in dvec4 test;
+in vec4 colorMap;
 
 uniform vec3 color;
 uniform float alphaValue;
+uniform bool hasColorMap;
 
 Fragment getFragment() {
     Fragment frag;
@@ -37,7 +39,13 @@ Fragment getFragment() {
         discard;
     }
 
-    frag.color = vec4(color, alphaValue);
+    if (hasColorMap) {
+        frag.color = vec4(colorMap.xyz, alphaValue);        
+    } else {
+        frag.color = vec4(color, alphaValue);
+    }
+    
+    //frag.depth = gs_screenSpaceDepth;
     frag.depth = vs_screenSpaceDepth;
 
     return frag;
