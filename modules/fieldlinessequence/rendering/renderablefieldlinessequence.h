@@ -30,6 +30,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 
@@ -59,6 +60,8 @@ private:
         OSFLS,
         INVALID
     };
+
+    std::string _name;
 
     int             _activeStateIndex         = -1;
     int             _activeTriggerTimeIndex   = -1;
@@ -94,22 +97,24 @@ private:
     const GLuint _VA_COLOR    = 1;
 
     // ----------------------------- Properties -----------------------------
-    properties::PropertyOwner  _colorGroup;          // Group to hold the color properties
-    properties::OptionProperty _colorMethod;         // Uniform/transfer function/topology?
-    properties::OptionProperty _colorQuantity;       // Index of the extra quantity to color lines by
-    properties::StringProperty _colorQuantityMin;    // Color table/transfer function min
-    properties::StringProperty _colorQuantityMax;    // Color table/transfer function max
-    properties::StringProperty _colorTablePath;      // Color table/transfer function for "By Quantity" coloring
-    properties::Vec4Property   _colorUniform;        // Uniform Field Line Color
+    properties::PropertyOwner    _colorGroup;          // Group to hold the color properties
+    properties::OptionProperty   _colorMethod;         // Uniform/transfer function/topology?
+    properties::OptionProperty   _colorQuantity;       // Index of the extra quantity to color lines by
+    properties::StringProperty   _colorQuantityMin;    // Color table/transfer function min
+    properties::StringProperty   _colorQuantityMax;    // Color table/transfer function max
+    properties::StringProperty   _colorTablePath;      // Color table/transfer function for "By Quantity" coloring
+    properties::Vec4Property     _colorUniform;        // Uniform Field Line Color
 
-    properties::Vec4Property   _flowColor;           // Simulated particles' color
-    properties::BoolProperty   _flowEnabled;         // Toggle flow [ON/OFF]
-    properties::PropertyOwner  _flowGroup;           // Gropu to hold the flow/particle properties
-    properties::IntProperty    _flowParticleSize;    // Size of simulated flow particles
-    properties::IntProperty    _flowParticleSpacing; // Size of simulated flow particles
-    properties::BoolProperty   _flowReversed;        // Toggle flow direction [FORWARDS/BACKWARDS]
-    properties::IntProperty    _flowSpeed;           // Speed of simulated flow
+    properties::Vec4Property     _flowColor;           // Simulated particles' color
+    properties::BoolProperty     _flowEnabled;         // Toggle flow [ON/OFF]
+    properties::PropertyOwner    _flowGroup;           // Gropu to hold the flow/particle properties
+    properties::IntProperty      _flowParticleSize;    // Size of simulated flow particles
+    properties::IntProperty      _flowParticleSpacing; // Size of simulated flow particles
+    properties::BoolProperty     _flowReversed;        // Toggle flow direction [FORWARDS/BACKWARDS]
+    properties::IntProperty      _flowSpeed;           // Speed of simulated flow
 
+    properties::TriggerProperty  _focusOnOriginBtn;    // Button which sets camera focus to parent node of the renderable
+    properties::TriggerProperty  _jumpToStartBtn;      // Button which executes a time jump to start of sequence
 
     void   computeSequenceEndTime();
     bool   extractInfoFromDictionary(const ghoul::Dictionary& dictionary);

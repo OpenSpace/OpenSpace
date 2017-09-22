@@ -25,8 +25,11 @@
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -90,6 +93,12 @@ namespace {
     static const openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "speed", "Speed", "Speed of the flow."
     };
+    static const openspace::properties::Property::PropertyInfo OriginButtonInfo = {
+        "focusCameraOnParent", "Focus Camera", "Focus camera on parent."
+    };
+    static const openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
+        "timeJumpToStart", "Jump to Start Time", "Performs a time jump to the start of the sequence."
+    };
 
     enum ColorMethod { UNIFORM = 0, BY_QUANTITY };
 } // namespace
@@ -113,7 +122,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _flowParticleSize(ParticleSizeInfo, 5, 0, 500),
       _flowParticleSpacing(ParticleSpacingInfo, 60, 0, 500),
       _flowReversed(ReverseFlowInfo, false),
-      _flowSpeed(FlowSpeedInfo, 20, 0, 1000) {
+      _flowSpeed(FlowSpeedInfo, 20, 0, 1000),
+      _focusOnOriginBtn(OriginButtonInfo),
+      _jumpToStartBtn(TimeJumpButtonInfo) {
 
     // Set the default color table, just in case user defined paths are corrupt!
     _transferFunction = std::make_shared<TransferFunction>(absPath(_colorTablePaths[0]));
@@ -174,6 +185,10 @@ void RenderableFieldlinesSequence::initialize() {
     addPropertySubOwner(_colorGroup);
     addPropertySubOwner(_flowGroup);
 
+    // Add non-grouped properties
+    addProperty(_focusOnOriginBtn);
+    addProperty(_jumpToStartBtn);
+
     // Add Properties to the groups
     _colorGroup.addProperty(_colorMethod);
     _colorGroup.addProperty(_colorQuantity);
@@ -233,6 +248,25 @@ void RenderableFieldlinesSequence::initialize() {
         // TODO CHECK IF VALID NUMBER!
         // _updateTransferFunctionMin = true;
         _colorTableRanges[_colorQuantity].y = std::stof(_colorQuantityMax);
+    });
+
+    _focusOnOriginBtn.onChange([this] {
+        LDEBUG("SET FOCUS NODE TO PARENT");
+        // TODO CHECK IF VALID NUMBER!
+        // _updateTransferFunctionMin = true;
+        //OsEng.navigationHandler().setFocusNode();
+        SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_name);
+        if (!node) {
+            LWARNING("Could not find a node in scenegraph called '" << _name << "'");
+            return;
+        }
+        OsEng.navigationHandler().setFocusNode(node->parent());
+        OsEng.navigationHandler().resetCameraDirection();
+    });
+
+    _jumpToStartBtn.onChange([this] {
+        LDEBUG("Jump in time to start of sequence!");
+        OsEng.timeManager().time().setTime(_startTimes[0]);
     });
 
     // Setup shader program
@@ -469,6 +503,7 @@ bool RenderableFieldlinesSequence::extractInfoFromDictionary(
 
     string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
+    _name = name;
     name += ": ";
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
