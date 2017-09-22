@@ -108,4 +108,17 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) 
     return true;
 }
 
+// Returns one of the extra variable vectors, _extraVariables[INDEX].
+// If INDEX is out of scope an empty vector is returned and the referenced bool will be false.
+const vector<float>&  FieldlinesState::extraVariable(const size_t INDEX,
+                                                     bool& isSuccessful) const {
+    if (INDEX < _extraVariables.size()) {
+        isSuccessful = true;
+        return _extraVariables[INDEX];
+    }
+    isSuccessful = false;
+    // return empty vector which goes out of scope hence unusable!
+    return std::vector<float>();
+}
+
 } // namespace openspace

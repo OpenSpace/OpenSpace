@@ -29,9 +29,9 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 
 using std::string;
 
@@ -44,6 +44,8 @@ namespace {
     const char* KEY_SOURCE_FOLDER           = "SourceFolder";    // [STRING]
 
     // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
+    const char* KEY_COLOR_TABLE_PATHS       = "ColorTablePaths"; // [STRING ARRAY] Values should be paths to .txt files
+    const char* KEY_COLOR_TABLE_RANGES      = "ColorTableRanges";// [VEC2 ARRAY] Values should be paths to .txt files
     const char* KEY_OSLFS_LOAD_AT_RUNTIME   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
@@ -51,8 +53,26 @@ namespace {
     const char* VALUE_INPUT_FILE_TYPE_JSON  = "json";
     const char* VALUE_INPUT_FILE_TYPE_OSFLS = "osfls";
 
-    static const openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "lineColor", "Line Color", "Color of lines."
+    static const openspace::properties::Property::PropertyInfo ColorMethodInfo = {
+        "colorMethod", "Color Method", "Color lines uniformly or using color tables based on extra variables like e.g. temperature or particle density."
+    };
+    static const openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
+        "colorQuantity", "Quantity to Color By", "Quantity/variable used to color lines if the \"By Quantity\" color method is selected."
+    };
+    static const openspace::properties::Property::PropertyInfo ColorQuantityMinInfo = {
+        "colorQuantityMin", "ColorTable Min Value", "Value to map to the lowest end of the color table."
+    };
+    static const openspace::properties::Property::PropertyInfo ColorQuantityMaxInfo = {
+        "colorQuantityMax", "ColorTable Max Value", "Value to map to the highest end of the color table."
+    };
+    static const openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
+        "colorTablePath", "Path to Color Table", "Color Table/Transfer Function to use for \"By Quantity\" coloring."
+    };
+    static const openspace::properties::Property::PropertyInfo ColorUniformInfo = {
+        "uniform", "Uniform Line Color", "The uniform color of lines shown when \"Color Method\" is set to \"Uniform\"."
+    };
+    static const openspace::properties::Property::PropertyInfo FlowColorInfo = {
+        "color", "Color", "Color of particles."
     };
     static const openspace::properties::Property::PropertyInfo EnableFlowInfo = {
         "Enable", "ON/OFF",
@@ -70,29 +90,37 @@ namespace {
     static const openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "speed", "Speed", "Speed of the flow."
     };
-    static const openspace::properties::Property::PropertyInfo FlowColorInfo = {
-        "color", "Color", "Color of particles."
-    };
+
+    enum ColorMethod { UNIFORM = 0, BY_QUANTITY };
 } // namespace
 
 namespace openspace {
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
-      _lineColor(LineColorInfo, glm::vec4(0.75f, 0.5f, 0.0f, 0.5f), glm::vec4(0.f), glm::vec4(1.f)),
-      _flowGroup({ "Flow" }),
+      _colorGroup({ "Color" }),
+      _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio),
+      _colorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown),
+      _colorQuantityMin(ColorQuantityMinInfo),
+      _colorQuantityMax(ColorQuantityMaxInfo),
+      _colorTablePath(ColorTablePathInfo),
+      _colorUniform(ColorUniformInfo, glm::vec4(0.75f, 0.5f, 0.0f, 0.5f),
+                                      glm::vec4(0.f), glm::vec4(1.f)),
+      _flowColor(FlowColorInfo, glm::vec4(0.8f, 0.7f, 0.0f, 0.6f),
+                                glm::vec4(0.f), glm::vec4(1.f)),
       _flowEnabled(EnableFlowInfo, true),
-      _flowReversed(ReverseFlowInfo, false),
+      _flowGroup({ "Flow" }),
       _flowParticleSize(ParticleSizeInfo, 5, 0, 500),
       _flowParticleSpacing(ParticleSpacingInfo, 60, 0, 500),
-      _flowSpeed(FlowSpeedInfo, 20, 0, 1000),
-      _flowColor(FlowColorInfo, glm::vec4(0.8f, 0.7f, 0.0f, 0.6f),
-                                   glm::vec4(0.f), glm::vec4(1.f)) {
+      _flowReversed(ReverseFlowInfo, false),
+      _flowSpeed(FlowSpeedInfo, 20, 0, 1000) {
+
+    // Set the default color table, just in case user defined paths are corrupt!
+    _transferFunction = std::make_shared<TransferFunction>(absPath(_colorTablePaths[0]));
 
     if(!extractInfoFromDictionary(dictionary)) {
         _sourceFileType = INVALID;
     }
-
 }
 
 void RenderableFieldlinesSequence::initialize() {
@@ -133,22 +161,79 @@ void RenderableFieldlinesSequence::initialize() {
             break;
     }
 
-    // No need to store source paths in memory if their states are already in RAM!
+    // At this point there's at least one state loaded into memory!
+    // No need to store source paths in memory if they are already in RAM!
     if (!_isLoadingStatesAtRuntime) {
         _sourceFiles.clear();
     }
 
     computeSequenceEndTime();
 
-    // HANDLE PROPERTIES
-    addProperty(_lineColor);
+    // --------------------- HANDLE PROPERTIES --------------------- //
+    // Add Property Groups
+    addPropertySubOwner(_colorGroup);
     addPropertySubOwner(_flowGroup);
+
+    // Add Properties to the groups
+    _colorGroup.addProperty(_colorMethod);
+    _colorGroup.addProperty(_colorQuantity);
+    _colorGroup.addProperty(_colorQuantityMin);
+    _colorGroup.addProperty(_colorQuantityMax);
+    _colorGroup.addProperty(_colorTablePath);
+    _colorGroup.addProperty(_colorUniform);
+
     _flowGroup.addProperty(_flowEnabled);
     _flowGroup.addProperty(_flowReversed);
     _flowGroup.addProperty(_flowColor);
     _flowGroup.addProperty(_flowParticleSize);
     _flowGroup.addProperty(_flowParticleSpacing);
     _flowGroup.addProperty(_flowSpeed);
+
+    // Add Options to OptionProperties
+    _colorMethod.addOption(ColorMethod::UNIFORM, "Uniform");
+    _colorMethod.addOption(ColorMethod::BY_QUANTITY, "By Quantity");
+
+    // Add option for each extra quantity. We assume that there are just as many names to
+    // extra variables as there are extra variables. We also assume that all states in the
+    // given sequence have the same extra variables!
+    const size_t N_EXTRA_QUANTITIES = _states[0].nExtraVariables();
+    auto EXTRA_VARIABLE_NAMES_VEC = _states[0].extraVariableNames();
+    for (size_t i = 0; i < N_EXTRA_QUANTITIES; ++i) {
+        _colorQuantity.addOption(i, EXTRA_VARIABLE_NAMES_VEC[i]);
+    }
+    // Each quantity should have its own color table and color table range, no more, no less
+    _colorTablePaths.resize(N_EXTRA_QUANTITIES, _colorTablePaths.back());
+    _colorTableRanges.resize(N_EXTRA_QUANTITIES, _colorTableRanges.back());
+
+    // Add Property Callback Functions
+    _colorQuantity.onChange([this] {
+        LDEBUG("CHANGED COLORING QUANTITY");
+        _shouldUpdateColorBuffer = true;
+        _colorQuantityMin = std::to_string(_colorTableRanges[_colorQuantity].x);
+        _colorQuantityMax = std::to_string(_colorTableRanges[_colorQuantity].y);
+        _activeColorTable = &_colorTablePaths[_colorQuantity];
+        _colorTablePath = *_activeColorTable;
+    });
+
+    _colorTablePath.onChange([this] {
+        // TOGGLE ACTIVE SHADER PROGRAM
+        _transferFunction->setPath(_colorTablePath);
+        *_activeColorTable = _colorTablePath;
+    });
+
+    _colorQuantityMin.onChange([this] {
+        LDEBUG("CHANGED MIN VALUE");
+        // TODO CHECK IF VALID NUMBER!
+        // _updateTransferFunctionMin = true;
+        _colorTableRanges[_colorQuantity].x = std::stof(_colorQuantityMin);
+    });
+
+    _colorQuantityMax.onChange([this] {
+        LDEBUG("CHANGED MAX VALUE");
+        // TODO CHECK IF VALID NUMBER!
+        // _updateTransferFunctionMin = true;
+        _colorTableRanges[_colorQuantity].y = std::stof(_colorQuantityMax);
+    });
 
     // Setup shader program
     _shaderProgram = OsEng.renderEngine().buildRenderProgram(
@@ -165,6 +250,7 @@ void RenderableFieldlinesSequence::initialize() {
     //------------------ Initialize OpenGL VBOs and VAOs-------------------------------//
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
+    glGenBuffers(1, &_vertexColorBuffer);
 }
 
 void RenderableFieldlinesSequence::deinitialize() {
@@ -194,6 +280,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     if (_activeTriggerTimeIndex != -1) {
         _shaderProgram->activate();
 
+        // Calculate Model View MatrixProjection
         const glm::dmat4 ROT_MAT = glm::dmat4(data.modelTransform.rotation);
         // const glm::mat4 SCALE_TRANSFORM = glm::mat4(1.0); // TODO remove if no use
         const glm::dmat4 MODEL_MAT =
@@ -205,7 +292,19 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("modelViewProjection",
                     data.camera.sgctInternal.projectionMatrix() * glm::mat4(MODEL_VIEW_MAT));
 
-        _shaderProgram->setUniform("lineColor", _lineColor);
+
+        _shaderProgram->setUniform("colorMethod", _colorMethod);
+        _shaderProgram->setUniform("lineColor", _colorUniform);
+
+        if (_colorMethod == ColorMethod::BY_QUANTITY) {
+                ghoul::opengl::TextureUnit textureUnit;
+                textureUnit.activate();
+                _transferFunction->bind(); // Calls update internally
+                _shaderProgram->setUniform("colorTable", textureUnit);
+                _shaderProgram->setUniform("colorTableRange",
+                                              _colorTableRanges[_colorQuantity]);
+        }
+
         // Flow/Particles
         _shaderProgram->setUniform("usingParticles", _flowEnabled);
         _shaderProgram->setUniform("flowColor", _flowColor);
@@ -238,8 +337,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         // Check if current time in OpenSpace is within sequence interval
         if (isWithinSequenceInterval(CURRENT_TIME)) {
             const int NEXT_IDX = _activeTriggerTimeIndex + 1;
-            if (_activeTriggerTimeIndex < 0                                          // true => Previous frame was not within the sequence interval
-                || CURRENT_TIME < _startTimes[_activeTriggerTimeIndex]               // true => OpenSpace has stepped back    to a time represented by another state
+            if (_activeTriggerTimeIndex < 0                                                // true => Previous frame was not within the sequence interval
+                || CURRENT_TIME < _startTimes[_activeTriggerTimeIndex]                     // true => OpenSpace has stepped back    to a time represented by another state
                 || (NEXT_IDX < _nStates && CURRENT_TIME >= _startTimes[NEXT_IDX])) { // true => OpenSpace has stepped forward to a time represented by another state
 
                 updateActiveTriggerTimeIndex(CURRENT_TIME);
@@ -275,30 +374,27 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 _states[0] = std::move(_newState);
             }
 
-            glBindVertexArray(_vertexArrayObject);
-            glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+            updateVertexPositionBuffer();
 
-            const std::vector<glm::vec3>& VERTEX_POS_VEC =
-                    _states[_activeStateIndex].vertexPositions();
-
-            glBufferData(GL_ARRAY_BUFFER, VERTEX_POS_VEC.size() * sizeof(glm::vec3),
-                    &VERTEX_POS_VEC.front(), GL_STATIC_DRAW);
-
-            glEnableVertexAttribArray(_vertAttrVertexPos);
-            glVertexAttribPointer(_vertAttrVertexPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-            // UNBIND
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
+            if (_states[_activeStateIndex].nExtraVariables() > 0) {
+                _shouldUpdateColorBuffer = true;
+            } else {
+                _colorMethod = ColorMethod::UNIFORM;
+            }
 
             // Everything is set and ready for rendering!
-            _needsUpdate = false;
+            _needsUpdate     = false;
             _newStateIsReady = false;
+        }
+
+        if (_shouldUpdateColorBuffer) {
+            updateVertexColorBuffer();
+            _shouldUpdateColorBuffer = false;
         }
     }
 }
 
-inline bool RenderableFieldlinesSequence::isWithinSequenceInterval(const double CURRENT_TIME) {
+inline bool RenderableFieldlinesSequence::isWithinSequenceInterval(const double CURRENT_TIME) const {
     return (CURRENT_TIME >= _startTimes[0]) && (CURRENT_TIME < _sequenceEndTime);
 }
 
@@ -325,6 +421,47 @@ void RenderableFieldlinesSequence::readNewState(const std::string& FILEPATH) {
 
     _newStateIsReady        = true;
     _isLoadingStateFromDisk = false;
+}
+
+// Unbind buffers and arrays
+inline void unbindGL() {
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
+    const std::vector<glm::vec3>& VERTEX_POS_VEC =
+            _states[_activeStateIndex].vertexPositions();
+
+    glBufferData(GL_ARRAY_BUFFER, VERTEX_POS_VEC.size() * sizeof(glm::vec3),
+            &VERTEX_POS_VEC.front(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(_VA_POSITION);
+    glVertexAttribPointer(_VA_POSITION, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    unbindGL();
+}
+
+void RenderableFieldlinesSequence::updateVertexColorBuffer() {
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+
+    bool isSuccessful;
+    const std::vector<float>& QUANTITY_VEC =
+            _states[_activeStateIndex].extraVariable(_colorQuantity, isSuccessful);
+
+    if (isSuccessful) {
+        glBufferData(GL_ARRAY_BUFFER, QUANTITY_VEC.size() * sizeof(float),
+                &QUANTITY_VEC.front(), GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(_VA_COLOR);
+        glVertexAttribPointer(_VA_COLOR, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        unbindGL();
+    }
 }
 
 bool RenderableFieldlinesSequence::extractInfoFromDictionary(
@@ -390,6 +527,32 @@ bool RenderableFieldlinesSequence::extractInfoFromDictionary(
         return false;
     }
 
+    // Extract optional info from modfile
+    ghoul::Dictionary colorTablesPathsDictionary;
+    if (dictionary.getValue(KEY_COLOR_TABLE_PATHS, colorTablesPathsDictionary)) {
+        const size_t N_PROVIDED_PATHS = colorTablesPathsDictionary.size();
+        if (N_PROVIDED_PATHS > 0) {
+            // Clear the default! It is already specified in the transferFunction
+            _colorTablePaths.clear();
+            for (size_t i = 1; i <= N_PROVIDED_PATHS; ++i) {
+                _colorTablePaths.push_back(
+                        colorTablesPathsDictionary.value<std::string>( std::to_string(i) ) );
+            }
+        }
+    }
+
+    ghoul::Dictionary colorTablesRangesDictionary;
+    if (dictionary.getValue(KEY_COLOR_TABLE_RANGES, colorTablesRangesDictionary)) {
+        const size_t N_PROVIDED_RANGES = colorTablesRangesDictionary.size();
+        for (size_t i = 1; i <= N_PROVIDED_RANGES; ++i) {
+            _colorTableRanges.push_back(
+                    colorTablesRangesDictionary.value<glm::vec2>( std::to_string(i) ) );
+        }
+    } else {
+        _colorTableRanges.push_back(glm::vec2(0, 1));
+    }
+
+    // Extract info specific to each inputType
     switch (_sourceFileType) {
         case CDF:
             LERROR(name << "CDF NOT YET IMPLEMENTED!");

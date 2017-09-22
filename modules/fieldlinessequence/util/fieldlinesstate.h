@@ -31,6 +31,8 @@
 #include <string>
 #include <vector>
 
+using std::vector;
+
 namespace openspace {
 
 class FieldlinesState {
@@ -46,23 +48,29 @@ public:
 
     bool   loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE);
 
-    // Getters
-    double       triggerTime() { return _triggerTime; }
-    Model        model()       { return _model; }
-    const std::vector<glm::vec3>& vertexPositions() { return _vertexPositions; }
-    const std::vector<GLint>&     lineStart() { return _lineStart; }
-    const std::vector<GLsizei>&   lineCount() { return _lineCount; }
+    // ------------------------------GETTERS-----------------------------------------//
+    const vector<vector<float>>& extraVariables()     const { return _extraVariables; }
+    const vector<std::string>&   extraVariableNames() const { return _extraVariableNames; }
+    const vector<GLsizei>&       lineCount()          const { return _lineCount; }
+    const vector<GLint>&         lineStart()          const { return _lineStart; }
+    size_t                       nExtraVariables()    const { return _extraVariables.size(); }
+    Model                        model()              const { return _model; }
+    double                       triggerTime()        const { return _triggerTime; }
+    const vector<glm::vec3>&     vertexPositions()    const { return _vertexPositions; }
+
+    // Special getter. Returns extraVariables[INDEX].
+    const vector<float>&       extraVariable(const size_t INDEX, bool& isSuccesful) const;
 
 private:
     bool    _isMorphable = false;
     double  _triggerTime = -1.0;
     Model   _model;
 
-    std::vector<glm::vec3>          _vertexPositions;
-    std::vector<GLint>              _lineStart;
-    std::vector<GLsizei>            _lineCount;
-    std::vector<std::vector<float>> _extraVariables;
-    std::vector<std::string>        _extraVariableNames;
+    vector<glm::vec3>          _vertexPositions;
+    vector<GLint>              _lineStart;
+    vector<GLsizei>            _lineCount;
+    vector<vector<float>>      _extraVariables;
+    vector<std::string>        _extraVariableNames;
     // TODO: Maybe introduce a vector containing seed point indices
 };
 
