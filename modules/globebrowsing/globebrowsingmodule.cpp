@@ -241,6 +241,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "Get geographic coordinates of the camera poosition in latitude, "
                 "longitude, and altitude"
             },
+#ifdef GLOBEBROWSING_USE_GDAL
             {
                 "loadWMSCapabilities",
                 &globebrowsing::luascriptfunctions::loadWMSCapabilities,
@@ -268,6 +269,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "component of the returned table can be used in the 'FilePath' argument "
                 "for a call to the 'addLayer' function to add the value to a globe."
             }
+#endif  // GLOBEBROWSING_USE_GDAL
         },
         {
             "${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"
