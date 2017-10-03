@@ -25,6 +25,7 @@
 #include <ghoul/io/texture/texturereader.h>
 
 namespace openspace {
+namespace volume {
 
 template <typename VoxelType>
 VoxelType TextureSliceVolumeReader<VoxelType>::get(const glm::ivec3& coordinates) const {
@@ -81,4 +82,5 @@ ghoul::opengl::Texture& TextureSliceVolumeReader<VoxelType>::getSlice(int sliceI
     return *_cache.get(sliceIndex).get();
 }
 
+} // namespace volume
 } // namespace openspace

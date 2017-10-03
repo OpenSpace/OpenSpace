@@ -109,8 +109,7 @@ void TransferFunction::setTextureFromTxt() {
     in.open(_filepath.c_str());
 
     if (!in.is_open()) {
-        LERROR("Could not open file " << _filepath);
-        return;
+        throw ghoul::FileNotFoundError(_filepath);
     }
 
     int width = 512;

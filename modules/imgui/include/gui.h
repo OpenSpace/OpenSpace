@@ -67,7 +67,9 @@ public:
 //protected:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
+#ifdef GLOBEBROWSING_USE_GDAL
     GuiGlobeBrowsingComponent _globeBrowsing;
+#endif //  GLOBEBROWSING_USE_GDAL
     GuiOriginComponent _origin;
     GuiPerformanceComponent _performance;
     GuiPropertyComponent _globalProperty;

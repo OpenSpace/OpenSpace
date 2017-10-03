@@ -22,85 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/other/threadpool.h>
+#include "gtest/gtest.h"
 
-namespace openspace::globebrowsing {
+#include <openspace/util/timeline.h>
+#include <openspace/util/time.h>
 
-Worker::Worker(ThreadPool& pool) : pool(pool) {}
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rawvolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
 
-void Worker::operator()() {
-    std::function<void()> task;
-    while (true) {
-        // acquire lock
-        {
-            std::unique_lock<std::mutex> lock(pool.queue_mutex);
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
 
-            // look for a work item
-            while (!pool.stop && pool.tasks.empty()) {
-                // if there are none wait for notification
-                pool.condition.wait(lock);
-            }
+using namespace openspace;
 
-            if (pool.stop) { // exit if the pool is stopped
-                return;
-            }
+class RawVolumeIoTest : public testing::Test {};
 
-            // get the task from the queue
-            task = pool.tasks.front();
-            pool.tasks.pop_front();
+TEST_F(RawVolumeIoTest, TinyInputOutput) {
+    using namespace volume;
 
-        }// release lock
+    glm::uvec3 dims{ 1, 1, 1 };
+    float value = 0.5;
 
-        // execute the task
-        task();
-    }
+    RawVolume<float> vol(dims);
+
+    vol.set({ 0, 0, 0 }, value);
+    ASSERT_EQ(vol.get({ 0, 0, 0 }), value);
+
+    std::string volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
+
+    // Write the 1x1x1 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
+
+    // Read the 1x1x1 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    ASSERT_EQ(storedVolume->get({ 0, 0, 0 }), value);
 }
 
-ThreadPool::ThreadPool(size_t numThreads)
-    : stop(false)
-{
-    for (size_t i = 0; i < numThreads; ++i) {
-        workers.push_back(std::thread(Worker(*this)));
-    }
+TEST_F(RawVolumeIoTest, BasicInputOutput) {
+    using namespace volume;
+
+    glm::uvec3 dims{ 2, 4, 8 };
+    auto value = [dims](glm::uvec3 v) {
+        return v.z * 8 * 4 + v.y * 4 + v.x;
+    };
+
+    RawVolume<float> vol(dims);
+    vol.forEachVoxel([&vol, &value](glm::uvec3 x, float v) {
+        vol.set(x, value(x));
+    });
+
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+        ASSERT_EQ(v, value(x));
+    });
+
+    std::string volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
+
+    // Write the 2x4x8 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
+
+    // Read the 2x4x8 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+        ASSERT_EQ(v, value(x));
+    });
 }
-
-ThreadPool::ThreadPool(const ThreadPool& toCopy)
-    : ThreadPool(toCopy.workers.size())
-{ }
-
-// the destructor joins all threads
-ThreadPool::~ThreadPool() {
-    // stop all threads
-    {
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        stop = true;
-    }
-    condition.notify_all();
-
-    // join them
-    for (size_t i = 0; i < workers.size(); ++i) {
-        workers[i].join();
-    }
-}
-
-// add new work item to the pool
-void ThreadPool::enqueue(std::function<void()> f) {
-    { // acquire lock
-        std::unique_lock<std::mutex> lock(queue_mutex);
-
-        // add the task
-        tasks.push_back(f);
-    } // release lock
-
-        // wake up one thread
-    condition.notify_one();
-}
-
-void ThreadPool::clearTasks() {
-    { // acquire lock
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        tasks.clear();
-    } // release lock
-}
-
-} // namespace openspace::globebrowsing

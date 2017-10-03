@@ -46,7 +46,6 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-class RenderableVolume;
 class Camera;
 class Scene;
     

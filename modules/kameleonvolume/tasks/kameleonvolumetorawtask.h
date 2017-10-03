@@ -22,45 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETORAWTASK___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETORAWTASK___H__
 
-namespace openspace::globebrowsing {
+#include <openspace/util/task.h>
 
-template<typename P>
-Job<P>::Job() {}
+#include <glm/glm.hpp>
 
-template<typename P>
-Job<P>::~Job() {}
+#include <string>
 
-template<typename P>
-ConcurrentJobManager<P>::ConcurrentJobManager(ThreadPool pool)
-    : threadPool(pool)
-{ }
+namespace openspace {
+namespace kameleonvolume {
 
-template<typename P>
-void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
-    threadPool.enqueue([this, job]() {
-        job->execute();
-        std::lock_guard<std::mutex> lock(_finishedJobsMutex);
-        _finishedJobs.push(job);
-    });
-}
+class KameleonVolumeToRawTask : public Task {
+public:
+    KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
+    
+private:
+    std::string _inputPath;
+    std::string _rawVolumeOutputPath;
+    std::string  _dictionaryOutputPath;
 
-template<typename P>
-void ConcurrentJobManager<P>::clearEnqueuedJobs() {
-    threadPool.clearTasks();
-}
+    std::string _variable;
+    glm::uvec3 _dimensions;
+    bool _autoDomainBounds;
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
+};
 
-template<typename P>
-std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
-    ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
-    std::lock_guard<std::mutex> lock(_finishedJobsMutex);
-    return _finishedJobs.pop();
-}
+} // namespace kameleon
+} // namespace openspace
 
-template<typename P>
-size_t ConcurrentJobManager<P>::numFinishedJobs() const {
-    return _finishedJobs.size();
-}
-
-} // namespace openspace::globebrowsing
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATORAWTASK___H__

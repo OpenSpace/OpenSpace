@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef GLOBEBROWSING_USE_GDAL
+
 #ifndef __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
 #define __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
 
@@ -49,3 +51,5 @@ private:
 
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
+
+#endif // GLOBEBROWSING_USE_GDAL

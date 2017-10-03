@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#define KAMELEON_PI      3.14159265358979323846  /* pi */
-#define KAMELEON_SQRT1_3 0.57735026919           /* 1/sqrt(3) */
+#include <ghoul/misc/assert.h>
 
-vec3 kameleon_cartesianToSpherical(vec3 zeroToOneCoords) {
-    // Put cartesian in [-1..1] range first
-    vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
+namespace openspace {
 
-    float r = length(cartesian);
-    float theta = 0.0;
-    float phi = 0.0;
+template<typename P>
+Job<P>::Job() {}
 
-    if (r != 0.0) {
-        theta = acos(cartesian.z / r) / KAMELEON_PI;
-        phi = (KAMELEON_PI + atan(cartesian.y, cartesian.x)) / (2.0 * KAMELEON_PI );
-    }
-    return vec3(r * KAMELEON_SQRT1_3, theta, phi);
+template<typename P>
+Job<P>::~Job() {}
+
+template<typename P>
+ConcurrentJobManager<P>::ConcurrentJobManager(ThreadPool pool)
+    : threadPool(pool)
+{ }
+
+template<typename P>
+void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
+    threadPool.enqueue([this, job]() {
+        job->execute();
+        std::lock_guard<std::mutex> lock(_finishedJobsMutex);
+        _finishedJobs.push(job);
+    });
 }
+
+template<typename P>
+void ConcurrentJobManager<P>::clearEnqueuedJobs() {
+    threadPool.clearTasks();
+}
+
+template<typename P>
+std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
+    ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
+    std::lock_guard<std::mutex> lock(_finishedJobsMutex);
+    return _finishedJobs.pop();
+}
+
+template<typename P>
+size_t ConcurrentJobManager<P>::numFinishedJobs() const {
+    return _finishedJobs.size();
+}
+
+} // namespace openspace

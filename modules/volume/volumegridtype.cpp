@@ -22,32 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#include <modules/volume/volumegridtype.h>
 
-#include <openspace/util/concurrentqueue.h>
+#include <string>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+namespace openspace {
+namespace volume {
 
-class ConcurrentQueueTest : public testing::Test {};
-
-TEST_F(ConcurrentQueueTest, Basic) {
-    using namespace openspace;
-
-    ConcurrentQueue<int> q1;
-    q1.push(4);
-    int val = q1.pop();
-    std::cout << val << std::endl;
+VolumeGridType parseGridType(const std::string& gridType) {
+    if (gridType == "Cartesian") {
+        return VolumeGridType::Cartesian;
+    }
+    if (gridType == "Spherical") {
+        return VolumeGridType::Spherical;
+    }
+    throw InvalidGridTypeError(gridType);
 }
 
-/*
-TEST_F(ConcurrentQueueTest, SharedPtr) {
-    ConcurrentQueue<std::shared_ptr<int>> q1;
-    std::shared_ptr<int> i1 = std::shared_ptr<int>(new int(1337));
+InvalidGridTypeError::InvalidGridTypeError(std::string gt)
+    : RuntimeError("Invalid grid type: '" + gt + "'")
+    , gridType(std::move(gt))
+{}
 
-    q1.push(i1);
-    auto val = q1.pop();
-    std::cout << *val << std::endl;
-}
-*/
+} // namespace volume
+} // namespace openspace
