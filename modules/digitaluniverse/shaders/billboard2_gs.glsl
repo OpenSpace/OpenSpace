@@ -29,6 +29,7 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 6) out;
 
+//uniform dmat4 transformMatrix;
 uniform dmat4 modelViewProjectionTransform;
 uniform float scaleFactor;
 uniform vec3 up;
@@ -76,9 +77,10 @@ void main() {
     } else if (pos.w == 6.f) {
         unit = 306391534.73091 * PARSEC;
     }
-   
-    dvec4 dpos = dvec4(dvec3(pos.xyz) * unit, 1.0); 
     
+    //dvec4 dpos = transformMatrix * dvec4(dvec3(pos.xyz) * unit, 1.0); 
+    dvec4 dpos = dvec4(dvec3(pos.xyz) * unit, 1.0); 
+
     texCoord = corners[0];
     vec4 initialPosition = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
     vs_screenSpaceDepth = initialPosition.w;

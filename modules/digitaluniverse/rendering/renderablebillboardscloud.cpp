@@ -39,6 +39,9 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
+#include <glm/gtx/string_cast.hpp>
+#include <glm/glm.hpp>
+
 #include <array>
 #include <fstream>
 #include <stdint.h>
@@ -90,13 +93,65 @@ namespace {
     static const openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
-        "The path to the color map file of the astronomical onject."
+        "The path to the color map file of the astronomical object."
     };
 
     static const openspace::properties::Property::PropertyInfo PolygonSidesInfo = {
         "PolygonSides",
         "Polygon Sides",
-        "The number of sides for the polygon used to represent the astronomical onject."
+        "The number of sides for the polygon used to represent the astronomical object."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TextColorInfo = {
+        "TextColor",
+        "Text Color",
+        "The text color for the astronomical object."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TextSizeInfo = {
+        "TextSize",
+        "Text Size",
+        "The text size for the astronomical object labels."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelFileInfo = {
+        "LabelFile",
+        "Label File",
+        "The path to the label file that contains information about the astronomical "
+        "objects being rendered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
+        "TextMinSize",
+        "Text Min Size",
+        "The minimal size (in pixels) of the text for the labels for the astronomical "
+        "objects being rendered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+        "DrawElements",
+        "Draw Elements",
+        "Enables/Disables the drawing of the astronomical objects."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
+        "ColorOption",
+        "Color Option",
+        "This value determines which paramenter is used default color of the "
+        "astronomical objects."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColorRangeInfo = {
+        "ColorRange",
+        "Color Range",
+        "This value determines the color ranges for the color parameter of the "
+        "astronomical objects."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+        "TransformationMatrix",
+        "Transformation Matrix",
+        "Transformation matrix to be applied to each astronomical object."
     };
 }  // namespace
 
@@ -116,7 +171,7 @@ namespace openspace {
                 {
                     KeyFile,
                     new StringVerifier,
-                    Optional::No,
+                    Optional::Yes,
                     "The path to the SPECK file that contains information about the astronomical "
                     "object being rendered."
                 },
@@ -156,7 +211,48 @@ namespace openspace {
                     Optional::Yes,
                     PolygonSidesInfo.description
                 },
-
+                {
+                    TextColorInfo.identifier,
+                    new DoubleVector4Verifier,
+                    Optional::Yes,
+                    TextColorInfo.description
+                },
+                {
+                    TextSizeInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    TextSizeInfo.description
+                },
+                {
+                    LabelFileInfo.identifier,
+                    new StringVerifier,
+                    Optional::Yes,
+                    LabelFileInfo.description
+                },
+                {
+                    LabelMinSizeInfo.identifier,
+                    new IntVerifier,
+                    Optional::Yes,
+                    LabelMinSizeInfo.description
+                },
+                {
+                    ColorOptionInfo.identifier,
+                    new StringListVerifier,
+                    Optional::Yes,
+                    ColorOptionInfo.description
+                },
+                {
+                    ColorRangeInfo.identifier,
+                    new Vector2ListVerifier<float>,
+                    Optional::Yes,
+                    ColorRangeInfo.description
+                },
+                {
+                    TransformationMatrixInfo.identifier,
+                    new Matrix4x4Verifier<double>,
+                    Optional::Yes,
+                    TransformationMatrixInfo.description
+                },
             }
         };
     }
@@ -164,25 +260,44 @@ namespace openspace {
 
     RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
+        , _hasSpeckFile(false)
         , _dataIsDirty(true)
+        , _textColorIsDirty(true)
         , _hasSpriteTexture(false)
         , _spriteTextureIsDirty(true)
         , _hasColorMapFile(false)
         , _hasPolygon(false)
+        , _hasLabel(false)
+        , _labelDataIsDirty(true)
         , _polygonSides(0)
+        , _textMinSize(0)
         , _pTexture(0)
         , _tTexture(0)
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
         , _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
         , _spriteTexturePath(SpriteTextureInfo)
+        , _textColor(
+            TextColorInfo,
+            glm::vec4(1.0f, 1.0, 1.0f, 1.f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        )
+        , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
+        , _drawElements(DrawElementsInfo, true)
+        , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _polygonTexture(nullptr)
         , _spriteTexture(nullptr)
         , _program(nullptr)
+        , _fontRenderer(nullptr)
+        , _font(nullptr)
         , _speckFile("")
         , _colorMapFile("")
+        , _labelFile("")
+        , _colorOptionString("")
         , _unit(Parsec)
         , _nValuesPerAstronomicalObject(0)
+        , _transformationMatrix(glm::dmat4(1.0))
         , _vao(0)
         , _vbo(0)
     {
@@ -193,8 +308,14 @@ namespace openspace {
             dictionary,
             "RenderableBillboardsCloud"
         );
-        
-        _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+
+        if (dictionary.hasKey(KeyFile)) {
+            _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+            _hasSpeckFile = true;
+            _drawElements.onChange([&]() { 
+                _hasSpeckFile = _hasSpeckFile == true? false : true; });
+            addProperty(_drawElements);
+        }
         
         if (dictionary.hasKey(keyUnit)) {
             std::string unit = dictionary.value<std::string>(keyUnit);
@@ -223,12 +344,7 @@ namespace openspace {
                 LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units.");
                 _unit = Meter;
             }
-        }
-
-        if (dictionary.hasKey(keyColor)) {
-            _pointColor = dictionary.value<glm::vec3>(keyColor);
-        }
-        addProperty(_pointColor);
+        }        
 
         if (dictionary.hasKey(SpriteTextureInfo.identifier)) {
             _spriteTexturePath = absPath(dictionary.value<std::string>(
@@ -242,6 +358,7 @@ namespace openspace {
             );
             addProperty(_spriteTexturePath);
 
+
             _hasSpriteTexture = true;
         }
 
@@ -250,7 +367,41 @@ namespace openspace {
                 ColorMapInfo.identifier
                 ));
             _hasColorMapFile = true;
-        }
+
+            if (dictionary.hasKey(ColorOptionInfo.identifier)) {
+                ghoul::Dictionary colorOptionDataDic = dictionary.value<ghoul::Dictionary>(
+                    ColorOptionInfo.identifier
+                    );
+                for (int i = 0; i < colorOptionDataDic.size(); ++i) {
+                    std::string colorMapInUseName(
+                        colorOptionDataDic.value<std::string>(std::to_string(i + 1)));
+                    _colorOption.addOption(i, colorMapInUseName);
+                    _optionConversionMap.insert({i, colorMapInUseName});
+                    _colorOptionString = colorMapInUseName;
+                }                
+            }
+            _colorOption.onChange(
+                [&] { 
+                _dataIsDirty = true; 
+                _colorOptionString = _optionConversionMap[_colorOption.value()];
+            });
+            addProperty(_colorOption);
+
+            if (dictionary.hasKey(ColorRangeInfo.identifier)) {
+                ghoul::Dictionary rangeDataDic = dictionary.value<ghoul::Dictionary>(
+                    ColorRangeInfo.identifier
+                    );
+                for (int i = 0; i < rangeDataDic.size(); ++i) {                    
+                    _colorRangeData.push_back(
+                        rangeDataDic.value<glm::vec2>(std::to_string(i+1)));
+                }
+                
+            }
+
+        } else if (dictionary.hasKey(keyColor)) {
+            _pointColor = dictionary.value<glm::vec3>(keyColor);
+            addProperty(_pointColor);
+        }                        
 
         if (dictionary.hasKey(TransparencyInfo.identifier)) {
             _alphaValue = static_cast<float>(
@@ -273,10 +424,38 @@ namespace openspace {
             _hasPolygon = true;
         }
 
+        if (dictionary.hasKey(LabelFileInfo.identifier)) {
+            _labelFile = absPath(dictionary.value<std::string>(
+                LabelFileInfo.identifier
+                ));                
+            _hasLabel = true;
+
+            if (dictionary.hasKey(TextColorInfo.identifier)) {
+                _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+                _hasLabel = true;
+            }
+            _textColor.setViewOption(properties::Property::ViewOptions::Color);
+            addProperty(_textColor);
+            _textColor.onChange([&]() { _textColorIsDirty = true; });
+
+
+            if (dictionary.hasKey(TextSizeInfo.identifier)) {
+                _textSize = dictionary.value<double>(TextSizeInfo.identifier);
+            }
+            addProperty(_textSize);
+
+            if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
+                _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
+            }         
+        }
+
+        if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
+            _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
+        }
     }
 
     bool RenderableBillboardsCloud::isReady() const {
-        return (_program != nullptr) && (!_fullData.empty());
+        return ((_program != nullptr) && (!_fullData.empty())) || (!_labelData.empty());
     }
 
     void RenderableBillboardsCloud::initialize() {
@@ -292,8 +471,25 @@ namespace openspace {
             throw ghoul::RuntimeError("Error loading data");
         }
 
+        if (!_colorOptionString.empty()) {
+            // Following DU behavior here. The last colormap variable 
+            // entry is the one selected by default.
+            _colorOption.setValue(_colorRangeData.size()-1);
+        }        
+
         if (_hasPolygon) {
             createPolygonTexture();
+        }
+
+        if (_hasLabel) {
+            if (_fontRenderer == nullptr)
+                _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
+                    ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
+            if (_font == nullptr) {
+                size_t _fontSize = 30;
+                _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
+                    ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
+            }
         }
     }
 
@@ -317,9 +513,14 @@ namespace openspace {
             _polygonTexture = nullptr;
             glDeleteTextures(1, &_pTexture);
         }
+
+        if (_hasLabel) {
+            glDeleteTextures(1, &_tTexture);
+        }
     }
 
-    void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
+    void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
+        const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
         glDepthMask(false);
 
         // Saving current OpenGL state
@@ -330,56 +531,39 @@ namespace openspace {
         GLenum blendDestRGB;
         GLenum blendSrcAlpha;
         GLenum blendSrcRGB;
-        
+
         glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
         glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
         glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
         glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
         glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
         glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-        
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         _program->activate();
 
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        
-        /*glm::dmat4 modelMatrix = glm::dmat4(1.0);*/
-
-        glm::dmat4 modelMatrix =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-        glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-        glm::mat4 viewMatrix = data.camera.viewMatrix();
-        glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
         _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
         _program->setUniform("projection", projectionMatrix);
         _program->setUniform("modelViewTransform", modelViewMatrix);
         _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
-        //_program->setUniform("campos", data.camera.positionVec3());
-
+        
         _program->setUniform("minBillboardSize", 1.f); // in pixels
         _program->setUniform("color", _pointColor);
         _program->setUniform("sides", 4);
         _program->setUniform("alphaValue", _alphaValue);
         _program->setUniform("scaleFactor", _scaleFactor);
 
-        glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-        glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-        glm::vec3 right = glm::cross(viewDirection, lookup);
-        glm::vec3 up = glm::cross(right, viewDirection);
+        _program->setUniform("up", orthoUp);
+        _program->setUniform("right", orthoRight);
 
-        glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-        _program->setUniform("up", glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0))));
-        _program->setUniform("right", glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))));
-        
         ghoul::opengl::TextureUnit spriteTextureUnit;
-        if (_hasSpriteTexture) {            
+        if (_hasSpriteTexture) {
             spriteTextureUnit.activate();
             _spriteTexture->bind();
             _program->setUniform("spriteTexture", spriteTextureUnit);
@@ -400,11 +584,11 @@ namespace openspace {
         else {
             _program->setUniform("hasColorMap", false);
         }
-     
+
         glBindVertexArray(_vao);
         const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() / _nValuesPerAstronomicalObject);
         glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
-        
+
         glBindVertexArray(0);
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::No);
@@ -413,16 +597,116 @@ namespace openspace {
         // Restores blending state
         glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
         glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-        
+
         if (!blendEnabled) {
-            glDisable(GL_BLEND);            
+            glDisable(GL_BLEND);
         }
-                   
+
         glDepthMask(true);
+
+    }
+
+    void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewMatrix,
+        const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+
+        _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
+        
+        /*auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        *_font,
+        "%s",
+        text
+        );*/
+
+        //float distanceFromCamera = glm::distance(data.camera.positionVec3(), glm::dvec3(textPosition));
+
+        /*if (_font == nullptr) {
+        size_t _fontSize = 30;
+        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
+        ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
+        }*/
+
+        /*size_t _fontSize = 50;
+        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
+        ghoul::fontrendering::FontManager::Outline::No, ghoul::fontrendering::FontManager::LoadGlyphs::No);
+        */
+
+        float scale = 0.0;
+        switch (_unit) {
+        case Meter:
+            scale = 1.0;
+            break;
+        case Kilometer:
+            scale = 1e3;
+            break;
+        case Parsec:
+            scale = PARSEC;
+            break;
+        case Kiloparsec:
+            scale = 1e3 * PARSEC;
+            break;
+        case Megaparsec:
+            scale = 1e6 * PARSEC;
+            break;
+        case Gigaparsec:
+            scale = 1e9 * PARSEC;
+            break;
+        case GigalightYears:
+            scale = 306391534.73091 * PARSEC;
+            break;
+        }
+        
+        for (const auto pair : _labelData) {
+            //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
+            glm::vec3 scaledPos(pair.first);
+            scaledPos *= scale;
+            _fontRenderer->render(
+                *_font,
+                scaledPos,                
+                _textColor,
+                pow(10.0, _textSize.value()),
+                _textMinSize,
+                modelViewMatrix,
+                projectionMatrix,
+                orthoRight,
+                orthoUp,
+                "%s",
+                pair.second.c_str());
+        }        
+
+    }
+
+    void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
+        glm::dmat4 modelMatrix =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+        glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+        glm::mat4 viewMatrix = data.camera.viewMatrix();
+        glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+
+        glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+        glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+        glm::vec3 right = glm::cross(viewDirection, lookup);
+        glm::vec3 up = glm::cross(right, viewDirection);
+
+        glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+        glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
+        glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
+
+      
+        if (_hasSpeckFile) {
+            renderBillboards(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp);
+        }
+        
+        if (_hasLabel) {
+            renderLabels(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp);
+        }                
     }
 
     void RenderableBillboardsCloud::update(const UpdateData&) {  
-        if (_dataIsDirty) {
+        if (_dataIsDirty && _hasSpeckFile) {
             LDEBUG("Regenerating data");
 
             createDataSlice();
@@ -511,49 +795,84 @@ namespace openspace {
             }
             _spriteTextureIsDirty = false;            
         }
+
+        if (_hasLabel && _labelDataIsDirty) {
+
+            _labelDataIsDirty = false;
+        }
     }
 
     bool RenderableBillboardsCloud::loadData() {
-        std::string _file = _speckFile;
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _file,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+        bool success = false;        
+        if (_hasSpeckFile) {
+            std::string _file = _speckFile;
+            std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+                _file,
+                ghoul::filesystem::CacheManager::Persistent::Yes
+            );
 
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+            bool hasCachedFile = FileSys.fileExists(cachedFile);
+            if (hasCachedFile) {
+                LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
 
-            bool success = loadCachedFile(cachedFile);
-            if (success) {
-                if (_hasColorMapFile) {
-                    success &= readColorMapFile();
+                success = loadCachedFile(cachedFile);
+                if (!success) {
+                    FileSys.cacheManager()->removeCacheFile(_file);
+                    // Intentional fall-through to the 'else' computation to generate the cache
+                    // file for the next run
                 }
-                return success;
             }
             else {
-                FileSys.cacheManager()->removeCacheFile(_file);
-                // Intentional fall-through to the 'else' computation to generate the cache
-                // file for the next run
+                LINFO("Cache for Speck file '" << _file << "' not found");
+                LINFO("Loading Speck file '" << _file << "'");
+
+                success = readSpeckFile();
+                if (!success) {
+                    return false;
+                }
+
+                LINFO("Saving cache");
+                success &= saveCachedFile(cachedFile);
             }
         }
-        else {
-            LINFO("Cache for Speck file '" << _file << "' not found");
-        }
-        LINFO("Loading Speck file '" << _file << "'");
-
-        bool success = readSpeckFile();
-        if (!success) {
-            return false;
-        }
-
-        LINFO("Saving cache");
-        success = saveCachedFile(cachedFile);
 
         if (_hasColorMapFile) {
+            if (!_hasSpeckFile)
+                success = true;
             success &= readColorMapFile();
         }
 
+        std::string labelFile = _labelFile;
+        if (!labelFile.empty()) {
+            std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+                labelFile,
+                ghoul::filesystem::CacheManager::Persistent::Yes
+            );
+            if (!_hasSpeckFile && !_hasColorMapFile)
+                success = true;
+            bool hasCachedFile = FileSys.fileExists(cachedFile);
+            if (hasCachedFile) {
+                LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
+                
+                success &= loadCachedFile(cachedFile);
+                if (!success) {
+                    FileSys.cacheManager()->removeCacheFile(labelFile);
+                    // Intentional fall-through to the 'else' computation to generate the cache
+                    // file for the next run
+                }
+            }
+            else {
+                LINFO("Cache for Label file '" << labelFile << "' not found");
+                LINFO("Loading Label file '" << labelFile << "'");
+
+                success &= readLabelFile();
+                if (!success) {
+                    return false;
+                }
+
+            }
+        }
+        
         return success;
     }
 
@@ -581,7 +900,9 @@ namespace openspace {
 
             if (line.substr(0, 7) != "datavar" &&
                 line.substr(0, 10) != "texturevar" &&
-                line.substr(0, 7) != "texture")
+                line.substr(0, 7) != "texture" &&
+                line.substr(0, 10) != "polyorivar" &&
+                line.substr(0, 10) != "maxcomment")
             {
                 // we read a line that doesn't belong to the header, so we have to jump back
                 // before the beginning of the current line
@@ -597,10 +918,37 @@ namespace openspace {
                 // number of values (+3 since X Y Z are not counted in the Speck file index)
                 std::stringstream str(line);
 
-                std::string dummy;
-                str >> dummy;
-                str >> _nValuesPerAstronomicalObject;
+                std::string dummy; // command
+                str >> dummy; // space
+                str >> _nValuesPerAstronomicalObject; // variable index
+                dummy.clear();
+                str >> dummy; // variable name
+
+                _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject });                
+
                 _nValuesPerAstronomicalObject += 1; // We want the number, but the index is 0 based
+            }
+
+            // JCC: This should be moved to the RenderablePlanesCloud:
+            if (line.substr(0, 10) == "polyorivar") {
+                _planeStartingIndexPos = 0;
+                std::stringstream str(line);
+
+                std::string dummy;
+                str >> dummy; // command
+                str >> _planeStartingIndexPos; 
+                _planeStartingIndexPos += 3; // 3 for xyz                
+            }
+
+            // JCC: This should be moved to the RenderablePlanesCloud:
+            if (line.substr(0, 10) == "texturevar") {
+                _textureVariableIndex = 0;
+                std::stringstream str(line);
+
+                std::string dummy;
+                str >> dummy; // command
+                str >> _textureVariableIndex; 
+                _textureVariableIndex += 3; // 3 for xyz
             }
         }
 
@@ -616,8 +964,42 @@ namespace openspace {
             
             std::stringstream str(line);
 
+            // JCC: This should be moved to the RenderablePlanesCloud:
+            glm::vec3 u(0.0f), v(0.0f);
+            int textureIndex = 0;
+
             for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
                 str >> values[i];
+                // JCC: This should be moved to the RenderablePlanesCloud:
+                if ((i >= _planeStartingIndexPos) &&
+                    (i <= _planeStartingIndexPos+6)) { // vectors u and v
+                    int index = i - _planeStartingIndexPos;
+                    switch (index) {
+                    case 0:
+                        u.x = values[i];
+                        break;
+                    case 1:
+                        u.y = values[i];
+                        break;
+                    case 2:
+                        u.z = values[i];
+                        break;
+                    case 3:
+                        v.x = values[i];
+                        break;
+                    case 4:
+                        v.y = values[i];
+                        break;
+                    case 5:
+                        v.z = values[i];
+                        break;                    
+                    }
+                }
+
+                // JCC: This should be moved to the RenderablePlanesCloud:
+                if (i == _textureVariableIndex) {
+                    textureIndex = values[i];
+                }
             }
 
             _fullData.insert(_fullData.end(), values.begin(), values.end());
@@ -675,6 +1057,81 @@ namespace openspace {
         return true;
     }
 
+    bool RenderableBillboardsCloud::readLabelFile() {
+        std::string _file = _labelFile;
+        std::ifstream file(_file);
+        if (!file.good()) {
+            LERROR("Failed to open Label file '" << _file << "'");
+            return false;
+        }
+        
+        // The beginning of the speck file has a header that either contains comments
+        // (signaled by a preceding '#') or information about the structure of the file
+        // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
+        std::string line = "";
+        while (true) {
+            std::streampos position = file.tellg();
+            std::getline(file, line);
+
+            if (line[0] == '#' || line.empty()) {
+                continue;
+            }
+
+            if (line.substr(0, 9) != "textcolor" )
+            {
+                // we read a line that doesn't belong to the header, so we have to jump back
+                // before the beginning of the current line
+                file.seekg(position);
+                continue;
+            }
+
+            if (line.substr(0, 9) == "textcolor") {
+                // textcolor lines are structured as follows:
+                // textcolor # description
+                // where # is color text defined in configuration file
+                std::stringstream str(line);
+
+                // TODO: handle cases of labels with different colors
+                break;
+            }
+        }
+
+        
+        do {
+            std::vector<float> values(_nValuesPerAstronomicalObject);
+
+            std::getline(file, line);
+
+            if (line.size() == 0)
+                continue;
+
+            std::stringstream str(line);
+
+            glm::vec3 position;
+            for (auto j = 0; j < 3; ++j) {
+                str >> position[j];
+            }
+
+            std::string dummy;
+            str >> dummy; // text keyword
+            
+            std::string label;
+            str >> label;
+            dummy.clear();
+
+            while (str >> dummy) {
+                label += " " + dummy;
+                dummy.clear();
+            }                        
+            
+            glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::dvec4(position, 1.0));
+            _labelData.push_back(std::make_pair(transformedPos, label));
+            
+        } while (!file.eof());
+
+        return true;
+    }
+
     bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
         std::ifstream fileStream(file, std::ifstream::binary);
         if (fileStream.good()) {
@@ -690,6 +1147,25 @@ namespace openspace {
             int32_t nValues = 0;
             fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
             fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));
+
+            if (_hasColorMapFile) {
+                int32_t nItems = 0;
+                fileStream.read(reinterpret_cast<char*>(&nItems), sizeof(int32_t));
+                
+                for (int i = 0; i < nItems; ++i) {
+                    int32_t keySize = 0;
+                    fileStream.read(reinterpret_cast<char*>(&keySize), sizeof(int32_t));
+                    char * key = new char[keySize + 1];
+                    key[keySize] = '\0';
+                    for (int c = 0; c < keySize; ++c) {
+                        fileStream.read(reinterpret_cast<char*>(&key[c]), sizeof(int32_t));
+                    }
+                    int32_t value = 0;
+                    fileStream.read(reinterpret_cast<char*>(&value), sizeof(int32_t));
+
+                    _variableDataPositionMap.insert({key, value});
+                }                
+            }
 
             _fullData.resize(nValues);
             fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
@@ -720,6 +1196,22 @@ namespace openspace {
             int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(_nValuesPerAstronomicalObject);
             fileStream.write(reinterpret_cast<const char*>(&nValuesPerAstronomicalObject), sizeof(int32_t));
 
+            if (_hasColorMapFile) {
+                int32_t nItems = static_cast<int32_t>(_variableDataPositionMap.size());
+                fileStream.write(reinterpret_cast<const char*>(&nItems), sizeof(int32_t));
+
+                for (auto pair : _variableDataPositionMap) {
+                    int32_t keySize = static_cast<int32_t>(pair.first.size());
+                    fileStream.write(reinterpret_cast<const char*>(&keySize), sizeof(int32_t));
+                    for (int c = 0; c < pair.first.size(); ++c) {
+                        int32_t keyChar = static_cast<int32_t>(pair.first[c]);
+                        fileStream.write(reinterpret_cast<const char*>(&keyChar), sizeof(int32_t));
+                    }
+                    int32_t value = static_cast<int32_t>(pair.second);
+                    fileStream.write(reinterpret_cast<const char*>(&value), sizeof(int32_t));
+                }
+            }
+            
             size_t nBytes = nValues * sizeof(_fullData[0]);
             fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
 
@@ -741,39 +1233,42 @@ namespace openspace {
             _slicedData.reserve(4 * (_fullData.size()/_nValuesPerAstronomicalObject));
         }
 
-        int colorIndex = 0;
-        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-            glm::vec3 p = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-         
-            /*
-            // Converting untis
-            if (_unit == Kilometer) {
-                p *= 1E3;
-            } 
-            else if (_unit == Parsec) {
-                p *= PARSEC;
+        // Generate the color bins for the colomap
+        int colorMapInUse = 0;
+        std::vector<float> colorBins;
+        if (_hasColorMapFile) {
+            colorMapInUse = _variableDataPositionMap[_colorOptionString];
+            glm::vec2 currentColorRange = _colorRangeData[_colorOption.value()];
+            float colorMapBinSize = (currentColorRange.y - currentColorRange.x) / static_cast<float>(_colorMapData.size());            
+            float bin = colorMapBinSize;
+            for (int i = 0; i < _colorMapData.size(); ++i) {
+                colorBins.push_back(bin);
+                bin += colorMapBinSize;
             }
-            else if (_unit == Kiloparsec) {
-                p *= 1E3 * PARSEC;
-            }
-            else if (_unit == Megaparsec) {
-                p *= 1E6 * PARSEC;
-            }
-            else if (_unit == Gigaparsec) {
-                p *= 1E9 * PARSEC;
-            }
-            else if (_unit == GigalightYears) {
-                p *= 306391534.73091 * PARSEC;
-            }
-            */
+        }        
 
-            glm::vec4 position(p, static_cast<float>(_unit));
-            //glm::dvec4 position(p, 1.0);
-
+        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) { 
+            glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2], 1.0);
+            glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
+            
             if (_hasColorMapFile) {
                 for (auto j = 0; j < 4; ++j) {
                     _slicedData.push_back(position[j]);
                 }
+                // Finds from which bin to get the color.
+                // Note: the first color in the colormap file
+                // is the outliers color.
+                glm::vec4 itemColor;                
+                float variableColor = _fullData[i + 3 + colorMapInUse];
+                int c = colorBins.size()-1;
+                while (variableColor < colorBins[c]) {
+                    --c;
+                    if (c == 0)
+                        break;
+                }
+                
+                int colorIndex = c == colorBins.size() - 1 ? 0 : c + 1;
+                
                 for (auto j = 0; j < 4; ++j) {
                     _slicedData.push_back(_colorMapData[colorIndex][j]);
                 }
@@ -782,9 +1277,7 @@ namespace openspace {
                 for (auto j = 0; j < 4; ++j) {
                     _slicedData.push_back(position[j]);
                 }
-            }
-            
-            colorIndex = (colorIndex == (_colorMapData.size() - 1)) ? 0 : colorIndex + 1;
+            }            
         }
     }
 
@@ -809,23 +1302,8 @@ namespace openspace {
             _pTexture, 256, 256);          
     }
 
-    void RenderableBillboardsCloud::createTextTexture() {
-        glGenTextures(1, &_tTexture);
-        glBindTexture(GL_TEXTURE_2D, _pTexture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256,
-            256, 0, GL_RGBA, GL_BYTE, nullptr);
-
-        renderToTexture(std::bind(&openspace::RenderableBillboardsCloud::loadTextGeometryForRendering,
-            this),
-            std::bind(&openspace::RenderableBillboardsCloud::renderTextgonGeometry,
-                this, std::placeholders::_1),
-            _pTexture, 256, 256);
+    void RenderableBillboardsCloud::createLabelData() {
+        LDEBUG("Creating Label Data");
     }
 
     void RenderableBillboardsCloud::renderToTexture(
@@ -840,9 +1318,9 @@ namespace openspace {
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        GLuint calcFBO;
-        glGenFramebuffers(1, &calcFBO);
-        glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
+        GLuint textureFBO;
+        glGenFramebuffers(1, &textureFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
         GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, drawBuffers);
 
@@ -892,29 +1370,32 @@ namespace openspace {
                 break;
             }
         }
+
         glViewport(0, 0, textureWidth, textureHeight);
 
         RenderEngine& renderEngine = OsEng.renderEngine();
 
        
-        GLuint pointVao = geometryLoadingFunction();
-        renderFunction(pointVao);
+        GLuint vao = geometryLoadingFunction();
+        renderFunction(vao);
         
         // Restores Applications' OpenGL State
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-        //glDeleteBuffers(1, &pointVbo);
-        glDeleteVertexArrays(1, &pointVao);
-        glDeleteFramebuffers(1, &calcFBO);
+        if (vao) {
+            glDeleteVertexArrays(1, &vao);
+        }
+        glDeleteFramebuffers(1, &textureFBO);
+        // TODO: delete the vbo used during the rendering to texture
     }
 
     GLuint RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
-        GLuint pointVao, pointVbo;
-        glGenVertexArrays(1, &pointVao);
-        glGenBuffers(1, &pointVbo);
-        glBindVertexArray(pointVao);
-        glBindBuffer(GL_ARRAY_BUFFER, pointVbo);
+        GLuint polygonVao, polygonVbo;
+        glGenVertexArrays(1, &polygonVao);
+        glGenBuffers(1, &polygonVbo);
+        glBindVertexArray(polygonVao);
+        glBindBuffer(GL_ARRAY_BUFFER, polygonVbo);
 
         const GLfloat vertex_data[] = {
             //      x      y     z     w
@@ -926,7 +1407,7 @@ namespace openspace {
         glEnableVertexAttribArray(0);
         glBindVertexArray(0);
 
-        return pointVao;
+        return polygonVao;
     }
 
     void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
@@ -948,41 +1429,58 @@ namespace openspace {
         glDrawArrays(GL_POINTS, 0, 1);
         glBindVertexArray(0);
 
-        if (true) {
+        /*if (true) {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("polygon_texture.ppm"),
                 256, 256);
 
-        }
+        }*/
         program->deactivate();
     }
 
     GLuint RenderableBillboardsCloud::loadTextGeometryForRendering() {
-        GLuint textVao = 0;
-        return textVao;
+        // The font render method creates its own vertex array object.        
+        return 0;
     }
 
-    void RenderableBillboardsCloud::renderTextgonGeometry(GLuint vao) {
-       /* size_t _fontSize = 50;
-        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
-        _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(ghoul::fontrendering::FontRenderer::createDefault());
-        _fontRenderer->setFramebufferSize(glm::vec2(256.0f,256.0f));
-        
-        std::string unit = "m";        
-        glm::vec2 textPosition;
-        textPosition.x = 0;
-        textPosition.y = _fontSize / 2.f;
-        
-        glm::vec4 color(1.0, 1.0, 1.0, 1.0);
+    void RenderableBillboardsCloud::renderTextGeometry(GLuint vao) {
+        size_t _fontSize = 10;
+       
+        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize), 
+            ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
 
-        ;
+        std::string text = "This is a text test!!";
+        auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+            *_font,
+            "%s",
+            text
+        );
+        
+
+        GLsizei framebufferSize = 10*static_cast<GLsizei>(ceil(size.boundingBox.x > size.boundingBox.y ? size.boundingBox.x : size.boundingBox.y));
+
+        framebufferSize = 256;
+
+        _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(ghoul::fontrendering::FontRenderer::createDefault());
+        _fontRenderer->setFramebufferSize(glm::vec2(framebufferSize,framebufferSize));
+               
+        glm::vec2 textPosition(0.0, 0.0);
+
+        static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        glClearBufferfv(GL_COLOR, 0, black);
 
         _fontRenderer->render(
             *_font,
             textPosition,
-            color,
-            " %.0f %s",
-            10.0, unit.c_str()
-        );*/
+            _textColor,
+            "%s",
+            text.c_str());
+
+        if (true) {
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("text_texture.ppm"),
+                framebufferSize, framebufferSize);
+
+        }
+
     }
 
     void RenderableBillboardsCloud::saveTextureToPPMFile(const GLenum color_buffer_attachment,
@@ -1017,7 +1515,8 @@ namespace openspace {
                 }
                 ppmFile << std::endl;
             }
-            delete[] pixels;
+            if (pixels)
+                delete[] pixels;
 
             ppmFile.close();
         }

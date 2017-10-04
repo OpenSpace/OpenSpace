@@ -79,7 +79,7 @@ function postInitialization()
     openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
     
     openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
-
+    openspace.setPropertyValue("Global Properties.GlobeBrowsing.GdalWrapper.LogGdalErrors", false)
 
     -- Digital Universe
     openspace.setPropertyValue("WMAP.renderable.Enabled", false)
@@ -99,13 +99,26 @@ function postInitialization()
     openspace.setPropertyValue("2MASS Galaxies.renderable.Enabled", false)
     openspace.setPropertyValue("6dF Galaxies.renderable.Enabled", false)
     openspace.setPropertyValue("2dF Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValue("Cosmic Background Explorer.renderable.Enabled", false)
+    openspace.setPropertyValue("CMB Planck.renderable.Enabled", false)
+    openspace.setPropertyValue("Dwarfs.renderable.Enabled", false)
+    openspace.setPropertyValue("Nearby Galaxy Groups.renderable.Enabled", false)
+    openspace.setPropertyValue("Galaxy Clusters.renderable.Enabled", false)
+    openspace.setPropertyValue("Voids.renderable.Enabled", false)
+    openspace.setPropertyValue("Galaxy Superclusters.renderable.Enabled", false)
+    openspace.setPropertyValue("Stars Labels.renderable.Enabled", false)
+    openspace.setPropertyValue("Stars Labels - Alternate.renderable.Enabled", false)
+    openspace.setPropertyValue("Tully Galaxies.renderable.Enabled", false)
 
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
 
     openspace.setPropertyValue("Ecliptic Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("Ecliptic Grid Labels.renderable.Enabled", false)
     openspace.setPropertyValue("Equatorial Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("Equatorial Grid Labels.renderable.Enabled", false)
     openspace.setPropertyValue("Galactic Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("Galactic Grid Labels.renderable.Enabled", false)
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
@@ -127,6 +140,7 @@ return {
         Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
     },
     Modules = {
+        -- # Solar system objects
         "sun",
         "mercury",
         "venus",
@@ -136,31 +150,44 @@ return {
         "jupiter",
         "saturn",
         "uranus",
-        "neptune",
+        --"neptune",        
+        -- "satellites"
+
+        "constellationbounds",
+        "grids",
+        
+        -- # Milkyway objects
         "stars/digitaluniverse",
+        "alternatestarlabels/digitaluniverse",
+        "starlabels/digitaluniverse",
         -- "stars/denver",
         "milkyway/digitaluniverse",
         --"milkyway/eso",
-        -- "satellites"
-        "constellationbounds",
-        "grids",
-        "quasars/digitaluniverse",
-        "backgroundradiation/digitaluniverse",
         "globularclusters/digitaluniverse",
         "kepler/digitaluniverse",
-        "pulsars/digitaluniverse",
-        "localdwarfs/digitaluniverse",
+        "pulsars/digitaluniverse",        
         "exoplanets/digitaluniverse",
-        "sloandss/digitaluniverse",
+        "dwarfs/digitaluniverse",        
         "openclusters/digitaluniverse",
         "obassociations/digitaluniverse",
         "planetarynebulae/digitaluniverse",
         "supernovaremnants/digitaluniverse",
         "h2regions/digitaluniverse",
+        
+        -- # Extragalactic objects
+        "groups/digitaluniverse",
+        "clusters/digitaluniverse",
+        "voids/digitaluniverse",
+        "superclusters/digitaluniverse",
+        "localdwarfs/digitaluniverse",
         "abell/digitaluniverse",
         "2mass/digitaluniverse",
         "6dF/digitaluniverse",
         "2dF/digitaluniverse",
+        "quasars/digitaluniverse",
+        "sloandss/digitaluniverse",
+        "tully/digitaluniverse",
+        "backgroundradiation/digitaluniverse",
     }
 }
 
