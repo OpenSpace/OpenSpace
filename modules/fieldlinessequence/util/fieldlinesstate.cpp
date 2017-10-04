@@ -118,6 +118,81 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) 
     return true;
 }
 
+bool FieldlinesState::loadStateFromJson(const std::string& PATH_TO_JSON_FILE,
+                                        const fls::Model MODEL,
+                                        const float COORD_TO_METERS = 1.f) {
+
+    // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
+    std::ifstream ifs(PATH_TO_JSON_FILE);
+
+    if (!ifs.is_open()) {
+        LERROR("FAILED TO OPEN FILE: " << PATH_TO_JSON_FILE);
+        return false;
+    }
+
+    json jFile;
+    ifs >> jFile;
+    // -------------------------------------------------------------------------------- //
+
+    _model = MODEL;
+
+    const std::string S_DATA  = "data";
+    const std::string S_TRACE = "trace";
+
+    // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
+    {
+        const json J_TMP = *jFile.begin(); // First field line in the file
+        _triggerTime = Time::convertTime(J_TMP["time"]);
+
+        const std::string S_COLUMNS = "columns";
+        auto variableNameVec = J_TMP[S_TRACE][S_COLUMNS];
+        const size_t N_VARIABLES = variableNameVec.size();
+        const size_t N_POS_COMPONENTS = 3; // x,y,z
+
+        if (N_VARIABLES < N_POS_COMPONENTS) {
+            LERROR(PATH_TO_JSON_FILE + ": Each field '" + S_COLUMNS +
+                    "' must contain the variables: 'x', 'y' and 'z' (order is important).");
+            return false;
+        }
+
+        for (size_t i = N_POS_COMPONENTS ; i < N_VARIABLES ; i++) {
+            _extraQuantityNames.push_back(variableNameVec[i]);
+        }
+    }
+
+    const size_t N_EXTRAS = _extraQuantityNames.size();
+    _extraQuantities.resize(N_EXTRAS);
+
+    size_t lineStartIdx = 0;
+    // Loop through all fieldlines
+    for (json::iterator fieldlineIt = jFile.begin(); fieldlineIt != jFile.end(); ++fieldlineIt) {
+        // The 'data' field in the 'trace' variable contains all vertex positions and the
+        // extra quantities. Each element is an array related to one vertex point.
+        const std::vector<std::vector<float>> J_DATA = (*fieldlineIt)[S_TRACE][S_DATA];
+        const size_t N_POINTS = J_DATA.size();
+
+        for (size_t j = 0; j < N_POINTS; ++j) {
+            const std::vector<float>& VARIABLES = J_DATA[j];
+
+            // Expects the x, y and z variables to be stored first!
+            const size_t X_IDX = 0, Y_IDX = 1, Z_IDX = 2;
+            _vertexPositions.push_back(COORD_TO_METERS * glm::vec3(VARIABLES[X_IDX],
+                                                                   VARIABLES[Y_IDX],
+                                                                   VARIABLES[Z_IDX]));
+
+            // Add the extra quantites. Stored in the same array as the x,y,z variables.
+            // Hence index of the first extra quantity = 3
+            for (size_t xtraIdx = 3, k = 0 ; k < N_EXTRAS; ++k, ++xtraIdx) {
+                _extraQuantities[k].push_back(VARIABLES[xtraIdx]);
+            }
+        }
+        _lineCount.push_back(static_cast<GLsizei>(N_POINTS));
+        _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+        lineStartIdx += N_POINTS;
+    }
+    return true;
+}
+
 // TODO: This should probably be rewritten, but this is the way the files were structured by CCMC
 // Structure of File! NO TRAILING COMMAS ALLOWED!
 // Additional info can be stored within each line as the code only extracts the keys it needs (time, trace & data)
