@@ -193,6 +193,68 @@ bool FieldlinesState::loadStateFromJson(const std::string& PATH_TO_JSON_FILE,
     return true;
 }
 
+/**
+ * @param ABS_FILEPATH must be the path to the file (incl. filename but excl. extension!)
+ * Directory must exist! File is created (or overwritten if already existing).
+ * File is structured like this: (for version 0)
+ *  0. int                    - version number of binary state file! (in case something needs to be altered in the future, then increase CURRENT_VERSION)
+ *  1. double                 - _triggerTime
+ *  2. int                    - _model
+ *  3. bool                   - _isMorphable
+ *  4. size_t                 - Number of lines in the state  == _lineStart.size()       == _lineCount.size()
+ *  5. size_t                 - Total number of vertex points == _vertexPositions.size() == _extraQuantities[i].size()
+ *  6. size_t                 - Number of extra quantites     == _extraQuantities.size() == _extraQuantityNames.size()
+ *  7. site_t                 - Number of total bytes that ALL _extraQuantityNames consists of (Each such name is stored as a c_str which means it ends with the null char '\0' )
+ *  7. std::vector<GLint>     - _lineStart
+ *  8. std::vector<GLsizei>   - _lineCount
+ *  9. std::vector<glm::vec3> - _vertexPositions
+ * 10. std::vector<float>     - _extraQuantities
+ * 11. array of c_str         - Strings naming the extra quantities (elements of _extraQuantityNames). Each string ends with null char '\0'
+ */
+void FieldlinesState::saveStateToOsfls(const std::string& ABS_FILEPATH) {
+    // Create the file
+    const std::string EXT = ".osfls";
+    std::ofstream ofs(ABS_FILEPATH + EXT, std::ofstream::binary | std::ofstream::trunc);
+    if (!ofs.is_open()) {
+        LERROR("Failed to save state to binary file: " << ABS_FILEPATH << EXT);
+        return;
+    }
+
+    std::string allExtraQuantityNamesInOne = "";
+    for (std::string str : _extraQuantityNames) {
+        allExtraQuantityNamesInOne += str + '\0'; // Add the null char '\0' for easier reading
+    }
+
+    const size_t N_LINES        = _lineStart.size();
+    const size_t N_POINTS       = _vertexPositions.size();
+    const size_t N_EXTRAS       = _extraQuantities.size();
+    const size_t N_STRING_BYTES = allExtraQuantityNamesInOne.size();
+
+    //------------------------------ WRITE EVERYTHING TO FILE ------------------------------
+    // WHICH VERSION OF BINARY FIELDLINES STATE FILE - IN CASE STRUCTURE CHANGES IN THE FUTURE
+    ofs.write( (char*)(&CURRENT_VERSION), sizeof( int ) );
+
+    //-------------------- WRITE META DATA FOR STATE --------------------------------
+    ofs.write( reinterpret_cast<char*>(&_triggerTime),   sizeof( _triggerTime ) );
+    ofs.write( reinterpret_cast<char*>(&_model),         sizeof( int ) );
+    ofs.write( reinterpret_cast<char*>(&_isMorphable),   sizeof( bool ) );
+
+    ofs.write( reinterpret_cast<const char*>(&N_LINES),        sizeof( size_t ) );
+    ofs.write( reinterpret_cast<const char*>(&N_POINTS),       sizeof( size_t ) );
+    ofs.write( reinterpret_cast<const char*>(&N_EXTRAS),       sizeof( size_t ) );
+    ofs.write( reinterpret_cast<const char*>(&N_STRING_BYTES), sizeof( size_t ) );
+
+    //---------------------- WRITE ALL ARRAYS OF DATA --------------------------------
+    ofs.write( reinterpret_cast<char*>(_lineStart.data()),       sizeof(GLint) * N_LINES);
+    ofs.write( reinterpret_cast<char*>(_lineCount.data()),       sizeof(GLsizei) * N_LINES);
+    ofs.write( reinterpret_cast<char*>(_vertexPositions.data()), sizeof(glm::vec3) * N_POINTS);
+    // Write the data for each vector in _extraQuantities
+    for (std::vector<float>& vec : _extraQuantities) {
+        ofs.write( reinterpret_cast<char*>(vec.data()),  sizeof(float) * N_POINTS);
+    }
+    ofs.write( allExtraQuantityNamesInOne.c_str(), N_STRING_BYTES);
+}
+
 // TODO: This should probably be rewritten, but this is the way the files were structured by CCMC
 // Structure of File! NO TRAILING COMMAS ALLOWED!
 // Additional info can be stored within each line as the code only extracts the keys it needs (time, trace & data)

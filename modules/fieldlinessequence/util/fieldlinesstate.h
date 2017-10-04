@@ -43,6 +43,7 @@ public:
     FieldlinesState(const std::string& PATH_TO_OSFLS_FILE, bool& loadSucessful);
 
     bool   loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE);
+    void   saveStateToOsfls(const std::string& PATH_TO_OSFLS_FILE);
 
     bool   loadStateFromJson(const std::string& PATH_TO_JSON_FILE,
                              const fls::Model MODEL, const float COORD_TO_METERS);
