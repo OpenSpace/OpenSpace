@@ -48,6 +48,9 @@ void RenderableFieldlinesSequence::deinitialize() {
     glDeleteBuffers(1, &_vertexColorBuffer);
     _vertexColorBuffer = 0;
 
+    glDeleteBuffers(1, &_vertexMaskingBuffer);
+    _vertexMaskingBuffer = 0;
+
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shaderProgram) {
         renderEngine.removeRenderProgram(_shaderProgram);
@@ -82,6 +85,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         _shaderProgram->setUniform("colorMethod",  _pColorMethod);
         _shaderProgram->setUniform("lineColor",    _pColorUniform);
+        _shaderProgram->setUniform("usingDomain",  _pDomainEnabled);
+        _shaderProgram->setUniform("usingMasking", _pMaskingEnabled);
 
         if (_pColorMethod == ColorMethod::BY_QUANTITY) {
                 ghoul::opengl::TextureUnit textureUnit;
@@ -92,6 +97,15 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
                                               _colorTableRanges[_pColorQuantity]);
         }
 
+        if (_pMaskingEnabled) {
+            _shaderProgram->setUniform("maskingRange", _maskingRanges[_pMaskingQuantity]);
+        }
+
+        _shaderProgram->setUniform("domainLimR", _pDomainR.value() * _scalingFactor);
+        _shaderProgram->setUniform("domainLimX", _pDomainX.value() * _scalingFactor);
+        _shaderProgram->setUniform("domainLimY", _pDomainY.value() * _scalingFactor);
+        _shaderProgram->setUniform("domainLimZ", _pDomainZ.value() * _scalingFactor);
+
         // Flow/Particles
         _shaderProgram->setUniform("flowColor",       _pFlowColor);
         _shaderProgram->setUniform("usingParticles",  _pFlowEnabled);
@@ -99,6 +113,26 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("particleSpacing", _pFlowParticleSpacing);
         _shaderProgram->setUniform("particleSpeed",   _pFlowSpeed);
         _shaderProgram->setUniform("time", OsEng.runTime() * (_pFlowReversed ? -1 : 1));
+
+        bool additiveBlending = false;
+        if (_pColorABlendEnabled) {
+            const auto RENDERER = OsEng.renderEngine().rendererImplementation();
+            bool usingFBufferRenderer = RENDERER ==
+                                        RenderEngine::RendererImplementation::Framebuffer;
+
+            bool usingABufferRenderer = RENDERER ==
+                                        RenderEngine::RendererImplementation::ABuffer;
+
+            if (usingABufferRenderer) {
+                _shaderProgram->setUniform("usingAdditiveBlending", _pColorABlendEnabled);
+            }
+
+            additiveBlending = usingFBufferRenderer;
+            if (additiveBlending) {
+                glDepthMask(false);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            }
+        }
 
         glBindVertexArray(_vertexArrayObject);
         glMultiDrawArrays(
@@ -110,6 +144,11 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         glBindVertexArray(0);
         _shaderProgram->deactivate();
+
+        if (additiveBlending) {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDepthMask(true);
+        }
     }
 }
 
@@ -164,7 +203,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             updateVertexPositionBuffer();
 
             if (_states[_activeStateIndex].nExtraQuantities() > 0) {
-                _shouldUpdateColorBuffer = true;
+                _shouldUpdateColorBuffer   = true;
+                _shouldUpdateMaskingBuffer = true;
             } else {
                 _pColorMethod = ColorMethod::UNIFORM;
             }
@@ -177,6 +217,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (_shouldUpdateColorBuffer) {
             updateVertexColorBuffer();
             _shouldUpdateColorBuffer = false;
+        }
+
+        if (_shouldUpdateMaskingBuffer) {
+            updateVertexMaskingBuffer();
+            _shouldUpdateMaskingBuffer = false;
         }
     }
 }
@@ -251,6 +296,26 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
         unbindGL();
     }
 }
+
+void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
+
+    bool isSuccessful;
+    const std::vector<float>& QUANTITY_VEC =
+        _states[_activeStateIndex].extraQuantity(_pMaskingQuantity, isSuccessful);
+
+    if (isSuccessful) {
+        glBufferData(GL_ARRAY_BUFFER, QUANTITY_VEC.size() * sizeof(float),
+            &QUANTITY_VEC.front(), GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(_VA_MASKING);
+        glVertexAttribPointer(_VA_MASKING, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+        unbindGL();
+    }
+}
+
 
 
 

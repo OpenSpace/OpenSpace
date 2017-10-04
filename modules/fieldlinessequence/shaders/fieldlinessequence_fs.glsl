@@ -25,6 +25,8 @@
 in vec4 vs_color;
 in float vs_depth;
 
+uniform bool usingAdditiveBlending;
+
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
@@ -38,6 +40,10 @@ Fragment getFragment() {
     Fragment frag;
     frag.depth = vs_depth;
     frag.color = fragColor;
+
+    if (usingAdditiveBlending) {
+        frag.blend = BLEND_MODE_ADDITIVE;
+    }
 
     return frag;
 }

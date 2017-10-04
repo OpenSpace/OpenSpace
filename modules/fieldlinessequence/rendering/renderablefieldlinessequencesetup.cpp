@@ -44,6 +44,7 @@ namespace {
     // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
     const char* KEY_COLOR_TABLE_PATHS       = "ColorTablePaths"; // [STRING ARRAY] Values should be paths to .txt files
     const char* KEY_COLOR_TABLE_RANGES      = "ColorTableRanges";// [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    const char* KEY_MASKING_RANGES          = "MaskingRanges";   // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     const char* KEY_OSLFS_LOAD_AT_RUNTIME   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
@@ -70,6 +71,24 @@ namespace {
     static const openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "uniform", "Uniform Line Color", "The uniform color of lines shown when \"Color Method\" is set to \"Uniform\"."
     };
+    static const openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
+        "aBlendingEnabled", "Additive Blending", "Activate/deactivate additive blending."
+    };
+    static const openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
+        "domainEnabled", "Domain Limits", "Enable/Disable domain limits"
+    };
+    static const openspace::properties::Property::PropertyInfo DomainXInfo = {
+        "limitsX", "X-limits", "Valid range along the X-axis. [Min, Max]"
+    };
+    static const openspace::properties::Property::PropertyInfo DomainYInfo = {
+        "limitsY", "Y-limits", "Valid range along the Y-axis. [Min, Max]"
+    };
+    static const openspace::properties::Property::PropertyInfo DomainZInfo = {
+        "limitsZ", "Z-limits", "Valid range along the Z-axis. [Min, Max]"
+    };
+    static const openspace::properties::Property::PropertyInfo DomainRInfo = {
+        "limitsR", "Radial limits", "Valid radial range. [Min, Max]"
+    };
     static const openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "color", "Color", "Color of particles."
     };
@@ -88,6 +107,19 @@ namespace {
     };
     static const openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "speed", "Speed", "Speed of the flow."
+    };
+    static const openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
+        "maskingEnabled", "Masking",
+        "Enable/disable masking. Use masking to show lines where a given quantity is within a given range, e.g. if you only want to see where the temperature is between 10 and 20 degrees. Also used for masking out line topologies like solar wind & closed lines."
+    };
+    static const openspace::properties::Property::PropertyInfo MaskingMinInfo = {
+        "maskingMinLimit", "Lower Limit", "Lower limit of the valid masking range"
+    };
+    static const openspace::properties::Property::PropertyInfo MaskingMaxInfo = {
+        "maskingMaxLimit", "Upper Limit", "Upper limit of the valid masking range"
+    };
+    static const openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
+        "maskingQuantity", "Quantity used for Masking", "Quantity used for masking."
     };
     static const openspace::properties::Property::PropertyInfo OriginButtonInfo = {
         "focusCameraOnParent", "Focus Camera", "Focus camera on parent."
@@ -121,6 +153,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _pColorTablePath(ColorTablePathInfo),
       _pColorUniform(ColorUniformInfo, glm::vec4(0.75f, 0.5f, 0.0f, 0.5f),
                                        glm::vec4(0.f), glm::vec4(1.f)),
+      _pColorABlendEnabled(ColorUseABlendingInfo, true),
+      _pDomainEnabled(DomainEnabledInfo, true),
+      _pDomainGroup({ "Domain" }),
+      _pDomainX(DomainXInfo),
+      _pDomainY(DomainYInfo),
+      _pDomainZ(DomainZInfo),
+      _pDomainR(DomainRInfo),
       _pFlowColor(FlowColorInfo, glm::vec4(0.8f, 0.7f, 0.0f, 0.6f),
                                  glm::vec4(0.f), glm::vec4(1.f)),
       _pFlowEnabled(FlowEnabledInfo, true),
@@ -129,6 +168,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500),
       _pFlowReversed(FlowReversedInfo, false),
       _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000),
+      _pMaskingEnabled(MaskingEnabledInfo, false),
+      _pMaskingGroup({ "Masking" }),
+      _pMaskingMin(MaskingMinInfo),
+      _pMaskingMax(MaskingMaxInfo),
+      _pMaskingQuantity(MaskingQuantityInfo, properties::OptionProperty::DisplayType::Dropdown),
       _pFocusOnOriginBtn(OriginButtonInfo),
       _pJumpToStartBtn(TimeJumpButtonInfo) {
 
@@ -191,6 +235,7 @@ void RenderableFieldlinesSequence::initialize() {
     }
 
     computeSequenceEndTime();
+    setModelDependentConstants();
 
     setupProperties();
 
@@ -210,6 +255,10 @@ void RenderableFieldlinesSequence::initialize() {
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
     glGenBuffers(1, &_vertexColorBuffer);
+    glGenBuffers(1, &_vertexMaskingBuffer);
+
+    // Needed for additive blending
+    setRenderBin(Renderable::RenderBin::Overlay);
 }
 
 bool RenderableFieldlinesSequence::extractInfoFromDictionary(
@@ -327,13 +376,18 @@ bool RenderableFieldlinesSequence::extractInfoFromDictionary(
 
 void RenderableFieldlinesSequence::setupProperties() {
     // -------------- Add non-grouped properties (enablers and buttons) -------------- //
+    addProperty(_pColorABlendEnabled);
+    addProperty(_pDomainEnabled);
     addProperty(_pFlowEnabled);
+    addProperty(_pMaskingEnabled);
     addProperty(_pFocusOnOriginBtn);
     addProperty(_pJumpToStartBtn);
 
     // ----------------------------- Add Property Groups ----------------------------- //
     addPropertySubOwner(_pColorGroup);
+    addPropertySubOwner(_pDomainGroup);
     addPropertySubOwner(_pFlowGroup);
+    addPropertySubOwner(_pMaskingGroup);
 
     // ------------------------- Add Properties to the groups ------------------------- //
     _pColorGroup.addProperty(_pColorMethod);
@@ -343,11 +397,20 @@ void RenderableFieldlinesSequence::setupProperties() {
     _pColorGroup.addProperty(_pColorTablePath);
     _pColorGroup.addProperty(_pColorUniform);
 
+    _pDomainGroup.addProperty(_pDomainX);
+    _pDomainGroup.addProperty(_pDomainY);
+    _pDomainGroup.addProperty(_pDomainZ);
+    _pDomainGroup.addProperty(_pDomainR);
+
     _pFlowGroup.addProperty(_pFlowReversed);
     _pFlowGroup.addProperty(_pFlowColor);
     _pFlowGroup.addProperty(_pFlowParticleSize);
     _pFlowGroup.addProperty(_pFlowParticleSpacing);
     _pFlowGroup.addProperty(_pFlowSpeed);
+
+    _pMaskingGroup.addProperty(_pMaskingMin);
+    _pMaskingGroup.addProperty(_pMaskingMax);
+    _pMaskingGroup.addProperty(_pMaskingQuantity);
 
     // ----------------------- Add Options to OptionProperties ----------------------- //
     _pColorMethod.addOption(ColorMethod::UNIFORM, "Uniform");
@@ -360,10 +423,12 @@ void RenderableFieldlinesSequence::setupProperties() {
     auto EXTRA_VARIABLE_NAMES_VEC = _states[0].extraQuantityNames();
     for (int i = 0; i < N_EXTRA_QUANTITIES; ++i) {
         _pColorQuantity.addOption(i, EXTRA_VARIABLE_NAMES_VEC[i]);
+        _pMaskingQuantity.addOption(i, EXTRA_VARIABLE_NAMES_VEC[i]);
     }
     // Each quantity should have its own color table and color table range, no more, no less
     _colorTablePaths.resize(N_EXTRA_QUANTITIES, _colorTablePaths.back());
     _colorTableRanges.resize(N_EXTRA_QUANTITIES, _colorTableRanges.back());
+    _maskingRanges.resize(N_EXTRA_QUANTITIES, _maskingRanges.back());
 
     definePropertyCallbackFunctions();
 
@@ -372,6 +437,10 @@ void RenderableFieldlinesSequence::setupProperties() {
     _pColorQuantityMin = std::to_string(_colorTableRanges[_pColorQuantity].x);
     _pColorQuantityMax = std::to_string(_colorTableRanges[_pColorQuantity].y);
     _pColorTablePath = _colorTablePaths[_pColorQuantity];
+
+    _pMaskingQuantity = 0;
+    _pMaskingMin = std::to_string(_maskingRanges[_pMaskingQuantity].x);
+    _pMaskingMax = std::to_string(_maskingRanges[_pMaskingQuantity].y);
 
 }
 
@@ -404,6 +473,27 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         _colorTableRanges[_pColorQuantity].y = f;
     });
 
+    _pMaskingQuantity.onChange([this] {
+        LDEBUG("CHANGED MASKING QUANTITY");
+        _shouldUpdateMaskingBuffer = true;
+        _pMaskingMin = std::to_string(_maskingRanges[_pMaskingQuantity].x);
+        _pMaskingMax = std::to_string(_maskingRanges[_pMaskingQuantity].y);
+    });
+
+    _pMaskingMin.onChange([this] {
+        LDEBUG("CHANGED LOWER MASKING LIMIT");
+        float f = stringToFloat(_pMaskingMin, _maskingRanges[_pMaskingQuantity].x);
+        _pMaskingMin = std::to_string(f);
+        _maskingRanges[_pMaskingQuantity].x = f;
+    });
+
+    _pMaskingMax.onChange([this] {
+        LDEBUG("CHANGED UPPER MASKING LIMIT");
+        float f = stringToFloat(_pMaskingMax, _maskingRanges[_pMaskingQuantity].y);
+        _pMaskingMax = std::to_string(f);
+        _maskingRanges[_pMaskingQuantity].y = f;
+    });
+
     _pFocusOnOriginBtn.onChange([this] {
         LDEBUG("SET FOCUS NODE TO PARENT");
         SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_name);
@@ -433,6 +523,38 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
         // If there's just one state it should never disappear!
         _sequenceEndTime = DBL_MAX;
     }
+}
+
+void RenderableFieldlinesSequence::setModelDependentConstants() {
+    const fls::Model simulationModel = _states[0].model();
+    float limit = 100.f; // Just used as a default value.
+    switch (simulationModel) {
+        case fls::Model::BATSRUS:
+            _scalingFactor = fls::R_E_TO_METER;
+            limit = 300; // Should include a long magnetotail
+            break;
+        case fls::Model::ENLIL:
+            _pFlowReversed = true;
+            _scalingFactor = fls::A_U_TO_METER;
+            limit = 50; // Should include Plutos furthest distance from the Sun
+            break;
+        case fls::Model::PFSS:
+            _scalingFactor = fls::R_S_TO_METER;
+            limit = 100; // Just a default value far away from the solar surface
+            break;
+        default:
+            break;
+    }
+    _pDomainX.setMinValue(glm::vec2(-limit)); _pDomainX.setMaxValue(glm::vec2(limit));
+    _pDomainY.setMinValue(glm::vec2(-limit)); _pDomainY.setMaxValue(glm::vec2(limit));
+    _pDomainZ.setMinValue(glm::vec2(-limit)); _pDomainZ.setMaxValue(glm::vec2(limit));
+    // Radial should range from 0 out to a corner of the cartesian box: sqrt(3) = 1.732..., 1.75 is a nice and round number
+    _pDomainR.setMinValue(glm::vec2(0));      _pDomainR.setMaxValue(glm::vec2(limit*1.75f));
+
+    _pDomainX = glm::vec2(-limit, limit);
+    _pDomainY = glm::vec2(-limit, limit);
+    _pDomainZ = glm::vec2(-limit, limit);
+    _pDomainR = glm::vec2(0, limit*1.5f);
 }
 
 // Extract J2000 time from file names

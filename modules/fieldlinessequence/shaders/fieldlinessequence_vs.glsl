@@ -43,8 +43,21 @@ uniform int       particleSpacing;
 uniform double    time;
 uniform bool      usingParticles;
 
-layout(location = 0) in vec3 in_position;      // Should be provided in meters
-layout(location = 1) in float in_color_scalar; // The extra value used to color lines. Location must correspond to _VA_COLOR in renderablefieldlinessequence.h
+// Masking Uniforms
+uniform bool      usingMasking;
+uniform vec2      maskingRange;
+
+// Domain Uniforms
+uniform bool      usingDomain;
+uniform vec2      domainLimX;
+uniform vec2      domainLimY;
+uniform vec2      domainLimZ;
+uniform vec2      domainLimR;
+
+// Inputs
+layout(location = 0) in vec3 in_position;        // Should be provided in meters
+layout(location = 1) in float in_color_scalar;   // The extra value used to color lines. Location must correspond to _VA_COLOR in renderablefieldlinessequence.h
+layout(location = 2) in float in_masking_scalar; // The extra value used to mask out parts of lines. Location must correspond to _VA_MASKING in renderablefieldlinessequence.h
 
 // These should correspond to the enum 'ColorMethod' in renderablefieldlinesequence.cpp
 const int UNIFORM_COLOR     = 0;
@@ -69,20 +82,43 @@ bool isPartOfParticle(const double TIME, const int VERTEX_ID, const int PARTICLE
 
 void main() {
 
-    const bool IS_PARTICLE = usingParticles && isPartOfParticle(time, gl_VertexID,
-                                                                particleSize,
-                                                                particleSpeed,
-                                                                particleSpacing);
+    bool hasColor = true;
 
-    if (IS_PARTICLE) {
-        vs_color = flowColor;
-    } else {
-        vs_color = lineColor;
+    if (usingMasking && (in_masking_scalar < maskingRange.x ||
+                         in_masking_scalar > maskingRange.y )) {
+        hasColor = false;
     }
 
-    if (colorMethod == COLOR_BY_QUANTITY) {
-        const vec4 QUANTITY_COLOR = getTransferFunctionColor();
-        vs_color = vec4(QUANTITY_COLOR.xyz, vs_color.a * QUANTITY_COLOR.a);
+    if (usingDomain && hasColor) {
+        const float RADIUS = length(in_position);
+
+        if (in_position.x < domainLimX.x || in_position.x > domainLimX.y ||
+            in_position.y < domainLimY.x || in_position.y > domainLimY.y ||
+            in_position.z < domainLimZ.x || in_position.z > domainLimZ.y ||
+            RADIUS        < domainLimR.x || RADIUS        > domainLimR.y) {
+
+            hasColor = false;
+        }
+    }
+
+    if (hasColor) {
+        const bool IS_PARTICLE = usingParticles && isPartOfParticle(time, gl_VertexID,
+                                                                    particleSize,
+                                                                    particleSpeed,
+                                                                    particleSpacing);
+
+        if (IS_PARTICLE) {
+            vs_color = flowColor;
+        } else {
+            vs_color = lineColor;
+        }
+
+        if (colorMethod == COLOR_BY_QUANTITY) {
+            const vec4 QUANTITY_COLOR = getTransferFunctionColor();
+            vs_color = vec4(QUANTITY_COLOR.xyz, vs_color.a * QUANTITY_COLOR.a);
+        }
+    } else {
+        vs_color = vec4(0);
     }
 
     vec4 position_in_meters = vec4(in_position, 1);
