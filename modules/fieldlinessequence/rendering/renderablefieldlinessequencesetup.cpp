@@ -128,6 +128,13 @@ namespace {
         "timeJumpToStart", "Jump to Start Of Sequence", "Performs a time jump to the start of the sequence."
     };
 
+    enum class SourceFileType : int {
+        CDF = 0,
+        JSON,
+        OSFLS,
+        INVALID
+    };
+
     float stringToFloat(const std::string INPUT, const float BACKUP_VALUE = 0.f) {
         float tmp;
         try {
@@ -143,8 +150,8 @@ namespace {
 
 namespace openspace {
 
-RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary),
+RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& DICTIONARY)
+    : Renderable(DICTIONARY),
       _pColorGroup({ "Color" }),
       _pColorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio),
       _pColorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown),
@@ -176,29 +183,37 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _pFocusOnOriginBtn(OriginButtonInfo),
       _pJumpToStartBtn(TimeJumpButtonInfo) {
 
-    _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
-    // Set the default color table, just in case user defined paths are corrupt!
-    _transferFunction = std::make_shared<TransferFunction>(absPath(_colorTablePaths[0]));
+    _dictionary = std::make_unique<ghoul::Dictionary>(DICTIONARY);
 }
 
 void RenderableFieldlinesSequence::initialize() {
     LINFO("RenderableFieldlinesSequence::initialize()");
 
-    if (!extractInfoFromDictionary(*_dictionary)) {
-        _sourceFileType = SourceFileType::INVALID;
+    // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
+    SourceFileType sourceFileType = SourceFileType::INVALID;
+    if (!extractMandatoryInfoFromDictionary(sourceFileType)) {
+        return;
     }
 
-    // dictionary is no longer necessary as everything is extracted
-    _dictionary.reset();
+    // Set the default color table, just in case the (optional) user defined paths are corrupt!
+    _colorTablePaths.push_back("${OPENSPACE_DATA}/colortables/kroyw.txt");
+    _transferFunction = std::make_shared<TransferFunction>(absPath(_colorTablePaths[0]));
 
-    switch (_sourceFileType) {
-        case CDF:
+    // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
+    std::string outputFolderPath;
+    extractOptionalInfoFromDictionary(outputFolderPath);
+    const bool SHOULD_SAVE_STATES = !outputFolderPath.empty();
+
+    // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM SOURCE
+    switch (sourceFileType) {
+        case SourceFileType::CDF:
             LERROR("CDF NOT YET IMPLEMENTED!"); return;
             break;
-        case JSON:
+        case SourceFileType::JSON:
             LERROR("JSON NOT YET IMPLEMENTED!"); return;
             break;
-        case OSFLS:
+        case SourceFileType::OSFLS:
+            extractOsflsInfoFromDictionary();
             if (_loadingStatesDynamically) {
                 extractTriggerTimesFromFileNames();
                 FieldlinesState newState;
@@ -209,7 +224,7 @@ void RenderableFieldlinesSequence::initialize() {
                     _activeStateIndex = 0;
                 } else {
                     LERROR("The provided .osfls files seem to be corrupt!");
-                    _sourceFileType = SourceFileType::INVALID;
+                    sourceFileType = SourceFileType::INVALID;
                 }
             } else {
                 // Load states into RAM!
@@ -227,6 +242,9 @@ void RenderableFieldlinesSequence::initialize() {
         default:
             return;
     }
+
+    // dictionary is no longer needed as everything is extracted
+    _dictionary.reset();
 
     // At this point there's at least one state loaded into memory!
     // No need to store source paths in memory if they are already in RAM!
@@ -248,7 +266,7 @@ void RenderableFieldlinesSequence::initialize() {
 
     if (!_shaderProgram) {
         LERROR("Shader program failed initialization!");
-        _sourceFileType = SourceFileType::INVALID;
+        sourceFileType = SourceFileType::INVALID;
     }
 
     //------------------ Initialize OpenGL VBOs and VAOs-------------------------------//
@@ -259,42 +277,44 @@ void RenderableFieldlinesSequence::initialize() {
 
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
+
+    _isReady = true;
 }
 
-bool RenderableFieldlinesSequence::extractInfoFromDictionary(
-    const ghoul::Dictionary& dictionary) {
+/*
+ * Returns false if it fails to extract mandatory information!
+ */
+bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
+        SourceFileType& sourceFileType) {
 
-    std::string name;
-    dictionary.getValue(SceneGraphNode::KeyName, name);
-    _name = name;
-    name += ": ";
+    _dictionary->getValue(SceneGraphNode::KeyName, _name);
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     std::string inputFileTypeString;
-    if (!dictionary.getValue(KEY_INPUT_FILE_TYPE, inputFileTypeString)) {
-        LERROR(name << "The field " << std::string(KEY_INPUT_FILE_TYPE) << " is missing!");
+    if (!_dictionary->getValue(KEY_INPUT_FILE_TYPE, inputFileTypeString)) {
+        LERROR(_name << ": The field " << std::string(KEY_INPUT_FILE_TYPE) << " is missing!");
         return false;
     } else {
         std::transform(inputFileTypeString.begin(), inputFileTypeString.end(),
                        inputFileTypeString.begin(), ::tolower);
         // Verify that the input type is correct
         if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_CDF) {
-            _sourceFileType = CDF;
+            sourceFileType = SourceFileType::CDF;
         } else if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_JSON) {
-            _sourceFileType = JSON;
+            sourceFileType = SourceFileType::JSON;
         } else if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_OSFLS) {
-            _sourceFileType = OSFLS;
+            sourceFileType = SourceFileType::OSFLS;
         } else {
-            LERROR(name << inputFileTypeString << " is not a recognised "
+            LERROR(_name << ": " << inputFileTypeString << " is not a recognised "
                 << KEY_INPUT_FILE_TYPE);
-            _sourceFileType = INVALID;
+            sourceFileType = SourceFileType::INVALID;
             return false;
         }
     }
 
     std::string sourceFolderPath;
-    if (!dictionary.getValue(KEY_SOURCE_FOLDER, sourceFolderPath)) {
-        LERROR(name << "The field " << std::string(KEY_SOURCE_FOLDER) << " is missing!");
+    if (!_dictionary->getValue(KEY_SOURCE_FOLDER, sourceFolderPath)) {
+        LERROR(_name << ": The field " << std::string(KEY_SOURCE_FOLDER) << " is missing!");
         return false;
     }
 
@@ -315,19 +335,25 @@ bool RenderableFieldlinesSequence::extractInfoFromDictionary(
                 }), _sourceFiles.end());
         // Ensure that there are available and valid source files left
         if (_sourceFiles.empty()) {
-            LERROR(name << sourceFolderPath << " contains no ." << inputFileTypeString
+            LERROR(_name << ": " << sourceFolderPath << " contains no ." << inputFileTypeString
                 << " files!");
             return false;
         }
     } else {
-        LERROR(name << "FieldlinesSequence" << sourceFolderPath
+        LERROR(_name << ": FieldlinesSequence" << sourceFolderPath
             << " is not a valid directory!");
         return false;
     }
 
+    return true;
+}
+
+void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
+        std::string& outputFolderPath) {
+
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
     ghoul::Dictionary colorTablesPathsDictionary;
-    if (dictionary.getValue(KEY_COLOR_TABLE_PATHS, colorTablesPathsDictionary)) {
+    if (_dictionary->getValue(KEY_COLOR_TABLE_PATHS, colorTablesPathsDictionary)) {
         const size_t N_PROVIDED_PATHS = colorTablesPathsDictionary.size();
         if (N_PROVIDED_PATHS > 0) {
             // Clear the default! It is already specified in the transferFunction
@@ -340,7 +366,7 @@ bool RenderableFieldlinesSequence::extractInfoFromDictionary(
     }
 
     ghoul::Dictionary colorTablesRangesDictionary;
-    if (dictionary.getValue(KEY_COLOR_TABLE_RANGES, colorTablesRangesDictionary)) {
+    if (_dictionary->getValue(KEY_COLOR_TABLE_RANGES, colorTablesRangesDictionary)) {
         const size_t N_PROVIDED_RANGES = colorTablesRangesDictionary.size();
         for (size_t i = 1; i <= N_PROVIDED_RANGES; ++i) {
             _colorTableRanges.push_back(
@@ -350,28 +376,33 @@ bool RenderableFieldlinesSequence::extractInfoFromDictionary(
         _colorTableRanges.push_back(glm::vec2(0, 1));
     }
 
-    // Extract info specific to each inputType
-    switch (_sourceFileType) {
-        case CDF:
-            LERROR(name << "CDF NOT YET IMPLEMENTED!");
-            break;
-        case JSON:
-            LERROR(name << "JSON NOT YET IMPLEMENTED!");
-            break;
-        case OSFLS: {
-            bool shouldLoadInRealtime = false;
-            if (dictionary.getValue(KEY_OSLFS_LOAD_AT_RUNTIME, shouldLoadInRealtime)) {
-                _loadingStatesDynamically = shouldLoadInRealtime;
-            } else {
-                LWARNING(name << KEY_OSLFS_LOAD_AT_RUNTIME <<
-                    " isn't specified! States from OSFLS files will be stored in RAM!");
-            }
-        } break;
-        default:
-            break;
+    ghoul::Dictionary maskingRangesDictionary;
+    if (_dictionary->getValue(KEY_MASKING_RANGES, maskingRangesDictionary)) {
+        const size_t N_PROVIDED_RANGES = maskingRangesDictionary.size();
+        for (size_t i = 1; i <= N_PROVIDED_RANGES; ++i) {
+            _maskingRanges.push_back(
+                    maskingRangesDictionary.value<glm::vec2>(std::to_string(i)));
+        }
+    } else {
+        _maskingRanges.push_back(glm::vec2(-100000, 100000)); // Just some default values!
     }
+}
 
+/*
+ * Returns false if it fails to extract mandatory information!
+ */
+bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& model) {
     return true;
+}
+
+void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
+    bool shouldLoadInRealtime = false;
+    if (_dictionary->getValue(KEY_OSLFS_LOAD_AT_RUNTIME, shouldLoadInRealtime)) {
+        _loadingStatesDynamically = shouldLoadInRealtime;
+    } else {
+        LWARNING(_name << ": " << KEY_OSLFS_LOAD_AT_RUNTIME <<
+            " isn't specified! States will be stored in RAM!");
+    }
 }
 
 void RenderableFieldlinesSequence::setupProperties() {
@@ -441,7 +472,6 @@ void RenderableFieldlinesSequence::setupProperties() {
     _pMaskingQuantity = 0;
     _pMaskingMin = std::to_string(_maskingRanges[_pMaskingQuantity].x);
     _pMaskingMax = std::to_string(_maskingRanges[_pMaskingQuantity].y);
-
 }
 
 void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {

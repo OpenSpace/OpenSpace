@@ -34,6 +34,10 @@
 
 namespace {
     std::string _loggerCat = "RenderableFieldlinesSequence";
+
+    const GLuint _VA_POSITION = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
+    const GLuint _VA_COLOR    = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
+    const GLuint _VA_MASKING  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
 } // namespace
 
 namespace openspace {
@@ -58,13 +62,13 @@ void RenderableFieldlinesSequence::deinitialize() {
     }
 
     // Stall main thread until thread that's loading states is done!
-    while (/*!_newStateIsReady &&*/ _isLoadingStateFromDisk) {
+    while (_isLoadingStateFromDisk) {
         LWARNING("TRYING TO DESTROY CLASS WHEN A THREAD USING IT IS STILL ACTIVE");
     }
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
-    return _sourceFileType != INVALID;
+    return _isReady;
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&) {
@@ -197,7 +201,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
         if (_needsUpdate || _newStateIsReady) {
             if (_loadingStatesDynamically) {
-                _states[0] = std::move(_newState);
+                _states[0] = std::move(*_newState);
             }
 
             updateVertexPositionBuffer();
@@ -245,14 +249,12 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(const double CUR
     }
 }
 
-// Reading state from disk. Thread safe!
+// Reading state from disk. Must be thread safe!
 void RenderableFieldlinesSequence::readNewState(const std::string& FILEPATH) {
-    FieldlinesState newState;
-
-    bool isSuccessful = newState.loadStateFromOsfls(FILEPATH);
-    _newState = std::move(newState);
-
-    _newStateIsReady        = true;
+    _newState = std::make_unique<FieldlinesState>();
+    if (_newState->loadStateFromOsfls(FILEPATH)) {
+        _newStateIsReady = true;
+    }
     _isLoadingStateFromDisk = false;
 }
 

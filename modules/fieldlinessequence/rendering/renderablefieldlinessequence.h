@@ -39,14 +39,15 @@
 
 #include <atomic>
 
-namespace openspace {
+namespace {
+    enum class SourceFileType;
+}
 
-class ghoul::Dictionary;
+namespace openspace {
 
 class RenderableFieldlinesSequence : public Renderable {
 public:
     RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
-    // ~RenderableFieldlinesSequence();
 
     void initialize() override;
     void deinitialize() override;
@@ -56,59 +57,51 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 private:
-    enum ColorMethod : int {
+    // ------------------------------------- ENUMS -------------------------------------//
+    enum ColorMethod : int {    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
         UNIFORM = 0,
         BY_QUANTITY
     };
 
-    enum SourceFileType : int {
-        CDF = 0,
-        JSON,
-        OSFLS,
-        INVALID
-    };
+    // ------------------------------------ STRINGS ------------------------------------//
+    std::string       _name;                               // Name of the Node!
 
-    std::string _name;
+    // ------------------------------------- FLAGS -------------------------------------//
+    std::atomic<bool> _isLoadingStateFromDisk    { false}; // Used for 'runtime-states'. True when loading a new state from disk on another thread.
+    bool              _isReady                   = false;  // If initialization proved successful
+    bool              _loadingStatesDynamically  = false;  // False => states are stored in RAM (using 'in-RAM-states'), True => states are loaded from disk during runtime (using 'runtime-states')
+    bool              _mustLoadNewStateFromDisk  = false;  // Used for 'runtime-states': True if new 'runtime-state' must be loaded from disk. False => the previous frame's state should still be shown
+    bool              _needsUpdate               = false;  // Used for 'in-RAM-states' : True if new 'in-RAM-state'  must be loaded.           False => the previous frame's state should still be shown
+    std::atomic<bool> _newStateIsReady           { false}; // Used for 'runtime-states'. True when finished loading a new state from disk on another thread.
+    bool              _shouldUpdateColorBuffer   = false;  // True when new state is loaded or user change which quantity to color the lines by
+    bool              _shouldUpdateMaskingBuffer = false;  // True when new state is loaded or user change which quantity used for masking out line segments
 
-    int             _activeStateIndex          = -1;
-    int             _activeTriggerTimeIndex    = -1;
-    bool            _loadingStatesDynamically  = false;  // False => loading osfls files into RAM in initializing step
-    bool            _mustLoadNewStateFromDisk  = false;
-    bool            _needsUpdate               = false; // If still in same state as previous frame == false
-    bool            _shouldUpdateColorBuffer   = false;
-    bool            _shouldUpdateMaskingBuffer = false;
-    FieldlinesState _newState;
-    size_t          _nStates                   = 0;
-    float           _scalingFactor             = 1.f;
-    double          _sequenceEndTime;
-    SourceFileType  _sourceFileType;
+    // --------------------------------- NUMERICALS ----------------------------------- //
+    int               _activeStateIndex          = -1;     // Active index of _states. If(==-1)=>no state available for current time. Always the same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else always = 0
+    int               _activeTriggerTimeIndex    = -1;     // Active index of _startTimes
+    size_t            _nStates                   = 0;      // Number of states in the sequence
+    float             _scalingFactor             = 1.f;    // In setup it is used to scale JSON coordinates. During runtime it is used to scale domain limits.
+    double            _sequenceEndTime;                    // Estimated end of sequence.
+    GLuint            _vertexArrayObject         = 0;      // OpenGL Vertex Array Object
+    GLuint            _vertexColorBuffer         = 0;      // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring the lines
+    GLuint            _vertexMaskingBuffer       = 0;      // OpenGL Vertex Buffer Object containing the extraQuantity values used for masking out segments of the lines
+    GLuint            _vertexPositionBuffer      = 0;      // OpenGL Vertex Buffer Object containing the vertex positions
 
-    std::atomic<bool> _isLoadingStateFromDisk{false};
-    std::atomic<bool> _newStateIsReady{false};
-
-    std::unique_ptr<ghoul::Dictionary>            _dictionary;
-    std::shared_ptr<TransferFunction>             _transferFunction;        // Transfer funtion (tf)
+    // ----------------------------------- POINTERS ------------------------------------//
+    std::unique_ptr<ghoul::Dictionary>            _dictionary;       // The Lua-Modfile-Dictionary used during initialization
+    std::unique_ptr<FieldlinesState>              _newState;         // Used for 'runtime-states' when switching out current state to a new state
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+    std::shared_ptr<TransferFunction>             _transferFunction; // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
 
-    std::vector<std::string>     _colorTablePaths {"${OPENSPACE_DATA}/colortables/kroyw.txt"}; // Default in case user doesn't specify otherwise
-    std::vector<std::string>     _sourceFiles;                // Stored in RAM if files are loaded at runtime, else emptied after initialization
-    std::vector<double>          _startTimes;
-    std::vector<FieldlinesState> _states;
-    std::vector<glm::vec2>       _colorTableRanges;       // Values represents min & max values represented in the color table
-    std::vector<glm::vec2>       _maskingRanges;          // Values represents min & max values for valid masking range
+    // ------------------------------------ VECTORS ----------------------------------- //
+    std::vector<std::string>     _colorTablePaths;      // Paths to color tables. One for each 'extraQuantity'
+    std::vector<glm::vec2>       _colorTableRanges;     // Values represents min & max values represented in the color table
+    std::vector<glm::vec2>       _maskingRanges;        // Values represents min & max limits for valid masking range
+    std::vector<std::string>     _sourceFiles;          // Stores the provided source file paths if using 'runtime-states', else emptied after initialization
+    std::vector<double>          _startTimes;           // Contains the _triggerTimes for all FieldlineStates in the sequence
+    std::vector<FieldlinesState> _states;               // Stores the FieldlineStates
 
-    GLuint _vertexArrayObject       = 0;
-    GLuint _vertexPositionBuffer    = 0;
-    GLuint _vertexColorBuffer       = 0;
-    GLuint _vertexMaskingBuffer     = 0;
-
-    // THESE MUST CORRESPOND TO THE SHADER PROGRAM
-    // TODO: THIS CAN BE DETERMINED BY ASKING THE SHADER PROGRAM TOO
-    const GLuint _VA_POSITION = 0;
-    const GLuint _VA_COLOR    = 1;
-    const GLuint _VA_MASKING  = 2;
-
-    // ----------------------------- Properties -----------------------------
+    // ---------------------------------- Properties ---------------------------------- //
     properties::PropertyOwner    _pColorGroup;          // Group to hold the color properties
     properties::OptionProperty   _pColorMethod;         // Uniform/transfer function/topology?
     properties::OptionProperty   _pColorQuantity;       // Index of the extra quantity to color lines by
@@ -142,22 +135,24 @@ private:
     properties::TriggerProperty  _pFocusOnOriginBtn;    // Button which sets camera focus to parent node of the renderable
     properties::TriggerProperty  _pJumpToStartBtn;      // Button which executes a time jump to start of sequence
 
+    // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
     void   computeSequenceEndTime();
-    bool   extractInfoFromDictionary(const ghoul::Dictionary& dictionary);
+    void   definePropertyCallbackFunctions();
+    bool   extractJsonInfoFromDictionary(fls::Model& model);
+    bool   extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
+    void   extractOptionalInfoFromDictionary(std::string& outputFolderPath);
+    void   extractOsflsInfoFromDictionary();
     void   extractTriggerTimesFromFileNames();
-    void   readNewState(const std::string& FILEPATH);
+    void   setModelDependentConstants();
+    void   setupProperties();
 
+    // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     inline bool isWithinSequenceInterval(const double CURRENT_TIME) const;
-
+    void   readNewState(const std::string& FILEPATH);
     void   updateActiveTriggerTimeIndex(const double CURRENT_TIME);
     void   updateVertexPositionBuffer();
     void   updateVertexColorBuffer();
     void   updateVertexMaskingBuffer();
-
-    void   definePropertyCallbackFunctions();
-    void   setupProperties();
-
-    void   setModelDependentConstants();
 };
 
 } // namespace openspace
