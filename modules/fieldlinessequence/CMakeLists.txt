@@ -27,11 +27,13 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequencesetup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

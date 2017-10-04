@@ -34,12 +34,13 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 
-
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
 #include <atomic>
 
 namespace openspace {
+
+class ghoul::Dictionary;
 
 class RenderableFieldlinesSequence : public Renderable {
 public:
@@ -54,6 +55,11 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 private:
+    enum ColorMethod : int {
+        UNIFORM = 0,
+        BY_QUANTITY
+    };
+
     enum SourceFileType : int {
         CDF = 0,
         JSON,
@@ -63,12 +69,12 @@ private:
 
     std::string _name;
 
-    int             _activeStateIndex         = -1;
-    int             _activeTriggerTimeIndex   = -1;
-    bool            _isLoadingStatesAtRuntime = true;  // False => loading osfls at runtime
-    bool            _mustLoadNewStateFromDisk = false;
-    bool            _needsUpdate              = false; // If still in same state as previous frame == false
-    bool            _shouldUpdateColorBuffer  = false;
+    int             _activeStateIndex          = -1;
+    int             _activeTriggerTimeIndex    = -1;
+    bool            _loadingStatesDynamically  = false;  // False => loading osfls files into RAM in initializing step
+    bool            _mustLoadNewStateFromDisk  = false;
+    bool            _needsUpdate               = false; // If still in same state as previous frame == false
+    bool            _shouldUpdateColorBuffer   = false;
     FieldlinesState _newState;
     size_t          _nStates                  = 0;
     double          _sequenceEndTime;
@@ -77,10 +83,10 @@ private:
     std::atomic<bool> _isLoadingStateFromDisk{false};
     std::atomic<bool> _newStateIsReady{false};
 
+    std::unique_ptr<ghoul::Dictionary>            _dictionary;
     std::shared_ptr<TransferFunction>             _transferFunction;        // Transfer funtion (tf)
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
-    std::string*                 _activeColorTable;
     std::vector<std::string>     _colorTablePaths {"${OPENSPACE_DATA}/colortables/kroyw.txt"}; // Default in case user doesn't specify otherwise
     std::vector<std::string>     _sourceFiles;                // Stored in RAM if files are loaded at runtime, else emptied after initialization
     std::vector<double>          _startTimes;
@@ -97,24 +103,24 @@ private:
     const GLuint _VA_COLOR    = 1;
 
     // ----------------------------- Properties -----------------------------
-    properties::PropertyOwner    _colorGroup;          // Group to hold the color properties
-    properties::OptionProperty   _colorMethod;         // Uniform/transfer function/topology?
-    properties::OptionProperty   _colorQuantity;       // Index of the extra quantity to color lines by
-    properties::StringProperty   _colorQuantityMin;    // Color table/transfer function min
-    properties::StringProperty   _colorQuantityMax;    // Color table/transfer function max
-    properties::StringProperty   _colorTablePath;      // Color table/transfer function for "By Quantity" coloring
-    properties::Vec4Property     _colorUniform;        // Uniform Field Line Color
+    properties::PropertyOwner    _pColorGroup;          // Group to hold the color properties
+    properties::OptionProperty   _pColorMethod;         // Uniform/transfer function/topology?
+    properties::OptionProperty   _pColorQuantity;       // Index of the extra quantity to color lines by
+    properties::StringProperty   _pColorQuantityMin;    // Color table/transfer function min
+    properties::StringProperty   _pColorQuantityMax;    // Color table/transfer function max
+    properties::StringProperty   _pColorTablePath;      // Color table/transfer function for "By Quantity" coloring
+    properties::Vec4Property     _pColorUniform;        // Uniform Field Line Color
 
-    properties::Vec4Property     _flowColor;           // Simulated particles' color
-    properties::BoolProperty     _flowEnabled;         // Toggle flow [ON/OFF]
-    properties::PropertyOwner    _flowGroup;           // Gropu to hold the flow/particle properties
-    properties::IntProperty      _flowParticleSize;    // Size of simulated flow particles
-    properties::IntProperty      _flowParticleSpacing; // Size of simulated flow particles
-    properties::BoolProperty     _flowReversed;        // Toggle flow direction [FORWARDS/BACKWARDS]
-    properties::IntProperty      _flowSpeed;           // Speed of simulated flow
+    properties::Vec4Property     _pFlowColor;           // Simulated particles' color
+    properties::BoolProperty     _pFlowEnabled;         // Toggle flow [ON/OFF]
+    properties::PropertyOwner    _pFlowGroup;           // Group to hold the flow/particle properties
+    properties::IntProperty      _pFlowParticleSize;    // Size of simulated flow particles
+    properties::IntProperty      _pFlowParticleSpacing; // Size of simulated flow particles
+    properties::BoolProperty     _pFlowReversed;        // Toggle flow direction [FORWARDS/BACKWARDS]
+    properties::IntProperty      _pFlowSpeed;           // Speed of simulated flow
 
-    properties::TriggerProperty  _focusOnOriginBtn;    // Button which sets camera focus to parent node of the renderable
-    properties::TriggerProperty  _jumpToStartBtn;      // Button which executes a time jump to start of sequence
+    properties::TriggerProperty  _pFocusOnOriginBtn;    // Button which sets camera focus to parent node of the renderable
+    properties::TriggerProperty  _pJumpToStartBtn;      // Button which executes a time jump to start of sequence
 
     void   computeSequenceEndTime();
     bool   extractInfoFromDictionary(const ghoul::Dictionary& dictionary);
@@ -126,6 +132,10 @@ private:
     void   updateActiveTriggerTimeIndex(const double CURRENT_TIME);
     void   updateVertexPositionBuffer();
     void   updateVertexColorBuffer();
+    void   updateVertexMaskingBuffer();
+
+    void   definePropertyCallbackFunctions();
+    void   setupProperties();
 };
 
 } // namespace openspace

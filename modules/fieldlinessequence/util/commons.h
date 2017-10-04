@@ -22,54 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
-
-#include <modules/fieldlinessequence/util/commons.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__
 
 #include <string>
-#include <vector>
-
-using std::vector;
 
 namespace openspace {
+namespace fls { // (F)ield(L)ines(S)equence
 
-class FieldlinesState {
-public:
-    FieldlinesState();
-    FieldlinesState(const std::string& PATH_TO_OSFLS_FILE, bool& loadSucessful);
-
-    bool   loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE);
-
-    // ------------------------------GETTERS-----------------------------------------//
-    const vector<vector<float>>& extraQuantities()    const { return _extraQuantities; }
-    const vector<std::string>&   extraQuantityNames() const { return _extraQuantityNames; }
-    const vector<GLsizei>&       lineCount()          const { return _lineCount; }
-    const vector<GLint>&         lineStart()          const { return _lineStart; }
-    size_t                       nExtraQuantities()   const { return _extraQuantities.size(); }
-    fls::Model                   model()              const { return _model; }
-    double                       triggerTime()        const { return _triggerTime; }
-    const vector<glm::vec3>&     vertexPositions()    const { return _vertexPositions; }
-
-    // Special getter. Returns extraQuantities[INDEX].
-    const vector<float>&       extraQuantity(const size_t INDEX, bool& isSuccesful) const;
-
-private:
-    bool                  _isMorphable = false;
-    double                _triggerTime = -1.0;
-    fls::Model            _model;
-
-    vector<glm::vec3>     _vertexPositions;
-    vector<GLint>         _lineStart;
-    vector<GLsizei>       _lineCount;
-    vector<vector<float>> _extraQuantities;
-    vector<std::string>   _extraQuantityNames;
-    // TODO: Maybe introduce a vector containing seed point indices
+enum Model : int {
+    BATSRUS = 0,
+    ENLIL,
+    PFSS,
+    INVALID
 };
 
+
+
+const float A_U_TO_METER = 149597870700.f;  // Astronomical Units
+const float R_E_TO_METER = 6371000.f;       // Earth radius
+const float R_S_TO_METER = 695700000.f;     // Sun radius
+
+} // namespace fls
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__

@@ -28,6 +28,11 @@
 
 #include <fstream>
 
+namespace {
+    std::string _loggerCat = "FieldlinesState";
+    const int CURRENT_VERSION = 0;
+}
+
 namespace openspace {
 
 FieldlinesState::FieldlinesState() {}
@@ -56,37 +61,37 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) 
     }
 
     // Define tmp variables to store meta data in
-    size_t numLines;
-    size_t numPoints;
-    size_t numExtras;
+    size_t nLines;
+    size_t nPoints;
+    size_t nExtras;
     size_t byteSizeAllNames;
 
     // Read single value variables
     ifs.read( reinterpret_cast<char*>(&_triggerTime),     sizeof(double));
     ifs.read( reinterpret_cast<char*>(&_model),           sizeof(int));
     ifs.read( reinterpret_cast<char*>(&_isMorphable),     sizeof(bool));
-    ifs.read( reinterpret_cast<char*>(&numLines),         sizeof(size_t));
-    ifs.read( reinterpret_cast<char*>(&numPoints),        sizeof(size_t));
-    ifs.read( reinterpret_cast<char*>(&numExtras),        sizeof(size_t));
+    ifs.read( reinterpret_cast<char*>(&nLines),           sizeof(size_t));
+    ifs.read( reinterpret_cast<char*>(&nPoints),          sizeof(size_t));
+    ifs.read( reinterpret_cast<char*>(&nExtras),          sizeof(size_t));
     ifs.read( reinterpret_cast<char*>(&byteSizeAllNames), sizeof(size_t));
 
     // RESERVE/RESIZE vectors
     // TODO: Do this without initializing values? Resize is slower than just using reserve, due to initialization of all values
-    _lineStart.resize(numLines);
-    _lineCount.resize(numLines);
-    _vertexPositions.resize(numPoints);
-    _extraQuantities.resize(numExtras);
-    _extraQuantityNames.reserve(numExtras);
+    _lineStart.resize(nLines);
+    _lineCount.resize(nLines);
+    _vertexPositions.resize(nPoints);
+    _extraQuantities.resize(nExtras);
+    _extraQuantityNames.reserve(nExtras);
 
     // Read vertex position data
-    ifs.read( reinterpret_cast<char*>(_lineStart.data()), sizeof(GLint)*numLines);
-    ifs.read( reinterpret_cast<char*>(_lineCount.data()), sizeof(GLsizei)*numLines);
-    ifs.read( reinterpret_cast<char*>(_vertexPositions.data()), sizeof(glm::vec3)*numPoints);
+    ifs.read( reinterpret_cast<char*>(_lineStart.data()),       sizeof(GLint)*nLines);
+    ifs.read( reinterpret_cast<char*>(_lineCount.data()),       sizeof(GLsizei)*nLines);
+    ifs.read( reinterpret_cast<char*>(_vertexPositions.data()), sizeof(glm::vec3)*nPoints);
 
     // Read all extra quantities
     for (std::vector<float>& vec : _extraQuantities) {
-        vec.resize(numPoints);
-        ifs.read( reinterpret_cast<char*>(vec.data()), sizeof(float) * numPoints);
+        vec.resize(nPoints);
+        ifs.read( reinterpret_cast<char*>(vec.data()), sizeof(float) * nPoints);
     }
 
     // Read all extra quantities' names. Stored as multiple c-strings
@@ -97,7 +102,7 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) 
     delete[] s;
 
     size_t offset = 0;
-    for (size_t i = 0; i < numExtras; ++i) {
+    for (size_t i = 0; i < nExtras; ++i) {
         auto endOfVarName = allNamesInOne.find('\0', offset);
         endOfVarName -= offset;
         std::string varName = allNamesInOne.substr(offset, endOfVarName);
