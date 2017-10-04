@@ -45,6 +45,7 @@ namespace {
     const char* KEY_COLOR_TABLE_PATHS       = "ColorTablePaths"; // [STRING ARRAY] Values should be paths to .txt files
     const char* KEY_COLOR_TABLE_RANGES      = "ColorTableRanges";// [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     const char* KEY_MASKING_RANGES          = "MaskingRanges";   // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    const char* KEY_OUTPUT_FOLDER           = "OutputFolder";    // [STRING] Value should be path to folder where states are saved (JSON/CDF input => osfls output & oslfs input => JSON output)
     const char* KEY_OSLFS_LOAD_AT_RUNTIME   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
@@ -235,6 +236,11 @@ void RenderableFieldlinesSequence::initialize() {
                         _states.push_back(newState);
                         _startTimes.push_back(newState.triggerTime());
                         _nStates++;
+
+                        if (SHOULD_SAVE_STATES) {
+                            ghoul::filesystem::File tmpFile(filePath);
+                            newState.saveStateToJson(outputFolderPath + tmpFile.baseName());
+                        }
                     }
                 }
             }
@@ -352,6 +358,16 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         std::string& outputFolderPath) {
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
+    if (_dictionary->getValue(KEY_OUTPUT_FOLDER, outputFolderPath)) {
+        ghoul::filesystem::Directory outputFolder(outputFolderPath);
+        if (FileSys.directoryExists(outputFolder)) {
+            outputFolderPath = absPath(outputFolderPath);
+        } else {
+            LERROR(_name << ": The specified output path: '" << outputFolderPath << "', does not exist!");
+            outputFolderPath = "";
+        }
+    }
+
     ghoul::Dictionary colorTablesPathsDictionary;
     if (_dictionary->getValue(KEY_COLOR_TABLE_PATHS, colorTablesPathsDictionary)) {
         const size_t N_PROVIDED_PATHS = colorTablesPathsDictionary.size();
