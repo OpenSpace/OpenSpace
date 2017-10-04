@@ -242,7 +242,9 @@ GUI::GUI()
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
     addPropertySubOwner(_virtualProperty);
+#ifdef GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_globeBrowsing);
+#endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
     addPropertySubOwner(_time);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -330,7 +332,9 @@ void GUI::initialize() {
     _globalProperty.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _filePath.initialize();
+#ifdef GLOBEBROWSING_USE_GDAL    
     _globeBrowsing.initialize();
+#endif // GLOBEBROWSING_USE_GDAL
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
@@ -352,7 +356,9 @@ void GUI::deinitialize() {
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
     _filePath.deinitialize();
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitialize();
+#endif // GLOBEBROWSING_USE_GDAL
     _property.deinitialize();
 
     delete iniFileBuffer;
@@ -427,8 +433,10 @@ void GUI::initializeGL() {
     _screenSpaceProperty.initializeGL();
     _globalProperty.initializeGL();
     _performance.initializeGL();
-    _help.initializeGL();
+    _help.initializeGL();    
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initializeGL();
+#endif // GLOBEBROWSING_USE_GDAL
     _filePath.initializeGL();
     _parallel.initializeGL();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -459,7 +467,9 @@ void GUI::deinitializeGL() {
     _performance.deinitializeGL();
     _globalProperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitializeGL();
+#endif // GLOBEBROWSING_USE_GDAL
     _filePath.deinitializeGL();
     _property.deinitializeGL();
 }
@@ -520,9 +530,11 @@ void GUI::endFrame() {
             _filePath.render();
         }
 
+#ifdef GLOBEBROWSING_USE_GDAL
         if (_globeBrowsing.isEnabled()) {
             _globeBrowsing.render();
         }
+#endif // GLOBEBROWSING_USE_GDAL
     }
 
     ImGui::Render();
@@ -622,9 +634,11 @@ void GUI::render() {
     ImGui::Checkbox("File Paths", &filePath);
     _filePath.setEnabled(filePath);
 
+#ifdef GLOBEBROWSING_USE_GDAL
     bool globeBrowsing = _globeBrowsing.isEnabled();
     ImGui::Checkbox("GlobeBrowsing", &globeBrowsing);
     _globeBrowsing.setEnabled(globeBrowsing);
+#endif // GLOBEBROWSING_USE_GDAL
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     bool iswa = _iswa.isEnabled();

@@ -22,7 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
+
+#include "gtest/gtest.h"
+
+#include <openspace/util/concurrentjobmanager.h>
+
 #include <ghoul/misc/threadpool.h>
 
 #define _USE_MATH_DEFINES
@@ -31,7 +35,7 @@
 
 class ConcurrentJobManagerTest : public testing::Test {};
 
-struct TestJob : public openspace::globebrowsing::Job<int> {
+struct TestJob : public openspace::Job<int> {
     TestJob(int jobExecutingTime)
         : _jobExecutingTime(jobExecutingTime)
     {}
@@ -56,8 +60,8 @@ private:
 
 
 TEST_F(ConcurrentJobManagerTest, Basic) {
-    using namespace openspace::globebrowsing;
-    
+    using namespace openspace;
+
     ConcurrentJobManager<int> jobManager(ThreadPool(1));
 
     auto testJob1 = std::shared_ptr<TestJob>(new TestJob(20));
@@ -97,7 +101,7 @@ struct VerboseProduct {
 };
 
 
-struct VerboseJob : public openspace::globebrowsing::Job<VerboseProduct>{
+struct VerboseJob : public openspace::Job<VerboseProduct>{
     VerboseJob(int jobExecutingTime)
         : _jobExecutingTime(jobExecutingTime) {
         std::cout << "VerboseTestJob constructor" << std::endl;
@@ -124,7 +128,7 @@ struct VerboseJob : public openspace::globebrowsing::Job<VerboseProduct>{
 };
 
 TEST_F(ConcurrentJobManagerTest, JobCreation) {
-    using namespace openspace::globebrowsing;
+    using namespace openspace;
     
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 

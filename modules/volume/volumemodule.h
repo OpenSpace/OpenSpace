@@ -33,6 +33,7 @@ class VolumeModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "Volume";
 
+    void internalInitialize() override;
     VolumeModule();
 };
 

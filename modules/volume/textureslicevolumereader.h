@@ -34,6 +34,7 @@
 #include <unordered_map>
 
 namespace openspace {
+namespace volume {
 
 template <typename Type>
 class TextureSliceVolumeReader {
@@ -53,6 +54,7 @@ private:
     bool _initialized;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #include "textureslicevolumereader.inl"

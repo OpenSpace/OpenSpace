@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__
+#ifndef __OPENSPACE_CORE___CONCURRENT_QUEUE___H__
+#define __OPENSPACE_CORE___CONCURRENT_QUEUE___H__
 
 #include <condition_variable>
 #include <mutex>
 #include <queue>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 /**
  * Templated thread-safe queue based on std::thread and std::queue
@@ -53,8 +53,8 @@ private:
     mutable std::condition_variable _cond;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #include "concurrentqueue.inl"
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__
+#endif // __OPENSPACE_CORE___CONCURRENT_QUEUE___H__
