@@ -44,6 +44,8 @@ public:
 
     bool   loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE);
 
+    void   saveStateToJson(const std::string& PATH_TO_JSON_FILE);
+
     // ------------------------------GETTERS-----------------------------------------//
     const vector<vector<float>>& extraQuantities()    const { return _extraQuantities; }
     const vector<std::string>&   extraQuantityNames() const { return _extraQuantityNames; }

@@ -24,6 +24,9 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+#include <ext/json/json.hpp>
+#include <openspace/util/time.h>
+
 #include <ghoul/logging/logmanager.h>
 
 #include <fstream>
@@ -31,6 +34,8 @@
 namespace {
     std::string _loggerCat = "FieldlinesState";
     const int CURRENT_VERSION = 0;
+
+    using json = nlohmann::json;
 }
 
 namespace openspace {
@@ -111,6 +116,78 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) 
     }
 
     return true;
+}
+
+// TODO: This should probably be rewritten, but this is the way the files were structured by CCMC
+// Structure of File! NO TRAILING COMMAS ALLOWED!
+// Additional info can be stored within each line as the code only extracts the keys it needs (time, trace & data)
+// The key/name of each line ("0" & "1" in the example below) is arbitrary
+// {
+//     "0":{
+//         "time": "YYYY-MM-DDTHH:MM:SS.XXX",
+//         "trace": {
+//             "columns": ["x","y","z","s","temperature","rho","j_para"],
+//             "data": [[8.694,127.853,115.304,0.0,0.047,9.249,-5e-10],...,[8.698,127.253,114.768,0.800,0.0,9.244,-5e-10]]
+//         },
+//     },
+//     "1":{
+//         "time": "YYYY-MM-DDTHH:MM:SS.XXX
+//         "trace": {
+//             "columns": ["x","y","z","s","temperature","rho","j_para"],
+//             "data": [[8.694,127.853,115.304,0.0,0.047,9.249,-5e-10],...,[8.698,127.253,114.768,0.800,0.0,9.244,-5e-10]]
+//         },
+//     }
+// }
+void FieldlinesState::saveStateToJson(const std::string& ABS_FILEPATH) {
+    // Create the file
+    const std::string EXT = ".json";
+    std::ofstream ofs(ABS_FILEPATH + EXT, std::ofstream::trunc);
+    if (!ofs.is_open()) {
+        LERROR("Failed to save state to json file at location: " << ABS_FILEPATH << EXT);
+        return;
+    }
+    LINFO("Saving fieldline state to: " << ABS_FILEPATH << EXT );
+
+    json jColumns = {"x", "y", "z"};
+    for (std::string s : _extraQuantityNames) {
+        jColumns.push_back(s);
+    }
+
+    json jFile;
+
+    const std::string TIME_STRING = Time(_triggerTime).ISO8601();
+
+    const size_t N_LINES         = _lineStart.size();
+    const size_t N_POINTS        = _vertexPositions.size();
+    const size_t N_EXTRAS        = _extraQuantities.size();
+
+    size_t pointIndex = 0;
+    for (size_t lineIndex = 0; lineIndex < N_LINES; lineIndex++) {
+        json jData = json::array();
+        for (size_t i = 0; i < _lineCount[lineIndex]; i++, pointIndex++) {
+            const glm::vec3 POS = _vertexPositions[pointIndex];
+            json jDataElement = {POS.x, POS.y, POS.z};
+
+            for (size_t extraIndex = 0; extraIndex < N_EXTRAS; extraIndex++) {
+                jDataElement.push_back(_extraQuantities[extraIndex][pointIndex]);
+            }
+            jData.push_back(jDataElement);
+        }
+
+        jFile[std::to_string(lineIndex)] = {
+            {"time", TIME_STRING},
+            {"trace", {
+                {"columns", jColumns},
+                {"data", jData}
+            }}
+        };
+    }
+
+    //------------------------------ WRITE EVERYTHING TO FILE ------------------------------
+    const int INDENTATION_SPACES = 2;
+    ofs << std::setw(INDENTATION_SPACES) << jFile << std::endl;
+
+    LINFO("Saved fieldline state to: " << ABS_FILEPATH << EXT );
 }
 
 // Returns one of the extra quantity vectors, _extraQuantities[INDEX].
