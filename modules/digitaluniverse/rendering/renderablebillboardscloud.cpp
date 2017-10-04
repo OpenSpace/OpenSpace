@@ -812,17 +812,18 @@ namespace openspace {
             );
 
             bool hasCachedFile = FileSys.fileExists(cachedFile);
-            if (hasCachedFile) {
-                LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+            //if (hasCachedFile) {
+            //    LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
 
-                success = loadCachedFile(cachedFile);
-                if (!success) {
-                    FileSys.cacheManager()->removeCacheFile(_file);
-                    // Intentional fall-through to the 'else' computation to generate the cache
-                    // file for the next run
-                }
-            }
-            else {
+            //    success = loadCachedFile(cachedFile);
+            //    if (!success) {
+            //        FileSys.cacheManager()->removeCacheFile(_file);
+            //        // Intentional fall-through to the 'else' computation to generate the cache
+            //        // file for the next run
+            //    }
+            //}
+            //else 
+            {
                 LINFO("Cache for Speck file '" << _file << "' not found");
                 LINFO("Loading Speck file '" << _file << "'");
 
@@ -850,18 +851,19 @@ namespace openspace {
             );
             if (!_hasSpeckFile && !_hasColorMapFile)
                 success = true;
-            bool hasCachedFile = FileSys.fileExists(cachedFile);
-            if (hasCachedFile) {
-                LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
-                
-                success &= loadCachedFile(cachedFile);
-                if (!success) {
-                    FileSys.cacheManager()->removeCacheFile(labelFile);
-                    // Intentional fall-through to the 'else' computation to generate the cache
-                    // file for the next run
-                }
-            }
-            else {
+            //bool hasCachedFile = FileSys.fileExists(cachedFile);
+            //if (hasCachedFile) {
+            //    LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
+            //    
+            //    success &= loadCachedFile(cachedFile);
+            //    if (!success) {
+            //        FileSys.cacheManager()->removeCacheFile(labelFile);
+            //        // Intentional fall-through to the 'else' computation to generate the cache
+            //        // file for the next run
+            //    }
+            //}
+            //else 
+            {
                 LINFO("Cache for Label file '" << labelFile << "' not found");
                 LINFO("Loading Label file '" << labelFile << "'");
 
@@ -927,29 +929,7 @@ namespace openspace {
                 _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject });                
 
                 _nValuesPerAstronomicalObject += 1; // We want the number, but the index is 0 based
-            }
-
-            // JCC: This should be moved to the RenderablePlanesCloud:
-            if (line.substr(0, 10) == "polyorivar") {
-                _planeStartingIndexPos = 0;
-                std::stringstream str(line);
-
-                std::string dummy;
-                str >> dummy; // command
-                str >> _planeStartingIndexPos; 
-                _planeStartingIndexPos += 3; // 3 for xyz                
-            }
-
-            // JCC: This should be moved to the RenderablePlanesCloud:
-            if (line.substr(0, 10) == "texturevar") {
-                _textureVariableIndex = 0;
-                std::stringstream str(line);
-
-                std::string dummy;
-                str >> dummy; // command
-                str >> _textureVariableIndex; 
-                _textureVariableIndex += 3; // 3 for xyz
-            }
+            }            
         }
 
         _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
@@ -964,42 +944,8 @@ namespace openspace {
             
             std::stringstream str(line);
 
-            // JCC: This should be moved to the RenderablePlanesCloud:
-            glm::vec3 u(0.0f), v(0.0f);
-            int textureIndex = 0;
-
             for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-                str >> values[i];
-                // JCC: This should be moved to the RenderablePlanesCloud:
-                if ((i >= _planeStartingIndexPos) &&
-                    (i <= _planeStartingIndexPos+6)) { // vectors u and v
-                    int index = i - _planeStartingIndexPos;
-                    switch (index) {
-                    case 0:
-                        u.x = values[i];
-                        break;
-                    case 1:
-                        u.y = values[i];
-                        break;
-                    case 2:
-                        u.z = values[i];
-                        break;
-                    case 3:
-                        v.x = values[i];
-                        break;
-                    case 4:
-                        v.y = values[i];
-                        break;
-                    case 5:
-                        v.z = values[i];
-                        break;                    
-                    }
-                }
-
-                // JCC: This should be moved to the RenderablePlanesCloud:
-                if (i == _textureVariableIndex) {
-                    textureIndex = values[i];
-                }
+                str >> values[i];                
             }
 
             _fullData.insert(_fullData.end(), values.begin(), values.end());
@@ -1146,12 +1092,16 @@ namespace openspace {
 
             int32_t nValues = 0;
             fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-            fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));
+            fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));            
+
+            _fullData.resize(nValues);
+            fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
+                nValues * sizeof(_fullData[0]));
 
             if (_hasColorMapFile) {
                 int32_t nItems = 0;
                 fileStream.read(reinterpret_cast<char*>(&nItems), sizeof(int32_t));
-                
+
                 for (int i = 0; i < nItems; ++i) {
                     int32_t keySize = 0;
                     fileStream.read(reinterpret_cast<char*>(&keySize), sizeof(int32_t));
@@ -1163,13 +1113,9 @@ namespace openspace {
                     int32_t value = 0;
                     fileStream.read(reinterpret_cast<char*>(&value), sizeof(int32_t));
 
-                    _variableDataPositionMap.insert({key, value});
-                }                
+                    _variableDataPositionMap.insert({ key, value });
+                }
             }
-
-            _fullData.resize(nValues);
-            fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
-                nValues * sizeof(_fullData[0]));
 
             bool success = fileStream.good();
             return success;
@@ -1194,7 +1140,10 @@ namespace openspace {
             fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
             int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(_nValuesPerAstronomicalObject);
-            fileStream.write(reinterpret_cast<const char*>(&nValuesPerAstronomicalObject), sizeof(int32_t));
+            fileStream.write(reinterpret_cast<const char*>(&nValuesPerAstronomicalObject), sizeof(int32_t));            
+            
+            size_t nBytes = nValues * sizeof(_fullData[0]);
+            fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
 
             if (_hasColorMapFile) {
                 int32_t nItems = static_cast<int32_t>(_variableDataPositionMap.size());
@@ -1211,9 +1160,6 @@ namespace openspace {
                     fileStream.write(reinterpret_cast<const char*>(&value), sizeof(int32_t));
                 }
             }
-            
-            size_t nBytes = nValues * sizeof(_fullData[0]);
-            fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
 
             bool success = fileStream.good();
             return success;
@@ -1473,14 +1419,7 @@ namespace openspace {
             textPosition,
             _textColor,
             "%s",
-            text.c_str());
-
-        if (true) {
-            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("text_texture.ppm"),
-                framebufferSize, framebufferSize);
-
-        }
-
+            text.c_str());        
     }
 
     void RenderableBillboardsCloud::saveTextureToPPMFile(const GLenum color_buffer_attachment,

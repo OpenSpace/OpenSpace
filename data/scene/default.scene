@@ -145,7 +145,7 @@ return {
         "mercury",
         "venus",
         "earth",
-        "moon",
+        --"moon",
         "mars",
         "jupiter",
         "saturn",
@@ -186,7 +186,7 @@ return {
         "2dF/digitaluniverse",
         "quasars/digitaluniverse",
         "sloandss/digitaluniverse",
-        "tully/digitaluniverse",
+        --"tully/digitaluniverse",
         "backgroundradiation/digitaluniverse",
     }
 }

@@ -116,11 +116,7 @@ namespace openspace {
 
         int _polygonSides;
         int _textMinSize;
-
-        // JCC: This should be moved to the RenderablePlanesCloud:
-        int _planeStartingIndexPos;
-        int _textureVariableIndex;
-
+        
         GLuint _pTexture;
         GLuint _tTexture;
 

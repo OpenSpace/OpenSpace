@@ -29,6 +29,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepoints.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanescloud.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -36,7 +37,8 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointssprite.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepoints.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanescloud.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
