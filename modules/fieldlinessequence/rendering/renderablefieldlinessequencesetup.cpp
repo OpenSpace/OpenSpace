@@ -46,6 +46,8 @@ namespace {
     const char* KEY_COLOR_TABLE_RANGES      = "ColorTableRanges";// [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     const char* KEY_MASKING_RANGES          = "MaskingRanges";   // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     const char* KEY_OUTPUT_FOLDER           = "OutputFolder";    // [STRING] Value should be path to folder where states are saved (JSON/CDF input => osfls output & oslfs input => JSON output)
+    const char* KEY_JSON_SIMULATION_MODEL   = "SimulationModel"; // [STRING]
+    const char* KEY_JSON_SCALING_FACTOR     = "ScaleToMeters";   // [STRING]
     const char* KEY_OSLFS_LOAD_AT_RUNTIME   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
@@ -147,6 +149,17 @@ namespace {
         }
         return tmp;
     }
+
+    openspace::fls::Model stringToModel(const std::string S) {
+        if (S == "batsrus") {
+            return openspace::fls::Model::BATSRUS;
+        } else if (S == "enlil") {
+            return openspace::fls::Model::ENLIL;
+        } else if (S == "pfss") {
+            return openspace::fls::Model::PFSS;
+        }
+        return openspace::fls::Model::INVALID;
+    }
 } // namespace
 
 namespace openspace {
@@ -211,7 +224,28 @@ void RenderableFieldlinesSequence::initialize() {
             LERROR("CDF NOT YET IMPLEMENTED!"); return;
             break;
         case SourceFileType::JSON:
-            LERROR("JSON NOT YET IMPLEMENTED!"); return;
+            fls::Model model;
+            if (!extractJsonInfoFromDictionary(model)) {
+                return;
+            }
+            // Load states into RAM!
+            for (std::string filePath : _sourceFiles) {
+                FieldlinesState newState;
+                bool loadedSuccessfully = newState.loadStateFromJson(filePath, model,
+                                                                     _scalingFactor);
+                if (loadedSuccessfully) {
+                    _states.push_back(newState);
+                    _startTimes.push_back(newState.triggerTime());
+                    _nStates++;
+                    if (SHOULD_SAVE_STATES) {
+                        std::string pathSafeTimeString = Time(_startTimes.back()).ISO8601();
+                        pathSafeTimeString.replace(13, 1, "-");
+                        pathSafeTimeString.replace(16, 1, "-");
+                        pathSafeTimeString.replace(19, 1, "-");
+                        newState.saveStateToOsfls(outputFolderPath + pathSafeTimeString);
+                    }
+                }
+            }
             break;
         case SourceFileType::OSFLS:
             extractOsflsInfoFromDictionary();
@@ -408,6 +442,22 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
  * Returns false if it fails to extract mandatory information!
  */
 bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& model) {
+    std::string modelStr;
+    if (_dictionary->getValue(KEY_JSON_SIMULATION_MODEL, modelStr)) {
+        std::transform(modelStr.begin(), modelStr.end(), modelStr.begin(), ::tolower);
+        model = stringToModel(modelStr);
+    } else {
+        LERROR(_name << ": Must specify '" << KEY_JSON_SIMULATION_MODEL << "'");
+        return false;
+    }
+
+    float scaleFactor;
+    if (_dictionary->getValue(KEY_JSON_SCALING_FACTOR, scaleFactor)) {
+        _scalingFactor = scaleFactor;
+    } else {
+        LWARNING(_name << ": Does not provide scalingFactor! " <<
+                 "Assumes coordinates are already expressed in meters!");
+    }
     return true;
 }
 
