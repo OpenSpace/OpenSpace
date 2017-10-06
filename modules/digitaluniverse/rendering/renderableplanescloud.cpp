@@ -51,7 +51,6 @@
 namespace {
     const char* _loggerCat        = "RenderablePlanesCloud";
     const char* KeyFile           = "File";
-    const char* keyColor          = "Color";
     const char* keyUnit           = "Unit";
     const char* MeterUnit         = "m";
     const char* KilometerUnit     = "Km";
@@ -62,7 +61,12 @@ namespace {
     const char* GigalightyearUnit = "Gly";
 
     const int8_t CurrentCacheVersion = 1;
-    const double PARSEC = 0.308567756E17;
+    const float PARSEC = 0.308567756E17f;
+
+    enum BlendMode {
+        BlendModeNormal = 0,
+        BlendModeAdditive
+    };
 
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
@@ -114,6 +118,12 @@ namespace {
         "TransformationMatrix",
         "Transformation Matrix",
         "Transformation matrix to be applied to each astronomical object."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+        "BlendMode",
+        "Blending Mode",
+        "This determines the blending mode that is applied to this plane."
     };
 }  // namespace
 
@@ -179,6 +189,12 @@ namespace openspace {
                     Optional::Yes,
                     TransformationMatrixInfo.description
                 },
+                {
+                    BlendModeInfo.identifier,
+                    new StringInListVerifier({ "Normal", "Additive" }),
+                    Optional::Yes,
+                    BlendModeInfo.description, // + " The default value is 'Normal'.",
+                },
             }
         };
     }
@@ -193,9 +209,7 @@ namespace openspace {
         , _labelDataIsDirty(true)
         , _textMinSize(0)
         , _planeStartingIndexPos(0)
-        , _textureVariableIndex(0)
-        , _pTexture(0)
-        , _tTexture(0)
+        , _textureVariableIndex(0)        
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
         , _textColor(
@@ -206,13 +220,12 @@ namespace openspace {
         )
         , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
         , _drawElements(DrawElementsInfo, true)
+        , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _program(nullptr)
         , _fontRenderer(nullptr)
         , _font(nullptr)
         , _speckFile("")
-        , _colorMapFile("")
         , _labelFile("")
-        , _colorOptionString("")
         , _unit(Parsec)
         , _nValuesPerAstronomicalObject(0)
         , _transformationMatrix(glm::dmat4(1.0))
@@ -298,7 +311,7 @@ namespace openspace {
 
 
             if (dictionary.hasKey(TextSizeInfo.identifier)) {
-                _textSize = dictionary.value<double>(TextSizeInfo.identifier);
+                _textSize = dictionary.value<float>(TextSizeInfo.identifier);
             }
             addProperty(_textSize);
 
@@ -309,6 +322,33 @@ namespace openspace {
 
         if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
             _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
+        }
+
+        _blendMode.addOptions({
+            { BlendModeNormal, "Normal" },
+            { BlendModeAdditive, "Additive" }
+        });
+        _blendMode.onChange([&]() {
+            switch (_blendMode) {
+            case BlendModeNormal:
+                setRenderBin(Renderable::RenderBin::Opaque);
+                break;
+            case BlendModeAdditive:
+                setRenderBin(Renderable::RenderBin::Transparent);
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+            }
+        });
+
+        if (dictionary.hasKey(BlendModeInfo.identifier)) {
+            const std::string v = dictionary.value<std::string>(BlendModeInfo.identifier);
+            if (v == "Normal") {
+                _blendMode = BlendModeNormal;
+            }
+            else if (v == "Additive") {
+                _blendMode = BlendModeAdditive;
+            }
         }
     }
 
@@ -351,11 +391,7 @@ namespace openspace {
         if (_program) {
             renderEngine.removeRenderProgram(_program);
             _program = nullptr;
-        }
-        
-        if (_hasLabel) {
-            glDeleteTextures(1, &_tTexture);
-        }
+        }        
     }
 
     void RenderablePlanesCloud::renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
@@ -427,26 +463,7 @@ namespace openspace {
         RenderEngine& renderEngine = OsEng.renderEngine();
 
         _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-        
-        /*auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        "%s",
-        text
-        );*/
-
-        //float distanceFromCamera = glm::distance(data.camera.positionVec3(), glm::dvec3(textPosition));
-
-        /*if (_font == nullptr) {
-        size_t _fontSize = 30;
-        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
-        ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
-        }*/
-
-        /*size_t _fontSize = 50;
-        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
-        ghoul::fontrendering::FontManager::Outline::No, ghoul::fontrendering::FontManager::LoadGlyphs::No);
-        */
-
+                
         float scale = 0.0;
         switch (_unit) {
         case Meter:
@@ -512,9 +529,9 @@ namespace openspace {
         glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
 
       
-        if (_hasSpeckFile) {
+        /*if (_hasSpeckFile) {
             renderBillboards(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp);
-        }
+        }*/
         
         if (_hasLabel) {
             renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
@@ -579,17 +596,18 @@ namespace openspace {
             );
 
             bool hasCachedFile = FileSys.fileExists(cachedFile);
-            if (hasCachedFile) {
-                LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+            //if (hasCachedFile) {
+            //    LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
 
-                success = loadCachedFile(cachedFile);
-                if (!success) {
-                    FileSys.cacheManager()->removeCacheFile(_file);
-                    // Intentional fall-through to the 'else' computation to generate the cache
-                    // file for the next run
-                }
-            }
-            else {
+            //    success = loadCachedFile(cachedFile);
+            //    if (!success) {
+            //        FileSys.cacheManager()->removeCacheFile(_file);
+            //        // Intentional fall-through to the 'else' computation to generate the cache
+            //        // file for the next run
+            //    }
+            //}
+            //else 
+            {
                 LINFO("Cache for Speck file '" << _file << "' not found");
                 LINFO("Loading Speck file '" << _file << "'");
 
@@ -757,62 +775,13 @@ namespace openspace {
 
                 // JCC: This should be moved to the RenderablePlanesCloud:
                 if (i == _textureVariableIndex) {
-                    textureIndex = values[i];
+                    textureIndex = static_cast<int>(values[i]);
                 }
             }
 
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         } while (!file.eof());
 
-        return true;
-    }
-
-    bool RenderablePlanesCloud::readColorMapFile() {
-        std::string _file = _colorMapFile;
-        std::ifstream file(_file);
-        if (!file.good()) {
-            LERROR("Failed to open Color Map file '" << _file << "'");
-            return false;
-        }
- 
-        std::size_t numberOfColors = 0;
-
-        // The beginning of the speck file has a header that either contains comments
-        // (signaled by a preceding '#') or information about the structure of the file
-        // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-        std::string line = "";
-        while (true) {
-            std::streampos position = file.tellg();
-            std::getline(file, line);
-
-            if (line[0] == '#' || line.empty()) {
-                continue;
-            }
-
-            // Initial number of colors
-            std::locale loc;
-            if (std::isdigit(line[0], loc)) {
-                std::string::size_type sz;
-                numberOfColors = std::stoi(line, &sz);
-                break;
-            }
-            else if (file.eof()) {
-                return false;
-            }            
-        }
-        
-        for (auto i = 0; i < numberOfColors; ++i) {
-            std::getline(file, line);
-            std::stringstream str(line);
-            
-            glm::vec4 color;
-            for (auto j = 0; j < 4; ++j) {
-                str >> color[j];
-            }
-
-            _colorMapData.push_back(color);
-        }
-        
         return true;
     }
 
@@ -1095,44 +1064,5 @@ namespace openspace {
 
         }*/
         program->deactivate();
-    }
-
-    GLuint RenderablePlanesCloud::loadTextGeometryForRendering() {
-        // The font render method creates its own vertex array object.        
-        return 0;
-    }
-
-    void RenderablePlanesCloud::renderTextGeometry(GLuint vao) {
-        size_t _fontSize = 10;
-       
-        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize), 
-            ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
-
-        std::string text = "This is a text test!!";
-        auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "%s",
-            text
-        );
-        
-
-        GLsizei framebufferSize = 10*static_cast<GLsizei>(ceil(size.boundingBox.x > size.boundingBox.y ? size.boundingBox.x : size.boundingBox.y));
-
-        framebufferSize = 256;
-
-        _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(ghoul::fontrendering::FontRenderer::createDefault());
-        _fontRenderer->setFramebufferSize(glm::vec2(framebufferSize,framebufferSize));
-               
-        glm::vec2 textPosition(0.0, 0.0);
-
-        static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        glClearBufferfv(GL_COLOR, 0, black);
-
-        _fontRenderer->render(
-            *_font,
-            textPosition,
-            _textColor,
-            "%s",
-            text.c_str());        
     }
 } // namespace openspace

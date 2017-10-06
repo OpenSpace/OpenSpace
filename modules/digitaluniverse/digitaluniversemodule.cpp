@@ -33,7 +33,7 @@
 
 #include <modules/digitaluniverse/rendering/renderablepoints.h>
 #include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
-//#include <modules/digitaluniverse/rendering/renderablepointssprite.h>
+#include <modules/digitaluniverse/rendering/renderableplanescloud.h>
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -48,7 +48,7 @@ void DigitalUniverseModule::internalInitialize() {
 
     fRenderable->registerClass<RenderablePoints>("RenderablePoints");
     fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
-    //fRenderable->registerClass<RenderablePointsSprite>("RenderablePointsSprite");
+    fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
     fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
 }
 

@@ -88,8 +88,6 @@ namespace openspace {
             GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight);
         GLuint loadPolygonGeometryForRendering();
         void renderPolygonGeometry(GLuint vao);
-        GLuint loadTextGeometryForRendering();
-        void renderTextGeometry(GLuint vao);
         void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix, 
@@ -118,7 +116,6 @@ namespace openspace {
         int _textMinSize;
         
         GLuint _pTexture;
-        GLuint _tTexture;
 
         properties::FloatProperty _alphaValue;
         properties::FloatProperty _scaleFactor;

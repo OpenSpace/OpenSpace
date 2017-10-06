@@ -25,7 +25,6 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointssprite.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepoints.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.h
@@ -34,7 +33,6 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepointssprite.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepoints.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledumeshes.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablebillboardscloud.cpp

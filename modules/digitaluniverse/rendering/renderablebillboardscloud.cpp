@@ -272,7 +272,6 @@ namespace openspace {
         , _polygonSides(0)
         , _textMinSize(0)
         , _pTexture(0)
-        , _tTexture(0)
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
         , _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
@@ -513,10 +512,6 @@ namespace openspace {
             _polygonTexture = nullptr;
             glDeleteTextures(1, &_pTexture);
         }
-
-        if (_hasLabel) {
-            glDeleteTextures(1, &_tTexture);
-        }
     }
 
     void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
@@ -734,9 +729,9 @@ namespace openspace {
             
             if (_hasColorMapFile) {
                 
-                const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
+                /*const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
                 const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-                GLsizei stride = static_cast<GLsizei>(sizeof(float) * nValues);
+                GLsizei stride = static_cast<GLsizei>(sizeof(float) * nValues);*/
                 
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribPointer(
@@ -1318,9 +1313,6 @@ namespace openspace {
         }
 
         glViewport(0, 0, textureWidth, textureHeight);
-
-        RenderEngine& renderEngine = OsEng.renderEngine();
-
        
         GLuint vao = geometryLoadingFunction();
         renderFunction(vao);
@@ -1357,8 +1349,6 @@ namespace openspace {
     }
 
     void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-
         std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
             "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl",
             "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl",
@@ -1381,45 +1371,6 @@ namespace openspace {
 
         }*/
         program->deactivate();
-    }
-
-    GLuint RenderableBillboardsCloud::loadTextGeometryForRendering() {
-        // The font render method creates its own vertex array object.        
-        return 0;
-    }
-
-    void RenderableBillboardsCloud::renderTextGeometry(GLuint vao) {
-        size_t _fontSize = 10;
-       
-        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize), 
-            ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
-
-        std::string text = "This is a text test!!";
-        auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "%s",
-            text
-        );
-        
-
-        GLsizei framebufferSize = 10*static_cast<GLsizei>(ceil(size.boundingBox.x > size.boundingBox.y ? size.boundingBox.x : size.boundingBox.y));
-
-        framebufferSize = 256;
-
-        _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(ghoul::fontrendering::FontRenderer::createDefault());
-        _fontRenderer->setFramebufferSize(glm::vec2(framebufferSize,framebufferSize));
-               
-        glm::vec2 textPosition(0.0, 0.0);
-
-        static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        glClearBufferfv(GL_COLOR, 0, black);
-
-        _fontRenderer->render(
-            *_font,
-            textPosition,
-            _textColor,
-            "%s",
-            text.c_str());        
     }
 
     void RenderableBillboardsCloud::saveTextureToPPMFile(const GLenum color_buffer_attachment,
