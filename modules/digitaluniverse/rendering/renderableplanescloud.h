@@ -91,8 +91,8 @@ namespace openspace {
         void renderTextGeometry(GLuint vao);
         void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp);
-        void renderLabels(const RenderData& data, const glm::dmat4& modelViewMatrix,
-            const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+        void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+            const glm::vec3& orthoRight, const glm::vec3& orthoUp);
 
         bool loadData();
         bool readSpeckFile();

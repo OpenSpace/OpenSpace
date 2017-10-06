@@ -606,8 +606,8 @@ namespace openspace {
 
     }
 
-    void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewMatrix,
-        const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+    void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
         RenderEngine& renderEngine = OsEng.renderEngine();
 
         _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
@@ -666,8 +666,7 @@ namespace openspace {
                 _textColor,
                 pow(10.0, _textSize.value()),
                 _textMinSize,
-                modelViewMatrix,
-                projectionMatrix,
+                modelViewProjectionMatrix,
                 orthoRight,
                 orthoUp,
                 "%s",
@@ -685,6 +684,7 @@ namespace openspace {
         glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
         glm::mat4 viewMatrix = data.camera.viewMatrix();
         glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+        glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
         glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
         glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
@@ -701,7 +701,7 @@ namespace openspace {
         }
         
         if (_hasLabel) {
-            renderLabels(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp);
+            renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
         }                
     }
 
