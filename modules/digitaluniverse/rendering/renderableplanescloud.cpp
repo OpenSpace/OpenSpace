@@ -430,8 +430,9 @@ namespace openspace {
         glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
         glEnable(GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(false);
 
         _program->activate();
 
@@ -443,21 +444,21 @@ namespace openspace {
         _program->setUniform("scaleFactor", _scaleFactor);
         //_program->setUniform("minPlaneSize", 1.f); // in pixels
         
-        bool usingFramebufferRenderer =
-            OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+        //bool usingFramebufferRenderer =
+        //    OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
 
-        bool usingABufferRenderer =
-            OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
+        //bool usingABufferRenderer =
+        //    OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
 
-        if (usingABufferRenderer) {
-            _program->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
-        }
+        //if (usingABufferRenderer) {
+        //    _program->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
+        //}
 
-        bool additiveBlending = _blendMode == BlendModeAdditive && usingFramebufferRenderer;
-        if (additiveBlending) {
-            //glDepthMask(false);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        }
+        //bool additiveBlending = _blendMode == BlendModeAdditive && usingFramebufferRenderer;
+        //if (additiveBlending) {
+        //    //glDepthMask(false);
+        //    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        //}
         
         for (auto pair : _renderingPlanesMap) {
             ghoul::opengl::TextureUnit unit;
@@ -469,10 +470,10 @@ namespace openspace {
             glDrawArrays(GL_TRIANGLES, 0, 6);                  
         }               
         
-        if (additiveBlending) {
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            //glDepthMask(true);
-        }
+        //if (additiveBlending) {
+        //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //    //glDepthMask(true);
+        //}
         
         glBindVertexArray(0);
 
@@ -483,6 +484,8 @@ namespace openspace {
         // Restores blending state
         glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
         glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+
+        glDepthMask(true);
 
         if (!blendEnabled) {
             glDisable(GL_BLEND);
@@ -969,6 +972,13 @@ dummy.clear();
 
                 RenderingPlane plane; 
                 plane.planeIndex = _fullData[p + _textureVariableIndex];
+
+                // JCC: Ask Abbott about these points refeering to a non-existing texture.
+                if (plane.planeIndex == 30) {
+                    //std::cout << "--- Creating planes - index: " << plane.planeIndex << std::endl;
+                    plane.planeIndex = 0;
+                }
+                    
                 glGenVertexArrays(1, &plane.vao);
                 glGenBuffers(1, &plane.vbo);
                 
