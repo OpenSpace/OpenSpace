@@ -607,25 +607,6 @@ namespace openspace {
 
         _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
         
-        /*auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        "%s",
-        text
-        );*/
-
-        //float distanceFromCamera = glm::distance(data.camera.positionVec3(), glm::dvec3(textPosition));
-
-        /*if (_font == nullptr) {
-        size_t _fontSize = 30;
-        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
-        ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
-        }*/
-
-        /*size_t _fontSize = 50;
-        std::shared_ptr<ghoul::fontrendering::Font> _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
-        ghoul::fontrendering::FontManager::Outline::No, ghoul::fontrendering::FontManager::LoadGlyphs::No);
-        */
-
         float scale = 0.0;
         switch (_unit) {
         case Meter:
@@ -915,8 +896,8 @@ namespace openspace {
                 // number of values (+3 since X Y Z are not counted in the Speck file index)
                 std::stringstream str(line);
 
-                std::string dummy; // command
-                str >> dummy; // space
+                std::string dummy; 
+                str >> dummy; // command
                 str >> _nValuesPerAstronomicalObject; // variable index
                 dummy.clear();
                 str >> dummy; // variable name
@@ -1241,10 +1222,6 @@ namespace openspace {
             std::bind(&openspace::RenderableBillboardsCloud::renderPolygonGeometry, 
             this, std::placeholders::_1),
             _pTexture, 256, 256);          
-    }
-
-    void RenderableBillboardsCloud::createLabelData() {
-        LDEBUG("Creating Label Data");
     }
 
     void RenderableBillboardsCloud::renderToTexture(

@@ -82,7 +82,6 @@ namespace openspace {
 
         void createDataSlice();
         void createPolygonTexture();
-        void createLabelData();
         void renderToTexture(std::function<GLuint(void)> geometryLoadingFunction,
             std::function<void(GLuint)> renderFunction,
             GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight);

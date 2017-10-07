@@ -49,6 +49,8 @@ namespace ghoul::opengl {
 } // namespace ghoul::opengl
 
 namespace openspace {
+    // (x, y, z, w, s, t) * 6 = 36
+    const int VERTEX_DATA_SIZE = 36;
 
     namespace documentation { struct Documentation; }
 
@@ -80,19 +82,26 @@ namespace openspace {
             GigalightYears = 6
         };
 
-        void createDataSlice();
-        void createLabelData();
+        struct RenderingPlane {
+            int planeIndex;
+            GLuint vao;
+            GLuint vbo;            
+            GLfloat vertexData[VERTEX_DATA_SIZE];
+        };
+
+        void createPlanes();
         void renderToTexture(std::function<GLuint(void)> geometryLoadingFunction,
             std::function<void(GLuint)> renderFunction,
             GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight);
         GLuint loadPolygonGeometryForRendering();
         void renderPolygonGeometry(GLuint vao);
-        void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-            const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+        void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
+            const glm::dmat4& projectionMatrix);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
             const glm::vec3& orthoRight, const glm::vec3& orthoUp);
 
         bool loadData();
+        bool loadTextures();
         bool readSpeckFile();
         bool readLabelFile();
         bool loadCachedFile(const std::string& file);
@@ -105,7 +114,6 @@ namespace openspace {
         bool _labelDataIsDirty;
 
         int _textMinSize;
-
         int _planeStartingIndexPos;
         int _textureVariableIndex;        
 
@@ -119,13 +127,15 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
         std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;        
         std::shared_ptr<ghoul::fontrendering::Font> _font;
+        std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
+        std::unordered_map<int, std::string> _textureFileMap;
 
         std::string _speckFile;
         std::string _labelFile;
+        std::string _texturesPath;
         
         Unit _unit;
 
-        std::vector<float> _slicedData;
         std::vector<float> _fullData;
         std::vector<std::pair<glm::vec3, std::string>> _labelData;
         std::unordered_map<std::string, int> _variableDataPositionMap;
@@ -134,8 +144,7 @@ namespace openspace {
 
         glm::dmat4 _transformationMatrix;
 
-        GLuint _vao;
-        GLuint _vbo;
+        std::unordered_map<int, RenderingPlane> _renderingPlanesMap;       
     };
 
 
