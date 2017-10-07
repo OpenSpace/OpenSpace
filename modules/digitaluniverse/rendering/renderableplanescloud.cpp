@@ -560,7 +560,7 @@ namespace openspace {
 
       
         if (_hasSpeckFile) {
-            renderPlanes(data, modelMatrix, projectionMatrix);            
+            renderPlanes(data, modelViewMatrix, projectionMatrix);            
         }
         
         if (_hasLabel) {
@@ -946,34 +946,36 @@ dummy.clear();
             LDEBUG("Creating planes");
 
             for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
-                glm::dvec4 transformedPos = _transformationMatrix * 
-                    glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0);                
+                glm::vec4 transformedPos = glm::vec4(_transformationMatrix * 
+                    glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));                
 
                 // Plane vectors u and v
-                glm::dvec4 u = _transformationMatrix * 
+                glm::vec4 u = glm::vec4(_transformationMatrix *
                     glm::dvec4(
                         _fullData[p + _planeStartingIndexPos + 0], 
                         _fullData[p + _planeStartingIndexPos + 1], 
                         _fullData[p + _planeStartingIndexPos + 2], 
-                        1.0)/2.0;
+                        1.0));
+                u /= 2.f;
                 u.w = 0.0;
-                glm::dvec4 v = _transformationMatrix * 
+                glm::vec4 v = glm::vec4(_transformationMatrix *
                     glm::dvec4(
                         _fullData[p + _planeStartingIndexPos + 3], 
                         _fullData[p + _planeStartingIndexPos + 4], 
                         _fullData[p + _planeStartingIndexPos + 5], 
-                        1.0)/2.0;
+                        1.0));
+                v /= 2.f;
                 v.w = 0.0;
 
-                RenderingPlane plane;
+                RenderingPlane plane; 
                 plane.planeIndex = _fullData[p + _textureVariableIndex];
                 glGenVertexArrays(1, &plane.vao);
                 glGenBuffers(1, &plane.vbo);
                 
-                glm::dvec4 vertex0 = transformedPos - u - v; // same as 3
-                glm::dvec4 vertex1 = transformedPos + u + v; // same as 5
-                glm::dvec4 vertex2 = transformedPos - u + v;
-                glm::dvec4 vertex4 = transformedPos + u - v;
+                glm::vec4 vertex0 = transformedPos - u - v; // same as 3
+                glm::vec4 vertex1 = transformedPos + u + v; // same as 5
+                glm::vec4 vertex2 = transformedPos - u + v;
+                glm::vec4 vertex4 = transformedPos + u - v;
                                              
                 float scale = 0.0;
                 switch (_unit) {
@@ -1000,22 +1002,22 @@ dummy.clear();
                     break;
                 }
 
-                vertex0 *= scale;
-                vertex1 *= scale;
-                vertex2 *= scale;
-                vertex4 *= scale;
+                vertex0 *= static_cast<float>(scale);
+                vertex1 *= static_cast<float>(scale);
+                vertex2 *= static_cast<float>(scale);
+                vertex4 *= static_cast<float>(scale);
 
                 GLfloat vertexData[] = {
-                    //      x      y     z     w     s     t
-                    vertex0.x, vertex0.y, vertex0.z, 1.0, 0.f, 0.f,
-                    vertex1.x, vertex1.y, vertex1.z, 1.0, 1.f, 1.f,
-                    vertex2.x, vertex2.y, vertex2.z, 1.0, 0.f, 1.f,
-                    vertex0.x, vertex0.y, vertex0.z, 1.0, 0.f, 0.f,
-                    vertex4.x, vertex4.y, vertex4.z, 1.0, 1.f, 0.f,
-                    vertex1.x, vertex1.y, vertex1.z, 1.0, 1.f, 1.f,
+                    //      x      y     z     w           s    t
+                    vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
+                    vertex1.x, vertex1.y, vertex1.z, 1.f, 1.f, 1.f,
+                    vertex2.x, vertex2.y, vertex2.z, 1.f, 0.f, 1.f,
+                    vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
+                    vertex4.x, vertex4.y, vertex4.z, 1.f, 1.f, 0.f,
+                    vertex1.x, vertex1.y, vertex1.z, 1.f, 1.f, 1.f,
                 };
 
-                std::memcpy(plane.vertexData, vertexData, sizeof(GLfloat) * VERTEX_DATA_SIZE);                
+                std::memcpy(plane.vertexData, vertexData, sizeof(vertexData));                
 
                 glBindVertexArray(plane.vao);
                 glBindBuffer(GL_ARRAY_BUFFER, plane.vbo);
@@ -1030,7 +1032,7 @@ dummy.clear();
                     sizeof(GLfloat) * 6,
                     nullptr
                 );
-
+                
                 // texture coords
                 glEnableVertexAttribArray(1);
                 glVertexAttribPointer(
@@ -1039,13 +1041,13 @@ dummy.clear();
                     GL_FLOAT,
                     GL_FALSE,
                     sizeof(GLfloat) * 6,
-                    reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-                );
-
-                glBindVertexArray(0);
+                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
+                );                                
 
                 _renderingPlanesMap.insert({plane.planeIndex, plane});
             }
+
+            glBindVertexArray(0);
 
             _dataIsDirty = false;
         }
@@ -1054,136 +1056,5 @@ dummy.clear();
 
             _labelDataIsDirty = false;
         }
-    }
-
-    void RenderablePlanesCloud::renderToTexture(
-        std::function<GLuint(void)> geometryLoadingFunction,
-        std::function<void(GLuint)> renderFunction,
-        GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight) {
-        LDEBUG("Rendering to Texture");
-        
-        // Saves initial Application's OpenGL State
-        GLint defaultFBO;
-        GLint viewport[4];
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-        glGetIntegerv(GL_VIEWPORT, viewport);
-
-        GLuint textureFBO;
-        glGenFramebuffers(1, &textureFBO);
-        glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-        GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, drawBuffers);
-
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
-        if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            LERROR("Framework not built. Polygon Texture");
-            GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-            switch (fbErr) {
-            case GL_FRAMEBUFFER_UNDEFINED:
-                LERROR("Indefined framebuffer.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                LERROR("Incomplete, missing attachement.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                LERROR("Framebuffer doesn't have at least one image attached to it.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                LERROR("Returned if the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE \
-                        for any color attachment point(s) named by GL_DRAW_BUFFERi.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                LERROR("Returned if GL_READ_BUFFER is not GL_NONE and the value of \
-                        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color attachment point \
-                        named by GL_READ_BUFFER.");
-                break;
-            case GL_FRAMEBUFFER_UNSUPPORTED:
-                LERROR("Returned if the combination of internal formats of the attached images \
-                        violates an implementation - dependent set of restrictions.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-                LERROR("Returned if the value of GL_RENDERBUFFE_r_samples is not the same for all \
-                        attached renderbuffers; if the value of GL_TEXTURE_SAMPLES is the not same for all \
-                        attached textures; or , if the attached images are a mix of renderbuffers and textures, \
-                        the value of GL_RENDERBUFFE_r_samples does not match the value of GL_TEXTURE_SAMPLES.");
-                LERROR("Returned if the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not the same \
-                        for all attached textures; or , if the attached images are a mix of renderbuffers and \
-                        textures, the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached textures.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-                LERROR("Returned if any framebuffer attachment is layered, and any populated attachment \
-                        is not layered, or if all populated color attachments are not from textures of the same target.");
-                break;
-            default:
-                LDEBUG("No error found checking framebuffer: Polygon Texture");
-                std::cout << "=== OK ===" << std::endl;
-                break;
-            }
-        }
-
-        glViewport(0, 0, textureWidth, textureHeight);
-
-        RenderEngine& renderEngine = OsEng.renderEngine();
-
-       
-        GLuint vao = geometryLoadingFunction();
-        renderFunction(vao);
-        
-        // Restores Applications' OpenGL State
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-        if (vao) {
-            glDeleteVertexArrays(1, &vao);
-        }
-        glDeleteFramebuffers(1, &textureFBO);
-        // TODO: delete the vbo used during the rendering to texture
-    }
-
-    GLuint RenderablePlanesCloud::loadPolygonGeometryForRendering() {
-        GLuint polygonVao, polygonVbo;
-        glGenVertexArrays(1, &polygonVao);
-        glGenBuffers(1, &polygonVbo);
-        glBindVertexArray(polygonVao);
-        glBindBuffer(GL_ARRAY_BUFFER, polygonVbo);
-
-        const GLfloat vertex_data[] = {
-            //      x      y     z     w
-            0.0f, 0.0f, 0.0f, 1.0f,
-        };
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<GLvoid*>(0));
-        glEnableVertexAttribArray(0);
-        glBindVertexArray(0);
-
-        return polygonVao;
-    }
-
-    void RenderablePlanesCloud::renderPolygonGeometry(GLuint vao) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-
-        std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build("RenderablePlanesCloud_Polygon",
-            "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl",
-            "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl",
-            "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl");
-
-        program->activate();
-        static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        glClearBufferfv(GL_COLOR, 0, black);
-
-        //program->setUniform("sides", _polygonSides);
-        //program->setUniform("polygonColor", _pointColor);
-
-        glBindVertexArray(vao);
-        glDrawArrays(GL_POINTS, 0, 1);
-        glBindVertexArray(0);
-
-        /*if (true) {
-            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("polygon_texture.ppm"),
-                256, 256);
-
-        }*/
-        program->deactivate();
     }
 } // namespace openspace

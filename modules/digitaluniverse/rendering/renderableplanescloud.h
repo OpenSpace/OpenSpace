@@ -89,12 +89,7 @@ namespace openspace {
             GLfloat vertexData[VERTEX_DATA_SIZE];
         };
 
-        void createPlanes();
-        void renderToTexture(std::function<GLuint(void)> geometryLoadingFunction,
-            std::function<void(GLuint)> renderFunction,
-            GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight);
-        GLuint loadPolygonGeometryForRendering();
-        void renderPolygonGeometry(GLuint vao);
+        void createPlanes();        
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
