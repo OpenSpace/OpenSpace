@@ -223,7 +223,7 @@ namespace openspace {
         , _planeStartingIndexPos(0)
         , _textureVariableIndex(0)        
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
+        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
         , _textColor(
             TextColorInfo,
             glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -430,33 +430,52 @@ namespace openspace {
         glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         _program->activate();
 
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-        //_program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
-        //_program->setUniform("projection", projectionMatrix);
-        //_program->setUniform("modelViewTransform", modelViewMatrix);
-        //_program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
+        _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
+        _program->setUniform("alphaValue", _alphaValue);
+        _program->setUniform("scaleFactor", _scaleFactor);
+        //_program->setUniform("minPlaneSize", 1.f); // in pixels
+        
+        bool usingFramebufferRenderer =
+            OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
 
-        //_program->setUniform("minBillboardSize", 1.f); // in pixels
-        //                                               //_program->setUniform("color", _pointColor);
-        //_program->setUniform("sides", 4);
-        //_program->setUniform("alphaValue", _alphaValue);
-        //_program->setUniform("scaleFactor", _scaleFactor);
+        bool usingABufferRenderer =
+            OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
 
-        //_program->setUniform("up", orthoUp);
-        //_program->setUniform("right", orthoRight);
+        if (usingABufferRenderer) {
+            _program->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
+        }
 
-        //glBindVertexArray(_vao);
-        /*const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() / _nValuesPerAstronomicalObject);
-        glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);*/
+        bool additiveBlending = _blendMode == BlendModeAdditive && usingFramebufferRenderer;
+        if (additiveBlending) {
+            //glDepthMask(false);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        }
+        
+        for (auto pair : _renderingPlanesMap) {
+            ghoul::opengl::TextureUnit unit;
+            unit.activate();
+            _textureMap[pair.second.planeIndex]->bind();
+            _program->setUniform("galaxyTexture", unit);
 
+            glBindVertexArray(pair.second.vao);
+            glDrawArrays(GL_TRIANGLES, 0, 6);                  
+        }               
+        
+        if (additiveBlending) {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            //glDepthMask(true);
+        }
+        
         glBindVertexArray(0);
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::No);
         _program->deactivate();
@@ -467,7 +486,7 @@ namespace openspace {
 
         if (!blendEnabled) {
             glDisable(GL_BLEND);
-        }
+        }        
     }
 
     void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
@@ -527,7 +546,6 @@ namespace openspace {
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
         glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-        glm::mat4 viewMatrix = data.camera.viewMatrix();
         glm::mat4 projectionMatrix = data.camera.projectionMatrix();
         glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
@@ -929,8 +947,7 @@ dummy.clear();
 
             for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
                 glm::dvec4 transformedPos = _transformationMatrix * 
-                    glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0);
-                glm::dvec4 position(glm::dvec3(transformedPos), static_cast<float>(_unit));
+                    glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0);                
 
                 // Plane vectors u and v
                 glm::dvec4 u = _transformationMatrix * 
@@ -949,23 +966,53 @@ dummy.clear();
                 v.w = 0.0;
 
                 RenderingPlane plane;
+                plane.planeIndex = _fullData[p + _textureVariableIndex];
                 glGenVertexArrays(1, &plane.vao);
                 glGenBuffers(1, &plane.vbo);
                 
-                glm::dvec4 vertex0 = position - u - v; // same as 3
-                glm::dvec4 vertex1 = position + u + v; // same as 5
-                glm::dvec4 vertex2 = position - u + v;
-                glm::dvec4 vertex4 = position + u - v;                
+                glm::dvec4 vertex0 = transformedPos - u - v; // same as 3
+                glm::dvec4 vertex1 = transformedPos + u + v; // same as 5
+                glm::dvec4 vertex2 = transformedPos - u + v;
+                glm::dvec4 vertex4 = transformedPos + u - v;
                                              
+                float scale = 0.0;
+                switch (_unit) {
+                case Meter:
+                    scale = 1.0;
+                    break;
+                case Kilometer:
+                    scale = 1e3;
+                    break;
+                case Parsec:
+                    scale = PARSEC;
+                    break;
+                case Kiloparsec:
+                    scale = 1e3 * PARSEC;
+                    break;
+                case Megaparsec:
+                    scale = 1e6 * PARSEC;
+                    break;
+                case Gigaparsec:
+                    scale = 1e9 * PARSEC;
+                    break;
+                case GigalightYears:
+                    scale = 306391534.73091 * PARSEC;
+                    break;
+                }
+
+                vertex0 *= scale;
+                vertex1 *= scale;
+                vertex2 *= scale;
+                vertex4 *= scale;
 
                 GLfloat vertexData[] = {
                     //      x      y     z     w     s     t
-                    vertex0.x, vertex0.y, vertex0.z, vertex0.w, 0.f, 0.f,
-                    vertex1.x, vertex1.y, vertex1.z, vertex1.w, 1.f, 1.f,
-                    vertex2.x, vertex2.y, vertex2.z, vertex2.w, 0.f, 1.f,
-                    vertex0.x, vertex0.y, vertex0.z, vertex0.w, 0.f, 0.f,
-                    vertex4.x, vertex4.y, vertex4.z, vertex4.w, 1.f, 0.f,
-                    vertex1.x, vertex1.y, vertex1.z, vertex1.w, 1.f, 1.f,
+                    vertex0.x, vertex0.y, vertex0.z, 1.0, 0.f, 0.f,
+                    vertex1.x, vertex1.y, vertex1.z, 1.0, 1.f, 1.f,
+                    vertex2.x, vertex2.y, vertex2.z, 1.0, 0.f, 1.f,
+                    vertex0.x, vertex0.y, vertex0.z, 1.0, 0.f, 0.f,
+                    vertex4.x, vertex4.y, vertex4.z, 1.0, 1.f, 0.f,
+                    vertex1.x, vertex1.y, vertex1.z, 1.0, 1.f, 1.f,
                 };
 
                 std::memcpy(plane.vertexData, vertexData, sizeof(GLfloat) * VERTEX_DATA_SIZE);                
@@ -996,6 +1043,8 @@ dummy.clear();
                 );
 
                 glBindVertexArray(0);
+
+                _renderingPlanesMap.insert({plane.planeIndex, plane});
             }
 
             _dataIsDirty = false;
