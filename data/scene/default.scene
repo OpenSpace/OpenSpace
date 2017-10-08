@@ -109,6 +109,8 @@ function postInitialization()
     openspace.setPropertyValue("Stars Labels.renderable.Enabled", false)
     openspace.setPropertyValue("Stars Labels - Alternate.renderable.Enabled", false)
     openspace.setPropertyValue("Tully Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValue("Tully Galaxies Pics.renderable.Enabled", false)
+    openspace.setPropertyValue("Constellations EXGAL.renderable.Enabled", false)
 
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
@@ -142,52 +144,53 @@ return {
     Modules = {
         -- # Solar system objects
         "sun",
-        "mercury",
-        "venus",
+        --"mercury",
+        --"venus",
         "earth",
         --"moon",
-        "mars",
-        "jupiter",
-        "saturn",
-        "uranus",
+        --"mars",
+        --"jupiter",
+        --"saturn",
+        --"uranus",
         --"neptune",        
         -- "satellites"
 
-        "constellationbounds",
-        "grids",
+        --"constellationbounds",
+        --"grids",
         
         -- # Milkyway objects
         "stars/digitaluniverse",
-        "alternatestarlabels/digitaluniverse",
-        "starlabels/digitaluniverse",
+        --"alternatestarlabels/digitaluniverse",
+        --"starlabels/digitaluniverse",
         -- "stars/denver",
         "milkyway/digitaluniverse",
         --"milkyway/eso",
-        "globularclusters/digitaluniverse",
-        "kepler/digitaluniverse",
-        "pulsars/digitaluniverse",        
-        "exoplanets/digitaluniverse",
-        "dwarfs/digitaluniverse",        
-        "openclusters/digitaluniverse",
-        "obassociations/digitaluniverse",
-        "planetarynebulae/digitaluniverse",
-        "supernovaremnants/digitaluniverse",
-        "h2regions/digitaluniverse",
+        --"globularclusters/digitaluniverse",
+        --"kepler/digitaluniverse",
+        --"pulsars/digitaluniverse",        
+        --"exoplanets/digitaluniverse",
+        --"dwarfs/digitaluniverse",        
+        --"openclusters/digitaluniverse",
+        --"obassociations/digitaluniverse",
+        --"planetarynebulae/digitaluniverse",
+        --"supernovaremnants/digitaluniverse",
+        --"h2regions/digitaluniverse",
         
         -- # Extragalactic objects
-        "groups/digitaluniverse",
-        "clusters/digitaluniverse",
-        "voids/digitaluniverse",
-        "superclusters/digitaluniverse",
-        "localdwarfs/digitaluniverse",
-        "abell/digitaluniverse",
-        "2mass/digitaluniverse",
-        "6dF/digitaluniverse",
-        "2dF/digitaluniverse",
-        "quasars/digitaluniverse",
-        "sloandss/digitaluniverse",
+        "constellations/digitaluniverse",
+        --"groups/digitaluniverse",
+        --"clusters/digitaluniverse",
+        --"voids/digitaluniverse",
+        --"superclusters/digitaluniverse",
+        --"localdwarfs/digitaluniverse",
+        --"abell/digitaluniverse",
+        --"2mass/digitaluniverse",
+        --"6dF/digitaluniverse",
+        --"2dF/digitaluniverse",
+        --"quasars/digitaluniverse",
+        --"sloandss/digitaluniverse",
         --"tully/digitaluniverse",
-        "backgroundradiation/digitaluniverse",
+        --"backgroundradiation/digitaluniverse",
     }
 }
 

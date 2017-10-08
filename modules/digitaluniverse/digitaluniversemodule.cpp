@@ -54,8 +54,10 @@ void DigitalUniverseModule::internalInitialize() {
 
 std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
     return {
-        RenderablePoints::Documentation()
-        //RenderablePointsSprinte::Documentation()       
+        RenderablePoints::Documentation(),
+        RenderableBillboardsCloud::Documentation(),
+        RenderablePlanesCloud::Documentation(),
+        RenderableDUMeshes::Documentation()
     };
 }
 

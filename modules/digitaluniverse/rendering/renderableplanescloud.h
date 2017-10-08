@@ -50,7 +50,7 @@ namespace ghoul::opengl {
 
 namespace openspace {
     // (x, y, z, w, s, t) * 6 = 36
-    const int VERTEX_DATA_SIZE = 36;
+    const int PLANES_VERTEX_DATA_SIZE = 36;
 
     namespace documentation { struct Documentation; }
 
@@ -86,7 +86,7 @@ namespace openspace {
             int planeIndex;
             GLuint vao;
             GLuint vbo;            
-            GLfloat vertexData[VERTEX_DATA_SIZE];
+            GLfloat vertexData[PLANES_VERTEX_DATA_SIZE];
         };
 
         void createPlanes();        

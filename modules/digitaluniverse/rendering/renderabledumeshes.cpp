@@ -36,13 +36,18 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
+
+#include <glm/gtx/string_cast.hpp>
+#include <glm/glm.hpp>
 
 #include <array>
 #include <fstream>
 #include <stdint.h>
 
 namespace {
-    const char* _loggerCat        = "RenderablePoints";
+    const char* _loggerCat        = "RenderableDUMeshes";
     const char* KeyFile           = "File";
     const char* keyColor          = "Color";
     const char* keyUnit           = "Unit";
@@ -55,7 +60,7 @@ namespace {
     const char* GigalightyearUnit = "Gly";
 
     const int8_t CurrentCacheVersion = 1;
-    const double PARSEC = 0.308567756E17;
+    const float PARSEC = 0.308567756E17;
     
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
@@ -76,6 +81,44 @@ namespace {
         "Color",
         "This value is used to define the color of the astronomical object."
     }; 
+
+    static const openspace::properties::Property::PropertyInfo TextColorInfo = {
+        "TextColor",
+        "Text Color",
+        "The text color for the astronomical object."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TextSizeInfo = {
+        "TextSize",
+        "Text Size",
+        "The text size for the astronomical object labels."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelFileInfo = {
+        "LabelFile",
+        "Label File",
+        "The path to the label file that contains information about the astronomical "
+        "objects being rendered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
+        "TextMinSize",
+        "Text Min Size",
+        "The minimal size (in pixels) of the text for the labels for the astronomical "
+        "objects being rendered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+        "DrawElements",
+        "Draw Elements",
+        "Enables/Disables the drawing of the astronomical objects."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+        "TransformationMatrix",
+        "Transformation Matrix",
+        "Transformation matrix to be applied to each astronomical object."
+    };
 }  // namespace
 
 namespace openspace {
@@ -83,12 +126,12 @@ namespace openspace {
     documentation::Documentation RenderableDUMeshes::Documentation() {
         using namespace documentation;
         return {
-            "RenderablePoints",
-            "digitaluniverse_renderablepoints",
+            "RenderableDUMeshes",
+            "digitaluniverse_renderabledumeshes",
             {
                 {
                     "Type",
-                    new StringEqualVerifier("RenderablePoints"),
+                    new StringEqualVerifier("RenderableDUMeshes"),
                     Optional::No
                 },
                 {
@@ -115,7 +158,37 @@ namespace openspace {
                     new DoubleVerifier,
                     Optional::Yes,
                     ScaleFactorInfo.description
-                }
+                },
+                {
+                    TextColorInfo.identifier,
+                    new DoubleVector4Verifier,
+                    Optional::Yes,
+                    TextColorInfo.description
+                },
+                {
+                    TextSizeInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    TextSizeInfo.description
+                },
+                {
+                    LabelFileInfo.identifier,
+                    new StringVerifier,
+                    Optional::Yes,
+                    LabelFileInfo.description
+                },
+                {
+                    LabelMinSizeInfo.identifier,
+                    new IntVerifier,
+                    Optional::Yes,
+                    LabelMinSizeInfo.description
+                },
+                {
+                    TransformationMatrixInfo.identifier,
+                    new Matrix4x4Verifier<double>,
+                    Optional::Yes,
+                    TransformationMatrixInfo.description
+                },
             }
         };
     }
@@ -123,16 +196,30 @@ namespace openspace {
 
     RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
+        , _hasSpeckFile(false)
         , _dataIsDirty(true)
+        , _textColorIsDirty(true)
+        , _hasLabel(false)
+        , _labelDataIsDirty(true)
+        , _textMinSize(0)
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-        , _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
+        //, _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
+        , _textColor(
+            TextColorInfo,
+            glm::vec4(1.0f, 1.0, 1.0f, 1.f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        )
+        , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
+        , _drawElements(DrawElementsInfo, true)
         , _program(nullptr)
+        , _fontRenderer(nullptr)
+        , _font(nullptr)
         , _speckFile("")
+        , _labelFile("")
         , _unit(Parsec)
-        , _nValuesPerAstronomicalObject(0)
-        , _vao(0)
-        , _vbo(0)
+        , _nValuesPerAstronomicalObject(0)        
     {
         using File = ghoul::filesystem::File;
 
@@ -142,8 +229,13 @@ namespace openspace {
             "RenderableDUMeshes"
         );
         
-        _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-
+        if (dictionary.hasKey(KeyFile)) {
+            _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+            _hasSpeckFile = true;
+            _drawElements.onChange([&]() {
+                _hasSpeckFile = _hasSpeckFile == true ? false : true; });
+            addProperty(_drawElements);
+        }
 
         if (dictionary.hasKey(keyUnit)) {
             std::string unit = dictionary.value<std::string>(keyUnit);
@@ -174,10 +266,10 @@ namespace openspace {
             }
         }
 
-        if (dictionary.hasKey(keyColor)) {
+        /*if (dictionary.hasKey(keyColor)) {
             _pointColor = dictionary.value<glm::vec3>(keyColor);
         }
-        addProperty(_pointColor);
+        addProperty(_pointColor);*/
 
         if (dictionary.hasKey(TransparencyInfo.identifier)) {
             _alphaValue = static_cast<float>(
@@ -193,31 +285,72 @@ namespace openspace {
         }
         addProperty(_scaleFactor);
 
+        if (dictionary.hasKey(LabelFileInfo.identifier)) {
+            _labelFile = absPath(dictionary.value<std::string>(
+                LabelFileInfo.identifier
+                ));
+            _hasLabel = true;
+
+            if (dictionary.hasKey(TextColorInfo.identifier)) {
+                _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+                _hasLabel = true;
+            }
+            _textColor.setViewOption(properties::Property::ViewOptions::Color);
+            addProperty(_textColor);
+            _textColor.onChange([&]() { _textColorIsDirty = true; });
+
+
+            if (dictionary.hasKey(TextSizeInfo.identifier)) {
+                _textSize = dictionary.value<float>(TextSizeInfo.identifier);
+            }
+            addProperty(_textSize);
+
+            if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
+                _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
+            }
+        }
+
+        if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
+            _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
+        }
     }
 
     bool RenderableDUMeshes::isReady() const {
-        return (_program != nullptr) && (!_fullData.empty());
+        return (_program != nullptr) && (!_fullData.empty() || (!_labelData.empty()));
     }
 
     void RenderableDUMeshes::initialize() {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _program = renderEngine.buildRenderProgram("RenderableDUMeshes",
-            "${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl",
-            "${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl");// ,
-            //"${MODULE_DIGITALUNIVERSE}/shaders/points_ge.glsl");
+            "${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl",
+            "${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl");
 
         bool success = loadData();
         if (!success) {
             throw ghoul::RuntimeError("Error loading data");
+            return;
+        }
+
+        createMeshes();
+        
+        if (_hasLabel) {
+            if (_fontRenderer == nullptr)
+                _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
+                    ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
+            if (_font == nullptr) {
+                size_t _fontSize = 30;
+                _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
+                    ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
+            }
         }
     }
 
     void RenderableDUMeshes::deinitialize() {
-        glDeleteBuffers(1, &_vbo);
-        _vbo = 0;
-        glDeleteVertexArrays(1, &_vao);
-        _vao = 0;
-
+        for (auto pair : _renderingMeshesMap) {
+            glDeleteVertexArrays(1, &pair.second.vao);
+            glDeleteBuffers(1, &pair.second.vbo);
+        }
+        
         RenderEngine& renderEngine = OsEng.renderEngine();
         if (_program) {
             renderEngine.removeRenderProgram(_program);
@@ -225,120 +358,218 @@ namespace openspace {
         }
     }
 
-    void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
+    void RenderableDUMeshes::renderMeshes(const RenderData& data, const glm::dmat4& modelViewMatrix,
+        const glm::dmat4& projectionMatrix) {
+        // Saving current OpenGL state
+        GLboolean blendEnabled = glIsEnabled(GL_BLEND);
+        GLenum blendEquationRGB;
+        GLenum blendEquationAlpha;
+        GLenum blendDestAlpha;
+        GLenum blendDestRGB;
+        GLenum blendSrcAlpha;
+        GLenum blendSrcRGB;
+
+        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+        glEnable(GL_BLEND);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(false);
+
         _program->activate();
 
-        glm::dmat4 modelMatrix = glm::dmat4(1.0);
-        
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _program->setUniform("modelViewProjectionTransform", glm::dmat4(data.camera.projectionMatrix()) * 
-            data.camera.combinedViewMatrix() * modelMatrix);
 
-        _program->setUniform("color", _pointColor);
+        _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
         _program->setUniform("alphaValue", _alphaValue);
         _program->setUniform("scaleFactor", _scaleFactor);
         
-        //setPscUniforms(*_program.get(), data.camera, data.position);
-        //_program->setUniform("scaling", scaling);
-        
+        for (auto pair : _renderingMeshesMap) {
+            glBindVertexArray(pair.second.vao);
+            switch (pair.second.style)
+            {
+            case Solid:
+                break;
+            case Wire:
+                glDrawArrays(GL_LINE_STRIP, 0, 6);
+                break;
+            case Point:
+                glDrawArrays(GL_POINTS, 0, 6);
+                break;
+            default:
+                break;
+            }
+            
+        }
 
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        glBindVertexArray(_vao);
-        const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() / _nValuesPerAstronomicalObject);
-        glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
-        
-        glDisable(GL_PROGRAM_POINT_SIZE);
+      
         glBindVertexArray(0);
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::No);
         _program->deactivate();
 
+        // Restores blending state
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+
         glDepthMask(true);
+
+        if (!blendEnabled) {
+            glDisable(GL_BLEND);
+        }
+    }
+
+    void RenderableDUMeshes::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+
+        _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
+
+        float scale = 0.0;
+        switch (_unit) {
+        case Meter:
+            scale = 1.0;
+            break;
+        case Kilometer:
+            scale = 1e3;
+            break;
+        case Parsec:
+            scale = PARSEC;
+            break;
+        case Kiloparsec:
+            scale = 1e3 * PARSEC;
+            break;
+        case Megaparsec:
+            scale = 1e6 * PARSEC;
+            break;
+        case Gigaparsec:
+            scale = 1e9 * PARSEC;
+            break;
+        case GigalightYears:
+            scale = 306391534.73091 * PARSEC;
+            break;
+        }
+
+        for (const auto pair : _labelData) {
+            //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
+            glm::vec3 scaledPos(pair.first);
+            scaledPos *= scale;
+            _fontRenderer->render(
+                *_font,
+                scaledPos,
+                _textColor,
+                pow(10.0, _textSize.value()),
+                _textMinSize,
+                modelViewProjectionMatrix,
+                orthoRight,
+                orthoUp,
+                "%s",
+                pair.second.c_str());
+        }
+    }
+
+    void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
+        glm::dmat4 modelMatrix =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+        glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+        glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+        glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+
+        glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+        glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+        glm::vec3 right = glm::cross(viewDirection, lookup);
+        glm::vec3 up = glm::cross(right, viewDirection);
+
+        glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+        glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
+        glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
+
+
+        if (_hasSpeckFile) {
+            renderMeshes(data, modelViewMatrix, projectionMatrix);
+        }
+
+        if (_hasLabel) {
+            renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        }
     }
 
     void RenderableDUMeshes::update(const UpdateData&) {
-        if (_dataIsDirty) {
-            LDEBUG("Regenerating data");
-
-            createDataSlice();
-
-            int size = static_cast<int>(_slicedData.size());
-
-            if (_vao == 0) {
-                glGenVertexArrays(1, &_vao);
-                LDEBUG("Generating Vertex Array id '" << _vao << "'");
-            }
-            if (_vbo == 0) {
-                glGenBuffers(1, &_vbo);
-                LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
-            }
-            glBindVertexArray(_vao);
-            glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                size * sizeof(double),
-                &_slicedData[0],
-                GL_STATIC_DRAW
-            );
-
-            GLint positionAttrib = _program->attributeLocation("in_position");
-            
-            const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
-            const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-
-            GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
-
-            glEnableVertexAttribArray(positionAttrib);
-            glVertexAttribLPointer(
-                positionAttrib,
-                4,
-                GL_DOUBLE,
-                0,
-                nullptr
-            );
-            
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
-
-            _dataIsDirty = false;
-        }
     }
 
     bool RenderableDUMeshes::loadData() {
-        std::string _file = _speckFile;
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _file,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+        bool success = false;
+        if (_hasSpeckFile) {
+            std::string _file = _speckFile;
+            std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+                _file,
+                ghoul::filesystem::CacheManager::Persistent::Yes
+            );
 
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+            bool hasCachedFile = FileSys.fileExists(cachedFile);
+            //if (hasCachedFile) {
+            //    LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
 
-            bool success = loadCachedFile(cachedFile);
-            if (success) {
-                return true;
+            //    success = loadCachedFile(cachedFile);
+            //    if (!success) {
+            //        FileSys.cacheManager()->removeCacheFile(_file);
+            //        // Intentional fall-through to the 'else' computation to generate the cache
+            //        // file for the next run
+            //    }
+            //}
+            //else 
+            {
+                LINFO("Cache for Speck file '" << _file << "' not found");
+                LINFO("Loading Speck file '" << _file << "'");
+
+                success = readSpeckFile();
+                if (!success) {
+                    return false;
+                }
+
+                LINFO("Saving cache");
+                success &= saveCachedFile(cachedFile);
+            }
+        }
+
+        std::string labelFile = _labelFile;
+        if (!labelFile.empty()) {
+            std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+                labelFile,
+                ghoul::filesystem::CacheManager::Persistent::Yes
+            );
+            bool hasCachedFile = FileSys.fileExists(cachedFile);
+            if (hasCachedFile) {
+                LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
+
+                success &= loadCachedFile(cachedFile);
+                if (!success) {
+                    FileSys.cacheManager()->removeCacheFile(labelFile);
+                    // Intentional fall-through to the 'else' computation to generate the cache
+                    // file for the next run
+                }
             }
             else {
-                FileSys.cacheManager()->removeCacheFile(_file);
-                // Intentional fall-through to the 'else' computation to generate the cache
-                // file for the next run
+                LINFO("Cache for Label file '" << labelFile << "' not found");
+                LINFO("Loading Label file '" << labelFile << "'");
+
+                success &= readLabelFile();
+                if (!success) {
+                    return false;
+                }
+
             }
         }
-        else {
-            LINFO("Cache for Speck file '" << _file << "' not found");
-        }
-        LINFO("Loading Speck file '" << _file << "'");
-
-        bool success = readSpeckFile();
-        if (!success) {
-            return false;
-        }
-
-        LINFO("Saving cache");
-        success = saveCachedFile(cachedFile);
 
         return success;
     }
@@ -351,7 +582,7 @@ namespace openspace {
             return false;
         }
 
-        _nValuesPerAstronomicalObject = 0;
+        int meshIndex = 0;
 
         // The beginning of the speck file has a header that either contains comments
         // (signaled by a preceding '#') or information about the structure of the file
@@ -361,13 +592,16 @@ namespace openspace {
             std::streampos position = file.tellg();
             std::getline(file, line);
             
+            std::cout << "=== Current position: " << file.tellg() << std::endl;
+            if (file.eof()) {
+                break;
+            }
+
             if (line[0] == '#' || line.empty()) {
                 continue;
             }
 
-            if (line.substr(0, 7) != "datavar" &&
-                line.substr(0, 10) != "texturevar" &&
-                line.substr(0, 7) != "texture")
+            if (line.substr(0, 4) != "mesh")
             {
                 // we read a line that doesn't belong to the header, so we have to jump back
                 // before the beginning of the current line
@@ -375,34 +609,161 @@ namespace openspace {
                 break;
             }
 
-            if (line.substr(0, 7) == "datavar") {
-                // datavar lines are structured as follows:
-                // datavar # description
-                // where # is the index of the data variable; so if we repeatedly overwrite
-                // the 'nValues' variable with the latest index, we will end up with the total
-                // number of values (+3 since X Y Z are not counted in the Speck file index)
+            if (line.substr(0, 4) == "mesh") {
+                // mesh lines are structured as follows:
+                // mesh -t texnum -c colorindex -s style { 
+                // where textnum is the index of the texture; 
+                // colorindex is the index of the color for the mesh
+                // and style is solid, wire or point (for now we support only wire)
                 std::stringstream str(line);
 
+                RenderingMesh mesh;
+                mesh.meshIndex = meshIndex;
+
                 std::string dummy;
-                str >> dummy;
-                str >> _nValuesPerAstronomicalObject;
-                _nValuesPerAstronomicalObject += 1; // We want the number, but the index is 0 based
+                str >> dummy; // mesh command
+                dummy.clear();
+                str >> dummy; // texture index command?
+                do {
+                    if (dummy == "-t") {
+                        dummy.clear();
+                        str >> mesh.textureIndex; // texture index 
+                    }
+                    else if (dummy == "-c") {
+                        dummy.clear();
+                        str >> mesh.colorIndex; // color index command
+                    }
+                    else if (dummy == "-s") {
+                        dummy.clear();
+                        str >> dummy; // style value command
+                        if (dummy == "solid") {
+                            mesh.style = Solid;
+                        }
+                        else if (dummy == "wire") {
+                            mesh.style = Wire;
+                        }
+                        else if (dummy == "point") {
+                            mesh.style = Point;
+                        }
+                        else {
+                            mesh.style = INVALID;
+                            break;
+                        }
+                    }
+                    dummy.clear();
+                    str >> dummy;
+                } while (dummy != "{");
+                
+                std::getline(file, line);
+                std::stringstream dim(line);
+                dim >> mesh.numU; // numU
+                dim >> mesh.numV; // numV
+
+                // We can now read the vertices data:
+                for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
+                    std::getline(file, line);
+                    if (line.substr(0, 1) != "}") {
+                        std::stringstream lineData(line);
+                        for (int i = 0; i < 7; ++i) {
+                            GLfloat value;
+                            lineData >> value;
+                            bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                            if (!errorReading) {
+                                mesh.vertices.push_back(value);
+                            }
+                            else {
+                                break;
+                            }                            
+                        }
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                std::getline(file, line);
+                if (line.substr(0, 1) == "}") {
+                    _renderingMeshesMap.insert({ meshIndex++, mesh });
+                }
+                else {
+                    return false;
+                }
+            }            
+        }       
+        
+        return true;
+    }
+
+    bool RenderableDUMeshes::readLabelFile() {
+        std::string _file = _labelFile;
+        std::ifstream file(_file);
+        if (!file.good()) {
+            LERROR("Failed to open Label file '" << _file << "'");
+            return false;
+        }
+
+        // The beginning of the speck file has a header that either contains comments
+        // (signaled by a preceding '#') or information about the structure of the file
+        // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
+        std::string line = "";
+        while (true) {
+            std::streampos position = file.tellg();
+            std::getline(file, line);
+
+            if (line[0] == '#' || line.empty()) {
+                continue;
+            }
+
+            if (line.substr(0, 9) != "textcolor")
+            {
+                // we read a line that doesn't belong to the header, so we have to jump back
+                // before the beginning of the current line
+                file.seekg(position);
+                continue;
+            }
+
+            if (line.substr(0, 9) == "textcolor") {
+                // textcolor lines are structured as follows:
+                // textcolor # description
+                // where # is color text defined in configuration file
+                std::stringstream str(line);
+
+                // TODO: handle cases of labels with different colors
+                break;
             }
         }
 
-        _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
 
         do {
             std::vector<float> values(_nValuesPerAstronomicalObject);
 
             std::getline(file, line);
+
+            if (line.size() == 0)
+                continue;
+
             std::stringstream str(line);
 
-            for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-                str >> values[i];
+            glm::vec3 position;
+            for (auto j = 0; j < 3; ++j) {
+                str >> position[j];
             }
 
-            _fullData.insert(_fullData.end(), values.begin(), values.end());
+            std::string dummy;
+            str >> dummy; // text keyword
+
+            std::string label;
+            str >> label;
+            dummy.clear();
+
+            while (str >> dummy) {
+                label += " " + dummy;
+                dummy.clear();
+            }
+
+            glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::dvec4(position, 1.0));
+            _labelData.push_back(std::make_pair(transformedPos, label));
+
         } while (!file.eof());
 
         return true;
@@ -464,40 +825,130 @@ namespace openspace {
             return false;
         }
     }
-    
-    void RenderableDUMeshes::createDataSlice() {
-        _slicedData.clear();
 
-        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-            glm::dvec3 p = glm::dvec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
+    void RenderableDUMeshes::createMeshes() {
+        /*
+        if (_dataIsDirty && _hasSpeckFile) {
+            LDEBUG("Creating planes");
 
-            // Converting untis
-            if (_unit == Kilometer) {
-                p *= 1E3;
-            } 
-            else if (_unit == Parsec) {
-                p *= PARSEC;
-            }
-            else if (_unit == Kiloparsec) {
-                p *= 1E3 * PARSEC;
-            }
-            else if (_unit == Megaparsec) {
-                p *= 1E6 * PARSEC;
-            }
-            else if (_unit == Gigaparsec) {
-                p *= 1E9 * PARSEC;
-            }
-            else if (_unit == GigalightYears) {
-                p *= 306391534.73091 * PARSEC;
+            for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
+                glm::vec4 transformedPos = glm::vec4(_transformationMatrix *
+                    glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));
+
+                // Plane vectors u and v
+                glm::vec4 u = glm::vec4(_transformationMatrix *
+                    glm::dvec4(
+                        _fullData[p + _planeStartingIndexPos + 0],
+                        _fullData[p + _planeStartingIndexPos + 1],
+                        _fullData[p + _planeStartingIndexPos + 2],
+                        1.0));
+                u /= 2.f;
+                u.w = 0.0;
+                glm::vec4 v = glm::vec4(_transformationMatrix *
+                    glm::dvec4(
+                        _fullData[p + _planeStartingIndexPos + 3],
+                        _fullData[p + _planeStartingIndexPos + 4],
+                        _fullData[p + _planeStartingIndexPos + 5],
+                        1.0));
+                v /= 2.f;
+                v.w = 0.0;
+
+                RenderingPlane plane;
+                plane.planeIndex = _fullData[p + _textureVariableIndex];
+
+                // JCC: Ask Abbott about these points refeering to a non-existing texture.
+                if (plane.planeIndex == 30) {
+                    //std::cout << "--- Creating planes - index: " << plane.planeIndex << std::endl;
+                    plane.planeIndex = 0;
+                }
+
+                glGenVertexArrays(1, &plane.vao);
+                glGenBuffers(1, &plane.vbo);
+
+                glm::vec4 vertex0 = transformedPos - u - v; // same as 3
+                glm::vec4 vertex1 = transformedPos + u + v; // same as 5
+                glm::vec4 vertex2 = transformedPos - u + v;
+                glm::vec4 vertex4 = transformedPos + u - v;
+
+                float scale = 0.0;
+                switch (_unit) {
+                case Meter:
+                    scale = 1.0;
+                    break;
+                case Kilometer:
+                    scale = 1e3;
+                    break;
+                case Parsec:
+                    scale = PARSEC;
+                    break;
+                case Kiloparsec:
+                    scale = 1e3 * PARSEC;
+                    break;
+                case Megaparsec:
+                    scale = 1e6 * PARSEC;
+                    break;
+                case Gigaparsec:
+                    scale = 1e9 * PARSEC;
+                    break;
+                case GigalightYears:
+                    scale = 306391534.73091 * PARSEC;
+                    break;
+                }
+
+                vertex0 *= static_cast<float>(scale);
+                vertex1 *= static_cast<float>(scale);
+                vertex2 *= static_cast<float>(scale);
+                vertex4 *= static_cast<float>(scale);
+
+                GLfloat vertexData[] = {
+                    //      x      y     z     w           s    t
+                    vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
+                    vertex1.x, vertex1.y, vertex1.z, 1.f, 1.f, 1.f,
+                    vertex2.x, vertex2.y, vertex2.z, 1.f, 0.f, 1.f,
+                    vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
+                    vertex4.x, vertex4.y, vertex4.z, 1.f, 1.f, 0.f,
+                    vertex1.x, vertex1.y, vertex1.z, 1.f, 1.f, 1.f,
+                };
+
+                std::memcpy(plane.vertexData, vertexData, sizeof(vertexData));
+
+                glBindVertexArray(plane.vao);
+                glBindBuffer(GL_ARRAY_BUFFER, plane.vbo);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(plane.vertexData), plane.vertexData, GL_STATIC_DRAW);
+                // in_position
+                glEnableVertexAttribArray(0);
+                glVertexAttribPointer(
+                    0,
+                    4,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    sizeof(GLfloat) * 6,
+                    nullptr
+                );
+
+                // texture coords
+                glEnableVertexAttribArray(1);
+                glVertexAttribPointer(
+                    1,
+                    2,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    sizeof(GLfloat) * 6,
+                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
+                );
+
+                _renderingPlanesMap.insert({ plane.planeIndex, plane });
             }
 
-            glm::dvec4 position(p, 1.0);
+            glBindVertexArray(0);
 
-            for (auto j = 0; j < 4; ++j) {
-                _slicedData.push_back(position[j]);
-            }                        
+            _dataIsDirty = false;
         }
-    }
-    
 
+        if (_hasLabel && _labelDataIsDirty) {
+
+            _labelDataIsDirty = false;
+        }
+        */
+    }
 } // namespace openspace
