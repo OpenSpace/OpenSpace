@@ -26,23 +26,18 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-in dvec4 in_position;
+in vec4 in_position;
 
 uniform dmat4 modelViewProjectionTransform;
 uniform float scaleFactor;
 
 out float vs_screenSpaceDepth;
-out dvec4 test;
 
 void main() {
-    test = in_position;
-    vec4 positionClipSpace = vec4(modelViewProjectionTransform * in_position);
-    //positionClipSpace = vec4( modelViewProjectionTransform * 
-    //vec4(0,0,0,1));
+    vec4 positionClipSpace = vec4(modelViewProjectionTransform * dvec4(in_position));
     vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
 
     vs_screenSpaceDepth = positionScreenSpace.w;
 
-    gl_PointSize = scaleFactor;
     gl_Position = positionScreenSpace;
 }

@@ -25,7 +25,6 @@
 #include "fragment.glsl"
 
 in float vs_screenSpaceDepth;
-flat in dvec4 test;
 
 uniform vec3 color;
 uniform float alphaValue;
