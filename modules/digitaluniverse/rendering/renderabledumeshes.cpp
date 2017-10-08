@@ -316,7 +316,7 @@ namespace openspace {
     }
 
     bool RenderableDUMeshes::isReady() const {
-        return (_program != nullptr) && (!_fullData.empty() || (!_labelData.empty()));
+        return (_program != nullptr) && (!_renderingMeshesMap.empty() || (!_labelData.empty()));
     }
 
     void RenderableDUMeshes::initialize() {
@@ -390,6 +390,8 @@ namespace openspace {
         _program->setUniform("alphaValue", _alphaValue);
         _program->setUniform("scaleFactor", _scaleFactor);
         
+        _program->setUniform("color", glm::vec3(1.0, 0.0, 0.0));
+
         for (auto pair : _renderingMeshesMap) {
             glBindVertexArray(pair.second.vao);
             switch (pair.second.style)
@@ -397,10 +399,10 @@ namespace openspace {
             case Solid:
                 break;
             case Wire:
-                glDrawArrays(GL_LINE_STRIP, 0, 6);
+                glDrawArrays(GL_LINE_STRIP, 0, pair.second.numU * pair.second.numV);
                 break;
             case Point:
-                glDrawArrays(GL_POINTS, 0, 6);
+                glDrawArrays(GL_POINTS, 0, pair.second.numU * pair.second.numV);
                 break;
             default:
                 break;
@@ -538,7 +540,7 @@ namespace openspace {
                 }
 
                 LINFO("Saving cache");
-                success &= saveCachedFile(cachedFile);
+                //success &= saveCachedFile(cachedFile);
             }
         }
 
@@ -592,7 +594,6 @@ namespace openspace {
             std::streampos position = file.tellg();
             std::getline(file, line);
             
-            std::cout << "=== Current position: " << file.tellg() << std::endl;
             if (file.eof()) {
                 break;
             }
@@ -827,48 +828,15 @@ namespace openspace {
     }
 
     void RenderableDUMeshes::createMeshes() {
-        /*
         if (_dataIsDirty && _hasSpeckFile) {
             LDEBUG("Creating planes");
 
-            for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
-                glm::vec4 transformedPos = glm::vec4(_transformationMatrix *
-                    glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));
+            std::unordered_map<int, RenderingMesh>::iterator it = _renderingMeshesMap.begin();
+            std::unordered_map<int, RenderingMesh>::iterator itEnd = _renderingMeshesMap.end();
 
-                // Plane vectors u and v
-                glm::vec4 u = glm::vec4(_transformationMatrix *
-                    glm::dvec4(
-                        _fullData[p + _planeStartingIndexPos + 0],
-                        _fullData[p + _planeStartingIndexPos + 1],
-                        _fullData[p + _planeStartingIndexPos + 2],
-                        1.0));
-                u /= 2.f;
-                u.w = 0.0;
-                glm::vec4 v = glm::vec4(_transformationMatrix *
-                    glm::dvec4(
-                        _fullData[p + _planeStartingIndexPos + 3],
-                        _fullData[p + _planeStartingIndexPos + 4],
-                        _fullData[p + _planeStartingIndexPos + 5],
-                        1.0));
-                v /= 2.f;
-                v.w = 0.0;
-
-                RenderingPlane plane;
-                plane.planeIndex = _fullData[p + _textureVariableIndex];
-
-                // JCC: Ask Abbott about these points refeering to a non-existing texture.
-                if (plane.planeIndex == 30) {
-                    //std::cout << "--- Creating planes - index: " << plane.planeIndex << std::endl;
-                    plane.planeIndex = 0;
-                }
-
-                glGenVertexArrays(1, &plane.vao);
-                glGenBuffers(1, &plane.vbo);
-
-                glm::vec4 vertex0 = transformedPos - u - v; // same as 3
-                glm::vec4 vertex1 = transformedPos + u + v; // same as 5
-                glm::vec4 vertex2 = transformedPos - u + v;
-                glm::vec4 vertex4 = transformedPos + u - v;
+            for (; it != itEnd; ++it) {
+                glGenVertexArrays(1, &(it->second.vao));
+                glGenBuffers(1, &(it->second.vbo));
 
                 float scale = 0.0;
                 switch (_unit) {
@@ -895,49 +863,48 @@ namespace openspace {
                     break;
                 }
 
-                vertex0 *= static_cast<float>(scale);
-                vertex1 *= static_cast<float>(scale);
-                vertex2 *= static_cast<float>(scale);
-                vertex4 *= static_cast<float>(scale);
-
-                GLfloat vertexData[] = {
-                    //      x      y     z     w           s    t
-                    vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
-                    vertex1.x, vertex1.y, vertex1.z, 1.f, 1.f, 1.f,
-                    vertex2.x, vertex2.y, vertex2.z, 1.f, 0.f, 1.f,
-                    vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
-                    vertex4.x, vertex4.y, vertex4.z, 1.f, 1.f, 0.f,
-                    vertex1.x, vertex1.y, vertex1.z, 1.f, 1.f, 1.f,
-                };
-
-                std::memcpy(plane.vertexData, vertexData, sizeof(vertexData));
-
-                glBindVertexArray(plane.vao);
-                glBindBuffer(GL_ARRAY_BUFFER, plane.vbo);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(plane.vertexData), plane.vertexData, GL_STATIC_DRAW);
+                for (int v = 0; v < it->second.vertices.size(); ++v) {
+                    it->second.vertices[v] *= scale;
+                }
+                
+                glBindVertexArray(it->second.vao);
+                glBindBuffer(GL_ARRAY_BUFFER, it->second.vbo);
+                glBufferData(GL_ARRAY_BUFFER, it->second.vertices.size() * sizeof(GLfloat),
+                    &it->second.vertices[0], GL_STATIC_DRAW);
                 // in_position
                 glEnableVertexAttribArray(0);
-                glVertexAttribPointer(
-                    0,
-                    4,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GLfloat) * 6,
-                    nullptr
-                );
+                // U and V may not be given by the user
+                if (it->second.vertices.size() / (it->second.numU * it->second.numV) > 3) {
+                    glVertexAttribPointer(
+                        0,
+                        3,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        sizeof(GLfloat) * 5,
+                        nullptr
+                    );
 
-                // texture coords
-                glEnableVertexAttribArray(1);
-                glVertexAttribPointer(
-                    1,
-                    2,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    sizeof(GLfloat) * 6,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
-                );
-
-                _renderingPlanesMap.insert({ plane.planeIndex, plane });
+                    // texture coords
+                    glEnableVertexAttribArray(1);
+                    glVertexAttribPointer(
+                        1,
+                        2,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        sizeof(GLfloat) * 6,
+                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
+                    );
+                }
+                else { // no U and V:
+                    glVertexAttribPointer(
+                        0,
+                        3,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        0,
+                        nullptr
+                    );
+                }                
             }
 
             glBindVertexArray(0);
@@ -948,7 +915,6 @@ namespace openspace {
         if (_hasLabel && _labelDataIsDirty) {
 
             _labelDataIsDirty = false;
-        }
-        */
+        }        
     }
 } // namespace openspace
