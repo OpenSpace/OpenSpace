@@ -223,7 +223,7 @@ namespace openspace {
         , _planeStartingIndexPos(0)
         , _textureVariableIndex(0)        
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
+        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
         , _textColor(
             TextColorInfo,
             glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -305,6 +305,9 @@ namespace openspace {
                 );
         }
         addProperty(_scaleFactor);
+        _scaleFactor.onChange([&]() {
+            _dataIsDirty = true;
+        });
       
         if (dictionary.hasKey(LabelFileInfo.identifier)) {
             _labelFile = absPath(dictionary.value<std::string>(
@@ -398,11 +401,16 @@ namespace openspace {
         }
     }
 
-    void RenderablePlanesCloud::deinitialize() {
+
+    void RenderablePlanesCloud::deleteDataGPU() {
         for (auto pair : _renderingPlanesMap) {
             glDeleteVertexArrays(1, &pair.second.vao);
             glDeleteBuffers(1, &pair.second.vbo);
         }
+    }
+
+    void RenderablePlanesCloud::deinitialize() {
+        deleteDataGPU();
        
         RenderEngine& renderEngine = OsEng.renderEngine();
         if (_program) {
@@ -571,7 +579,12 @@ namespace openspace {
         }                
     }
 
-    void RenderablePlanesCloud::update(const UpdateData&) {        
+    void RenderablePlanesCloud::update(const UpdateData&) { 
+        if (_dataIsDirty  && _hasSpeckFile) {
+            deleteDataGPU();
+            createPlanes();
+            _dataIsDirty = false;
+        }
     }
 
     bool RenderablePlanesCloud::loadData() {
@@ -969,6 +982,9 @@ dummy.clear();
                         1.0));
                 v /= 2.f;
                 v.w = 0.0;
+
+                u *= _scaleFactor;
+                v *= _scaleFactor;
 
                 RenderingPlane plane; 
                 plane.planeIndex = _fullData[p + _textureVariableIndex];

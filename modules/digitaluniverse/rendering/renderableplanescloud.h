@@ -89,6 +89,7 @@ namespace openspace {
             GLfloat vertexData[PLANES_VERTEX_DATA_SIZE];
         };
 
+        void deleteDataGPU();
         void createPlanes();        
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix);
