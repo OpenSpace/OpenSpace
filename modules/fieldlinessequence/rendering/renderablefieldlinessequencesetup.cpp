@@ -726,6 +726,9 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& OUTP
         return false;
     }
 
+    std::vector<std::string> extraMagVars;
+    extractMagnitudeVarsFromStrings(extraVars, extraMagVars);
+
     // Load states into RAM!
     for (std::string filePath : _sourceFiles) {
         // Create Kameleon object and open CDF file!
@@ -736,6 +739,10 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& OUTP
         newState.setTriggerTime(kameleonHelper::getTime(kameleon.get()));
 
         if (newState.addLinesFromKameleon(kameleon.get(), seedPoints, tracingVar)) {
+            // The line points are in their RAW format (unscaled & maybe spherical)
+            // Before we scale to meters (and maybe cartesian) we must extract
+            // the extraQuantites, as the iterpolator needs the unaltered positions
+            newState.addExtraQuantities(kameleon.get(), extraVars, extraMagVars);
             switch (newState.model()) {
                 case fls::BATSRUS:
                     newState.scalePositions(fls::R_E_TO_METER);
@@ -827,6 +834,38 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(
     }
 
     return true;
+}
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
+        std::vector<std::string>& extraVars,
+        std::vector<std::string>& extraMagVars) {
+
+
+    for (int i = 0; i < extraVars.size(); i++) {
+        const std::string STR = extraVars[i];
+        // Check if string is in the format specified for magnitude variables
+        if (STR.substr(0, 2) == "|(" && STR.substr(STR.size() - 2, 2) == ")|") {
+            std::istringstream ss(STR.substr(2, STR.size() - 4));
+            std::string magVar;
+            size_t counter = 0;
+            while(std::getline(ss, magVar, ',')) {
+                magVar.erase(std::remove_if(magVar.begin(), magVar.end(), ::isspace),
+                        magVar.end());
+                extraMagVars.push_back(magVar);
+                counter++;
+                if (counter == 3) {
+                    break;
+                }
+            }
+            if (counter != 3 && counter > 0) {
+                extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
+            }
+            extraVars.erase(extraVars.begin() + i);
+            i--;
+        }
+    }
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 

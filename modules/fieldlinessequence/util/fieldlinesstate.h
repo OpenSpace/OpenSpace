@@ -52,6 +52,8 @@ public:
     bool addLinesFromKameleon(ccmc::Kameleon* kameleon,
                               const vector<glm::vec3>& SEED_POINTS,
                               const std::string TRACING_VAR);
+    void addExtraQuantities(ccmc::Kameleon* kameleon, vector<std::string>& xtraScalarVars,
+                                                      vector<std::string>& xtraMagVars);
     void   convertLatLonToCartesian(const float SCALE = 1.f);
     void   scalePositions(const float SCALE);
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
@@ -88,6 +90,12 @@ private:
     vector<GLsizei>       _lineCount;
     vector<vector<float>> _extraQuantities;
     vector<std::string>   _extraQuantityNames;
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+    void loadExtrasIntoKameleon(ccmc::Kameleon* kameleon,
+                                vector<std::string>& xtraScalarVars,
+                                vector<std::string>& xtraMagVars);
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
     // TODO: Maybe introduce a vector containing seed point indices
 };
 

@@ -156,6 +156,8 @@ private:
                                         std::vector<std::string>& extraVars);
     bool   extractSeedPointsFromFile(const std::string& path,
                                      std::vector<glm::vec3>& outVec);
+    void   extractMagnitudeVarsFromStrings(std::vector<std::string>& extraVars,
+                                           std::vector<std::string>& extraMagVars);
     bool   getStatesFromCdfFiles(const std::string& OUTPUT_FOLDER);
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
