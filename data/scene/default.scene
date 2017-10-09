@@ -111,6 +111,7 @@ function postInitialization()
     openspace.setPropertyValue("Tully Galaxies.renderable.Enabled", false)
     openspace.setPropertyValue("Tully Galaxies Pics.renderable.Enabled", false)
     openspace.setPropertyValue("Constellations EXGAL.renderable.Enabled", false)
+    openspace.setPropertyValue("Constellations.renderable.Enabled", false)
 
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
@@ -121,6 +122,11 @@ function postInitialization()
     openspace.setPropertyValue("Equatorial Grid Labels.renderable.Enabled", false)
     openspace.setPropertyValue("Galactic Grid.renderable.Enabled", false)
     openspace.setPropertyValue("Galactic Grid Labels.renderable.Enabled", false)
+    openspace.setPropertyValue("100kly Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("1Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("10Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("100Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValue("20Gly Grid.renderable.Enabled", false)
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
@@ -156,7 +162,8 @@ return {
         -- "satellites"
 
         --"constellationbounds",
-        --"grids",
+        --"constellations/digitaluniverse",
+        "grids",
         
         -- # Milkyway objects
         "stars/digitaluniverse",
@@ -176,8 +183,7 @@ return {
         --"supernovaremnants/digitaluniverse",
         --"h2regions/digitaluniverse",
         
-        -- # Extragalactic objects
-        "constellations/digitaluniverse",
+        -- # Extragalactic objects        
         --"groups/digitaluniverse",
         --"clusters/digitaluniverse",
         --"voids/digitaluniverse",

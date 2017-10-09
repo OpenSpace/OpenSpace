@@ -370,8 +370,10 @@ namespace openspace {
 
     void RenderableDUMeshes::deinitialize() {
         for (auto pair : _renderingMeshesMap) {
-            glDeleteVertexArrays(1, &pair.second.vao);
-            glDeleteBuffers(1, &pair.second.vbo);
+            for (int i = 0; i < pair.second.numU; ++i) {
+                glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
+                glDeleteBuffers(1, &pair.second.vboArray[i]);
+            }            
         }
         
         RenderEngine& renderEngine = OsEng.renderEngine();
@@ -415,21 +417,22 @@ namespace openspace {
 
         for (auto pair : _renderingMeshesMap) {
             _program->setUniform("color", _meshColorMap[pair.second.colorIndex]);
-            glBindVertexArray(pair.second.vao);
-            switch (pair.second.style)
-            {
-            case Solid:
-                break;
-            case Wire:
-                glDrawArrays(GL_LINE_STRIP, 0, pair.second.numU * pair.second.numV);
-                break;
-            case Point:
-                glDrawArrays(GL_POINTS, 0, pair.second.numU * pair.second.numV);
-                break;
-            default:
-                break;
-            }
-            
+            for (int i = 0; i < pair.second.numU; ++i) {
+                glBindVertexArray(pair.second.vaoArray[i]);
+                switch (pair.second.style)
+                {
+                case Solid:
+                    break;
+                case Wire:
+                    glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
+                    break;
+                case Point:
+                    glDrawArrays(GL_POINTS, 0, pair.second.numV);
+                    break;
+                default:
+                    break;
+                }
+            }                        
         }
 
       
@@ -856,10 +859,7 @@ namespace openspace {
             std::unordered_map<int, RenderingMesh>::iterator it = _renderingMeshesMap.begin();
             std::unordered_map<int, RenderingMesh>::iterator itEnd = _renderingMeshesMap.end();
 
-            for (; it != itEnd; ++it) {
-                glGenVertexArrays(1, &(it->second.vao));
-                glGenBuffers(1, &(it->second.vbo));
-
+            for (; it != itEnd; ++it) {                
                 float scale = 0.0;
                 switch (_unit) {
                 case Meter:
@@ -889,45 +889,54 @@ namespace openspace {
                     it->second.vertices[v] *= scale;
                 }
                 
-                glBindVertexArray(it->second.vao);
-                glBindBuffer(GL_ARRAY_BUFFER, it->second.vbo);
-                glBufferData(GL_ARRAY_BUFFER, it->second.vertices.size() * sizeof(GLfloat),
-                    &it->second.vertices[0], GL_STATIC_DRAW);
-                // in_position
-                glEnableVertexAttribArray(0);
-                // U and V may not be given by the user
-                if (it->second.vertices.size() / (it->second.numU * it->second.numV) > 3) {
-                    glVertexAttribPointer(
-                        0,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        sizeof(GLfloat) * 5,
-                        nullptr
-                    );
+                for (int i = 0; i < it->second.numU; ++i) {
+                    GLuint vao, vbo;
+                    glGenVertexArrays(1, &vao);
+                    glGenBuffers(1, &vbo);
+                    it->second.vaoArray.push_back(vao);
+                    it->second.vboArray.push_back(vbo);
 
-                    // texture coords
-                    glEnableVertexAttribArray(1);
-                    glVertexAttribPointer(
-                        1,
-                        2,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        sizeof(GLfloat) * 6,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
-                    );
-                }
-                else { // no U and V:
-                    glVertexAttribPointer(
-                        0,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        0,
-                        nullptr
-                    );
-                }                
-            }
+                    glBindVertexArray(vao);
+                    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+                    //glBufferData(GL_ARRAY_BUFFER, it->second.numV * sizeof(GLfloat),
+                    glBufferData(GL_ARRAY_BUFFER, it->second.vertices.size() * sizeof(GLfloat),
+                        &it->second.vertices[0], GL_STATIC_DRAW);
+                    // in_position
+                    glEnableVertexAttribArray(0);
+                    // U and V may not be given by the user
+                    if (it->second.vertices.size() / (it->second.numU * it->second.numV) > 3) {
+                        glVertexAttribPointer(
+                            0,
+                            3,
+                            GL_FLOAT,
+                            GL_FALSE,
+                            sizeof(GLfloat) * 5,
+                            reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * it->second.numV)
+                        );
+
+                        // texture coords
+                        glEnableVertexAttribArray(1);
+                        glVertexAttribPointer(
+                            1,
+                            2,
+                            GL_FLOAT,
+                            GL_FALSE,
+                            sizeof(GLfloat) * 6,
+                            reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * it->second.numV)
+                        );
+                    }
+                    else { // no U and V:
+                        glVertexAttribPointer(
+                            0,
+                            3,
+                            GL_FLOAT,
+                            GL_FALSE,
+                            0,
+                            reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * it->second.numV)
+                        );
+                    }
+                }    
+            }                
 
             glBindVertexArray(0);
 

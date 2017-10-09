@@ -98,8 +98,8 @@ namespace openspace {
             // then numU numU will both equal 21
             int numU, numV;
             MeshType style;
-            GLuint vao;
-            GLuint vbo;
+            std::vector<GLuint> vaoArray;
+            std::vector<GLuint> vboArray;
             std::vector<GLfloat> vertices;
         };
 
