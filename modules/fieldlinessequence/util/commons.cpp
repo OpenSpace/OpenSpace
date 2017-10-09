@@ -22,28 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__
-
-#include <string>
+#include <modules/fieldlinessequence/util/commons.h>
 
 namespace openspace {
-namespace fls { // (F)ield(L)ines(S)equence
+namespace fls {
 
-enum Model : int {
-    BATSRUS = 0,
-    ENLIL,
-    PFSS,
-    INVALID
-};
-
-Model stringToModel(const std::string S);
-
-const float A_U_TO_METER = 149597870700.f;  // Astronomical Units
-const float R_E_TO_METER = 6371000.f;       // Earth radius
-const float R_S_TO_METER = 695700000.f;     // Sun radius
+Model stringToModel(const std::string S) {
+    if (S == "batsrus") {
+        return Model::BATSRUS;
+    } else if (S == "enlil") {
+        return Model::ENLIL;
+    } else if (S == "pfss") {
+        return Model::PFSS;
+    }
+    return Model::INVALID;
+}
 
 } // namespace fls
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__

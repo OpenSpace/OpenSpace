@@ -149,17 +149,6 @@ namespace {
         }
         return tmp;
     }
-
-    openspace::fls::Model stringToModel(const std::string S) {
-        if (S == "batsrus") {
-            return openspace::fls::Model::BATSRUS;
-        } else if (S == "enlil") {
-            return openspace::fls::Model::ENLIL;
-        } else if (S == "pfss") {
-            return openspace::fls::Model::PFSS;
-        }
-        return openspace::fls::Model::INVALID;
-    }
 } // namespace
 
 namespace openspace {
@@ -445,7 +434,7 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
     std::string modelStr;
     if (_dictionary->getValue(KEY_JSON_SIMULATION_MODEL, modelStr)) {
         std::transform(modelStr.begin(), modelStr.end(), modelStr.begin(), ::tolower);
-        model = stringToModel(modelStr);
+        model = fls::stringToModel(modelStr);
     } else {
         LERROR(_name << ": Must specify '" << KEY_JSON_SIMULATION_MODEL << "'");
         return false;

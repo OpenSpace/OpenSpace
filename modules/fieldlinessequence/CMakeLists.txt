@@ -35,6 +35,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequencesetup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
