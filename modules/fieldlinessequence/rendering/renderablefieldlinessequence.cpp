@@ -209,8 +209,6 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             if (_states[_activeStateIndex].nExtraQuantities() > 0) {
                 _shouldUpdateColorBuffer   = true;
                 _shouldUpdateMaskingBuffer = true;
-            } else {
-                _pColorMethod = ColorMethod::UNIFORM;
             }
 
             // Everything is set and ready for rendering!

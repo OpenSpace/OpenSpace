@@ -474,11 +474,13 @@ void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
 }
 
 void RenderableFieldlinesSequence::setupProperties() {
+    bool hasExtras = _states[0].nExtraQuantities() > 0;
+
     // -------------- Add non-grouped properties (enablers and buttons) -------------- //
     addProperty(_pColorABlendEnabled);
     addProperty(_pDomainEnabled);
     addProperty(_pFlowEnabled);
-    addProperty(_pMaskingEnabled);
+    if (hasExtras) { addProperty(_pMaskingEnabled); }
     addProperty(_pFocusOnOriginBtn);
     addProperty(_pJumpToStartBtn);
 
@@ -486,111 +488,114 @@ void RenderableFieldlinesSequence::setupProperties() {
     addPropertySubOwner(_pColorGroup);
     addPropertySubOwner(_pDomainGroup);
     addPropertySubOwner(_pFlowGroup);
-    addPropertySubOwner(_pMaskingGroup);
+    if (hasExtras) { addPropertySubOwner(_pMaskingGroup); }
 
     // ------------------------- Add Properties to the groups ------------------------- //
-    _pColorGroup.addProperty(_pColorMethod);
-    _pColorGroup.addProperty(_pColorQuantity);
-    _pColorGroup.addProperty(_pColorQuantityMin);
-    _pColorGroup.addProperty(_pColorQuantityMax);
-    _pColorGroup.addProperty(_pColorTablePath);
     _pColorGroup.addProperty(_pColorUniform);
-
     _pDomainGroup.addProperty(_pDomainX);
     _pDomainGroup.addProperty(_pDomainY);
     _pDomainGroup.addProperty(_pDomainZ);
     _pDomainGroup.addProperty(_pDomainR);
-
     _pFlowGroup.addProperty(_pFlowReversed);
     _pFlowGroup.addProperty(_pFlowColor);
     _pFlowGroup.addProperty(_pFlowParticleSize);
     _pFlowGroup.addProperty(_pFlowParticleSpacing);
     _pFlowGroup.addProperty(_pFlowSpeed);
+    if (hasExtras) {
+        _pColorGroup.addProperty(_pColorMethod);
+        _pColorGroup.addProperty(_pColorQuantity);
+        _pColorGroup.addProperty(_pColorQuantityMin);
+        _pColorGroup.addProperty(_pColorQuantityMax);
+        _pColorGroup.addProperty(_pColorTablePath);
+        _pMaskingGroup.addProperty(_pMaskingMin);
+        _pMaskingGroup.addProperty(_pMaskingMax);
+        _pMaskingGroup.addProperty(_pMaskingQuantity);
 
-    _pMaskingGroup.addProperty(_pMaskingMin);
-    _pMaskingGroup.addProperty(_pMaskingMax);
-    _pMaskingGroup.addProperty(_pMaskingQuantity);
-
-    // ----------------------- Add Options to OptionProperties ----------------------- //
-    _pColorMethod.addOption(ColorMethod::UNIFORM, "Uniform");
-    _pColorMethod.addOption(ColorMethod::BY_QUANTITY, "By Quantity");
-
-    /* Add option for each extra quantity. We assume that there are just as many names to
-       extra quantities as there are extra quantities. We also assume that all states in
-       the given sequence have the same extra quantities! */
-    const size_t N_EXTRA_QUANTITIES = _states[0].nExtraQuantities();
-    auto EXTRA_VARIABLE_NAMES_VEC = _states[0].extraQuantityNames();
-    for (int i = 0; i < N_EXTRA_QUANTITIES; ++i) {
-        _pColorQuantity.addOption(i, EXTRA_VARIABLE_NAMES_VEC[i]);
-        _pMaskingQuantity.addOption(i, EXTRA_VARIABLE_NAMES_VEC[i]);
+        // --------------------- Add Options to OptionProperties --------------------- //
+        _pColorMethod.addOption(ColorMethod::UNIFORM, "Uniform");
+        _pColorMethod.addOption(ColorMethod::BY_QUANTITY, "By Quantity");
+        // Add option for each extra quantity. Assumes there are just as many names to
+        // extra quantities as there are extra quantities. Also assume that all states in
+        // the given sequence have the same extra quantities! */
+        const size_t N_EXTRA_QUANTITIES = _states[0].nExtraQuantities();
+        const std::vector<std::string>& XTRA_NAMES_VEC = _states[0].extraQuantityNames();
+        for (int i = 0; i < N_EXTRA_QUANTITIES; ++i) {
+            _pColorQuantity.addOption(i, XTRA_NAMES_VEC[i]);
+            _pMaskingQuantity.addOption(i, XTRA_NAMES_VEC[i]);
+        }
+        // Each quantity should have its own color table and color table range, no more, no less
+        _colorTablePaths.resize(N_EXTRA_QUANTITIES, _colorTablePaths.back());
+        _colorTableRanges.resize(N_EXTRA_QUANTITIES, _colorTableRanges.back());
+        _maskingRanges.resize(N_EXTRA_QUANTITIES, _maskingRanges.back());
     }
-    // Each quantity should have its own color table and color table range, no more, no less
-    _colorTablePaths.resize(N_EXTRA_QUANTITIES, _colorTablePaths.back());
-    _colorTableRanges.resize(N_EXTRA_QUANTITIES, _colorTableRanges.back());
-    _maskingRanges.resize(N_EXTRA_QUANTITIES, _maskingRanges.back());
 
     definePropertyCallbackFunctions();
 
-    // Set defaults
-    _pColorQuantity = 0;
-    _pColorQuantityMin = std::to_string(_colorTableRanges[_pColorQuantity].x);
-    _pColorQuantityMax = std::to_string(_colorTableRanges[_pColorQuantity].y);
-    _pColorTablePath = _colorTablePaths[_pColorQuantity];
+    if (hasExtras) {
+        // Set defaults
+        _pColorQuantity = 0;
+        _pColorQuantityMin = std::to_string(_colorTableRanges[0].x);
+        _pColorQuantityMax = std::to_string(_colorTableRanges[0].y);
+        _pColorTablePath = _colorTablePaths[0];
 
-    _pMaskingQuantity = 0;
-    _pMaskingMin = std::to_string(_maskingRanges[_pMaskingQuantity].x);
-    _pMaskingMax = std::to_string(_maskingRanges[_pMaskingQuantity].y);
+        _pMaskingQuantity = 0;
+        _pMaskingMin = std::to_string(_maskingRanges[0].x);
+        _pMaskingMax = std::to_string(_maskingRanges[0].y);
+    }
 }
 
 void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     // Add Property Callback Functions
-    _pColorQuantity.onChange([this] {
-        LDEBUG("CHANGED COLORING QUANTITY");
-        _shouldUpdateColorBuffer = true;
-        _pColorQuantityMin = std::to_string(_colorTableRanges[_pColorQuantity].x);
-        _pColorQuantityMax = std::to_string(_colorTableRanges[_pColorQuantity].y);
-        _pColorTablePath = _colorTablePaths[_pColorQuantity];
-    });
+    bool hasExtras = _states[0].nExtraQuantities() > 0;
+    if (hasExtras) {
+        _pColorQuantity.onChange([this] {
+            LDEBUG("CHANGED COLORING QUANTITY");
+            _shouldUpdateColorBuffer = true;
+            _pColorQuantityMin = std::to_string(_colorTableRanges[_pColorQuantity].x);
+            _pColorQuantityMax = std::to_string(_colorTableRanges[_pColorQuantity].y);
+            _pColorTablePath = _colorTablePaths[_pColorQuantity];
+        });
 
-    _pColorTablePath.onChange([this] {
-        _transferFunction->setPath(_pColorTablePath);
-        _colorTablePaths[_pColorQuantity] = _pColorTablePath;
-    });
+        _pColorTablePath.onChange([this] {
+            _transferFunction->setPath(_pColorTablePath);
+            _colorTablePaths[_pColorQuantity] = _pColorTablePath;
+        });
 
-    _pColorQuantityMin.onChange([this] {
-        LDEBUG("CHANGED MIN VALUE");
-        float f = stringToFloat(_pColorQuantityMin, _colorTableRanges[_pColorQuantity].x);
-        _pColorQuantityMin = std::to_string(f);
-        _colorTableRanges[_pColorQuantity].x = f;
-    });
+        _pColorQuantityMin.onChange([this] {
+            LDEBUG("CHANGED MIN VALUE");
+            float f = stringToFloat(_pColorQuantityMin, _colorTableRanges[_pColorQuantity].x);
+            _pColorQuantityMin = std::to_string(f);
+            _colorTableRanges[_pColorQuantity].x = f;
+        });
 
-    _pColorQuantityMax.onChange([this] {
-        LDEBUG("CHANGED MAX VALUE");
-        float f = stringToFloat(_pColorQuantityMax, _colorTableRanges[_pColorQuantity].y);
-        _pColorQuantityMax = std::to_string(f);
-        _colorTableRanges[_pColorQuantity].y = f;
-    });
+        _pColorQuantityMax.onChange([this] {
+            LDEBUG("CHANGED MAX VALUE");
+            float f = stringToFloat(_pColorQuantityMax, _colorTableRanges[_pColorQuantity].y);
+            _pColorQuantityMax = std::to_string(f);
+            _colorTableRanges[_pColorQuantity].y = f;
+        });
 
-    _pMaskingQuantity.onChange([this] {
-        LDEBUG("CHANGED MASKING QUANTITY");
-        _shouldUpdateMaskingBuffer = true;
-        _pMaskingMin = std::to_string(_maskingRanges[_pMaskingQuantity].x);
-        _pMaskingMax = std::to_string(_maskingRanges[_pMaskingQuantity].y);
-    });
+        _pMaskingQuantity.onChange([this] {
+            LDEBUG("CHANGED MASKING QUANTITY");
+            _shouldUpdateMaskingBuffer = true;
+            _pMaskingMin = std::to_string(_maskingRanges[_pMaskingQuantity].x);
+            _pMaskingMax = std::to_string(_maskingRanges[_pMaskingQuantity].y);
+        });
 
-    _pMaskingMin.onChange([this] {
-        LDEBUG("CHANGED LOWER MASKING LIMIT");
-        float f = stringToFloat(_pMaskingMin, _maskingRanges[_pMaskingQuantity].x);
-        _pMaskingMin = std::to_string(f);
-        _maskingRanges[_pMaskingQuantity].x = f;
-    });
+        _pMaskingMin.onChange([this] {
+            LDEBUG("CHANGED LOWER MASKING LIMIT");
+            float f = stringToFloat(_pMaskingMin, _maskingRanges[_pMaskingQuantity].x);
+            _pMaskingMin = std::to_string(f);
+            _maskingRanges[_pMaskingQuantity].x = f;
+        });
 
-    _pMaskingMax.onChange([this] {
-        LDEBUG("CHANGED UPPER MASKING LIMIT");
-        float f = stringToFloat(_pMaskingMax, _maskingRanges[_pMaskingQuantity].y);
-        _pMaskingMax = std::to_string(f);
-        _maskingRanges[_pMaskingQuantity].y = f;
-    });
+        _pMaskingMax.onChange([this] {
+            LDEBUG("CHANGED UPPER MASKING LIMIT");
+            float f = stringToFloat(_pMaskingMax, _maskingRanges[_pMaskingQuantity].y);
+            _pMaskingMax = std::to_string(f);
+            _maskingRanges[_pMaskingQuantity].y = f;
+        });
+    }
 
     _pFocusOnOriginBtn.onChange([this] {
         LDEBUG("SET FOCUS NODE TO PARENT");
