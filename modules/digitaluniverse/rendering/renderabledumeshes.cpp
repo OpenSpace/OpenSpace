@@ -119,6 +119,12 @@ namespace {
         "Transformation Matrix",
         "Transformation matrix to be applied to each astronomical object."
     };
+
+    static const openspace::properties::Property::PropertyInfo MeshColorInfo = {
+        "MeshColor",
+        "Meshes colors",
+        "The defined colors for the meshes to be rendered."
+    };
 }  // namespace
 
 namespace openspace {
@@ -188,6 +194,12 @@ namespace openspace {
                     new Matrix4x4Verifier<double>,
                     Optional::Yes,
                     TransformationMatrixInfo.description
+                },
+                {
+                    MeshColorInfo.identifier,
+                    new Vector3ListVerifier<float>,
+                    Optional::No,
+                    MeshColorInfo.description
                 },
             }
         };
@@ -313,6 +325,17 @@ namespace openspace {
         if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
             _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
         }
+
+        if (dictionary.hasKey(MeshColorInfo.identifier)) {
+            ghoul::Dictionary colorDic = dictionary.value<ghoul::Dictionary>(
+                MeshColorInfo.identifier
+                );
+            for (int i = 0; i < colorDic.size(); ++i) {
+                _meshColorMap.insert({ i + 1,
+                    colorDic.value<glm::vec3>(std::to_string(i + 1)) });
+            }
+
+        }
     }
 
     bool RenderableDUMeshes::isReady() const {
@@ -388,11 +411,10 @@ namespace openspace {
 
         _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
         _program->setUniform("alphaValue", _alphaValue);
-        _program->setUniform("scaleFactor", _scaleFactor);
-        
-        _program->setUniform("color", glm::vec3(1.0, 0.0, 0.0));
+        _program->setUniform("scaleFactor", _scaleFactor);                
 
         for (auto pair : _renderingMeshesMap) {
+            _program->setUniform("color", _meshColorMap[pair.second.colorIndex]);
             glBindVertexArray(pair.second.vao);
             switch (pair.second.style)
             {
