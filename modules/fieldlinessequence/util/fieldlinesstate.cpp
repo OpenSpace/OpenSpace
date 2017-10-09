@@ -51,11 +51,6 @@ namespace {
 
 namespace openspace {
 
-FieldlinesState::FieldlinesState() {}
-FieldlinesState::FieldlinesState(const std::string& PATH_TO_OSFLS_FILE, bool& loadSucessful) {
-    loadSucessful = loadStateFromOsfls(PATH_TO_OSFLS_FILE);
-}
-
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 /**
  * Traces and adds line vertices to state. (Also sets the simulation model variable: _model!)
@@ -588,8 +583,8 @@ void FieldlinesState::saveStateToJson(const std::string& ABS_FILEPATH) {
 
 // Returns one of the extra quantity vectors, _extraQuantities[INDEX].
 // If INDEX is out of scope an empty vector is returned and the referenced bool will be false.
-const vector<float>&  FieldlinesState::extraQuantity(const size_t INDEX,
-                                                     bool& isSuccessful) const {
+const std::vector<float>&  FieldlinesState::extraQuantity(const size_t INDEX,
+                                                          bool& isSuccessful) const {
     if (INDEX < _extraQuantities.size()) {
         isSuccessful = true;
         return _extraQuantities[INDEX];

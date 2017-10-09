@@ -46,8 +46,8 @@ namespace {
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
-    const char* KEY_INPUT_FILE_TYPE         = "InputFileType";   // [STRING]
-    const char* KEY_SOURCE_FOLDER           = "SourceFolder";    // [STRING]
+    const char* KEY_INPUT_FILE_TYPE         = "InputFileType";   // [STRING] "cdf", "json" or "osfls"
+    const char* KEY_SOURCE_FOLDER           = "SourceFolder";    // [STRING] should be path to folder containing the input files
 
     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
     const char* KEY_CDF_SEED_POINT_FILE     = "SeedPointFile";   // [STRING] Path to a .txt file containing seed points
@@ -213,7 +213,7 @@ void RenderableFieldlinesSequence::initialize() {
         return;
     }
 
-    // Set the default color table, just in case the (optional) user defined paths are corrupt!
+    // Set a default color table, just in case the (optional) user defined paths are corrupt/not provided!
     _colorTablePaths.push_back("${OPENSPACE_DATA}/colortables/kroyw.txt");
     _transferFunction = std::make_shared<TransferFunction>(absPath(_colorTablePaths[0]));
 
@@ -292,7 +292,9 @@ void RenderableFieldlinesSequence::initialize() {
     _isReady = true;
 }
 
-/*
+/**
+ * Extracts the general information (from the lua modfile) that is mandatory for the class
+ * to function; such as the file type and the location of the source files.
  * Returns false if it fails to extract mandatory information!
  */
 bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
@@ -413,7 +415,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     }
 }
 
-/*
+/**
  * Returns false if it fails to extract mandatory information!
  */
 bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& model) {

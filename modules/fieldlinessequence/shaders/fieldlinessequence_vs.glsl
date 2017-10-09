@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 // General Uniforms that's always needed
 uniform vec4      lineColor;
 uniform mat4      modelViewProjection;
@@ -123,6 +121,6 @@ void main() {
 
     vec4 position_in_meters = vec4(in_position, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
-    gl_Position = z_normalization(positionClipSpace);
+    gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
     vs_depth = gl_Position.w;
 }

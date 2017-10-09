@@ -33,8 +33,6 @@
 #include <string>
 #include <vector>
 
-using std::vector;
-
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 namespace ccmc {
     class Kameleon;
@@ -45,15 +43,14 @@ namespace openspace {
 
 class FieldlinesState {
 public:
-    FieldlinesState();
-    FieldlinesState(const std::string& PATH_TO_OSFLS_FILE, bool& loadSucessful);
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     bool addLinesFromKameleon(ccmc::Kameleon* kameleon,
-                              const vector<glm::vec3>& SEED_POINTS,
+                              const std::vector<glm::vec3>& SEED_POINTS,
                               const std::string TRACING_VAR);
-    void addExtraQuantities(ccmc::Kameleon* kameleon, vector<std::string>& xtraScalarVars,
-                                                      vector<std::string>& xtraMagVars);
+    void addExtraQuantities(ccmc::Kameleon* kameleon,
+                            std::vector<std::string>& xtraScalarVars,
+                            std::vector<std::string>& xtraMagVars);
     void   convertLatLonToCartesian(const float SCALE = 1.f);
     void   scalePositions(const float SCALE);
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
@@ -66,37 +63,36 @@ public:
     void   saveStateToJson(const std::string& PATH_TO_JSON_FILE);
 
     // ------------------------------GETTERS-----------------------------------------//
-    const vector<vector<float>>& extraQuantities()    const { return _extraQuantities; }
-    const vector<std::string>&   extraQuantityNames() const { return _extraQuantityNames; }
-    const vector<GLsizei>&       lineCount()          const { return _lineCount; }
-    const vector<GLint>&         lineStart()          const { return _lineStart; }
-    size_t                       nExtraQuantities()   const { return _extraQuantities.size(); }
-    fls::Model                   model()              const { return _model; }
-    double                       triggerTime()        const { return _triggerTime; }
-    const vector<glm::vec3>&     vertexPositions()    const { return _vertexPositions; }
+    const std::vector<std::vector<float>>& extraQuantities()    const { return _extraQuantities; }
+    const std::vector<std::string>&        extraQuantityNames() const { return _extraQuantityNames; }
+    const std::vector<GLsizei>&            lineCount()          const { return _lineCount; }
+    const std::vector<GLint>&              lineStart()          const { return _lineStart; }
+    size_t                                 nExtraQuantities()   const { return _extraQuantities.size(); }
+    fls::Model                             model()              const { return _model; }
+    double                                 triggerTime()        const { return _triggerTime; }
+    const std::vector<glm::vec3>&          vertexPositions()    const { return _vertexPositions; }
 
     // Special getter. Returns extraQuantities[INDEX].
-    const vector<float>&       extraQuantity(const size_t INDEX, bool& isSuccesful) const;
+    const std::vector<float>& extraQuantity(const size_t INDEX, bool& isSuccesful) const;
 
     void setTriggerTime(const double T) { _triggerTime = T; }
 
 private:
-    bool                  _isMorphable = false;
-    double                _triggerTime = -1.0;
-    fls::Model            _model;
+    bool                            _isMorphable = false;
+    double                          _triggerTime = -1.0;
+    fls::Model                      _model;
 
-    vector<glm::vec3>     _vertexPositions;
-    vector<GLint>         _lineStart;
-    vector<GLsizei>       _lineCount;
-    vector<vector<float>> _extraQuantities;
-    vector<std::string>   _extraQuantityNames;
+    std::vector<std::vector<float>> _extraQuantities;
+    std::vector<std::string>        _extraQuantityNames;
+    std::vector<GLsizei>            _lineCount;
+    std::vector<GLint>              _lineStart;
+    std::vector<glm::vec3>          _vertexPositions;
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     void loadExtrasIntoKameleon(ccmc::Kameleon* kameleon,
-                                vector<std::string>& xtraScalarVars,
-                                vector<std::string>& xtraMagVars);
+                                std::vector<std::string>& xtraScalarVars,
+                                std::vector<std::string>& xtraMagVars);
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
-    // TODO: Maybe introduce a vector containing seed point indices
 };
 
 } // namespace openspace
