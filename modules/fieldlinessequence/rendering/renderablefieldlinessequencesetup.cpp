@@ -214,7 +214,7 @@ void RenderableFieldlinesSequence::initialize() {
     }
 
     // Set a default color table, just in case the (optional) user defined paths are corrupt/not provided!
-    _colorTablePaths.push_back("${OPENSPACE_DATA}/colortables/kroyw.txt");
+    _colorTablePaths.push_back("${OPENSPACE_DATA}/scene/fieldlinessequence/colortables/kroyw.txt");
     _transferFunction = std::make_shared<TransferFunction>(absPath(_colorTablePaths[0]));
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
