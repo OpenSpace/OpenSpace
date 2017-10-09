@@ -25,15 +25,26 @@
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
 #include <ext/json/json.hpp>
+
 #include <openspace/util/time.h>
 
 #include <ghoul/logging/logmanager.h>
 
 #include <fstream>
 
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+    #include <ccmc/Kameleon.h>
+    #include <ccmc/KameleonInterpolator.h>
+    #include <modules/kameleon/include/kameleonhelper.h>
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
 namespace {
     std::string _loggerCat = "FieldlinesState";
     const int CURRENT_VERSION = 0;
+
+    const std::string T_AS_P_OVER_RHO = "T = p/rho";
+    const std::string J_PARALLEL_B    = "Current: mag(J||B)";
+    const float TO_KELVIN = 72429735.6984f; // <-- [nPa]/[amu/cm^3] * TO_KELVIN => Temperature in Kelvin
 
     using json = nlohmann::json;
 }
@@ -44,6 +55,99 @@ FieldlinesState::FieldlinesState() {}
 FieldlinesState::FieldlinesState(const std::string& PATH_TO_OSFLS_FILE, bool& loadSucessful) {
     loadSucessful = loadStateFromOsfls(PATH_TO_OSFLS_FILE);
 }
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+/**
+ * Traces and adds line vertices to state. (Also sets the simulation model variable: _model!)
+ * Vertices may need to be scaled to meters & converted from spherical into cartesian coordinates.
+ * Note that extraQuantities will NOT be set!
+ */
+bool FieldlinesState::addLinesFromKameleon(ccmc::Kameleon* kameleon,
+                                          const std::vector<glm::vec3>& SEED_POINTS,
+                                          const std::string TRACING_VAR) {
+
+    _model = fls::stringToModel(kameleon->getModelName());
+
+    float innerBoundaryLimit;
+
+    switch (_model) {
+        case fls::Model::BATSRUS :
+            innerBoundaryLimit = 2.5f;  // TODO specify in Lua?
+            break;
+        case fls::Model::ENLIL :
+            innerBoundaryLimit = 0.11f; // TODO specify in Lua?
+            break;
+        default:
+            LERROR("OpenSpace's fieldlines sequence currently only supports CDFs from" <<
+                "the BATSRUS and ENLIL models!" );
+            return false;
+    }
+
+    // --------------------------- LOAD TRACING VARIABLE ---------------------------- //
+    if (!kameleon->loadVariable(TRACING_VAR)) {
+        LERROR("FAILED TO LOAD TRACING VARIABLE: " << TRACING_VAR);
+        return false;
+    }
+
+    LINFO("TRACING FIELD LINES!");
+    // - LOOP THROUGH THE SEED POINTS, TRACE LINES AND CONVERT TO THE DESIRED FORMAT - //
+    size_t lineStart = 0;
+    for (glm::vec3 seed : SEED_POINTS) {
+        //--------------------------------------------------------------------------//
+        // We have to create a new tracer (or actually a new interpolator) for each //
+        // new line, otherwise some issues occur                                    //
+        //--------------------------------------------------------------------------//
+        std::unique_ptr<ccmc::Interpolator> interpolator =
+                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+        ccmc::Tracer tracer(kameleon, interpolator.get());
+        tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
+        ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(TRACING_VAR,
+                                                                  seed.x,
+                                                                  seed.y,
+                                                                  seed.z);
+        const std::vector<ccmc::Point3f>& POSITIONS = ccmcFieldline.getPositions();
+
+        _lineStart.push_back(lineStart);
+        const size_t N_LINE_POINTS = POSITIONS.size();
+        _lineCount.push_back(static_cast<GLsizei>(N_LINE_POINTS));
+        lineStart += static_cast<GLint>(N_LINE_POINTS);
+
+        for (const ccmc::Point3f& p : POSITIONS) {
+            _vertexPositions.emplace_back(
+                    glm::vec3(p.component1, p.component2, p.component3));
+        }
+    }
+
+    return _vertexPositions.size() > 0;
+}
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+/**
+* Converts all glm::vec3 in _vertexPositions from spherical (radius, latitude, longitude)
+* coordinates into cartesian coordinates. The longitude and latitude coordinates are
+* expected to be in degrees. SCALE is an optional scaling factor.
+*/
+void FieldlinesState::convertLatLonToCartesian(const float SCALE /* = 1.f */) {
+    for (glm::vec3& p : _vertexPositions) {
+
+        const float R = p.x * SCALE;
+        const float LAT = glm::radians(p.y);
+        const float LON = glm::radians(p.z);
+        const float R_COS_LAT = R * cos(LAT);
+
+        p = glm::vec3(R_COS_LAT * cos(LON), R_COS_LAT* sin(LON), R * sin(LAT));
+    }
+}
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+void FieldlinesState::scalePositions(const float SCALE) {
+    for (glm::vec3& p : _vertexPositions) {
+        p *= SCALE;
+    }
+}
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) {
     std::ifstream ifs(PATH_TO_OSFLS_FILE, std::ifstream::binary);

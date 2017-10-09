@@ -24,6 +24,11 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+    #include <ccmc/Kameleon.h>
+    #include <modules/kameleon/include/kameleonhelper.h>
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scene.h>
@@ -33,6 +38,9 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
+#include <fstream>
+#include <sstream>
+
 namespace {
     std::string _loggerCat = "RenderableFieldlinesSequence";
 
@@ -41,14 +49,21 @@ namespace {
     const char* KEY_INPUT_FILE_TYPE         = "InputFileType";   // [STRING]
     const char* KEY_SOURCE_FOLDER           = "SourceFolder";    // [STRING]
 
+    // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
+    const char* KEY_CDF_SEED_POINT_FILE     = "SeedPointFile";   // [STRING] Path to a .txt file containing seed points
+    const char* KEY_JSON_SIMULATION_MODEL   = "SimulationModel"; // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
+
+    // ----------------------- OPTIONAL INPUT TYPE SPECIFIC KEYS ---------------------- //
+    const char* KEY_CDF_EXTRA_VARIABLES     = "ExtraVariables";  // [STRING ARRAY]
+    const char* KEY_CDF_TRACING_VARIABLE    = "TracingVariable"; // [STRING]
+    const char* KEY_JSON_SCALING_FACTOR     = "ScaleToMeters";   // [STRING]
+    const char* KEY_OSLFS_LOAD_AT_RUNTIME   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
+
     // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
     const char* KEY_COLOR_TABLE_PATHS       = "ColorTablePaths"; // [STRING ARRAY] Values should be paths to .txt files
     const char* KEY_COLOR_TABLE_RANGES      = "ColorTableRanges";// [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     const char* KEY_MASKING_RANGES          = "MaskingRanges";   // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     const char* KEY_OUTPUT_FOLDER           = "OutputFolder";    // [STRING] Value should be path to folder where states are saved (JSON/CDF input => osfls output & oslfs input => JSON output)
-    const char* KEY_JSON_SIMULATION_MODEL   = "SimulationModel"; // [STRING]
-    const char* KEY_JSON_SCALING_FACTOR     = "ScaleToMeters";   // [STRING]
-    const char* KEY_OSLFS_LOAD_AT_RUNTIME   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     const char* VALUE_INPUT_FILE_TYPE_CDF   = "cdf";
@@ -209,7 +224,11 @@ void RenderableFieldlinesSequence::initialize() {
     // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM SOURCE
     switch (sourceFileType) {
         case SourceFileType::CDF:
-            LERROR("CDF NOT YET IMPLEMENTED!"); return;
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+            if (!getStatesFromCdfFiles(outputFolderPath)) {
+                return;
+            }
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
             break;
         case SourceFileType::JSON:
             if (!loadJsonStatesIntoRAM(outputFolderPath)) {
@@ -292,6 +311,10 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         // Verify that the input type is correct
         if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_CDF) {
             sourceFileType = SourceFileType::CDF;
+#ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
+            LERROR(_name << ": CDF file inputs requires the 'Kameleon' module to be enabled!");
+            return false;
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
         } else if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_JSON) {
             sourceFileType = SourceFileType::JSON;
         } else if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_OSFLS) {
@@ -687,5 +710,124 @@ void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
     _startTimes.push_back(state.triggerTime());
     _nStates++;
 }
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& OUTPUT_FOLDER) {
+
+    std::string seedFilePath;
+    std::string tracingVar;
+    std::vector<std::string> extraVars;
+    if (!extractCdfInfoFromDictionary(seedFilePath, tracingVar, extraVars)) {
+        return false;
+    }
+
+    std::vector<glm::vec3> seedPoints;
+    if (!extractSeedPointsFromFile(seedFilePath, seedPoints)) {
+        return false;
+    }
+
+    // Load states into RAM!
+    for (std::string filePath : _sourceFiles) {
+        // Create Kameleon object and open CDF file!
+        std::unique_ptr<ccmc::Kameleon> kameleon =
+                kameleonHelper::createKameleonObject(filePath);
+
+        FieldlinesState newState;
+        newState.setTriggerTime(kameleonHelper::getTime(kameleon.get()));
+
+        if (newState.addLinesFromKameleon(kameleon.get(), seedPoints, tracingVar)) {
+            switch (newState.model()) {
+                case fls::BATSRUS:
+                    newState.scalePositions(fls::R_E_TO_METER);
+                    break;
+                case fls::ENLIL :
+                    newState.convertLatLonToCartesian(fls::A_U_TO_METER);
+                    break;
+                default:
+                    break;
+            }
+
+            addStateToSequence(newState);
+            if (!OUTPUT_FOLDER.empty()) {
+                newState.saveStateToOsfls(OUTPUT_FOLDER);
+            }
+        }
+    }
+    return true;
+}
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+/*
+ * Returns false if it fails to extract mandatory information!
+ */
+bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(
+        std::string& seedFilePath,
+        std::string& tracingVar,
+        std::vector<std::string>& extraVars) {
+
+    if (_dictionary->getValue(KEY_CDF_SEED_POINT_FILE, seedFilePath)) {
+        ghoul::filesystem::File seedPointFile(seedFilePath);
+        if (FileSys.fileExists(seedPointFile)) {
+            seedFilePath = absPath(seedFilePath);
+        } else {
+            LERROR(_name << ": The specified seed point file: '" << seedFilePath
+                         << "', does not exist!");
+            return false;
+        }
+    } else {
+        LERROR(_name << ": Must specify '" << KEY_CDF_SEED_POINT_FILE << "'");
+        return false;
+    }
+
+    if (!_dictionary->getValue(KEY_CDF_TRACING_VARIABLE, tracingVar)) {
+        tracingVar = "b"; //  Magnetic field variable as default
+        LWARNING(_name << ": No '" << KEY_CDF_TRACING_VARIABLE << "', using default: "
+                       << tracingVar);
+    }
+
+    ghoul::Dictionary extraQuantityNamesDictionary;
+    if (_dictionary->getValue(KEY_CDF_EXTRA_VARIABLES, extraQuantityNamesDictionary)) {
+        const size_t N_PROVIDED_EXTRAS = extraQuantityNamesDictionary.size();
+        for (size_t i = 1; i <= N_PROVIDED_EXTRAS; ++i) {
+            extraVars.push_back(
+                    extraQuantityNamesDictionary.value<std::string>(std::to_string(i)));
+        }
+    }
+
+    return true;
+}
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+bool RenderableFieldlinesSequence::extractSeedPointsFromFile(
+            const std::string& path,
+            std::vector<glm::vec3>& outVec) {
+
+    std::ifstream seedFile(FileSys.relativePath(path));
+    if (!seedFile.good()) {
+        LERROR("Could not open seed points file '" << path << "'");
+        return false;
+    }
+
+    LDEBUG("Reading seed points from file '" << path << "'");
+    std::string line;
+    while (std::getline(seedFile, line)) {
+        glm::vec3 point;
+        std::stringstream ss(line);
+        ss >> point.x;
+        ss >> point.y;
+        ss >> point.z;
+        outVec.push_back(std::move(point));
+    }
+
+    if (outVec.size() == 0) {
+        LERROR("Found no seed points in: " << path);
+        return false;
+    }
+
+    return true;
+}
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 } // namespace openspace

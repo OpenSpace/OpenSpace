@@ -149,6 +149,15 @@ private:
     void   setModelDependentConstants();
     void   setupProperties();
     bool   prepareForOsflsStreaming();
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+    // --- Initialization functions which require the kameleon module to be loaded! --- //
+    bool   extractCdfInfoFromDictionary(std::string& seedFilePath,
+                                        std::string& tracingVar,
+                                        std::vector<std::string>& extraVars);
+    bool   extractSeedPointsFromFile(const std::string& path,
+                                     std::vector<glm::vec3>& outVec);
+    bool   getStatesFromCdfFiles(const std::string& OUTPUT_FOLDER);
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     inline bool isWithinSequenceInterval(const double CURRENT_TIME) const;

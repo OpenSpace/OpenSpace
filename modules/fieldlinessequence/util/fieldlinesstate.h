@@ -35,12 +35,26 @@
 
 using std::vector;
 
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+namespace ccmc {
+    class Kameleon;
+}
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+
 namespace openspace {
 
 class FieldlinesState {
 public:
     FieldlinesState();
     FieldlinesState(const std::string& PATH_TO_OSFLS_FILE, bool& loadSucessful);
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+    bool addLinesFromKameleon(ccmc::Kameleon* kameleon,
+                              const vector<glm::vec3>& SEED_POINTS,
+                              const std::string TRACING_VAR);
+    void   convertLatLonToCartesian(const float SCALE = 1.f);
+    void   scalePositions(const float SCALE);
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
     bool   loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE);
     void   saveStateToOsfls(const std::string& PATH_TO_OSFLS_FILE);
@@ -61,6 +75,8 @@ public:
 
     // Special getter. Returns extraQuantities[INDEX].
     const vector<float>&       extraQuantity(const size_t INDEX, bool& isSuccesful) const;
+
+    void setTriggerTime(const double T) { _triggerTime = T; }
 
 private:
     bool                  _isMorphable = false;
