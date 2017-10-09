@@ -782,7 +782,6 @@ namespace openspace {
             
             std::stringstream str(line);
 
-            // JCC: This should be moved to the RenderablePlanesCloud:
             glm::vec3 u(0.0f), v(0.0f);
             int textureIndex = 0;
 
@@ -818,7 +817,6 @@ namespace openspace {
                     textureIndex = static_cast<int>(values[i]);
                 }
             }
-
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         } while (!file.eof());
 
@@ -961,6 +959,7 @@ dummy.clear();
         if (_dataIsDirty && _hasSpeckFile) {
             LDEBUG("Creating planes");
 
+            int planeNumber = 0;
             for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
                 glm::vec4 transformedPos = glm::vec4(_transformationMatrix * 
                     glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));                
@@ -988,7 +987,7 @@ dummy.clear();
 
                 RenderingPlane plane; 
                 plane.planeIndex = _fullData[p + _textureVariableIndex];
-
+                
                 // JCC: Ask Abbott about these points refeering to a non-existing texture.
                 if (plane.planeIndex == 30) {
                     //std::cout << "--- Creating planes - index: " << plane.planeIndex << std::endl;
@@ -1070,7 +1069,7 @@ dummy.clear();
                     reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
                 );                                
 
-                _renderingPlanesMap.insert({plane.planeIndex, plane});
+                _renderingPlanesMap.insert({planeNumber++, plane});
             }
 
             glBindVertexArray(0);
