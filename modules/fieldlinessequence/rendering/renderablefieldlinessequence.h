@@ -136,6 +136,7 @@ private:
     properties::TriggerProperty  _pJumpToStartBtn;      // Button which executes a time jump to start of sequence
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
+    void   addStateToSequence(FieldlinesState& STATE);
     void   computeSequenceEndTime();
     void   definePropertyCallbackFunctions();
     bool   extractJsonInfoFromDictionary(fls::Model& model);
@@ -143,8 +144,11 @@ private:
     void   extractOptionalInfoFromDictionary(std::string& outputFolderPath);
     void   extractOsflsInfoFromDictionary();
     void   extractTriggerTimesFromFileNames();
+    bool   loadJsonStatesIntoRAM(const std::string& OUTPUT_FOLDER);
+    void   loadOsflsStatesIntoRAM(const std::string& OUTPUT_FOLDER);
     void   setModelDependentConstants();
     void   setupProperties();
+    bool   prepareForOsflsStreaming();
 
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     inline bool isWithinSequenceInterval(const double CURRENT_TIME) const;

@@ -205,7 +205,6 @@ void RenderableFieldlinesSequence::initialize() {
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
     extractOptionalInfoFromDictionary(outputFolderPath);
-    const bool SHOULD_SAVE_STATES = !outputFolderPath.empty();
 
     // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM SOURCE
     switch (sourceFileType) {
@@ -213,59 +212,18 @@ void RenderableFieldlinesSequence::initialize() {
             LERROR("CDF NOT YET IMPLEMENTED!"); return;
             break;
         case SourceFileType::JSON:
-            fls::Model model;
-            if (!extractJsonInfoFromDictionary(model)) {
+            if (!loadJsonStatesIntoRAM(outputFolderPath)) {
                 return;
-            }
-            // Load states into RAM!
-            for (std::string filePath : _sourceFiles) {
-                FieldlinesState newState;
-                bool loadedSuccessfully = newState.loadStateFromJson(filePath, model,
-                                                                     _scalingFactor);
-                if (loadedSuccessfully) {
-                    _states.push_back(newState);
-                    _startTimes.push_back(newState.triggerTime());
-                    _nStates++;
-                    if (SHOULD_SAVE_STATES) {
-                        std::string pathSafeTimeString = Time(_startTimes.back()).ISO8601();
-                        pathSafeTimeString.replace(13, 1, "-");
-                        pathSafeTimeString.replace(16, 1, "-");
-                        pathSafeTimeString.replace(19, 1, "-");
-                        newState.saveStateToOsfls(outputFolderPath + pathSafeTimeString);
-                    }
-                }
             }
             break;
         case SourceFileType::OSFLS:
             extractOsflsInfoFromDictionary();
             if (_loadingStatesDynamically) {
-                extractTriggerTimesFromFileNames();
-                FieldlinesState newState;
-                bool loadedSuccessfully = newState.loadStateFromOsfls(_sourceFiles[0]);
-                if (loadedSuccessfully) {
-                    _states.push_back(newState);
-                    _nStates = _startTimes.size();
-                    _activeStateIndex = 0;
-                } else {
-                    LERROR("The provided .osfls files seem to be corrupt!");
-                    sourceFileType = SourceFileType::INVALID;
+                if (!prepareForOsflsStreaming()) {
+                    return;
                 }
             } else {
-                // Load states into RAM!
-                for (std::string filePath : _sourceFiles) {
-                    FieldlinesState newState;
-                    bool loadedSuccessfully = newState.loadStateFromOsfls(filePath);
-                    if (loadedSuccessfully) {
-                        _states.push_back(newState);
-                        _startTimes.push_back(newState.triggerTime());
-                        _nStates++;
-
-                        if (SHOULD_SAVE_STATES) {
-                            ghoul::filesystem::File tmpFile(filePath);
-                            newState.saveStateToJson(outputFolderPath + tmpFile.baseName());
-                        }
-                    }
-                }
+                loadOsflsStatesIntoRAM(outputFolderPath);
             }
             break;
         default:
@@ -275,10 +233,15 @@ void RenderableFieldlinesSequence::initialize() {
     // dictionary is no longer needed as everything is extracted
     _dictionary.reset();
 
-    // At this point there's at least one state loaded into memory!
     // No need to store source paths in memory if they are already in RAM!
     if (!_loadingStatesDynamically) {
         _sourceFiles.clear();
+    }
+
+    // At this point there should be at least one state loaded into memory!
+    if (_states.size() == 0) {
+        LERROR("Wasn't able to extract any valid states from provided source files!");
+        return;
     }
 
     computeSequenceEndTime();
@@ -448,6 +411,56 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
                  "Assumes coordinates are already expressed in meters!");
     }
     return true;
+}
+
+bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& OUTPUT_FOLDER) {
+    fls::Model model;
+    if (!extractJsonInfoFromDictionary(model)) {
+        return false;
+    }
+    // Load states into RAM!
+    for (std::string filePath : _sourceFiles) {
+        FieldlinesState newState;
+        bool loadedSuccessfully = newState.loadStateFromJson(filePath, model,
+                                                             _scalingFactor);
+        if (loadedSuccessfully) {
+            addStateToSequence(newState);
+            if (!OUTPUT_FOLDER.empty()) {
+                newState.saveStateToOsfls(OUTPUT_FOLDER);
+            }
+        }
+    }
+    return true;
+}
+
+bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
+    extractTriggerTimesFromFileNames();
+    FieldlinesState newState;
+    if (!newState.loadStateFromOsfls(_sourceFiles[0])) {
+        LERROR("The provided .osfls files seem to be corrupt!");
+        return false;
+    }
+    _states.push_back(newState);
+    _nStates = _startTimes.size();
+    _activeStateIndex = 0;
+    return true;
+
+}
+
+void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& OUTPUT_FOLDER) {
+    // Load states from .osfls files into RAM!
+    for (const std::string FILEPATH : _sourceFiles) {
+        FieldlinesState newState;
+        if (newState.loadStateFromOsfls(FILEPATH)) {
+            addStateToSequence(newState);
+            if (!OUTPUT_FOLDER.empty()) {
+                ghoul::filesystem::File tmpFile(FILEPATH);
+                newState.saveStateToJson(OUTPUT_FOLDER + tmpFile.baseName());
+            }
+        } else {
+            LWARNING("Failed to load state from: " << FILEPATH);
+        }
+    }
 }
 
 void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
@@ -662,6 +675,12 @@ void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
         const double TRIGGER_TIME = Time::convertTime(timeString);
         _startTimes.push_back(TRIGGER_TIME);
     }
+}
+
+void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
+    _states.push_back(state);
+    _startTimes.push_back(state.triggerTime());
+    _nStates++;
 }
 
 } // namespace openspace

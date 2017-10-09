@@ -212,14 +212,20 @@ bool FieldlinesState::loadStateFromJson(const std::string& PATH_TO_JSON_FILE,
  * 11. array of c_str         - Strings naming the extra quantities (elements of _extraQuantityNames). Each string ends with null char '\0'
  */
 void FieldlinesState::saveStateToOsfls(const std::string& ABS_FILEPATH) {
-    // Create the file
-    const std::string EXT = ".osfls";
-    std::ofstream ofs(ABS_FILEPATH + EXT, std::ofstream::binary | std::ofstream::trunc);
+    // ------------------------------- Create the file ------------------------------- //
+    std::string pathSafeTimeString = Time(_triggerTime).ISO8601();
+    pathSafeTimeString.replace(13, 1, "-");
+    pathSafeTimeString.replace(16, 1, "-");
+    pathSafeTimeString.replace(19, 1, "-");
+    const std::string FILENAME = pathSafeTimeString + ".osfls";
+
+    std::ofstream ofs(ABS_FILEPATH + FILENAME, std::ofstream::binary | std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR("Failed to save state to binary file: " << ABS_FILEPATH << EXT);
+        LERROR("Failed to save state to binary file: " << ABS_FILEPATH << FILENAME);
         return;
     }
 
+    // --------- Add each string of _extraQuantityNames into one long string --------- //
     std::string allExtraQuantityNamesInOne = "";
     for (std::string str : _extraQuantityNames) {
         allExtraQuantityNamesInOne += str + '\0'; // Add the null char '\0' for easier reading
