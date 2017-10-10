@@ -208,30 +208,19 @@ Asset* AssetLoader::loadAsset(std::string path) {
     return rawAsset;
 }
 
-std::string AssetLoader::generateAssetPath(const std::string& baseDirectory, const std::string& assetPath) const {
-    if (isRelative(assetPath)) {
-        ghoul::filesystem::File assetFile =
-            static_cast<std::string>(baseDirectory) +
-            ghoul::filesystem::FileSystem::PathSeparator +
-            assetPath +
-            "." +
-            AssetFileSuffix;
-
-        return assetFile.path();
-    }
-    else {
-        std::string assetRoot = ghoul::filesystem::Directory(_assetRootDirectory);
-        ghoul::filesystem::File assetFile =
-            assetRoot +
-            ghoul::filesystem::FileSystem::PathSeparator +
-            assetPath +
-            "." +
-            AssetFileSuffix;
-
-        return assetFile.path();
-    }
+std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
+                                           const std::string& assetPath) const
+{
+    ghoul::filesystem::Directory directory = isRelative(assetPath) ?
+        baseDirectory :
+        _assetRootDirectory;
+   
+    return directory.path() +
+        ghoul::filesystem::FileSystem::PathSeparator +
+        assetPath +
+        "." +
+        AssetFileSuffix;
 }
-
 
 Asset* AssetLoader::getAsset(std::string name) {
     ghoul::filesystem::Directory directory = currentDirectory();
@@ -239,9 +228,10 @@ Asset* AssetLoader::getAsset(std::string name) {
 
     // Check if asset is already loaded.
     const auto it = _importedAssets.find(path);
-    const bool loaded = it != _importedAssets.end();
 
-    return loaded ? it->second.get() : loadAsset(path);
+    return it == _importedAssets.end() ?
+        loadAsset(path) :
+        it->second.get();
 }
 
 Asset* AssetLoader::importRequiredDependency(const std::string& name) {
@@ -251,7 +241,7 @@ Asset* AssetLoader::importRequiredDependency(const std::string& name) {
         return nullptr;
     }
     Asset* dependant = _assetStack.back();
-    dependant->addDependency(asset);
+    dependant->addRequiredDependency(asset);
     return asset;
 }
 
@@ -262,7 +252,7 @@ Asset* AssetLoader::importOptionalDependency(const std::string& name, bool enabl
         return nullptr;
     }
     Asset* owner = _assetStack.back();
-    owner->addOptional(asset, enabled);
+    owner->addOptionalDependency(asset, enabled);
     return asset;
 }
 

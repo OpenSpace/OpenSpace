@@ -72,20 +72,20 @@ public:
     void initialize();
     void deinitialize();
 
-    bool hasDependency(const Asset* asset) const;
-    void addDependency(Asset* asset);
-    void removeDependency(Asset* asset);
-    void removeDependency(const std::string& assetId);
+    bool hasRequiredDependency(const Asset* asset) const;
+    void addRequiredDependency(Asset* asset);
+    void removeRequiredDependency(Asset* asset);
+    void removeRequiredDependency(const std::string& assetId);
 
     bool hasDependants() const;
     bool hasInitializedDependants() const;
 
     std::vector<Asset*> optionalAssets() const;
-    bool hasOptional(const Asset* asset) const;
-    bool hasEnabledOptional(const Asset* asset) const;
-    void setOptionalEnabled(Asset* asset, bool enabled);
-    void addOptional(Asset* asset, bool enabled);
-    void removeOptional(Asset* asset);
+    bool hasOptionalDependency(const Asset* asset) const;
+    bool hasEnabledOptionalDependency(const Asset* asset) const;
+    void setOptionalDependencyEnabled(Asset* asset, bool enabled);
+    void addOptionalDependency(Asset* asset, bool enabled);
+    void removeOptionalDependency(Asset* asset);
 
     void dependantDidInitialize(Asset* dependant);
     void dependantWillDeinitialize(Asset* dependant);

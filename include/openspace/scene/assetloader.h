@@ -44,8 +44,8 @@ namespace openspace {
 class Asset;
 
 namespace assetloader {
-int importDependency(lua_State* state);
-int importOptional(lua_State* state);
+int importRequiredDependency(lua_State* state);
+int importOptionalDependency(lua_State* state);
 int resolveLocalResource(lua_State* state);
 int resolveSyncedResource(lua_State* state);
 int onFinishSynchronization(lua_State* state);

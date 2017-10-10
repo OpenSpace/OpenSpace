@@ -52,13 +52,16 @@ Asset::Asset(AssetLoader* loader, ghoul::filesystem::File assetPath)
 
 std::string Asset::resolveLocalResource(std::string resourceName) {
     std::string currentAssetDirectory = assetDirectory();
-    return currentAssetDirectory + ghoul::filesystem::FileSystem::PathSeparator + resourceName;
+    return currentAssetDirectory +
+        ghoul::filesystem::FileSystem::PathSeparator +
+        resourceName;
 }
 
 std::string Asset::syncDirectory() const {
     std::string currentAssetDirectory = assetDirectory();
     std::string rootAssetDirectory = loader()->syncRootDirectory();
-    std::string relativePath = FileSys.relativePath(currentAssetDirectory, rootAssetDirectory);
+    std::string relativePath = FileSys.relativePath(currentAssetDirectory,
+                                                    rootAssetDirectory);
 
     return loader()->syncRootDirectory() +
         ghoul::filesystem::FileSystem::PathSeparator +
@@ -103,6 +106,7 @@ void Asset::synchronize() {
         // Already synchronized or currently synchronizing
         return;
     }
+
     LDEBUG("Synchronizing asset " << id());
     _readyState = Asset::ReadyState::Synchronizing;
 
@@ -112,7 +116,6 @@ void Asset::synchronize() {
     }
 
     loader()->callOnSynchronize(this);
-
 }
 
 void Asset::initialize() {
@@ -197,19 +200,25 @@ AssetLoader* Asset::loader() const {
     return _loader;
 }
 
-bool Asset::hasDependency(const Asset* asset) const {
-    const auto it = std::find(_requiredDependencies.begin(), _requiredDependencies.end(), asset);
+bool Asset::hasRequiredDependency(const Asset* asset) const {
+    const auto it = std::find(_requiredDependencies.begin(),
+                              _requiredDependencies.end(),
+                              asset);
+
     return it != _requiredDependencies.end();
 }
 
-void Asset::addDependency(Asset* dependency) {
+void Asset::addRequiredDependency(Asset* dependency) {
     if (_readyState == Asset::ReadyState::Initialized) {
         // TODO: Throw: cannot add dep while asset is initialized.
         return;
     }
 
     // Do nothing if the dependency already exists.
-    auto it = std::find(_requiredDependencies.begin(), _requiredDependencies.end(), dependency);
+    auto it = std::find(_requiredDependencies.begin(),
+                        _requiredDependencies.end(),
+                        dependency);
+
     if (it != _requiredDependencies.end()) {
         return;
     }
@@ -220,9 +229,12 @@ void Asset::addDependency(Asset* dependency) {
     //addPropertySubOwner(dependency);
 }
 
-void Asset::removeDependency(Asset* dependency) {
+void Asset::removeRequiredDependency(Asset* dependency) {
     _requiredDependencies.erase(
-        std::remove(_requiredDependencies.begin(), _requiredDependencies.end(), dependency),
+        std::remove(_requiredDependencies.begin(),
+            _requiredDependencies.end(),
+            dependency),
+
         _requiredDependencies.end()
     );
     std::vector<Asset*>& dependants = dependency->_requiredDependants;
@@ -236,12 +248,16 @@ void Asset::removeDependency(Asset* dependency) {
     }
 }
 
-void Asset::removeDependency(const std::string& assetId) {
-    auto dep = std::find_if(_requiredDependencies.begin(), _requiredDependencies.end(), [&assetId](const Asset* d) {
-        return d->id() == assetId;
-    });
+void Asset::removeRequiredDependency(const std::string& assetId) {
+    auto dep = std::find_if(
+        _requiredDependencies.begin(),
+        _requiredDependencies.end(),
+        [&assetId](const Asset* d) {
+            return d->id() == assetId;
+        });
+
     if (dep != _requiredDependencies.end()) {
-       removeDependency(*dep);
+       removeRequiredDependency(*dep);
     } else {
         LERROR("No such dependency '" << assetId << "'");
     }
@@ -256,13 +272,35 @@ void Asset::dependantWillDeinitialize(Asset* dependant) {
 }
 
 bool Asset::hasDependants() const {
-    bool foundDep = false;
     for (const auto& dependant : _requiredDependants) {
-        if (dependant->hasDependency(this)) {
-            foundDep = true;
+        if (dependant->hasRequiredDependency(this)) {
+            return true;
         }
     }
-    return foundDep;
+    for (const auto& dependant : _optionalDependants) {
+        if (dependant->hasEnabledOptionalDependency(this)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Asset::hasInitializedDependants() const {
+    for (const auto& dependant : _requiredDependants) {
+        if (dependant->readyState == Asset::ReadyState::Initialized &&
+            dependant->hasRequiredDependency(this))
+        {
+            return true;
+        }
+    }
+    for (const auto& dependant : _optionalDependants) {
+        if (dependant->readyState == Asset::ReadyState::Initialized &&
+            dependant->hasEnabledOptionalDependency(this))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::vector<Asset*> Asset::optionalAssets() const {
@@ -278,7 +316,7 @@ std::vector<Asset*> Asset::optionalAssets() const {
     return assets;
 }
 
-bool Asset::hasOptional(const Asset* asset) const {
+bool Asset::hasOptionalDependency(const Asset* asset) const {
     auto it = std::find_if(
         _optionalDependencies.begin(),
         _optionalDependencies.end(),
@@ -289,7 +327,7 @@ bool Asset::hasOptional(const Asset* asset) const {
     return it != _optionalDependencies.end();
 }
 
-bool Asset::hasEnabledOptional(const Asset* asset) const {
+bool Asset::hasEnabledOptionalDependency(const Asset* asset) const {
         auto it = std::find_if(
             _optionalDependencies.begin(),
             _optionalDependencies.end(),
@@ -300,17 +338,7 @@ bool Asset::hasEnabledOptional(const Asset* asset) const {
     return it != _optionalDependencies.end();
 }
 
-bool Asset::hasInitializedDependants() const {
-    bool foundInitializedDep = false;
-    for (const auto& dependant : _requiredDependants) {
-        if (dependant->readyState() == Asset::ReadyState::Initialized && dependant->hasDependency(this)) {
-            foundInitializedDep = true;
-        }
-    }
-    return foundInitializedDep;
-}
-
-void Asset::setOptionalEnabled(Asset* asset, bool enabled) {
+void Asset::setOptionalDependencyEnabled(Asset* asset, bool enabled) {
     auto it = std::find_if(
         _optionalDependencies.begin(),
         _optionalDependencies.end(),
@@ -324,7 +352,7 @@ void Asset::setOptionalEnabled(Asset* asset, bool enabled) {
     }
 }
 
-void Asset::removeOptional(Asset* asset) {
+void Asset::removeOptionalDependency(Asset* asset) {
     _optionalDependencies.erase(
         std::remove_if(
             _optionalDependencies.begin(),
@@ -338,7 +366,7 @@ void Asset::removeOptional(Asset* asset) {
     // TODO: Update and validate
 }
 
-void Asset::addOptional(Asset* asset, bool enabled) {
+void Asset::addOptionalDependency(Asset* asset, bool enabled) {
     _optionalDependencies.push_back(std::make_pair(asset, enabled));
     // TODO: Update and validate
 }
