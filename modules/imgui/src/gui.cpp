@@ -211,17 +211,25 @@ static void RenderDrawLists(ImDrawData* drawData) {
 }
 
 
-void addScreenSpaceRenderable(std::string texturePath) {
+void addScreenSpaceRenderableLocal(std::string texturePath) {
     if (!FileSys.fileExists(texturePath)) {
         LWARNING("Could not find image '" << texturePath << "'");
         return;
     }
 
     const std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = openspace.absPath('" + texturePath + "') }";
+        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" + texturePath + "') }";
     const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
+
+void addScreenSpaceRenderableOnline(std::string texturePath) {
+    const std::string luaTable =
+        "{Type = 'ScreenSpaceImageOnline', TexturePath = '" + texturePath + "' }";
+    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+}
+
 } // namespace 
 
 namespace openspace::gui {
@@ -656,16 +664,27 @@ void GUI::render() {
     renderAndUpdatePropertyVisibility();
 
     static const int addImageBufferSize = 256;
-    static char addImageBuffer[addImageBufferSize];
+    static char addImageLocalBuffer[addImageBufferSize];
+    static char addImageOnlineBuffer[addImageBufferSize];
 
-    bool addImage = ImGui::InputText(
-        "addImage",
-        addImageBuffer,
+    bool addImageLocal = ImGui::InputText(
+        "Add Local Image",
+        addImageLocalBuffer,
         addImageBufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
-    if (addImage) {
-        addScreenSpaceRenderable(std::string(addImageBuffer));
+    if (addImageLocal) {
+        addScreenSpaceRenderableLocal(std::string(addImageLocalBuffer));
+    }
+
+    bool addImageOnline = ImGui::InputText(
+        "Add Online Image",
+        addImageOnlineBuffer,
+        addImageBufferSize,
+        ImGuiInputTextFlags_EnterReturnsTrue
+    );
+    if (addImageOnline) {
+        addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
 
     ImGui::Checkbox("ImGUI Internals", &_showInternals);

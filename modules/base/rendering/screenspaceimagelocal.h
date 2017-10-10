@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_st;
+#include <openspace/rendering/screenspacerenderable.h>
 
-out vec2 vs_st;
-out vec4 vs_position;
+#include <openspace/properties/stringproperty.h>
 
-uniform mat4 ModelTransform;
-uniform mat4 ViewProjectionMatrix;
+#include <ghoul/opengl/texture.h>
+ 
+namespace openspace {
+    
+namespace documentation { struct Documentation; }
 
+class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
+public:
+    ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);
 
-void main() {
-    vs_st = in_st;
-    vs_position = ViewProjectionMatrix * ModelTransform * vec4(in_position, 0.0, 1.0);
-    gl_Position = vec4(vs_position);
-}
+    void update() override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    properties::StringProperty _texturePath;
+    bool _textureIsDirty;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
