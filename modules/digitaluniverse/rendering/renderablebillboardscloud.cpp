@@ -153,6 +153,12 @@ namespace {
         "Transformation Matrix",
         "Transformation matrix to be applied to each astronomical object."
     };
+
+    static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+        "RenderOptionInfo",
+        "Render Option",
+        "Debug option for rendering of billboards and texts."
+    };
 }  // namespace
 
 namespace openspace {
@@ -285,6 +291,7 @@ namespace openspace {
         , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
         , _drawElements(DrawElementsInfo, true)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _polygonTexture(nullptr)
         , _spriteTexture(nullptr)
         , _program(nullptr)
@@ -316,6 +323,12 @@ namespace openspace {
             addProperty(_drawElements);
         }
         
+        // DEBUG:
+        _renderOption.addOption(0, "Camera View Direction");
+        _renderOption.addOption(1, "Camera Position Normal");
+        _renderOption.addOption(2, "Screen center Position Normal");
+        addProperty(_renderOption);
+
         if (dictionary.hasKey(keyUnit)) {
             std::string unit = dictionary.value<std::string>(keyUnit);
             if (unit == MeterUnit) {
@@ -450,7 +463,8 @@ namespace openspace {
 
         if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
             _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
-        }
+        }        
+
     }
 
     bool RenderableBillboardsCloud::isReady() const {
@@ -547,6 +561,12 @@ namespace openspace {
         _program->setUniform("projection", projectionMatrix);
         _program->setUniform("modelViewTransform", modelViewMatrix);
         _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
+
+        _program->setUniform("cameraPosition", data.camera.positionVec3());
+        _program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
+        _program->setUniform("renderOption", _renderOption.value());
+        glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0);
+        _program->setUniform("centerScreenInWorldPosition", centerScreenWorld);
         
         _program->setUniform("minBillboardSize", 1.f); // in pixels
         _program->setUniform("color", _pointColor);
@@ -638,13 +658,16 @@ namespace openspace {
             scaledPos *= scale;
             _fontRenderer->render(
                 *_font,
-                scaledPos,                
+                scaledPos,
                 _textColor,
                 pow(10.0, _textSize.value()),
                 _textMinSize,
                 modelViewProjectionMatrix,
                 orthoRight,
                 orthoUp,
+                data.camera.positionVec3(),
+                data.camera.lookUpVectorWorldSpace(),
+                _renderOption.value(),
                 "%s",
                 pair.second.c_str());
         }        

@@ -34,6 +34,10 @@ uniform dmat4 modelViewProjectionTransform;
 uniform float scaleFactor;
 uniform vec3 up;
 uniform vec3 right;
+uniform dvec3 cameraPosition;
+uniform dvec3 cameraLookUp;
+uniform dvec4 centerScreenInWorldPosition;
+uniform int renderOption;
 
 
 in vec4 colorMap[];
@@ -56,10 +60,25 @@ void main() {
     vec4 pos = gl_in[0].gl_Position;
     gs_colorMap = colorMap[0];
     
-    // Temp:
     double scaleMultiply = exp(scaleFactor/10);
-    dvec3 scaledRight = scaleMultiply * right/2.0f;
-    dvec3 scaledUp = scaleMultiply * up/2.0f;
+    dvec3 scaledRight = dvec3(0.0);
+    dvec3 scaledUp = dvec3(0.0);
+    if (renderOption == 0) {
+        scaledRight = scaleMultiply * right/2.0f;
+        scaledUp = scaleMultiply * up/2.0f;
+    } else if (renderOption == 1) {
+        dvec3 normal = normalize(cameraPosition - dvec3(pos.xyz));
+        dvec3 newRight = normalize(cross(cameraLookUp, normal));
+        dvec3 newUp = cross(normal, newRight);
+        scaledRight = scaleMultiply * newRight/2.0f;
+        scaledUp = scaleMultiply * newUp/2.0f;
+    } else if (renderOption == 2) {
+        dvec3 normal = normalize(centerScreenInWorldPosition.xyz - dvec3(pos.xyz));
+        dvec3 newRight = normalize(cross(cameraLookUp, normal));
+        dvec3 newUp = cross(normal, newRight);
+        scaledRight = scaleMultiply * newRight/2.0f;
+        scaledUp = scaleMultiply * newUp/2.0f;
+    }
 
     double unit = PARSEC;
 

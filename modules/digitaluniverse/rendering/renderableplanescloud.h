@@ -120,6 +120,9 @@ namespace openspace {
         properties::BoolProperty _drawElements;
         properties::OptionProperty _blendMode;
 
+        // DEBUG:
+        properties::OptionProperty _renderOption;
+
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
         std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;        
         std::shared_ptr<ghoul::fontrendering::Font> _font;

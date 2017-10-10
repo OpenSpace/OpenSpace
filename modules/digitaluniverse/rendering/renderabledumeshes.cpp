@@ -125,6 +125,12 @@ namespace {
         "Meshes colors",
         "The defined colors for the meshes to be rendered."
     };
+
+    static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+        "RenderOptionInfo",
+        "Render Option",
+        "Debug option for rendering of billboards and texts."
+    };
 }  // namespace
 
 namespace openspace {
@@ -223,8 +229,9 @@ namespace openspace {
             glm::vec4(0.f),
             glm::vec4(1.f)
         )
-        , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
+        , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)        
         , _drawElements(DrawElementsInfo, true)
+        , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _program(nullptr)
         , _fontRenderer(nullptr)
         , _font(nullptr)
@@ -248,6 +255,12 @@ namespace openspace {
                 _hasSpeckFile = _hasSpeckFile == true ? false : true; });
             addProperty(_drawElements);
         }
+
+        // DEBUG:
+        _renderOption.addOption(0, "Camera View Direction");
+        _renderOption.addOption(1, "Camera Position Normal");
+        _renderOption.addOption(2, "Screen center Position Normal");
+        addProperty(_renderOption);
 
         if (dictionary.hasKey(keyUnit)) {
             std::string unit = dictionary.value<std::string>(keyUnit);
@@ -497,6 +510,9 @@ namespace openspace {
                 modelViewProjectionMatrix,
                 orthoRight,
                 orthoUp,
+                data.camera.positionVec3(),
+                data.camera.lookUpVectorWorldSpace(),
+                _renderOption.value(),
                 "%s",
                 pair.second.c_str());
         }

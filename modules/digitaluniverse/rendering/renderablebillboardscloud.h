@@ -125,6 +125,9 @@ namespace openspace {
         properties::BoolProperty _drawElements;
         properties::OptionProperty _colorOption;
 
+        // DEBUG:
+        properties::OptionProperty _renderOption;
+
 
         std::unique_ptr<ghoul::opengl::Texture> _polygonTexture;
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
