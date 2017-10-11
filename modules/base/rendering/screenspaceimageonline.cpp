@@ -131,7 +131,10 @@ void ScreenSpaceImageOnline::update() {
                 );
 
             if (texture) {
-                // LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+                // Images don't need to start on 4-byte boundaries, for example if the
+                // image is only RGB
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
                 texture->uploadTexture();
 
                 // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
