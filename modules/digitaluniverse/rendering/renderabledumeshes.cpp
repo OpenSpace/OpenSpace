@@ -430,7 +430,7 @@ namespace openspace {
 
         for (auto pair : _renderingMeshesMap) {
             _program->setUniform("color", _meshColorMap[pair.second.colorIndex]);
-            for (int i = 0; i < pair.second.numU; ++i) {
+            for (int i = 0; i < pair.second.vaoArray.size(); ++i) {
                 glBindVertexArray(pair.second.vaoArray[i]);
                 switch (pair.second.style)
                 {
@@ -447,7 +447,6 @@ namespace openspace {
                 }
             }                        
         }
-
       
         glBindVertexArray(0);
 
@@ -872,6 +871,7 @@ namespace openspace {
         if (_dataIsDirty && _hasSpeckFile) {
             LDEBUG("Creating planes");
 
+
             std::unordered_map<int, RenderingMesh>::iterator it = _renderingMeshesMap.begin();
             std::unordered_map<int, RenderingMesh>::iterator itEnd = _renderingMeshesMap.end();
 
@@ -904,7 +904,7 @@ namespace openspace {
                 for (int v = 0; v < it->second.vertices.size(); ++v) {
                     it->second.vertices[v] *= scale;
                 }
-                
+                                
                 for (int i = 0; i < it->second.numU; ++i) {
                     GLuint vao, vbo;
                     glGenVertexArrays(1, &vao);
@@ -937,7 +937,7 @@ namespace openspace {
                             2,
                             GL_FLOAT,
                             GL_FALSE,
-                            sizeof(GLfloat) * 6,
+                            sizeof(GLfloat) * 7,
                             reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * it->second.numV)
                         );
                     }
@@ -950,8 +950,58 @@ namespace openspace {
                             0,
                             reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * it->second.numV)
                         );
-                    }
+                    }                    
                 }    
+
+                // Grid: we need columns
+                if (it->second.numU > 1) {
+                    for (int i = 0; i < it->second.numV; ++i) {
+                        GLuint cvao, cvbo;
+                        glGenVertexArrays(1, &cvao);
+                        glGenBuffers(1, &cvbo);
+                        it->second.vaoArray.push_back(cvao);
+                        it->second.vboArray.push_back(cvbo);
+
+                        glBindVertexArray(cvao);
+                        glBindBuffer(GL_ARRAY_BUFFER, cvbo);
+                        glBufferData(GL_ARRAY_BUFFER, it->second.vertices.size() * sizeof(GLfloat),
+                            &it->second.vertices[0], GL_STATIC_DRAW);
+                        // in_position
+                        glEnableVertexAttribArray(0);
+                        // U and V may not be given by the user
+                        if (it->second.vertices.size() / (it->second.numU * it->second.numV) > 3) {
+                            glVertexAttribPointer(
+                                0,
+                                3,
+                                GL_FLOAT,
+                                GL_FALSE,
+                                it->second.numV * sizeof(GLfloat) * 5,
+                                reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i)
+                            );
+
+                            // texture coords
+                            glEnableVertexAttribArray(1);
+                            glVertexAttribPointer(
+                                1,
+                                2,
+                                GL_FLOAT,
+                                GL_FALSE,
+                                it->second.numV * sizeof(GLfloat) * 7,
+                                reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
+                            );
+                        }
+                        else { // no U and V:
+                            glVertexAttribPointer(
+                                0,
+                                3,
+                                GL_FLOAT,
+                                GL_FALSE,
+                                it->second.numV * sizeof(GLfloat) * 3,
+                                reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
+                            );
+                        }
+                    }                    
+                }
             }                
 
             glBindVertexArray(0);
