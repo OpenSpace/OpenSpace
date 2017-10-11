@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/scene/scenegraphnode.h>
+
 namespace openspace {
 namespace luascriptfunctions {
 
@@ -144,7 +146,7 @@ int removeVirtualProperty(lua_State* L) {
 int removeAllVirtualProperties(lua_State* L) {
     const int nArguments = lua_gettop(L);
     if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
     }
     
     std::vector<properties::Property*> ps = OsEng.virtualPropertyManager().properties();
@@ -152,6 +154,30 @@ int removeAllVirtualProperties(lua_State* L) {
         OsEng.virtualPropertyManager().removeProperty(p);
         delete p;
     }
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * addTag()
+ * Adds a Tag to a SceneGraphNode
+ */
+int addTag(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 2) {
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    }
+
+    const std::string uri = lua_tostring(L, -2);
+    const std::string tag = lua_tostring(L, -1);
+
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
+    if (!node) {
+        return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
+    }
+
+    node->addTag(tag);
+
     return 0;
 }
 

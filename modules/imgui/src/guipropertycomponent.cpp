@@ -143,7 +143,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
 
 void GuiPropertyComponent::render() {
     bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, size, 0.5f);
+    ImGui::Begin(name().c_str(), &v, size, 0.75f);
     _isEnabled = v;
 
     if (_function) {

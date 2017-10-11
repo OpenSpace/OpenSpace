@@ -32,7 +32,7 @@
 #include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guiorigincomponent.h>
-#include <modules/imgui/include/guitimecomponent.h>
+#include <modules/imgui/include/guispacetimecomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <openspace/scripting/scriptengine.h>
@@ -70,13 +70,13 @@ public:
 #ifdef GLOBEBROWSING_USE_GDAL
     GuiGlobeBrowsingComponent _globeBrowsing;
 #endif //  GLOBEBROWSING_USE_GDAL
-    GuiOriginComponent _origin;
+    //GuiOriginComponent _origin;
     GuiPerformanceComponent _performance;
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _property;
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _virtualProperty;
-    GuiTimeComponent _time;
+    GuiSpaceTimeComponent _spaceTime;
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     GuiIswaComponent _iswa;
 #endif // OPENSPACE_MODULE_ISWA_ENABLED

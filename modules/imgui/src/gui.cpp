@@ -39,8 +39,6 @@
 
 #include <modules/imgui/include/imgui_include.h>
 
-#include "gui_lua.inl"
-
 //#define SHOW_IMGUI_HELPERS
 
 namespace {
@@ -246,7 +244,7 @@ GUI::GUI()
     , _currentVisibility(properties::Property::Visibility::Developer)
 {
     addPropertySubOwner(_help);
-    addPropertySubOwner(_origin);
+    //addPropertySubOwner(_origin);
     addPropertySubOwner(_performance);
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
@@ -256,7 +254,7 @@ GUI::GUI()
     addPropertySubOwner(_globeBrowsing);
 #endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
-    addPropertySubOwner(_time);
+    addPropertySubOwner(_spaceTime);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     addPropertySubOwner(_iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -571,6 +569,9 @@ void GUI::endFrame() {
             _globeBrowsing.render();
         }
 #endif // GLOBEBROWSING_USE_GDAL
+
+        // We always want to render the Space/Time component
+        _spaceTime.render();
     }
 
     ImGui::Render();
@@ -681,9 +682,6 @@ void GUI::render() {
     ImGui::Checkbox("iSWA", &iswa);
     _iswa.setEnabled(iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
-
-    _origin.render();
-    _time.render();
 
     bool help = _help.isEnabled();
     ImGui::Checkbox("Help", &help);

@@ -32,11 +32,10 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guifilepathcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiglobebrowsingcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guihelpcomponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/guiorigincomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiperformancecomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiparallelcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guipropertycomponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/guitimecomponent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/guispacetimecomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiiswacomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui_include.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/renderproperties.h
@@ -45,16 +44,14 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gui.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/gui_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guicomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guifilepathcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiglobebrowsingcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guihelpcomponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/guiorigincomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiperformancecomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiparallelcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guipropertycomponent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/guitimecomponent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/guispacetimecomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiiswacomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderproperties.cpp
 
