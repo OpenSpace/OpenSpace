@@ -47,7 +47,9 @@ namespace {
 
 const char* _loggerCat = "GUI";
 const char* configurationFile = "imgui.ini";
-const char* GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
+//const char* GuiFont = "${FONTS}/ubuntu/Ubuntu-Regular.ttf";
+const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+const float FontSize = 14.f;
 const ImVec2 size = ImVec2(350, 500);
 
 //GLuint fontTex = 0;
@@ -297,7 +299,7 @@ void GUI::initialize() {
     io.RenderDrawListsFn = RenderDrawLists;
     io.Fonts->AddFontFromFileTTF(
         absPath(GuiFont).c_str(),
-        16.f
+        FontSize
     );
 
     ImGuiStyle& style = ImGui::GetStyle();
@@ -305,32 +307,58 @@ void GUI::initialize() {
     style.WindowRounding = 0.f;
     style.FramePadding = { 3.f, 3.f };
     style.FrameRounding = 0.f;
-    style.ScrollbarSize = 15.f;
+    style.ItemSpacing = { 3.f, 2.f };
+    style.ItemInnerSpacing = { 3.f, 2.f };
+    style.TouchExtraPadding = { 1.f, 1.f };
+    style.IndentSpacing = 15.f;
+    style.ScrollbarSize = 10.f;
     style.ScrollbarRounding = 0.f;
-    style.IndentSpacing = 25;
-    style.ItemSpacing = { 4.f, 2.f };
+    style.GrabMinSize = 10.f;
+    style.GrabRounding = 16.f;
 
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.21f, 0.24f, 1.0f);
-    style.Colors[ImGuiCol_Border] = ImVec4(0.1f, 0.39f, 0.42f, 0.59f);
-    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
-    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.8f, 0.43f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
-    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.f);
-    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5f, 0.8f, 0.76f, 1.0f);
-    style.Colors[ImGuiCol_Button] = ImVec4(0.0f, 0.36f, 0.67f, 0.6f);
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.51f, 0.94f, 1.0f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.43f, 0.8f, 1.0f);
-    style.Colors[ImGuiCol_Header] = ImVec4(0.f, 0.36f, 0.67f, 0.45f);
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.f, 0.54f, 1.0f, 0.8f);
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.8f);
-    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
-    style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.6f);
-    style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
+    style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.80f, 0.43f);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.00f);
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
+    style.Colors[ImGuiCol_Button] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.00f, 0.51f, 0.94f, 1.00f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.43f, 0.80f, 1.00f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
+    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
+    style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
+    style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+
+    //style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.21f, 0.24f, 1.0f);
+    //style.Colors[ImGuiCol_Border] = ImVec4(0.1f, 0.39f, 0.42f, 0.59f);
+    //style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    //style.Colors[ImGuiCol_TitleBg] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
+    //style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
+    //style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    //style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.8f, 0.43f);
+    //style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
+    //style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
+    //style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.f);
+    //style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5f, 0.8f, 0.76f, 1.0f);
+    //style.Colors[ImGuiCol_Button] = ImVec4(0.0f, 0.36f, 0.67f, 0.6f);
+    //style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.51f, 0.94f, 1.0f);
+    //style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.43f, 0.8f, 1.0f);
+    //style.Colors[ImGuiCol_Header] = ImVec4(0.f, 0.36f, 0.67f, 0.45f);
+    //style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.f, 0.54f, 1.0f, 0.8f);
+    //style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.8f);
+    //style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
+    //style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.6f);
+    //style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
 
     _property.initialize();
     _property.setHasRegularProperties(true);
