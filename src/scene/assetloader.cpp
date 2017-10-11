@@ -75,6 +75,28 @@ namespace openspace {
 
 namespace assetloader {
 
+int onInitialize(lua_State* state) {
+    AssetLoader *assetLoader =
+        reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
+
+    int nArguments = lua_gettop(state);
+    SCRIPT_CHECK_ARGUMENTS("onInitialize", state, 1, nArguments);
+
+    int referenceIndex = luaL_ref(state, LUA_REGISTRYINDEX);
+    assetLoader->addInitializationFunction(referenceIndex);
+}
+
+int onDeinitialize(lua_State* state) {
+    AssetLoader *assetLoader =
+        reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
+
+    int nArguments = lua_gettop(state);
+    SCRIPT_CHECK_ARGUMENTS("onDeinitialize", state, 1, nArguments);
+
+    int referenceIndex = luaL_ref(state, LUA_REGISTRYINDEX);
+    assetLoader->addDeinitializationFunction(referenceIndex);
+}
+
 int importRequiredDependency(lua_State* state) {
     AssetLoader *assetLoader =
         reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
@@ -141,7 +163,7 @@ int onFinishSynchronization(lua_State* state) {
     return asset->loader()->onFinishSynchronizationLua(asset);
 }
 
-int noOperation(lua_State* state) {
+int noOperation(lua_State*) {
     return 0;
 }
 
@@ -175,6 +197,9 @@ AssetLoader::AssetLoader(
     // Create _assets table.
     lua_newtable(*_luaState);
     lua_setglobal(*_luaState, AssetsTableName);
+}
+
+AssetLoader::~AssetLoader() {
 }
 
 Asset* AssetLoader::loadAsset(std::string path) {
@@ -234,6 +259,16 @@ Asset* AssetLoader::getAsset(std::string name) {
         it->second.get();
 }
 
+void AssetLoader::addInitializationFunction(int luaRef) {
+    Asset* asset = _assetStack.back();
+    _onInitializationFunctions[asset].push_back(luaRef);
+}
+
+void AssetLoader::addDeinitializationFunction(int luaRef) {
+    Asset* asset = _assetStack.back();
+    _onDeinitializationFunctions[asset].push_back(luaRef);
+}
+
 Asset* AssetLoader::importRequiredDependency(const std::string& name) {
     Asset* asset = getAsset(name);
     if (!asset) {
@@ -275,7 +310,7 @@ void AssetLoader::loadSingleAsset(const std::string& identifier) {
     // Remove all other optionals
     for (auto& optional : optionals) {
         if (optional != imported) {
-            _rootAsset->removeOptional(optional);
+            _rootAsset->removeOptionalDependency(optional);
         }
     }
 }
@@ -313,6 +348,19 @@ Asset* AssetLoader::rootAsset() const {
 
 const std::string& AssetLoader::syncRootDirectory() {
     return _syncRootDirectory;
+}
+
+void AssetLoader::callOnInitialize(Asset* asset) {
+    for (int init : _onInitializationFunctions[asset]) {
+        lua_pcall(*_luaState, init, 0, 0);
+    }
+}
+
+void AssetLoader::callOnDeinitialize(Asset * asset) {
+    std::vector<int>& funs = _onDeinitializationFunctions[asset];
+    for (auto it = funs.rbegin(); it != funs.rend(); it++) {
+        lua_pcall(*_luaState, *it, 0, 0);
+    }
 }
 
 /*
@@ -442,6 +490,17 @@ void AssetLoader::pushAsset(Asset* asset) {
     lua_getglobal(*_luaState, AssetsTableName);
     int globalTableIndex = lua_gettop(*_luaState);
 
+    // Set up lua table:
+    // Asset
+    // |- localResource
+    // |- syncedResource
+    // |- import
+    // |- importOptional
+    // |- export
+    // |- onInitialize
+    // |- onDeinitialize
+    // |- addSynchronization
+    
     // Create table for the current asset.
     lua_newtable(*_luaState);
     int assetTableIndex = lua_gettop(*_luaState);
@@ -469,6 +528,12 @@ void AssetLoader::pushAsset(Asset* asset) {
     lua_pushlightuserdata(*_luaState, this);
     lua_pushcclosure(*_luaState, &assetloader::importOptionalDependency, 1);
     lua_setfield(*_luaState, assetTableIndex, ImportOptionalDependencyFunctionName);
+
+    // Register export-dependency function
+    // export(string key, any value)
+    lua_pushlightuserdata(*_luaState, this);
+    lua_pushcclosure(*_luaState, &assetloader::importRequiredDependency, 1);
+    lua_setfield(*_luaState, assetTableIndex, ExportFunctionName);
 
     // Register onInitialize function
     // void onInitialize(function<void()> initializationFunction)

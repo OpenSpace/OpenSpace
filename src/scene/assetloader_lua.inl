@@ -65,10 +65,9 @@ int synchronizeResource(lua_State* state) {
         ghoul::lua::luaDictionaryFromState(state, d);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addSceneGraphNode", e.what());
+        LERRORC("addSynchronization", e.what());
         return luaL_error(state, "Error loading dictionary from lua state");
     }
-
 
     assetLoader->synchronizeResource(d, [state, referenceIndex](bool success) {
         lua_rawgeti(state, LUA_REGISTRYINDEX, referenceIndex);
@@ -76,7 +75,6 @@ int synchronizeResource(lua_State* state) {
         lua_pcall(state, 1, 0, 0);
         luaL_unref(state, LUA_REGISTRYINDEX, referenceIndex);
     });
-
 }
 
 }

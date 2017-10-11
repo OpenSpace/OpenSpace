@@ -38,12 +38,14 @@
 class SceneLoaderTest : public ::testing::Test {
 protected:
     virtual void SetUp() {
-        _assetLoader = std::make_unique<openspace::AssetLoader>(&_luaState, "${TESTDIR}/SceneLoaderTest/", "${TEMPORARY}/resources/");
+        _resourceSynchronizer = std::make_unique<openspace::ResourceSynchronizer>();
+        _assetLoader = std::make_unique<openspace::AssetLoader>(&_luaState, _resourceSynchronizer, "${TESTDIR}/SceneLoaderTest/", "${TEMPORARY}/resources/");
         _sceneLoader = std::make_unique<openspace::SceneLoader>(_assetLoader.get());
     }
 
     openspace::Scene _scene;
     ghoul::lua::LuaState _luaState;
+    std::unique_ptr<openspace::ResourceSynchronizer> _resourceSynchronizer;
     std::unique_ptr<openspace::AssetLoader> _assetLoader;
     std::unique_ptr<openspace::SceneLoader> _sceneLoader;
 };

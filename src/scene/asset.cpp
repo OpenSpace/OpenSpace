@@ -287,14 +287,14 @@ bool Asset::hasDependants() const {
 
 bool Asset::hasInitializedDependants() const {
     for (const auto& dependant : _requiredDependants) {
-        if (dependant->readyState == Asset::ReadyState::Initialized &&
+        if (dependant->readyState() == Asset::ReadyState::Initialized &&
             dependant->hasRequiredDependency(this))
         {
             return true;
         }
     }
     for (const auto& dependant : _optionalDependants) {
-        if (dependant->readyState == Asset::ReadyState::Initialized &&
+        if (dependant->readyState() == Asset::ReadyState::Initialized &&
             dependant->hasEnabledOptionalDependency(this))
         {
             return true;
