@@ -832,7 +832,7 @@ namespace openspace {
                 }
 
                 LINFO("Saving cache");
-                success &= saveCachedFile(cachedFile);
+                //success &= saveCachedFile(cachedFile);
             }
         }
 
@@ -1104,10 +1104,12 @@ namespace openspace {
                 for (int i = 0; i < nItems; ++i) {
                     int32_t keySize = 0;
                     fileStream.read(reinterpret_cast<char*>(&keySize), sizeof(int32_t));
-                    char * key = new char[keySize + 1];
-                    key[keySize] = '\0';
+                    std::string key;                    
                     for (int c = 0; c < keySize; ++c) {
-                        fileStream.read(reinterpret_cast<char*>(&key[c]), sizeof(int32_t));
+                        char t[2];
+                        t[1] = '\0';
+                        fileStream.read(reinterpret_cast<char*>(&t), sizeof(int32_t));
+                        key.append(t);
                     }
                     int32_t value = 0;
                     fileStream.read(reinterpret_cast<char*>(&value), sizeof(int32_t));

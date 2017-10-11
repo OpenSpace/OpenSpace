@@ -60,7 +60,7 @@ namespace {
     const char* GigaparsecUnit    = "Gpc";
     const char* GigalightyearUnit = "Gly";
 
-    const int8_t CurrentCacheVersion = 1;
+    const int8_t CurrentCacheVersion = 2;
     const float PARSEC = 0.308567756E17f;
 
     enum BlendMode {
@@ -670,7 +670,7 @@ namespace openspace {
                 }
 
                 LINFO("Saving cache");
-                success &= saveCachedFile(cachedFile);
+                //success &= saveCachedFile(cachedFile);
             }
         }
         
@@ -681,17 +681,18 @@ namespace openspace {
                 ghoul::filesystem::CacheManager::Persistent::Yes
             );
             bool hasCachedFile = FileSys.fileExists(cachedFile);
-            if (hasCachedFile) {
-                LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
-                
-                success &= loadCachedFile(cachedFile);
-                if (!success) {
-                    FileSys.cacheManager()->removeCacheFile(labelFile);
-                    // Intentional fall-through to the 'else' computation to generate the cache
-                    // file for the next run
-                }
-            }
-            else {
+            //if (hasCachedFile) {
+            //    LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
+            //    
+            //    success &= loadCachedFile(cachedFile);
+            //    if (!success) {
+            //        FileSys.cacheManager()->removeCacheFile(labelFile);
+            //        // Intentional fall-through to the 'else' computation to generate the cache
+            //        // file for the next run
+            //    }
+            //}
+            //else
+            {
                 LINFO("Cache for Label file '" << labelFile << "' not found");
                 LINFO("Loading Label file '" << labelFile << "'");
 
