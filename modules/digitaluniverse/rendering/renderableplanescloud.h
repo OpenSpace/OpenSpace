@@ -132,6 +132,7 @@ namespace openspace {
         std::string _speckFile;
         std::string _labelFile;
         std::string _texturesPath;
+        std::string _luminosityVar;
         
         Unit _unit;
 
@@ -140,6 +141,8 @@ namespace openspace {
         std::unordered_map<std::string, int> _variableDataPositionMap;
         
         int _nValuesPerAstronomicalObject;
+
+        float _sluminosity;
 
         glm::dmat4 _transformationMatrix;
 

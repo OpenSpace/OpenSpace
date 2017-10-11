@@ -132,11 +132,25 @@ namespace {
         "This value specifies the path for the textures in disk."
     };
 
+    static const openspace::properties::Property::PropertyInfo LuminosityInfo = {
+        "Luminosity",
+        "Luminosity variable",
+        "Datavar variable to control the luminosity/size of the astronomical objects."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ScaleLuminosityInfo = {
+        "ScaleLuminosity",
+        "ScaleLuminosity variable",
+        "Scaling control for the luminosity/size of the astronomical objects."
+    };
+
     static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOptionInfo",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
+
+
 }  // namespace
 
 namespace openspace {
@@ -213,6 +227,18 @@ namespace openspace {
                     Optional::No,
                     TexturePathInfo.description,
                 },
+                {
+                    LuminosityInfo.identifier,
+                    new StringVerifier,
+                    Optional::Yes,
+                    LuminosityInfo.description,
+                },
+                {
+                    ScaleFactorInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    ScaleFactorInfo.description,
+                },
             }
         };
     }
@@ -246,8 +272,10 @@ namespace openspace {
         , _speckFile("")
         , _labelFile("")
         , _texturesPath("")
+        , _luminosityVar("")
         , _unit(Parsec)
         , _nValuesPerAstronomicalObject(0)
+        , _sluminosity(1.f)
         , _transformationMatrix(glm::dmat4(1.0))        
     {
         using File = ghoul::filesystem::File;
@@ -379,6 +407,14 @@ namespace openspace {
         }
 
         _texturesPath = absPath(dictionary.value<std::string>(TexturePathInfo.identifier));
+
+        if (dictionary.hasKey(LuminosityInfo.identifier)) {
+            _luminosityVar = dictionary.value<std::string>(LuminosityInfo.identifier);            
+        }
+
+        if (dictionary.hasKey(ScaleLuminosityInfo.identifier)) {
+            _sluminosity = static_cast<float>(dictionary.value<double>(ScaleLuminosityInfo.identifier));
+        }
     }
 
     bool RenderablePlanesCloud::isReady() const {
@@ -740,7 +776,8 @@ namespace openspace {
                 dummy.clear();
                 str >> dummy; // variable name
 
-                _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject });                
+                // +3 because of the x, y and z at the begining of each line.
+                _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject + 3});                
 
                 if (dummy == "orientation") { // 3d vectors u and v
                     _nValuesPerAstronomicalObject += 6; // We want the number, but the index is 0 based
@@ -997,6 +1034,12 @@ dummy.clear();
                         1.0));
                 v /= 2.f;
                 v.w = 0.0;
+
+                if (!_luminosityVar.empty()) {
+                    float lumS = _fullData[p + _variableDataPositionMap[_luminosityVar]] * _sluminosity;
+                    u *= lumS;
+                    v *= lumS;
+                }
 
                 u *= _scaleFactor;
                 v *= _scaleFactor;
