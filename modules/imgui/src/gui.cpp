@@ -240,6 +240,7 @@ GUI::GUI()
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
+    , _featuredProperties("Featured Properties")
     , _showInternals(false)
     , _currentVisibility(properties::Property::Visibility::Developer)
 {
@@ -364,6 +365,7 @@ void GUI::initialize() {
     _screenSpaceProperty.setHasRegularProperties(true);
     _globalProperty.initialize();
     _globalProperty.setHasRegularProperties(true);
+    _featuredProperties.initialize();
     _virtualProperty.initialize();
     _filePath.initialize();
 #ifdef GLOBEBROWSING_USE_GDAL    
@@ -387,6 +389,7 @@ void GUI::deinitialize() {
     _help.deinitialize();
     _performance.deinitialize();
     _globalProperty.deinitialize();
+    _featuredProperties.deinitialize();
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
     _filePath.deinitialize();
@@ -466,6 +469,7 @@ void GUI::initializeGL() {
     _property.initializeGL();
     _screenSpaceProperty.initializeGL();
     _globalProperty.initializeGL();
+    _featuredProperties.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();    
 #ifdef GLOBEBROWSING_USE_GDAL
@@ -499,6 +503,7 @@ void GUI::deinitializeGL() {
     _parallel.deinitializeGL();
     _help.deinitializeGL();
     _performance.deinitializeGL();
+    _featuredProperties.deinitializeGL();
     _globalProperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
@@ -572,6 +577,9 @@ void GUI::endFrame() {
 
         // We always want to render the Space/Time component
         _spaceTime.render();
+
+        // We always want to render the featured properties component
+        _featuredProperties.render();
     }
 
     ImGui::Render();
@@ -745,6 +753,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _property.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
     _virtualProperty.setVisibility(_currentVisibility);
+    _featuredProperties.setVisibility(_currentVisibility);
 }
 
 

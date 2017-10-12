@@ -81,6 +81,7 @@ public:
     GuiIswaComponent _iswa;
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
     GuiParallelComponent _parallel;
+    GuiPropertyComponent _featuredProperties;
 
     bool _showInternals;
 

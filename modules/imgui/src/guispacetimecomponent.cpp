@@ -71,7 +71,10 @@ void GuiSpaceTimeComponent::render() {
 
 
     ImGui::Text("%s", "Focus selection");
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
+    ImGui::Text("%s", "Focus on:");
+    ImGui::SameLine();
     // Buttons for important SceneGraphNodes
     for (SceneGraphNode* n : nodes) {
         const std::vector<std::string>& tags = n->tags();
@@ -90,6 +93,7 @@ void GuiSpaceTimeComponent::render() {
     }
 
     ImGui::NewLine();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
     SceneGraphNode* currentFocus = OsEng.navigationHandler().focusNode();
 

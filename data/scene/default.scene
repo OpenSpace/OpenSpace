@@ -8,6 +8,8 @@ local mars_folders = {
     -- tl;dr:  Specify CTX folders first, then HiRISE 
 }
 
+dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
+
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -21,7 +23,6 @@ function preInitialization()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
-
 
     -- Toggle night texture, shading, atmosphere and water
     openspace.bindKey("s",
@@ -95,6 +96,12 @@ function postInitialization()
     for _, file in pairs(mars_folders) do
         openspace.globebrowsing.addBlendingLayersFromDirectory(file, "Mars")
     end
+
+    -- Defined in scene_helper.lua
+    -- Used to create focus buttons for a subset of scenegraph nodes
+    mark_interesting_nodes({
+        "Earth", "Mars"
+    })
 end
 
 

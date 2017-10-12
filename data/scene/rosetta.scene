@@ -1,3 +1,5 @@
+dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
+
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -102,6 +104,10 @@ function postInitialization()
     openspace.setPropertyValue('67P.renderable.PerformShading', false);
 
     openspace.printInfo("Done setting default values")
+
+    mark_interesting_nodes({
+        "Pluto", "NewHorizons", "Charon"
+    })
 end
 
 return {
