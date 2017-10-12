@@ -255,7 +255,7 @@ namespace openspace {
         , _planeStartingIndexPos(0)
         , _textureVariableIndex(0)        
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
+        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
         , _textColor(
             TextColorInfo,
             glm::vec4(1.0f, 1.0, 1.0f, 1.f),

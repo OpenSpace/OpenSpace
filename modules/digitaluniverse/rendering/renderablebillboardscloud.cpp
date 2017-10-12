@@ -306,6 +306,8 @@ namespace openspace {
         , _transformationMatrix(glm::dmat4(1.0))
         , _vao(0)
         , _vbo(0)
+        , _polygonVao(0)
+        , _polygonVbo(0)
     {
         using File = ghoul::filesystem::File;
 
@@ -811,17 +813,17 @@ namespace openspace {
             );
 
             bool hasCachedFile = FileSys.fileExists(cachedFile);
-            //if (hasCachedFile) {
-            //    LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+            if (hasCachedFile) {
+                LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
 
-            //    success = loadCachedFile(cachedFile);
-            //    if (!success) {
-            //        FileSys.cacheManager()->removeCacheFile(_file);
-            //        // Intentional fall-through to the 'else' computation to generate the cache
-            //        // file for the next run
-            //    }
-            //}
-            //else 
+                success = loadCachedFile(cachedFile);
+                if (!success) {
+                    FileSys.cacheManager()->removeCacheFile(_file);
+                    // Intentional fall-through to the 'else' computation to generate the cache
+                    // file for the next run
+                }
+            }
+            else 
             {
                 LINFO("Cache for Speck file '" << _file << "' not found");
                 LINFO("Loading Speck file '" << _file << "'");
@@ -832,7 +834,7 @@ namespace openspace {
                 }
 
                 LINFO("Saving cache");
-                //success &= saveCachedFile(cachedFile);
+                success &= saveCachedFile(cachedFile);
             }
         }
 
@@ -1250,7 +1252,7 @@ namespace openspace {
     }
 
     void RenderableBillboardsCloud::renderToTexture(
-        std::function<GLuint(void)> geometryLoadingFunction,
+        std::function<void(void)> geometryLoadingFunction,
         std::function<void(GLuint)> renderFunction,
         GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight) {
         LDEBUG("Rendering to Texture");
@@ -1268,74 +1270,31 @@ namespace openspace {
         glDrawBuffers(1, drawBuffers);
 
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
-        if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            LERROR("Framework not built. Polygon Texture");
-            GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-            switch (fbErr) {
-            case GL_FRAMEBUFFER_UNDEFINED:
-                LERROR("Indefined framebuffer.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                LERROR("Incomplete, missing attachement.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                LERROR("Framebuffer doesn't have at least one image attached to it.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                LERROR("Returned if the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE \
-                        for any color attachment point(s) named by GL_DRAW_BUFFERi.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                LERROR("Returned if GL_READ_BUFFER is not GL_NONE and the value of \
-                        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color attachment point \
-                        named by GL_READ_BUFFER.");
-                break;
-            case GL_FRAMEBUFFER_UNSUPPORTED:
-                LERROR("Returned if the combination of internal formats of the attached images \
-                        violates an implementation - dependent set of restrictions.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-                LERROR("Returned if the value of GL_RENDERBUFFE_r_samples is not the same for all \
-                        attached renderbuffers; if the value of GL_TEXTURE_SAMPLES is the not same for all \
-                        attached textures; or , if the attached images are a mix of renderbuffers and textures, \
-                        the value of GL_RENDERBUFFE_r_samples does not match the value of GL_TEXTURE_SAMPLES.");
-                LERROR("Returned if the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not the same \
-                        for all attached textures; or , if the attached images are a mix of renderbuffers and \
-                        textures, the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached textures.");
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-                LERROR("Returned if any framebuffer attachment is layered, and any populated attachment \
-                        is not layered, or if all populated color attachments are not from textures of the same target.");
-                break;
-            default:
-                LDEBUG("No error found checking framebuffer: Polygon Texture");
-                std::cout << "=== OK ===" << std::endl;
-                break;
-            }
-        }
-
+        
         glViewport(0, 0, textureWidth, textureHeight);
        
-        GLuint vao = geometryLoadingFunction();
-        renderFunction(vao);
+        geometryLoadingFunction();
+        renderFunction(_polygonVao);
         
         // Restores Applications' OpenGL State
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-        if (vao) {
-            glDeleteVertexArrays(1, &vao);
+        if (_polygonVbo) {
+            glDeleteBuffers(1, &_polygonVbo);
         }
-        glDeleteFramebuffers(1, &textureFBO);
-        // TODO: delete the vbo used during the rendering to texture
+
+        if (_polygonVao) {
+            glDeleteVertexArrays(1, &_polygonVao);
+        }
+        glDeleteFramebuffers(1, &textureFBO);        
     }
 
-    GLuint RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
-        GLuint polygonVao, polygonVbo;
-        glGenVertexArrays(1, &polygonVao);
-        glGenBuffers(1, &polygonVbo);
-        glBindVertexArray(polygonVao);
-        glBindBuffer(GL_ARRAY_BUFFER, polygonVbo);
+    void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
+        glGenVertexArrays(1, &_polygonVao);
+        glGenBuffers(1, &_polygonVbo);
+        glBindVertexArray(_polygonVao);
+        glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
 
         const GLfloat vertex_data[] = {
             //      x      y     z     w
@@ -1346,12 +1305,11 @@ namespace openspace {
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<GLvoid*>(0));
         glEnableVertexAttribArray(0);
         glBindVertexArray(0);
-
-        return polygonVao;
     }
 
     void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
+        std::unique_ptr<ghoul::opengl::ProgramObject> program = 
+            ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
             "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl",
             "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl",
             "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl");
@@ -1367,52 +1325,6 @@ namespace openspace {
         glDrawArrays(GL_POINTS, 0, 1);
         glBindVertexArray(0);
 
-        /*if (true) {
-            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("polygon_texture.ppm"),
-                256, 256);
-
-        }*/
         program->deactivate();
     }
-
-    void RenderableBillboardsCloud::saveTextureToPPMFile(const GLenum color_buffer_attachment,
-        const std::string & fileName, const int width, const int height) const {
-        std::fstream ppmFile;
-
-        ppmFile.open(fileName.c_str(), std::fstream::out);
-        if (ppmFile.is_open()) {
-            unsigned char * pixels = new unsigned char[width*height * 3];
-            for (int t = 0; t < width*height * 3; ++t)
-                pixels[t] = 255;
-
-            if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
-                glReadBuffer(color_buffer_attachment);
-                glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-
-            }
-            else {
-                glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, pixels);
-            }
-
-            ppmFile << "P3" << std::endl;
-            ppmFile << width << " " << height << std::endl;
-            ppmFile << "255" << std::endl;
-
-            std::cout << "\n\nFILE\n\n";
-            int k = 0;
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    ppmFile << (unsigned int)pixels[k] << " " << (unsigned int)pixels[k + 1] << " " << (unsigned int)pixels[k + 2] << " ";
-                    k += 3;
-                }
-                ppmFile << std::endl;
-            }
-            if (pixels)
-                delete[] pixels;
-
-            ppmFile.close();
-        }
-    }
-    
-
 } // namespace openspace

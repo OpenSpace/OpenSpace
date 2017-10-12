@@ -82,10 +82,10 @@ namespace openspace {
 
         void createDataSlice();
         void createPolygonTexture();
-        void renderToTexture(std::function<GLuint(void)> geometryLoadingFunction,
+        void renderToTexture(std::function<void(void)> geometryLoadingFunction,
             std::function<void(GLuint)> renderFunction,
             GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight);
-        GLuint loadPolygonGeometryForRendering();
+        void loadPolygonGeometryForRendering();
         void renderPolygonGeometry(GLuint vao);
         void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp);
@@ -98,9 +98,7 @@ namespace openspace {
         bool readLabelFile();
         bool loadCachedFile(const std::string& file);
         bool saveCachedFile(const std::string& file) const;
-        void saveTextureToPPMFile(const GLenum color_buffer_attachment,
-            const std::string & fileName, const int width, const int height) const;
-
+        
         bool _hasSpeckFile;
         bool _dataIsDirty;
         bool _textColorIsDirty;
@@ -157,6 +155,10 @@ namespace openspace {
 
         GLuint _vao;
         GLuint _vbo;
+
+        // For polygons
+        GLuint _polygonVao;
+        GLuint _polygonVbo;
     };
 
 
