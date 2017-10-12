@@ -1,65 +1,19 @@
-local registerSynchronizations = function (syncAsset, syncs)
-    local oldSync = syncAsset.onSynchronize;
-    syncAsset.onSynchronize = function (onFinish)
-        print("helper synchronize")
-        local nSyncs = #syncs + 1
-        local nSynced = 0
-
-        local onOneFinish = function(success)
-            if not success then
-                onFinish(false)
-            end
-            nSynced = nSynced + 1
-            if nSynced == nSyncs then
-                onFinish(true)
-            end
-        end
-
-        for i, sync in ipairs(syncs) do
-            print(sync)
-            openspace.synchronizeResource(sync, onOneFinish)
-        end
-        oldSync(onOneFinish)
-    end
-end
-
-local registerSceneGraphNodes = function (sceneAsset, nodes)
-    local oldInit = sceneAsset.onInitialize;
-    sceneAsset.onInitialize = function ()
-        for i, node in ipairs(nodes) do
-            openspace.addSceneGraphNode(node)
-        end
-        oldInit()
-    end
-
-    local oldDeinit =  sceneAsset.onDeinitialize;
-    sceneAsset.onDeinitialize = function ()
-        for i = #nodes, 1, -1 do
-            node = nodes[i]
-            openspace.removeSceneGraphNode(node.Name)
-        end
-        oldDeinit()
-    end
-end
-
 local registerSpiceKernels = function (spiceAsset, kernels)
     local oldInit = spiceAsset.onInitialize;
-    spiceAsset.onInitialize = function ()
+    spiceAsset.onInitialize(function ()
         print "loading spice kernels...."
         for i, kernel in ipairs(kernels) do
             openspace.spice.loadKernel(kernel)
         end
-        oldInit()
-    end
+    end)
 
     local oldDeinit = spiceAsset.onDeinitialize;
-    spiceAsset.onDeinitialize = function ()
+    spiceAsset.onDeinitialize(function ()
         for i = #kernels, 1, -1 do
             kernel = kernels[i]
             openspace.spice.unloadKernel(kernel) 
         end
-        oldDeinit()
-    end
+    end)
 end
 
 asset.export("registerSceneGraphNodes", registerSceneGraphNodes);

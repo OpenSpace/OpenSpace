@@ -114,8 +114,6 @@ void Asset::synchronize() {
     for (auto& dependency : _requiredDependencies) {
         dependency->synchronize();
     }
-
-    loader()->callOnSynchronize(this);
 }
 
 void Asset::initialize() {
@@ -264,11 +262,11 @@ void Asset::removeRequiredDependency(const std::string& assetId) {
 }
 
 void Asset::dependantDidInitialize(Asset* dependant) {
-    loader()->callOnDependantInitialize(this, dependant);
+    //loader()->callOnDependantInitialize(this, dependant);
 }
 
 void Asset::dependantWillDeinitialize(Asset* dependant) {
-    loader()->callOnDependantDeinitialize(this, dependant);
+    //loader()->callOnDependantDeinitialize(this, dependant);
 }
 
 bool Asset::hasDependants() const {

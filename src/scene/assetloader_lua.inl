@@ -51,7 +51,8 @@ int unimportAsset(lua_State* state) {
     return 0;
 }
 
-int synchronizeResource(lua_State* state) {
+int addSynchronization(lua_State* state) {
+    /*
     AssetLoader *assetLoader =
         reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
 
@@ -74,8 +75,83 @@ int synchronizeResource(lua_State* state) {
         lua_pushboolean(state, success ? 1 : 0);
         lua_pcall(state, 1, 0, 0);
         luaL_unref(state, LUA_REGISTRYINDEX, referenceIndex);
-    });
+    });*/
+    return 0;
 }
 
+} // namespace luascriptfunctions
+
+namespace assetloader {
+
+/**
+ * Adds a Lua function to be called upon asset initialization
+ * Usage: void asset.onInitialize(function<void()> initFun)
+ */
+int onInitialize(lua_State* state) {
+    Asset *asset =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->onInitializeLua(asset);
 }
+
+/**
+ * Adds a Lua function to be called upon asset deinitialization
+ * Usage: void asset.onDeinitialize(function<void()> initFun)
+ */
+int onDeinitialize(lua_State* state) {
+    Asset *asset =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->onDeinitializeLua(asset);
+}
+
+/**
+ * Imports required dependencies
+ * Gives access to
+ *   AssetTable: Exported lua values
+ *   Dependency: ...
+ * Usage: {AssetTable, Dependency} = asset.import(string assetIdentifier)
+ */
+int importRequiredDependency(lua_State* state) {
+    Asset *asset =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->importRequiredDependencyLua(asset);
+}
+
+int importOptionalDependency(lua_State* state) {
+    Asset *asset =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->importOptionalDependencyLua(asset);
+}
+
+int resolveLocalResource(lua_State* state) {
+    Asset *asset =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->resolveLocalResourceLua(asset);
+}
+
+int resolveSyncedResource(lua_State* state) {
+    Asset *asset =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->resolveSyncedResourceLua(asset);
+}
+
+int onFinishSynchronization(lua_State* state) {
+    Asset *asset =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->onFinishSynchronizationLua(asset);
+}
+
+int noOperation(lua_State*) {
+    return 0;
+}
+
+int exportAsset(lua_State* state) {
+    Asset *asset =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->exportAssetLua(asset);
+}
+
+} // namespace assetloader
+
+
+
 }

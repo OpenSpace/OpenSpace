@@ -39,7 +39,7 @@ class SceneLoaderTest : public ::testing::Test {
 protected:
     virtual void SetUp() {
         _resourceSynchronizer = std::make_unique<openspace::ResourceSynchronizer>();
-        _assetLoader = std::make_unique<openspace::AssetLoader>(&_luaState, _resourceSynchronizer, "${TESTDIR}/SceneLoaderTest/", "${TEMPORARY}/resources/");
+        _assetLoader = std::make_unique<openspace::AssetLoader>(_luaState, *_resourceSynchronizer.get(), "${TESTDIR}/SceneLoaderTest/", "${TEMPORARY}/resources/");
         _sceneLoader = std::make_unique<openspace::SceneLoader>(_assetLoader.get());
     }
 
