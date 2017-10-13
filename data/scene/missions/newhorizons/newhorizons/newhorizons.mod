@@ -67,6 +67,7 @@ return {
                 Ghosting = false,
             },
         },
+        GuiPath = "/Solar System/Missions/New Horizons"
     },
     --NewHorizonsTrail module
     --[[{   
@@ -118,7 +119,8 @@ return {
                 Fadeable = false,
                 Ghosting = false,
             },
-        }
+        },
+        GuiPath = "/Solar System/Missions/New Horizons"
     },
     {
         Name = "NewHorizonsTrailPluto",
@@ -140,6 +142,7 @@ return {
             EnableFade = false,
             Rendering = "Lines+Points"
         },
+        GuiPath = "/Solar System/Missions/New Horizons"
     },
     --[[
     -- NewHorizonsPath module

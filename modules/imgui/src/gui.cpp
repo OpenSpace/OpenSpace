@@ -60,6 +60,8 @@ std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 char* iniFileBuffer = nullptr;
 
+ImFont* captionFont = nullptr;
+
 static void RenderDrawLists(ImDrawData* drawData) {
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
@@ -234,10 +236,20 @@ void addScreenSpaceRenderableOnline(std::string texturePath) {
 
 namespace openspace::gui {
 
+void CaptionText(const char* text) {
+    ImGui::PushFont(captionFont);
+    ImGui::Text("%s", text);
+    ImGui::PopFont();
+}
+
 GUI::GUI() 
     : GuiComponent("Main")
     , _globalProperty("Global")
-    , _property("Properties", GuiPropertyComponent::UseTreeLayout::Yes)
+    , _property(
+        "Properties",
+        GuiPropertyComponent::UseTreeLayout::Yes,
+        GuiPropertyComponent::IsTopLevelWindow::Yes
+    )
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
     , _featuredProperties("Featured Properties")
@@ -299,6 +311,11 @@ void GUI::initialize() {
     io.Fonts->AddFontFromFileTTF(
         absPath(GuiFont).c_str(),
         FontSize
+    );
+
+    captionFont = io.Fonts->AddFontFromFileTTF(
+        absPath(GuiFont).c_str(),
+        FontSize * 1.5f
     );
 
     ImGuiStyle& style = ImGui::GetStyle();

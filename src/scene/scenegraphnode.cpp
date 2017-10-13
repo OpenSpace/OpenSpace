@@ -56,7 +56,7 @@
 namespace {
     const char* _loggerCat = "SceneGraphNode";
     const char* KeyRenderable = "Renderable";
-    const char* KeyGuiGrouping = "GuiGrouping";
+    const char* KeyGuiPath = "GuiPath";
 
     const char* keyTransformTranslation = "Transform.Translation";
     const char* keyTransformRotation = "Transform.Rotation";
@@ -160,8 +160,8 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
         }
     }
 
-    if (dictionary.hasKey(KeyGuiGrouping)) {
-        result->_guiGroup = dictionary.value<std::string>(KeyGuiGrouping);
+    if (dictionary.hasKey(KeyGuiPath)) {
+        result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
     }
 
     LDEBUG("Successfully created SceneGraphNode '"
@@ -531,8 +531,8 @@ double SceneGraphNode::worldScale() const {
     return _worldScaleCached;
 }
 
-const std::string& SceneGraphNode::guiGroup() const {
-    return _guiGroup;
+const std::string& SceneGraphNode::guiPath() const {
+    return _guiPath;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {

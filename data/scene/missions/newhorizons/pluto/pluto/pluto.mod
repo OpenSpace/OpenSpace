@@ -155,8 +155,9 @@ return {
                 DestinationFrame = "GALACTIC",
             }
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
-    {   
+    {
        Name = "PlutoBarycenterLabel",
        Parent = "PlutoBarycenter",
        Renderable = {
@@ -170,6 +171,7 @@ return {
                MieColor = {1.0, 1.0, 1.0}
            }
        },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "PlutoText",
@@ -188,6 +190,7 @@ return {
                 Position = {0, -2000000, 0}
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "PlutoTexture",
@@ -206,6 +209,7 @@ return {
                 Position = {0, -4000000, 0}
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "PlutoShadow",
@@ -235,6 +239,7 @@ return {
             Period = 6.38723,
             Resolution = 1000
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
   -- PlutoTrail module
     {   
@@ -253,5 +258,6 @@ return {
             Period = 160 * 365.242, 
             Resolution = 1000
         },
-    }    
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    }
 }

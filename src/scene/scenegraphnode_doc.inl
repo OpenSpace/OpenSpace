@@ -100,7 +100,7 @@ documentation::Documentation SceneGraphNode::Documentation() {
             "corresponding to a 'Translation', a 'Rotation', and a 'Scale'."
         },
         {
-            "GuiGrouping",
+            "GuiPath",
             new StringVerifier,
             Optional::Yes,
             "If this value is specified, this '/' separated URI specifies the location "

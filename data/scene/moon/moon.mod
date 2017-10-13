@@ -62,7 +62,7 @@ return {
                 }
             }
         },
-        GuiGrouping = "/SolarSystem/Earth/Moon"
+        GuiPath = "/Solar System/Planets/Earth/Moon"
     },
     -- MoonTrail module
     {   
@@ -78,6 +78,7 @@ return {
             Color = { 0.5, 0.3, 0.3 },
             Period =  27,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Earth/Moon"
     }
 }

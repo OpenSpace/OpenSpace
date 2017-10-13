@@ -127,9 +127,11 @@ namespace {
 
 namespace openspace::gui {
 
-GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree)
+GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree, IsTopLevelWindow topLevel)
     : GuiComponent(std::move(name))
     , _useTreeLayout(useTree)
+    , _isTopLevel(topLevel)
+    , _currentUseTreeLayout(useTree)
 {}
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
@@ -209,11 +211,21 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
 }
 
 void GuiPropertyComponent::render() {
-    bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, size, 0.75f);
-    _isEnabled = v;
+    if (_isTopLevel) {
+        ImGui::Begin(name().c_str(), nullptr, size, 0.75f);
+    }
+    else {
+        bool v = _isEnabled;
+        ImGui::Begin(name().c_str(), &v, size, 0.75f);
+        _isEnabled = v;
+    }
 
     if (_function) {
+        if (_useTreeLayout) {
+            ImGui::Checkbox("Use Tree layout", &_currentUseTreeLayout);
+        }
+
+
         std::vector<properties::PropertyOwner*> owners = _function();
 
         std::sort(
@@ -224,7 +236,7 @@ void GuiPropertyComponent::render() {
             }
         );
 
-        if (_useTreeLayout) {
+        if (_currentUseTreeLayout) {
             for (properties::PropertyOwner* owner : owners) {
                 ghoul_assert(
                     dynamic_cast<SceneGraphNode*>(owner),
@@ -239,8 +251,8 @@ void GuiPropertyComponent::render() {
                 owners.begin(),
                 owners.end(),
                 [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
-                    std::string lhsGroup = static_cast<SceneGraphNode*>(lhs)->guiGroup();
-                    std::string rhsGroup = static_cast<SceneGraphNode*>(rhs)->guiGroup();
+                    std::string lhsGroup = static_cast<SceneGraphNode*>(lhs)->guiPath();
+                    std::string rhsGroup = static_cast<SceneGraphNode*>(rhs)->guiPath();
 
                     if (lhsGroup.empty()) {
                         return false;
@@ -260,7 +272,7 @@ void GuiPropertyComponent::render() {
         bool noGuiGroups =
             owners.empty() ||
                 (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
-                 dynamic_cast<SceneGraphNode*>(*owners.begin())->guiGroup().empty());
+                 dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
 
         auto renderProp = [&](properties::PropertyOwner* pOwner) {
             int count = nVisibleProperties(pOwner->propertiesRecursive(), _visibility);
@@ -291,7 +303,7 @@ void GuiPropertyComponent::render() {
             }       
         };
 
-        if (!_useTreeLayout || noGuiGroups) {
+        if (!_currentUseTreeLayout || noGuiGroups) {
             std::for_each(owners.begin(), owners.end(), renderProp);
         }
         else { // _useTreeLayout && gui groups exist
@@ -301,13 +313,13 @@ void GuiPropertyComponent::render() {
                 // We checked above that pOwner is a SceneGraphNode
                 SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
 
-                if (nOwner->guiGroup().empty()) {
+                if (nOwner->guiPath().empty()) {
                     // We know that we are done now since we stable_sort:ed them above
                     break;
                 }
 
                 std::vector<std::string> paths = ghoul::tokenizeString(
-                    nOwner->guiGroup().substr(1),
+                    nOwner->guiPath().substr(1),
                     '/'
                 );
 
@@ -322,7 +334,7 @@ void GuiPropertyComponent::render() {
                 // We checked above that pOwner is a SceneGraphNode
                 SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
 
-                if (!nOwner->guiGroup().empty()) {
+                if (!nOwner->guiPath().empty()) {
                     continue;
                 }
 

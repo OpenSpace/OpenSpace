@@ -116,7 +116,8 @@ return {
                 "spice/ck/juno_sc_prl_160729_160826_jm0002rp_v01.bc",
                 "spice/ck/juno_sc_prl_161115_161213_jx0405rp_v01.bc"
             }
-        }
+        },
+        GuiPath = "/Solar System/Missions/Juno"
     },
     --NewHorizonsTrail module
     {   
@@ -134,5 +135,6 @@ return {
             EndTime = "2016 APR 01",
             SampleInterval = 3600  
         },
+        GuiPath = "/Solar System/Missions/Juno"
     },
     }

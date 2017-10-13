@@ -83,7 +83,8 @@ return {
                 -- The scale of the model is in cm; OpenSpace is in m
                 Scale = 0.01
             }
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_black_foil",
@@ -97,7 +98,8 @@ return {
             },
             ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_black_parts",
@@ -111,7 +113,8 @@ return {
             },
             ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_dish",
@@ -126,6 +129,7 @@ return {
             ColorTexture = "textures/dish_AO.png",
             ModelTransform = RotationMatrix
         },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_parts",
@@ -139,7 +143,8 @@ return {
             },
             ColorTexture = "textures/parts2_AO.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_silver_foil",
@@ -153,7 +158,8 @@ return {
             },
             ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_vents",
@@ -167,7 +173,8 @@ return {
             },
             ColorTexture = "textures/tex_01.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_wing_a",
@@ -182,6 +189,7 @@ return {
             ColorTexture = "textures/tex_01.png",
             ModelTransform = RotationMatrix
         },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_wing_b",
@@ -196,6 +204,7 @@ return {
             ColorTexture = "textures/tex_01.png",
             ModelTransform = RotationMatrix
         },
+        GuiPath = "/Solar System/Missions/Rosetta"
         -- Transform = {
         --     Rotation = {
         --         Type = "SpiceRotation",
@@ -216,7 +225,8 @@ return {
             },
             ColorTexture = "textures/foil_gold_ramp.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae",
@@ -240,7 +250,8 @@ return {
                 -- The scale of the model is in cm; OpenSpace is in m
                 Scale = 0.01
             }
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae_foil",
@@ -254,7 +265,8 @@ return {
             },
             ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae_lids",
@@ -268,7 +280,8 @@ return {
             },
             ColorTexture = "textures/parts2_AO.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae_parts",
@@ -282,7 +295,8 @@ return {
             },
             ColorTexture = "textures/foil_silver_ramp.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae_solarp",
@@ -296,7 +310,8 @@ return {
             },
             ColorTexture = "textures/tex_01.png",
             ModelTransform = RotationMatrix
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "RosettaCometTrail",
@@ -313,6 +328,7 @@ return {
             EndTime = "2016 SEP 30 12:00:00",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "PhilaeTrail",
@@ -329,12 +345,14 @@ return {
             EndTime = "2014 NOV 12 17:00:00",
             SampleInterval = 2,
         },
-    },    
+        GuiPath = "/Solar System/Missions/Rosetta"
+    },
     {
         Name = "NAVCAM",
-        Parent = "Rosetta",
+        Parent = "Rosetta",,
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
-    {   
+    {
         Name = "NAVCAM FOV",
         Parent = "NAVCAM",
         Renderable = {
@@ -359,6 +377,7 @@ return {
                 ["CHURYUMOV-GERASIMENKO"] = "67P/C-G_CK"
             }
         },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     -- Latest image taken by NAVCAM
     { 
@@ -372,6 +391,7 @@ return {
             Instrument = "ROS_NAVCAM-A",
             Moving = false,
             Texture = "textures/defaultProj.png",
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     }
 }

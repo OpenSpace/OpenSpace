@@ -92,6 +92,8 @@ private:
 
 };
 
+void CaptionText(const char* text);
+
 } // namespace openspace::gui
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUI___H__

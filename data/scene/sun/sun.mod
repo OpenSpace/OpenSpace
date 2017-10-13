@@ -39,7 +39,8 @@ return {
                 SourceFrame = "IAU_SUN",
                 DestinationFrame = "GALACTIC"
             }
-        }
+        },
+        GuiPath = "/Solar System/Sun"
     },
 
     {
@@ -60,7 +61,8 @@ return {
                 Observer = "SSB",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        }
+        },
+        GuiPath = "/Solar System/Sun"
     },
 
     {
@@ -79,6 +81,7 @@ return {
                 Type = "StaticTranslation",
                 Position = {0, 0, 0, 5}
             }
-        }
+        },
+        GuiPath = "/Solar System/Sun"
     }
 }

@@ -24,7 +24,9 @@
 
 #include <modules/imgui/include/guispacetimecomponent.h>
 
+#include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
+
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
@@ -43,11 +45,7 @@ namespace openspace::gui {
 GuiSpaceTimeComponent::GuiSpaceTimeComponent() : GuiComponent("Space/Time") {}
 
 void GuiSpaceTimeComponent::render() {
-    bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
-    _isEnabled = v;
-
-
+    ImGui::Begin(name().c_str(), nullptr, size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
 
     std::vector<SceneGraphNode*> nodes =
         OsEng.renderEngine().scene()->allSceneGraphNodes();
@@ -69,8 +67,8 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
+    CaptionText("Focus Selection");
 
-    ImGui::Text("%s", "Focus selection");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
     ImGui::Text("%s", "Focus on:");
@@ -137,7 +135,9 @@ void GuiSpaceTimeComponent::render() {
             "These elements determine the simulation time inside OpenSpace."
         );
     }
-    ImGui::Text("%s", "Time Controls");
+
+    CaptionText("Time Controls");
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
     constexpr int BufferSize = 256;
     static char Buffer[BufferSize];

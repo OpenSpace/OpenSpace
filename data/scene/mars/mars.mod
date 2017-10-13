@@ -12,7 +12,8 @@ return {
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Mars"
     },
     -- RenderableGlobe module
     {   
@@ -131,7 +132,7 @@ return {
             }
         },
         Tag = { "planet_solarSystem", "planet_terrestrial" },
-        GuiGrouping = "/SolarSystem/Mars"
+        GuiPath = "/Solar System/Planets/Mars"
     },
 
     -- Trail module
@@ -150,6 +151,6 @@ return {
             Resolution = 1000
         },
         Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
-        GuiGrouping = "/SolarSystem/Mars"
+        GuiPath = "/Solar System/Planets/Mars"
     }
 }

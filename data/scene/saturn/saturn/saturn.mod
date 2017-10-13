@@ -10,7 +10,8 @@ return {
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Saturn"
     },
 
     -- Saturn module
@@ -38,7 +39,8 @@ return {
                 SourceFrame = "IAU_SATURN",
                 DestinationFrame = "GALACTIC"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Saturn"
     },
     {
         Name = "SaturnRings",
@@ -48,7 +50,8 @@ return {
             Texture = "textures/saturn_rings.png",
             Size = 140220000,
             Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
-        }
+        },
+        GuiPath = "/Solar System/Planets/Saturn"
     },
     -- SaturnTrail module
     {   
@@ -65,6 +68,7 @@ return {
             Period = 10746.94,
             Resolution = 1000,
         },
-        Tag = { "planetTrail_solarSystem", "planetTrail_giants" }
+        Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+        GuiPath = "/Solar System/Planets/Saturn"
     }
 }

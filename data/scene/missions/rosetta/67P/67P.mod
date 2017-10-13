@@ -78,6 +78,7 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
+        GuiPath = "/Solar System/Comets/67P Churymov-Gerasimenko"
     },
     -- -- 67P Trail Module
     {   
@@ -95,6 +96,7 @@ return {
             EndTime = "2017 JAN 01 00:00:00.000",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Comets/67P Churymov-Gerasimenko"
     },
     --[[
     {   

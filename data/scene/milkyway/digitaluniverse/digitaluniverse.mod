@@ -10,6 +10,6 @@ return {
             Texture = "textures/DarkUniverse_mellinger_8k.jpg",
             Orientation = "Inside/Outside"
         },
-        GuiGrouping = "/MilkyWay/MilkyWay"
+        GuiPath = "/Milky Way/Milky Way"
     }
 }
