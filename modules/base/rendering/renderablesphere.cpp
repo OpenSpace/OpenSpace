@@ -258,7 +258,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (_fadeOutThreshold > -1.0) {
         float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
-        double term = std::exp((-distCamera + _size * _fadeOutThreshold) / _size);
+        double term = std::exp((-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold));
         
         _shader->setUniform("alpha", _transparency * static_cast<float>(term / (term + 1.0)));
     }
