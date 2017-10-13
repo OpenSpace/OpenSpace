@@ -107,6 +107,23 @@ namespace {
         );
     };
 
+    void simplifyTree(TreeNode& node) {
+        // Merging consecutive nodes if they only have a single child
+
+        for (const std::unique_ptr<TreeNode>& c : node.children) {
+            simplifyTree(*c);
+        }
+
+        if ((node.children.size() == 1) && (node.nodes.empty())) {
+            node.path = node.path + "/" + node.children[0]->path;
+            node.nodes = std::move(node.children[0]->nodes);
+            std::vector<std::unique_ptr<TreeNode>> cld = std::move(
+                node.children[0]->children
+            );
+            node.children = std::move(cld);
+        }
+    }
+
     void renderTree(const TreeNode& node, const std::function<void (openspace::properties::PropertyOwner*)>& renderFunc) {
         if (node.path.empty() || ImGui::TreeNode(node.path.c_str())) {
             for (const std::unique_ptr<TreeNode>& c : node.children) {
@@ -325,6 +342,8 @@ void GuiPropertyComponent::render() {
 
                 addPathToTree(root, paths, nOwner);
             }
+
+            simplifyTree(root);
 
             renderTree(root, renderProp);
 
