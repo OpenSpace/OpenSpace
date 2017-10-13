@@ -75,7 +75,8 @@ class OpenSpaceEngine {
 public:
     static void create(int argc, char** argv,
         std::unique_ptr<WindowWrapper> windowWrapper,
-        std::vector<std::string>& sgctArguments, bool& requestClose);
+        std::vector<std::string>& sgctArguments,
+        bool& requestClose, bool consoleLog = true);
     static void destroy();
     static OpenSpaceEngine& ref();
     static bool isCreated();
@@ -180,7 +181,7 @@ private:
     void loadSingleAsset(const std::string& assetPath);
     void gatherCommandlineArguments();
     void loadFonts();
-    void configureLogging();
+    void configureLogging(bool consoleLog);
     
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;

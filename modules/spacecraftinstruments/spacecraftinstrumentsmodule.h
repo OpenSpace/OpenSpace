@@ -39,6 +39,7 @@ public:
 
 protected:
     void internalInitialize() override;
+    void internalDeinitialize() override;
 };
 
 } // namespace openspace

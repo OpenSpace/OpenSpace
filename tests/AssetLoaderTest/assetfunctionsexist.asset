@@ -1,0 +1,8 @@
+assert(type(asset.import) == "function", "import should be function")
+assert(type(asset.importOptional) == "function", "importOptional should be function")
+assert(type(asset.localResource) == "function", "localResource should be function")
+assert(type(asset.syncedResource) == "function", "syncedResource should be function")
+assert(type(asset.export) == "function", "export should be function")
+assert(type(asset.onInitialize) == "function", "onInitialize should be function")
+assert(type(asset.onDeinitialize) == "function", "onDeinitialize should be function")
+assert(type(asset.addSynchronization) == "function", "addSynchronization should be function")

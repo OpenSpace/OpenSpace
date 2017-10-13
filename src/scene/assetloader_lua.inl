@@ -104,6 +104,31 @@ int onDeinitialize(lua_State* state) {
 }
 
 /**
+* Adds a Lua function to be called when a dependency link is initialized
+* Usage: void asset.onInitialize(function<void()> initFun)
+*/
+int onInitializeDependency(lua_State* state) {
+    Asset *dependant =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset *dependency =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(2)));
+    return dependant->loader()->onInitializeDependencyLua(dependant, dependency);
+}
+
+/**
+* Adds a Lua function to be called upon asset deinitialization
+* Usage: void asset.onDeinitialize(function<void()> initFun)
+*/
+int onDeinitializeDependency(lua_State* state) {
+    Asset *dependant =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset *dependency =
+        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(2)));
+    return dependant->loader()->onDeinitializeDependencyLua(dependant, dependency);
+}
+
+
+/**
  * Imports required dependencies
  * Gives access to
  *   AssetTable: Exported lua values
@@ -134,10 +159,10 @@ int resolveSyncedResource(lua_State* state) {
     return asset->loader()->resolveSyncedResourceLua(asset);
 }
 
-int onFinishSynchronization(lua_State* state) {
+int addSynchronization(lua_State* state) {
     Asset *asset =
         reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    return asset->loader()->onFinishSynchronizationLua(asset);
+    return asset->loader()->addSynchronizationLua(asset);
 }
 
 int noOperation(lua_State*) {

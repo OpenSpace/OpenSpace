@@ -68,6 +68,10 @@ void SpacecraftInstrumentsModule::internalInitialize() {
     fDecoder->registerClass<TargetDecoder>("Target");
 }
 
+void SpacecraftInstrumentsModule::internalDeinitialize() {
+    ImageSequencer::deinitialize();
+}
+
 std::vector<documentation::Documentation>
 SpacecraftInstrumentsModule::documentations() const
 {

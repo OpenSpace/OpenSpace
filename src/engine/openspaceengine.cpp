@@ -226,7 +226,8 @@ bool OpenSpaceEngine::isCreated() {
 
 void OpenSpaceEngine::create(int argc, char** argv,
                              std::unique_ptr<WindowWrapper> windowWrapper,
-                             std::vector<std::string>& sgctArguments, bool& requestClose)
+                             std::vector<std::string>& sgctArguments,
+                             bool& requestClose, bool consoleLog)
 {
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
     ghoul_assert(windowWrapper != nullptr, "No Window Wrapper was provided");
@@ -246,7 +247,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         LogLevel::Debug,
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
-    LogMgr.addLog(std::make_unique<ConsoleLog>());
+    if (consoleLog) {
+        LogMgr.addLog(std::make_unique<ConsoleLog>());
+    }
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
@@ -361,7 +364,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     }
 
     // Initialize the requested logs from the configuration file
-    _engine->configureLogging();
+    _engine->configureLogging(consoleLog);
 
     LINFOC("OpenSpace Version",
         OPENSPACE_VERSION_MAJOR << "." <<
@@ -421,14 +424,6 @@ void OpenSpaceEngine::destroy() {
 
     _engine->_scene = nullptr;
 
-    for (const auto& func : _engine->_moduleCallbacks.deinitializeGL) {
-        func();
-    }
-
-    for (const auto& func : _engine->_moduleCallbacks.deinitialize) {
-        func();
-    }
-
     _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
 
@@ -438,7 +433,9 @@ void OpenSpaceEngine::destroy() {
     _engine->_scriptEngine->deinitialize();
 
     delete _engine;
+    _engine = nullptr;
     FactoryManager::deinitialize();
+    TransformationManager::deinitialize();
     SpiceManager::deinitialize();
 
     ghoul::fontrendering::FontRenderer::deinitialize();
@@ -655,8 +652,16 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
+    for (const auto& func : _engine->_moduleCallbacks.deinitializeGL) {
+        func();
+    }
+
+    for (const auto& func : _engine->_moduleCallbacks.deinitialize) {
+        func();
+    }
+
     _navigationHandler->deinitialize();
-    _renderEngine->deinitialize();
+    _renderEngine->deinitialize(); 
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
 }
@@ -756,7 +761,7 @@ void OpenSpaceEngine::loadFonts() {
     }
 }
     
-void OpenSpaceEngine::configureLogging() {
+void OpenSpaceEngine::configureLogging(bool consoleLog) {
     const std::string KeyLogLevel =
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogLevel;
     const std::string KeyLogImmediateFlush =
@@ -778,8 +783,9 @@ void OpenSpaceEngine::configureLogging() {
             level,
             immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
         );
-        
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
+        if (consoleLog) {
+            LogMgr.addLog(std::make_unique<ConsoleLog>());
+        }
     }
 
     if (configurationManager().hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {

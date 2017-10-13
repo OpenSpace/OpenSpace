@@ -73,7 +73,9 @@ void ScriptEngine::initialize() {
     initializeLuaState(_state);
 }
 
-void ScriptEngine::deinitialize() {}
+void ScriptEngine::deinitialize() {
+    _registeredLibraries.clear();
+}
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
     LDEBUG("Create openspace base library");

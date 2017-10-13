@@ -1,0 +1,6 @@
+local imports, dep = asset.import('export')
+
+assert(type(dep.localResource) == "function", "localResource should be function")
+assert(type(dep.syncedResource) == "function", "syncedResource should be function")
+assert(type(dep.onInitialize) == "function", "onInitialize should be function")
+assert(type(dep.onDeinitialize) == "function", "onDeinitialize should be function")
