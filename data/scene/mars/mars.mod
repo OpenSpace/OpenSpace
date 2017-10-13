@@ -131,6 +131,7 @@ return {
             }
         },
         Tag = { "planet_solarSystem", "planet_terrestrial" },
+        GuiGrouping = "/SolarSystem/Mars"
     },
 
     -- Trail module
@@ -148,6 +149,7 @@ return {
             Period = 686.973,
             Resolution = 1000
         },
-        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" }
+        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+        GuiGrouping = "/SolarSystem/Mars"
     }
 }

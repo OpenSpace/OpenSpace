@@ -56,6 +56,7 @@
 namespace {
     const char* _loggerCat = "SceneGraphNode";
     const char* KeyRenderable = "Renderable";
+    const char* KeyGuiGrouping = "GuiGrouping";
 
     const char* keyTransformTranslation = "Transform.Translation";
     const char* keyTransformRotation = "Transform.Rotation";
@@ -157,6 +158,10 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
                 }
             }
         }
+    }
+
+    if (dictionary.hasKey(KeyGuiGrouping)) {
+        result->_guiGroup = dictionary.value<std::string>(KeyGuiGrouping);
     }
 
     LDEBUG("Successfully created SceneGraphNode '"
@@ -494,28 +499,23 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::dependentNodes() const {
     return _dependentNodes;
 }
 
-glm::dvec3 SceneGraphNode::position() const
-{
+glm::dvec3 SceneGraphNode::position() const {
     return _transform.translation->position();
 }
 
-const glm::dmat3& SceneGraphNode::rotationMatrix() const
-{
+const glm::dmat3& SceneGraphNode::rotationMatrix() const {
     return _transform.rotation->matrix();
 }
 
-double SceneGraphNode::scale() const
-{
+double SceneGraphNode::scale() const {
     return _transform.scale->scaleValue();
 }
 
-glm::dvec3 SceneGraphNode::worldPosition() const
-{
+glm::dvec3 SceneGraphNode::worldPosition() const {
     return _worldPositionCached;
 }
 
-const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
-{
+const glm::dmat3& SceneGraphNode::worldRotationMatrix() const {
     return _worldRotationCached;
 }
 
@@ -527,9 +527,12 @@ glm::dmat4 SceneGraphNode::inverseModelTransform() const {
     return _inverseModelTransformCached;
 }
 
-double SceneGraphNode::worldScale() const
-{
+double SceneGraphNode::worldScale() const {
     return _worldScaleCached;
+}
+
+const std::string& SceneGraphNode::guiGroup() const {
+    return _guiGroup;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {

@@ -237,7 +237,7 @@ namespace openspace::gui {
 GUI::GUI() 
     : GuiComponent("Main")
     , _globalProperty("Global")
-    , _property("Properties")
+    , _property("Properties", GuiPropertyComponent::UseTreeLayout::Yes)
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
     , _featuredProperties("Featured Properties")

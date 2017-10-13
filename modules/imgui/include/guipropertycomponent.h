@@ -29,6 +29,8 @@
 
 #include <openspace/properties/property.h>
 
+#include <ghoul/misc/boolean.h>
+
 #include <functional>
 #include <string>
 #include <vector>
@@ -44,7 +46,10 @@ class GuiPropertyComponent : public GuiComponent {
 public:
     using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
 
-    GuiPropertyComponent(std::string name);
+    using UseTreeLayout = ghoul::Boolean;
+
+
+    GuiPropertyComponent(std::string name, UseTreeLayout useTree = UseTreeLayout::No);
 
     // This is the function that evaluates to the list of Propertyowners that this
     // component should render
@@ -66,6 +71,7 @@ protected:
     /// are regular, i.e., not containing wildcards, regex, or groups
     /// This variable only has an impact on which \c setPropertyValue function is called
     bool _hasOnlyRegularProperties = false;
+    UseTreeLayout _useTreeLayout;
 };
 
 } // namespace openspace::gui

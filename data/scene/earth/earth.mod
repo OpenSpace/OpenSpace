@@ -44,7 +44,7 @@ return {
             Resolution = 1000
         },
         Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
-        GuiName = "/Solar/EarthTrail"
+        GuiGrouping = "/SolarSystem/Earth"
     },
     -- RenderableGlobe module
     {
@@ -57,7 +57,6 @@ return {
                 DestinationFrame = "GALACTIC",
             }
         },
-        Tag = { "planet_solarSystem", "planet_terrestrial" },
         Renderable = {
             Type = "RenderableGlobe",
             Radii = earthEllipsoid,
@@ -212,6 +211,8 @@ return {
                     }
                 }
             }
-        }
+        },
+        Tag = { "planet_solarSystem", "planet_terrestrial" },
+        GuiGrouping = "/SolarSystem/Earth"
     }
 }

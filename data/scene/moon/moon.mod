@@ -61,7 +61,8 @@ return {
                     }
                 }
             }
-        }
+        },
+        GuiGrouping = "/SolarSystem/Earth/Moon"
     },
     -- MoonTrail module
     {   
