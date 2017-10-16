@@ -248,12 +248,13 @@ GUI::GUI()
     , _globalProperty("Global")
     , _property(
         "Properties",
-        GuiPropertyComponent::UseTreeLayout::Yes,
-        GuiPropertyComponent::IsTopLevelWindow::Yes
+        GuiPropertyComponent::UseTreeLayout::Yes
     )
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
-    , _featuredProperties("Featured Properties")
+    , _featuredProperties("Featured Properties",
+        GuiPropertyComponent::UseTreeLayout::No,
+        GuiPropertyComponent::IsTopLevelWindow::Yes)
     , _showInternals(false)
     , _currentVisibility(properties::Property::Visibility::Developer)
 {

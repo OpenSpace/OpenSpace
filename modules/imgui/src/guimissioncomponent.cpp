@@ -52,23 +52,27 @@ namespace {
                 ImGui::Text("%s", mission.description().c_str());
             }
 
-            for (const openspace::Mission& m : mission.phases()) {
-                renderMission(m);
-            }
-
             openspace::TimeRange range = mission.timeRange();
             openspace::Time startTime = openspace::Time(range.start);
             openspace::Time endTime  = openspace::Time(range.end);
             
+            openspace::gui::CaptionText("Mission Progress");
+
             ImGui::Text("%s", startTime.UTC().c_str());
             ImGui::SameLine();
             float v = static_cast<float>(currentTime);
             float s = static_cast<float>(startTime.j2000Seconds());
             float e = static_cast<float>(endTime.j2000Seconds());
 
-            ImGui::SliderFloat(missionHashname.c_str(), &v, s, e);
+            ImGui::SliderFloat(missionHashname.c_str(), &v, s, e, OsEng.timeManager().time().UTC().c_str());
             ImGui::SameLine();
             ImGui::Text("%s", endTime.UTC().c_str());
+
+            openspace::gui::CaptionText("Phases");
+
+            for (const openspace::Mission& m : mission.phases()) {
+                renderMission(m);
+            }
 
 
             ImGui::TreePop();
