@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceimageonline.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -38,12 +38,11 @@
 namespace {
     const char* KeyName = "Name";
     const char* KeyTexturePath = "TexturePath";
-    const char* KeyUrl = "URL";
 
     static const openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture path",
-        "Sets the path of the texture that is displayed on this screen space plane. If "
+        "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
         "size of this plane."
@@ -52,11 +51,11 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImage::Documentation() {
+documentation::Documentation ScreenSpaceImageOnline::Documentation() {
     using namespace openspace::documentation;
     return {
-        "ScreenSpace Image",
-        "base_screenspace_image",
+        "ScreenSpace Online Image",
+        "base_screenspace_image_online",
         {
             {
                 KeyName,
@@ -68,16 +67,14 @@ documentation::Documentation ScreenSpaceImage::Documentation() {
                 KeyTexturePath,
                 new StringVerifier,
                 Optional::Yes,
-                "Specifies the image that is shown on the screenspace-aligned plane. If "
-                "this value is set and the URL is not, the disk image is used."
+                TexturePathInfo.description
             }
         }
     };
 }
 
-ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
+ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _downloadImage(false)
     , _textureIsDirty(false)
     , _texturePath(TexturePathInfo)
 {
@@ -92,138 +89,78 @@ ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
     }
     else {
         static int id = 0;
-        setName("ScreenSpaceImage " + std::to_string(id));
+        setName("ScreenSpaceImageOnline " + std::to_string(id));
         ++id;
-    }
-
-    std::string texturePath;
-    if (dictionary.getValue(KeyTexturePath, texturePath)) {
-        _texturePath = dictionary.value<std::string>(KeyTexturePath);
-    }
-
-    if (dictionary.getValue(KeyUrl, _url)) {
-        _downloadImage = true;
     }
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     addProperty(_texturePath);
-}
 
-bool ScreenSpaceImage::initialize() {
-    _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
-
-    createPlane();
-    createShaders();
-    updateTexture();
-
-    return isReady();
-}
-
-bool ScreenSpaceImage::deinitialize() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    _texturePath = "";
-    _texture = nullptr;
-
-    if (_shader) {
-        OsEng.renderEngine().removeRenderProgram(_shader);
-        _shader = nullptr;
+    std::string texturePath;
+    if (dictionary.hasKey(TexturePathInfo.identifier)) {
+        _texturePath = dictionary.value<std::string>(TexturePathInfo.identifier);
     }
 
-    return true;
 }
 
-void ScreenSpaceImage::render() {
-    draw(rotationMatrix() * translationMatrix() * scaleMatrix());
-}
+void ScreenSpaceImageOnline::update() {
+    if (_textureIsDirty) {
+        if (!_imageFuture.valid()) {
+            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(_texturePath);
+            if (future.valid()) {
+                _imageFuture = std::move(future);
+            }
+        }
 
-void ScreenSpaceImage::update() {
-    bool download = _downloadImage ? (_futureImage.valid() && DownloadManager::futureReady(_futureImage)) : true;
-    if (download && _textureIsDirty) {
-        loadTexture();
-    }
-}
+        if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
+            DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
-bool ScreenSpaceImage::isReady() const {
-    return _shader && _texture;
-}
+            if (imageFile.corrupted) {
+                LERRORC(
+                    "ScreenSpaceImageOnline",
+                    "Error loading image from URL '" << _texturePath << "'"
+                );
+                return;
+            }
 
-void ScreenSpaceImage::loadTexture() {
-    std::unique_ptr<ghoul::opengl::Texture> texture = nullptr;
-    if (!_downloadImage)
-        texture = loadFromDisk();
-    else
-        texture = loadFromMemory();
+            std::unique_ptr<ghoul::opengl::Texture> texture =
+                ghoul::io::TextureReader::ref().loadTexture(
+                    reinterpret_cast<void*>(imageFile.buffer),
+                    imageFile.size,
+                    imageFile.format
+                );
 
-    if (texture) {
-        // LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
-        texture->uploadTexture();
+            if (texture) {
+                // Images don't need to start on 4-byte boundaries, for example if the
+                // image is only RGB
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                texture->uploadTexture();
 
-        _texture = std::move(texture);
-        _textureIsDirty = false;
-    }
-}
+                // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-void ScreenSpaceImage::updateTexture() {
-    if (!_downloadImage) {
-        loadTexture();
-    } else {
-        if (_futureImage.valid())
-            return;
-
-        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(_url);
-        if (future.valid()) {
-            _futureImage = std::move(future);
+                _texture = std::move(texture);
+                _textureIsDirty = false;
+            }
         }
     }
 }
 
- std::unique_ptr<ghoul::opengl::Texture> ScreenSpaceImage::loadFromDisk() {
-    if (_texturePath.value() != "")
-        return (ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath.value())));
-    return nullptr;
- }
-
- std::unique_ptr<ghoul::opengl::Texture> ScreenSpaceImage::loadFromMemory() {
-    if (_futureImage.valid() && DownloadManager::futureReady(_futureImage)) {
-        DownloadManager::MemoryFile imageFile = _futureImage.get();
-
-        if (imageFile.corrupted) {
-            return nullptr;
-        }
-
-        return (ghoul::io::TextureReader::ref().loadTexture(
-            reinterpret_cast<void*>(imageFile.buffer), 
-            imageFile.size, 
-            imageFile.format)
-        );
-    }
-    else {
-        return nullptr;
-    }
- }
-
-std::future<DownloadManager::MemoryFile> ScreenSpaceImage::downloadImageToMemory(
+std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
     std::string url)
 {
     return OsEng.downloadManager().fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(
-                "ScreenSpaceImage",
+                "ScreenSpaceImageOnline",
                 "Download to memory finished for screen space image"
             );
         },
         [url](const std::string& err) {
             LDEBUGC(
-                "ScreenSpaceImage",
+                "ScreenSpaceImageOnline",
                 "Download to memory failer for screen space image: " + err
             );
         }

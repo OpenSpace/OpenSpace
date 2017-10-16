@@ -22,32 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
 
-#include <openspace/util/concurrentqueue.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+#include <openspace/properties/stringproperty.h>
 
-class ConcurrentQueueTest : public testing::Test {};
+#include <ghoul/opengl/texture.h>
+ 
+namespace openspace {
+    
+namespace documentation { struct Documentation; }
 
-TEST_F(ConcurrentQueueTest, Basic) {
-    using namespace openspace;
+class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
+public:
+    ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);
 
-    ConcurrentQueue<int> q1;
-    q1.push(4);
-    int val = q1.pop();
-    std::cout << val << std::endl;
-}
+    void update() override;
 
-/*
-TEST_F(ConcurrentQueueTest, SharedPtr) {
-    ConcurrentQueue<std::shared_ptr<int>> q1;
-    std::shared_ptr<int> i1 = std::shared_ptr<int>(new int(1337));
+    static documentation::Documentation Documentation();
 
-    q1.push(i1);
-    auto val = q1.pop();
-    std::cout << *val << std::endl;
-}
-*/
+private:
+    properties::StringProperty _texturePath;
+    bool _textureIsDirty;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__

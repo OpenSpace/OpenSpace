@@ -133,6 +133,7 @@ namespace {
 } // namespace
 
 namespace openspace {
+namespace kameleonvolume {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -226,7 +227,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
 
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
-    _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDictionary);
+    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setName("clipPlanes");
 
     bool cache;
@@ -234,14 +235,14 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         _cache = cache;
     }
 
-    _gridType.addOption(static_cast<int>(VolumeGridType::Cartesian), "Cartesian grid");
-    _gridType.addOption(static_cast<int>(VolumeGridType::Spherical), "Spherical grid");
-    _gridType.setValue(static_cast<int>(VolumeGridType::Cartesian));
+    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid");
+    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid");
+    _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
     std::string gridType;
     if (dictionary.getValue(KeyGridType, gridType)) {
         if (gridType == ValueSphericalGridType) {
-            _gridType.setValue(static_cast<int>(VolumeGridType::Spherical));
+            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         } else {
             _autoGridType = true;
         }
@@ -256,15 +257,15 @@ void RenderableKameleonVolume::initialize() {
     _volumeTexture->uploadTexture();
     _transferFunction->update();
 
-    _raycaster = std::make_unique<KameleonVolumeRaycaster>(_volumeTexture, _transferFunction, _clipPlanes);
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(_volumeTexture, _transferFunction, _clipPlanes);
 
     _raycaster->setStepSize(_stepSize);
     _gridType.onChange([this] {
         _raycaster->setStepSize(_stepSize);
     });
-    _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
+    _raycaster->setGridType(static_cast<volume::VolumeGridType>(_gridType.value()));
     _gridType.onChange([this] {
-        _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
+        _raycaster->setGridType(static_cast<volume::VolumeGridType>(_gridType.value()));
     });
 
     updateRaycasterModelTransform();
@@ -372,7 +373,7 @@ void RenderableKameleonVolume::loadFromPath(const std::string& path) {
 }
 
 void RenderableKameleonVolume::loadRaw(const std::string& path) {
-    RawVolumeReader<float> reader(path, _dimensions);
+    volume::RawVolumeReader<float> reader(path, _dimensions);
     _rawVolume = reader.read();
     updateTextureFromVolume();
 }
@@ -401,10 +402,10 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
 
     if (variables.size() == 3 && _autoGridType) {
         if (variables[0] == "r" && variables[0] == "theta" && variables[0] == "phi") {
-            _gridType.setValue(static_cast<int>(VolumeGridType::Spherical));
+            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         }
         else {
-            _gridType.setValue(static_cast<int>(VolumeGridType::Cartesian));
+            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
         }       
     }
 
@@ -414,7 +415,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
 }
 
 void RenderableKameleonVolume::updateTextureFromVolume() {
-    _normalizedVolume = std::make_unique<RawVolume<GLfloat>>(_dimensions);
+    _normalizedVolume = std::make_unique<volume::RawVolume<GLfloat>>(_dimensions);
     float* in = _rawVolume->data();
     GLfloat* out = _normalizedVolume->data();
     float min = _lowerValueBound;
@@ -438,7 +439,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
 }
 
 void RenderableKameleonVolume::storeRaw(const std::string& path) {
-    RawVolumeWriter<float> writer(path);
+    volume::RawVolumeWriter<float> writer(path);
     writer.write(*_rawVolume);
 }
     
@@ -463,4 +464,5 @@ void RenderableKameleonVolume::render(const RenderData& data, RendererTasks& tas
     tasks.raycasterTasks.push_back({ _raycaster.get(), data });
 }
        
+}
 }

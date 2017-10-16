@@ -47,7 +47,9 @@ namespace {
 
 const char* _loggerCat = "GUI";
 const char* configurationFile = "imgui.ini";
-const char* GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
+//const char* GuiFont = "${FONTS}/ubuntu/Ubuntu-Regular.ttf";
+const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+const float FontSize = 14.f;
 const ImVec2 size = ImVec2(350, 500);
 
 //GLuint fontTex = 0;
@@ -211,17 +213,25 @@ static void RenderDrawLists(ImDrawData* drawData) {
 }
 
 
-void addScreenSpaceRenderable(std::string texturePath) {
+void addScreenSpaceRenderableLocal(std::string texturePath) {
     if (!FileSys.fileExists(texturePath)) {
         LWARNING("Could not find image '" << texturePath << "'");
         return;
     }
 
     const std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = openspace.absPath('" + texturePath + "') }";
+        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" + texturePath + "') }";
     const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
+
+void addScreenSpaceRenderableOnline(std::string texturePath) {
+    const std::string luaTable =
+        "{Type = 'ScreenSpaceImageOnline', TexturePath = '" + texturePath + "' }";
+    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+}
+
 } // namespace 
 
 namespace openspace::gui {
@@ -242,7 +252,9 @@ GUI::GUI()
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
     addPropertySubOwner(_virtualProperty);
+#ifdef GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_globeBrowsing);
+#endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
     addPropertySubOwner(_time);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -287,7 +299,7 @@ void GUI::initialize() {
     io.RenderDrawListsFn = RenderDrawLists;
     io.Fonts->AddFontFromFileTTF(
         absPath(GuiFont).c_str(),
-        16.f
+        FontSize
     );
 
     ImGuiStyle& style = ImGui::GetStyle();
@@ -295,32 +307,58 @@ void GUI::initialize() {
     style.WindowRounding = 0.f;
     style.FramePadding = { 3.f, 3.f };
     style.FrameRounding = 0.f;
-    style.ScrollbarSize = 15.f;
+    style.ItemSpacing = { 3.f, 2.f };
+    style.ItemInnerSpacing = { 3.f, 2.f };
+    style.TouchExtraPadding = { 1.f, 1.f };
+    style.IndentSpacing = 15.f;
+    style.ScrollbarSize = 10.f;
     style.ScrollbarRounding = 0.f;
-    style.IndentSpacing = 25;
-    style.ItemSpacing = { 4.f, 2.f };
+    style.GrabMinSize = 10.f;
+    style.GrabRounding = 16.f;
 
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.21f, 0.24f, 1.0f);
-    style.Colors[ImGuiCol_Border] = ImVec4(0.1f, 0.39f, 0.42f, 0.59f);
-    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
-    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.8f, 0.43f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
-    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.f);
-    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5f, 0.8f, 0.76f, 1.0f);
-    style.Colors[ImGuiCol_Button] = ImVec4(0.0f, 0.36f, 0.67f, 0.6f);
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.51f, 0.94f, 1.0f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.43f, 0.8f, 1.0f);
-    style.Colors[ImGuiCol_Header] = ImVec4(0.f, 0.36f, 0.67f, 0.45f);
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.f, 0.54f, 1.0f, 0.8f);
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.8f);
-    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
-    style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.6f);
-    style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
+    style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.80f, 0.43f);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.00f);
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
+    style.Colors[ImGuiCol_Button] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.00f, 0.51f, 0.94f, 1.00f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.43f, 0.80f, 1.00f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
+    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
+    style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
+    style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+
+    //style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.21f, 0.24f, 1.0f);
+    //style.Colors[ImGuiCol_Border] = ImVec4(0.1f, 0.39f, 0.42f, 0.59f);
+    //style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    //style.Colors[ImGuiCol_TitleBg] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
+    //style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
+    //style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    //style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.8f, 0.43f);
+    //style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
+    //style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
+    //style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.f);
+    //style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5f, 0.8f, 0.76f, 1.0f);
+    //style.Colors[ImGuiCol_Button] = ImVec4(0.0f, 0.36f, 0.67f, 0.6f);
+    //style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.51f, 0.94f, 1.0f);
+    //style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.43f, 0.8f, 1.0f);
+    //style.Colors[ImGuiCol_Header] = ImVec4(0.f, 0.36f, 0.67f, 0.45f);
+    //style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.f, 0.54f, 1.0f, 0.8f);
+    //style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.8f);
+    //style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
+    //style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.6f);
+    //style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
 
     _property.initialize();
     _property.setHasRegularProperties(true);
@@ -330,7 +368,9 @@ void GUI::initialize() {
     _globalProperty.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _filePath.initialize();
+#ifdef GLOBEBROWSING_USE_GDAL    
     _globeBrowsing.initialize();
+#endif // GLOBEBROWSING_USE_GDAL
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
@@ -352,7 +392,9 @@ void GUI::deinitialize() {
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
     _filePath.deinitialize();
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitialize();
+#endif // GLOBEBROWSING_USE_GDAL
     _property.deinitialize();
 
     delete iniFileBuffer;
@@ -427,8 +469,10 @@ void GUI::initializeGL() {
     _screenSpaceProperty.initializeGL();
     _globalProperty.initializeGL();
     _performance.initializeGL();
-    _help.initializeGL();
+    _help.initializeGL();    
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initializeGL();
+#endif // GLOBEBROWSING_USE_GDAL
     _filePath.initializeGL();
     _parallel.initializeGL();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -459,7 +503,9 @@ void GUI::deinitializeGL() {
     _performance.deinitializeGL();
     _globalProperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitializeGL();
+#endif // GLOBEBROWSING_USE_GDAL
     _filePath.deinitializeGL();
     _property.deinitializeGL();
 }
@@ -520,9 +566,11 @@ void GUI::endFrame() {
             _filePath.render();
         }
 
+#ifdef GLOBEBROWSING_USE_GDAL
         if (_globeBrowsing.isEnabled()) {
             _globeBrowsing.render();
         }
+#endif // GLOBEBROWSING_USE_GDAL
     }
 
     ImGui::Render();
@@ -622,9 +670,11 @@ void GUI::render() {
     ImGui::Checkbox("File Paths", &filePath);
     _filePath.setEnabled(filePath);
 
+#ifdef GLOBEBROWSING_USE_GDAL
     bool globeBrowsing = _globeBrowsing.isEnabled();
     ImGui::Checkbox("GlobeBrowsing", &globeBrowsing);
     _globeBrowsing.setEnabled(globeBrowsing);
+#endif // GLOBEBROWSING_USE_GDAL
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     bool iswa = _iswa.isEnabled();
@@ -642,16 +692,27 @@ void GUI::render() {
     renderAndUpdatePropertyVisibility();
 
     static const int addImageBufferSize = 256;
-    static char addImageBuffer[addImageBufferSize];
+    static char addImageLocalBuffer[addImageBufferSize];
+    static char addImageOnlineBuffer[addImageBufferSize];
 
-    bool addImage = ImGui::InputText(
-        "addImage",
-        addImageBuffer,
+    bool addImageLocal = ImGui::InputText(
+        "Add Local Image",
+        addImageLocalBuffer,
         addImageBufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
-    if (addImage) {
-        addScreenSpaceRenderable(std::string(addImageBuffer));
+    if (addImageLocal) {
+        addScreenSpaceRenderableLocal(std::string(addImageLocalBuffer));
+    }
+
+    bool addImageOnline = ImGui::InputText(
+        "Add Online Image",
+        addImageOnlineBuffer,
+        addImageBufferSize,
+        ImGuiInputTextFlags_EnterReturnsTrue
+    );
+    if (addImageOnline) {
+        addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
 
     ImGui::Checkbox("ImGUI Internals", &_showInternals);

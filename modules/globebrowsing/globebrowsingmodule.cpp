@@ -123,6 +123,15 @@ namespace openspace {
 GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
 
 void GlobeBrowsingModule::internalInitialize() {
+    // TODO: Remove dependency on OsEng.
+    // Instead, make this class implement an interface that OsEng depends on.
+    // Do not try to register module callbacks if OsEng does not exist,
+    // for example in the TaskRunner.
+
+    if (!OpenSpaceEngine::isCreated()) {
+        return;
+    }
+
     using namespace globebrowsing;
 
     // Initialize
@@ -237,6 +246,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "Get geographic coordinates of the camera poosition in latitude, "
                 "longitude, and altitude"
             },
+#ifdef GLOBEBROWSING_USE_GDAL
             {
                 "loadWMSCapabilities",
                 &globebrowsing::luascriptfunctions::loadWMSCapabilities,
@@ -267,6 +277,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "component of the returned table can be used in the 'FilePath' argument "
                 "for a call to the 'addLayer' function to add the value to a globe."
             }
+#endif  // GLOBEBROWSING_USE_GDAL
         },
         {
             "${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"

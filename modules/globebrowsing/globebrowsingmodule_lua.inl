@@ -204,6 +204,7 @@ int getGeoPosition(lua_State* L) {
     return 3;
 }
 
+#ifdef GLOBEBROWSING_USE_GDAL
 int loadWMSCapabilities(lua_State* L) {
     int nArguments = lua_gettop(L);
 
@@ -220,8 +221,6 @@ int loadWMSCapabilities(lua_State* L) {
         std::move(globe),
         std::move(url)
     );
-
-    return 0;
 }
 
 int removeWMSServer(lua_State* L) {
@@ -266,5 +265,7 @@ int capabilities(lua_State* L) {
 
     return 1;
 }
+#endif // GLOBEBROWSING_USE_GDAL
+
 
 } // namespace openspace::globebrowsing::luascriptfunctions

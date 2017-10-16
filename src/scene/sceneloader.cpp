@@ -96,7 +96,6 @@ void SceneLoader::loadScene(Scene* scene, const std::string& path) {
     //_assetLoader->rootAsset()->getSynchronizations();
 
     // also show 
-    
 
     try {
         _assetLoader->rootAsset()->initialize();

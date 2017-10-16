@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,51 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
+#define VOLUME_PI      3.14159265358979323846  /* pi */
+#define VOLUME_SQRT1_3 0.57735026919           /* 1/sqrt(3) */
 
-#include <openspace/rendering/screenspacerenderable.h>
+vec3 volume_cartesianToSpherical(vec3 zeroToOneCoords) {
+    // Put cartesian in [-1..1] range first
+    vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
 
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/stringproperty.h>
+    float r = length(cartesian);
 
-#include <ghoul/opengl/texture.h>
- 
-namespace openspace {
-    
-namespace documentation { struct Documentation; }
+    float theta = 0.0;
+    float phi = 0.0;
 
-class ScreenSpaceImage : public ScreenSpaceRenderable {
-public:
-    ScreenSpaceImage(const ghoul::Dictionary& dictionary);
-
-    bool initialize() override;
-    bool deinitialize() override;
-    void render() override;
-    void update() override;
-    bool isReady() const override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    void loadTexture();
-    void updateTexture();
-
-    std::string _url;
-    bool _downloadImage;
-    bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _futureImage;
-    
-private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
-    std::unique_ptr<ghoul::opengl::Texture> loadFromDisk();
-    std::unique_ptr<ghoul::opengl::Texture> loadFromMemory();
-
-    properties::StringProperty _texturePath;
-
-
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
+    if (r != 0.0) {
+        theta = acos(cartesian.z / r) / VOLUME_PI;
+        phi = (VOLUME_PI + atan(cartesian.y, cartesian.x)) / (2.0 * VOLUME_PI );
+    }
+    return vec3(r * VOLUME_SQRT1_3, theta, phi);
+}

@@ -53,7 +53,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "the Scene documentation."
         },
         {
-            ConfigurationManager::KeyConfigTask,
+            ConfigurationManager::KeyConfigTasksRoot,
             new StringAnnotationVerifier(
                 "A valid task file as described in the Task documentation"
             ),

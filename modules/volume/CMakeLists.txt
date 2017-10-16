@@ -39,6 +39,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingvolume.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.h
 )
@@ -50,7 +52,10 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingvolume.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.cpp
 )

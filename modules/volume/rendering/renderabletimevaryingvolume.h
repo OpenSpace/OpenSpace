@@ -22,24 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__
-#define __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
+#define __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
+
+#include <openspace/rendering/renderable.h>
+
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rendering/basicvolumeraycaster.h>
+#include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/boxgeometry.h>
-#include <openspace/rendering/renderable.h>
-#include <modules/galaxy/rendering/galaxyraycaster.h>
-#include <modules/volume/rawvolume.h>
-#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
 struct RenderData;
-    
-class RenderableGalaxy : public Renderable {
+
+namespace volume {
+
+class RenderableTimeVaryingVolume : public Renderable {
 public:
-    RenderableGalaxy(const ghoul::Dictionary& dictionary);
-    ~RenderableGalaxy();
+    RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
+    ~RenderableTimeVaryingVolume();
     
     void initialize() override;
     void deinitialize() override;
@@ -47,35 +54,56 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+    static documentation::Documentation TimestepDocumentation();
+
 private:
-    float safeLength(const glm::vec3& vector);
+    struct Timestep {
+        std::string baseName;
+        double time;
+        float minValue;
+        float maxValue;
+        glm::uvec3 dimensions;
+        glm::vec3 lowerDomainBound;
+        glm::vec3 upperDomainBound;
+        bool inRam;
+        bool onGpu;
+        std::unique_ptr<RawVolume<float>> rawVolume;
+        std::shared_ptr<ghoul::opengl::Texture> texture;
+    };
 
-    glm::vec3 _volumeSize;
-    glm::vec3 _pointScaling;
+    Timestep* currentTimestep();
+    int timestepIndex(const Timestep* t) const;
+    Timestep* timestepFromIndex(int index);
+    void jumpToTimestep(int i);
+
+    void loadTimestepMetadata(const std::string& path);
+
+    properties::OptionProperty _gridType;
+    std::shared_ptr<VolumeClipPlanes> _clipPlanes;
+
     properties::FloatProperty _stepSize;
-    properties::FloatProperty _pointStepSize;
-    properties::Vec3Property _translation;
-    properties::Vec3Property _rotation;
-    properties::FloatProperty _enabledPointsRatio;
+    properties::FloatProperty _opacity;
+    properties::FloatProperty _rNormalization;
+    properties::FloatProperty _rUpperBound;
+    properties::FloatProperty _secondsBefore;
+    properties::FloatProperty _secondsAfter;
+    properties::StringProperty _sourceDirectory;
+    properties::StringProperty _transferFunctionPath;
+    properties::FloatProperty _lowerValueBound;
+    properties::FloatProperty _upperValueBound;
 
-    std::string _volumeFilename;
-    glm::ivec3 _volumeDimensions;
-    std::string _pointsFilename;
+    properties::TriggerProperty _triggerTimeJump;
+    properties::IntProperty _jumpToTimestep;
+    properties::IntProperty _currentTimestep;
 
-    std::unique_ptr<GalaxyRaycaster> _raycaster;
-    std::unique_ptr<volume::RawVolume<glm::tvec4<GLfloat>>> _volume;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::mat4 _pointTransform;
-    glm::vec3 _aspect;
-    float _opacityCoefficient;
+    std::map<double, Timestep> _volumeTimesteps;
+    std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
-    size_t _nPoints;
-    GLuint _pointsVao;
-    GLuint _positionVbo;
-    GLuint _colorVbo;
+    std::shared_ptr<TransferFunction> _transferFunction;
 };
 
+} // namespace volume
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
