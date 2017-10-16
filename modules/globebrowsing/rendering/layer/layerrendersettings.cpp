@@ -29,7 +29,6 @@ namespace {
     const char* keyGamma = "Gamma";
     const char* keyMultiplier = "Multiplier";
     const char* keyOffset = "Offset";
-    const char* keyValueBlending = "ValueBlending";
 
     static const openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",

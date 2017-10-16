@@ -34,7 +34,7 @@
 
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/util/boxgeometry.h>
-#include <openspace/rendering/transferfunction.h>
+#include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <modules/volume/volumegridtype.h>
@@ -54,7 +54,7 @@ class KameleonVolumeRaycaster : public VolumeRaycaster {
 public:
     KameleonVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
-        std::shared_ptr<TransferFunction> transferFunction, 
+        std::shared_ptr<TransferFunctionHandler> transferFunctionHandler,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
 
     virtual ~KameleonVolumeRaycaster();
@@ -71,14 +71,18 @@ public:
     std::string getRaycastPath() const override;
     std::string getHelperPath() const override;
 
+
+    void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
+    std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
+    void setTransferFunctionHandler(std::shared_ptr<TransferFunctionHandler> transferFunctionHandler);
     void setStepSize(float stepSize);
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
-    
+
 private:
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform;
@@ -90,4 +94,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER___H__ 
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER___H__

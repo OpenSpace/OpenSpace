@@ -28,7 +28,7 @@ const Window = (props) => {
             </Button>
           )}
         </header>
-        <section className={styles.body}>
+        <section className={styles.filler}>
           { children }
         </section>
       </section>
@@ -45,8 +45,8 @@ Window.propTypes = {
     y: PropTypes.number,
   }),
   size: PropTypes.shape({
-    height: PropTypes.string,
-    width: PropTypes.string,
+    height: PropTypes.number,
+    width: PropTypes.number,
   }),
   title: PropTypes.string,
 };

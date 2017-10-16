@@ -52,16 +52,16 @@ KameleonVolumeRaycaster::KameleonVolumeRaycaster(
     , _transferFunction(transferFunction)
     , _boundingBox(glm::vec3(1.0))
 {}
-    
+
 KameleonVolumeRaycaster::~KameleonVolumeRaycaster() {}
 
 void KameleonVolumeRaycaster::initialize() {
     _boundingBox.initialize();
 }
-    
+
 void KameleonVolumeRaycaster::deinitialize() {
 }
-    
+
 void KameleonVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
@@ -71,15 +71,15 @@ void KameleonVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::o
 
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
-    
+
     // Cull back face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
+
     // Render bounding geometry
     _boundingBox.render();
 }
-    
+
 void KameleonVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -93,15 +93,16 @@ void KameleonVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::op
     // Cull front face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
-    
+
     // Render bounding geometry
     _boundingBox.render();
-    
+
     // Restore defaults
     glCullFace(GL_BACK);
 }
-    
+
 void KameleonVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+
     std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
     program.setUniform(stepSizeUniformName, _stepSize);
 
@@ -109,7 +110,7 @@ void KameleonVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
-    _transferFunction->getTexture().bind();
+    _transferFunctionHandler->getTexture().bind();
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -127,7 +128,7 @@ void KameleonVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
     program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);
     program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
 }
-    
+
 void KameleonVolumeRaycaster::postRaycast(const RaycastData&,
                                           ghoul::opengl::ProgramObject&)
 {
@@ -149,11 +150,11 @@ bool KameleonVolumeRaycaster::cameraIsInside(const RenderData & data, glm::vec3 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
     return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 && localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
 }
-    
+
 std::string KameleonVolumeRaycaster::getBoundsVsPath() const {
     return GlslBoundsVsPath;
 }
-    
+
 std::string KameleonVolumeRaycaster::getBoundsFsPath() const {
     return GlslBoundsFsPath;
 }
@@ -165,8 +166,9 @@ std::string KameleonVolumeRaycaster::getRaycastPath() const {
 std::string KameleonVolumeRaycaster::getHelperPath() const {
     return GlslHelperPath;
 }
-    
+
 void KameleonVolumeRaycaster::setStepSize(float stepSize) {
+
     _stepSize = stepSize;
 }
 
@@ -177,5 +179,5 @@ void KameleonVolumeRaycaster::setGridType(VolumeGridType gridType) {
 void KameleonVolumeRaycaster::setModelTransform(const glm::mat4 & transform) {
     _modelTransform = transform;
 }
-    
+
 }

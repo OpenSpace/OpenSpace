@@ -1,4 +1,4 @@
-@import "../../styles/all";
+@import "../../../styles/all";
 
 .Editor {
   align-items: center;
@@ -43,4 +43,17 @@
   z-index: 10;
 }
 
+.Canvas {
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+}
 
+.ColorPickerWindow {
+  max-width: none !important;
+  bottom: unquote("calc(100% + #{$popover-arrow-size})");
+  left: 50%;
+  position: absolute;
+  z-index: 11;
+}

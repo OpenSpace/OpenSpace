@@ -1,22 +1,24 @@
 import React, {Component} from 'react';
-import Axis from './Axis';
 import GraphBody from './GraphBody';
 
-class Graph extends Component {
-
-  render() {
-    return (
-      <div>
-      <svg width={this.props.width} height={this.props.height}>
-        <GraphBody
-          {...this.props}
-          x={0}
-          y={this.props.height}
-        />
-      </svg>
-      </div>
-    )
-  }
-}
+const Graph = ({
+  points,
+  color,
+}) =>
+(
+  <div>
+    <svg width={800} height={600}>
+      <GraphBody
+        points={points}
+        color={color}
+        x={0}
+        y={600}
+        fill={"blue"}
+        fillOpacity={".5"}
+        strokeWidth={1}
+      />
+    </svg>
+  </div>
+);
 
 export default Graph

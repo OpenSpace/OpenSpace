@@ -139,7 +139,7 @@ function (set_openspace_compile_settings project)
             "-Wredundant-move"
             "-Wreorder"
             "-Wsemicolon-before-method-body"
-            "-Wshadow-field"
+            # "-Wshadow-field"
             "-Wshadow-field-in-constructor"
             # "-Wshadow-all"  Add this again once the Properties don't throw warnings --abock
             "-Wshift-sign-overflow"

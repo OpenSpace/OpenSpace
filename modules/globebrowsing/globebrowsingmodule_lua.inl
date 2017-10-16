@@ -190,7 +190,7 @@ int getGeoPosition(lua_State* L) {
     glm::dmat4 inverseModelTransform =
         OsEng.navigationHandler().focusNode()->inverseModelTransform();
     glm::dvec3 cameraPositionModelSpace =
-        inverseModelTransform * glm::dvec4(cameraPosition, 1.0);
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
         cameraPositionModelSpace);
 
@@ -204,6 +204,7 @@ int getGeoPosition(lua_State* L) {
     return 3;
 }
 
+#ifdef GLOBEBROWSING_USE_GDAL
 int loadWMSCapabilities(lua_State* L) {
     int nArguments = lua_gettop(L);
 
@@ -220,8 +221,6 @@ int loadWMSCapabilities(lua_State* L) {
         std::move(globe),
         std::move(url)
     );
-
-    return 0;
 }
 
 int removeWMSServer(lua_State* L) {
@@ -248,7 +247,7 @@ int capabilities(lua_State* L) {
         OsEng.moduleEngine().module<GlobeBrowsingModule>()->capabilities(name);
 
     lua_newtable(L);
-    for (int i = 0; i < cap.size(); ++i) {
+    for (unsigned long i = 0; i < cap.size(); ++i) {
         const GlobeBrowsingModule::Layer& l = cap[i];
         
         lua_newtable(L);
@@ -266,5 +265,7 @@ int capabilities(lua_State* L) {
 
     return 1;
 }
+#endif // GLOBEBROWSING_USE_GDAL
+
 
 } // namespace openspace::globebrowsing::luascriptfunctions

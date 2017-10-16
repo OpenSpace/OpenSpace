@@ -1,96 +1,94 @@
-import React, {Component} from 'react'
-import Draggable from 'react-draggable'
-import Histogram from './Histogram';
+import React, {Component} from 'react';
+import Draggable from 'react-draggable';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import {createStore} from 'redux';
-
-import styles from './EditorCanvas.scss'
-
-class Circle extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-  return (
-  <Draggable axis={this.props.axis}  defaultPosition={{x: this.props.x, y: this.props.y}} onDrag={() => this.props.handleDrag(this.props.position.x + 1)}>
-    <circle r={10} fill={this.props.color} onClick={this.props.onClick}/>
-  </Draggable>
-  );
-}
-}
-
-class Envelope extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-
-        x:0,
-        y:0,
-
-    }
-
-    }
-
-    renderCircle(i) {
-    return (
-      <Circle
-        {...this.props.circles[i]}
-        onClick={() => this.props.onClick(i)}
-        position={0}
-        handleDrag={(position) => this.setState({position})}
-      />
-    );
-  }
-
-  render() {
-    return (
-      <svg className={styles.EditorCanvas}>
-        {this.renderCircle(0)}
-        {this.renderCircle(1)}
-        {this.renderCircle(2)}
-        {this.renderCircle(3)}
-      </svg>
-    );
-  }
-}
+import CreatedHistograms from './Histogram';
+import CreatedEnvelopes from './EnvelopeCanvas'
+import { addEnvelope, addHistogram, deleteEnvelope } from './actions';
+import styles from './EditorCanvas.scss';
+import DataManager from '../../../api/DataManager';
+import { TransferFunctionKey } from '../../../api/keys';
 
 class EditorCanvas extends Component {
-
   constructor(props) {
     super(props);
-
-    this.state = {
-      circles: [
-      {x: 100, y: this.props.height, color: "red", axis: "x"},
-      {x: 150, y: 150, color: "blue" , axis: "both"},
-      {x: 300, y: 150, color: "blue" , axis: "both"},
-      {x: 300, y: this.props.height, color: "red" , axis: "x"},
-      ],
-    }
+    this.handleChange = this.handleChange.bind(this);
+    this.convertPointsBeforeSending = this.convertPointsBeforeSending.bind(this);
   }
 
-  handleClick(i) {
-    const circles = this.state.circles.slice();
-    circles[i].x = this.state.lastX;
-    circles[i].y = this.state.lastY;
+  componentDidMount() {
+    var histPositions = [{x: 0, y: 0}, {x: 300, y: 500},{x: 400, y: 600}, {x: 800, y: 0}];
+    this.props.AddHistogram(histPositions);
   }
 
-  handleDrag(test) {
-    console.log('dragging' + this.state.test);
+  convertPointsBeforeSending(position) {
+      let x = (position.x - 10) / 800;
+      let y = (600 - position.y) / 590;
+      return {x: x, y: y};
+  }
+
+  handleChange(envelopes) {
+      let data = envelopes.map(envelope =>
+          Object.assign({},
+              {color: envelope.color},
+              {points: envelope.points.map(point =>
+                  Object.assign({},
+                  {position : this.convertPointsBeforeSending(point.position)}
+                  )
+                )
+              },
+            )
+        )
+      console.log(data);
+      DataManager.setValue(TransferFunctionKey, JSON.stringify(data));
   }
 
   render() {
-    return (
+    var positions = [{x: 10, y: 600}, {x: 30, y: 50},{x: 40, y: 60}, {x: 50, y: 600}];
+      return (
       <div className={styles.EditorContainer} >
-        <Histogram className={styles.Histogram} {...this.props}/>
-        <Envelope
-          circles={this.state.circles}
-          onClick={i => this.handleClick(i)}
-        />
+        <button onClick={() => this.props.AddEnvelope(positions)}>Add Envelope</button>
+        <button onClick={() => this.handleChange(this.props.envelopes)}>Send Envelopes</button>
+        <button onClick={() => this.props.DeleteEnvelope()}>Delete Envelope</button>
+        <div className={styles.EnvelopeContainer}>
+          <CreatedEnvelopes />
+        </div>
+        <div className={styles.HistogramContainer}>
+          <CreatedHistograms />
+        </div>
       </div>
     );
-  }
+    }
 };
+EditorCanvas.propTypes = {
+  AddEnvelope: PropTypes.func.isRequired,
+  AddHistogram: PropTypes.func.isRequired,
+  DeleteEnvelope: PropTypes.func.isRequired,
+}
+const mapStateToProps = (state) => {
+  return {
+    envelopes:
+      state.envelopes,
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    AddEnvelope: (data) => {
+      dispatch(addEnvelope(data, 'red'));
+    },
+    AddHistogram: (data) => {
+      dispatch(addHistogram(data, 'blue'));
+    },
+    DeleteEnvelope: () => {
+      dispatch(deleteEnvelope());
+    },
+  }
+}
+
+EditorCanvas = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  )(EditorCanvas)
+
 export default EditorCanvas;

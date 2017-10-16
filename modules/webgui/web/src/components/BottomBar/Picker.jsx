@@ -26,6 +26,7 @@ Picker.Name = styles.Name;
 Picker.Popover = styles.Popover;
 Picker.Title = styles.Title;
 Picker.Wrapper = styles.Wrapper;
+Picker.Window = styles.Window;
 
 export default Picker;
 

@@ -38,7 +38,7 @@ function (handle_applications)
 
         get_application_attribute_default(${app_dir} is_default_application)
         if (${is_default_application})
-            set(OPENSPACE_APPLICATION_${upper_app} ON CACHE BOOL "Build ${app} application" FORCE)
+            option(OPENSPACE_APPLICATION_${upper_app} "Build ${app} application" ${is_default_application})
         endif ()
 
         if (OPENSPACE_APPLICATION_${upper_app})

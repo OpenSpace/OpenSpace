@@ -2,6 +2,8 @@
 
 // key for setting/getting the Origin (focus) node
 export const OriginKey = 'NavigationHandler.Origin';
+// key for setting/getting the envelopes (focus) node
+export const TransferFunctionKey = 'Enlil Sequence.renderable.TransferFunctionHandler.TransferFunction';
 // key to get all scene graph nodes
 export const SceneGraphKey = '__allNodes';
 // key to get all properties in openspace engine
