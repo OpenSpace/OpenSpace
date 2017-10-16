@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,56 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
-#define __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
+#include <openspace/scene/assetsynchronizer.h>
 
-#include <openspace/util/concurrentjobmanager.h>
+#include <algorithm>
+#include <memory>
 
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/misc/dictionary.h>
+namespace {
+    const char* _loggerCat = "AssetSynchronizer";
+}
 
 namespace openspace {
+AssetSynchronizer::AssetSynchronizer(ResourceSynchronizer* resourceSynchronizer) {
+    _resourceSynchronizer = resourceSynchronizer;
+}
 
-class ResourceSynchronization;
+void AssetSynchronizer::addAsset(std::shared_ptr<Asset> asset) {
+    _synchronizations.push_back({ asset, SynchronizationState::Added });
+    std::vector<std::shared_ptr<ResourceSynchronization>> syncs = asset->synchronizations();
+    for (const auto& s : syncs) {
+        if (!s->isResolved()) {
+            return;
+        }
+    }
+    _synchronizations.back().state = SynchronizationState::Synchronized;
+}
 
-class SynchronizationProduct {
+void AssetSynchronizer::removeAsset(Asset* asset) {
+    std::remove_if(
+        _synchronizations.begin(),
+        _synchronizations.end(),
+        [asset](const AssetSynchronization& a) {
+            return a.asset.get() == asset;
+        }
+    );
+}
 
-};
+void AssetSynchronizer::syncAsset(Asset* asset) {
+    const auto& sync = std::find_if(
+        _synchronizations.begin(),
+        _synchronizations.end(),
+        [asset](const AssetSynchronization& a) {
+            return a.asset.get() == asset;
+        }
+    );
+    // todo...
+}
 
-class SynchronizationJob : public Job<SynchronizationProduct> {
-public:
-    SynchronizationJob(std::shared_ptr<ResourceSynchronization> synchronization);
-    void execute() = 0;
-protected:
-    void resolve();
-    void updateProgress(float t);
-private:
-    std::shared_ptr<ResourceSynchronization> _synchronization;
-};
-
-class ResourceSynchronization {
-public:
-    ResourceSynchronization();
-    static std::unique_ptr<ResourceSynchronization> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
-
-    virtual std::shared_ptr<SynchronizationJob> job();
-    void wait();
-    bool isResolved();
-    void resolve();
-    float progress();
-    void updateProgress(float t);
-private:
-    std::atomic<bool> _started;
-    std::atomic<bool> _resolved;
-    std::atomic<float> _progress;
-};
-
-
-
-
-
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
+}

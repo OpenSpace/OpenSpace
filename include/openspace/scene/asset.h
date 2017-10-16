@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___ASSET___H__
 #define __OPENSPACE_CORE___ASSET___H__
 
+#include <openspace/util/resourcesynchronization.h>
+
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <string>
@@ -41,8 +43,6 @@ public:
 
     enum class ReadyState : unsigned int {
         Loaded,
-        Synchronizing,
-        Synchronized,
         Initialized
     };
 
@@ -65,8 +65,9 @@ public:
     std::string syncDirectory() const;
     ReadyState readyState() const;
 
-    void synchronize();
-    void synchronizeEnabledRecursive();
+    void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
+    std::vector<std::shared_ptr<ResourceSynchronization>> synchronizations();
+    std::vector<std::shared_ptr<ResourceSynchronization>> getSynchronizationsRecursive();
 
     bool isInitReady() const;
     void initialize();
@@ -90,17 +91,12 @@ public:
     void dependantDidInitialize(Asset* dependant);
     void dependantWillDeinitialize(Asset* dependant);
 
-    //void optionalDidInitialize(Asset* optional);
-    //void optionalWillDeinitialize(Asset* optional);
-
-    //bool shouldSynchronize();
-    //bool shouldInitialize();
-
     std::string resolveLocalResource(std::string resourceName);
     std::string resolveSyncedResource(std::string resourceName);
 private:
     ReadyState _readyState;
     AssetLoader* _loader;
+    std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
 
     // The name of the asset
     std::string _assetName;

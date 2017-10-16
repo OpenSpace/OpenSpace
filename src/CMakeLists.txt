@@ -129,6 +129,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/assetloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/assetsynchronizer.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
@@ -154,6 +155,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledscalar.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledsphere.cpp
     ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
     ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronizer.cpp
     ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
@@ -287,6 +289,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetsynchronizer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h

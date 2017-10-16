@@ -74,11 +74,17 @@ Asset::ReadyState Asset::readyState() const {
     return _readyState;
 }
 
+void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization) {
+    _synchronizations.push_back(synchronization);
+}
+
 bool Asset::isInitReady() const {
-    // An asset is ready for initialization if it is synchronized
+    // An asset is ready for initialization if all synchronizations are resolved
     // and all its required dependencies are ready for initialization.
-    if (_readyState != Asset::ReadyState::Synchronized) {
-        return false;
+    for (const std::shared_ptr<ResourceSynchronization>& sync : _synchronizations) {
+        if (!sync->isResolved()) {
+            return false;
+        }
     }
     for (const auto& dependency : _requiredDependencies) {
         if (!dependency->isInitReady()) {
@@ -86,34 +92,6 @@ bool Asset::isInitReady() const {
         }
     }
     return true;
-}
-
-
-void Asset::synchronizeEnabledRecursive() {
-    synchronize();
-    for (Asset* a : _requiredDependencies) {
-        a->synchronizeEnabledRecursive();
-    }
-    for (Optional& o : _optionalDependencies) {
-        if (o.second) {
-            o.first->synchronizeEnabledRecursive();
-        }        
-    }
-}
-
-void Asset::synchronize() {
-    if (_readyState != Asset::ReadyState::Loaded) {
-        // Already synchronized or currently synchronizing
-        return;
-    }
-
-    LDEBUG("Synchronizing asset " << id());
-    _readyState = Asset::ReadyState::Synchronizing;
-
-    // Synchronize dependencies
-    for (auto& dependency : _requiredDependencies) {
-        dependency->synchronize();
-    }
 }
 
 void Asset::initialize() {
@@ -156,7 +134,7 @@ void Asset::deinitialize() {
     // Call onDeinitialize in Lua
     loader()->callOnDeinitialize(this);
 
-    _readyState = Asset::ReadyState::Synchronized;
+    _readyState = Asset::ReadyState::Loaded;
 
     // Make sure no dependencies are left dangling
     for (auto& dependency : _requiredDependencies) {
@@ -173,7 +151,7 @@ std::string Asset::resolveSyncedResource(std::string resourceName) {
 }
 
 std::string Asset::id() const {
-    return _assetPath.has_value() ? _assetPath.value() : "";
+    return _assetPath.has_value() ? _assetPath.value() : "$root";
 }
 
 std::string Asset::assetFilePath() const {
@@ -262,11 +240,11 @@ void Asset::removeRequiredDependency(const std::string& assetId) {
 }
 
 void Asset::dependantDidInitialize(Asset* dependant) {
-    //loader()->callOnDependantInitialize(this, dependant);
+    loader()->callOnDependantInitialize(this, dependant);
 }
 
 void Asset::dependantWillDeinitialize(Asset* dependant) {
-    //loader()->callOnDependantDeinitialize(this, dependant);
+    loader()->callOnDependantDeinitialize(this, dependant);
 }
 
 bool Asset::hasDependants() const {

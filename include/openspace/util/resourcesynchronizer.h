@@ -30,8 +30,15 @@
 
 namespace openspace {
 
-class ResourceSynchronizer {
+class ResourceSyncClient {};
 
+class ResourceSynchronizer {
+public:
+    void enqueueSynchronization(std::shared_ptr<ResourceSyncClient> client);
+    std::vector<std::shared_ptr<SynchronizationProduct>> getFinishedSynchronizations(ResourceSyncClient* client);
+private:
+    std::map<std::shared_ptr<ResourceSynchronization>,
+        std::shared_ptr<ResourceSyncClient>> _origin;
 };
 
 

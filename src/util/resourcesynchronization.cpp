@@ -1,4 +1,5 @@
-﻿/*****************************************************************************************
+#include "..\..\include\openspace\util\resourcesynchronization.h"
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,56 +23,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
-#define __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
-
-#include <openspace/util/concurrentjobmanager.h>
-
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/misc/dictionary.h>
-
 namespace openspace {
 
-class ResourceSynchronization;
+ResourceSynchronization::ResourceSynchronization() {}
 
-class SynchronizationProduct {
+std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
+    const ghoul::Dictionary & dictionary)
+{
+    return std::unique_ptr<ResourceSynchronization>();
+}
 
-};
+std::shared_ptr<SynchronizationJob> ResourceSynchronization::job()
+{
+    return std::shared_ptr<SynchronizationJob>();
+}
 
-class SynchronizationJob : public Job<SynchronizationProduct> {
-public:
-    SynchronizationJob(std::shared_ptr<ResourceSynchronization> synchronization);
-    void execute() = 0;
-protected:
-    void resolve();
-    void updateProgress(float t);
-private:
-    std::shared_ptr<ResourceSynchronization> _synchronization;
-};
+void ResourceSynchronization::wait() {
+}
 
-class ResourceSynchronization {
-public:
-    ResourceSynchronization();
-    static std::unique_ptr<ResourceSynchronization> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+bool ResourceSynchronization::isResolved() {
+    return _resolved;
+}
 
-    virtual std::shared_ptr<SynchronizationJob> job();
-    void wait();
-    bool isResolved();
-    void resolve();
-    float progress();
-    void updateProgress(float t);
-private:
-    std::atomic<bool> _started;
-    std::atomic<bool> _resolved;
-    std::atomic<float> _progress;
-};
+void ResourceSynchronization::resolve() {
+    _resolved = true;
+}
 
+float ResourceSynchronization::progress() {
+    return _progress;
+}
 
+void ResourceSynchronization::updateProgress(float t) {
+    _progress = std::min(1.0f, std::max(t, 0.0f));
+}
 
+SynchronizationJob::SynchronizationJob(
+    std::shared_ptr<ResourceSynchronization> synchronization)
+{
+    _synchronization = synchronization;
+}
 
+void SynchronizationJob::resolve() {
+    _synchronization->resolve();
+}
 
+void SynchronizationJob::updateProgress(float t) {
+    _synchronization->updateProgress(t);
+}
 
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
+}

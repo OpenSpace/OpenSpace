@@ -35,12 +35,11 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict)
 
 }
 
-bool HttpSynchronization::needsSync() {
-	return true;
-}
-
 documentation::Documentation HttpSynchronization::Documentation() {
     return {};
 }
+
+
+
 
 } // namespace openspace

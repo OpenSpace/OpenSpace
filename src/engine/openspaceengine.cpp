@@ -412,7 +412,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Set up asset loader
     _engine->_assetLoader = std::make_unique<AssetLoader>(
-        *OsEng.scriptEngine().luaState(), OsEng.resourceSynchronizer(), "${ASSETS}", "${SYNC}");
+        *OsEng.scriptEngine().luaState(), "${ASSETS}", "${SYNC}");
     //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
 
@@ -613,8 +613,6 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
             return;
         }
     }
-
-    _assetLoader->synchronizeEnabledAssets();
 
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);

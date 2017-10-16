@@ -28,7 +28,7 @@
 #include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/util/resourcesynchronizer.h>
+#include <openspace/scene/assetsynchronizer.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/luastate.h>
@@ -64,7 +64,6 @@ public:
      */
     AssetLoader(
         ghoul::lua::LuaState& luaState,
-        ResourceSynchronizer& resourceSynchronizer,
         std::string assetRoot,
         std::string syncRoot
     );
@@ -75,31 +74,18 @@ public:
     ~AssetLoader();
 
     /**
-     * Start synchronization recursively
-     */
-    void synchronizeEnabledAssets();
-
-    /**
      * Load single asset.
      *  - Import one asset
      *  - Unimport all other assets
      */
-    void loadSingleAsset(const std::string& identifier);
-
-    /**
-     * Synchronize, mark as synchronized,
-     * initialize and deinitialize dependencies
-     * based on state of the assets.
-     * Update asset ready states.
-     */
-    void update();
+    Asset* loadSingleAsset(const std::string& identifier);
 
     /**
      * Import an asset:
      * Add the asset as an optional on the root asset
      * The asset is imported synchronously
      */
-    void importAsset(const std::string& identifier);
+    Asset* importAsset(const std::string& identifier);
 
     /**
      * Unimport an asset:
@@ -136,8 +122,6 @@ public:
 
     void callOnDependantDeinitialize(Asset* asset, Asset* dependant);
 
-    //void synchronizeResource(const ghoul::Dictionary& d, std::function<void(bool)> onFinish);
-
     std::string generateAssetPath(const std::string& baseDirectory, const std::string& path) const;
 
 private:
@@ -162,7 +146,6 @@ private:
     int importOptionalDependencyLua(Asset* asset);
     int resolveLocalResourceLua(Asset* asset);
     int resolveSyncedResourceLua(Asset* asset);
-    int onFinishSynchronizationLua(Asset* asset);
     int exportAssetLua(Asset* asset);
 
     // Friend c closures (callable from lua, and maps to lua functions above)
@@ -181,7 +164,7 @@ private:
     std::map<std::string, std::unique_ptr<Asset>> _importedAssets;
     std::vector<Asset*> _assetStack;
 
-    ResourceSynchronizer* _resourceSynchronizer;
+    AssetSynchronizer* _assetSynchronizer;
     std::string _assetRootDirectory;
     std::string _syncRootDirectory;
     ghoul::lua::LuaState* _luaState;

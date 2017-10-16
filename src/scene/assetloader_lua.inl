@@ -51,34 +51,6 @@ int unimportAsset(lua_State* state) {
     return 0;
 }
 
-int addSynchronization(lua_State* state) {
-    /*
-    AssetLoader *assetLoader =
-        reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("addSynchronization", state, 2, nArguments);
-    
-    int referenceIndex = luaL_ref(state, LUA_REGISTRYINDEX);
-
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(state, d);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addSynchronization", e.what());
-        return luaL_error(state, "Error loading dictionary from lua state");
-    }
-
-    assetLoader->synchronizeResource(d, [state, referenceIndex](bool success) {
-        lua_rawgeti(state, LUA_REGISTRYINDEX, referenceIndex);
-        lua_pushboolean(state, success ? 1 : 0);
-        lua_pcall(state, 1, 0, 0);
-        luaL_unref(state, LUA_REGISTRYINDEX, referenceIndex);
-    });*/
-    return 0;
-}
-
 } // namespace luascriptfunctions
 
 namespace assetloader {

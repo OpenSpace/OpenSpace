@@ -63,10 +63,8 @@ protected:
     virtual void SetUp() {
         ghoul::lua::LuaState* state = OsEng.scriptEngine().luaState();
         OsEng.scriptEngine().initialize();
-        _resourceSynchronizer = std::make_unique<openspace::ResourceSynchronizer>();
         _assetLoader = std::make_unique<openspace::AssetLoader>(
             *state,
-            *_resourceSynchronizer.get(),
             "${TESTDIR}/AssetLoaderTest/",
             "${TEMPORARY}/resources/");
 
@@ -133,10 +131,9 @@ TEST_F(AssetLoaderTest, DependencyFuncitons) {
 }
 
 TEST_F(AssetLoaderTest, AssetInitialization) {
-    LINFOC("test", "WHAT?");
     try {
-        _assetLoader->loadSingleAsset("initialization");
-        _assetLoader->rootAsset()->initialize();
+        openspace::Asset* asset = _assetLoader->loadSingleAsset("initialization");
+        asset->initialize();
         EXPECT_TRUE(passed());
     }
     catch (const std::exception& e) {

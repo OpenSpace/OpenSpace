@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,56 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
-#define __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
+#ifndef __OPENSPACE_CORE___ASSETSYNCHRONIZER___H__
+#define __OPENSPACE_CORE___ASSETSYNCHRONIZER___H__
 
-#include <openspace/util/concurrentjobmanager.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/asset.h>
 
-#include <ghoul/filesystem/directory.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/resourcesynchronizer.h>
+
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/lua/luastate.h>
+
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/filesystem/directory.h>
+
+#include <memory>
+#include <string>
 
 namespace openspace {
 
-class ResourceSynchronization;
-
-class SynchronizationProduct {
-
-};
-
-class SynchronizationJob : public Job<SynchronizationProduct> {
+class AssetSynchronizer : public ResourceSyncClient {
 public:
-    SynchronizationJob(std::shared_ptr<ResourceSynchronization> synchronization);
-    void execute() = 0;
-protected:
-    void resolve();
-    void updateProgress(float t);
+    AssetSynchronizer(ResourceSynchronizer* resourceSynchronizer);
+    void addAsset(std::shared_ptr<Asset> asset);
+    void removeAsset(Asset* asset);
+    void syncAsset(Asset* asset);
+
+    std::vector<Asset*> getRecentlySynchronizedAssets();
 private:
-    std::shared_ptr<ResourceSynchronization> _synchronization;
+    enum class SynchronizationState : int {
+        Added,
+        Synchronizing,
+        RecentlySynchronized,
+        Synchronized
+    };
+
+    struct AssetSynchronization {
+        std::shared_ptr<Asset> asset;
+        SynchronizationState state;
+    };
+
+    ResourceSynchronizer* _resourceSynchronizer;
+    std::vector<AssetSynchronization> _synchronizations;
+    
+    std::map<ResourceSynchronization*, Asset*> _resourceToAssetMap;
 };
-
-class ResourceSynchronization {
-public:
-    ResourceSynchronization();
-    static std::unique_ptr<ResourceSynchronization> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
-
-    virtual std::shared_ptr<SynchronizationJob> job();
-    void wait();
-    bool isResolved();
-    void resolve();
-    float progress();
-    void updateProgress(float t);
-private:
-    std::atomic<bool> _started;
-    std::atomic<bool> _resolved;
-    std::atomic<float> _progress;
-};
-
-
 
 
 
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
+#endif // __OPENSPACE_CORE___ASSETSYNCHRONIZER___H__

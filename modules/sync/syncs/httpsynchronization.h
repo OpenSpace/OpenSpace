@@ -35,10 +35,14 @@ namespace openspace {
 class HttpSynchronization : public ResourceSynchronization {
 public:
     HttpSynchronization(const ghoul::Dictionary& dict);
-    bool needsSync() override;
-    void start();
     static documentation::Documentation Documentation();
 };
+
+class HttpSynchronizationJob : public SynchronizationJob {
+    HttpSynchronizationJob(std::shared_ptr<ResourceSynchronization> synchronization);
+    void execute() override;
+};
+
 
 } // namespace openspace
 
