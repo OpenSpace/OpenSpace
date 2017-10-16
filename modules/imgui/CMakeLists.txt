@@ -32,6 +32,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guifilepathcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiglobebrowsingcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guihelpcomponent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/guimissioncomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiperformancecomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiparallelcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guipropertycomponent.h
@@ -48,6 +49,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guifilepathcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiglobebrowsingcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guihelpcomponent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/guimissioncomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiperformancecomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiparallelcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guipropertycomponent.cpp

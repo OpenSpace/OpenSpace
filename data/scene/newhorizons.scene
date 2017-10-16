@@ -188,6 +188,8 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
+    openspace.loadMission("${OPENSPACE_DATA}/scene/missions/newhorizons/newhorizons/newhorizons.mission")
+
     -- Defined in scene_helper.lua
     -- Used to create focus buttons for a subset of scenegraph nodes
     mark_interesting_nodes({

@@ -27,6 +27,7 @@
 #include <modules/imgui/imguimodule.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/keys.h>
 
@@ -268,6 +269,7 @@ GUI::GUI()
 #endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
     addPropertySubOwner(_spaceTime);
+    addPropertySubOwner(_mission);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     addPropertySubOwner(_iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -391,6 +393,7 @@ void GUI::initialize() {
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
+    _mission.initialize();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initialize(); 
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -402,6 +405,7 @@ void GUI::deinitialize() {
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitialize();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+    _mission.deinitialize();
     _parallel.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();
@@ -494,6 +498,7 @@ void GUI::initializeGL() {
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.initializeGL();
     _parallel.initializeGL();
+    _mission.initializeGL();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initializeGL();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -517,6 +522,7 @@ void GUI::deinitializeGL() {
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitializeGL();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+    _mission.deinitializeGL();
     _parallel.deinitializeGL();
     _help.deinitializeGL();
     _performance.deinitializeGL();
@@ -591,6 +597,10 @@ void GUI::endFrame() {
             _globeBrowsing.render();
         }
 #endif // GLOBEBROWSING_USE_GDAL
+
+        if (_mission.isEnabled() && MissionManager::ref().hasCurrentMission()) {
+            _mission.render();
+        }
 
         // We always want to render the Space/Time component
         _spaceTime.render();
@@ -691,6 +701,10 @@ void GUI::render() {
     bool virtualProperty = _virtualProperty.isEnabled();
     ImGui::Checkbox("Virtual Properties", &virtualProperty);
     _virtualProperty.setEnabled(virtualProperty);
+
+    bool mission = _mission.isEnabled();
+    ImGui::Checkbox("Mission Information", &mission);
+    _mission.setEnabled(mission);
 
     bool filePath = _filePath.isEnabled();
     ImGui::Checkbox("File Paths", &filePath);

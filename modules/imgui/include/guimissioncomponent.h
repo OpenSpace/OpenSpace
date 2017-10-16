@@ -22,20 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_IMGUI___GUIORIGINCOMPONENT___H__
-#define __OPENSPACE_MODULE_IMGUI___GUIORIGINCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIMISSIONCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIMISSIONCOMPONENT___H__
 
 #include <modules/imgui/include/guicomponent.h>
 
 namespace openspace::gui {
 
-class GuiOriginComponent : public GuiComponent {
+class GuiMissionComponent: public GuiComponent {
 public:
-    GuiOriginComponent();
+    GuiMissionComponent();
 
     void render() override;
 };
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_IMGUI___GUIORIGINCOMPONENT___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIMISSIONCOMPONENT___H__
