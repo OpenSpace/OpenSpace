@@ -10,8 +10,9 @@ return {
                 Observer = "SUN",
             },
         },
+        GuiPath = "/Solar System/Comets/67P Churymov-Gerasimenko"
     },
-    {   
+    {
         Name = "67P",
         Parent = "67PBarycenter", 
 

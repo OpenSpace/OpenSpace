@@ -18,6 +18,7 @@ return {
                 Kernels = NewHorizonsKernels
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     -- Pluto module
     {   
@@ -122,7 +123,7 @@ return {
                     },
                 },
 
-                Instrument = {                
+                Instrument = {
                     Name       = "NH_LORRI",
                     Method     = "ELLIPSOID",
                     Aberration = "NONE",
@@ -223,6 +224,7 @@ return {
             BodyFrame = "IAU_PLUTO",
             Aberration = "NONE",
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     -- PlutoBarycentricTrail module
     {   

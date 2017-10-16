@@ -47,7 +47,8 @@ return {
                 SourceFrame = "NH_SPACECRAFT",
                 DestinationFrame = "GALACTIC",
             },
-        }
+        },
+        GuiPath = "/Solar System/Missions/New Horizons"
     },
     {
         Name = "NewHorizons",

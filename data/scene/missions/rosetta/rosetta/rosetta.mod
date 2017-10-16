@@ -72,7 +72,8 @@ return {
                 SourceFrame = "ROS_SPACECRAFT",
                 DestinationFrame = "GALACTIC",
             }
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "RosettaModel",
