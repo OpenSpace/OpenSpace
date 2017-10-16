@@ -350,7 +350,7 @@ return {
     },
     {
         Name = "NAVCAM",
-        Parent = "Rosetta",,
+        Parent = "Rosetta",
         GuiPath = "/Solar System/Missions/Rosetta"
     },
     {

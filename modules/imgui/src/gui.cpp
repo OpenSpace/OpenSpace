@@ -259,7 +259,6 @@ GUI::GUI()
     , _currentVisibility(properties::Property::Visibility::Developer)
 {
     addPropertySubOwner(_help);
-    //addPropertySubOwner(_origin);
     addPropertySubOwner(_performance);
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
