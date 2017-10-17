@@ -76,29 +76,14 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
 
 bool ScreenSpaceFramebuffer::initialize() {
-    _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
-
-    createPlane();
-    createShaders();
+    ScreenSpaceRenderable::initialize();
     createFragmentbuffer();
 
     return isReady();
 }
 
 bool ScreenSpaceFramebuffer::deinitialize() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    _texture = nullptr;
-
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
+    ScreenSpaceRenderable::deinitialize();
 
     _framebuffer->detachAll();
     removeAllRenderFunctions();

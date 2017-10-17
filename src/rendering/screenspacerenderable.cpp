@@ -37,11 +37,6 @@ namespace {
     const char* _loggerCat = "ScreenSpaceRenderable";
 
     const char* KeyType = "Type";
-    const char* KeyFlatScreen = "FlatScreen";
-    const char* KeyPosition = "Position";
-    const char* KeyScale = "Scale";
-    const char* KeyDepth = "Depth";
-    const char* KeyAlpha = "Alpha";
     const char* KeyTag = "Tag";
     const float PlaneDepth = -2.f;
 
@@ -126,6 +121,59 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
                 "available types of Screenspace renderable depend on the configuration of"
                 "the application and can be written to disk on application startup into "
                 "the FactoryDocumentation."
+            },
+            {
+                EnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                EnabledInfo.description
+            },
+            {
+                FlatScreenInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                FlatScreenInfo.description
+            },
+            {
+                EuclideanPositionInfo.identifier,
+                new DoubleVector2Verifier,
+                Optional::Yes,
+                EuclideanPositionInfo.description
+            },
+            {
+                SphericalPositionInfo.identifier,
+                new DoubleVector2Verifier,
+                Optional::Yes,
+                SphericalPositionInfo.description
+            },
+            {
+                DepthInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                DepthInfo.description
+            },
+            {
+                ScaleInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                ScaleInfo.description
+            },
+            {
+                AlphaInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                AlphaInfo.description
+            },
+            {
+                KeyTag,
+                new OrVerifier(
+                    new StringVerifier,
+                    new StringListVerifier
+                ),
+                Optional::Yes,
+                "Defines either a single or multiple tags that apply to this "
+                "ScreenSpaceRenderable, thus making it possible to address multiple, "
+                "seprate Renderables with a single property change."
             }
         }
     };
@@ -143,15 +191,7 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
     std::string renderableType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    std::unique_ptr<ScreenSpaceRenderable> result = factory->create(renderableType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed to create a ScreenSpaceRenderable object of type '" <<
-               renderableType << "'"
-        );
-        return nullptr;
-    }
-
-    return result;
+    return factory->create(renderableType, dictionary);
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
@@ -182,25 +222,61 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 {
     addProperty(_enabled);
     addProperty(_useFlatScreen);
+    addProperty(_euclideanPosition);
+
+    // Setting spherical/euclidean onchange handler
+    _useFlatScreen.onChange([this]() {
+        if (_useFlatScreen) {
+            addProperty(_euclideanPosition);
+            removeProperty(_sphericalPosition);
+        }
+        else {
+            removeProperty(_euclideanPosition);
+            addProperty(_sphericalPosition);
+        }
+        useEuclideanCoordinates(_useFlatScreen);
+    });
+   
     addProperty(_depth);
     addProperty(_scale);
     addProperty(_alpha);
     addProperty(_delete);
 
-    dictionary.getValue(KeyFlatScreen, _useFlatScreen);
+    if (dictionary.hasKey(EnabledInfo.identifier)) {
+        _enabled = dictionary.value<bool>(EnabledInfo.identifier);
+    }
+
+    if (dictionary.hasKey(FlatScreenInfo.identifier)) {
+        _useFlatScreen = dictionary.value<bool>(FlatScreenInfo.identifier);
+    }
     useEuclideanCoordinates(_useFlatScreen);
     
     if (_useFlatScreen) {
-        dictionary.getValue(KeyPosition, _euclideanPosition);
+        if (dictionary.hasKey(EuclideanPositionInfo.identifier)) {
+            _euclideanPosition = dictionary.value<glm::vec2>(
+                EuclideanPositionInfo.identifier
+            );
+        }
     }
     else {
-        dictionary.getValue(KeyPosition, _sphericalPosition);
+        if (dictionary.hasKey(SphericalPositionInfo.identifier)) {
+            _sphericalPosition = dictionary.value<glm::vec2>(
+                SphericalPositionInfo.identifier
+            );
+        }
     }
 
+    if (dictionary.hasKey(ScaleInfo.identifier)) {
+        _scale = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
+    }
 
-    dictionary.getValue(KeyScale, _scale);
-    dictionary.getValue(KeyDepth, _depth);
-    dictionary.getValue(KeyAlpha, _alpha);
+    if (dictionary.hasKey(DepthInfo.identifier)) {
+        _depth = static_cast<float>(dictionary.value<double>(DepthInfo.identifier));
+    }
+
+    if (dictionary.hasKey(AlphaInfo.identifier)) {
+        _alpha = static_cast<float>(dictionary.value<double>(AlphaInfo.identifier));
+    }
 
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
@@ -219,18 +295,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         }
     }
 
-    // Setting spherical/euclidean onchange handler
-    _useFlatScreen.onChange([this](){   
-        if (_useFlatScreen) {
-            addProperty(_euclideanPosition);
-            removeProperty(_sphericalPosition);
-        } else {
-            removeProperty(_euclideanPosition);
-            addProperty(_sphericalPosition);
-        }
-        useEuclideanCoordinates(_useFlatScreen);
-    });
-
     _delete.onChange([this](){
         std::string script = 
             "openspace.unregisterScreenSpaceRenderable('" + name() + "');";
@@ -241,7 +305,40 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     });
 }
 
-ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
+bool ScreenSpaceRenderable::initialize() {
+    _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
+
+    createPlane();
+    createShaders();
+
+    return isReady();
+}
+
+bool ScreenSpaceRenderable::deinitialize() {
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
+
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    _texture = nullptr;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+
+    return true;
+}
+
+void ScreenSpaceRenderable::render() {
+    draw(rotationMatrix() * translationMatrix() * scaleMatrix());
+}
+
+bool ScreenSpaceRenderable::isReady() const {
+    return _shader && _texture;
+}
 
 bool ScreenSpaceRenderable::isEnabled() const {
     return _enabled;
@@ -262,29 +359,27 @@ float ScreenSpaceRenderable::depth() const {
 void ScreenSpaceRenderable::createPlane() {
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
-    const GLfloat vertex_data[] = {
-        //      x      y     z     w     s     t
-        -1, -1, 0.0f, 1, 0, 0,
-         1,  1, 0.0f, 1, 1, 1,
-        -1,  1, 0.0f, 1, 0, 1,
-        -1, -1, 0.0f, 1, 0, 0,
-         1, -1, 0.0f, 1, 1, 0,
-         1,  1, 0.0f, 1, 1, 1,
+
+    const GLfloat data[] = {
+        // x     y    s    t
+        -1.f, -1.f, 0.f, 0.f,
+         1.f,  1.f, 1.f, 1.f,
+        -1.f,  1.f, 0.f, 1.f,
+        -1.f, -1.f, 0.f, 0.f,
+         1.f, -1.f, 1.f, 0.f,
+         1.f,  1.f, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,
-        4,
+        2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(GLfloat) * 6,
+        sizeof(GLfloat) * 4,
         nullptr
     );
     
@@ -294,8 +389,8 @@ void ScreenSpaceRenderable::createPlane() {
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+        sizeof(GLfloat) * 4,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 2)
     );
 }
 

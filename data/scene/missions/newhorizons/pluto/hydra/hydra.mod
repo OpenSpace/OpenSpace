@@ -34,6 +34,7 @@ return {
                 DestinationFrame = "ECLIPJ2000"
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "HydraText",
@@ -51,6 +52,7 @@ return {
                 Position = {1000000, 0, 1000000},
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },    
     -- HydraTrail module
     {   
@@ -67,6 +69,7 @@ return {
             Period = 38.20177,
             Resolution = 1000
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     }
     
 }

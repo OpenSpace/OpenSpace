@@ -98,6 +98,7 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter"
     },
     {
         Name = "JupiterText",
@@ -116,7 +117,8 @@ return {
                 Position = {0, -100000000, 0}
             },
         },
-    },    
+        GuiPath = "/Solar System/Planets/Jupiter"
+    },
     -- JupiterTrail module
     {   
         Name = "JupiterTrail",
@@ -131,7 +133,8 @@ return {
             Color = { 0.8, 0.7, 0.7 },
             Period = 4330.595,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Jupiter"
     }
     
 }

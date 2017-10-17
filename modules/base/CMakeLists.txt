@@ -35,7 +35,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
@@ -53,7 +54,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp

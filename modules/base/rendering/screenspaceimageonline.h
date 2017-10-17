@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
 
@@ -36,37 +36,24 @@ namespace openspace {
     
 namespace documentation { struct Documentation; }
 
-class ScreenSpaceImage : public ScreenSpaceRenderable {
+class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceImage(const ghoul::Dictionary& dictionary);
+    ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
-    void render() override;
     void update() override;
-    bool isReady() const override;
 
     static documentation::Documentation Documentation();
 
 protected:
-    void loadTexture();
-    void updateTexture();
-
-    std::string _url;
     bool _downloadImage;
     bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _futureImage;
-    
-private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
-    std::unique_ptr<ghoul::opengl::Texture> loadFromDisk();
-    std::unique_ptr<ghoul::opengl::Texture> loadFromMemory();
-
+    std::future<DownloadManager::MemoryFile> _imageFuture;
     properties::StringProperty _texturePath;
 
-
+private:
+    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__

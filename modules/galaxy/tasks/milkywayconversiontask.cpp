@@ -83,6 +83,8 @@ std::string MilkywayConversionTask::description()
 }
 
 void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallback) {
+    using namespace openspace::volume;
+
     std::vector<std::string> filenames;
     for (int i = 0; i < _inNSlices; i++) {
         filenames.push_back(_inFilenamePrefix + std::to_string(i + _inFirstIndex) + _inFilenameSuffix);

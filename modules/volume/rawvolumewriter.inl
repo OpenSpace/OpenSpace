@@ -41,7 +41,7 @@ size_t RawVolumeWriter<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) co
 
 template <typename VoxelType>
 glm::ivec3 RawVolumeWriter<VoxelType>::indexToCoords(size_t linear) const {
-    return indexToCoords(linear, dimensions());
+    return volume::indexToCoords(linear, dimensions());
 }
 
 template <typename VoxelType>

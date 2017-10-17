@@ -36,7 +36,7 @@ namespace {
 namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceImage(dictionary)
+    : ScreenSpaceImageOnline(dictionary)
 {
     // hacky, have to first get as float and then cast to int.
     float cygnetid;
@@ -48,7 +48,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _updateTime = (int) interval;
 
     _downloadImage = true;
-    _url = IswaManager::ref().iswaUrl(_cygnetId);
+    _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
         
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
     _lastUpdateOpenSpaceTime = _openSpaceTime;
@@ -77,14 +77,9 @@ void ScreenSpaceCygnet::update(){
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
     if((OsEng.timeManager().time().timeJumped() || timeToUpdate )){
-        _url = IswaManager::ref().iswaUrl(_cygnetId);
-        updateTexture();
+        _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
-    }
-
-    if(_futureImage.valid() && DownloadManager::futureReady(_futureImage)) {
-        loadTexture();
     }
 }
 }

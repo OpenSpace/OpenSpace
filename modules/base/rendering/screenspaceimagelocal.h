@@ -22,58 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/imgui/include/guiorigincomponent.h>
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
 
-#include <modules/imgui/include/imgui_include.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
+#include <openspace/properties/stringproperty.h>
 
-#include <ghoul/misc/assert.h>
+#include <ghoul/opengl/texture.h>
+ 
+namespace openspace {
+    
+namespace documentation { struct Documentation; }
 
-namespace openspace::gui {
+class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
+public:
+    ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);
 
-GuiOriginComponent::GuiOriginComponent()
-    : GuiComponent("Origin")
-{}
+    void update() override;
 
-void GuiOriginComponent::render() {
-    SceneGraphNode* currentFocus = OsEng.navigationHandler().focusNode();
+    static documentation::Documentation Documentation();
 
-    std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
+private:
+    properties::StringProperty _texturePath;
+    bool _textureIsDirty;
+};
 
-    std::sort(
-        nodes.begin(),
-        nodes.end(),
-        [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
-            return lhs->name() < rhs->name();
-        }
-    );
-    std::string nodeNames = "";
-    for (SceneGraphNode* n : nodes) {
-        nodeNames += n->name() + '\0';
-    }
+} // namespace openspace
 
-    auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
-    if (!nodes.empty()) {
-        // Only check if we found the current focus node if we have any nodes at all
-        // only then it would be a real error
-        ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
-    }
-    int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
-
-    bool hasChanged = ImGui::Combo("Origin", &currentPosition, nodeNames.c_str());
-    if (hasChanged) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
-            nodes[currentPosition]->name() + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-}
-
-} // namespace openspace::gui
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGELOCAL___H__
