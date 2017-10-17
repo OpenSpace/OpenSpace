@@ -39,7 +39,8 @@
 #include <modules/base/rendering/renderableplane.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/base/rendering/multimodelgeometry.h>
-#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceimagelocal.h>
+#include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
 #include <modules/base/translation/statictranslation.h>
@@ -67,7 +68,8 @@ void BaseModule::internalInitialize() {
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
 
-    fScreenSpaceRenderable->registerClass<ScreenSpaceImage>("ScreenSpaceImage");
+    fScreenSpaceRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
+    fScreenSpaceRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
     fScreenSpaceRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -108,7 +110,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),
-        ScreenSpaceImage::Documentation(),
+        ScreenSpaceImageLocal::Documentation(),
+        ScreenSpaceImageOnline::Documentation(),
         StaticRotation::Documentation(),
         StaticScale::Documentation(),
         StaticTranslation::Documentation(),

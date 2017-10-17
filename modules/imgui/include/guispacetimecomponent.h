@@ -22,55 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/moduleengine.h>
+#ifndef __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__
 
-namespace openspace::gui::luascriptfunctions {
-   
-/**
- * \ingroup LuaScripts
- * show():
- * Shows the GUI
- */
-int show(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+#include <modules/imgui/include/guicomponent.h>
 
-    OsEng.moduleEngine().module<ImGUIModule>()->gui.setEnabled(true);
-    return 0;
-}
+namespace openspace::gui {
 
-/**
- * \ingroup LuaScripts
- * hide():
- * Hides the console
- */
-int hide(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+class GuiSpaceTimeComponent : public GuiComponent {
+public:
+    GuiSpaceTimeComponent();
 
-    OsEng.moduleEngine().module<ImGUIModule>()->gui.setEnabled(false);
-    return 0;
-}
+    void render() override;
+};
 
-/**
- * \ingroup LuaScripts
- * toggle():
- * Toggles the console
- */
-int toggle(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+} // namespace openspace::gui
 
-    OsEng.moduleEngine().module<ImGUIModule>()->gui.setEnabled(
-        !OsEng.moduleEngine().module<ImGUIModule>()->gui.isEnabled()
-    );
-    return 0;
-}
-
-} // namespace openspace::gui::luascriptfunctions
+#endif // __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__

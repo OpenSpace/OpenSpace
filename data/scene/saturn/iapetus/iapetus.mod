@@ -28,7 +28,8 @@ return {
                 SourceFrame = "IAU_ENCELADUS",
                 DestinationFrame = "GALACTIC"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Saturn/Moons"
     },
     {
         Name = "IapetusTrail",
@@ -43,6 +44,7 @@ return {
             Color = { 0.5, 0.3, 0.3 },
             Period = 79,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Saturn/Moons"
     }
 }

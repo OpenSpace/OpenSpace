@@ -189,6 +189,7 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     {
         Name = "ORX_OCAMS_POLYCAM",
@@ -219,6 +220,7 @@ return {
                 DestinationFrame = "ORX_SPACECRAFT",
             },
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     {
         Name = "ORX_REXIS",
@@ -249,6 +251,7 @@ return {
                 DestinationFrame = "ORX_SPACECRAFT",
             },
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     {
         Name = "POLYCAM FOV",
@@ -267,6 +270,7 @@ return {
                 BENNU_BODY -- Bennu
             }
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     { 
         Name = "REXIS FOV",
@@ -288,6 +292,7 @@ return {
                 [BENNU_BODY] = "IAU_BENNU"
             }
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     --[[
     -- Latest image taken by POLYCAM
@@ -345,6 +350,7 @@ return {
             EndTime = "2016 SEP 9 00:05:00",
             SampleInterval = 60,
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
 
     -- Trail relative to solar system barycenter
@@ -363,6 +369,7 @@ return {
             EndTime = "2023 SEP 24 12:00:00",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
 
     -- Trail relative to Bennu
@@ -381,5 +388,6 @@ return {
             EndTime = "2023 SEP 24 12:00:00",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
 }

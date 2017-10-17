@@ -55,6 +55,7 @@ return {
                 DestinationFrame = "ECLIPJ2000",
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     },
     {
         Name = "EuropaText",
@@ -79,6 +80,7 @@ return {
                 Position = {0, -10000000, 0}
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     },    
     -- EuropaTrail module
     {   
@@ -94,6 +96,7 @@ return {
             Color = { 0.5, 0.3, 0.3 },
             Period =  85 / 24,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     }
 }

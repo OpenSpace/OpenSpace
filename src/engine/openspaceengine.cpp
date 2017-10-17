@@ -1393,6 +1393,12 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::removeAllVirtualProperties,
                 "",
                 "Remove all registered virtual properties"
+            },
+            {
+                "addTag",
+                &luascriptfunctions::addTag,
+                "string, string",
+                "Adds a tag (second argument) to a scene graph node (first argument)"
             }
         }
     };

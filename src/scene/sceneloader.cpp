@@ -95,20 +95,27 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     // inside the modules to toggle settings.
     ghoul::lua::runScriptFile(state, absScenePath);
     std::vector<std::string> keys = moduleDictionary.keys();
-    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
 
     std::vector<SceneLoader::LoadedNode> allNodes;
 
-    for (const std::string& key : keys) {
-        std::string fullModuleName = moduleDictionary.value<std::string>(key);
-        std::replace(fullModuleName.begin(), fullModuleName.end(), '/', FileSys.PathSeparator);
-        std::string modulePath = FileSys.pathByAppendingComponent(modulesPath, fullModuleName);
+    {
+        // Inside loadDirectory the working directory is changed (for now), so we need
+        // to save the old state
+        ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
+        
+        // Placing this head to guard against exceptions in the directory loading that
+        // would otherwise mess up the working directory for everyone else
+        OnExit([&]() { FileSys.setCurrentDirectory(oldDirectory); });
 
-        std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(modulePath, state);
-        std::move(nodes.begin(), nodes.end(), std::back_inserter(allNodes));
+        for (const std::string& key : keys) {
+            std::string fullName = moduleDictionary.value<std::string>(key);
+            std::replace(fullName.begin(), fullName.end(), '/', FileSys.PathSeparator);
+            std::string path = FileSys.pathByAppendingComponent(modulesPath, fullName);
+
+            std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(path, state);
+            std::move(nodes.begin(), nodes.end(), std::back_inserter(allNodes));
+        }
     }
-
-    FileSys.setCurrentDirectory(oldDirectory);
     
     std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
@@ -206,6 +213,8 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadDirectory(
     if (FileSys.fileExists(moduleFile)) {
         // TODO: Get rid of changing the working directory (global state is bad) -- emiax
         // This requires refactoring all renderables to not use relative paths in constructors.
+        // For now, no need to reset the directory here as it is done from the outside
+        // function calling this method
         FileSys.setCurrentDirectory(ghoul::filesystem::Directory(path));
         
         // We have a module file, so it is a direct include.

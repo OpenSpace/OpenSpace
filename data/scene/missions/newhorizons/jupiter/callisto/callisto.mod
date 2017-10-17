@@ -55,6 +55,7 @@ return {
                 DestinationFrame = "ECLIPJ2000",
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     },
     {
         Name = "CallistoText",
@@ -79,6 +80,7 @@ return {
                 Position = {0, -10000000, 0}
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     },
     -- CallistoTrail module
     {   
@@ -94,6 +96,7 @@ return {
             Color = { 0.4, 0.3, 0.01 },
             Period =  17,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     }
 }

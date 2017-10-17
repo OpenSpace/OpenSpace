@@ -34,6 +34,7 @@ return {
                 DestinationFrame = "ECLIPJ2000"
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "StyxText",
@@ -52,6 +53,7 @@ return {
                 Position = {1000000, 0, 1000000}
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     -- StyxTrail module
     {   
@@ -68,5 +70,6 @@ return {
             Period = 20.16155,
             Resolution = 1000
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     }
 }
