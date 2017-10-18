@@ -34,7 +34,7 @@ namespace ccmc {
 
 namespace openspace::kameleonHelper {
 
-    std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& CDF_FILE_PATH);
+    std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath);
     double getTime(ccmc::Kameleon* kameleon);
 
 } //namespace openspace::kameleonHelper

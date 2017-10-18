@@ -40,11 +40,11 @@
 
 namespace {
     std::string _loggerCat = "FieldlinesState";
-    const int CURRENT_VERSION = 0;
+    const int CurrentVersion = 0;
 
-    const std::string T_AS_P_OVER_RHO = "T = p/rho";
-    const std::string J_PARALLEL_B    = "Current: mag(J||B)";
-    const float TO_KELVIN = 72429735.6984f; // <-- [nPa]/[amu/cm^3] * TO_KELVIN => Temperature in Kelvin
+    const std::string TAsPOverRho = "T = p/rho";
+    const std::string JParallelB  = "Current: mag(J||B)";
+    const float ToKelvin = 72429735.6984f; // <-- [nPa]/[amu/cm^3] * ToKelvin => Temperature in Kelvin
 
     using json = nlohmann::json;
 }
@@ -58,18 +58,18 @@ namespace openspace {
  * Note that extraQuantities will NOT be set!
  */
 bool FieldlinesState::addLinesFromKameleon(ccmc::Kameleon* kameleon,
-                                          const std::vector<glm::vec3>& SEED_POINTS,
-                                          const std::string TRACING_VAR) {
+                                          const std::vector<glm::vec3>& seedPoints,
+                                          const std::string tracingVar) {
 
     _model = fls::stringToModel(kameleon->getModelName());
 
     float innerBoundaryLimit;
 
     switch (_model) {
-        case fls::Model::BATSRUS :
+        case fls::Model::Batsrus :
             innerBoundaryLimit = 2.5f;  // TODO specify in Lua?
             break;
-        case fls::Model::ENLIL :
+        case fls::Model::Enlil :
             innerBoundaryLimit = 0.11f; // TODO specify in Lua?
             break;
         default:
@@ -79,15 +79,15 @@ bool FieldlinesState::addLinesFromKameleon(ccmc::Kameleon* kameleon,
     }
 
     // --------------------------- LOAD TRACING VARIABLE ---------------------------- //
-    if (!kameleon->loadVariable(TRACING_VAR)) {
-        LERROR("FAILED TO LOAD TRACING VARIABLE: " << TRACING_VAR);
+    if (!kameleon->loadVariable(tracingVar)) {
+        LERROR("FAILED TO LOAD TRACING VARIABLE: " << tracingVar);
         return false;
     }
 
     LINFO("TRACING FIELD LINES!");
     // - LOOP THROUGH THE SEED POINTS, TRACE LINES AND CONVERT TO THE DESIRED FORMAT - //
     size_t lineStart = 0;
-    for (glm::vec3 seed : SEED_POINTS) {
+    for (glm::vec3 seed : seedPoints) {
         //--------------------------------------------------------------------------//
         // We have to create a new tracer (or actually a new interpolator) for each //
         // new line, otherwise some issues occur                                    //
@@ -96,18 +96,18 @@ bool FieldlinesState::addLinesFromKameleon(ccmc::Kameleon* kameleon,
                 std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
         ccmc::Tracer tracer(kameleon, interpolator.get());
         tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
-        ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(TRACING_VAR,
+        ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(tracingVar,
                                                                   seed.x,
                                                                   seed.y,
                                                                   seed.z);
-        const std::vector<ccmc::Point3f>& POSITIONS = ccmcFieldline.getPositions();
+        const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
 
         _lineStart.push_back(lineStart);
-        const size_t N_LINE_POINTS = POSITIONS.size();
-        _lineCount.push_back(static_cast<GLsizei>(N_LINE_POINTS));
-        lineStart += static_cast<GLint>(N_LINE_POINTS);
+        const size_t nLinePoints = positions.size();
+        _lineCount.push_back(static_cast<GLsizei>(nLinePoints));
+        lineStart += static_cast<GLint>(nLinePoints);
 
-        for (const ccmc::Point3f& p : POSITIONS) {
+        for (const ccmc::Point3f& p : positions) {
             _vertexPositions.emplace_back(
                     glm::vec3(p.component1, p.component2, p.component3));
         }
@@ -127,13 +127,13 @@ void FieldlinesState::loadExtrasIntoKameleon(ccmc::Kameleon* kameleon,
         std::string& str = xtraScalarVars[i];
         bool isSuccesful = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!isSuccesful &&
-            (_model == fls::Model::BATSRUS && (str == T_AS_P_OVER_RHO || str == "T" ))) {
+                (_model == fls::Model::Batsrus && (str == TAsPOverRho || str == "T" ))) {
             LDEBUG("BATSRUS doesn't contain variable T for temperature. Trying to "
                    << "calculate it using the ideal gas law: T = pressure/density");
-            const std::string P = "p", R = "rho";
-            isSuccesful = kameleon->doesVariableExist(P) && kameleon->loadVariable(P)
-                       && kameleon->doesVariableExist(R) && kameleon->loadVariable(R);
-            str = T_AS_P_OVER_RHO;
+            const std::string p = "p", r = "rho";
+            isSuccesful = kameleon->doesVariableExist(p) && kameleon->loadVariable(p)
+                       && kameleon->doesVariableExist(r) && kameleon->loadVariable(r);
+            str = TAsPOverRho;
         }
         if (!isSuccesful) {
             LWARNING("FAILED TO LOAD EXTRA VARIABLE: '" << str << "'. Ignoring it!");
@@ -158,7 +158,7 @@ void FieldlinesState::loadExtrasIntoKameleon(ccmc::Kameleon* kameleon,
                                kameleon->loadVariable(s2) &&
                                kameleon->loadVariable(s3);
             std::string name = "Magnitude of (" + s1 + ", "+ s2 + ", "+ s3 + ")";
-            if (isSuccesful && _model == fls::Model::BATSRUS && s1 == "jx" && s2 == "jy"
+            if (isSuccesful && _model == fls::Model::Batsrus && s1 == "jx" && s2 == "jy"
                     && s3 == "jz") {
                 // CCMC isn't really interested in the magnitude of current, but by the
                 // magnitude of the part of the current's vector that is parallel to the
@@ -169,7 +169,7 @@ void FieldlinesState::loadExtrasIntoKameleon(ccmc::Kameleon* kameleon,
                                kameleon->loadVariable("bx") &&
                                kameleon->loadVariable("by") &&
                                kameleon->loadVariable("bz");
-                name = J_PARALLEL_B;
+                name = JParallelB;
             }
             if (!isSuccesful) {
                 LWARNING("FAILED TO LOAD AT LEAST ONE OF THE MAGNITUDE VARIABLES: "
@@ -211,56 +211,56 @@ void FieldlinesState::addExtraQuantities(ccmc::Kameleon* kameleon,
 
     loadExtrasIntoKameleon(kameleon, xtraScalarVars, xtraMagVars);
 
-    const size_t N_XTRA_SCALARS = xtraScalarVars.size();
-    const size_t N_XTRA_MAGNITUDES = xtraMagVars.size() / 3;
+    const size_t nXtraScalars = xtraScalarVars.size();
+    const size_t nXtraMagnitudes = xtraMagVars.size() / 3;
 
-    _extraQuantities.resize(N_XTRA_SCALARS + N_XTRA_MAGNITUDES);
+    _extraQuantities.resize(nXtraScalars + nXtraMagnitudes);
 
     std::unique_ptr<ccmc::Interpolator> interpolator =
         std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
     // ------ Extract all the extraQuantities from kameleon and store in state! ------ //
-    for (const glm::vec3& P : _vertexPositions) {
+    for (const glm::vec3& p : _vertexPositions) {
         // Load the scalars!
-        for (size_t i = 0; i < N_XTRA_SCALARS; i++) {
+        for (size_t i = 0; i < nXtraScalars; i++) {
             float val;
-            if (xtraScalarVars[i] == T_AS_P_OVER_RHO) {
-                val = interpolator->interpolate("p", P.x, P.y, P.z);
-                val *= TO_KELVIN;
-                val /= interpolator->interpolate("rho", P.x, P.y, P.z);
+            if (xtraScalarVars[i] == TAsPOverRho) {
+                val = interpolator->interpolate("p", p.x, p.y, p.z);
+                val *= ToKelvin;
+                val /= interpolator->interpolate("rho", p.x, p.y, p.z);
             } else {
-                val = interpolator->interpolate(xtraScalarVars[i], P.x, P.y, P.z);
+                val = interpolator->interpolate(xtraScalarVars[i], p.x, p.y, p.z);
 
                 // When measuring density in ENLIL CCMC multiply by the radius^2
-                if (xtraScalarVars[i] == "rho" && _model == fls::Model::ENLIL) {
-                    val *= std::pow(P.x * fls::A_U_TO_METER, 2.0f);
+                if (xtraScalarVars[i] == "rho" && _model == fls::Model::Enlil) {
+                    val *= std::pow(p.x * fls::AuToMeter, 2.0f);
                 }
             }
             _extraQuantities[i].push_back(val);
         }
         // Calculate and store the magnitudes!
-        for (size_t i = 0; i < N_XTRA_MAGNITUDES; ++i) {
-            const size_t IDX = i*3;
+        for (size_t i = 0; i < nXtraMagnitudes; ++i) {
+            const size_t idx = i*3;
 
-            const float X = interpolator->interpolate(xtraMagVars[IDX]  , P.x, P.y, P.z);
-            const float Y = interpolator->interpolate(xtraMagVars[IDX+1], P.x, P.y, P.z);
-            const float Z = interpolator->interpolate(xtraMagVars[IDX+2], P.x, P.y, P.z);
+            const float x = interpolator->interpolate(xtraMagVars[idx]  , p.x, p.y, p.z);
+            const float y = interpolator->interpolate(xtraMagVars[idx+1], p.x, p.y, p.z);
+            const float z = interpolator->interpolate(xtraMagVars[idx+2], p.x, p.y, p.z);
             float val;
             // When looking at the current's magnitude in Batsrus, CCMC staff are
             // only interested in the magnitude parallel to the magnetic field
-            if (_extraQuantityNames[N_XTRA_SCALARS + i] == J_PARALLEL_B) {
-                const glm::vec3 NORM_MAGNETIC =  glm::normalize(glm::vec3(
-                        interpolator->interpolate("bx", P.x, P.y, P.z),
-                        interpolator->interpolate("by", P.x, P.y, P.z),
-                        interpolator->interpolate("bz", P.x, P.y, P.z)));
+            if (_extraQuantityNames[nXtraScalars + i] == JParallelB) {
+                const glm::vec3 normMagnetic =  glm::normalize(glm::vec3(
+                        interpolator->interpolate("bx", p.x, p.y, p.z),
+                        interpolator->interpolate("by", p.x, p.y, p.z),
+                        interpolator->interpolate("bz", p.x, p.y, p.z)));
                 // Magnitude of the part of the current vector that's parallel to
                 // the magnetic field vector!
-                val = glm::dot(glm::vec3(X,Y,Z), NORM_MAGNETIC);
+                val = glm::dot(glm::vec3(x,y,z), normMagnetic);
 
             } else {
-                val = std::sqrt(X*X + Y*Y + Z*Z);
+                val = std::sqrt(x*x + y*y + z*z);
             }
-            _extraQuantities[i + N_XTRA_SCALARS].push_back(val);
+            _extraQuantities[i + nXtraScalars].push_back(val);
         }
     }
 }
@@ -270,33 +270,33 @@ void FieldlinesState::addExtraQuantities(ccmc::Kameleon* kameleon,
 /**
 * Converts all glm::vec3 in _vertexPositions from spherical (radius, latitude, longitude)
 * coordinates into cartesian coordinates. The longitude and latitude coordinates are
-* expected to be in degrees. SCALE is an optional scaling factor.
+* expected to be in degrees. scale is an optional scaling factor.
 */
-void FieldlinesState::convertLatLonToCartesian(const float SCALE /* = 1.f */) {
+void FieldlinesState::convertLatLonToCartesian(const float scale /* = 1.f */) {
     for (glm::vec3& p : _vertexPositions) {
 
-        const float R = p.x * SCALE;
-        const float LAT = glm::radians(p.y);
-        const float LON = glm::radians(p.z);
-        const float R_COS_LAT = R * cos(LAT);
+        const float r = p.x * scale;
+        const float lat = glm::radians(p.y);
+        const float lon = glm::radians(p.z);
+        const float rCosLat = r * cos(lat);
 
-        p = glm::vec3(R_COS_LAT * cos(LON), R_COS_LAT* sin(LON), R * sin(LAT));
+        p = glm::vec3(rCosLat * cos(lon), rCosLat* sin(lon), r * sin(lat));
     }
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-void FieldlinesState::scalePositions(const float SCALE) {
+void FieldlinesState::scalePositions(const float scale) {
     for (glm::vec3& p : _vertexPositions) {
-        p *= SCALE;
+        p *= scale;
     }
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) {
-    std::ifstream ifs(PATH_TO_OSFLS_FILE, std::ifstream::binary);
+bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
+    std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
     if (!ifs.is_open()) {
-        LERRORC("FieldlinesState", "Couldn't open file: " + PATH_TO_OSFLS_FILE);
+        LERRORC("FieldlinesState", "Couldn't open file: " + pathToOsflsFile);
         return false;
     }
 
@@ -366,15 +366,15 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE) 
     return true;
 }
 
-bool FieldlinesState::loadStateFromJson(const std::string& PATH_TO_JSON_FILE,
-                                        const fls::Model MODEL,
-                                        const float COORD_TO_METERS = 1.f) {
+bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
+                                        const fls::Model Model,
+                                        const float coordToMeters = 1.f) {
 
     // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
-    std::ifstream ifs(PATH_TO_JSON_FILE);
+    std::ifstream ifs(pathToJsonFile);
 
     if (!ifs.is_open()) {
-        LERROR("FAILED TO OPEN FILE: " << PATH_TO_JSON_FILE);
+        LERROR("FAILED TO OPEN FILE: " << pathToJsonFile);
         return false;
     }
 
@@ -382,70 +382,70 @@ bool FieldlinesState::loadStateFromJson(const std::string& PATH_TO_JSON_FILE,
     ifs >> jFile;
     // -------------------------------------------------------------------------------- //
 
-    _model = MODEL;
+    _model = Model;
 
-    const std::string S_DATA  = "data";
-    const std::string S_TRACE = "trace";
+    const std::string sData  = "data";
+    const std::string sTrace = "trace";
 
     // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
     {
-        const json J_TMP = *jFile.begin(); // First field line in the file
-        _triggerTime = Time::convertTime(J_TMP["time"]);
+        const json jTmp = *jFile.begin(); // First field line in the file
+        _triggerTime = Time::convertTime(jTmp["time"]);
 
-        const std::string S_COLUMNS = "columns";
-        auto variableNameVec = J_TMP[S_TRACE][S_COLUMNS];
-        const size_t N_VARIABLES = variableNameVec.size();
-        const size_t N_POS_COMPONENTS = 3; // x,y,z
+        const std::string sColumns = "columns";
+        auto variableNameVec = jTmp[sTrace][sColumns];
+        const size_t nVariables = variableNameVec.size();
+        const size_t nPosComponents = 3; // x,y,z
 
-        if (N_VARIABLES < N_POS_COMPONENTS) {
-            LERROR(PATH_TO_JSON_FILE + ": Each field '" + S_COLUMNS +
+        if (nVariables < nPosComponents) {
+            LERROR(pathToJsonFile + ": Each field '" + sColumns +
                     "' must contain the variables: 'x', 'y' and 'z' (order is important).");
             return false;
         }
 
-        for (size_t i = N_POS_COMPONENTS ; i < N_VARIABLES ; i++) {
+        for (size_t i = nPosComponents ; i < nVariables ; i++) {
             _extraQuantityNames.push_back(variableNameVec[i]);
         }
     }
 
-    const size_t N_EXTRAS = _extraQuantityNames.size();
-    _extraQuantities.resize(N_EXTRAS);
+    const size_t nExtras = _extraQuantityNames.size();
+    _extraQuantities.resize(nExtras);
 
     size_t lineStartIdx = 0;
     // Loop through all fieldlines
-    for (json::iterator fieldlineIt = jFile.begin(); fieldlineIt != jFile.end(); ++fieldlineIt) {
+    for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); ++lineIter) {
         // The 'data' field in the 'trace' variable contains all vertex positions and the
         // extra quantities. Each element is an array related to one vertex point.
-        const std::vector<std::vector<float>> J_DATA = (*fieldlineIt)[S_TRACE][S_DATA];
-        const size_t N_POINTS = J_DATA.size();
+        const std::vector<std::vector<float>> jData = (*lineIter)[sTrace][sData];
+        const size_t nPoints = jData.size();
 
-        for (size_t j = 0; j < N_POINTS; ++j) {
-            const std::vector<float>& VARIABLES = J_DATA[j];
+        for (size_t j = 0; j < nPoints; ++j) {
+            const std::vector<float>& variables = jData[j];
 
             // Expects the x, y and z variables to be stored first!
-            const size_t X_IDX = 0, Y_IDX = 1, Z_IDX = 2;
-            _vertexPositions.push_back(COORD_TO_METERS * glm::vec3(VARIABLES[X_IDX],
-                                                                   VARIABLES[Y_IDX],
-                                                                   VARIABLES[Z_IDX]));
+            const size_t xIdx = 0, yIdx = 1, zIdx = 2;
+            _vertexPositions.push_back(coordToMeters * glm::vec3(variables[xIdx],
+                                                                 variables[yIdx],
+                                                                 variables[zIdx]));
 
             // Add the extra quantites. Stored in the same array as the x,y,z variables.
             // Hence index of the first extra quantity = 3
-            for (size_t xtraIdx = 3, k = 0 ; k < N_EXTRAS; ++k, ++xtraIdx) {
-                _extraQuantities[k].push_back(VARIABLES[xtraIdx]);
+            for (size_t xtraIdx = 3, k = 0 ; k < nExtras; ++k, ++xtraIdx) {
+                _extraQuantities[k].push_back(variables[xtraIdx]);
             }
         }
-        _lineCount.push_back(static_cast<GLsizei>(N_POINTS));
+        _lineCount.push_back(static_cast<GLsizei>(nPoints));
         _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
-        lineStartIdx += N_POINTS;
+        lineStartIdx += nPoints;
     }
     return true;
 }
 
 /**
- * @param ABS_FILEPATH must be the path to the file (incl. filename but excl. extension!)
+ * @param absPath must be the path to the file (incl. filename but excl. extension!)
  * Directory must exist! File is created (or overwritten if already existing).
  * File is structured like this: (for version 0)
- *  0. int                    - version number of binary state file! (in case something needs to be altered in the future, then increase CURRENT_VERSION)
+ *  0. int                    - version number of binary state file! (in case something needs to be altered in the future, then increase CurrentVersion)
  *  1. double                 - _triggerTime
  *  2. int                    - _model
  *  3. bool                   - _isMorphable
@@ -459,17 +459,17 @@ bool FieldlinesState::loadStateFromJson(const std::string& PATH_TO_JSON_FILE,
  * 10. std::vector<float>     - _extraQuantities
  * 11. array of c_str         - Strings naming the extra quantities (elements of _extraQuantityNames). Each string ends with null char '\0'
  */
-void FieldlinesState::saveStateToOsfls(const std::string& ABS_FILEPATH) {
+void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     // ------------------------------- Create the file ------------------------------- //
     std::string pathSafeTimeString = Time(_triggerTime).ISO8601();
     pathSafeTimeString.replace(13, 1, "-");
     pathSafeTimeString.replace(16, 1, "-");
     pathSafeTimeString.replace(19, 1, "-");
-    const std::string FILENAME = pathSafeTimeString + ".osfls";
+    const std::string fileName = pathSafeTimeString + ".osfls";
 
-    std::ofstream ofs(ABS_FILEPATH + FILENAME, std::ofstream::binary | std::ofstream::trunc);
+    std::ofstream ofs(absPath + fileName, std::ofstream::binary | std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR("Failed to save state to binary file: " << ABS_FILEPATH << FILENAME);
+        LERROR("Failed to save state to binary file: " << absPath << fileName);
         return;
     }
 
@@ -479,34 +479,34 @@ void FieldlinesState::saveStateToOsfls(const std::string& ABS_FILEPATH) {
         allExtraQuantityNamesInOne += str + '\0'; // Add the null char '\0' for easier reading
     }
 
-    const size_t N_LINES        = _lineStart.size();
-    const size_t N_POINTS       = _vertexPositions.size();
-    const size_t N_EXTRAS       = _extraQuantities.size();
-    const size_t N_STRING_BYTES = allExtraQuantityNamesInOne.size();
+    const size_t nLines       = _lineStart.size();
+    const size_t nPoints      = _vertexPositions.size();
+    const size_t nExtras      = _extraQuantities.size();
+    const size_t nStringBytes = allExtraQuantityNamesInOne.size();
 
     //------------------------------ WRITE EVERYTHING TO FILE ------------------------------
     // WHICH VERSION OF BINARY FIELDLINES STATE FILE - IN CASE STRUCTURE CHANGES IN THE FUTURE
-    ofs.write( (char*)(&CURRENT_VERSION), sizeof( int ) );
+    ofs.write( (char*)(&CurrentVersion), sizeof( int ) );
 
     //-------------------- WRITE META DATA FOR STATE --------------------------------
-    ofs.write( reinterpret_cast<char*>(&_triggerTime),   sizeof( _triggerTime ) );
-    ofs.write( reinterpret_cast<char*>(&_model),         sizeof( int ) );
-    ofs.write( reinterpret_cast<char*>(&_isMorphable),   sizeof( bool ) );
+    ofs.write( reinterpret_cast<char*>(&_triggerTime), sizeof( _triggerTime ) );
+    ofs.write( reinterpret_cast<char*>(&_model),       sizeof( int ) );
+    ofs.write( reinterpret_cast<char*>(&_isMorphable), sizeof( bool ) );
 
-    ofs.write( reinterpret_cast<const char*>(&N_LINES),        sizeof( size_t ) );
-    ofs.write( reinterpret_cast<const char*>(&N_POINTS),       sizeof( size_t ) );
-    ofs.write( reinterpret_cast<const char*>(&N_EXTRAS),       sizeof( size_t ) );
-    ofs.write( reinterpret_cast<const char*>(&N_STRING_BYTES), sizeof( size_t ) );
+    ofs.write( reinterpret_cast<const char*>(&nLines),       sizeof( size_t ) );
+    ofs.write( reinterpret_cast<const char*>(&nPoints),      sizeof( size_t ) );
+    ofs.write( reinterpret_cast<const char*>(&nExtras),      sizeof( size_t ) );
+    ofs.write( reinterpret_cast<const char*>(&nStringBytes), sizeof( size_t ) );
 
     //---------------------- WRITE ALL ARRAYS OF DATA --------------------------------
-    ofs.write( reinterpret_cast<char*>(_lineStart.data()),       sizeof(GLint) * N_LINES);
-    ofs.write( reinterpret_cast<char*>(_lineCount.data()),       sizeof(GLsizei) * N_LINES);
-    ofs.write( reinterpret_cast<char*>(_vertexPositions.data()), sizeof(glm::vec3) * N_POINTS);
+    ofs.write( reinterpret_cast<char*>(_lineStart.data()),       sizeof(GLint) * nLines);
+    ofs.write( reinterpret_cast<char*>(_lineCount.data()),       sizeof(GLsizei) * nLines);
+    ofs.write( reinterpret_cast<char*>(_vertexPositions.data()), sizeof(glm::vec3) * nPoints);
     // Write the data for each vector in _extraQuantities
     for (std::vector<float>& vec : _extraQuantities) {
-        ofs.write( reinterpret_cast<char*>(vec.data()),  sizeof(float) * N_POINTS);
+        ofs.write( reinterpret_cast<char*>(vec.data()),  sizeof(float) * nPoints);
     }
-    ofs.write( allExtraQuantityNamesInOne.c_str(), N_STRING_BYTES);
+    ofs.write( allExtraQuantityNamesInOne.c_str(), nStringBytes);
 }
 
 // TODO: This should probably be rewritten, but this is the way the files were structured by CCMC
@@ -529,15 +529,15 @@ void FieldlinesState::saveStateToOsfls(const std::string& ABS_FILEPATH) {
 //         },
 //     }
 // }
-void FieldlinesState::saveStateToJson(const std::string& ABS_FILEPATH) {
+void FieldlinesState::saveStateToJson(const std::string& absPath) {
     // Create the file
-    const std::string EXT = ".json";
-    std::ofstream ofs(ABS_FILEPATH + EXT, std::ofstream::trunc);
+    const std::string ext = ".json";
+    std::ofstream ofs(absPath + ext, std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR("Failed to save state to json file at location: " << ABS_FILEPATH << EXT);
+        LERROR("Failed to save state to json file at location: " << absPath << ext);
         return;
     }
-    LINFO("Saving fieldline state to: " << ABS_FILEPATH << EXT );
+    LINFO("Saving fieldline state to: " << absPath << ext );
 
     json jColumns = {"x", "y", "z"};
     for (std::string s : _extraQuantityNames) {
@@ -546,27 +546,26 @@ void FieldlinesState::saveStateToJson(const std::string& ABS_FILEPATH) {
 
     json jFile;
 
-    const std::string TIME_STRING = Time(_triggerTime).ISO8601();
-
-    const size_t N_LINES         = _lineStart.size();
-    const size_t N_POINTS        = _vertexPositions.size();
-    const size_t N_EXTRAS        = _extraQuantities.size();
+    const std::string timeStr = Time(_triggerTime).ISO8601();
+    const size_t nLines       = _lineStart.size();
+    const size_t nPoints      = _vertexPositions.size();
+    const size_t nExtras      = _extraQuantities.size();
 
     size_t pointIndex = 0;
-    for (size_t lineIndex = 0; lineIndex < N_LINES; lineIndex++) {
+    for (size_t lineIndex = 0; lineIndex < nLines; lineIndex++) {
         json jData = json::array();
         for (size_t i = 0; i < _lineCount[lineIndex]; i++, pointIndex++) {
-            const glm::vec3 POS = _vertexPositions[pointIndex];
-            json jDataElement = {POS.x, POS.y, POS.z};
+            const glm::vec3 pos = _vertexPositions[pointIndex];
+            json jDataElement = {pos.x, pos.y, pos.z};
 
-            for (size_t extraIndex = 0; extraIndex < N_EXTRAS; extraIndex++) {
+            for (size_t extraIndex = 0; extraIndex < nExtras; extraIndex++) {
                 jDataElement.push_back(_extraQuantities[extraIndex][pointIndex]);
             }
             jData.push_back(jDataElement);
         }
 
         jFile[std::to_string(lineIndex)] = {
-            {"time", TIME_STRING},
+            {"time", timeStr},
             {"trace", {
                 {"columns", jColumns},
                 {"data", jData}
@@ -575,19 +574,19 @@ void FieldlinesState::saveStateToJson(const std::string& ABS_FILEPATH) {
     }
 
     //------------------------------ WRITE EVERYTHING TO FILE ------------------------------
-    const int INDENTATION_SPACES = 2;
-    ofs << std::setw(INDENTATION_SPACES) << jFile << std::endl;
+    const int indentationSpaces = 2;
+    ofs << std::setw(indentationSpaces) << jFile << std::endl;
 
-    LINFO("Saved fieldline state to: " << ABS_FILEPATH << EXT );
+    LINFO("Saved fieldline state to: " << absPath << ext );
 }
 
-// Returns one of the extra quantity vectors, _extraQuantities[INDEX].
-// If INDEX is out of scope an empty vector is returned and the referenced bool will be false.
-const std::vector<float>&  FieldlinesState::extraQuantity(const size_t INDEX,
+// Returns one of the extra quantity vectors, _extraQuantities[index].
+// If index is out of scope an empty vector is returned and the referenced bool will be false.
+const std::vector<float>&  FieldlinesState::extraQuantity(const size_t index,
                                                           bool& isSuccessful) const {
-    if (INDEX < _extraQuantities.size()) {
+    if (index < _extraQuantities.size()) {
         isSuccessful = true;
-        return _extraQuantities[INDEX];
+        return _extraQuantities[index];
     }
     isSuccessful = false;
     // return empty vector which goes out of scope hence unusable!

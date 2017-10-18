@@ -59,8 +59,8 @@ public:
 private:
     // ------------------------------------- ENUMS -------------------------------------//
     enum ColorMethod : int {    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
-        UNIFORM = 0,
-        BY_QUANTITY
+        Uniform = 0,
+        ByQuantity
     };
 
     // ------------------------------------ STRINGS ------------------------------------//
@@ -144,8 +144,8 @@ private:
     void   extractOptionalInfoFromDictionary(std::string& outputFolderPath);
     void   extractOsflsInfoFromDictionary();
     void   extractTriggerTimesFromFileNames();
-    bool   loadJsonStatesIntoRAM(const std::string& OUTPUT_FOLDER);
-    void   loadOsflsStatesIntoRAM(const std::string& OUTPUT_FOLDER);
+    bool   loadJsonStatesIntoRAM(const std::string& outputFolder);
+    void   loadOsflsStatesIntoRAM(const std::string& outputFolder);
     void   setModelDependentConstants();
     void   setupProperties();
     bool   prepareForOsflsStreaming();
@@ -158,13 +158,13 @@ private:
                                      std::vector<glm::vec3>& outVec);
     void   extractMagnitudeVarsFromStrings(std::vector<std::string>& extraVars,
                                            std::vector<std::string>& extraMagVars);
-    bool   getStatesFromCdfFiles(const std::string& OUTPUT_FOLDER);
+    bool   getStatesFromCdfFiles(const std::string& outputFolder);
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
-    inline bool isWithinSequenceInterval(const double CURRENT_TIME) const;
-    void   readNewState(const std::string& FILEPATH);
-    void   updateActiveTriggerTimeIndex(const double CURRENT_TIME);
+    inline bool isWithinSequenceInterval(const double currentTime) const;
+    void   readNewState(const std::string& filePath);
+    void   updateActiveTriggerTimeIndex(const double currentTime);
     void   updateVertexPositionBuffer();
     void   updateVertexColorBuffer();
     void   updateVertexMaskingBuffer();

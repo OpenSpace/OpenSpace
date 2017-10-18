@@ -31,13 +31,12 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
-
 namespace {
     std::string _loggerCat = "RenderableFieldlinesSequence";
 
-    const GLuint _VA_POSITION = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
-    const GLuint _VA_COLOR    = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
-    const GLuint _VA_MASKING  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
+    const GLuint VaPosition = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
+    const GLuint VaColor    = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
+    const GLuint VaMasking  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
 } // namespace
 
 namespace openspace {
@@ -76,23 +75,22 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->activate();
 
         // Calculate Model View MatrixProjection
-        const glm::dmat4 ROT_MAT = glm::dmat4(data.modelTransform.rotation);
-        // const glm::mat4 SCALE_TRANSFORM = glm::mat4(1.0); // TODO remove if no use
-        const glm::dmat4 MODEL_MAT =
+        const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
+        const glm::dmat4 modelMat =
                 glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-                ROT_MAT *
+                rotMat *
                 glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
-        const glm::dmat4 MODEL_VIEW_MAT = data.camera.combinedViewMatrix() * MODEL_MAT;
+        const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
         _shaderProgram->setUniform("modelViewProjection",
-                    data.camera.sgctInternal.projectionMatrix() * glm::mat4(MODEL_VIEW_MAT));
+                data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
 
         _shaderProgram->setUniform("colorMethod",  _pColorMethod);
         _shaderProgram->setUniform("lineColor",    _pColorUniform);
         _shaderProgram->setUniform("usingDomain",  _pDomainEnabled);
         _shaderProgram->setUniform("usingMasking", _pMaskingEnabled);
 
-        if (_pColorMethod == ColorMethod::BY_QUANTITY) {
+        if (_pColorMethod == ColorMethod::ByQuantity) {
                 ghoul::opengl::TextureUnit textureUnit;
                 textureUnit.activate();
                 _transferFunction->bind(); // Calls update internally
@@ -120,11 +118,11 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         bool additiveBlending = false;
         if (_pColorABlendEnabled) {
-            const auto RENDERER = OsEng.renderEngine().rendererImplementation();
-            bool usingFBufferRenderer = RENDERER ==
+            const auto renderer = OsEng.renderEngine().rendererImplementation();
+            bool usingFBufferRenderer = renderer ==
                                         RenderEngine::RendererImplementation::Framebuffer;
 
-            bool usingABufferRenderer = RENDERER ==
+            bool usingABufferRenderer = renderer ==
                                         RenderEngine::RendererImplementation::ABuffer;
 
             if (usingABufferRenderer) {
@@ -163,15 +161,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     // This node shouldn't do anything if its been disabled from the gui!
     if (_enabled) {
-        const double CURRENT_TIME = data.time.j2000Seconds();
+        const double currentTime = data.time.j2000Seconds();
         // Check if current time in OpenSpace is within sequence interval
-        if (isWithinSequenceInterval(CURRENT_TIME)) {
-            const int NEXT_IDX = _activeTriggerTimeIndex + 1;
-            if (_activeTriggerTimeIndex < 0                                          // true => Previous frame was not within the sequence interval
-                || CURRENT_TIME < _startTimes[_activeTriggerTimeIndex]               // true => OpenSpace has stepped back    to a time represented by another state
-                || (NEXT_IDX < _nStates && CURRENT_TIME >= _startTimes[NEXT_IDX])) { // true => OpenSpace has stepped forward to a time represented by another state
+        if (isWithinSequenceInterval(currentTime)) {
+            const int nextIdx = _activeTriggerTimeIndex + 1;
+            if (_activeTriggerTimeIndex < 0                                       // true => Previous frame was not within the sequence interval
+                || currentTime < _startTimes[_activeTriggerTimeIndex]             // true => OpenSpace has stepped back    to a time represented by another state
+                || (nextIdx < _nStates && currentTime >= _startTimes[nextIdx])) { // true => OpenSpace has stepped forward to a time represented by another state
 
-                updateActiveTriggerTimeIndex(CURRENT_TIME);
+                updateActiveTriggerTimeIndex(currentTime);
 
                 if (_loadingStatesDynamically) {
                     _mustLoadNewStateFromDisk = true;
@@ -191,9 +189,9 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             if (!_isLoadingStateFromDisk && !_newStateIsReady) {
                     _isLoadingStateFromDisk    = true;
                     _mustLoadNewStateFromDisk  = false;
-                    const std::string FILEPATH = _sourceFiles[_activeTriggerTimeIndex];
-                    std::thread readBinaryThread([this, FILEPATH] {
-                        this->readNewState(FILEPATH);
+                    const std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
+                    std::thread readBinaryThread([this, filePath] {
+                        this->readNewState(filePath);
                     });
                     readBinaryThread.detach();
             }
@@ -228,13 +226,13 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
 }
 
-inline bool RenderableFieldlinesSequence::isWithinSequenceInterval(const double CURRENT_TIME) const {
-    return (CURRENT_TIME >= _startTimes[0]) && (CURRENT_TIME < _sequenceEndTime);
+inline bool RenderableFieldlinesSequence::isWithinSequenceInterval(const double currentTime) const {
+    return (currentTime >= _startTimes[0]) && (currentTime < _sequenceEndTime);
 }
 
-// Assumes we already know that CURRENT_TIME is within the sequence interval
-void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(const double CURRENT_TIME) {
-    auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), CURRENT_TIME);
+// Assumes we already know that currentTime is within the sequence interval
+void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(const double currentTime) {
+    auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if ( iter != _startTimes.begin()) {
             _activeTriggerTimeIndex =
@@ -248,9 +246,9 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(const double CUR
 }
 
 // Reading state from disk. Must be thread safe!
-void RenderableFieldlinesSequence::readNewState(const std::string& FILEPATH) {
+void RenderableFieldlinesSequence::readNewState(const std::string& filePath) {
     _newState = std::make_unique<FieldlinesState>();
-    if (_newState->loadStateFromOsfls(FILEPATH)) {
+    if (_newState->loadStateFromOsfls(filePath)) {
         _newStateIsReady = true;
     }
     _isLoadingStateFromDisk = false;
@@ -266,14 +264,14 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    const std::vector<glm::vec3>& VERTEX_POS_VEC =
+    const std::vector<glm::vec3>& vertexPosVec =
             _states[_activeStateIndex].vertexPositions();
 
-    glBufferData(GL_ARRAY_BUFFER, VERTEX_POS_VEC.size() * sizeof(glm::vec3),
-            &VERTEX_POS_VEC.front(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexPosVec.size() * sizeof(glm::vec3),
+            &vertexPosVec.front(), GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(_VA_POSITION);
-    glVertexAttribPointer(_VA_POSITION, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(VaPosition);
+    glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     unbindGL();
 }
@@ -283,15 +281,15 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
     bool isSuccessful;
-    const std::vector<float>& QUANTITY_VEC =
+    const std::vector<float>& quantityVec =
             _states[_activeStateIndex].extraQuantity(_pColorQuantity, isSuccessful);
 
     if (isSuccessful) {
-        glBufferData(GL_ARRAY_BUFFER, QUANTITY_VEC.size() * sizeof(float),
-                &QUANTITY_VEC.front(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, quantityVec.size() * sizeof(float),
+                &quantityVec.front(), GL_STATIC_DRAW);
 
-        glEnableVertexAttribArray(_VA_COLOR);
-        glVertexAttribPointer(_VA_COLOR, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(VaColor);
+        glVertexAttribPointer(VaColor, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
         unbindGL();
     }
@@ -302,22 +300,18 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
 
     bool isSuccessful;
-    const std::vector<float>& QUANTITY_VEC =
+    const std::vector<float>& quantityVec =
         _states[_activeStateIndex].extraQuantity(_pMaskingQuantity, isSuccessful);
 
     if (isSuccessful) {
-        glBufferData(GL_ARRAY_BUFFER, QUANTITY_VEC.size() * sizeof(float),
-            &QUANTITY_VEC.front(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, quantityVec.size() * sizeof(float),
+            &quantityVec.front(), GL_STATIC_DRAW);
 
-        glEnableVertexAttribArray(_VA_MASKING);
-        glVertexAttribPointer(_VA_MASKING, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(VaMasking);
+        glVertexAttribPointer(VaMasking, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
         unbindGL();
     }
 }
-
-
-
-
 
 } // namespace openspace

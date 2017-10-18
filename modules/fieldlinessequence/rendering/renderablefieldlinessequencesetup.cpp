@@ -46,29 +46,29 @@ namespace {
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
-    const char* KEY_INPUT_FILE_TYPE         = "InputFileType";   // [STRING] "cdf", "json" or "osfls"
-    const char* KEY_SOURCE_FOLDER           = "SourceFolder";    // [STRING] should be path to folder containing the input files
+    const char* KeyInputFileType        = "InputFileType";   // [STRING] "cdf", "json" or "osfls"
+    const char* KeySourceFolder         = "SourceFolder";    // [STRING] should be path to folder containing the input files
 
     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
-    const char* KEY_CDF_SEED_POINT_FILE     = "SeedPointFile";   // [STRING] Path to a .txt file containing seed points
-    const char* KEY_JSON_SIMULATION_MODEL   = "SimulationModel"; // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
+    const char* KeyCdfSeedPointFile     = "SeedPointFile";   // [STRING] Path to a .txt file containing seed points
+    const char* KeyJsonSimulationModel  = "SimulationModel"; // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
 
     // ----------------------- OPTIONAL INPUT TYPE SPECIFIC KEYS ---------------------- //
-    const char* KEY_CDF_EXTRA_VARIABLES     = "ExtraVariables";  // [STRING ARRAY]
-    const char* KEY_CDF_TRACING_VARIABLE    = "TracingVariable"; // [STRING]
-    const char* KEY_JSON_SCALING_FACTOR     = "ScaleToMeters";   // [STRING]
-    const char* KEY_OSLFS_LOAD_AT_RUNTIME   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
+    const char* KeyCdfExtraVariables    = "ExtraVariables";  // [STRING ARRAY]
+    const char* KeyCdfTracingVariable   = "TracingVariable"; // [STRING]
+    const char* KeyJsonScalingFactor    = "ScaleToMeters";   // [STRING]
+    const char* KeyOslfsLoadAtRuntime   = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
 
     // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
-    const char* KEY_COLOR_TABLE_PATHS       = "ColorTablePaths"; // [STRING ARRAY] Values should be paths to .txt files
-    const char* KEY_COLOR_TABLE_RANGES      = "ColorTableRanges";// [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
-    const char* KEY_MASKING_RANGES          = "MaskingRanges";   // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
-    const char* KEY_OUTPUT_FOLDER           = "OutputFolder";    // [STRING] Value should be path to folder where states are saved (JSON/CDF input => osfls output & oslfs input => JSON output)
+    const char* KeyColorTablePaths      = "ColorTablePaths"; // [STRING ARRAY] Values should be paths to .txt files
+    const char* KeyColorTableRanges     = "ColorTableRanges";// [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    const char* KeyMaskingRanges        = "MaskingRanges";   // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    const char* KeyOutputFolder         = "OutputFolder";    // [STRING] Value should be path to folder where states are saved (JSON/CDF input => osfls output & oslfs input => JSON output)
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
-    const char* VALUE_INPUT_FILE_TYPE_CDF   = "cdf";
-    const char* VALUE_INPUT_FILE_TYPE_JSON  = "json";
-    const char* VALUE_INPUT_FILE_TYPE_OSFLS = "osfls";
+    const char* ValueInputFileTypeCdf   = "cdf";
+    const char* ValueInputFileTypeJson  = "json";
+    const char* ValueInputFileTypeOsfls = "osfls";
 
     // --------------------------------- Property Info -------------------------------- //
     static const openspace::properties::Property::PropertyInfo ColorMethodInfo = {
@@ -147,20 +147,20 @@ namespace {
     };
 
     enum class SourceFileType : int {
-        CDF = 0,
-        JSON,
-        OSFLS,
-        INVALID
+        Cdf = 0,
+        Json,
+        Osfls,
+        Invalid
     };
 
-    float stringToFloat(const std::string INPUT, const float BACKUP_VALUE = 0.f) {
+    float stringToFloat(const std::string input, const float backupValue = 0.f) {
         float tmp;
         try {
-            tmp = std::stof(INPUT);
+            tmp = std::stof(input);
         } catch (const std::invalid_argument& ia) {
-            LWARNING("Invalid argument: " << ia.what() << ". '" << INPUT <<
+            LWARNING("Invalid argument: " << ia.what() << ". '" << input <<
                 "' is NOT a valid number!");
-            return BACKUP_VALUE;
+            return backupValue;
         }
         return tmp;
     }
@@ -168,8 +168,8 @@ namespace {
 
 namespace openspace {
 
-RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& DICTIONARY)
-    : Renderable(DICTIONARY),
+RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary),
       _pColorGroup({ "Color" }),
       _pColorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio),
       _pColorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown),
@@ -201,14 +201,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _pFocusOnOriginBtn(OriginButtonInfo),
       _pJumpToStartBtn(TimeJumpButtonInfo) {
 
-    _dictionary = std::make_unique<ghoul::Dictionary>(DICTIONARY);
+    _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
 }
 
 void RenderableFieldlinesSequence::initialize() {
     LINFO("RenderableFieldlinesSequence::initialize()");
 
     // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
-    SourceFileType sourceFileType = SourceFileType::INVALID;
+    SourceFileType sourceFileType = SourceFileType::Invalid;
     if (!extractMandatoryInfoFromDictionary(sourceFileType)) {
         return;
     }
@@ -223,19 +223,19 @@ void RenderableFieldlinesSequence::initialize() {
 
     // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM SOURCE
     switch (sourceFileType) {
-        case SourceFileType::CDF:
+        case SourceFileType::Cdf:
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
             if (!getStatesFromCdfFiles(outputFolderPath)) {
                 return;
             }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
             break;
-        case SourceFileType::JSON:
+        case SourceFileType::Json:
             if (!loadJsonStatesIntoRAM(outputFolderPath)) {
                 return;
             }
             break;
-        case SourceFileType::OSFLS:
+        case SourceFileType::Osfls:
             extractOsflsInfoFromDictionary();
             if (_loadingStatesDynamically) {
                 if (!prepareForOsflsStreaming()) {
@@ -277,7 +277,7 @@ void RenderableFieldlinesSequence::initialize() {
 
     if (!_shaderProgram) {
         LERROR("Shader program failed initialization!");
-        sourceFileType = SourceFileType::INVALID;
+        sourceFileType = SourceFileType::Invalid;
     }
 
     //------------------ Initialize OpenGL VBOs and VAOs-------------------------------//
@@ -304,34 +304,34 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     std::string inputFileTypeString;
-    if (!_dictionary->getValue(KEY_INPUT_FILE_TYPE, inputFileTypeString)) {
-        LERROR(_name << ": The field " << std::string(KEY_INPUT_FILE_TYPE) << " is missing!");
+    if (!_dictionary->getValue(KeyInputFileType, inputFileTypeString)) {
+        LERROR(_name << ": The field " << std::string(KeyInputFileType) << " is missing!");
         return false;
     } else {
         std::transform(inputFileTypeString.begin(), inputFileTypeString.end(),
                        inputFileTypeString.begin(), ::tolower);
         // Verify that the input type is correct
-        if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_CDF) {
-            sourceFileType = SourceFileType::CDF;
+        if (inputFileTypeString == ValueInputFileTypeCdf) {
+            sourceFileType = SourceFileType::Cdf;
 #ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
             LERROR(_name << ": CDF file inputs requires the 'Kameleon' module to be enabled!");
             return false;
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
-        } else if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_JSON) {
-            sourceFileType = SourceFileType::JSON;
-        } else if (inputFileTypeString == VALUE_INPUT_FILE_TYPE_OSFLS) {
-            sourceFileType = SourceFileType::OSFLS;
+        } else if (inputFileTypeString == ValueInputFileTypeJson) {
+            sourceFileType = SourceFileType::Json;
+        } else if (inputFileTypeString == ValueInputFileTypeOsfls) {
+            sourceFileType = SourceFileType::Osfls;
         } else {
             LERROR(_name << ": " << inputFileTypeString << " is not a recognised "
-                << KEY_INPUT_FILE_TYPE);
-            sourceFileType = SourceFileType::INVALID;
+                << KeyInputFileType);
+            sourceFileType = SourceFileType::Invalid;
             return false;
         }
     }
 
     std::string sourceFolderPath;
-    if (!_dictionary->getValue(KEY_SOURCE_FOLDER, sourceFolderPath)) {
-        LERROR(_name << ": The field " << std::string(KEY_SOURCE_FOLDER) << " is missing!");
+    if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
+        LERROR(_name << ": The field " << std::string(KeySourceFolder) << " is missing!");
         return false;
     }
 
@@ -345,8 +345,8 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         // Remove all files that don't have <inputFileTypeString> as extension
         _sourceFiles.erase(std::remove_if(_sourceFiles.begin(), _sourceFiles.end(),
                 [inputFileTypeString](std::string str) {
-                    const size_t EXT_LENGTH = inputFileTypeString.length();
-                    std::string sub = str.substr(str.length() - EXT_LENGTH, EXT_LENGTH);
+                    const size_t extLength = inputFileTypeString.length();
+                    std::string sub = str.substr(str.length() - extLength, extLength);
                     std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
                     return sub != inputFileTypeString;
                 }), _sourceFiles.end());
@@ -369,7 +369,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         std::string& outputFolderPath) {
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
-    if (_dictionary->getValue(KEY_OUTPUT_FOLDER, outputFolderPath)) {
+    if (_dictionary->getValue(KeyOutputFolder, outputFolderPath)) {
         ghoul::filesystem::Directory outputFolder(outputFolderPath);
         if (FileSys.directoryExists(outputFolder)) {
             outputFolderPath = absPath(outputFolderPath);
@@ -380,12 +380,12 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     }
 
     ghoul::Dictionary colorTablesPathsDictionary;
-    if (_dictionary->getValue(KEY_COLOR_TABLE_PATHS, colorTablesPathsDictionary)) {
-        const size_t N_PROVIDED_PATHS = colorTablesPathsDictionary.size();
-        if (N_PROVIDED_PATHS > 0) {
+    if (_dictionary->getValue(KeyColorTablePaths, colorTablesPathsDictionary)) {
+        const size_t nProvidedPaths = colorTablesPathsDictionary.size();
+        if (nProvidedPaths > 0) {
             // Clear the default! It is already specified in the transferFunction
             _colorTablePaths.clear();
-            for (size_t i = 1; i <= N_PROVIDED_PATHS; ++i) {
+            for (size_t i = 1; i <= nProvidedPaths; ++i) {
                 _colorTablePaths.push_back(
                         colorTablesPathsDictionary.value<std::string>(std::to_string(i)));
             }
@@ -393,9 +393,9 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     }
 
     ghoul::Dictionary colorTablesRangesDictionary;
-    if (_dictionary->getValue(KEY_COLOR_TABLE_RANGES, colorTablesRangesDictionary)) {
-        const size_t N_PROVIDED_RANGES = colorTablesRangesDictionary.size();
-        for (size_t i = 1; i <= N_PROVIDED_RANGES; ++i) {
+    if (_dictionary->getValue(KeyColorTableRanges, colorTablesRangesDictionary)) {
+        const size_t nProvidedRanges = colorTablesRangesDictionary.size();
+        for (size_t i = 1; i <= nProvidedRanges; ++i) {
             _colorTableRanges.push_back(
                     colorTablesRangesDictionary.value<glm::vec2>(std::to_string(i)));
         }
@@ -404,9 +404,9 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     }
 
     ghoul::Dictionary maskingRangesDictionary;
-    if (_dictionary->getValue(KEY_MASKING_RANGES, maskingRangesDictionary)) {
-        const size_t N_PROVIDED_RANGES = maskingRangesDictionary.size();
-        for (size_t i = 1; i <= N_PROVIDED_RANGES; ++i) {
+    if (_dictionary->getValue(KeyMaskingRanges, maskingRangesDictionary)) {
+        const size_t nProvidedRanges = maskingRangesDictionary.size();
+        for (size_t i = 1; i <= nProvidedRanges; ++i) {
             _maskingRanges.push_back(
                     maskingRangesDictionary.value<glm::vec2>(std::to_string(i)));
         }
@@ -420,16 +420,16 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
  */
 bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& model) {
     std::string modelStr;
-    if (_dictionary->getValue(KEY_JSON_SIMULATION_MODEL, modelStr)) {
+    if (_dictionary->getValue(KeyJsonSimulationModel, modelStr)) {
         std::transform(modelStr.begin(), modelStr.end(), modelStr.begin(), ::tolower);
         model = fls::stringToModel(modelStr);
     } else {
-        LERROR(_name << ": Must specify '" << KEY_JSON_SIMULATION_MODEL << "'");
+        LERROR(_name << ": Must specify '" << KeyJsonSimulationModel << "'");
         return false;
     }
 
     float scaleFactor;
-    if (_dictionary->getValue(KEY_JSON_SCALING_FACTOR, scaleFactor)) {
+    if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
         _scalingFactor = scaleFactor;
     } else {
         LWARNING(_name << ": Does not provide scalingFactor! " <<
@@ -438,7 +438,7 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
     return true;
 }
 
-bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& OUTPUT_FOLDER) {
+bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& outputFolder) {
     fls::Model model;
     if (!extractJsonInfoFromDictionary(model)) {
         return false;
@@ -450,8 +450,8 @@ bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& OUTP
                                                              _scalingFactor);
         if (loadedSuccessfully) {
             addStateToSequence(newState);
-            if (!OUTPUT_FOLDER.empty()) {
-                newState.saveStateToOsfls(OUTPUT_FOLDER);
+            if (!outputFolder.empty()) {
+                newState.saveStateToOsfls(outputFolder);
             }
         }
     }
@@ -472,28 +472,28 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
 
 }
 
-void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& OUTPUT_FOLDER) {
+void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& outputFolder) {
     // Load states from .osfls files into RAM!
-    for (const std::string FILEPATH : _sourceFiles) {
+    for (const std::string filePath : _sourceFiles) {
         FieldlinesState newState;
-        if (newState.loadStateFromOsfls(FILEPATH)) {
+        if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
-            if (!OUTPUT_FOLDER.empty()) {
-                ghoul::filesystem::File tmpFile(FILEPATH);
-                newState.saveStateToJson(OUTPUT_FOLDER + tmpFile.baseName());
+            if (!outputFolder.empty()) {
+                ghoul::filesystem::File tmpFile(filePath);
+                newState.saveStateToJson(outputFolder + tmpFile.baseName());
             }
         } else {
-            LWARNING("Failed to load state from: " << FILEPATH);
+            LWARNING("Failed to load state from: " << filePath);
         }
     }
 }
 
 void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
     bool shouldLoadInRealtime = false;
-    if (_dictionary->getValue(KEY_OSLFS_LOAD_AT_RUNTIME, shouldLoadInRealtime)) {
+    if (_dictionary->getValue(KeyOslfsLoadAtRuntime, shouldLoadInRealtime)) {
         _loadingStatesDynamically = shouldLoadInRealtime;
     } else {
-        LWARNING(_name << ": " << KEY_OSLFS_LOAD_AT_RUNTIME <<
+        LWARNING(_name << ": " << KeyOslfsLoadAtRuntime <<
             " isn't specified! States will be stored in RAM!");
     }
 }
@@ -537,21 +537,21 @@ void RenderableFieldlinesSequence::setupProperties() {
         _pMaskingGroup.addProperty(_pMaskingQuantity);
 
         // --------------------- Add Options to OptionProperties --------------------- //
-        _pColorMethod.addOption(ColorMethod::UNIFORM, "Uniform");
-        _pColorMethod.addOption(ColorMethod::BY_QUANTITY, "By Quantity");
+        _pColorMethod.addOption(ColorMethod::Uniform, "Uniform");
+        _pColorMethod.addOption(ColorMethod::ByQuantity, "By Quantity");
         // Add option for each extra quantity. Assumes there are just as many names to
         // extra quantities as there are extra quantities. Also assume that all states in
         // the given sequence have the same extra quantities! */
-        const size_t N_EXTRA_QUANTITIES = _states[0].nExtraQuantities();
-        const std::vector<std::string>& XTRA_NAMES_VEC = _states[0].extraQuantityNames();
-        for (int i = 0; i < N_EXTRA_QUANTITIES; ++i) {
-            _pColorQuantity.addOption(i, XTRA_NAMES_VEC[i]);
-            _pMaskingQuantity.addOption(i, XTRA_NAMES_VEC[i]);
+        const size_t nExtraQuantities = _states[0].nExtraQuantities();
+        const std::vector<std::string>& extraNamesVec = _states[0].extraQuantityNames();
+        for (int i = 0; i < nExtraQuantities; ++i) {
+            _pColorQuantity.addOption(i, extraNamesVec[i]);
+            _pMaskingQuantity.addOption(i, extraNamesVec[i]);
         }
         // Each quantity should have its own color table and color table range, no more, no less
-        _colorTablePaths.resize(N_EXTRA_QUANTITIES, _colorTablePaths.back());
-        _colorTableRanges.resize(N_EXTRA_QUANTITIES, _colorTableRanges.back());
-        _maskingRanges.resize(N_EXTRA_QUANTITIES, _maskingRanges.back());
+        _colorTablePaths.resize(nExtraQuantities, _colorTablePaths.back());
+        _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
+        _maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
     }
 
     definePropertyCallbackFunctions();
@@ -642,11 +642,11 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
 // Calculate expected end time.
 void RenderableFieldlinesSequence::computeSequenceEndTime() {
     if (_nStates > 1) {
-        const double LAST_TRIGGER_TIME = _startTimes[_nStates - 1];
-        const double SEQUENCE_DURATION = LAST_TRIGGER_TIME - _startTimes[0];
-        const double AVERAGE_STATE_DURATION = SEQUENCE_DURATION /
-                                              (static_cast<double>(_nStates) - 1.0);
-        _sequenceEndTime = LAST_TRIGGER_TIME + AVERAGE_STATE_DURATION;
+        const double lastTriggerTime      = _startTimes[_nStates - 1];
+        const double sequenceDuration     = lastTriggerTime - _startTimes[0];
+        const double averageStateDuration = sequenceDuration /
+                                            (static_cast<double>(_nStates) - 1.0);
+        _sequenceEndTime = lastTriggerTime + averageStateDuration;
     } else {
         // If there's just one state it should never disappear!
         _sequenceEndTime = DBL_MAX;
@@ -657,17 +657,17 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
     const fls::Model simulationModel = _states[0].model();
     float limit = 100.f; // Just used as a default value.
     switch (simulationModel) {
-        case fls::Model::BATSRUS:
-            _scalingFactor = fls::R_E_TO_METER;
+        case fls::Model::Batsrus:
+            _scalingFactor = fls::ReToMeter;
             limit = 300; // Should include a long magnetotail
             break;
-        case fls::Model::ENLIL:
+        case fls::Model::Enlil:
             _pFlowReversed = true;
-            _scalingFactor = fls::A_U_TO_METER;
+            _scalingFactor = fls::AuToMeter;
             limit = 50; // Should include Plutos furthest distance from the Sun
             break;
-        case fls::Model::PFSS:
-            _scalingFactor = fls::R_S_TO_METER;
+        case fls::Model::Pfss:
+            _scalingFactor = fls::RsToMeter;
             limit = 100; // Just a default value far away from the solar surface
             break;
         default:
@@ -682,28 +682,28 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
     _pDomainX = glm::vec2(-limit, limit);
     _pDomainY = glm::vec2(-limit, limit);
     _pDomainZ = glm::vec2(-limit, limit);
-    _pDomainR = glm::vec2(0, limit*1.5f);
+    _pDomainR = glm::vec2(0, limit * 1.5f);
 }
 
 // Extract J2000 time from file names
 // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
 void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
-    const size_t FILENAME_SIZE = 23; // number of  characters in filename (excluding '.osfls')
-    const size_t EXT_SIZE = 6;  // size(".osfls")
+    const size_t filenameSize = 23; // number of  characters in filename (excluding '.osfls')
+    const size_t extSize = 6;  // size(".osfls")
 
-    for (const std::string& FILEPATH : _sourceFiles) {
-        const size_t STR_LENGTH = FILEPATH.size();
+    for (const std::string& filePath : _sourceFiles) {
+        const size_t strLength = filePath.size();
         // Extract the filename from the path (without extension)
-        std::string timeString = FILEPATH.substr(STR_LENGTH - FILENAME_SIZE - EXT_SIZE,
-                                                 FILENAME_SIZE - 1);
+        std::string timeString = filePath.substr(strLength - filenameSize - extSize,
+                                                 filenameSize - 1);
         // Ensure the separators are correct
         timeString.replace(4, 1, "-");
         timeString.replace(7, 1, "-");
         timeString.replace(13, 1, ":");
         timeString.replace(16, 1, ":");
         timeString.replace(19, 1, ".");
-        const double TRIGGER_TIME = Time::convertTime(timeString);
-        _startTimes.push_back(TRIGGER_TIME);
+        const double triggerTime = Time::convertTime(timeString);
+        _startTimes.push_back(triggerTime);
     }
 }
 
@@ -714,7 +714,7 @@ void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
 }
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& OUTPUT_FOLDER) {
+bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outputFolder) {
 
     std::string seedFilePath;
     std::string tracingVar;
@@ -746,19 +746,19 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& OUTP
             // the extraQuantites, as the iterpolator needs the unaltered positions
             newState.addExtraQuantities(kameleon.get(), extraVars, extraMagVars);
             switch (newState.model()) {
-                case fls::BATSRUS:
-                    newState.scalePositions(fls::R_E_TO_METER);
+                case fls::Batsrus:
+                    newState.scalePositions(fls::ReToMeter);
                     break;
-                case fls::ENLIL :
-                    newState.convertLatLonToCartesian(fls::A_U_TO_METER);
+                case fls::Enlil :
+                    newState.convertLatLonToCartesian(fls::AuToMeter);
                     break;
                 default:
                     break;
             }
 
             addStateToSequence(newState);
-            if (!OUTPUT_FOLDER.empty()) {
-                newState.saveStateToOsfls(OUTPUT_FOLDER);
+            if (!outputFolder.empty()) {
+                newState.saveStateToOsfls(outputFolder);
             }
         }
     }
@@ -775,7 +775,7 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(
         std::string& tracingVar,
         std::vector<std::string>& extraVars) {
 
-    if (_dictionary->getValue(KEY_CDF_SEED_POINT_FILE, seedFilePath)) {
+    if (_dictionary->getValue(KeyCdfSeedPointFile, seedFilePath)) {
         ghoul::filesystem::File seedPointFile(seedFilePath);
         if (FileSys.fileExists(seedPointFile)) {
             seedFilePath = absPath(seedFilePath);
@@ -785,20 +785,20 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(
             return false;
         }
     } else {
-        LERROR(_name << ": Must specify '" << KEY_CDF_SEED_POINT_FILE << "'");
+        LERROR(_name << ": Must specify '" << KeyCdfSeedPointFile << "'");
         return false;
     }
 
-    if (!_dictionary->getValue(KEY_CDF_TRACING_VARIABLE, tracingVar)) {
+    if (!_dictionary->getValue(KeyCdfTracingVariable, tracingVar)) {
         tracingVar = "b"; //  Magnetic field variable as default
-        LWARNING(_name << ": No '" << KEY_CDF_TRACING_VARIABLE << "', using default: "
+        LWARNING(_name << ": No '" << KeyCdfTracingVariable << "', using default: "
                        << tracingVar);
     }
 
     ghoul::Dictionary extraQuantityNamesDictionary;
-    if (_dictionary->getValue(KEY_CDF_EXTRA_VARIABLES, extraQuantityNamesDictionary)) {
-        const size_t N_PROVIDED_EXTRAS = extraQuantityNamesDictionary.size();
-        for (size_t i = 1; i <= N_PROVIDED_EXTRAS; ++i) {
+    if (_dictionary->getValue(KeyCdfExtraVariables, extraQuantityNamesDictionary)) {
+        const size_t nProvidedExtras = extraQuantityNamesDictionary.size();
+        for (size_t i = 1; i <= nProvidedExtras; ++i) {
             extraVars.push_back(
                     extraQuantityNamesDictionary.value<std::string>(std::to_string(i)));
         }
@@ -846,10 +846,10 @@ void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
 
 
     for (int i = 0; i < extraVars.size(); i++) {
-        const std::string STR = extraVars[i];
+        const std::string str = extraVars[i];
         // Check if string is in the format specified for magnitude variables
-        if (STR.substr(0, 2) == "|(" && STR.substr(STR.size() - 2, 2) == ")|") {
-            std::istringstream ss(STR.substr(2, STR.size() - 4));
+        if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
+            std::istringstream ss(str.substr(2, str.size() - 4));
             std::string magVar;
             size_t counter = 0;
             while(std::getline(ss, magVar, ',')) {

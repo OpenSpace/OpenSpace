@@ -31,17 +31,17 @@ namespace openspace {
 namespace fls { // (F)ield(L)ines(S)equence
 
 enum Model : int {
-    BATSRUS = 0,
-    ENLIL,
-    PFSS,
-    INVALID
+    Batsrus = 0,
+    Enlil,
+    Pfss,
+    Invalid
 };
 
-Model stringToModel(const std::string S);
+Model stringToModel(const std::string s);
 
-const float A_U_TO_METER = 149597870700.f;  // Astronomical Units
-const float R_E_TO_METER = 6371000.f;       // Earth radius
-const float R_S_TO_METER = 695700000.f;     // Sun radius
+const float AuToMeter = 149597870700.f;  // Astronomical Units
+const float ReToMeter = 6371000.f;       // Earth radius
+const float RsToMeter = 695700000.f;     // Sun radius
 
 } // namespace fls
 } // namespace openspace

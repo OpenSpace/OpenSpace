@@ -58,8 +58,8 @@ layout(location = 1) in float in_color_scalar;   // The extra value used to colo
 layout(location = 2) in float in_masking_scalar; // The extra value used to mask out parts of lines. Location must correspond to _VA_MASKING in renderablefieldlinessequence.h
 
 // These should correspond to the enum 'ColorMethod' in renderablefieldlinesequence.cpp
-const int UNIFORM_COLOR     = 0;
-const int COLOR_BY_QUANTITY = 1;
+const int uniformColor     = 0;
+const int colorByQuantity  = 1;
 
 out vec4 vs_color;
 out float vs_depth;
@@ -67,15 +67,15 @@ out float vs_depth;
 
 vec4 getTransferFunctionColor() {
     // Remap the color scalar to a [0,1] range
-    const float LOOK_UP_VAL = (in_color_scalar - colorTableRange.x) /
-                              (colorTableRange.y - colorTableRange.x);
-    return texture(colorTable, LOOK_UP_VAL);
+    const float lookUpVal = (in_color_scalar - colorTableRange.x) /
+                            (colorTableRange.y - colorTableRange.x);
+    return texture(colorTable, lookUpVal);
 }
 
-bool isPartOfParticle(const double TIME, const int VERTEX_ID, const int PARTICLE_SIZE,
-                      const int PARTICLE_SPEED, const int PARTICLE_SPACING) {
-    const int MODULUS_RESULT = int(double(PARTICLE_SPEED) * TIME + VERTEX_ID) % PARTICLE_SPACING;
-    return MODULUS_RESULT > 0 && MODULUS_RESULT <= PARTICLE_SIZE;
+bool isPartOfParticle(const double time, const int vertexId, const int particleSize,
+                      const int particleSpeed, const int particleSpacing) {
+    const int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
+    return modulusResult > 0 && modulusResult <= particleSize;
 }
 
 void main() {
@@ -88,32 +88,32 @@ void main() {
     }
 
     if (usingDomain && hasColor) {
-        const float RADIUS = length(in_position);
+        const float radius = length(in_position);
 
         if (in_position.x < domainLimX.x || in_position.x > domainLimX.y ||
             in_position.y < domainLimY.x || in_position.y > domainLimY.y ||
             in_position.z < domainLimZ.x || in_position.z > domainLimZ.y ||
-            RADIUS        < domainLimR.x || RADIUS        > domainLimR.y) {
+            radius        < domainLimR.x || radius        > domainLimR.y) {
 
             hasColor = false;
         }
     }
 
     if (hasColor) {
-        const bool IS_PARTICLE = usingParticles && isPartOfParticle(time, gl_VertexID,
+        const bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
                                                                     particleSize,
                                                                     particleSpeed,
                                                                     particleSpacing);
 
-        if (IS_PARTICLE) {
+        if (isParticle) {
             vs_color = flowColor;
         } else {
             vs_color = lineColor;
         }
 
-        if (colorMethod == COLOR_BY_QUANTITY) {
-            const vec4 QUANTITY_COLOR = getTransferFunctionColor();
-            vs_color = vec4(QUANTITY_COLOR.xyz, vs_color.a * QUANTITY_COLOR.a);
+        if (colorMethod == colorByQuantity) {
+            const vec4 quantityColor = getTransferFunctionColor();
+            vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
         }
     } else {
         vs_color = vec4(0);

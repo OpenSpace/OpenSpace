@@ -42,18 +42,18 @@ namespace openspace::kameleonHelper {
  *
  * Returns 'nullptr' if the file fails to open!
  */
-std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& CDF_FILE_PATH) {
+std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath) {
 
     // ---------------------------- CREATE KAMELEON OBJECT ---------------------------- //
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
-    LDEBUG("\tOpening the cdf file: " << CDF_FILE_PATH);
-    long kamStatus = kameleon->open(CDF_FILE_PATH);
+    LDEBUG("\tOpening the cdf file: " << cdfFilePath);
+    long kamStatus = kameleon->open(cdfFilePath);
 
     if (kamStatus != ccmc::FileReader::OK) {
-        LERROR("Failed to create a Kameleon Object from file: " << CDF_FILE_PATH);
+        LERROR("Failed to create a Kameleon Object from file: " << cdfFilePath);
        return nullptr;
     }
-    LDEBUG("\tSuccessfully opened : " << CDF_FILE_PATH);
+    LDEBUG("\tSuccessfully opened : " << cdfFilePath);
     return kameleon;
 }
 

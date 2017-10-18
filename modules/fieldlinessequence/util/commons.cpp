@@ -27,15 +27,15 @@
 namespace openspace {
 namespace fls {
 
-Model stringToModel(const std::string S) {
-    if (S == "batsrus") {
-        return Model::BATSRUS;
-    } else if (S == "enlil") {
-        return Model::ENLIL;
-    } else if (S == "pfss") {
-        return Model::PFSS;
+Model stringToModel(const std::string s) {
+    if (s == "batsrus") {
+        return Model::Batsrus;
+    } else if (s == "enlil") {
+        return Model::Enlil;
+    } else if (s == "pfss") {
+        return Model::Pfss;
     }
-    return Model::INVALID;
+    return Model::Invalid;
 }
 
 } // namespace fls

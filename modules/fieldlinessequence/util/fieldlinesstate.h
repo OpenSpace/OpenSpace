@@ -46,23 +46,23 @@ public:
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     bool addLinesFromKameleon(ccmc::Kameleon* kameleon,
-                              const std::vector<glm::vec3>& SEED_POINTS,
-                              const std::string TRACING_VAR);
+                              const std::vector<glm::vec3>& seedPoints,
+                              const std::string tracingVar);
     void addExtraQuantities(ccmc::Kameleon* kameleon,
                             std::vector<std::string>& xtraScalarVars,
                             std::vector<std::string>& xtraMagVars);
-    void   convertLatLonToCartesian(const float SCALE = 1.f);
-    void   scalePositions(const float SCALE);
+    void   convertLatLonToCartesian(const float scale = 1.f);
+    void   scalePositions(const float scale);
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-    bool   loadStateFromOsfls(const std::string& PATH_TO_OSFLS_FILE);
-    void   saveStateToOsfls(const std::string& PATH_TO_OSFLS_FILE);
+    bool   loadStateFromOsfls(const std::string& pathToOsflsFile);
+    void   saveStateToOsfls(const std::string& pathToOsflsFile);
 
-    bool   loadStateFromJson(const std::string& PATH_TO_JSON_FILE,
-                             const fls::Model MODEL, const float COORD_TO_METERS);
-    void   saveStateToJson(const std::string& PATH_TO_JSON_FILE);
+    bool   loadStateFromJson(const std::string& pathToJsonFile,
+                             const fls::Model model, const float coordToMeters);
+    void   saveStateToJson(const std::string& pathToJsonFile);
 
-    // ------------------------------GETTERS-----------------------------------------//
+    // ----------------------------------- GETTERS ----------------------------------- //
     const std::vector<std::vector<float>>& extraQuantities()    const { return _extraQuantities; }
     const std::vector<std::string>&        extraQuantityNames() const { return _extraQuantityNames; }
     const std::vector<GLsizei>&            lineCount()          const { return _lineCount; }
