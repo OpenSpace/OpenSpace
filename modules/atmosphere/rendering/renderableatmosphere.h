@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -52,6 +52,22 @@ class AtmosphereDeferredcaster;
 
 struct TransformData;
 
+// Shadow structure
+struct ShadowConfiguration {
+    std::pair<std::string, float> source;
+    std::pair<std::string, float> caster;
+};
+
+struct ShadowRenderingStruct {
+    float xu,
+        xp;
+    float rs,
+        rc;
+    glm::vec3 sourceCasterVec;
+    glm::vec3 casterPositionVec;
+    bool isShadowing;
+};
+
 namespace planetgeometry {
 class PlanetGeometry;
 }
@@ -60,22 +76,7 @@ namespace documentation { struct Documentation; }
 namespace planetgeometry { class PlanetGeometry; }
 
 class RenderableAtmosphere : public Renderable {
-public:
-    // Shadow structure
-    struct ShadowConfiguration {
-        std::pair<std::string, float> source;
-        std::pair<std::string, float> caster;
-    };
-
-    struct ShadowRenderingStruct {
-        float xu, 
-              xp;
-        float rs, 
-              rc;
-        glm::vec3 sourceCasterVec;
-        glm::vec3 casterPositionVec;
-        bool isShadowing;
-    };
+public:    
 
     RenderableAtmosphere(const ghoul::Dictionary& dictionary);
 
@@ -115,10 +116,11 @@ private:
     properties::FloatProperty _hdrExpositionP;
     properties::FloatProperty _gammaConstantP;
     properties::BoolProperty  _sunFollowingCameraEnabledP;
+    properties::BoolProperty  _hardShadowsEnabledP;
 
     bool _atmosphereEnabled;
     bool _ozoneLayerEnabled;
-    bool _sunFollowingCameraEnabled;
+    bool _sunFollowingCameraEnabled;   
     float _atmosphereRadius;
     float _atmospherePlanetRadius;
     float _planetAverageGroundReflectance;
@@ -143,6 +145,7 @@ private:
     std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
 
     bool _shadowEnabled;
+    bool _hardShadows;
     double _time;
 
     glm::dmat3 _stateMatrix;

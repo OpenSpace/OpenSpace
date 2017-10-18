@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,7 +31,7 @@
 #include <openspace/rendering/deferredcaster.h>
 #include <ghoul/opengl/textureunit.h>
 
-//#include <ghoul/opengl/textureunit.h>
+//#include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 namespace ghoul::opengl {
     class Texture;        
@@ -43,6 +43,7 @@ namespace openspace {
 
 struct RenderData;
 struct DeferredcastData;
+struct ShadowConfiguration;
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
@@ -89,6 +90,8 @@ public:
     void setMieExtinctionCoefficients(const glm::vec3 & mieExtCoeff);
     void setEllipsoidRadii(const glm::dvec3 & radii);
     void setRenderableClass(const AtmosphereDeferredcaster::AtmospherRenderableClass rc);
+    void setShadowConfigArray(const std::vector<ShadowConfiguration>& shadowConfigArray);
+    void setHardShadows(const bool enabled);
     void enableSunFollowing(const bool enable);
 
     void setPrecalculationTextureScale(const float _preCalculatedTexturesScale);
@@ -191,6 +194,10 @@ private:
     glm::dmat4 _modelTransform;
     float _stepSize;
     double _time;
+
+    // Eclipse Shadows
+    std::vector<ShadowConfiguration> _shadowConfArray;
+    bool _hardShadowsEnabled;
 
     // Atmosphere Debugging
     float _calculationTextureScale;

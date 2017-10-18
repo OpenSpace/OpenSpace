@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -59,6 +59,7 @@
  */
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
+#include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -150,9 +151,10 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _exposureConstant(0.4f)
     , _exposureBackgroundConstant(1.8f)
     , _gammaConstant(1.8f)
+    , _hardShadowsEnabled(false)
     , _renderableClass(NoRenderableClass)
     , _calculationTextureScale(1.0)
-    , _saveCalculationTextures(false)
+    , _saveCalculationTextures(false)    
 
 
 {}
@@ -240,6 +242,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
             // Object Space
             glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
             program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
+            program.setUniform("dModelTransformMatrix", _modelTransform);
 
             // The following scale comes from PSC transformations.
             float fScaleFactor = renderData.camera.scaling().x * pow(10.0, renderData.camera.scaling().y);
@@ -288,6 +291,82 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
             program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
 
             program.setUniform("ellipsoidRadii", _ellipsoidRadii);
+
+            // Shadow calculations..
+            if (!_shadowConfArray.empty()) {
+                std::vector<ShadowRenderingStruct> shadowDataArray;
+                shadowDataArray.reserve(_shadowConfArray.size());
+
+                for (const auto & shadowConf : _shadowConfArray) {
+                    // TO REMEMBER: all distances and lengths in world coordinates are in meters!!! We need to move this to view space...
+                    // Getting source and caster:
+                    glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(shadowConf.source.first, "SUN", "GALACTIC", {}, _time, lt);
+                    sourcePos *= 1000.0; // converting to meters
+                    glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, _time, lt);
+                    casterPos *= 1000.0; // converting to meters
+                    psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
+
+
+                    // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
+                    glm::vec3 planetCasterVec = (caster_pos - renderData.position).vec3();
+                    glm::vec3 sourceCasterVec = glm::vec3(casterPos - sourcePos);
+                    float sc_length = glm::length(sourceCasterVec);
+                    glm::vec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) * sourceCasterVec;
+                    float d_test = glm::length(planetCasterVec - planetCaster_proj);
+                    float xp_test = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
+                    float rp_test = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
+
+                    float casterDistSun = glm::length(casterPos);
+                    float planetDistSun = glm::length(renderData.position.vec3());
+
+                    ShadowRenderingStruct shadowData;
+                    shadowData.isShadowing = false;
+
+                    if (((d_test - rp_test) < (_atmospherePlanetRadius * 1000.0)) &&
+                    //if (((d_test - rp_test) < (_atmosphereRadius * 1000.0)) &&
+                        (casterDistSun < planetDistSun)) {
+                        // The current caster is shadowing the current planet
+                        shadowData.isShadowing = true;
+                        shadowData.rs = shadowConf.source.second;
+                        shadowData.rc = shadowConf.caster.second;
+                        shadowData.sourceCasterVec = sourceCasterVec;
+                        shadowData.xp = xp_test;
+                        shadowData.xu = shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
+                        shadowData.casterPositionVec = glm::vec3(casterPos);
+                    }
+                    shadowDataArray.push_back(shadowData);
+                }
+
+                const std::string uniformVarName("shadowDataArray[");
+                unsigned int counter = 0;
+                for (const auto & sd : shadowDataArray) {
+                    std::stringstream ss;
+                    ss << uniformVarName << counter << "].isShadowing";
+                    program.setUniform(ss.str(), sd.isShadowing);
+                    if (sd.isShadowing) {
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].xp";
+                        program.setUniform(ss.str(), sd.xp);
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].xu";
+                        program.setUniform(ss.str(), sd.xu);
+                        /*ss.str(std::string());
+                        ss << uniformVarName << counter << "].rs";
+                        program.setUniform(ss.str(), sd.rs);*/
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].rc";
+                        program.setUniform(ss.str(), sd.rc);
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].sourceCasterVec";
+                        program.setUniform(ss.str(), sd.sourceCasterVec);
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].casterPositionVec";
+                        program.setUniform(ss.str(), sd.casterPositionVec);
+                    }
+                    counter++;
+                }
+                program.setUniform("hardShadows", _hardShadowsEnabled);
+            }
             
         }
     }             
@@ -409,6 +488,15 @@ void AtmosphereDeferredcaster::setEllipsoidRadii(const glm::dvec3 & radii) {
 void AtmosphereDeferredcaster::setRenderableClass(const AtmosphereDeferredcaster::AtmospherRenderableClass rc)
 {
     _renderableClass = rc;
+}
+
+void AtmosphereDeferredcaster::setHardShadows(const bool enabled) {
+    _hardShadowsEnabled = enabled;
+}
+
+void AtmosphereDeferredcaster::setShadowConfigArray(
+    const std::vector<ShadowConfiguration>& shadowConfigArray) {
+    _shadowConfArray = shadowConfigArray;
 }
 
 void AtmosphereDeferredcaster::enableSunFollowing(const bool enable) {

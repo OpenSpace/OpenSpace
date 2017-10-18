@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -215,6 +215,12 @@ namespace {
         "Enable Sun On Camera Position",
         "" // @TODO Missing documentation
     };
+
+    static const openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
+        "EclipseHardShadowsInfo",
+        "Enable Hard Shadows for Eclipses",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
@@ -268,6 +274,7 @@ namespace openspace {
         , _hdrExpositionP(AtmosphereExposureInfo, 0.4f, 0.01f, 5.0f)
         , _gammaConstantP(AtmosphereGammaInfo, 1.8f, 0.1f, 3.0f)
         , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
+        , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
         , _atmosphereEnabled(false)
         , _ozoneLayerEnabled(false)
         , _sunFollowingCameraEnabled(false)
@@ -289,6 +296,7 @@ namespace openspace {
         , _saveCalculationsToTexture(false)
         , _preCalculatedTexturesScale(1.0)
         , _shadowEnabled(false)
+        , _hardShadows(false)
         , _time(0.f)
     {
         ghoul_precondition(
@@ -312,7 +320,7 @@ namespace openspace {
         bool disableShadows = false;
         if (success) {
             std::vector<std::pair<std::string, float>> sourceArray;
-            unsigned int sourceCounter = 1;
+            unsigned int sourceCounter = 1; 
             while (success) {
                 std::string sourceName;
                 success = shadowDictionary.getValue(keyShadowSource + 
@@ -618,6 +626,12 @@ namespace openspace {
                 _sunFollowingCameraEnabledP = _sunFollowingCameraEnabled;
                 _sunFollowingCameraEnabledP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_sunFollowingCameraEnabledP);
+
+                _hardShadowsEnabledP = _hardShadows;
+                _hardShadowsEnabledP.onChange([this]() { updateAtmosphereParameters(); });
+                if (_shadowEnabled) {
+                    addProperty(_hardShadowsEnabledP);
+                }                
             }
         }
     }
@@ -652,6 +666,11 @@ namespace openspace {
                 _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
                 if (_saveCalculationsToTexture)
                     _deferredcaster->enablePrecalculationTexturesSaving();
+
+                if (_shadowEnabled) {
+                    _deferredcaster->setShadowConfigArray(_shadowConfArray);
+                    _deferredcaster->setHardShadows(_hardShadows);
+                }
 
                 _deferredcaster->initialize();
             }
@@ -720,7 +739,8 @@ namespace openspace {
             _hdrConstant != _hdrExpositionP ||
             _exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground() ||
             _gammaConstant != _gammaConstantP ||
-            _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP) {
+            _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP ||
+            _hardShadows != _hardShadowsEnabledP) {
             executeComputation = false;
         }
             
@@ -745,6 +765,7 @@ namespace openspace {
         _exposureBackgroundConstant = OsEng.renderEngine().renderer()->hdrBackground();
         _gammaConstant = _gammaConstantP;
         _sunFollowingCameraEnabled = _sunFollowingCameraEnabledP;
+        _hardShadows = _hardShadowsEnabledP;
 
 
         if (_deferredcaster) {
@@ -767,6 +788,11 @@ namespace openspace {
             _deferredcaster->setRenderableClass(_atmosphereType);
             _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
             //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
+
+            if (_shadowEnabled) {
+                _deferredcaster->setHardShadows(_hardShadows);
+            }
+
             if (executeComputation)
                 _deferredcaster->preCalculateAtmosphereParam();
         }
