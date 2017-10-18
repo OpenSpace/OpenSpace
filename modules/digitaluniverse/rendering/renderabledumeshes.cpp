@@ -569,25 +569,26 @@ bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
         std::string _file = _speckFile;
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _file,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+        // I disabled the cache as it didn't work on Mac --- abock
+        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        //     _file,
+        //     ghoul::filesystem::CacheManager::Persistent::Yes
+        // );
 
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        //if (hasCachedFile) {
-        //    LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+        // bool hasCachedFile = FileSys.fileExists(cachedFile);
+        // //if (hasCachedFile) {
+        // //    LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
 
-        //    success = loadCachedFile(cachedFile);
-        //    if (!success) {
-        //        FileSys.cacheManager()->removeCacheFile(_file);
-        //        // Intentional fall-through to the 'else' computation to generate the cache
-        //        // file for the next run
-        //    }
-        //}
-        //else 
-        {
-            LINFO("Cache for Speck file '" << _file << "' not found");
+        // //    success = loadCachedFile(cachedFile);
+        // //    if (!success) {
+        // //        FileSys.cacheManager()->removeCacheFile(_file);
+        // //        // Intentional fall-through to the 'else' computation to generate the cache
+        // //        // file for the next run
+        // //    }
+        // //}
+        // //else 
+        // {
+        //     LINFO("Cache for Speck file '" << _file << "' not found");
             LINFO("Loading Speck file '" << _file << "'");
 
             success = readSpeckFile();
@@ -595,30 +596,31 @@ bool RenderableDUMeshes::loadData() {
                 return false;
             }
 
-            LINFO("Saving cache");
+            // LINFO("Saving cache");
             //success &= saveCachedFile(cachedFile);
-        }
+        // }
     }
 
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            labelFile,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
+        // I disabled the cache as it didn't work on Mac --- abock
+        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        //     labelFile,
+        //     ghoul::filesystem::CacheManager::Persistent::Yes
+        // );
+        // bool hasCachedFile = FileSys.fileExists(cachedFile);
+        // if (hasCachedFile) {
+        //     LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
 
-            success &= loadCachedFile(cachedFile);
-            if (!success) {
-                FileSys.cacheManager()->removeCacheFile(labelFile);
-                // Intentional fall-through to the 'else' computation to generate the cache
-                // file for the next run
-            }
-        }
-        else {
-            LINFO("Cache for Label file '" << labelFile << "' not found");
+        //     success &= loadCachedFile(cachedFile);
+        //     if (!success) {
+        //         FileSys.cacheManager()->removeCacheFile(labelFile);
+        //         // Intentional fall-through to the 'else' computation to generate the cache
+        //         // file for the next run
+        //     }
+        // }
+        // else {
+        //     LINFO("Cache for Label file '" << labelFile << "' not found");
             LINFO("Loading Label file '" << labelFile << "'");
 
             success &= readLabelFile();
@@ -626,7 +628,7 @@ bool RenderableDUMeshes::loadData() {
                 return false;
             }
 
-        }
+        // }
     }
 
     return success;
@@ -654,12 +656,17 @@ bool RenderableDUMeshes::readSpeckFile() {
             break;
         }
 
-        if (line[0] == '#' || line.empty()) {
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r 
+        if (!line.empty() && line.back() == '\r') {
+            line = line.substr(0, line.length() -1);
+        }
+
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 
-        if (line.substr(0, 4) != "mesh")
-        {
+        if (line.substr(0, 4) != "mesh") {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
             file.seekg(position);
@@ -730,7 +737,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                         }
                         else {
                             break;
-                        }                            
+                        }
                     }
                 }
                 else {
@@ -767,12 +774,18 @@ bool RenderableDUMeshes::readLabelFile() {
         std::streampos position = file.tellg();
         std::getline(file, line);
 
-        if (line[0] == '#' || line.empty()) {
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r 
+        if (!line.empty() && line.back() == '\r') {
+            line = line.substr(0, line.length() -1);
+        }
+
+
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 
-        if (line.substr(0, 9) != "textcolor")
-        {
+        if (line.substr(0, 9) != "textcolor") {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
             file.seekg(position);
@@ -796,8 +809,15 @@ bool RenderableDUMeshes::readLabelFile() {
 
         std::getline(file, line);
 
-        if (line.size() == 0)
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r 
+        if (!line.empty() && line.back() == '\r') {
+            line = line.substr(0, line.length() -1);
+        }
+
+        if (line.empty()) {
             continue;
+        }
 
         std::stringstream str(line);
 

@@ -37,6 +37,8 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/font/fontrenderer.h>
 
+#include <unordered_map>
+
 namespace ghoul::filesystem { 
     class File; 
 }

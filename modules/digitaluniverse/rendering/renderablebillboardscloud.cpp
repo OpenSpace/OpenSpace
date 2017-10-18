@@ -281,7 +281,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
     , _spriteTexturePath(SpriteTextureInfo)
-    , _drawLabels(DrawLabelInfo, false)
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -291,6 +290,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _textMinSize(LabelMinSizeInfo, 8.0, 0.5, 24.0)
     , _drawElements(DrawElementsInfo, true)
+    , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _polygonTexture(nullptr)
@@ -805,28 +805,30 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 }
 
 bool RenderableBillboardsCloud::loadData() {
-    bool success = false;        
+    bool success = false; 
     if (_hasSpeckFile) {
         std::string _file = _speckFile;
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _file,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+        // I disabled the cache as it didn't work on Mac --- abock
 
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        //     _file,
+        //     ghoul::filesystem::CacheManager::Persistent::Yes
+        // );
 
-            success = loadCachedFile(cachedFile);
-            if (!success) {
-                FileSys.cacheManager()->removeCacheFile(_file);
-                // Intentional fall-through to the 'else' computation to generate the cache
-                // file for the next run
-            }
-        }
-        else 
-        {
-            LINFO("Cache for Speck file '" << _file << "' not found");
+        // bool hasCachedFile = FileSys.fileExists(cachedFile);
+        // if (hasCachedFile) {
+        //     LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+
+        //     success = loadCachedFile(cachedFile);
+        //     if (!success) {
+        //         FileSys.cacheManager()->removeCacheFile(_file);
+        //         // Intentional fall-through to the 'else' computation to generate the cache
+        //         // file for the next run
+        //     }
+        // }
+        // else 
+        // {
+        //     LINFO("Cache for Speck file '" << _file << "' not found");
             LINFO("Loading Speck file '" << _file << "'");
 
             success = readSpeckFile();
@@ -834,9 +836,9 @@ bool RenderableBillboardsCloud::loadData() {
                 return false;
             }
 
-            LINFO("Saving cache");
-            success &= saveCachedFile(cachedFile);
-        }
+            // LINFO("Saving cache");
+            // success &= saveCachedFile(cachedFile);
+        // }
     }
 
     if (_hasColorMapFile) {
@@ -847,10 +849,11 @@ bool RenderableBillboardsCloud::loadData() {
 
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            labelFile,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+        // I disabled the cache as it didn't work on Mac --- abock
+        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        //     labelFile,
+        //     ghoul::filesystem::CacheManager::Persistent::Yes
+        // );
         if (!_hasSpeckFile && !_hasColorMapFile)
             success = true;
         //bool hasCachedFile = FileSys.fileExists(cachedFile);
@@ -865,8 +868,8 @@ bool RenderableBillboardsCloud::loadData() {
         //    }
         //}
         //else 
-        {
-            LINFO("Cache for Label file '" << labelFile << "' not found");
+        // {
+            // LINFO("Cache for Label file '" << labelFile << "' not found");
             LINFO("Loading Label file '" << labelFile << "'");
 
             success &= readLabelFile();
@@ -874,7 +877,7 @@ bool RenderableBillboardsCloud::loadData() {
                 return false;
             }
 
-        }
+        // }
     }
         
     return success;
@@ -897,8 +900,14 @@ bool RenderableBillboardsCloud::readSpeckFile() {
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
-            
-        if (line[0] == '#' || line.empty()) {
+
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r 
+        if (!line.empty() && line.back() == '\r') {
+            line = line.substr(0, line.length() -1);
+        }
+
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 
@@ -940,10 +949,17 @@ bool RenderableBillboardsCloud::readSpeckFile() {
         std::vector<float> values(_nValuesPerAstronomicalObject);
 
         std::getline(file, line);
-            
-        if (line.size() == 0)
+
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r 
+        if (!line.empty() && line.back() == '\r') {
+            line = line.substr(0, line.length() -1);
+        }
+
+        if (line.empty()) {
             continue;
-            
+        }
+
         std::stringstream str(line);
 
         for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
@@ -1021,12 +1037,17 @@ bool RenderableBillboardsCloud::readLabelFile() {
         std::streampos position = file.tellg();
         std::getline(file, line);
 
-        if (line[0] == '#' || line.empty()) {
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r 
+        if (!line.empty() && line.back() == '\r') {
+            line = line.substr(0, line.length() -1);
+        }
+
+        if (line.empty() || line[0] == '#') {
             continue;
         }
 
-        if (line.substr(0, 9) != "textcolor" )
-        {
+        if (line.substr(0, 9) != "textcolor") {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
             file.seekg(position);
@@ -1044,14 +1065,21 @@ bool RenderableBillboardsCloud::readLabelFile() {
         }
     }
 
-        
+
     do {
         std::vector<float> values(_nValuesPerAstronomicalObject);
 
         std::getline(file, line);
 
-        if (line.size() == 0)
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r 
+        if (!line.empty() && line.back() == '\r') {
+            line = line.substr(0, line.length() -1);
+        }
+
+        if (line.empty()) {
             continue;
+        }
 
         std::stringstream str(line);
 
@@ -1070,8 +1098,8 @@ bool RenderableBillboardsCloud::readLabelFile() {
         while (str >> dummy) {
             label += " " + dummy;
             dummy.clear();
-        }                        
-            
+        }
+
         _labelData.push_back(std::make_pair(position, label));
             
     } while (!file.eof());
@@ -1093,7 +1121,7 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
 
         int32_t nValues = 0;
         fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));            
+        fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));
 
         _fullData.resize(nValues);
         fileStream.read(reinterpret_cast<char*>(&_fullData[0]),

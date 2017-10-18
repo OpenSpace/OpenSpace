@@ -145,10 +145,7 @@ function postInitialization()
 
     -- Add local patches described at the top of this file
     for obj, list in pairs(vrt_folders) do
-        print(obj)
-        print(list)
         for _, dir in pairs(list) do
-            print(dir)
             openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
         end
     end

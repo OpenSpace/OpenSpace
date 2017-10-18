@@ -38,6 +38,7 @@
 #include <ghoul/font/fontrenderer.h>
 
 #include <functional>
+#include <unordered_map>
 
 namespace ghoul::filesystem { 
     class File; 
