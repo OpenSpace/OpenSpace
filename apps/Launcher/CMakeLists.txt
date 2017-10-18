@@ -65,9 +65,14 @@ target_link_libraries(
 #####
 # Libtorrent
 #####
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+SET(LIBTORRENT_encryption OFF)
+SET(LIBTORRENT_shared OFF)
+
 include_external_library(
     Launcher
-    libtorrent
+    torrent-rasterbar
     ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent
 )
 target_include_directories(
