@@ -568,7 +568,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         fontResolution().x - size.boundingBox.x - 10,
         fontResolution().y - size.boundingBox.y
     );
-    penPosition.y -= _fontDate->height();
+    // penPosition.y -= _fontDate->height();
 
     RenderFontCr(
         *_fontDate,
