@@ -35,6 +35,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/onscopeexit.h>
 
 #include <QApplication>
 #include <QCheckBox>
@@ -57,6 +58,7 @@
 #include <libtorrent/torrent_info.hpp>
 
 #include <fstream>
+#include <mutex>
 
 namespace {
     const std::string _loggerCat = "SyncWidget";
@@ -279,27 +281,38 @@ void SyncWidget::handleDirectFiles() {
 
 void SyncWidget::handleFileRequest() {
     LDEBUG("File Requests");
+        
     for (const FileRequest& f : _fileRequests) {
         LDEBUG(f.identifier.toStdString() << " (" << f.version << ") -> " << f.destination.toStdString()); 
 
         ghoul::filesystem::Directory d = FileSys.currentDirectory();
-//        std::string thisDirectory = absPath("${SCENE}/" + f.module.toStdString() + "/");
+        OnExit([&]() { FileSys.setCurrentDirectory(d); });
         FileSys.setCurrentDirectory(f.baseDir.toStdString());
-
 
         std::string identifier =  f.identifier.toStdString();
         std::string path = absPath(f.destination.toStdString());
         int version = f.version;
+
+        std::string requestId = path + "$" + identifier;
+
+
+        std::lock_guard<std::mutex> g(_filesDownloadingMutex);
+        if (_filesDownloading.find(requestId) != _filesDownloading.end()) {
+            continue; // The file is already being downloaded.
+        }
+        _filesDownloading.insert(requestId);
 
         _downloadManager->downloadRequestFilesAsync(
             identifier,
             path,
             version,
             OverwriteFiles,
-            std::bind(&SyncWidget::handleFileFutureAddition, this, std::placeholders::_1)
+            [this, requestId](const std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>>& futures) {
+                handleFileFutureAddition(futures);
+                std::lock_guard<std::mutex> g(_filesDownloadingMutex);
+                _filesDownloading.erase(requestId);
+            }
         );
-
-        FileSys.setCurrentDirectory(d);
     }
 }
 
@@ -534,78 +547,34 @@ void SyncWidget::syncButtonPressed() {
         }
     }
 
-    //// Make the lists unique
-    {
-        auto equal = [](const DirectFile& lhs, const DirectFile& rhs) -> bool {
-            return lhs.module == rhs.module && lhs.url == rhs.url && lhs.destination == rhs.destination && lhs.baseDir == rhs.baseDir;
-        };
-
-        QList<DirectFile> files;
-        for (const DirectFile& f : _directFiles) {
-            bool found = false;
-            for (const DirectFile& g : files) {
-                if (equal(g, f)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-                files.append(f);
-        }
-
-        _directFiles = files;
+    // Remove duplicates for file requests
+    std::map<QString, FileRequest> uniqueFileRequests;
+    for (const FileRequest& f : _fileRequests) {
+        uniqueFileRequests.emplace(std::make_pair(f.baseDir + "/" + f.destination, f));
     }
-    {
-        auto equal = [](const FileRequest& lhs, const FileRequest& rhs) -> bool {
-            return
-                lhs.module == rhs.module &&
-                lhs.identifier == rhs.identifier &&
-                lhs.destination == rhs.destination &&
-                lhs.baseDir == rhs.baseDir &&
-                lhs.version == rhs.version;
-        };
-
-        QList<FileRequest> files;
-        for (const FileRequest& f : _fileRequests) {
-            bool found = false;
-            for (const FileRequest& g : files) {
-                if (equal(g, f)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-                files.append(f);
-        }
-
-        _fileRequests = files;
+    _fileRequests.clear();
+    for (const auto& f : uniqueFileRequests) {
+        _fileRequests.append(f.second);
     }
-    {
-        auto equal = [](const TorrentFile& lhs, const TorrentFile& rhs) -> bool {
-            return
-                lhs.module == rhs.module &&
-                lhs.file == rhs.file &&
-                lhs.destination == rhs.destination &&
-                lhs.baseDir == rhs.baseDir;
-        };
 
-        QList<TorrentFile> files;
-        for (const TorrentFile& f : _torrentFiles) {
-            bool found = false;
-            for (const TorrentFile& g : files) {
-                if (equal(g, f)) {
-                    found = true;
-                    break;
-                }
-            }
+    // Remove duplicates for direct files
+    std::map<QString, DirectFile> uniqueDirectFiles;
+    for (const DirectFile& f : _directFiles) {
+        uniqueDirectFiles.emplace(std::make_pair(f.destination, f));
+    }
+    _directFiles.clear();
+    for (const auto& f : uniqueDirectFiles) {
+        _directFiles.append(f.second);
+    }
 
-            if (!found)
-                files.append(f);
-        }
-
-        _torrentFiles = files;
+    // Remove duplicates for torrents
+    std::map<QString, TorrentFile> uniqueTorrentFiles;
+    for (const TorrentFile& f : _torrentFiles) {
+        uniqueTorrentFiles.emplace(std::make_pair(f.destination, f));
+    }
+    _directFiles.clear();
+    for (const auto& f : uniqueTorrentFiles) {
+        _torrentFiles.append(f.second);
     }
 
     handleDirectFiles();

@@ -112,6 +112,9 @@ private:
     QList<FileRequest> _fileRequests;
     QList<TorrentFile> _torrentFiles;
 
+    std::mutex _filesDownloadingMutex;
+    std::set<std::string> _filesDownloading;
+
     std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>> _futures;
     std::map<std::shared_ptr<openspace::DownloadManager::FileFuture>, InfoWidget*> _futureInfoWidgetMap;
 
