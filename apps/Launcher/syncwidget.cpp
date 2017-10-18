@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
 
 #include <QApplication>
@@ -53,6 +54,7 @@
 #include <libtorrent/bencode.hpp>
 #include <libtorrent/session.hpp>
 #include <libtorrent/alert_types.hpp>
+#include <libtorrent/torrent_info.hpp>
 
 #include <fstream>
 
@@ -137,19 +139,19 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     libtorrent::error_code ec;
     _session->listen_on(std::make_pair(20280, 20290), ec);
 
-    libtorrent::session_settings settings = _session->settings();
-    settings.user_agent =
-        "OpenSpace/" +
+    libtorrent::settings_pack settings;
+    settings.set_str(libtorrent::settings_pack::user_agent, "OpenSpace/" +
         std::to_string(openspace::OPENSPACE_VERSION_MAJOR) + "." +
         std::to_string(openspace::OPENSPACE_VERSION_MINOR) + "." +
-        std::to_string(openspace::OPENSPACE_VERSION_PATCH);
-    settings.allow_multiple_connections_per_ip = true;
-    settings.ignore_limits_on_local_network = true;
-    settings.connection_speed = 20;
-    settings.active_downloads = -1;
-    settings.active_seeds = -1;
-    settings.active_limit = 30;
-    settings.dht_announce_interval = 60;
+        std::to_string(openspace::OPENSPACE_VERSION_PATCH));
+    settings.set_bool(libtorrent::settings_pack::allow_multiple_connections_per_ip, true);
+    settings.set_bool(libtorrent::settings_pack::ignore_limits_on_local_network, true);
+    settings.set_int(libtorrent::settings_pack::connection_speed, 20);
+    settings.set_int(libtorrent::settings_pack::active_downloads, -1);
+    settings.set_int(libtorrent::settings_pack::active_seeds, -1);
+    settings.set_int(libtorrent::settings_pack::active_limit, 30);
+    settings.set_int(libtorrent::settings_pack::dht_announce_interval, 60);
+    _session->apply_settings(settings);
 
     if (ec) {
         LFATAL("Failed to open socket: " << ec.message());
@@ -187,6 +189,8 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     timer->start(100);
 
     _mutex.clear();
+
+    _scriptEngine.initialize();
 }
 
 SyncWidget::~SyncWidget() {
@@ -325,10 +329,9 @@ void SyncWidget::handleTorrentFiles() {
             //p.save_path = 
         p.save_path = absPath(f.destination.toStdString());
 
-        p.ti = new libtorrent::torrent_info(file.toStdString(), ec);
+        p.ti = std::make_shared<libtorrent::torrent_info>(file.toStdString(), ec);
         p.name = f.file.toStdString();
         p.storage_mode = libtorrent::storage_mode_allocate;
-        p.auto_managed = true;
         if (ec) {
             LERROR(f.file.toStdString() << ": " << ec.message());
             continue;
@@ -358,13 +361,23 @@ void SyncWidget::handleTorrentFiles() {
 void SyncWidget::syncButtonPressed() {
     clear();
 
+    ghoul::lua::LuaState state;
+    _scriptEngine.initializeLuaState(state);
+
     for (const QString& scene : selectedScenes()) {
         LDEBUG(scene.toStdString());
         ghoul::Dictionary sceneDictionary;
-        ghoul::lua::loadDictionaryFromFile(
-            scene.toStdString(),
-            sceneDictionary
-        );
+
+        try {
+            ghoul::lua::loadDictionaryFromFile(
+                scene.toStdString(),
+                sceneDictionary,
+                state
+            );
+        } catch (const ghoul::lua::LuaRuntimeException& e) {
+            LERROR(e.message);
+            return;
+        }
 
         ghoul::Dictionary modules;
         bool success = sceneDictionary.getValue<ghoul::Dictionary>("Modules", modules);

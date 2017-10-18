@@ -30,6 +30,7 @@
 #include <QMap>
 
 #include <openspace/engine/downloadmanager.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <libtorrent/torrent_handle.hpp>
 
@@ -118,6 +119,7 @@ private:
     std::atomic_flag _mutex;
 
     std::unique_ptr<openspace::DownloadManager> _downloadManager;
+    openspace::scripting::ScriptEngine _scriptEngine;
 
 };
 
