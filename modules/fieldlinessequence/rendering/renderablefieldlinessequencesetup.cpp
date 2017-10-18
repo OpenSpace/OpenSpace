@@ -574,7 +574,6 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     bool hasExtras = _states[0].nExtraQuantities() > 0;
     if (hasExtras) {
         _pColorQuantity.onChange([this] {
-            LDEBUG("CHANGED COLORING QUANTITY");
             _shouldUpdateColorBuffer = true;
             _pColorQuantityMin = std::to_string(_colorTableRanges[_pColorQuantity].x);
             _pColorQuantityMax = std::to_string(_colorTableRanges[_pColorQuantity].y);
@@ -587,35 +586,30 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         });
 
         _pColorQuantityMin.onChange([this] {
-            LDEBUG("CHANGED MIN VALUE");
             float f = stringToFloat(_pColorQuantityMin, _colorTableRanges[_pColorQuantity].x);
             _pColorQuantityMin = std::to_string(f);
             _colorTableRanges[_pColorQuantity].x = f;
         });
 
         _pColorQuantityMax.onChange([this] {
-            LDEBUG("CHANGED MAX VALUE");
             float f = stringToFloat(_pColorQuantityMax, _colorTableRanges[_pColorQuantity].y);
             _pColorQuantityMax = std::to_string(f);
             _colorTableRanges[_pColorQuantity].y = f;
         });
 
         _pMaskingQuantity.onChange([this] {
-            LDEBUG("CHANGED MASKING QUANTITY");
             _shouldUpdateMaskingBuffer = true;
             _pMaskingMin = std::to_string(_maskingRanges[_pMaskingQuantity].x);
             _pMaskingMax = std::to_string(_maskingRanges[_pMaskingQuantity].y);
         });
 
         _pMaskingMin.onChange([this] {
-            LDEBUG("CHANGED LOWER MASKING LIMIT");
             float f = stringToFloat(_pMaskingMin, _maskingRanges[_pMaskingQuantity].x);
             _pMaskingMin = std::to_string(f);
             _maskingRanges[_pMaskingQuantity].x = f;
         });
 
         _pMaskingMax.onChange([this] {
-            LDEBUG("CHANGED UPPER MASKING LIMIT");
             float f = stringToFloat(_pMaskingMax, _maskingRanges[_pMaskingQuantity].y);
             _pMaskingMax = std::to_string(f);
             _maskingRanges[_pMaskingQuantity].y = f;
@@ -623,7 +617,6 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     }
 
     _pFocusOnOriginBtn.onChange([this] {
-        LDEBUG("SET FOCUS NODE TO PARENT");
         SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_name);
         if (!node) {
             LWARNING("Could not find a node in scenegraph called '" << _name << "'");
@@ -634,7 +627,6 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     });
 
     _pJumpToStartBtn.onChange([this] {
-        LDEBUG("Jump in time to start of sequence!");
         OsEng.timeManager().time().setTime(_startTimes[0]);
     });
 }

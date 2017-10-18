@@ -155,74 +155,76 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
+    // This node shouldn't do anything if its been disabled from the gui!
+    if (!_enabled) {
+        return;
+    }
+
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
     }
 
-    // This node shouldn't do anything if its been disabled from the gui!
-    if (_enabled) {
-        const double currentTime = data.time.j2000Seconds();
-        // Check if current time in OpenSpace is within sequence interval
-        if (isWithinSequenceInterval(currentTime)) {
-            const int nextIdx = _activeTriggerTimeIndex + 1;
-            if (_activeTriggerTimeIndex < 0                                       // true => Previous frame was not within the sequence interval
-                || currentTime < _startTimes[_activeTriggerTimeIndex]             // true => OpenSpace has stepped back    to a time represented by another state
-                || (nextIdx < _nStates && currentTime >= _startTimes[nextIdx])) { // true => OpenSpace has stepped forward to a time represented by another state
+    const double currentTime = data.time.j2000Seconds();
+    // Check if current time in OpenSpace is within sequence interval
+    if (isWithinSequenceInterval(currentTime)) {
+        const int nextIdx = _activeTriggerTimeIndex + 1;
+        if (_activeTriggerTimeIndex < 0                                       // true => Previous frame was not within the sequence interval
+            || currentTime < _startTimes[_activeTriggerTimeIndex]             // true => OpenSpace has stepped back    to a time represented by another state
+            || (nextIdx < _nStates && currentTime >= _startTimes[nextIdx])) { // true => OpenSpace has stepped forward to a time represented by another state
 
-                updateActiveTriggerTimeIndex(currentTime);
+            updateActiveTriggerTimeIndex(currentTime);
 
-                if (_loadingStatesDynamically) {
-                    _mustLoadNewStateFromDisk = true;
-                } else {
-                    _needsUpdate = true;
-                    _activeStateIndex = _activeTriggerTimeIndex;
-                }
-            } // else {we're still in same state as previous frame (no changes needed)}
-        } else {
-            // Not in interval => set everything to false
-            _activeTriggerTimeIndex   = -1;
-            _mustLoadNewStateFromDisk = false;
-            _needsUpdate              = false;
-        }
-
-        if (_mustLoadNewStateFromDisk) {
-            if (!_isLoadingStateFromDisk && !_newStateIsReady) {
-                    _isLoadingStateFromDisk    = true;
-                    _mustLoadNewStateFromDisk  = false;
-                    const std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
-                    std::thread readBinaryThread([this, filePath] {
-                        this->readNewState(filePath);
-                    });
-                    readBinaryThread.detach();
-            }
-        }
-
-        if (_needsUpdate || _newStateIsReady) {
             if (_loadingStatesDynamically) {
-                _states[0] = std::move(*_newState);
+                _mustLoadNewStateFromDisk = true;
+            } else {
+                _needsUpdate = true;
+                _activeStateIndex = _activeTriggerTimeIndex;
             }
+        } // else {we're still in same state as previous frame (no changes needed)}
+    } else {
+        // Not in interval => set everything to false
+        _activeTriggerTimeIndex   = -1;
+        _mustLoadNewStateFromDisk = false;
+        _needsUpdate              = false;
+    }
 
-            updateVertexPositionBuffer();
+    if (_mustLoadNewStateFromDisk) {
+        if (!_isLoadingStateFromDisk && !_newStateIsReady) {
+                _isLoadingStateFromDisk    = true;
+                _mustLoadNewStateFromDisk  = false;
+                const std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
+                std::thread readBinaryThread([this, filePath] {
+                    this->readNewState(filePath);
+                });
+                readBinaryThread.detach();
+        }
+    }
 
-            if (_states[_activeStateIndex].nExtraQuantities() > 0) {
-                _shouldUpdateColorBuffer   = true;
-                _shouldUpdateMaskingBuffer = true;
-            }
-
-            // Everything is set and ready for rendering!
-            _needsUpdate     = false;
-            _newStateIsReady = false;
+    if (_needsUpdate || _newStateIsReady) {
+        if (_loadingStatesDynamically) {
+            _states[0] = std::move(*_newState);
         }
 
-        if (_shouldUpdateColorBuffer) {
-            updateVertexColorBuffer();
-            _shouldUpdateColorBuffer = false;
+        updateVertexPositionBuffer();
+
+        if (_states[_activeStateIndex].nExtraQuantities() > 0) {
+            _shouldUpdateColorBuffer   = true;
+            _shouldUpdateMaskingBuffer = true;
         }
 
-        if (_shouldUpdateMaskingBuffer) {
-            updateVertexMaskingBuffer();
-            _shouldUpdateMaskingBuffer = false;
-        }
+        // Everything is set and ready for rendering!
+        _needsUpdate     = false;
+        _newStateIsReady = false;
+    }
+
+    if (_shouldUpdateColorBuffer) {
+        updateVertexColorBuffer();
+        _shouldUpdateColorBuffer = false;
+    }
+
+    if (_shouldUpdateMaskingBuffer) {
+        updateVertexMaskingBuffer();
+        _shouldUpdateMaskingBuffer = false;
     }
 }
 
