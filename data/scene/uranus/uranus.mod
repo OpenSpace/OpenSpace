@@ -10,7 +10,8 @@ return {
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Uranus"
     },
     -- RenderableGlobe module
     {   
@@ -37,7 +38,8 @@ return {
                 }
             }
         },
-        Tag = { "planet_solarSystem", "planet_giants" }
+        Tag = { "planet_solarSystem", "planet_giants" },
+        GuiPath = "/Solar System/Planets/Uranus"
     },
     -- Trail module
     {   
@@ -54,6 +56,7 @@ return {
             Period = 30588.740,
             Resolution = 1000
         },
-        Tag = { "planetTrail_solarSystem", "planetTrail_giants" }
+        Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+        GuiPath = "/Solar System/Planets/Uranus"
     }
 }

@@ -22,52 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__
 
-#include <modules/globebrowsing/other/concurrentqueue.h>
-#include <modules/globebrowsing/other/threadpool.h>
+#include <modules/imgui/include/guicomponent.h>
 
-#include <mutex>
+namespace openspace::gui {
 
-namespace openspace::globebrowsing {
-
-// Templated abstract base class representing a job to be done.
-// Client code derive from this class and implement the virtual execute() method
-template<typename P>
-struct Job {
-    Job();
-    virtual ~Job();
-
-    virtual void execute() = 0;
-    virtual std::shared_ptr<P> product() = 0;
-};
-
-/* 
- * Templated Concurrent Job Manager
- * This class is used execute specific jobs on one (1) parallell thread
- */
-template<typename P>
-class ConcurrentJobManager {
+class GuiSpaceTimeComponent : public GuiComponent {
 public:
-    ConcurrentJobManager(ThreadPool pool);
+    GuiSpaceTimeComponent();
 
-    void enqueueJob(std::shared_ptr<Job<P>> job);
-
-    void clearEnqueuedJobs();
-
-    std::shared_ptr<Job<P>> popFinishedJob();
-
-    size_t numFinishedJobs() const;
-
-private:
-    ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-    std::mutex _finishedJobsMutex;
-    ThreadPool threadPool;
+    void render() override;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace::gui
 
-#include "concurrentjobmanager.inl"
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__

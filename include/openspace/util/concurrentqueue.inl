@@ -22,20 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_IMGUI___GUIORIGINCOMPONENT___H__
-#define __OPENSPACE_MODULE_IMGUI___GUIORIGINCOMPONENT___H__
+namespace openspace {
 
-#include <modules/imgui/include/guicomponent.h>
+template <typename T>
+T ConcurrentQueue<T>::pop() {
+    std::unique_lock<std::mutex> mlock(_mutex);
+    while (_queue.empty()) {
+        _cond.wait(mlock);
+    }
+    auto item = _queue.front();
+    _queue.pop();
+    return item;
+}
 
-namespace openspace::gui {
+template <typename T>
+void ConcurrentQueue<T>::pop(T& item) {
+    std::unique_lock<std::mutex> mlock(_mutex);
+    while (_queue.empty()) {
+        _cond.wait(mlock);
+    }
+    item = _queue.front();
+    _queue.pop();
+}
 
-class GuiOriginComponent : public GuiComponent {
-public:
-    GuiOriginComponent();
+template <typename T>
+void ConcurrentQueue<T>::push(const T& item) {
+    std::unique_lock<std::mutex> mlock(_mutex);
+    _queue.push(item);
+    mlock.unlock();
+    _cond.notify_one();
+}
 
-    void render() override;
-};
+template <typename T>
+void ConcurrentQueue<T>::push(T&& item) {
+    std::unique_lock<std::mutex> mlock(_mutex);
+    _queue.push(std::move(item));
+    mlock.unlock();
+    _cond.notify_one();
+}
 
-} // namespace openspace::gui
+template <typename T>
+size_t ConcurrentQueue<T>::size() const {
+    std::unique_lock<std::mutex> mlock(_mutex);
+    size_t s = _queue.size();
+    mlock.unlock();
+    _cond.notify_one();
+    return s;
+}
 
-#endif // __OPENSPACE_MODULE_IMGUI___GUIORIGINCOMPONENT___H__
+} // namespace openspace

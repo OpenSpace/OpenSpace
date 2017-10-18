@@ -1,12 +1,24 @@
 -- Add folders to this list that contain .info files describing HiRISE patches
-local mars_folders = {
-    -- Add a folder here whose contents will be automatically added to the Mars globe
-    -- If multiple folders are added, the results will be added sequentially, meaning that
-    -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
-    -- CTX will stomp over the HiRISE
-    --
-    -- tl;dr:  Specify CTX folders first, then HiRISE 
+local vrt_folders = {
+    Mars = {
+        -- Add folders here whose contents will be automatically added to the Mars globe
+        -- If multiple folders are added, the results will be added sequentially, meaning that
+        -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
+        -- CTX will stomp over the HiRISE
+        --
+        -- tl;dr:  Specify CTX folders first, then HiRISE 
+        -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
+    },
+    Moon = {
+        -- Add folders here whose contents will be automatically added to the Moon globe
+        -- If multiple folders are added, the results will be added sequentially, meaning that
+        -- if areas overlap, images from the lower results will overwrite the images from former
+        -- results
+        -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
+    }
 }
+
+dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
 
 function preInitialization()
     --[[
@@ -21,7 +33,6 @@ function preInitialization()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
-
 
     -- Toggle night texture, shading, atmosphere and water
     openspace.bindKey("s",
@@ -91,10 +102,23 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
-    -- Add the CTX and HiRISE patches described at the top of this file
-    for _, file in pairs(mars_folders) do
-        openspace.globebrowsing.addBlendingLayersFromDirectory(file, "Mars")
+    -- Add local patches described at the top of this file
+    for obj, list in pairs(vrt_folders) do
+        print(obj)
+        print(list)
+        for _, dir in pairs(list) do
+            print(dir)
+            openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
+        end
     end
+
+
+
+    -- Defined in scene_helper.lua
+    -- Used to create focus buttons for a subset of scenegraph nodes
+    mark_interesting_nodes({
+        "Earth", "Mars", "Moon"
+    })
 end
 
 

@@ -22,52 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::globebrowsing {
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIMISSIONCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIMISSIONCOMPONENT___H__
 
-template <typename T>
-T ConcurrentQueue<T>::pop() {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    while (_queue.empty()) {
-        _cond.wait(mlock);
-    }
-    auto item = _queue.front();
-    _queue.pop();
-    return item;
-}
+#include <modules/imgui/include/guicomponent.h>
 
-template <typename T>
-void ConcurrentQueue<T>::pop(T& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    while (_queue.empty()) {
-        _cond.wait(mlock);
-    }
-    item = _queue.front();
-    _queue.pop();
-}
+namespace openspace::gui {
 
-template <typename T>
-void ConcurrentQueue<T>::push(const T& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    _queue.push(item);
-    mlock.unlock();
-    _cond.notify_one();
-}
+class GuiMissionComponent: public GuiComponent {
+public:
+    GuiMissionComponent();
 
-template <typename T>
-void ConcurrentQueue<T>::push(T&& item) {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    _queue.push(std::move(item));
-    mlock.unlock();
-    _cond.notify_one();
-}
+    void render() override;
+};
 
-template <typename T>
-size_t ConcurrentQueue<T>::size() const {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    size_t s = _queue.size();
-    mlock.unlock();
-    _cond.notify_one();
-    return s;
-}
+} // namespace openspace::gui
 
-} // namespace openspace::globebrowsing
+#endif // __OPENSPACE_MODULE_IMGUI___GUIMISSIONCOMPONENT___H__

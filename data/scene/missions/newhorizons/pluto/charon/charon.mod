@@ -55,6 +55,7 @@ return {
                 DestinationFrame = "GALACTIC"
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "CharonText",
@@ -73,6 +74,7 @@ return {
                 Position = {0, -1000000, 0}
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "CharonShadow",
@@ -86,9 +88,10 @@ return {
             BodyFrame = "IAU_CHARON",
             Aberration = "NONE",
         },
-    },    
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    },
     -- CharonTrail module
-    {   
+    {
         Name = "CharonTrail",
         Parent = "PlutoBarycenter",
         Renderable = {
@@ -102,5 +105,6 @@ return {
             Period = 6.38725,
             Resolution = 1000
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     }
 }

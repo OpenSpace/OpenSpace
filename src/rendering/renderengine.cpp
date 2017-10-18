@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -29,6 +29,7 @@
 #endif
 #include <openspace/util/syncdata.h>
 
+#include <openspace/openspace.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -128,6 +129,13 @@ namespace {
         "log."
     };
 
+    static const openspace::properties::Property::PropertyInfo ShowVersionInfo = {
+        "ShowVersion",
+        "Shows the version on-screen information",
+        "This value determines whether the GIT version information (branch and commit ) "
+        "hash are shown on the screen."
+    };
+
     static const openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
         "TakeScreenshot",
         "Take Screenshot",
@@ -219,6 +227,7 @@ RenderEngine::RenderEngine()
     , _showDate(ShowDateInfo, true)
     , _showInfo(ShowInfoInfo, true)
     , _showLog(ShowLogInfo, true)
+    , _showVersionInfo(ShowVersionInfo, true)
     , _takeScreenshot(TakeScreenshotInfo)
     , _shouldTakeScreenshot(false)
     , _applyWarping(ApplyWarpingInfo, false)
@@ -269,6 +278,7 @@ RenderEngine::RenderEngine()
     addProperty(_showDate);
     addProperty(_showInfo);
     addProperty(_showLog);
+    addProperty(_showVersionInfo);
     
     _nAaSamples.onChange([this](){
         if (_renderer) {
@@ -1077,81 +1087,81 @@ void RenderEngine::renderInformation() {
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
         double currentTime = OsEng.timeManager().time().j2000Seconds();
 
-            if (MissionManager::ref().hasCurrentMission()) {
+        //if (MissionManager::ref().hasCurrentMission()) {
 
-                const Mission& mission = MissionManager::ref().currentMission();
+        //    const Mission& mission = MissionManager::ref().currentMission();
 
-                if (mission.phases().size() > 0) {
-                    static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
-                    //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
-                    static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
-                    static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
-                    // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
-                    static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
+        //        if (mission.phases().size() > 0) {
+        //            static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
+        //            //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
+        //            static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
+        //            static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
+        //            // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+        //            static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
-                    // Add spacing
-                    RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
+        //            // Add spacing
+        //            RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
 
-                    auto phaseTrace = mission.phaseTrace(currentTime);
+        //            auto phaseTrace = mission.phaseTrace(currentTime);
 
-                    if (phaseTrace.size()) {
-                        const MissionPhase& phase = phaseTrace.back().get();
-                        std::string title = "Current Mission Phase: " + phase.name();
-                        RenderFontCr(*_fontInfo, penPosition, missionProgressColor, title.c_str());
-                        double remaining = phase.timeRange().end - currentTime;
-                        float t = static_cast<float>(1.0 - remaining / phase.timeRange().duration());
-                        std::string progress = progressToStr(25, t);
-                        //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
-                        //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
-                    }
-                    else {
-                        RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission:");
-                        double remaining = mission.timeRange().start - currentTime;
-                        RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
-                            "%.0f s", remaining);
-                    }
+        //            if (phaseTrace.size()) {
+        //                const MissionPhase& phase = phaseTrace.back().get();
+        //                std::string title = "Current Mission Phase: " + phase.name();
+        //                RenderFontCr(*_fontInfo, penPosition, missionProgressColor, title.c_str());
+        //                double remaining = phase.timeRange().end - currentTime;
+        //                float t = static_cast<float>(1.0 - remaining / phase.timeRange().duration());
+        //                std::string progress = progressToStr(25, t);
+        //                //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
+        //                //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
+        //            }
+        //            else {
+        //                RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission:");
+        //                double remaining = mission.timeRange().start - currentTime;
+        //                RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
+        //                    "%.0f s", remaining);
+        //            }
 
-                    bool showAllPhases = false;
+        //            bool showAllPhases = false;
 
-                    typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
-                    std::stack<PhaseWithDepth> S;
-                    int pixelIndentation = 20;
-                    S.push({ &mission, 0 });
-                    while (!S.empty()) {
-                        const MissionPhase* phase = S.top().first;
-                        int depth = S.top().second;
-                        S.pop();
+        //            typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
+        //            std::stack<PhaseWithDepth> S;
+        //            int pixelIndentation = 20;
+        //            S.push({ &mission, 0 });
+        //            while (!S.empty()) {
+        //                const MissionPhase* phase = S.top().first;
+        //                int depth = S.top().second;
+        //                S.pop();
 
-                        bool isCurrentPhase = phase->timeRange().includes(currentTime);
+        //                bool isCurrentPhase = phase->timeRange().includes(currentTime);
 
-                        penPosition.x += depth * pixelIndentation;
-                        if (isCurrentPhase) {
-                            double remaining = phase->timeRange().end - currentTime;
-                            float t = static_cast<float>(1.0 - remaining / phase->timeRange().duration());
-                            std::string progress = progressToStr(25, t);
-                            RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
-                                "%s  %s %.1f %%",
-                                phase->name().c_str(),
-                                progress.c_str(),
-                                t * 100
-                            );
-                        }
-                        else {
-                            RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, phase->name().c_str());
-                        }
-                        penPosition.x -= depth * pixelIndentation;
+        //                penPosition.x += depth * pixelIndentation;
+        //                if (isCurrentPhase) {
+        //                    double remaining = phase->timeRange().end - currentTime;
+        //                    float t = static_cast<float>(1.0 - remaining / phase->timeRange().duration());
+        //                    std::string progress = progressToStr(25, t);
+        //                    RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
+        //                        "%s  %s %.1f %%",
+        //                        phase->name().c_str(),
+        //                        progress.c_str(),
+        //                        t * 100
+        //                        );
+        //                }
+        //                else {
+        //                    RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, phase->name().c_str());
+        //                }
+        //                penPosition.x -= depth * pixelIndentation;
 
-                        if (isCurrentPhase || showAllPhases) {
-                            // phases are sorted increasingly by start time, and will be popped
-                            // last-in-first-out from the stack, so add them in reversed order.
-                            int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
-                            for (int i = indexLastPhase; 0 <= i; --i) {
-                                S.push({ &phase->phases()[i], depth + 1 });
-                            }
-                        }
-                    }
-                }
-            }
+        //                if (isCurrentPhase || showAllPhases) {
+        //                    // phases are sorted increasingly by start time, and will be popped
+        //                    // last-in-first-out from the stack, so add them in reversed order.
+        //                    int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
+        //                    for (int i = indexLastPhase; 0 <= i; --i) {
+        //                        S.push({ &phase->phases()[i], depth + 1 });
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
 
 
 
@@ -1333,6 +1343,59 @@ void RenderEngine::renderInformation() {
             }
 #endif
         }
+    }
+}
+
+void RenderEngine::renderVersionInformation() {
+    if (!_showVersionInfo) {
+        return;
+    }
+
+    using FR = ghoul::fontrendering::FontRenderer;
+
+    FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s",
+        OPENSPACE_VERSION_STRING_FULL
+    );
+
+    FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s@%s",
+        OPENSPACE_GIT_BRANCH,
+        OPENSPACE_GIT_COMMIT
+    );
+
+
+    
+
+    FR::defaultRenderer().render(
+        *_fontInfo,
+        glm::vec2(
+            fontResolution().x - versionBox.boundingBox.x - 10.f,
+            5.f
+        ),
+        glm::vec4(0.5, 0.5, 0.5, 1.f),
+        "%s",
+        OPENSPACE_VERSION_STRING_FULL
+    );
+
+    // If a developer hasn't placed the Git command in the path, this variable will be
+    // empty
+    if (!std::string(OPENSPACE_GIT_COMMIT).empty()) {
+        // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
+        // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
+        // checking for that is a bit brittle)
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            glm::vec2(
+                fontResolution().x - commitBox.boundingBox.x - 10.f,
+                versionBox.boundingBox.y + 5.f
+            ),
+            glm::vec4(0.5, 0.5, 0.5, 1.f),
+            "%s",
+            OPENSPACE_GIT_FULL
+        );
     }
 }
 

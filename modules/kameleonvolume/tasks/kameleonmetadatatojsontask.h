@@ -30,6 +30,7 @@
 #include <string>
 
 namespace openspace {
+namespace kameleonvolume {
 
 class KameleonMetadataToJsonTask : public Task {
 public:
@@ -43,6 +44,7 @@ private:
     std::string _outputPath;
 };
 
+} // namespace kameleonvolume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__

@@ -22,51 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
+#ifndef __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__
+#define __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/util/concurrentqueue.h>
+#include <openspace/util/threadpool.h>
 
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/stringproperty.h>
+#include <mutex>
 
-#include <ghoul/opengl/texture.h>
- 
 namespace openspace {
-    
-namespace documentation { struct Documentation; }
 
-class ScreenSpaceImage : public ScreenSpaceRenderable {
+// Templated abstract base class representing a job to be done.
+// Client code derive from this class and implement the virtual execute() method
+template<typename P>
+struct Job {
+    Job();
+    virtual ~Job();
+
+    virtual void execute() = 0;
+    virtual std::shared_ptr<P> product() = 0;
+};
+
+/* 
+ * Templated Concurrent Job Manager
+ * This class is used execute specific jobs on one (1) parallell thread
+ */
+template<typename P>
+class ConcurrentJobManager {
 public:
-    ScreenSpaceImage(const ghoul::Dictionary& dictionary);
+    ConcurrentJobManager(ThreadPool pool);
 
-    bool initialize() override;
-    bool deinitialize() override;
-    void render() override;
-    void update() override;
-    bool isReady() const override;
+    void enqueueJob(std::shared_ptr<Job<P>> job);
 
-    static documentation::Documentation Documentation();
+    void clearEnqueuedJobs();
 
-protected:
-    void loadTexture();
-    void updateTexture();
+    std::shared_ptr<Job<P>> popFinishedJob();
 
-    std::string _url;
-    bool _downloadImage;
-    bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _futureImage;
-    
+    size_t numFinishedJobs() const;
+
 private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
-    std::unique_ptr<ghoul::opengl::Texture> loadFromDisk();
-    std::unique_ptr<ghoul::opengl::Texture> loadFromMemory();
-
-    properties::StringProperty _texturePath;
-
-
+    ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
+    std::mutex _finishedJobsMutex;
+    ThreadPool threadPool;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
+#include "concurrentjobmanager.inl"
+
+#endif // __OPENSPACE_CORE___CONCURRENT_JOB_MANAGER___H__

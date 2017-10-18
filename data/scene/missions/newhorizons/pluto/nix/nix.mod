@@ -34,6 +34,7 @@ return {
                 DestinationFrame = "ECLIPJ2000"
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "NixText",
@@ -45,6 +46,7 @@ return {
             Billboard = true,
             Texture = "textures/Nix-Text.png"
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     -- NixTrail module
     {   
@@ -61,6 +63,6 @@ return {
             Period = 24.85463,
             Resolution = 1000
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     }
-    
 }

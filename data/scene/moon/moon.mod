@@ -26,7 +26,6 @@ return {
                     {
                         Name = "LRO WAC Mosaic [OnMoon]",
                         FilePath = "map_service_configs/OnMoonColor.xml",
-                        Enabled = true,
                     },
                     -- Utah based servers
                     {
@@ -38,8 +37,9 @@ return {
                         FilePath = "map_service_configs/Utah/Kaguya.wms"
                     },
                     {
-                        Name = "WAC",
-                        FilePath = "map_service_configs/Utah/Wac.wms"
+                        Name = "WAC [Utah]",
+                        FilePath = "map_service_configs/Utah/Wac.wms",
+                        Enabled = true,
                     }
                 },
                 HeightLayers = {
@@ -61,7 +61,8 @@ return {
                     }
                 }
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Earth/Moon"
     },
     -- MoonTrail module
     {   
@@ -77,6 +78,7 @@ return {
             Color = { 0.5, 0.3, 0.3 },
             Period =  27,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Earth/Moon"
     }
 }

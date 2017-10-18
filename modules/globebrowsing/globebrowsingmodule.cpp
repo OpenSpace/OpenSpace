@@ -123,6 +123,15 @@ namespace openspace {
 GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
 
 void GlobeBrowsingModule::internalInitialize() {
+    // TODO: Remove dependency on OsEng.
+    // Instead, make this class implement an interface that OsEng depends on.
+    // Do not try to register module callbacks if OsEng does not exist,
+    // for example in the TaskRunner.
+
+    if (!OpenSpaceEngine::isCreated()) {
+        return;
+    }
+
     using namespace globebrowsing;
 
     // Initialize
@@ -232,6 +241,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "Get geographic coordinates of the camera poosition in latitude, "
                 "longitude, and altitude"
             },
+#ifdef GLOBEBROWSING_USE_GDAL
             {
                 "loadWMSCapabilities",
                 &globebrowsing::luascriptfunctions::loadWMSCapabilities,
@@ -259,6 +269,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "component of the returned table can be used in the 'FilePath' argument "
                 "for a call to the 'addLayer' function to add the value to a globe."
             }
+#endif  // GLOBEBROWSING_USE_GDAL
         },
         {
             "${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"
@@ -348,7 +359,7 @@ void GlobeBrowsingModule::goToGeodetic2(Camera& camera,
     glm::dmat4 inverseModelTransform =
         OsEng.navigationHandler().focusNode()->inverseModelTransform();
     glm::dvec3 cameraPositionModelSpace =
-        inverseModelTransform * glm::dvec4(cameraPosition, 1.0);
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
                                                                 cameraPositionModelSpace);
     
@@ -372,7 +383,7 @@ void GlobeBrowsingModule::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3
 
     glm::dvec3 positionModelSpace = globe->ellipsoid().cartesianPosition(geo3);
     glm::dmat4 modelTransform = globe->modelTransform();
-    glm::dvec3 positionWorldSpace = modelTransform * glm::dvec4(positionModelSpace, 1.0);
+    glm::dvec3 positionWorldSpace = glm::dvec3(modelTransform * glm::dvec4(positionModelSpace, 1.0));
     camera.setPositionVec3(positionWorldSpace);
 
     if (resetCameraDirection) {
@@ -401,7 +412,7 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera, globebrowsing::Ge
     glm::dvec3 lookUpWorldSpace = glm::dmat3(modelTransform) * lookUpModelSpace;
     
     // Lookat vector
-    glm::dvec3 lookAtWorldSpace = modelTransform * glm::dvec4(positionModelSpace, 1.0);
+    glm::dvec3 lookAtWorldSpace = glm::dvec3(modelTransform * glm::dvec4(positionModelSpace, 1.0));
 
     // Eye position
     glm::dvec3 eye = camera.positionVec3();

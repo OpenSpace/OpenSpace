@@ -20,6 +20,7 @@ return {
                 SourceFrame = "J2000",
                 DestinationFrame = "GALACTIC"
             }
-        }
+        },
+        GuiPath = "/Milky Way/Stars"
     }
 }

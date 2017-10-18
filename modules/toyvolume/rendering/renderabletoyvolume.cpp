@@ -44,12 +44,11 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     , _rotation({ "Rotation", "Euler rotation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f)) // @TODO Missing documentation
     , _color({ "Color", "Color", "" }, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f)) // @TODO Missing documentation
 {
-    float stepSize;
-    int scalingExponent;
+    float stepSize, scalingExponent;
     glm::vec3 scaling, translation, rotation;
     glm::vec4 color;
     if (dictionary.getValue("ScalingExponent", scalingExponent)) {
-        _scalingExponent = scalingExponent;
+        _scalingExponent = static_cast<int>(scalingExponent);
     }
     if (dictionary.getValue("Scaling", scaling)) {
         _scaling = scaling;

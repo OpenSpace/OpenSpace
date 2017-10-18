@@ -216,8 +216,8 @@ bool Renderable::isEnabled() const {
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
-    _enabled.onChange([&] () {
-        callback(isEnabled());
+    _enabled.onChange([this, c{ std::move(callback) }]() {
+        c(isEnabled());
     });
 }
 

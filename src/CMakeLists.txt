@@ -160,6 +160,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/task.cpp
     ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/threadpool.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timeline.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
@@ -300,6 +301,10 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
@@ -322,6 +327,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )

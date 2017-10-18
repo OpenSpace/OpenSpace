@@ -34,7 +34,10 @@ using datamessagestructures::TimeKeyframe;
 void TimeManager::preSynchronization(double dt) {
 //    double now = OsEng.runTime();
     removeKeyframesBefore(_latestConsumedTimestamp);
-    if (_timeline.nKeyframes() == 0) {
+    if (_shouldSetTime) {
+        time().setTime(_timeNextFrame.j2000Seconds());
+        _shouldSetTime = false;
+    } else if (_timeline.nKeyframes() == 0) {
         time().advanceTime(dt);
     } else {
         consumeKeyframes(dt);
@@ -139,6 +142,11 @@ void TimeManager::removeKeyframesBefore(double timestamp) {
 
 void TimeManager::clearKeyframes() {
     _timeline.clearKeyframes();
+}
+
+void TimeManager::setTimeNextFrame(Time t) {
+    _shouldSetTime = true;
+    _timeNextFrame = t;
 }
 
 size_t TimeManager::nKeyframes() const {

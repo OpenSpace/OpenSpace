@@ -28,14 +28,14 @@
 #include <chrono>
 #include <future>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceimageonline.h>
 
 #include <openspace/engine/downloadmanager.h>
 #include <modules/iswa/util/iswamanager.h>
 
 namespace openspace {
 
-class ScreenSpaceCygnet : public ScreenSpaceImage {
+class ScreenSpaceCygnet : public ScreenSpaceImageOnline {
 public:
     ScreenSpaceCygnet(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceCygnet();

@@ -22,53 +22,85 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
+#include <openspace/util/threadpool.h>
 
-#include <condition_variable>
-#include <functional>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <vector>
-#include <atomic>
+namespace openspace {
 
-// Implementatin based on http://progsch.net/wordpress/?p=81
+Worker::Worker(ThreadPool& pool) : pool(pool) {}
 
-namespace openspace::globebrowsing {
+void Worker::operator()() {
+    std::function<void()> task;
+    while (true) {
+        // acquire lock
+        {
+            std::unique_lock<std::mutex> lock(pool.queue_mutex);
 
-class ThreadPool;
+            // look for a work item
+            while (!pool.stop && pool.tasks.empty()) {
+                // if there are none wait for notification
+                pool.condition.wait(lock);
+            }
 
-class Worker {
-public: 
-    Worker(ThreadPool& pool);
-    void operator()();
-private:
-    ThreadPool& pool;
-};
+            if (pool.stop) { // exit if the pool is stopped
+                return;
+            }
 
-class ThreadPool {
-public:
-    ThreadPool(size_t numThreads);
-    ThreadPool(const ThreadPool& toCopy);
-    ~ThreadPool();
+            // get the task from the queue
+            task = pool.tasks.front();
+            pool.tasks.pop_front();
 
-    void enqueue(std::function<void()> f);
-    void clearTasks();
+        }// release lock
 
-private:
-    friend class Worker;
+        // execute the task
+        task();
+    }
+}
 
-    std::vector<std::thread> workers;
+ThreadPool::ThreadPool(size_t numThreads)
+    : stop(false)
+{
+    for (size_t i = 0; i < numThreads; ++i) {
+        workers.push_back(std::thread(Worker(*this)));
+    }
+}
 
-    std::deque<std::function<void()>> tasks;
+ThreadPool::ThreadPool(const ThreadPool& toCopy)
+    : ThreadPool(toCopy.workers.size())
+{ }
 
-    std::mutex queue_mutex;
-    std::condition_variable condition;
+// the destructor joins all threads
+ThreadPool::~ThreadPool() {
+    // stop all threads
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        stop = true;
+    }
+    condition.notify_all();
 
-    bool stop;
-};
+    // join them
+    for (size_t i = 0; i < workers.size(); ++i) {
+        workers[i].join();
+    }
+}
 
-} // namespace openspace::globebrowsing
+// add new work item to the pool
+void ThreadPool::enqueue(std::function<void()> f) {
+    { // acquire lock
+        std::unique_lock<std::mutex> lock(queue_mutex);
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
+        // add the task
+        tasks.push_back(f);
+    } // release lock
+
+        // wake up one thread
+    condition.notify_one();
+}
+
+void ThreadPool::clearTasks() {
+    { // acquire lock
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        tasks.clear();
+    } // release lock
+}
+
+} // namespace openspace
