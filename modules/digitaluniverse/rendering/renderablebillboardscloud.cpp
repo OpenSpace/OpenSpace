@@ -134,6 +134,12 @@ namespace {
         "Enables/Disables the drawing of the astronomical objects."
     };
 
+    static const openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+        "DrawLabels",
+        "Draw Labels",
+        "Determines whether labels should be drawn or hidden."
+    };
+
     static const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
@@ -146,12 +152,6 @@ namespace {
         "Color Range",
         "This value determines the color ranges for the color parameter of the "
         "astronomical objects."
-    };
-
-    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
-        "TransformationMatrix",
-        "Transformation Matrix",
-        "Transformation matrix to be applied to each astronomical object."
     };
 
     static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -218,6 +218,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 PolygonSidesInfo.description
             },
             {
+                DrawLabelInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DrawLabelInfo.description
+            },
+            {
                 TextColorInfo.identifier,
                 new DoubleVector4Verifier,
                 Optional::Yes,
@@ -237,7 +243,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             },
             {
                 LabelMinSizeInfo.identifier,
-                new IntVerifier,
+                new DoubleVerifier,
                 Optional::Yes,
                 LabelMinSizeInfo.description
             },
@@ -252,13 +258,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new Vector2ListVerifier<float>,
                 Optional::Yes,
                 ColorRangeInfo.description
-            },
-            {
-                TransformationMatrixInfo.identifier,
-                new Matrix4x4Verifier<double>,
-                Optional::Yes,
-                TransformationMatrixInfo.description
-            },
+            }
         }
     };
 }
@@ -276,12 +276,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _hasLabel(false)
     , _labelDataIsDirty(true)
     , _polygonSides(0)
-    , _textMinSize(0)
     , _pTexture(0)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
     , _spriteTexturePath(SpriteTextureInfo)
+    , _drawLabels(DrawLabelInfo, false)
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -289,6 +289,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         glm::vec4(1.f)
     )
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
+    , _textMinSize(LabelMinSizeInfo, 8.0, 0.5, 24.0)
     , _drawElements(DrawElementsInfo, true)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -303,7 +304,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _colorOptionString("")
     , _unit(Parsec)
     , _nValuesPerAstronomicalObject(0)
-    , _transformationMatrix(glm::dmat4(1.0))
     , _vao(0)
     , _vbo(0)
     , _polygonVao(0)
@@ -439,6 +439,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
 
     if (dictionary.hasKey(LabelFileInfo.identifier)) {
+        if (dictionary.hasKey(DrawLabelInfo.identifier)) {
+            _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
+        }
+        addProperty(_drawLabels);
+
         _labelFile = absPath(dictionary.value<std::string>(
             LabelFileInfo.identifier
         ));                
@@ -461,12 +466,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
         }         
+        addProperty(_textMinSize);
     }
-
-    if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-        _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
-    }        
-
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -701,7 +702,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         renderBillboards(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp);
     }
         
-    if (_hasLabel) {
+    if (_drawLabels && _hasLabel) {
         renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
     }                
 }
@@ -1071,8 +1072,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
             dummy.clear();
         }                        
             
-        glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::dvec4(position, 1.0));
-        _labelData.push_back(std::make_pair(transformedPos, label));
+        _labelData.push_back(std::make_pair(position, label));
             
     } while (!file.eof());
 
@@ -1197,7 +1197,7 @@ void RenderableBillboardsCloud::createDataSlice() {
     }        
 
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) { 
-        glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2], 1.0);
+        glm::dvec4 transformedPos = glm::dvec4(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2], 1.0);
         glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
             
         if (_hasColorMapFile) {

@@ -372,7 +372,7 @@ void RenderEngine::initializeGL() {
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
+    OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 10000.f);
 
     try {
         const float fontSizeBig = 50.f;

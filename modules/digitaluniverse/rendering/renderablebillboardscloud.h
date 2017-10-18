@@ -110,7 +110,6 @@ private:
     bool _labelDataIsDirty;
 
     int _polygonSides;
-    int _textMinSize;
         
     GLuint _pTexture;
 
@@ -120,7 +119,9 @@ private:
     properties::StringProperty _spriteTexturePath;
     properties::Vec4Property _textColor;
     properties::FloatProperty _textSize;
+    properties::FloatProperty _textMinSize;
     properties::BoolProperty _drawElements;
+    properties::BoolProperty _drawLabels;
     properties::OptionProperty _colorOption;
 
     // DEBUG:
@@ -150,8 +151,6 @@ private:
     std::vector<glm::vec2> _colorRangeData;
 
     int _nValuesPerAstronomicalObject;
-
-    glm::dmat4 _transformationMatrix;
 
     GLuint _vao;
     GLuint _vbo;

@@ -129,6 +129,7 @@ private:
     properties::Vec4Property _textColor;
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
+    properties::BoolProperty _drawLabels;
     //properties::OptionProperty _blendMode;
 
     // DEBUG:

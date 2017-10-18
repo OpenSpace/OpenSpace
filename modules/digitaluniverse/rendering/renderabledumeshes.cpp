@@ -114,6 +114,12 @@ namespace {
         "Enables/Disables the drawing of the astronomical objects."
     };
 
+    static const openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+        "DrawLabels",
+        "Draw Labels",
+        "Determines whether labels should be drawn or hidden."
+    };
+
     static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
@@ -172,6 +178,12 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 ScaleFactorInfo.description
             },
             {
+                DrawLabelInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DrawLabelInfo.description
+            },
+            {
                 TextColorInfo.identifier,
                 new DoubleVector4Verifier,
                 Optional::Yes,
@@ -223,6 +235,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     //, _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
+    , _drawLabels(DrawLabelInfo, false)
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -309,6 +322,11 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             );
     }
     addProperty(_scaleFactor);
+    
+    if (dictionary.hasKey(DrawLabelInfo.identifier)) {
+        _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
+    }
+    addProperty(_drawLabels);
 
     if (dictionary.hasKey(LabelFileInfo.identifier)) {
         _labelFile = absPath(dictionary.value<std::string>(
@@ -536,18 +554,16 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
     glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
     glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
 
-
     if (_hasSpeckFile) {
         renderMeshes(data, modelViewMatrix, projectionMatrix);
     }
 
-    if (_hasLabel) {
+    if (_drawLabels && _hasLabel) {
         renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
     }
 }
 
-void RenderableDUMeshes::update(const UpdateData&) {
-}
+void RenderableDUMeshes::update(const UpdateData&) {}
 
 bool RenderableDUMeshes::loadData() {
     bool success = false;

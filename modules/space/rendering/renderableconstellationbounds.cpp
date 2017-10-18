@@ -61,11 +61,11 @@ namespace {
         "abbreviations are used as the full names."
     };
 
-    static const openspace::properties::Property::PropertyInfo DistanceInfo = {
-        "Distance",
-        "Distance to the celestial sphere",
-        "This value specifies the value to the celestial sphere in kilometers at which "
-        "the constellations are projected."
+    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color of constellation lines",
+        "Specifies the color of the constellation lines. The lines are always drawn at "
+        "full opacity."
     };
 
     static const openspace::properties::Property::PropertyInfo SelectionInfo = {
@@ -98,10 +98,10 @@ documentation::Documentation RenderableConstellationBounds::Documentation() {
                 "omitted, the abbreviations are used as the full names."
             },
             {
-                DistanceInfo.identifier,
-                new DoubleVerifier,
+                ColorInfo.identifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
-                DistanceInfo.description
+                ColorInfo.description
             },
             {
                 SelectionInfo.identifier,
@@ -119,7 +119,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     : Renderable(dictionary)
     , _vertexFilename(VertexInfo)
     , _constellationFilename(ConstellationInfo)
-    , _distance(DistanceInfo, 15.f, 0.f, 30.f)
+    , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _constellationSelection(SelectionInfo)
     , _vao(0)
     , _vbo(0)
@@ -141,13 +141,16 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     });
     addProperty(_constellationFilename);
     if (dictionary.hasKey(ConstellationInfo.identifier)) {
-        _constellationFilename = dictionary.value<std::string>(ConstellationInfo.identifier);
+        _constellationFilename = dictionary.value<std::string>(
+            ConstellationInfo.identifier
+        );
     }
 
-    if (dictionary.hasKey(DistanceInfo.identifier)) {
-        _distance = static_cast<float>(dictionary.value<double>(DistanceInfo.identifier));
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
+    if (dictionary.hasKey(ColorInfo.identifier)) {
+        _color = glm::vec3(dictionary.value<glm::dvec3>(ColorInfo.identifier));
     }
-    addProperty(_distance);
 
     fillSelectionProperty();
     _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
@@ -190,7 +193,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 
         _constellationSelection = selectedIndices;
     }
-
 }
 
 void RenderableConstellationBounds::initialize() {
@@ -247,9 +249,9 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
 
-    _program->setUniform("exponent", _distance);
     _program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("ModelTransform", glm::mat4(modelTransform));
+    _program->setUniform("color", _color);
 
     glBindVertexArray(_vao);
     for (const ConstellationBound& bound : _constellationBounds) {
