@@ -1,0 +1,6 @@
+return {
+    FileRequest = {
+        { Identifier = "digitaluniverse_6df_speck", Destination = "speck", Version = 1 },
+        { Identifier = "digitaluniverse_6df_textures", Destination = "textures", Version = 1 }
+    }
+}

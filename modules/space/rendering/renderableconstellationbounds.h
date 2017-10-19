@@ -30,6 +30,7 @@
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/programobject.h>
 #include <array>
 
@@ -98,8 +99,11 @@ private:
     properties::StringProperty _vertexFilename;
 
     /// The file containing constellation names
-    properties::StringProperty _constellationFilename; 
+    properties::StringProperty _constellationFilename;
 
+    /// Determines the color of the constellation lines
+    properties::Vec3Property _color;
+    
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     /// The list of all loaded constellation bounds
@@ -107,9 +111,6 @@ private:
     
     using Vertex = std::array<float, 3>;
     std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
-
-    /// The radius of the celestial sphere onto which the bounds are drawn
-    properties::FloatProperty _distance;
 
     /// The property that stores all indices of constellations that should be drawn
     properties::SelectionProperty _constellationSelection;

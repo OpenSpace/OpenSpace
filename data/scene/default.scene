@@ -86,17 +86,58 @@ function postInitialization()
 
     openspace.printInfo("Setting default values")
 
-    openspace.setPropertyValue("SunGlare.renderable.Enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("SunGlare.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("SunMarker.renderable.Enabled", false)
     
-    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
-    
-    openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
-    openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
+    openspace.setPropertyValueSingle("Constellation Bounds.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Global Properties.GlobeBrowsing.GdalWrapper.LogGdalErrors", false)
 
-    openspace.setPropertyValue("Ecliptic Grid.renderable.Enabled", false)
-    openspace.setPropertyValue("Equatorial Grid.renderable.Enabled", false)
-    openspace.setPropertyValue("Galactic Grid.renderable.Enabled", false)
+    -- Digital Universe
+    openspace.setPropertyValueSingle("Wilkinson Microwave Anisotropy Probe (WMAP).renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Quasars.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Pulsars.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Globular Clusters.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Kepler Planetary Candidates.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Local Dwarf Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Exoplanets.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Sloan Digital Sky Survey.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Planetary Nebulae.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("OB Associations.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Open Star Clusters.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Supernova Remnants.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("HII Regions.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Abell Galaxy Clusters.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("2MASS Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("6dF Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("2dF Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Cosmic Background Explorer.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Planck.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Dwarfs.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Nearby Galaxy Groups.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Galaxy Cluster Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Voids.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Galaxy Superclusters.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Stars Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Stars Labels - Alternate.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Tully Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Tully Galaxies Pics.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Constellations (Extragalactic).renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Constellations.renderable.Enabled", false)
+
+    openspace.setPropertyValueSingle("Earth.RenderableGlobe.Atmosphere", true)
+    openspace.setPropertyValueSingle("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
+
+    openspace.setPropertyValueSingle("Ecliptic Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Ecliptic Grid Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Equatorial Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Equatorial Grid Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Galactic Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Galactic Grid Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("100kly Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("1Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("10Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("100Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("20Gly Grid.renderable.Enabled", false)
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
@@ -104,15 +145,10 @@ function postInitialization()
 
     -- Add local patches described at the top of this file
     for obj, list in pairs(vrt_folders) do
-        print(obj)
-        print(list)
         for _, dir in pairs(list) do
-            print(dir)
             openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
         end
     end
-
-
 
     -- Defined in scene_helper.lua
     -- Used to create focus buttons for a subset of scenegraph nodes
@@ -131,6 +167,7 @@ return {
         Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
     },
     Modules = {
+        -- # Solar system objects
         "sun",
         "mercury",
         "venus",
@@ -141,13 +178,12 @@ return {
         "saturn",
         "uranus",
         "neptune",
+        -- "satellites",
+        
+        "grids",
+        "digitaluniverse",
         "stars/digitaluniverse",
-        -- "stars/denver",
-        "milkyway/digitaluniverse",
-        --"milkyway/eso",
-        -- "satellites"
-        "constellationbounds",
-        "grids"
+        "milkyway/digitaluniverse"
     }
 }
 

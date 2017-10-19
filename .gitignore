@@ -122,3 +122,11 @@ data/spice/new_horizons/
 data/scene/mars/map_datasets/mars_COL_v006_mars2000_rgb.tif
 data/scene/mars/map_datasets/mars_COL_v006_mars2000_rgb.vrt
 data/spice/Juno/
+data/scene/digitaluniverse/*/data/*.dat
+data/scene/digitaluniverse/*/speck/*.speck
+data/scene/digitaluniverse/*/speck/*.cmap
+data/scene/digitaluniverse/*/speck/*.label
+data/scene/digitaluniverse/*/textures/*.jpg
+data/scene/digitaluniverse/*/textures/*.pbm
+data/scene/digitaluniverse/*/textures/*.png
+data/scene/digitaluniverse/*/textures/*.sgi

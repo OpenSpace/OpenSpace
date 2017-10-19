@@ -77,6 +77,13 @@ namespace {
         "This value determines the transparency of the sphere. If this value is set to "
         "1, the sphere is completely opaque. At 0, the sphere is completely transparent."
     };
+
+    static const openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
+        "FadeOutThreshould",
+        "Fade-Out Threshould",
+        "This value determines percentage of the sphere is visible before starting "
+        "fading-out it."
+    };
 } // namespace
 
 namespace openspace {
@@ -116,6 +123,12 @@ documentation::Documentation RenderableSphere::Documentation() {
                 new DoubleInRangeVerifier(0.0, 1.0),
                 Optional::Yes,
                 TransparencyInfo.description
+            },
+            {
+                FadeOutThreshouldInfo.identifier,
+                new DoubleInRangeVerifier(0.0, 1.0),
+                Optional::Yes,
+                FadeOutThreshouldInfo.description
             }
         }
     };
@@ -129,6 +142,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _transparency(TransparencyInfo, 1.f, 0.f, 1.f)
+    , _fadeOutThreshold(-1.0)
     , _shader(nullptr)
     , _texture(nullptr)
     , _sphere(nullptr)
@@ -194,6 +208,10 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
 
+    if (dictionary.hasKey(FadeOutThreshouldInfo.identifier)) {
+        _fadeOutThreshold = static_cast<float>(dictionary.value<double>(FadeOutThreshouldInfo.identifier));
+    }
+
 }
 
 bool RenderableSphere::isReady() const {
@@ -237,8 +255,17 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("ModelTransform", transform);
 
     setPscUniforms(*_shader.get(), data.camera, data.position);
-    _shader->setUniform("alpha", _transparency);
 
+    if (_fadeOutThreshold > -1.0) {
+        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
+        double term = std::exp((-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold));
+        
+        _shader->setUniform("alpha", _transparency * static_cast<float>(term / (term + 1.0)));
+    }
+    else {
+        _shader->setUniform("alpha", _transparency);
+    }
+    
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
