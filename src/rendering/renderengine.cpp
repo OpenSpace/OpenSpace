@@ -414,7 +414,7 @@ void RenderEngine::initializeGL() {
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
+    OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 10000.f);
 
     try {
         const float fontSizeBig = 50.f;
@@ -610,7 +610,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         fontResolution().x - size.boundingBox.x - 10,
         fontResolution().y - size.boundingBox.y
     );
-    penPosition.y -= _fontDate->height();
+    // penPosition.y -= _fontDate->height();
 
     RenderFontCr(
         *_fontDate,

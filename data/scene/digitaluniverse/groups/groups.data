@@ -1,0 +1,5 @@
+return {
+    FileRequest = {
+        { Identifier = "digitaluniverse_groups_speck", Destination = "speck", Version = 1 }
+    }
+}

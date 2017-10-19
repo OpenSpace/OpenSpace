@@ -22,10 +22,11 @@ return {
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
-                    -- LMMP based servers
+                    -- MoonTrek based servers
                     {
-                        Name = "LRO WAC Mosaic [OnMoon]",
-                        FilePath = "map_service_configs/OnMoonColor.xml",
+                        Name = "WAC [MoonTrek]",
+                        FilePath = "map_service_configs/MoonTrek/LRO WAC.wms",
+                        Enabled = true
                     },
                     -- Utah based servers
                     {
@@ -38,8 +39,8 @@ return {
                     },
                     {
                         Name = "WAC [Utah]",
-                        FilePath = "map_service_configs/Utah/Wac.wms",
-                        Enabled = true,
+                        FilePath = "map_service_configs/Utah/Wac.wms"
+                        -- Enabled = true,
                     }
                 },
                 HeightLayers = {

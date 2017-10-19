@@ -13,3 +13,6 @@
 [submodule "modules/touch/ext/libTUIO11"]
 	path = modules/touch/ext/libTUIO11
 	url = https://github.com/mkalten/TUIO11_CPP
+[submodule "apps/Launcher/ext/libtorrent"]
+	path = apps/Launcher/ext/libtorrent
+	url = https://github.com/OpenSpace/libtorrent.git
