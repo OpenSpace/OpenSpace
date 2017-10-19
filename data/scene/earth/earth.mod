@@ -103,7 +103,7 @@ return {
                      SaveCalculatedTextures = false, 
                   },                   
               },
-              Shadow_Group = {
+              ShadowGroup = {
                   Source1 = {
                       Name = "Sun",
                       -- All radius in meters

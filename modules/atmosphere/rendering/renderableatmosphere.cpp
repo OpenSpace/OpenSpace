@@ -64,7 +64,7 @@ namespace {
     static const char* _loggerCat = "RenderableAtmosphere";
 
     const char* keyFrame        = "Frame";
-    const char* keyShadowGroup  = "Shadow_Group";
+    const char* keyShadowGroup  = "ShadowGroup";
     const char* keyShadowSource = "Source";
     const char* keyShadowCaster = "Caster";
     const char* keyBody         = "Body";
