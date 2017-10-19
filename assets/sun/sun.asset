@@ -20,7 +20,7 @@ asset.sync = {
 
 
 -- Simple sphere to represent the Sun
-asset.Sun = {
+local Sun = {
     Name = "Sun",
     Renderable = {
         Parent = sunParentName,
@@ -41,7 +41,7 @@ asset.Sun = {
 }
 
 -- Billboard to represent the sun
-asset.SunGlare = {
+local SunGlare = {
     Name = "SunGlare",
     Parent = sunParentName,
     Renderable = {
@@ -55,9 +55,9 @@ asset.SunGlare = {
 }
 
 -- Marker for the sun
-asset.SunMarker = {
+local SunMarker = {
     Name = "SunMarker",
-    Parent = asset.Sun.Name,
+    Parent = Sun.Name,
     Renderable = {
         Type = "RenderablePlane",
         Size = 3.0E11,
@@ -75,7 +75,7 @@ asset.SunMarker = {
 }
 
 assetHelper.registerSceneGraphNodes(asset, {
-    asset.Sun,
-    asset.SunGlare,
-    asset.SunMarker
+    Sun,
+    SunGlare,
+    SunMarker
 })

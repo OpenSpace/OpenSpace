@@ -47,6 +47,7 @@
 
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetloader.h>
+#include <openspace/scene/assetsynchronizer.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -146,6 +147,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _parallelConnection(new ParallelConnection)
     , _renderEngine(new RenderEngine)
     , _resourceSynchronizer(new ResourceSynchronizer)
+    , _assetSynchronizer(new AssetSynchronizer(_resourceSynchronizer.get()))
     , _settingsEngine(new SettingsEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
@@ -595,7 +597,15 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
             _scene = std::make_unique<Scene>();
             _renderEngine->setScene(_scene.get());
-            _assetLoader->loadSingleAsset(assetPath);        
+            std::shared_ptr<Asset> asset = _assetLoader->loadSingleAsset(assetPath);
+            std::vector<std::shared_ptr<Asset>> assets = asset->allActiveAssets();
+            for (const auto& asset : assets) {
+                _assetSynchronizer->addAsset(asset);
+            }
+            LINFO("SYNCS");
+
+            asset->initialize();
+            
         } catch (const ghoul::FileNotFoundError& e) {
             LERRORC(e.component, e.message);
             return;
@@ -1479,6 +1489,11 @@ AssetLoader & OpenSpaceEngine::assetLoader() {
 ResourceSynchronizer & OpenSpaceEngine::resourceSynchronizer() {
     ghoul_assert(_resourceSynchronizer, "Resource Synchronizer must not be nullptr");
     return *_resourceSynchronizer;
+}
+
+AssetSynchronizer & OpenSpaceEngine::assetSynchronizer() {
+    ghoul_assert(_assetSynchronizer, "Asset Synchronizer must not be nullptr");
+    return *_assetSynchronizer;
 }
 
 ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {

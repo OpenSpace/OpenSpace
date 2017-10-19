@@ -78,14 +78,14 @@ public:
      *  - Import one asset
      *  - Unimport all other assets
      */
-    Asset* loadSingleAsset(const std::string& identifier);
+    std::shared_ptr<Asset> loadSingleAsset(const std::string& identifier);
 
     /**
      * Import an asset:
      * Add the asset as an optional on the root asset
      * The asset is imported synchronously
      */
-    Asset* importAsset(const std::string& identifier);
+    std::shared_ptr<Asset> importAsset(const std::string& identifier);
 
     /**
      * Unimport an asset:
@@ -107,12 +107,17 @@ public:
     /**
      * Return the root asset
      */
-    Asset* rootAsset() const;
+    std::shared_ptr<Asset> rootAsset() const;
 
     /**
      * Return the sync root directory
      */
     const std::string& syncRootDirectory();
+
+    /**
+    * Return the asset root directory
+    */
+    const std::string& assetRootDirectory();
 
     void callOnInitialize(Asset* asset);
 
@@ -125,13 +130,13 @@ public:
     std::string generateAssetPath(const std::string& baseDirectory, const std::string& path) const;
 
 private:
-    Asset* importRequiredDependency(const std::string& identifier);
-    Asset* importOptionalDependency(const std::string& identifier, bool enabled = true);
-    Asset* loadAsset(std::string name);
-    Asset* getAsset(std::string name);
+    std::shared_ptr<Asset> importRequiredDependency(const std::string& identifier);
+    std::shared_ptr<Asset> importOptionalDependency(const std::string& identifier, bool enabled = true);
+    std::shared_ptr<Asset> loadAsset(std::string name);
+    std::shared_ptr<Asset> getAsset(std::string name);
     ghoul::filesystem::Directory currentDirectory();
 
-    void pushAsset(Asset* asset);
+    void pushAsset(std::shared_ptr<Asset> asset);
     void popAsset();
     void updateLuaGlobals();
     void addLuaDependencyTable(Asset* dependant, Asset* dependency);
@@ -160,9 +165,9 @@ private:
     friend int assetloader::resolveSyncedResource(lua_State* state);
     friend int assetloader::exportAsset(lua_State* state);
 
-    std::unique_ptr<Asset> _rootAsset;
-    std::map<std::string, std::unique_ptr<Asset>> _importedAssets;
-    std::vector<Asset*> _assetStack;
+    std::shared_ptr<Asset> _rootAsset;
+    std::map<std::string, std::shared_ptr<Asset>> _importedAssets;
+    std::vector<std::shared_ptr<Asset>> _assetStack;
 
     AssetSynchronizer* _assetSynchronizer;
     std::string _assetRootDirectory;

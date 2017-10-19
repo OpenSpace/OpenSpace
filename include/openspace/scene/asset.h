@@ -33,13 +33,17 @@
 #include <vector>
 #include <optional>
 
+#include <memory>
+#include <set>
+#include <iterator>
+
 namespace openspace {
 
 class AssetLoader;
 
-class Asset {
+class Asset : public std::enable_shared_from_this<Asset> {
 public:
-    using Optional = std::pair<Asset*, bool>;
+    using Optional = std::pair<std::shared_ptr<Asset>, bool>;
 
     enum class ReadyState : unsigned int {
         Loaded,
@@ -67,29 +71,28 @@ public:
 
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     std::vector<std::shared_ptr<ResourceSynchronization>> synchronizations();
-    std::vector<std::shared_ptr<ResourceSynchronization>> getSynchronizationsRecursive();
+
+    std::vector<std::shared_ptr<Asset>> allActiveAssets();
+    std::vector<std::shared_ptr<Asset>> allAssets();
 
     bool isInitReady() const;
     void initialize();
     void deinitialize();
 
     bool hasRequiredDependency(const Asset* asset) const;
-    void addRequiredDependency(Asset* asset);
+    void addRequiredDependency(std::shared_ptr<Asset> asset);
     void removeRequiredDependency(Asset* asset);
     void removeRequiredDependency(const std::string& assetId);
 
     bool hasDependants() const;
     bool hasInitializedDependants() const;
 
-    std::vector<Asset*> optionalAssets() const;
+    std::vector<std::shared_ptr<Asset>> optionalAssets() const;
     bool hasOptionalDependency(const Asset* asset) const;
     bool hasEnabledOptionalDependency(const Asset* asset) const;
     void setOptionalDependencyEnabled(Asset* asset, bool enabled);
-    void addOptionalDependency(Asset* asset, bool enabled);
+    void addOptionalDependency(std::shared_ptr<Asset> asset, bool enabled);
     void removeOptionalDependency(Asset* asset);
-
-    void dependantDidInitialize(Asset* dependant);
-    void dependantWillDeinitialize(Asset* dependant);
 
     std::string resolveLocalResource(std::string resourceName);
     std::string resolveSyncedResource(std::string resourceName);
@@ -105,16 +108,16 @@ private:
     std::optional<std::string> _assetPath;
 
     // Required dependencies
-    std::vector<Asset*> _requiredDependencies;
+    std::vector<std::shared_ptr<Asset>> _requiredDependencies;
 
     // Assets that refers to this asset as an required dependency
-    std::vector<Asset*> _requiredDependants;
+    std::vector<std::weak_ptr<Asset>> _requiredDependants;
 
     // Optional dependencies
     std::vector<Optional> _optionalDependencies;
 
     // Assets that refers to this asset as an optional dependency
-    std::vector<Asset*> _optionalDependants;
+    std::vector<std::weak_ptr<Asset>> _optionalDependants;
 };
 
 } // namespace openspace

@@ -14,7 +14,7 @@ local SunIau = {
 	Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Body = "SUN",
+            Target = "SUN",
             Observer = "SSB",
         },
         Rotation = {
@@ -26,8 +26,8 @@ local SunIau = {
 }
 
 assetHelper.registerSceneGraphNodes(asset, {
-    asset.SolarSystemBarycenter,
-    asset.SunIau
+    SolarSystemBarycenter,
+    SunIau
 })
 
 asset.export("SolarSystemBarycenter", SolarSystemBarycenter)
