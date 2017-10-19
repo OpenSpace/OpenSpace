@@ -34,6 +34,7 @@ return {
                 DestinationFrame = "ECLIPJ2000"
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "KerberosText",
@@ -51,7 +52,8 @@ return {
                 Position = {1000000, 0, 1000000},
             },
         },
-    },    
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    },
     -- KerberosTrail module
     {   
         Name = "KerberosTrail",
@@ -67,6 +69,6 @@ return {
             Period = 32.16756,
             Resolution = 1000
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     }
-    
 }

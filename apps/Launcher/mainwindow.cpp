@@ -92,7 +92,7 @@ MainWindow::MainWindow()
     //image->setContentsMargins(0, 0, 0, 0);
     image->setObjectName("Image");
     QPixmap p = QPixmap(":/images/header.png");
-    image->setPixmap(p.scaledToWidth(WindowSize.width()));
+    image->setPixmap(p);
     layout->addWidget(image, 0, 0, 1, 2);
 
     

@@ -82,7 +82,6 @@ return {
                     Far        = 1000000,
                 },
             },
-
         },
 
         Transform = {
@@ -92,6 +91,7 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
+        GuiPath = "/Solar System/Asteroid"
     },
     {   
         Name = "BennuTrail",
@@ -108,5 +108,6 @@ return {
             EndTime = "2023 MAY 31 00:00:00.000",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Asteroid"
     },
 }

@@ -27,6 +27,7 @@
 #include <modules/imgui/imguimodule.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/keys.h>
 
@@ -38,8 +39,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 #include <modules/imgui/include/imgui_include.h>
-
-#include "gui_lua.inl"
 
 //#define SHOW_IMGUI_HELPERS
 
@@ -61,6 +60,8 @@ GLuint vboElements = 0;
 std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 char* iniFileBuffer = nullptr;
+
+ImFont* captionFont = nullptr;
 
 static void RenderDrawLists(ImDrawData* drawData) {
     // Avoid rendering when minimized, scale coordinates for retina displays
@@ -236,17 +237,28 @@ void addScreenSpaceRenderableOnline(std::string texturePath) {
 
 namespace openspace::gui {
 
+void CaptionText(const char* text) {
+    ImGui::PushFont(captionFont);
+    ImGui::Text("%s", text);
+    ImGui::PopFont();
+}
+
 GUI::GUI() 
     : GuiComponent("Main")
     , _globalProperty("Global")
-    , _property("Properties")
+    , _property(
+        "Properties",
+        GuiPropertyComponent::UseTreeLayout::Yes
+    )
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
+    , _featuredProperties("Featured Properties",
+        GuiPropertyComponent::UseTreeLayout::No,
+        GuiPropertyComponent::IsTopLevelWindow::Yes)
     , _showInternals(false)
     , _currentVisibility(properties::Property::Visibility::Developer)
 {
     addPropertySubOwner(_help);
-    addPropertySubOwner(_origin);
     addPropertySubOwner(_performance);
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
@@ -256,7 +268,8 @@ GUI::GUI()
     addPropertySubOwner(_globeBrowsing);
 #endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
-    addPropertySubOwner(_time);
+    addPropertySubOwner(_spaceTime);
+    addPropertySubOwner(_mission);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     addPropertySubOwner(_iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -302,6 +315,11 @@ void GUI::initialize() {
         FontSize
     );
 
+    captionFont = io.Fonts->AddFontFromFileTTF(
+        absPath(GuiFont).c_str(),
+        FontSize * 1.5f
+    );
+
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowPadding = { 4.f, 4.f };
     style.WindowRounding = 0.f;
@@ -316,49 +334,50 @@ void GUI::initialize() {
     style.GrabMinSize = 10.f;
     style.GrabRounding = 16.f;
 
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
+    style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
     style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
+    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.30f);
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.91f, 0.94f, 0.99f, 0.40f);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.90f, 0.90f, 0.45f);
     style.Colors[ImGuiCol_TitleBg] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
     style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
     style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
+    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.26f, 0.27f, 0.33f, 0.80f);
     style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.80f, 0.43f);
+    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
     style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
     style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
-    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.00f);
+    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
+    style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+    style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
     style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
     style.Colors[ImGuiCol_Button] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.00f, 0.51f, 0.94f, 1.00f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.43f, 0.80f, 1.00f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.36f, 0.54f, 0.68f, 1.00f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.36f, 0.61f, 0.81f, 1.00f);
     style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
     style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
     style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
+    style.Colors[ImGuiCol_Column] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+    style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
+    style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
     style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
     style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
     style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
     style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
-
-    //style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.21f, 0.24f, 1.0f);
-    //style.Colors[ImGuiCol_Border] = ImVec4(0.1f, 0.39f, 0.42f, 0.59f);
-    //style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    //style.Colors[ImGuiCol_TitleBg] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
-    //style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
-    //style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    //style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.8f, 0.43f);
-    //style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
-    //style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
-    //style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.f);
-    //style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5f, 0.8f, 0.76f, 1.0f);
-    //style.Colors[ImGuiCol_Button] = ImVec4(0.0f, 0.36f, 0.67f, 0.6f);
-    //style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.51f, 0.94f, 1.0f);
-    //style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.43f, 0.8f, 1.0f);
-    //style.Colors[ImGuiCol_Header] = ImVec4(0.f, 0.36f, 0.67f, 0.45f);
-    //style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.f, 0.54f, 1.0f, 0.8f);
-    //style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.8f);
-    //style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
-    //style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.6f);
-    //style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
+    style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
+    style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
 
     _property.initialize();
     _property.setHasRegularProperties(true);
@@ -366,6 +385,7 @@ void GUI::initialize() {
     _screenSpaceProperty.setHasRegularProperties(true);
     _globalProperty.initialize();
     _globalProperty.setHasRegularProperties(true);
+    _featuredProperties.initialize();
     _virtualProperty.initialize();
     _filePath.initialize();
 #ifdef GLOBEBROWSING_USE_GDAL    
@@ -374,6 +394,7 @@ void GUI::initialize() {
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
+    _mission.initialize();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initialize(); 
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -385,10 +406,12 @@ void GUI::deinitialize() {
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitialize();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+    _mission.deinitialize();
     _parallel.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();
     _globalProperty.deinitialize();
+    _featuredProperties.deinitialize();
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
     _filePath.deinitialize();
@@ -468,6 +491,7 @@ void GUI::initializeGL() {
     _property.initializeGL();
     _screenSpaceProperty.initializeGL();
     _globalProperty.initializeGL();
+    _featuredProperties.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();    
 #ifdef GLOBEBROWSING_USE_GDAL
@@ -475,6 +499,7 @@ void GUI::initializeGL() {
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.initializeGL();
     _parallel.initializeGL();
+    _mission.initializeGL();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initializeGL();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -498,9 +523,11 @@ void GUI::deinitializeGL() {
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitializeGL();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+    _mission.deinitializeGL();
     _parallel.deinitializeGL();
     _help.deinitializeGL();
     _performance.deinitializeGL();
+    _featuredProperties.deinitializeGL();
     _globalProperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
@@ -571,6 +598,16 @@ void GUI::endFrame() {
             _globeBrowsing.render();
         }
 #endif // GLOBEBROWSING_USE_GDAL
+
+        if (_mission.isEnabled() && MissionManager::ref().hasCurrentMission()) {
+            _mission.render();
+        }
+
+        // We always want to render the Space/Time component
+        _spaceTime.render();
+
+        // We always want to render the featured properties component
+        _featuredProperties.render();
     }
 
     ImGui::Render();
@@ -666,6 +703,10 @@ void GUI::render() {
     ImGui::Checkbox("Virtual Properties", &virtualProperty);
     _virtualProperty.setEnabled(virtualProperty);
 
+    bool mission = _mission.isEnabled();
+    ImGui::Checkbox("Mission Information", &mission);
+    _mission.setEnabled(mission);
+
     bool filePath = _filePath.isEnabled();
     ImGui::Checkbox("File Paths", &filePath);
     _filePath.setEnabled(filePath);
@@ -681,9 +722,6 @@ void GUI::render() {
     ImGui::Checkbox("iSWA", &iswa);
     _iswa.setEnabled(iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
-
-    _origin.render();
-    _time.render();
 
     bool help = _help.isEnabled();
     ImGui::Checkbox("Help", &help);
@@ -747,6 +785,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _property.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
     _virtualProperty.setVisibility(_currentVisibility);
+    _featuredProperties.setVisibility(_currentVisibility);
 }
 
 

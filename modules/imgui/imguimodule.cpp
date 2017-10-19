@@ -103,6 +103,27 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     return res;
                 }
             );
+
+            gui._featuredProperties.setSource(
+                [](){
+                    std::vector<SceneGraphNode*> nodes =
+                        OsEng.renderEngine().scene()->allSceneGraphNodes();
+
+                    nodes.erase(
+                        std::remove_if(
+                            nodes.begin(),
+                            nodes.end(),
+                            [](SceneGraphNode* n) {
+                                const std::vector<std::string>& tags = n->tags();
+                                auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
+                                return it == tags.end();
+                            }
+                        ),
+                        nodes.end()
+                    );
+                    return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+                }
+            );
         }
     );
     

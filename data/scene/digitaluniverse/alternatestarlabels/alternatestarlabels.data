@@ -1,0 +1,5 @@
+return {
+    FileRequest = {
+        { Identifier = "digitaluniverse_alternatestarlabels_speck", Destination = "speck", Version = 1 },
+    }
+}

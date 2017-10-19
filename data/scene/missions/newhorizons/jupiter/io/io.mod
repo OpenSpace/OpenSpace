@@ -55,6 +55,7 @@ return {
                 DestinationFrame = "ECLIPJ2000",
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
         --[[
         Ephemeris = {
             Type = "Spice",
@@ -89,6 +90,7 @@ return {
                 Position = {0, -10000000, 0}
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     },
     -- IoTrail module
     {   
@@ -104,6 +106,7 @@ return {
             Color = { 0.4, 0.4, 0.2 },
             Period =  42 / 24,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     }
 }

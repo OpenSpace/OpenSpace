@@ -70,6 +70,8 @@ private:
 
     properties::FloatProperty _transparency;
 
+    float _fadeOutThreshold;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 

@@ -98,6 +98,14 @@ documentation::Documentation SceneGraphNode::Documentation() {
             "node and all of its children. There are only three possible values "
             "corresponding to a 'Translation', a 'Rotation', and a 'Scale'."
         },
+        {
+            "GuiPath",
+            new StringVerifier,
+            Optional::Yes,
+            "If this value is specified, this '/' separated URI specifies the location "
+            "of this scenegraph node in a GUI representation, for instance "
+            "'/SolarSystem/Earth/Moon'."
+        }
         }
     };
 }

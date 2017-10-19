@@ -10,7 +10,8 @@ return {
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Neptune"
     },
     -- RenderableGlobe module
     {   
@@ -38,6 +39,7 @@ return {
             }
         },
         Tag = { "planet_solarSystem", "planet_giants" },
+        GuiPath = "/Solar System/Planets/Neptune"
 
     },
     -- Trail module
@@ -55,6 +57,7 @@ return {
             Period  = 60200,
             Resolution = 1000
         },
-        Tag = { "planetTrail_solarSystem", "planetTrail_giants" }
+        Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+        GuiPath = "/Solar System/Planets/Neptune"
     }
 }

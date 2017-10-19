@@ -28,6 +28,9 @@
 #include <modules/imgui/include/renderproperties.h>
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/scene/scenegraphnode.h>
+
+#include <ghoul/misc/misc.h>
 
 #include <algorithm>
 
@@ -57,12 +60,95 @@ namespace {
             ImGui::SetTooltip("%s", propOwner->description().c_str());
         }
     }
+
+    struct TreeNode {
+        TreeNode(std::string p) : path(std::move(p)) {}
+        std::string path;
+        std::vector<std::unique_ptr<TreeNode>> children;
+        std::vector<openspace::SceneGraphNode*> nodes;
+    };
+
+    void addPathToTree(TreeNode& node, const std::vector<std::string>& path,
+                       openspace::SceneGraphNode* owner)
+    {
+        if (path.empty()) {
+            // No more path, so we have reached a leaf
+            node.nodes.push_back(owner);
+            return;
+        }
+
+        // Check if any of the children's paths contains the first part of the path
+        auto it = std::find_if(
+            node.children.begin(),
+            node.children.end(),
+            [p = *path.begin()](const std::unique_ptr<TreeNode>& c) {
+            return c.get()->path == p;
+        }
+        );
+
+        TreeNode* n;
+        if (it != node.children.end()) {
+            // We have a child, so we use it
+            n = it->get();
+        }
+        else {
+            // We don't have a child, so we must generate it
+            std::unique_ptr<TreeNode> newNode = std::make_unique<TreeNode>(*path.begin());
+            n = newNode.get();
+            node.children.push_back(std::move(newNode));
+
+        }
+
+        // Recurse into the tree and chop off the first path
+        addPathToTree(
+            *n,
+            std::vector<std::string>(path.begin() + 1, path.end()),
+            owner
+        );
+    };
+
+    void simplifyTree(TreeNode& node) {
+        // Merging consecutive nodes if they only have a single child
+
+        for (const std::unique_ptr<TreeNode>& c : node.children) {
+            simplifyTree(*c);
+        }
+
+        if ((node.children.size() == 1) && (node.nodes.empty())) {
+            node.path = node.path + "/" + node.children[0]->path;
+            node.nodes = std::move(node.children[0]->nodes);
+            std::vector<std::unique_ptr<TreeNode>> cld = std::move(
+                node.children[0]->children
+            );
+            node.children = std::move(cld);
+        }
+    }
+
+    void renderTree(const TreeNode& node, const std::function<void (openspace::properties::PropertyOwner*)>& renderFunc) {
+        if (node.path.empty() || ImGui::TreeNode(node.path.c_str())) {
+            for (const std::unique_ptr<TreeNode>& c : node.children) {
+                renderTree(*c, renderFunc);
+            }
+
+            for (openspace::SceneGraphNode* n : node.nodes) {
+                renderFunc(n);
+            }
+
+            if (!node.path.empty()) {
+                ImGui::TreePop();
+            }
+        }
+    }
+
 } // namespace
 
 namespace openspace::gui {
 
-GuiPropertyComponent::GuiPropertyComponent(std::string name) 
+GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree, IsTopLevelWindow topLevel)
     : GuiComponent(std::move(name))
+    , _useTreeLayout(useTree)
+    , _isTopLevel(topLevel)
+    , _currentUseTreeLayout(useTree)
 {}
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
@@ -142,12 +228,23 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
 }
 
 void GuiPropertyComponent::render() {
-    bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, size, 0.5f);
-    _isEnabled = v;
+    if (_isTopLevel) {
+        ImGui::Begin(name().c_str(), nullptr, size, 0.75f);
+    }
+    else {
+        bool v = _isEnabled;
+        ImGui::Begin(name().c_str(), &v, size, 0.75f);
+        _isEnabled = v;
+    }
 
     if (_function) {
+        if (_useTreeLayout) {
+            ImGui::Checkbox("Use Tree layout", &_currentUseTreeLayout);
+        }
+
+
         std::vector<properties::PropertyOwner*> owners = _function();
+
         std::sort(
             owners.begin(),
             owners.end(),
@@ -156,11 +253,49 @@ void GuiPropertyComponent::render() {
             }
         );
 
-        for (properties::PropertyOwner* pOwner : owners) {
+        if (_currentUseTreeLayout) {
+            for (properties::PropertyOwner* owner : owners) {
+                ghoul_assert(
+                    dynamic_cast<SceneGraphNode*>(owner),
+                    "When using the tree layout, all owners must be SceneGraphNodes"
+                );
+            }
+
+            // Sort:
+            // if guigrouping, sort by name and shortest first
+            // then all w/o guigroup
+            std::stable_sort(
+                owners.begin(),
+                owners.end(),
+                [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+                    std::string lhsGroup = static_cast<SceneGraphNode*>(lhs)->guiPath();
+                    std::string rhsGroup = static_cast<SceneGraphNode*>(rhs)->guiPath();
+
+                    if (lhsGroup.empty()) {
+                        return false;
+                    }
+                    if (rhsGroup.empty()) {
+                        return true;
+                    }
+                    return lhsGroup < rhsGroup;
+                }
+            );
+        }
+
+        // If the owners list is empty, we wnat to do the normal thing (-> nothing)
+        // Otherwise, check if the first owner has a GUI group
+        // This makes the assumption that the tree layout is only used if the owners are
+        // SceenGraphNodes (checked above)
+        bool noGuiGroups =
+            owners.empty() ||
+                (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
+                 dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
+
+        auto renderProp = [&](properties::PropertyOwner* pOwner) {
             int count = nVisibleProperties(pOwner->propertiesRecursive(), _visibility);
 
             if (count == 0) {
-                continue;
+                return;
             }
 
             auto header = [&]() -> bool {
@@ -182,6 +317,47 @@ void GuiPropertyComponent::render() {
 
             if (header()) {
                 renderPropertyOwner(pOwner);
+            }       
+        };
+
+        if (!_currentUseTreeLayout || noGuiGroups) {
+            std::for_each(owners.begin(), owners.end(), renderProp);
+        }
+        else { // _useTreeLayout && gui groups exist
+            TreeNode root("");
+
+            for (properties::PropertyOwner* pOwner : owners) {
+                // We checked above that pOwner is a SceneGraphNode
+                SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
+
+                if (nOwner->guiPath().empty()) {
+                    // We know that we are done now since we stable_sort:ed them above
+                    break;
+                }
+
+                std::vector<std::string> paths = ghoul::tokenizeString(
+                    nOwner->guiPath().substr(1),
+                    '/'
+                );
+
+                addPathToTree(root, paths, nOwner);
+            }
+
+            simplifyTree(root);
+
+            renderTree(root, renderProp);
+
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
+
+            for (properties::PropertyOwner* pOwner : owners) {
+                // We checked above that pOwner is a SceneGraphNode
+                SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
+
+                if (!nOwner->guiPath().empty()) {
+                    continue;
+                }
+
+                renderProp(pOwner);
             }
         }
     }

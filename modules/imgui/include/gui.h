@@ -29,15 +29,15 @@
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 #include <modules/imgui/include/guihelpcomponent.h>
+#include <modules/imgui/include/guiiswacomponent.h>
+#include <modules/imgui/include/guimissioncomponent.h>
+#include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
-#include <modules/imgui/include/guiorigincomponent.h>
-#include <modules/imgui/include/guitimecomponent.h>
-#include <modules/imgui/include/guiiswacomponent.h>
-#include <modules/imgui/include/guiparallelcomponent.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/properties/property.h>
+#include <modules/imgui/include/guispacetimecomponent.h>
 
+#include <openspace/properties/property.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
@@ -70,17 +70,18 @@ public:
 #ifdef GLOBEBROWSING_USE_GDAL
     GuiGlobeBrowsingComponent _globeBrowsing;
 #endif //  GLOBEBROWSING_USE_GDAL
-    GuiOriginComponent _origin;
     GuiPerformanceComponent _performance;
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _property;
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _virtualProperty;
-    GuiTimeComponent _time;
+    GuiSpaceTimeComponent _spaceTime;
+    GuiMissionComponent _mission;
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     GuiIswaComponent _iswa;
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
     GuiParallelComponent _parallel;
+    GuiPropertyComponent _featuredProperties;
 
     bool _showInternals;
 
@@ -90,6 +91,8 @@ private:
     properties::Property::Visibility _currentVisibility;
 
 };
+
+void CaptionText(const char* text);
 
 } // namespace openspace::gui
 

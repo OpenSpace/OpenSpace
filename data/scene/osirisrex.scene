@@ -1,5 +1,6 @@
 KernelCase = 2 -- Right now we only have the image times for case 2
 
+dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
 
 function preInitialization()
     --[[
@@ -102,6 +103,10 @@ function postInitialization()
     openspace.loadMission("${OPENSPACE_DATA}/scene/missions/osirisrex/osirisrex/osirisrex.mission")
 
     openspace.navigation.resetCameraDirection()
+
+    mark_interesting_nodes({
+        "OsirisRex", "BennuBarycenter", "Earth"
+    })
 end
 
 return {

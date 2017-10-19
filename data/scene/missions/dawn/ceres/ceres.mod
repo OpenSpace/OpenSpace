@@ -31,7 +31,8 @@ return {
             Type = "Spice",
             Frame = "IAU_CERES",
             Reference = "GALACTIC"
-        }
+        },
+        GuiPath = "/Solar System/Dwarf Planets/Ceres"
     },
     --[[ Ceres Trail Module
     {   

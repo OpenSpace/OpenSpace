@@ -1,12 +1,24 @@
 -- Add folders to this list that contain .info files describing HiRISE patches
-local mars_folders = {
-    -- Add a folder here whose contents will be automatically added to the Mars globe
-    -- If multiple folders are added, the results will be added sequentially, meaning that
-    -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
-    -- CTX will stomp over the HiRISE
-    --
-    -- tl;dr:  Specify CTX folders first, then HiRISE 
+local vrt_folders = {
+    Mars = {
+        -- Add folders here whose contents will be automatically added to the Mars globe
+        -- If multiple folders are added, the results will be added sequentially, meaning that
+        -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
+        -- CTX will stomp over the HiRISE
+        --
+        -- tl;dr:  Specify CTX folders first, then HiRISE 
+        -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
+    },
+    Moon = {
+        -- Add folders here whose contents will be automatically added to the Moon globe
+        -- If multiple folders are added, the results will be added sequentially, meaning that
+        -- if areas overlap, images from the lower results will overwrite the images from former
+        -- results
+        -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
+    }
 }
+
+dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
 
 function preInitialization()
     --[[
@@ -21,7 +33,6 @@ function preInitialization()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
-
 
     -- Toggle night texture, shading, atmosphere and water
     openspace.bindKey("s",
@@ -75,26 +86,75 @@ function postInitialization()
 
     openspace.printInfo("Setting default values")
 
-    openspace.setPropertyValue("SunGlare.renderable.Enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("SunGlare.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("SunMarker.renderable.Enabled", false)
     
-    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
-    
-    openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
-    openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
+    openspace.setPropertyValueSingle("Constellation Bounds.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Global Properties.GlobeBrowsing.GdalWrapper.LogGdalErrors", false)
 
-    openspace.setPropertyValue("Ecliptic Grid.renderable.Enabled", false)
-    openspace.setPropertyValue("Equatorial Grid.renderable.Enabled", false)
-    openspace.setPropertyValue("Galactic Grid.renderable.Enabled", false)
+    -- Digital Universe
+    openspace.setPropertyValueSingle("Wilkinson Microwave Anisotropy Probe (WMAP).renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Quasars.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Pulsars.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Globular Clusters.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Kepler Planetary Candidates.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Local Dwarf Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Exoplanets.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Sloan Digital Sky Survey.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Planetary Nebulae.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("OB Associations.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Open Star Clusters.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Supernova Remnants.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("HII Regions.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Abell Galaxy Clusters.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("2MASS Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("6dF Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("2dF Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Cosmic Background Explorer.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Planck.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Dwarfs.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Nearby Galaxy Groups.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Galaxy Cluster Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Voids.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Galaxy Superclusters.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Stars Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Stars Labels - Alternate.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Tully Galaxies.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Tully Galaxies Pics.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Constellations (Extragalactic).renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Constellations.renderable.Enabled", false)
+
+    openspace.setPropertyValueSingle("Earth.RenderableGlobe.Atmosphere", true)
+    openspace.setPropertyValueSingle("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
+
+    openspace.setPropertyValueSingle("Ecliptic Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Ecliptic Grid Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Equatorial Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Equatorial Grid Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Galactic Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("Galactic Grid Labels.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("100kly Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("1Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("10Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("100Mly Grid.renderable.Enabled", false)
+    openspace.setPropertyValueSingle("20Gly Grid.renderable.Enabled", false)
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
     openspace.printInfo("Done setting default values")
 
-    -- Add the CTX and HiRISE patches described at the top of this file
-    for _, file in pairs(mars_folders) do
-        openspace.globebrowsing.addBlendingLayersFromDirectory(file, "Mars")
+    -- Add local patches described at the top of this file
+    for obj, list in pairs(vrt_folders) do
+        for _, dir in pairs(list) do
+            openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
+        end
     end
+
+    -- Defined in scene_helper.lua
+    -- Used to create focus buttons for a subset of scenegraph nodes
+    mark_interesting_nodes({
+        "Earth", "Mars", "Moon"
+    })
 end
 
 
@@ -117,13 +177,12 @@ return {
         "saturn",
         "uranus",
         "neptune",
+        -- "satellites",
+        
+        "grids",
+        "digitaluniverse",
         "stars/digitaluniverse",
-        -- "stars/denver",
-        "milkyway/digitaluniverse",
-        --"milkyway/eso",
-        -- "satellites"
-        "constellationbounds",
-        "grids"
+        "milkyway/digitaluniverse"
     }
 }
 

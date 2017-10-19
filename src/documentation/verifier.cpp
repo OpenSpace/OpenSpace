@@ -42,6 +42,17 @@ template struct Vector4Verifier<bool>;
 template struct Vector4Verifier<int>;
 template struct Vector4Verifier<double>;
 
+template struct Vector2ListVerifier<bool>;
+template struct Vector2ListVerifier<int>;
+template struct Vector2ListVerifier<double>;
+template struct Vector3ListVerifier<bool>;
+template struct Vector3ListVerifier<int>;
+template struct Vector3ListVerifier<double>;
+template struct Vector4ListVerifier<bool>;
+template struct Vector4ListVerifier<int>;
+template struct Vector4ListVerifier<double>;
+
+
 template struct Matrix2x2Verifier<double>;
 template struct Matrix2x3Verifier<double>;
 template struct Matrix2x4Verifier<double>;

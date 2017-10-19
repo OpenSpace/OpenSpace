@@ -30,6 +30,7 @@
 #include <QMap>
 
 #include <openspace/engine/downloadmanager.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <libtorrent/torrent_handle.hpp>
 
@@ -111,6 +112,9 @@ private:
     QList<FileRequest> _fileRequests;
     QList<TorrentFile> _torrentFiles;
 
+    std::mutex _filesDownloadingMutex;
+    std::set<std::string> _filesDownloading;
+
     std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>> _futures;
     std::map<std::shared_ptr<openspace::DownloadManager::FileFuture>, InfoWidget*> _futureInfoWidgetMap;
 
@@ -118,6 +122,7 @@ private:
     std::atomic_flag _mutex;
 
     std::unique_ptr<openspace::DownloadManager> _downloadManager;
+    openspace::scripting::ScriptEngine _scriptEngine;
 
 };
 
