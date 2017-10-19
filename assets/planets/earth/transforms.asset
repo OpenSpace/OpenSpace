@@ -16,7 +16,7 @@ local EarthBarycenter = {
 local EarthInertial = {
     -- The default reference frame for Earth-orbiting satellites
     Name = "EarthInertial",
-    Parent = asset.EarthBarycenter.Name,
+    Parent = EarthBarycenter.Name,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -28,7 +28,7 @@ local EarthInertial = {
 
 local EarthIau = {
     Name = "EarthIau",
-    Parent = asset.EarthBarycenter.Name,
+    Parent = EarthBarycenter.Name,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",

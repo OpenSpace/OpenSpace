@@ -1,18 +1,18 @@
 local assetHelper = asset.import("assethelper")
 local transforms = asset.import("./transforms")
 
-assetHelper.registerSynchronizations(asset, {
-    {
-        Type = "HTTPSynchronization",
-        --- todo...
-    }
-})
+--assetHelper.registerSynchronizations(asset, {
+--    {
+--        Type = "HTTPSynchronization",
+--        --- todo...
+--    }
+--})
 
 --asset.onSynchronize = function (onFinish)
 --    onFinish(true)
 --end
 
-asset.Earth = {
+Earth = {
     Name = "Earth",
     Parent = transforms.EarthIau.Name,
     Renderable = {
@@ -36,6 +36,5 @@ asset.Earth = {
 }
 
 assetHelper.registerSceneGraphNodes(asset, {
-    asset.Earth,
-    asset.EarthMarker
+    Earth
 })

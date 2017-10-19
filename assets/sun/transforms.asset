@@ -2,15 +2,15 @@ local assetHelper = asset.import("assethelper")
 asset.import("spice/base")
 
 -- Barycenter of the solar system, expressed in the Galactic frame
-asset.SolarSystemBarycenter = {
+local SolarSystemBarycenter = {
     Name = "SolarSystemBarycenter"
    	-- No parent; this node is attached to the scene graph root
 }
 
 -- Spice frame for the Sun
-asset.SunIau = {
+local SunIau = {
 	Name = "SunIau",
-	Parent = asset.SolarSystemBarycenter.Name,
+	Parent = SolarSystemBarycenter.Name,
 	Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -29,3 +29,6 @@ assetHelper.registerSceneGraphNodes(asset, {
     asset.SolarSystemBarycenter,
     asset.SunIau
 })
+
+asset.export("SolarSystemBarycenter", SolarSystemBarycenter)
+asset.export("SunIau", SunIau)

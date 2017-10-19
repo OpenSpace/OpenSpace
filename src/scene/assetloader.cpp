@@ -106,7 +106,7 @@ Asset* AssetLoader::loadAsset(std::string path) {
     }
 
     ghoul::lua::runScriptFile(*_luaState, path);
-    _importedAssets.emplace(asset->id(), std::move(asset));
+    _importedAssets.emplace(rawAsset->id(), std::move(asset));
 
     return rawAsset;
 }
@@ -118,11 +118,11 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         baseDirectory :
         _assetRootDirectory;
    
-    return directory.path() +
+    return ghoul::filesystem::File(directory.path() +
         ghoul::filesystem::FileSystem::PathSeparator +
         assetPath +
         "." +
-        AssetFileSuffix;
+        AssetFileSuffix);
 }
 
 Asset* AssetLoader::getAsset(std::string name) {

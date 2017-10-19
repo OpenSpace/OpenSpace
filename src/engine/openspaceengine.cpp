@@ -618,10 +618,12 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _renderEngine->startFading(1, 3.0);
 
     if (_scene) {
-        _renderEngine->setCamera(_scene->camera());
-        _navigationHandler->setCamera(_scene->camera());
-        _navigationHandler->setFocusNode(_scene->camera()->parent());
-    
+        Camera* camera = _scene->camera();
+        if (camera) {
+            _renderEngine->setCamera(camera);
+            _navigationHandler->setCamera(camera);
+            _navigationHandler->setFocusNode(camera->parent());
+        }
         // Write keyboard documentation.
         if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
             keyBindingManager().writeDocumentation(
@@ -1339,6 +1341,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "addTag",
                 &luascriptfunctions::addTag,
+                {},
                 "string, string",
                 "Adds a tag (second argument) to a scene graph node (first argument)"
             }
