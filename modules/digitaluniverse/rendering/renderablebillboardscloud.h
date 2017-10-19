@@ -153,6 +153,8 @@ private:
 
     int _nValuesPerAstronomicalObject;
 
+    glm::dmat4 _transformationMatrix;
+
     GLuint _vao;
     GLuint _vbo;
 

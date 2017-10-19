@@ -154,6 +154,12 @@ namespace {
         "astronomical objects."
     };
 
+    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+        "TransformationMatrix",
+        "Transformation Matrix",
+        "Transformation matrix to be applied to each astronomical object."
+    };
+
     static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOptionInfo",
         "Render Option",
@@ -258,7 +264,13 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new Vector2ListVerifier<float>,
                 Optional::Yes,
                 ColorRangeInfo.description
-            }
+            },
+            {
+                TransformationMatrixInfo.identifier,
+                new Matrix4x4Verifier<double>,
+                Optional::Yes,
+                TransformationMatrixInfo.description
+            },
         }
     };
 }
@@ -304,6 +316,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _colorOptionString("")
     , _unit(Parsec)
     , _nValuesPerAstronomicalObject(0)
+    , _transformationMatrix(glm::dmat4(1.0))
     , _vao(0)
     , _vbo(0)
     , _polygonVao(0)
@@ -467,6 +480,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
         }         
         addProperty(_textMinSize);
+    }
+
+    if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
+        _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
     }
 }
 
@@ -1100,7 +1117,8 @@ bool RenderableBillboardsCloud::readLabelFile() {
             dummy.clear();
         }
 
-        _labelData.push_back(std::make_pair(position, label));
+        glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::dvec4(position, 1.0));
+        _labelData.push_back(std::make_pair(transformedPos, label));
             
     } while (!file.eof());
 
@@ -1225,7 +1243,7 @@ void RenderableBillboardsCloud::createDataSlice() {
     }        
 
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) { 
-        glm::dvec4 transformedPos = glm::dvec4(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2], 1.0);
+        glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2], 1.0);
         glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
             
         if (_hasColorMapFile) {

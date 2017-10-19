@@ -14,8 +14,15 @@ return {
             TextColor = { 0.0, 0.8, 0.0, 1.0 },
             TextSize = 22,
             TextMinSize = 10.0,
-            Unit = "Mpc"
+            Unit = "Mpc",
+            TransformationMatrix = {
+                -0.7357425748,    0.67726129641,  0.0,           0.0,
+                -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+                0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+                0.0,              0.0,            0.0,           1.0
+            },
         },
+        --[[
         Transform = {
             Rotation = {
                 Type = "StaticRotation",
@@ -26,6 +33,7 @@ return {
                 }
             }
         },
+        ]]--
         GuiPath = "/Universe/Galaxies"
     }
 }
