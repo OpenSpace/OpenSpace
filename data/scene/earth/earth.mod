@@ -36,7 +36,6 @@ return {
          Renderable = {
               Type = "RenderableAtmosphere",
               Atmosphere = {
-                Type = "RenderableGlobe",
                 -- Atmosphere radius in Km
                 AtmosphereRadius = 6447.0,
                 PlanetRadius    = 6377.0,
@@ -119,6 +118,7 @@ return {
                   --Caster2 = { Name = "Independency Day Ship", Radius = 0.0, }
                },
          },
+         GuiPath = "/Solar System/Planets/Earth"
     },  
     -- EarthTrail module
     {

@@ -65,17 +65,11 @@
 #include "hdr.glsl"
 #include "atmosphere_common.glsl"
 
-const int RenderablePlanet = 1;
-const int RenderableGlobe  = 2;
-
-const uint numberOfShadows = 1;
-
 out vec4 renderTarget;
 in vec3 interpolatedNDCPos;
 
 // Atmosphere applied over a RenderablePlanet or
 // a RenderableGlobe
-uniform int RenderableClass;
 uniform int nAaSamples;
 uniform int cullAtmosphere;
 
@@ -106,16 +100,21 @@ uniform dvec3 ellipsoidRadii;
 /*******************************************************************************
  **** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN OBJECT SPACE SYSTEM ****
  *******************************************************************************/
+// JCC: Remove and use dictionary to 
+// decides the number of shadows
+const uint numberOfShadows = 1;
 
 struct ShadowRenderingStruct {
-        float xu, xp;
-        float rs, rc;
-        vec3 sourceCasterVec;
-        vec3 casterPositionVec;
+        double xu, xp;
+        double rs, rc;
+        dvec3 sourceCasterVec;
+        dvec3 casterPositionVec;
         bool isShadowing;
 };
 
 // Eclipse shadow data
+// JCC: Remove and use dictionary to 
+// decides the number of shadows
 uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
 uniform int shadows;
 uniform bool hardShadows;
@@ -127,16 +126,16 @@ vec4 butterworthFunc(const float d, const float r, const float n) {
 vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], const dvec3 position,
                 const bool ground) {
     if (shadowInfoArray[0].isShadowing) {
-        vec3 pc = vec3(dvec3(shadowInfoArray[0].casterPositionVec) - position);
-        vec3 sc_norm = normalize(shadowInfoArray[0].sourceCasterVec); // we can pass this normalized to the shader
-        vec3 pc_proj = dot(pc, sc_norm) * sc_norm;
-        vec3 d = pc - pc_proj;
+        dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
+        dvec3 sc_norm = shadowInfoArray[0].sourceCasterVec;
+        dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
+        dvec3 d = pc - pc_proj;
         
-        float length_d = length(d);
-        float length_pc_proj = length(pc_proj);
+        float length_d = float(length(d));
+        double length_pc_proj = length(pc_proj);
         
-        float r_p_pi = shadowInfoArray[0].rc * (length_pc_proj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp;        
-        float r_u_pi = shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu;
+        float r_p_pi = float(shadowInfoArray[0].rc * (length_pc_proj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
+        float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu);
         
         if ( length_d < r_u_pi ) { // umbra            
             if (ground) {
@@ -274,50 +273,6 @@ void dCalculateRayRenderableGlobe(out dRay ray, out dvec4 planetPositionObjectCo
   // JCC: Applying the inverse of the model transformation on the object postion in World 
   // space results in imprecision. 
   planetPositionObjectCoords = dvec4(0.0,0.0,0.0,1.0);//dInverseModelTransformMatrix * dvec4(dObjpos.xyz, 1.0);
-
-  // Camera Position in Object Space
-  cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);
-    
-  // ============================
-  // ====== Building Ray ========
-  // Ray in object space (in KM)
-  ray.origin    = cameraPositionInObject * dvec4(0.001, 0.001, 0.001, 1.0);
-  ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
-}
-
-/*
- * Calculates Intersection Ray by walking through
- * all the graphic pipile transformations in the 
- * opposite direction.
- * Instead of passing through all the pipeline,
- * it starts at NDC from the interpolated
- * positions from the screen quad.
- * This method avoids matrices multiplications
- * wherever is possible.
- */
-void dCalculateRayRenderablePlanet(out dRay ray, out dvec4 planetPositionObjectCoords, 
-                                   out dvec4 cameraPositionInObject) {
-  // ======================================
-  // ======= Avoiding Some Matrices =======
-
-  // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
-  // Using the interpolated coords:
-  // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
-  dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0) / gl_FragCoord.w; 
- 
-  // Clip to SGCT Eye
-  dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
-  //sgctEyeCoords /= sgctEyeCoords.w;
-  sgctEyeCoords.w = 1.0;
-    
-  // SGCT Eye to OS World
-  dvec4 worldCoords = dInverseSgctEyeToWorldTranform * sgctEyeCoords;
-
-  // World to Object
-  dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
-
-  // Planet Position in Object Space
-  planetPositionObjectCoords =  dvec4(0.0,0.0,0.0,1.0);//dInverseModelTransformMatrix * dvec4(-dObjpos.xyz + dObjpos.xyz, 1.0);
 
   // Camera Position in Object Space
   cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);

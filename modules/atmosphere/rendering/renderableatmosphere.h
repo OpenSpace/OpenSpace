@@ -54,17 +54,17 @@ struct TransformData;
 
 // Shadow structure
 struct ShadowConfiguration {
-    std::pair<std::string, float> source;
-    std::pair<std::string, float> caster;
+    std::pair<std::string, double> source;
+    std::pair<std::string, double> caster;
 };
 
 struct ShadowRenderingStruct {
-    float xu,
-        xp;
-    float rs,
-        rc;
-    glm::vec3 sourceCasterVec;
-    glm::vec3 casterPositionVec;
+    double xu,
+           xp;
+    double rs,
+           rc;
+    glm::dvec3 sourceCasterVec;
+    glm::dvec3 casterPositionVec;
     bool isShadowing;
 };
 

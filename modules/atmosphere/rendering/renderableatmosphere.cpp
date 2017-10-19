@@ -70,7 +70,6 @@ namespace {
     const char* keyBody         = "Body";
 
     const char* keyAtmosphere               = "Atmosphere";
-    const char* keyAtmosphereType           = "Type";
     const char* keyAtmosphereRadius         = "AtmosphereRadius";
     const char* keyPlanetRadius             = "PlanetRadius";
     const char* keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
@@ -326,7 +325,7 @@ namespace openspace {
                 success = shadowDictionary.getValue(keyShadowSource + 
                     std::to_string(sourceCounter) + ".Name", sourceName);
                 if (success) {
-                    float sourceRadius;
+                    double sourceRadius;
                     success = shadowDictionary.getValue(keyShadowSource + 
                         std::to_string(sourceCounter) + ".Radius", sourceRadius);
                     if (success) {
@@ -352,7 +351,7 @@ namespace openspace {
                     success = shadowDictionary.getValue(keyShadowCaster +
                         std::to_string(casterCounter) + ".Name", casterName);
                     if (success) {
-                        float casterRadius;
+                        double casterRadius;
                         success = shadowDictionary.getValue(keyShadowCaster +
                             std::to_string(casterCounter) + ".Radius", casterRadius);
                         if (success) {
@@ -391,28 +390,6 @@ namespace openspace {
         ghoul::Dictionary atmosphereDictionary;
         success = dictionary.getValue(keyAtmosphere, atmosphereDictionary);
         if (success) {
-            std::string atmTypeString;
-            if (!atmosphereDictionary.getValue(keyAtmosphereType, atmTypeString)) {
-                errorReadingAtmosphereData = true;
-                LWARNING("No Atmosphere Type value expecified for Atmosphere Effects " << name 
-                    << " planet. Types allowed: RenderableGlobe or RenderablePlanet.\nDisabling atmosphere effects for this planet.");
-            }
-            else {
-                if (atmTypeString.compare("RenderableGlobe") == 0) {
-                    _atmosphereType = AtmosphereDeferredcaster::RenderableGlobe;
-                }
-                else if (atmTypeString.compare("RenderablePlanet") == 0) 
-                {
-                    _atmosphereType = AtmosphereDeferredcaster::RenderablePlanet;
-                }
-                else 
-                {
-                    errorReadingAtmosphereData = true;
-                    LWARNING("Wrong atmosphere type specified for " << name 
-                        << " planet. Types allowed: RenderableGlobe or RenderablePlanet.\nDisabling atmosphere effects for this planet.");
-                }
-            }
-
             if (!atmosphereDictionary.getValue(keyAtmosphereRadius, _atmosphereRadius)) {
                 errorReadingAtmosphereData = true;
                 LWARNING("No Atmosphere Radius value expecified for Atmosphere Effects of "
@@ -660,7 +637,6 @@ namespace openspace {
                 _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
                 // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
                 //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
-                _deferredcaster->setRenderableClass(_atmosphereType);
                 _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
 
                 _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
@@ -719,12 +695,6 @@ namespace openspace {
         if (_deferredcaster) {
             _deferredcaster->setTime(data.time.j2000Seconds());
             glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
-            if (_atmosphereType == AtmosphereDeferredcaster::RenderablePlanet) {
-                //earth needs to be rotated
-                glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
-                glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
-                modelTransform = modelTransform * rot * roty;
-            }
             _deferredcaster->setModelTransform(modelTransform);
 
             if (_exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground())
@@ -785,7 +755,6 @@ namespace openspace {
             _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-            _deferredcaster->setRenderableClass(_atmosphereType);
             _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
             //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
 

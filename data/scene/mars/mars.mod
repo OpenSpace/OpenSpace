@@ -143,7 +143,6 @@ return {
         Renderable = {
             Type = "RenderableAtmosphere",
             Atmosphere = {
-                Type = "RenderableGlobe",
                 -- Atmosphere radius in Km
                 AtmosphereRadius = 3463.17495,
                 --PlanetRadius    = 3396.19,
@@ -189,6 +188,7 @@ return {
                 },   
             },
         },
+        GuiPath = "/Solar System/Planets/Mars"        
     },
 
     -- Trail module

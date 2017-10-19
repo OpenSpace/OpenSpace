@@ -92,7 +92,7 @@ namespace {
     const char* GlslDeferredcastVsPath = "${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
 
     const float ATM_EPS = 2.0;
-    const float KM_TO_M = 1000.0;
+    const double KM_TO_M = 1000.0;
 } // namespace
 
 namespace openspace {
@@ -151,8 +151,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _exposureConstant(0.4f)
     , _exposureBackgroundConstant(1.8f)
     , _gammaConstant(1.8f)
-    , _hardShadowsEnabled(false)
-    , _renderableClass(NoRenderableClass)
+    , _hardShadowsEnabled(false)    
     , _calculationTextureScale(1.0)
     , _saveCalculationTextures(false)    
 
@@ -224,7 +223,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
             program.setUniform("exposure", _exposureConstant);
             program.setUniform("backgroundExposure", _exposureBackgroundConstant);
             program.setUniform("gamma", _gammaConstant);
-            program.setUniform("RenderableClass", static_cast<int>(_renderableClass));
 
             program.setUniform("TRANSMITTANCE_W", _transmittance_table_width);
             program.setUniform("TRANSMITTANCE_H", _transmittance_table_height);
@@ -277,14 +275,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
                 sunPosObj = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
             }
             else {
-                if (_renderableClass == RenderablePlanet) {
-                    sunPosObj = inverseModelMatrix *
-                        glm::dvec4(sunPosWorld - renderData.position.dvec3(), 1.0);
-                }
-                else if (_renderableClass == RenderableGlobe) {
-                    sunPosObj = inverseModelMatrix *
-                        glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
-                }
+                sunPosObj = inverseModelMatrix * 
+                    glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
             }
 
             // Sun Position in Object Space
@@ -301,38 +293,39 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
                     // TO REMEMBER: all distances and lengths in world coordinates are in meters!!! We need to move this to view space...
                     // Getting source and caster:
                     glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(shadowConf.source.first, "SUN", "GALACTIC", {}, _time, lt);
-                    sourcePos *= 1000.0; // converting to meters
+                    sourcePos *= KM_TO_M; // converting to meters
                     glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, _time, lt);
-                    casterPos *= 1000.0; // converting to meters
+                    casterPos *= KM_TO_M; // converting to meters
                     psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
 
 
                     // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
-                    glm::vec3 planetCasterVec = (caster_pos - renderData.position).vec3();
-                    glm::vec3 sourceCasterVec = glm::vec3(casterPos - sourcePos);
-                    float sc_length = glm::length(sourceCasterVec);
-                    glm::vec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) * sourceCasterVec;
-                    float d_test = glm::length(planetCasterVec - planetCaster_proj);
-                    float xp_test = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
-                    float rp_test = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
+                    glm::dvec3 planetCasterVec = casterPos - renderData.position.dvec3();
+                    glm::dvec3 sourceCasterVec = casterPos - sourcePos;
+                    double sc_length = glm::length(sourceCasterVec);
+                    glm::dvec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) * sourceCasterVec;
+                    double d_test = glm::length(planetCasterVec - planetCaster_proj);
+                    double xp_test = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
+                    double rp_test = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
 
-                    float casterDistSun = glm::length(casterPos);
-                    float planetDistSun = glm::length(renderData.position.vec3());
+                    glm::dvec3 sunPos = SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
+                    double casterDistSun = glm::length(casterPos - sunPos);
+                    double planetDistSun = glm::length(renderData.position.dvec3() - sunPos);
 
                     ShadowRenderingStruct shadowData;
                     shadowData.isShadowing = false;
 
-                    if (((d_test - rp_test) < (_atmospherePlanetRadius * 1000.0)) &&
-                    //if (((d_test - rp_test) < (_atmosphereRadius * 1000.0)) &&
+                    if (((d_test - rp_test) < (_atmospherePlanetRadius * KM_TO_M)) &&
+                    //if (((d_test - rp_test) < (_atmosphereRadius * KM_TO_M)) &&
                         (casterDistSun < planetDistSun)) {
                         // The current caster is shadowing the current planet
                         shadowData.isShadowing = true;
                         shadowData.rs = shadowConf.source.second;
                         shadowData.rc = shadowConf.caster.second;
-                        shadowData.sourceCasterVec = sourceCasterVec;
+                        shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
                         shadowData.xp = xp_test;
                         shadowData.xu = shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
-                        shadowData.casterPositionVec = glm::vec3(casterPos);
+                        shadowData.casterPositionVec = casterPos;
                     }
                     shadowDataArray.push_back(shadowData);
                 }
@@ -485,10 +478,6 @@ void AtmosphereDeferredcaster::setEllipsoidRadii(const glm::dvec3 & radii) {
     _ellipsoidRadii = radii;
 }
 
-void AtmosphereDeferredcaster::setRenderableClass(const AtmosphereDeferredcaster::AtmospherRenderableClass rc)
-{
-    _renderableClass = rc;
-}
 
 void AtmosphereDeferredcaster::setHardShadows(const bool enabled) {
     _hardShadowsEnabled = enabled;
@@ -1172,7 +1161,6 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(std::unique_p
     shaderProg->setUniform("exposure", _exposureConstant);
     shaderProg->setUniform("backgroundExposure", _exposureBackgroundConstant);
     shaderProg->setUniform("gamma", _gammaConstant);
-    shaderProg->setUniform("RenderableClass", static_cast<int>(_renderableClass));
     shaderProg->setUniform("TRANSMITTANCE_W", (int)_transmittance_table_width);
     shaderProg->setUniform("TRANSMITTANCE_H", (int)_transmittance_table_height);
     shaderProg->setUniform("SKY_W", (int)_irradiance_table_width);

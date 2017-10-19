@@ -117,7 +117,7 @@ function postInitialization()
     -- Defined in scene_helper.lua
     -- Used to create focus buttons for a subset of scenegraph nodes
     mark_interesting_nodes({
-        "Earth", "Mars", "Moon"
+        "Earth", "Mars", "Moon", "EarthAtmosphere", "MarsAtmosphere"
     })
 end
 
