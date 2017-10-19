@@ -24,9 +24,8 @@ return {
                 ColorLayers = {
                     -- MoonTrek based servers
                     {
-                        Name = "WAC [MoonTrek]",
-                        FilePath = "map_service_configs/MoonTrek/LRO WAC.wms",
-                        Enabled = true
+                        Name = "Apollo 16 Metric Cam Image Mosaic",
+                        FilePath = "map_service_configs/MoonTrek/Apollo16_Metric_Cam_Image_Mosaic.wms"
                     },
                     -- Utah based servers
                     {
@@ -38,9 +37,9 @@ return {
                         FilePath = "map_service_configs/Utah/Kaguya.wms"
                     },
                     {
-                        Name = "WAC [Utah]",
-                        FilePath = "map_service_configs/Utah/Wac.wms"
-                        -- Enabled = true,
+                        Name = "WAC Utah",
+                        FilePath = "map_service_configs/Utah/Wac.wms",
+                        Enabled = true
                     }
                 },
                 HeightLayers = {
