@@ -1,6 +1,6 @@
 <GDAL_WMS>
         <Service name="TMS">
-                <ServerUrl>http://moontrek.jpl.nasa.gov/trektiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/default/default028mm/${z}/${y}/${x}.jpg</ServerUrl>
+                <ServerUrl>http://asgard.sci.utah.edu/Moon/Wac/tile/${z}/${y}/${x}</ServerUrl>
         </Service>
         <DataWindow>
                 <UpperLeftX>-180.0</UpperLeftX>
