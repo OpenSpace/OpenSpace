@@ -40,7 +40,7 @@ return {
             Type = "RenderablePlanesCloud",
             Color = { 1.0, 1.0, 1.0 },
             Transparency = 0.99,
-            ScaleFactor = 27.39,
+            ScaleFactor = 1.0,
             File = "speck/tully.speck",
             TexturePath = "textures",
             Luminosity = "diamkpc",
