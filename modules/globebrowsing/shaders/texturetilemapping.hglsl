@@ -61,6 +61,8 @@
 #define USE_ATMOSPHERE #{useAtmosphere}
 #define USE_ACCURATE_NORMALS #{useAccurateNormals}
 #define PERFORM_SHADING #{performShading}
+#define USE_ECLIPSE_SHADOWS #{useEclipseShadows}
+#define USE_ECLIPSE_HARD_SHADOWS #{useEclipseHardShadows}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}

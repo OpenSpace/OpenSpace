@@ -98,7 +98,7 @@ uniform dvec3 sunDirectionObj;
 uniform dvec3 ellipsoidRadii;
 
 /*******************************************************************************
- **** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN OBJECT SPACE SYSTEM ****
+ ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
  *******************************************************************************/
 // JCC: Remove and use dictionary to 
 // decides the number of shadows

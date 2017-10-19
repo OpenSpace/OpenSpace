@@ -45,6 +45,11 @@ out vec3 ellipsoidTangentThetaCameraSpace;
 out vec3 ellipsoidTangentPhiCameraSpace;
 #endif //USE_ACCURATE_NORMALS
 
+#if USE_ECLIPSE_SHADOWS
+out vec3 positionWorldSpace;
+uniform dmat4 modelTransform;
+#endif
+
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
 uniform vec3 radiiSquared;
@@ -119,4 +124,8 @@ void main() {
     ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
     fs_normal = pair.normal;
     positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1.0));
+
+#if USE_ECLIPSE_SHADOWS
+    positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
+#endif
 }

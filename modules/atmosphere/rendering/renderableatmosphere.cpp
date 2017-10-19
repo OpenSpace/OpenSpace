@@ -318,7 +318,7 @@ namespace openspace {
         bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
         bool disableShadows = false;
         if (success) {
-            std::vector<std::pair<std::string, float>> sourceArray;
+            std::vector<std::pair<std::string, double>> sourceArray;
             unsigned int sourceCounter = 1; 
             while (success) {
                 std::string sourceName;
@@ -344,7 +344,7 @@ namespace openspace {
 
             if (!disableShadows && !sourceArray.empty()) {
                 success = true;
-                std::vector<std::pair<std::string, float>> casterArray;
+                std::vector<std::pair<std::string, double>> casterArray;
                 unsigned int casterCounter = 1;
                 while (success) {
                     std::string casterName;

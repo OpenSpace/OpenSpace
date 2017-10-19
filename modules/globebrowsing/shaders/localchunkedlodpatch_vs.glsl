@@ -45,6 +45,11 @@ out vec3 ellipsoidTangentThetaCameraSpace;
 out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
+#if USE_ECLIPSE_SHADOWS
+out vec3 positionWorldSpace;
+uniform dmat4 inverseViewTransform;
+#endif
+
 uniform mat4 projectionTransform;
 // Input points in camera space
 uniform vec3 p00;
@@ -104,4 +109,8 @@ void main() {
     ellipsoidNormalCameraSpace = patchNormalCameraSpace;
     fs_normal = patchNormalModelSpace;
     positionCameraSpace = p;
+
+#if USE_ECLIPSE_SHADOWS
+    positionWorldSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
+#endif
 }

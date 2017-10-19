@@ -308,9 +308,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
                     double xp_test = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
                     double rp_test = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
 
-                    glm::dvec3 sunPos = SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
-                    double casterDistSun = glm::length(casterPos - sunPos);
-                    double planetDistSun = glm::length(renderData.position.dvec3() - sunPos);
+                    double casterDistSun = glm::length(casterPos - sunPosWorld);
+                    double planetDistSun = glm::length(renderData.position.dvec3() - sunPosWorld);
 
                     ShadowRenderingStruct shadowData;
                     shadowData.isShadowing = false;

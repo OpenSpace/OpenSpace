@@ -165,4 +165,17 @@ glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const {
     return rSurface + geodetic3.height * normal;
 }
 
+void Ellipsoid::setShadowConfigurationArray(
+    const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray) {
+    _shadowConfArray = shadowConfArray;
+}
+
+std::vector<Ellipsoid::ShadowConfiguration> Ellipsoid::shadowConfigurationArray() const {
+    return _shadowConfArray;
+}
+
+bool Ellipsoid::hasEclipseShadows() const {
+    return !_shadowConfArray.empty();
+}
+
 } // namespace openspace::globebrowsing

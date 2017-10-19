@@ -60,7 +60,17 @@ return {
                         Settings = { Multiplier = 0.5 },
                     }
                 }
-            }
+            },
+            ShadowGroup = {
+                Source1 = {
+                    Name = "Sun",
+                    Radius = 696.3E6,
+                },
+                Caster1 = { 
+                    Name = "Earth",
+                    Radius = 6.371E6,
+                },
+            },
         },
         GuiPath = "/Solar System/Planets/Earth/Moon"
     },

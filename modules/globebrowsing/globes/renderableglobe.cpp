@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,12 +29,13 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
+
 namespace {
     const char* keyFrame = "Frame";
     const char* keyRadii = "Radii";
     const char* keySegmentsPerPatch = "SegmentsPerPatch";
     const char* keyLayers = "Layers";
-    const char* keyShadowGroup = "Shadow_Group";
+    const char* keyShadowGroup = "ShadowGroup";
     const char* keyShadowSource = "Source";
     const char* keyShadowCaster = "Caster";
 
@@ -134,6 +135,18 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    static const openspace::properties::Property::PropertyInfo EclipseInfo = {
+        "Eclipse",
+        "Eclipse",
+        "Enables/Disable Eclipse shadows"
+    };
+
+    static const openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
+        "EclipseHardShadows",
+        "Eclipse Hard Shadows",
+        "Enables the rendering of eclipse shadows using hard shadows"
+    };    
+
     static const openspace::properties::Property::PropertyInfo LodScaleFactorInfo = {
         "LodScaleFactor",
         "Level of Detail Scale Factor",
@@ -178,12 +191,13 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(PerformShadingInfo, true),
         BoolProperty(AtmosphereInfo, false),
         BoolProperty(AccurateNormalsInfo, false),
+        BoolProperty(EclipseInfo, false),
+        BoolProperty(EclipseHardShadowsInfo, false),
         FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
     , _debugPropertyOwner({ "Debug" })
-    , _shadowEnabled(false)
 {
     setName("RenderableGlobe");
         
@@ -227,6 +241,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
+    addProperty(_generalProperties.eclipseShadowsEnabled);
+    addProperty(_generalProperties.eclipseHardShadows);
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
@@ -252,6 +268,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     };
     _generalProperties.atmosphereEnabled.onChange(notifyShaderRecompilation);
     _generalProperties.useAccurateNormals.onChange(notifyShaderRecompilation);
+    _generalProperties.eclipseShadowsEnabled.onChange(notifyShaderRecompilation);
+    _generalProperties.eclipseHardShadows.onChange(notifyShaderRecompilation);
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
@@ -263,27 +281,30 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_layerManager.get());
     //addPropertySubOwner(_pointGlobe.get());
 
+    //================================================================
+    //======== Reads Shadow (Eclipses) Entries in mod file ===========
+    //================================================================
     ghoul::Dictionary shadowDictionary;
-    bool dicSuccess = dictionary.getValue(keyShadowGroup, shadowDictionary);
+    bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
     bool disableShadows = false;
-    if (dicSuccess) {
-        std::vector< std::pair<std::string, float > > sourceArray;
+    if (success) {
+        std::vector<std::pair<std::string, double>> sourceArray;
         unsigned int sourceCounter = 1;
-        while (dicSuccess) {
+        while (success) {
             std::string sourceName;
-            dicSuccess = shadowDictionary.getValue(keyShadowSource +
+            success = shadowDictionary.getValue(keyShadowSource +
                 std::to_string(sourceCounter) + ".Name", sourceName);
-            if (dicSuccess) {
-                float sourceRadius;
-                dicSuccess = shadowDictionary.getValue(keyShadowSource +
+            if (success) {
+                double sourceRadius;
+                success = shadowDictionary.getValue(keyShadowSource +
                     std::to_string(sourceCounter) + ".Radius", sourceRadius);
-                if (dicSuccess) {
-                    sourceArray.emplace_back(sourceName, sourceRadius);                    
+                if (success) {
+                    sourceArray.emplace_back(sourceName, sourceRadius);
                 }
                 else {
-                    /*LWARNING("No Radius value expecified for Shadow Source Name "
-                        << sourceName << " from " << name
-                        << " planet.\nDisabling shadows for this planet.");*/
+                    //LWARNING("No Radius value expecified for Shadow Source Name "
+                    //    << sourceName << " from " << name
+                    //    << " planet.\nDisabling shadows for this planet.");
                     disableShadows = true;
                     break;
                 }
@@ -292,24 +313,24 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         }
 
         if (!disableShadows && !sourceArray.empty()) {
-            dicSuccess = true;
-            std::vector< std::pair<std::string, float > > casterArray;
+            success = true;
+            std::vector<std::pair<std::string, double>> casterArray;
             unsigned int casterCounter = 1;
-            while (dicSuccess) {
+            while (success) {
                 std::string casterName;
-                dicSuccess = shadowDictionary.getValue(keyShadowCaster +
+                success = shadowDictionary.getValue(keyShadowCaster +
                     std::to_string(casterCounter) + ".Name", casterName);
-                if (dicSuccess) {
-                    float casterRadius;
-                    dicSuccess = shadowDictionary.getValue(keyShadowCaster +
+                if (success) {
+                    double casterRadius;
+                    success = shadowDictionary.getValue(keyShadowCaster +
                         std::to_string(casterCounter) + ".Radius", casterRadius);
-                    if (dicSuccess) {
+                    if (success) {
                         casterArray.emplace_back(casterName, casterRadius);
                     }
                     else {
-                        /*LWARNING("No Radius value expecified for Shadow Caster Name "
-                            << casterName << " from " << name
-                            << " planet.\nDisabling shadows for this planet.");*/
+                        //LWARNING("No Radius value expecified for Shadow Caster Name "
+                        //    << casterName << " from " << name
+                        //    << " planet.\nDisabling shadows for this planet.");
                         disableShadows = true;
                         break;
                     }
@@ -318,19 +339,20 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                 casterCounter++;
             }
 
+            std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
             if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (auto source : sourceArray)
-                    for (auto caster : casterArray) {
-                        ShadowConfiguration sc;
+                for (const auto & source : sourceArray) {
+                    for (const auto & caster : casterArray) {
+                        Ellipsoid::ShadowConfiguration sc;
                         sc.source = source;
                         sc.caster = caster;
-                        _shadowConfArray.push_back(sc);
+                        shadowConfArray.push_back(sc);
                     }
-                _shadowEnabled = true;
+                }
+                _ellipsoid.setShadowConfigurationArray(shadowConfArray);
             }
         }
-    }    
-
+    }
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
     _chunkedLodGlobe->recompileShaders();

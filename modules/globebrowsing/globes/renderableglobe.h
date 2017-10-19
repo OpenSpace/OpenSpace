@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -79,24 +79,21 @@ public:
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty useAccurateNormals;
+        properties::BoolProperty eclipseShadowsEnabled;
+        properties::BoolProperty eclipseHardShadows;
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;        
         properties::FloatProperty orenNayarRoughness;
     };
 
     // Shadow structure
-    struct ShadowConfiguration {
-        std::pair<std::string, float> source;
-        std::pair<std::string, float> caster;
-    };
-
     struct ShadowRenderingStruct {
-        float xu, 
-              xp;
-        float rs, 
-              rc;
-        glm::vec3 sourceCasterVec;
-        glm::vec3 casterPositionVec;
+        double xu, 
+               xp;
+        double rs, 
+               rc;
+        glm::dvec3 sourceCasterVec;
+        glm::dvec3 casterPositionVec;
         bool isShadowing;
     };
     
@@ -153,9 +150,6 @@ private:
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
     
-    // Shadow
-    bool _shadowEnabled;
-    std::vector<ShadowConfiguration> _shadowConfArray;
 };
 
 } // namespace openspace::globebrowsing
