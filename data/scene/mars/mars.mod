@@ -79,20 +79,24 @@ return {
                     },
                     {
                         Name = "Themis IR Day [Utah]",
-                        FilePath = "map_service_configs/Utah/Themis_IR_Day.xml"
+                        FilePath = "map_service_configs/Utah/Themis_IR_Day.xml",
+                        BlendMode = "Color"
                     },
                     {
                         Name = "Themis IR Night [Utah]",
-                        FilePath = "map_service_configs/Utah/Themis_IR_Night.xml"
+                        FilePath = "map_service_configs/Utah/Themis_IR_Night.xml",
+                        BlendMode = "Color"
                     },
 
                     {
                         Name = "Themis IR Day [AWS]",
-                        FilePath = "map_service_configs/AWS/Themis_IR_Day.wms"
+                        FilePath = "map_service_configs/AWS/Themis_IR_Day.wms",
+                        BlendMode = "Color"
                     },
                     {
                         Name = "Themis IR Night [AWS]",
-                        FilePath = "map_service_configs/AWS/Themis_IR_Night.wms"
+                        FilePath = "map_service_configs/AWS/Themis_IR_Night.wms",
+                        BlendMode = "Color"
                     }
                 },
                 Overlays = {
