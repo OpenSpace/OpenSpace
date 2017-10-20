@@ -69,6 +69,7 @@ return {
         Name = "SunMarker",
         Parent = "Sun",
         Renderable = {
+            Enabled = false,
             Type = "RenderablePlane",
             Size = 3.0E11,
             Origin = "Center",

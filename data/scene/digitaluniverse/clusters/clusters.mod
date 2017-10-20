@@ -5,6 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.65,
             LabelFile = "speck/galclust.label",
