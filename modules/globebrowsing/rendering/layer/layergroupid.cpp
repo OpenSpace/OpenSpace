@@ -22,55 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
-#define __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 
-#include <ghoul/designpattern/singleton.h>
-#include <ghoul/glm.h>
+namespace openspace::globebrowsing::layergroupid {
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+TypeID getTypeIDFromTypeString(const std::string& typeString) {
+    for (int i = 0; i < NUM_LAYER_TYPES; ++i) {
+        if (typeString == LAYER_TYPE_NAMES[i]) {
+            return static_cast<TypeID>(i);
+        }
+    }
+    return TypeID::Unknown;
+}
 
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
-#endif // WIN32
+layergroupid::GroupID getGroupIDFromName(const std::string& layerGroupName) {
+    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
+        if (layerGroupName == layergroupid::LAYER_GROUP_NAMES[i]) {
+            return static_cast<layergroupid::GroupID>(i);
+        }
+    }
+    return GroupID::Unknown;
+}
 
-#include <ccmc/Kameleon.h>
+layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
+    const std::string& adjustmentTypeName)
+{
+    for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
+        if (adjustmentTypeName == layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
+            return static_cast<layergroupid::AdjustmentTypeID>(i);
+        }
+    }
+    return AdjustmentTypeID::None;
+}
 
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
-#endif
+layergroupid::BlendModeID getBlendModeIDFromName(
+    const std::string& blendModeName)
+{
+    for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
+        if (blendModeName == layergroupid::BLEND_MODE_NAMES[i]) {
+            return static_cast<layergroupid::BlendModeID>(i);
+        }
+    }
+    return BlendModeID::Normal;
+}
 
-
-#include <set>
-
-namespace ccmc {
-    class Kameleon;
-} // namespace ccmc
-
-namespace openspace {
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-#endif
-class TransformationManager : public ghoul::Singleton<TransformationManager> {
-    friend class ghoul::Singleton<TransformationManager>;
-
-public:
-    TransformationManager();
-    ~TransformationManager();
-
-    glm::dmat3 frameTransformationMatrix(const std::string& from, const std::string& to, double ephemerisTime) const;
-
-private:
-    glm::dmat3 kameleonTransformationMatrix(const std::string& from, const std::string& to, double ephemerisTime) const;
-
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-    std::shared_ptr<ccmc::Kameleon> _kameleon;
-#endif
-    std::set<std::string> _kameleonFrames;
-    std::set<std::string> _dipoleFrames;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
+} // namespace openspace::globebrowsing::layergroupid

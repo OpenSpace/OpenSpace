@@ -34,14 +34,6 @@ namespace openspace::properties {
 
 namespace {
     const char* _loggerCat = "PropertyOwner";
-
-    bool propertyLess(Property* lhs, Property* rhs) {
-        return lhs->identifier() < rhs->identifier();
-    }
-
-    bool subOwnerLess(PropertyOwner* lhs, PropertyOwner* rhs) {
-        return lhs->name() < rhs->name();
-    }
 } // namespace
 
 

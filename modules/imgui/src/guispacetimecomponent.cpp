@@ -262,13 +262,6 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
-    auto setDeltaTime = [](std::chrono::seconds dt) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(dt.count()) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    };
-
     bool minusDs = ImGui::Button("-1d/s");
     if (minusDs) {
         OsEng.scriptEngine().queueScript(

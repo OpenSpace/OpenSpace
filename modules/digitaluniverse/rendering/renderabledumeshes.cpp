@@ -235,15 +235,15 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     //, _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
-    , _drawLabels(DrawLabelInfo, false)
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)        
+    , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _drawElements(DrawElementsInfo, true)
+    , _drawLabels(DrawLabelInfo, false)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
     , _fontRenderer(nullptr)
@@ -251,10 +251,8 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _speckFile("")
     , _labelFile("")
     , _unit(Parsec)
-    , _nValuesPerAstronomicalObject(0)        
+    , _nValuesPerAstronomicalObject(0)
 {
-    using File = ghoul::filesystem::File;
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -382,7 +380,6 @@ void RenderableDUMeshes::initialize() {
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
-        return;
     }
 
     createMeshes();
@@ -400,7 +397,7 @@ void RenderableDUMeshes::initialize() {
 }
 
 void RenderableDUMeshes::deinitialize() {
-    for (auto pair : _renderingMeshesMap) {
+    for (const std::pair<int, RenderingMesh>& pair : _renderingMeshesMap) {
         for (int i = 0; i < pair.second.numU; ++i) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
             glDeleteBuffers(1, &pair.second.vboArray[i]);
@@ -414,8 +411,10 @@ void RenderableDUMeshes::deinitialize() {
     }
 }
 
-void RenderableDUMeshes::renderMeshes(const RenderData& data, const glm::dmat4& modelViewMatrix,
-    const glm::dmat4& projectionMatrix) {
+void RenderableDUMeshes::renderMeshes(const RenderData&,
+                                      const glm::dmat4& modelViewMatrix,
+                                      const glm::dmat4& projectionMatrix)
+{
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabled(GL_BLEND);
     GLenum blendEquationRGB;
@@ -514,7 +513,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data, const glm::dmat4& 
         break;
     }
 
-    for (const auto pair : _labelData) {
+    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;

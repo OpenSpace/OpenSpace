@@ -114,10 +114,10 @@ void TimeManager::consumeKeyframes(double dt) {
         double parameter = (t1 - t0) / (t2 - t0);
         
         double y0 = time().j2000Seconds();
-        double yPrime0 = time().deltaTime();
+        // double yPrime0 = time().deltaTime();
 
         double y2 = nextTime.j2000Seconds();
-        double yPrime2 = nextTime.deltaTime();
+        // double yPrime2 = nextTime.deltaTime();
 
         double y1 = (1 - parameter) * y0 + parameter * y2;
         double y1Prime = (y1 - y0) / dt;
