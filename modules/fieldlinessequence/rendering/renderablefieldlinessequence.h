@@ -136,38 +136,33 @@ private:
     properties::TriggerProperty  _pJumpToStartBtn;      // Button which executes a time jump to start of sequence
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
-    void   addStateToSequence(FieldlinesState& STATE);
-    void   computeSequenceEndTime();
-    void   definePropertyCallbackFunctions();
-    bool   extractJsonInfoFromDictionary(fls::Model& model);
-    bool   extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
-    void   extractOptionalInfoFromDictionary(std::string& outputFolderPath);
-    void   extractOsflsInfoFromDictionary();
-    void   extractTriggerTimesFromFileNames();
-    bool   loadJsonStatesIntoRAM(const std::string& outputFolder);
-    void   loadOsflsStatesIntoRAM(const std::string& outputFolder);
-    void   setModelDependentConstants();
-    void   setupProperties();
-    bool   prepareForOsflsStreaming();
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-    // --- Initialization functions which require the kameleon module to be loaded! --- //
-    bool   extractCdfInfoFromDictionary(std::string& seedFilePath,
-                                        std::string& tracingVar,
-                                        std::vector<std::string>& extraVars);
-    bool   extractSeedPointsFromFile(const std::string& path,
-                                     std::vector<glm::vec3>& outVec);
-    void   extractMagnitudeVarsFromStrings(std::vector<std::string>& extraVars,
-                                           std::vector<std::string>& extraMagVars);
-    bool   getStatesFromCdfFiles(const std::string& outputFolder);
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+    void addStateToSequence(FieldlinesState& STATE);
+    void computeSequenceEndTime();
+    void definePropertyCallbackFunctions();
+    bool extractCdfInfoFromDictionary(std::string& seedFilePath, std::string& tracingVar,
+                                      std::vector<std::string>& extraVars);
+    bool extractJsonInfoFromDictionary(fls::Model& model);
+    void extractMagnitudeVarsFromStrings(std::vector<std::string>& extraVars,
+                                         std::vector<std::string>& extraMagVars);
+    bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
+    void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
+    void extractOsflsInfoFromDictionary();
+    bool extractSeedPointsFromFile(const std::string& path, std::vector<glm::vec3>& outVec);
+    void extractTriggerTimesFromFileNames();
+    bool loadJsonStatesIntoRAM(const std::string& outputFolder);
+    void loadOsflsStatesIntoRAM(const std::string& outputFolder);
+    bool getStatesFromCdfFiles(const std::string& outputFolder);
+    void setModelDependentConstants();
+    void setupProperties();
+    bool prepareForOsflsStreaming();
 
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     inline bool isWithinSequenceInterval(const double currentTime) const;
-    void   readNewState(const std::string& filePath);
-    void   updateActiveTriggerTimeIndex(const double currentTime);
-    void   updateVertexPositionBuffer();
-    void   updateVertexColorBuffer();
-    void   updateVertexMaskingBuffer();
+    void readNewState(const std::string& filePath);
+    void updateActiveTriggerTimeIndex(const double currentTime);
+    void updateVertexPositionBuffer();
+    void updateVertexColorBuffer();
+    void updateVertexMaskingBuffer();
 };
 
 } // namespace openspace

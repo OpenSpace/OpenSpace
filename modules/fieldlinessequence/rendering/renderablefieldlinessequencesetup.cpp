@@ -24,10 +24,7 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-    #include <ccmc/Kameleon.h>
-    #include <modules/kameleon/include/kameleonhelper.h>
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+#include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -224,11 +221,9 @@ void RenderableFieldlinesSequence::initialize() {
     // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM SOURCE
     switch (sourceFileType) {
         case SourceFileType::Cdf:
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
             if (!getStatesFromCdfFiles(outputFolderPath)) {
                 return;
             }
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
             break;
         case SourceFileType::Json:
             if (!loadJsonStatesIntoRAM(outputFolderPath)) {
@@ -313,10 +308,6 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         // Verify that the input type is correct
         if (inputFileTypeString == ValueInputFileTypeCdf) {
             sourceFileType = SourceFileType::Cdf;
-#ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
-            LERROR(_name << ": CDF file inputs requires the 'Kameleon' module to be enabled!");
-            return false;
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
         } else if (inputFileTypeString == ValueInputFileTypeJson) {
             sourceFileType = SourceFileType::Json;
         } else if (inputFileTypeString == ValueInputFileTypeOsfls) {
@@ -705,7 +696,6 @@ void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
     _nStates++;
 }
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outputFolder) {
 
     std::string seedFilePath;
@@ -724,30 +714,13 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
     extractMagnitudeVarsFromStrings(extraVars, extraMagVars);
 
     // Load states into RAM!
-    for (std::string filePath : _sourceFiles) {
-        // Create Kameleon object and open CDF file!
-        std::unique_ptr<ccmc::Kameleon> kameleon =
-                kameleonHelper::createKameleonObject(filePath);
+    for (std::string cdfPath : _sourceFiles) {
 
         FieldlinesState newState;
-        newState.setTriggerTime(kameleonHelper::getTime(kameleon.get()));
+        bool isSuccessful = fls::convertCdfToFieldlinesState(newState, cdfPath,
+                seedPoints, tracingVar, extraVars, extraMagVars);
 
-        if (newState.addLinesFromKameleon(kameleon.get(), seedPoints, tracingVar)) {
-            // The line points are in their RAW format (unscaled & maybe spherical)
-            // Before we scale to meters (and maybe cartesian) we must extract
-            // the extraQuantites, as the iterpolator needs the unaltered positions
-            newState.addExtraQuantities(kameleon.get(), extraVars, extraMagVars);
-            switch (newState.model()) {
-                case fls::Batsrus:
-                    newState.scalePositions(fls::ReToMeter);
-                    break;
-                case fls::Enlil :
-                    newState.convertLatLonToCartesian(fls::AuToMeter);
-                    break;
-                default:
-                    break;
-            }
-
+        if (isSuccessful) {
             addStateToSequence(newState);
             if (!outputFolder.empty()) {
                 newState.saveStateToOsfls(outputFolder);
@@ -756,9 +729,7 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
     }
     return true;
 }
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 /*
  * Returns false if it fails to extract mandatory information!
  */
@@ -798,9 +769,7 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(
 
     return true;
 }
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 bool RenderableFieldlinesSequence::extractSeedPointsFromFile(
             const std::string& path,
             std::vector<glm::vec3>& outVec) {
@@ -829,13 +798,10 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(
 
     return true;
 }
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
         std::vector<std::string>& extraVars,
         std::vector<std::string>& extraMagVars) {
-
 
     for (int i = 0; i < extraVars.size(); i++) {
         const std::string str = extraVars[i];
@@ -861,6 +827,5 @@ void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
         }
     }
 }
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 } // namespace openspace
