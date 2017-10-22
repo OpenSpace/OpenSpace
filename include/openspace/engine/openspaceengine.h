@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -30,7 +30,6 @@
 #include <openspace/util/mouse.h>
 #include <ghoul/glm.h>
 
-#include <optional>
 #include <functional>
 #include <memory>
 #include <string>
@@ -217,7 +216,8 @@ private:
         properties::StringProperty sourceControlInformation;
     } _versionInformation;
     
-    std::optional<std::string> _scheduledAssetPathToLoad;
+    bool _hasScheduledAssetLoading;
+    std::string _scheduledAssetPathToLoad;
 
     struct {
         std::vector<std::function<void()>> initialize;

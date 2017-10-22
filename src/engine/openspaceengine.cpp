@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -1064,9 +1064,10 @@ void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
     FileSys.triggerFilesystemEvents();
 
-    if (_scheduledAssetPathToLoad.has_value()) {
-        loadSingleAsset(_scheduledAssetPathToLoad.value());
-        _scheduledAssetPathToLoad.reset();
+    if (_hasScheduledAssetLoading) {
+        loadSingleAsset(_scheduledAssetPathToLoad);
+        _hasScheduledAssetLoading = false;
+        _scheduledAssetPathToLoad = "";
     }
 
     if (_isFirstRenderingFirstFrame) {

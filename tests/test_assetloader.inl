@@ -132,7 +132,7 @@ TEST_F(AssetLoaderTest, DependencyFuncitons) {
 
 TEST_F(AssetLoaderTest, AssetInitialization) {
     try {
-        openspace::Asset* asset = _assetLoader->loadSingleAsset("initialization");
+        std::shared_ptr<openspace::Asset> asset = _assetLoader->loadSingleAsset("initialization");
         asset->initialize();
         EXPECT_TRUE(passed());
     }

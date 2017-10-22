@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -39,6 +39,7 @@ Asset::Asset(AssetLoader* loader)
     //: PropertyOwner({ "RootAsset", "Root asset" })
     : _readyState(Asset::ReadyState::Loaded)
     , _loader(loader)
+    , _hasAssetPath(false)
     , _assetName("Root Asset")
 
 {}
@@ -47,6 +48,7 @@ Asset::Asset(AssetLoader* loader, ghoul::filesystem::File assetPath)
     //: PropertyOwner({ assetPath, assetPath })
     : _readyState(Asset::ReadyState::Loaded)
     , _loader(loader)
+    , _hasAssetPath(true)
     , _assetPath(assetPath)
 {}
 
@@ -67,7 +69,7 @@ std::string Asset::syncDirectory() const {
         ghoul::filesystem::FileSystem::PathSeparator +
         relativePath +
         ghoul::filesystem::FileSystem::PathSeparator +
-        ghoul::filesystem::File(_assetPath.value()).baseName();
+        ghoul::filesystem::File(_assetPath).baseName();
 }
 
 Asset::ReadyState Asset::readyState() const {
@@ -186,19 +188,19 @@ std::string Asset::resolveSyncedResource(std::string resourceName) {
 }
 
 std::string Asset::id() const {
-    return _assetPath.has_value() ? _assetPath.value() : "$root";
+    return _hasAssetPath ? _assetPath : "$root";
 }
 
 std::string Asset::assetFilePath() const {
-    return _assetPath.value();
+    return _assetPath;
 }
 
 bool Asset::hasAssetFile() const {
-    return _assetPath.has_value();
+    return _hasAssetPath;
 }
 
 std::string Asset::assetDirectory() const {
-    return ghoul::filesystem::File(_assetPath.value()).directoryName();
+    return ghoul::filesystem::File(_assetPath).directoryName();
 }
 
 std::string Asset::assetName() const {

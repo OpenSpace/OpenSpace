@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -31,7 +31,6 @@
 #include <ghoul/filesystem/file.h>
 #include <string>
 #include <vector>
-#include <optional>
 
 #include <memory>
 #include <set>
@@ -101,11 +100,12 @@ private:
     AssetLoader* _loader;
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
 
+    bool _hasAssetPath;
     // The name of the asset
     std::string _assetName;
 
     // Absolute path to asset file
-    std::optional<std::string> _assetPath;
+    std::string _assetPath;
 
     // Required dependencies
     std::vector<std::shared_ptr<Asset>> _requiredDependencies;
