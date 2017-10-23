@@ -69,6 +69,8 @@ StaticTranslation::StaticTranslation()
     )
 {
     addProperty(_position);
+
+    _position.onChange([&](){ _positionValue = _position; });
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
@@ -81,10 +83,6 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     );
 
     _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
-}
-
-glm::dvec3 StaticTranslation::position() const {
-    return _position;
 }
 
 } // namespace openspace

@@ -43,13 +43,11 @@ function (handle_applications)
     foreach (app ${appDirs})
         set(app_dir "${OPENSPACE_APPS_DIR}/${app}")
         string(TOUPPER ${app} upper_app)
-        message ("${app} ${OPENSPACE_APPLICATION_${upper_app}}")
         if (OPENSPACE_APPLICATION_${upper_app})
+            message(STATUS "Adding application ${app}")
             add_subdirectory(${app_dir})
         endif ()
     endforeach ()
-
-    message("Done")
 endfunction()
 
 

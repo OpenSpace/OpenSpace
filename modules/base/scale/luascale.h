@@ -22,28 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___STATICSCALE___H__
-#define __OPENSPACE_MODULE_BASE___STATICSCALE___H__
+#ifndef __OPENSPACE_MODULE_BASE___LUASCALE___H__
+#define __OPENSPACE_MODULE_BASE___LUASCALE___H__
 
 #include <openspace/scene/scale.h>
 
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
+
+#include <ghoul/lua/luastate.h>
 
 namespace openspace {
     
 namespace documentation { struct Documentation; }
     
-class StaticScale : public Scale {
+class LuaScale : public Scale {
 public:
-    StaticScale();
-    StaticScale(const ghoul::Dictionary& dictionary);
+    LuaScale();
+    LuaScale(const ghoul::Dictionary& dictionary);
+
+    void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    properties::FloatProperty _scaleValue;
+    properties::StringProperty _luaScriptFile;
+    ghoul::lua::LuaState _state;
 };
-    
+
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___STATICSCALE___H__
+#endif // __OPENSPACE_MODULE_BASE___LUASCALE___H__

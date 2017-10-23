@@ -22,52 +22,98 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/scale/staticscale.h>
+#include <modules/base/scale/luascale.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include <chrono>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "This value is used as a scaling factor for the scene graph node that this "
-        "transformation is attached to relative to its parent."
+    static const openspace::properties::Property::PropertyInfo ScriptInfo = {
+        "Script",
+        "Script",
+        "This value is the path to the Lua script that will be executed to compute the "
+        "scaling factor for this transformation. The script needs to define a function "
+        "'scale' that takes the current simulation time in seconds past the J2000 epoch "
+        "as the first argument, the current wall time as milliseconds past the J2000 "
+        "epoch the second argument and computes the scaling factor."
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation StaticScale::Documentation() {
+documentation::Documentation LuaScale::Documentation() {
     using namespace openspace::documentation;
     return {
-        "Static Scaling",
-        "base_scale_static",
+        "Lua Scaling",
+        "base_scale_lua",
         {
             {
-                ScaleInfo.identifier,
-                new DoubleVerifier,
+                ScriptInfo.identifier,
+                new StringVerifier,
                 Optional::No,
-                ScaleInfo.description
+                ScriptInfo.description
             }
         }
     };
 }
 
-StaticScale::StaticScale()
-    : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6)
+LuaScale::LuaScale()
+    : _luaScriptFile(ScriptInfo)
+    , _state(false)
 {
-    addProperty(_scaleValue);
-
-    _scaleValue.onChange([&](){ _scale = _scaleValue; });
+    addProperty(_luaScriptFile);
 }
 
-StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
-    : StaticScale()
+LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
+    : LuaScale()
 {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "LuaScale");
+
+    _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
+}
+
+void LuaScale::update(const UpdateData& data) {
+    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+
+    // Get the scaling function
+    lua_getglobal(_state, "scale");
+    bool isFunction = lua_isfunction(_state, -1);
+    if (!isFunction) {
+        LERRORC(
+            "LuaScale",
+            "Script '" << _luaScriptFile << "' does not have a function 'scale'"
+        );
+        return;
+    }
+
+    // First argument is the number of seconds past the J2000 epoch in ingame time
+    lua_pushnumber(_state, data.time.j2000Seconds());
+
+    // Second argument is the number of milliseconds past the J2000 epoch in wallclock
+    using namespace std::chrono;
+    auto now = high_resolution_clock::now();
+    lua_pushnumber(
+        _state,
+        duration_cast<milliseconds>(now.time_since_epoch()).count()
+    );
     
-    _scaleValue = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
+    // Execute the scaling function
+    int success = lua_pcall(_state, 2, 1, 0);
+    if (success != 0) {
+        LERRORC(
+            "LuaScale",
+            "Error executing 'scale': " << lua_tostring(_state, -1)
+        );
+    }
+
+    _scale = luaL_checknumber(_state, -1);
 }
 
 } // namespace openspace
