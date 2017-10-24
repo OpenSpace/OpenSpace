@@ -48,6 +48,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
+#include <openspace/scene/scenelicense.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/scenemanager.h>
 
@@ -641,6 +642,15 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         keyBindingManager().writeDocumentation(
             absPath(configurationManager().value<std::string>(
                 ConfigurationManager::KeyKeyboardShortcuts
+            ))
+        );
+    }
+
+    if (configurationManager().hasKey(ConfigurationManager::KeySceneLicenseDocumentation))
+    {
+        scene->writeSceneLicenseDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeySceneLicenseDocumentation
             ))
         );
     }
