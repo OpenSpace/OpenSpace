@@ -1399,14 +1399,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     };
 }
 
-void OpenSpaceEngine::enableBarrier() {
-    _windowWrapper->setBarrier(true);
-}
-
-void OpenSpaceEngine::disableBarrier() {
-    _windowWrapper->setBarrier(false);
-}
-
 // Registers a callback for a specific CallbackOption
 void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption option,
                                              std::function<void()> function)
@@ -1440,7 +1432,7 @@ void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption opt
             throw ghoul::MissingCaseException();
     }
 }
-    
+
 void OpenSpaceEngine::registerModuleKeyboardCallback(
                                std::function<bool (Key, KeyModifier, KeyAction)> function)
 {

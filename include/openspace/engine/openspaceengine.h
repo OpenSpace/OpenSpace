@@ -98,9 +98,6 @@ public:
     void decode();
 
     void scheduleLoadScene(std::string scenePath);
-
-    void enableBarrier();
-    void disableBarrier();
     
     void writeDocumentation();
     void toggleShutdownMode();
