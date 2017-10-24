@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -62,6 +62,7 @@ public:
     void updateRaycastData();
     void updateDeferredcastData();
     void updateHDRData();
+    void updateMSAASamplingPattern();
 
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
@@ -118,6 +119,7 @@ private:
     Camera* _camera;
     Scene* _scene;
     glm::vec2 _resolution;
+    std::vector<glm::vec2> _msaaSamplePattern;
     int _nAaSamples;
     float _hdrExposure;
     float _hdrBackground;
