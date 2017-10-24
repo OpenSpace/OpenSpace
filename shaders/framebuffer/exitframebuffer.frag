@@ -24,7 +24,6 @@
 
 #version __CONTEXT__
 
-
 #include "floatoperations.glsl"
 #include <#{fragmentPath}>
 

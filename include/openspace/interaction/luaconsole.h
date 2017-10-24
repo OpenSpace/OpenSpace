@@ -55,6 +55,7 @@ public:
 
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
+
     void addToCommand(std::string c);
     std::string sanitizeInput(std::string str);
 
@@ -68,7 +69,6 @@ private:
     properties::Vec4Property _historyTextColor;
     properties::IntProperty _historyLength;
 
-    
     size_t _inputPosition;
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand;
