@@ -176,7 +176,31 @@ int addTag(lua_State* L) {
         return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
     }
 
-    node->addTag(tag);
+    node->addTag(std::move(tag));
+
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * removeTag():
+ * Removes a tag from a SceneGraphNode
+ */
+int removeTag(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 2) {
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    }
+
+    const std::string uri = lua_tostring(L, -2);
+    const std::string tag = lua_tostring(L, -1);
+
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
+    if (!node) {
+        return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
+    }
+
+    node->removeTag(tag);
 
     return 0;
 }

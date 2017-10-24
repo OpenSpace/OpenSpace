@@ -23,7 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/util/timemanager.h>
+
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/util/timeline.h>
 
@@ -45,7 +47,7 @@ void TimeManager::preSynchronization(double dt) {
 }
 
 void TimeManager::consumeKeyframes(double dt) {
-    double now = OsEng.runTime();
+    double now = OsEng.windowWrapper().applicationTime();
     
     const std::deque<Keyframe<Time>>& keyframes = _timeline.keyframes();
     auto firstFutureKeyframe = std::lower_bound(keyframes.begin(), keyframes.end(), now, &compareKeyframeTimeWithTime);

@@ -165,7 +165,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     }
     , _scheduledSceneSwitch(false)
     , _scenePath("")
-    , _runTime(0.0)
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
@@ -321,23 +320,17 @@ void OpenSpaceEngine::create(int argc, char** argv,
         ConfigurationManager::KeyPerSceneCache
     );
     std::string cacheFolder = absPath("${CACHE}");
-    if (hasCacheCommandline) {
-        cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
-        // @CLEANUP:  Why is this commented out? ---abock
-        //FileSys.registerPathToken(
-        //    "${CACHE}",
-        //    commandlineArgumentPlaceholders.cacheFolder,
-        //    ghoul::filesystem::FileSystem::Override::Yes
-        //);
-    }
-    if (hasCacheConfiguration) {
-        std::string scene = _engine->configurationManager().value<std::string>(
-            ConfigurationManager::KeyConfigScene
-        );
-        cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
-    }
-
     if (hasCacheCommandline || hasCacheConfiguration) {
+        if (hasCacheCommandline) {
+            cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
+        }
+        if (hasCacheConfiguration) {
+            std::string scene = _engine->configurationManager().value<std::string>(
+                ConfigurationManager::KeyConfigScene
+            );
+            cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
+        }
+
         LINFO("Old cache: " << absPath("${CACHE}"));
         LINFO("New cache: " << cacheFolder);
         FileSys.registerPathToken(
@@ -348,8 +341,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     }
 
     // Create directories that doesn't exist
-    auto tokens = FileSys.tokens();
-    for (const std::string& token : tokens) {
+    for (const std::string& token : FileSys.tokens()) {
         if (!FileSys.directoryExists(token)) {
             std::string p = absPath(token);
             FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
@@ -378,9 +370,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     }
 
     // Create the cachemanager
-    FileSys.createCacheManager(
-        absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion
-    );
+    FileSys.createCacheManager(cacheFolder, CacheVersion);
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -446,7 +436,7 @@ void OpenSpaceEngine::initialize() {
     glbinding::Binding::useCurrentContext();
     glbinding::Binding::initialize();
 
-    // clear the screen so the user don't have to see old buffer contents from the
+    // clear the screen so the user doesn't have to see old buffer contents from the
     // graphics card
     LDEBUG("Clearing all Windows");
     _windowWrapper->clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
@@ -912,10 +902,11 @@ void OpenSpaceEngine::initializeGL() {
     }
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(end)");
 
-    const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
-    if (_configurationManager->hasKey(key)) {
+    if (_configurationManager->hasKey(ConfigurationManager::KeyOpenGLDebugContext)) {
         LTRACE("OpenSpaceEngine::initializeGL::DebugContext(begin)");
-        ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
+        ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(
+            ConfigurationManager::KeyOpenGLDebugContext
+        );
         bool debug = dict.value<bool>(ConfigurationManager::PartActivate);
 
         // Debug output is not available before 4.3
@@ -934,7 +925,6 @@ void OpenSpaceEngine::initializeGL() {
             }
 
             setDebugOutput(DebugOutput(debug), SynchronousOutput(synchronous));
-
 
             if (dict.hasKey(ConfigurationManager::PartFilterIdentifier)) {
                 ghoul::Dictionary filterDict = dict.value<ghoul::Dictionary>(
@@ -1112,20 +1102,9 @@ void OpenSpaceEngine::initializeGL() {
     
     LINFO("Finished initializing OpenGL");
 
-    LINFO("IsUsingSwapGroups: " << _windowWrapper->isUsingSwapGroups());
-    LINFO("IsSwapGroupMaster: " << _windowWrapper->isSwapGroupMaster());
-    
     LTRACE("OpenSpaceEngine::initializeGL(end)");
 }
 
-double OpenSpaceEngine::runTime() {
-    return _runTime;
-}
-
-void OpenSpaceEngine::setRunTime(double d) {
-    _runTime = d;
-}
-    
 void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
     FileSys.triggerFilesystemEvents();
@@ -1236,7 +1215,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         func();
     }
 
-    if (_shutdown.inShutdown) {
+    if (isGuiWindow && _shutdown.inShutdown) {
         _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
     }
 
@@ -1409,17 +1388,15 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::addTag,
                 "string, string",
                 "Adds a tag (second argument) to a scene graph node (first argument)"
+            },
+            {
+                "removeTag",
+                &luascriptfunctions::removeTag,
+                "string, string",
+                "Removes a tag (second argument) from a scene graph node (first argument)"
             }
         }
     };
-}
-
-void OpenSpaceEngine::enableBarrier() {
-    _windowWrapper->setBarrier(true);
-}
-
-void OpenSpaceEngine::disableBarrier() {
-    _windowWrapper->setBarrier(false);
 }
 
 // Registers a callback for a specific CallbackOption
@@ -1455,7 +1432,7 @@ void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption opt
             throw ghoul::MissingCaseException();
     }
 }
-    
+
 void OpenSpaceEngine::registerModuleKeyboardCallback(
                                std::function<bool (Key, KeyModifier, KeyAction)> function)
 {

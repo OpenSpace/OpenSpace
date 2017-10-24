@@ -416,6 +416,13 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 &luascriptfunctions::removeSceneGraphNode,
                 "string",
                 "Removes the SceneGraphNode identified by name"
+            },
+            {
+                "hasSceneGraphNode",
+                &luascriptfunctions::hasSceneGraphNode,
+                "string",
+                "Checks whether the specifies SceneGraphNode is present in the current "
+                "scene"
             }
         }
     };
