@@ -139,10 +139,12 @@ void GuiSpaceTimeComponent::render() {
     CaptionText("Time Controls");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
+    ImGui::Text("Current Date: %s", OsEng.timeManager().time().UTC().c_str());
+
     constexpr int BufferSize = 256;
     static char Buffer[BufferSize];
     bool dateChanged = ImGui::InputText(
-        "Date",
+        "Change Date",
         Buffer,
         BufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
@@ -207,8 +209,26 @@ void GuiSpaceTimeComponent::render() {
         incrementTime(-1);
     }
     ImGui::SameLine();
-    
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 55.f);
+
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
+
+    bool nowDay = ImGui::Button("Now");
+    if (nowDay) {
+        std::string nowTime = Time::now().UTC();
+        // UTC returns a string of the type YYYY MMM DDTHH:mm:ss.xxx
+        // setTime doesn't like the T in it and wants a space instead
+        nowTime[11] = ' ';
+        
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setTime(\"" + nowTime + "\")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
+    }
+    ImGui::SameLine();
+
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
+
 
     bool plusDay = ImGui::Button("+Day");
     if (plusDay) {
@@ -261,13 +281,6 @@ void GuiSpaceTimeComponent::render() {
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
-
-    auto setDeltaTime = [](std::chrono::seconds dt) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(dt.count()) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    };
 
     bool minusDs = ImGui::Button("-1d/s");
     if (minusDs) {

@@ -38,8 +38,6 @@ public:
     StaticTranslation();
     StaticTranslation(const ghoul::Dictionary& dictionary);
 
-    virtual glm::dvec3 position() const override;
-
     static documentation::Documentation Documentation();
 
 private:

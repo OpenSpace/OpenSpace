@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,19 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+#ifndef __OPENSPACE_MODULE_BASE___LUASCALE___H__
+#define __OPENSPACE_MODULE_BASE___LUASCALE___H__
 
-in vec4 vs_positionScreenSpace;
-in vec4 vs_pointColor;
+#include <openspace/scene/scale.h>
 
+#include <openspace/properties/stringproperty.h>
 
-Fragment getFragment() {
-    if (vs_pointColor.a < 0.01) {
-        discard;
-    }
-    Fragment frag;
-    frag.color = vs_pointColor;
-    frag.depth = vs_positionScreenSpace.w;
-    return frag;
-}
+#include <ghoul/lua/luastate.h>
+
+namespace openspace {
+    
+namespace documentation { struct Documentation; }
+    
+class LuaScale : public Scale {
+public:
+    LuaScale();
+    LuaScale(const ghoul::Dictionary& dictionary);
+
+    void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    properties::StringProperty _luaScriptFile;
+    ghoul::lua::LuaState _state;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___LUASCALE___H__

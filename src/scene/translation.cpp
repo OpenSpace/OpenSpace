@@ -73,6 +73,7 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
 
 Translation::Translation()
     : properties::PropertyOwner({ "Translation" })
+    , _positionValue(glm::dvec3(0.0))
 {}
 
 bool Translation::initialize() {
@@ -80,6 +81,10 @@ bool Translation::initialize() {
 }
     
 void Translation::update(const UpdateData&) {}
+
+glm::dvec3 Translation::position() const {
+    return _positionValue;
+}
 
 glm::dvec3 Translation::position(double time) {
     update({

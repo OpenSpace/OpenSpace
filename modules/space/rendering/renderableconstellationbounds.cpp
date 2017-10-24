@@ -274,8 +274,10 @@ bool RenderableConstellationBounds::loadVertexFile() {
 
     std::string fileName = absPath(_vertexFilename);
     std::ifstream file;
-    file.exceptions(std::ifstream::goodbit);
     file.open(fileName);
+    if (!file.good()) {
+        return false;
+    }
 
     ConstellationBound currentBound;
     currentBound.constellationAbbreviation = "";

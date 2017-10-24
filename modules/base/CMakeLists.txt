@@ -37,8 +37,11 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -56,8 +59,11 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
@@ -67,13 +73,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/path_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/path_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/path_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pscstandard_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pscstandard_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderabletrail_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderabletrail_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/screenspace_fs.glsl

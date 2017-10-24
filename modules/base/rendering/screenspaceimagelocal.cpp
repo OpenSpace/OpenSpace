@@ -38,7 +38,6 @@
 
 namespace {
     const char* KeyName = "Name";
-    const char* KeyUrl = "URL";
 
     static const openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
