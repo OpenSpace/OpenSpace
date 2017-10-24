@@ -139,6 +139,10 @@ void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
     }
 }
 
+void Scene::addSceneLicense(SceneLicense license) {
+    _licenses.push_back(std::move(license));
+}
+
 void Scene::updateDependencies() {
     sortTopologically();
 }
@@ -270,6 +274,11 @@ SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
 
 const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
     return _topologicallySortedNodes;
+}
+
+void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
+    SceneLicenseWriter writer(_licenses);
+    writer.writeDocumentation(path);
 }
 
 std::string Scene::generateJson() const {
