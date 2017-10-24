@@ -313,7 +313,6 @@ void mainInitFunc() {
 
 void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(begin)");
-    OsEng.setRunTime(sgct::Engine::getTime());
     OsEng.preSynchronization();
     LTRACE("main::mainPreSyncFunc(end)");
 }
