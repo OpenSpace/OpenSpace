@@ -1215,7 +1215,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         func();
     }
 
-    if (_shutdown.inShutdown) {
+    if (isGuiWindow && _shutdown.inShutdown) {
         _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
     }
 
@@ -1388,6 +1388,12 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::addTag,
                 "string, string",
                 "Adds a tag (second argument) to a scene graph node (first argument)"
+            },
+            {
+                "removeTag",
+                &luascriptfunctions::removeTag,
+                "string, string",
+                "Removes a tag (second argument) from a scene graph node (first argument)"
             }
         }
     };

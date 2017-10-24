@@ -282,4 +282,11 @@ void PropertyOwner::addTag(std::string tag) {
     _tags.push_back(std::move(tag));
 }
 
+void PropertyOwner::removeTag(const std::string& tag) {
+    _tags.erase(
+        std::remove(_tags.begin(), _tags.end(), tag),
+        _tags.end()
+    );
+}
+
 } // namespace openspace::properties
