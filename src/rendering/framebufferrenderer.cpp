@@ -69,7 +69,7 @@ void saveTextureToPPMFile(const GLenum color_buffer_attachment,
     const std::string & fileName,
     const int width, const int height);
 void saveTextureToMemory(const GLenum color_buffer_attachment, 
-    const int width, const int height, GLfloat ** memory);
+    const int width, const int height, float ** memory);
 
 FramebufferRenderer::FramebufferRenderer()
     : _camera(nullptr)
@@ -1225,7 +1225,11 @@ float FramebufferRenderer::hdrBackground() const {
     return _hdrBackground;
 }
 
-const GLfloat * FramebufferRenderer::mSSAPattern() const {
+const int FramebufferRenderer::nAaSamples() const {
+    return _nAaSamples;
+}
+
+const float * FramebufferRenderer::mSSAPattern() const {
     return _mSAAPattern;
 }
 
@@ -1278,13 +1282,13 @@ void saveTextureToPPMFile(const GLenum color_buffer_attachment,
 }
 
 void saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, GLfloat ** memory) {
+    const int width, const int height, float ** memory) {
     
     if (*memory != nullptr) {
         delete[] *memory;
     }
 
-    *memory = new GLfloat[width*height * 3];
+    *memory = new float[width*height * 3];
     
     if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
         glReadBuffer(color_buffer_attachment);

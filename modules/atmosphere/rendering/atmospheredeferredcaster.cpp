@@ -72,6 +72,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderer.h>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -193,6 +194,15 @@ void AtmosphereDeferredcaster::deinitialize()
 void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
                                           ghoul::opengl::ProgramObject& program) 
 {    
+    // MSAA pixel position pattern
+    const Renderer * currentRenderer = OsEng.renderEngine().renderer();
+    const float * mssaPatternArray = currentRenderer->mSSAPattern();
+
+    for (int i = 0; i < OsEng.renderEngine().renderer()->nAaSamples() * 3; ++i) {
+        std::cout << mssaPatternArray[i] << " ";
+    }
+    std::cout << std::endl;
+
     // Atmosphere Frustum Culling
     glm::dvec3 tPlanetPosWorld = glm::dvec3(_modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
 

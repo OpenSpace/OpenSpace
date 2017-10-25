@@ -61,6 +61,8 @@ public:
     virtual void setGamma(const float gamma) = 0;
 
     virtual float hdrBackground() const = 0;
+    virtual const int nAaSamples() const = 0;
+    virtual const float * mSSAPattern() const = 0;
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.

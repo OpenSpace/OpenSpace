@@ -73,8 +73,8 @@ public:
     void setGamma(const float gamma) override;
 
     float hdrBackground() const override;
-
-    const GLfloat * mSSAPattern() const;
+    const int nAaSamples() const override;
+    const float * mSSAPattern() const override;
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -121,13 +121,12 @@ private:
     Camera* _camera;
     Scene* _scene;
     glm::vec2 _resolution;
-    std::vector<glm::vec2> _msaaSamplePattern;
     int _nAaSamples;
     float _hdrExposure;
     float _hdrBackground;
     float _gamma;
 
-    GLfloat * _mSAAPattern;
+    float * _mSAAPattern;
 
     ghoul::Dictionary _rendererData;
 };
