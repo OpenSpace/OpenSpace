@@ -74,6 +74,8 @@ public:
 
     float hdrBackground() const override;
 
+    const GLfloat * mSSAPattern() const;
+
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
     
@@ -124,6 +126,8 @@ private:
     float _hdrExposure;
     float _hdrBackground;
     float _gamma;
+
+    GLfloat * _mSAAPattern;
 
     ghoul::Dictionary _rendererData;
 };

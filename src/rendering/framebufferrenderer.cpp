@@ -78,6 +78,7 @@ FramebufferRenderer::FramebufferRenderer()
     , _hdrExposure(0.4f)
     , _hdrBackground(2.8f)
     , _gamma(2.2f)
+    , _mSAAPattern(nullptr)
 {}
 
 FramebufferRenderer::~FramebufferRenderer() {}
@@ -230,6 +231,10 @@ void FramebufferRenderer::deinitialize() {
 
     OsEng.renderEngine().raycasterManager().removeListener(*this);
     OsEng.renderEngine().deferredcasterManager().removeListener(*this);
+
+    if (_mSAAPattern != nullptr) {
+        delete[] _mSAAPattern;
+    }
 }
 
 void FramebufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
@@ -637,6 +642,8 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     // Saves current state
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
 
     // Main framebuffer
     GLuint pixelSizeTexture = 0;
@@ -655,6 +662,8 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
         true
     );
     
+    glViewport(0, 0, ONEPIXEL, ONEPIXEL);
+
     glGenFramebuffers(1, &pixelSizeFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, pixelSizeFramebuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture, 0);
@@ -792,7 +801,7 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
         0,
         GL_RGBA32F,
         _nAaSamples,
-        1,
+        ONEPIXEL,
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -816,6 +825,8 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("nOneStrip framebuffer is not complete");
     }
+    
+    glViewport(0, 0, _nAaSamples, ONEPIXEL);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> nOneStripProgram = nullptr;
     try {
@@ -848,26 +859,30 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
         nOneStripProgram->setUniform("currentSample", sample);
         glDrawArrays(GL_TRIANGLES, sample * 6, 6);
     }
-    //nOneStripProgram->setUniform("currentSample", 7);
-    //glDrawArrays(GL_TRIANGLES, 0, 6 * _nAaSamples);
+    /*nOneStripProgram->setUniform("currentSample", 0);
+    glDrawArrays(GL_TRIANGLES, 0, 6 * _nAaSamples);*/
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(0);
 
     saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("test_nOneStripMSAA.ppm"), _nAaSamples, 1);
-    GLfloat * nOneStripMSAA_Data = nullptr;
-    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, &nOneStripMSAA_Data);
+    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, &_mSAAPattern);
+    // Convert back to [-1, 1] range:
+    for (int d = 0; d < _nAaSamples * 3; d += 3) {
+        _mSAAPattern[d] = 2.0f * _mSAAPattern[d] - 1.0f;
+    }
+    // Debug;
     std::cout << "==== Saved Data for oneStrip:" << std::endl;
-    for (int d = 0; d < _nAaSamples * 1 * 3; d+=3)
-        std::cout << "(" << nOneStripMSAA_Data[d] << ", " << nOneStripMSAA_Data[d+1] << ", " << nOneStripMSAA_Data[d+2] << ") ";
+    for (int d = 0; d < _nAaSamples * 3; d += 3) {
+        std::cout << "(" << _mSAAPattern[d] << ", " << _mSAAPattern[d + 1] << ", " << _mSAAPattern[d + 2] << ") ";
+    }
     std::cout << std::endl;
 
     nOneStripProgram->deactivate();
-    
-    delete[] nOneStripMSAA_Data;
-
+        
     // Restores default state
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);    
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
     // Deletes unused buffers
     glDeleteFramebuffers(1, &pixelSizeFramebuffer);   
@@ -1210,6 +1225,10 @@ float FramebufferRenderer::hdrBackground() const {
     return _hdrBackground;
 }
 
+const GLfloat * FramebufferRenderer::mSSAPattern() const {
+    return _mSAAPattern;
+}
+
 void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
@@ -1261,6 +1280,10 @@ void saveTextureToPPMFile(const GLenum color_buffer_attachment,
 void saveTextureToMemory(const GLenum color_buffer_attachment,
     const int width, const int height, GLfloat ** memory) {
     
+    if (*memory != nullptr) {
+        delete[] *memory;
+    }
+
     *memory = new GLfloat[width*height * 3];
     
     if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {

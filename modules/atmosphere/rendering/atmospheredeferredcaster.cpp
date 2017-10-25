@@ -700,7 +700,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F_ARB, _mu_s_samples * _nu_samples,
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _mu_s_samples * _nu_samples,
             _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
     }
 

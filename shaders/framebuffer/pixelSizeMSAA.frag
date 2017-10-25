@@ -29,5 +29,5 @@ layout (location = 0) out vec4 finalColor;
 flat in vec3 vPosition;
 
 void main() {     
-     finalColor = vec4(0.5*vPosition +0.5, 1.0);
+     finalColor = vec4(0.5 * vPosition + 0.5, 1.0);
 }
