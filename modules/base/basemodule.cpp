@@ -43,10 +43,13 @@
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
+#include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/statictranslation.h>
 
+#include <modules/base/rotation/luarotation.h>
 #include <modules/base/rotation/staticrotation.h>
 
+#include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -85,16 +88,19 @@ void BaseModule::internalInitialize() {
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
+    fTranslation->registerClass<LuaTranslation>("LuaTranslation");
     fTranslation->registerClass<StaticTranslation>("StaticTranslation");
 
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
+    fRotation->registerClass<LuaRotation>("LuaRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
 
     auto fScale = FactoryManager::ref().factory<Scale>();
     ghoul_assert(fScale, "Scale factory was not created");
 
+    fScale->registerClass<LuaScale>("LuaScale");
     fScale->registerClass<StaticScale>("StaticScale");
 
     auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
@@ -112,8 +118,11 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceFramebuffer::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
+        LuaRotation::Documentation(),
         StaticRotation::Documentation(),
+        LuaScale::Documentation(),
         StaticScale::Documentation(),
+        LuaTranslation::Documentation(),
         StaticTranslation::Documentation(),
         modelgeometry::ModelGeometry::Documentation(),
     };

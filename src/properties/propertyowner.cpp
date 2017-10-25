@@ -34,14 +34,6 @@ namespace openspace::properties {
 
 namespace {
     const char* _loggerCat = "PropertyOwner";
-
-    bool propertyLess(Property* lhs, Property* rhs) {
-        return lhs->identifier() < rhs->identifier();
-    }
-
-    bool subOwnerLess(PropertyOwner* lhs, PropertyOwner* rhs) {
-        return lhs->name() < rhs->name();
-    }
 } // namespace
 
 
@@ -288,6 +280,13 @@ std::vector<std::string> PropertyOwner::tags() const {
 
 void PropertyOwner::addTag(std::string tag) {
     _tags.push_back(std::move(tag));
+}
+
+void PropertyOwner::removeTag(const std::string& tag) {
+    _tags.erase(
+        std::remove(_tags.begin(), _tags.end(), tag),
+        _tags.end()
+    );
 }
 
 } // namespace openspace::properties

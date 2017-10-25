@@ -10,6 +10,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableConstellationBounds",
+            Enabled = false,
             File = "data/bound_20.dat",
             ConstellationFile = "data/constellations.dat"
             -- ConstellationSelection = zodiacs

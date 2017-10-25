@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,55 +21,62 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#include <openspace/scene/scenelicensewriter.h>
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+#include <sstream>
 
-in vec2 vs_st;
-in vec4 vs_normal;
-in vec4 vs_position;
+namespace {
+    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/scenelicense/main.hbs";
+    const char* SceneLicenseTemplateFilename = "${OPENSPACE_DATA}/web/scenelicense/scenelicense.hbs";
+    const char* JsFilename = "${OPENSPACE_DATA}/web/scenelicense/script.js";
+} // namespace
 
-uniform vec4 campos;
-uniform vec4 objpos;
-uniform vec3 sun_pos;
-uniform bool _performShading = true;
-uniform float transparency;
-uniform int shadows;
-uniform float time;
-uniform sampler2D texture1;
+namespace openspace {
+ 
+SceneLicenseWriter::SceneLicenseWriter(const std::vector<SceneLicense>& licenses)
+    : DocumentationGenerator(
+        "Documentation",
+        "sceneLicenses",
+        {
+            { "sceneLicenseTemplate",  SceneLicenseTemplateFilename },
+            { "mainTemplate", MainTemplateFilename }
+        },
+        JsFilename
+    )
+    , _licenses(licenses)
+{}
 
+std::string SceneLicenseWriter::generateJson() const {
+    std::stringstream json;
+    json << "[";
+    for (const SceneLicense& license : _licenses) {
+        json << "{";
+        json << "\"module\": \"" << escapedJson(license.module) << "\", ";
+        json << "\"name\": \"" << escapedJson(license.name) << "\", ";
+        json << "\"attribution\": \"" << escapedJson(license.attribution) << "\", ";
+        json << "\"url\": \"" << escapedJson(license.url) << "\", ";
+        json << "\"licenseText\": \"" << escapedJson(license.licenseText) << "\"";
+        json << "}";
 
-Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
-    vec4 diffuse = texture(texture1, vs_st);
-
-    Fragment frag;
-    if (_performShading) {
-        vec3 n = normalize(vs_normal.xyz);
-        vec3 l_pos = vec3(sun_pos); // sun.
-        vec3 l_dir = normalize(l_pos - objpos.xyz);
-        float intensity = min(max(5 * dot(n,l_dir), 0.0), 1);
-        
-        // float shine = 0.0001;
-
-        const vec4 specular = vec4(0.5);
-        vec4 ambient = vec4(0.0, 0.0, 0.0, transparency);
-        /*
-        if(intensity > 0.f){
-            // halfway vector
-            vec3 h = normalize(l_dir + e);
-            // specular factor
-            float intSpec = max(dot(h,n),0.0);
-            spec = specular * pow(intSpec, shine);
+        if (&license != &(_licenses.back())) {
+            json << ",";
         }
-        */
-        diffuse = max(intensity * diffuse, ambient);
     }
 
-    frag.color.rgb = diffuse.rgb;
-    frag.color.a = transparency;
-    frag.depth = depth;
+    json << "]";
+    
 
-    return frag;
+    std::string jsonString = "";
+    for (const char& c : json.str()) {
+        if (c == '\'') {
+            jsonString += "\\'";
+        } else {
+            jsonString += c;
+        }
+    }
+
+    return jsonString;
 }
+
+} // namespace openspace

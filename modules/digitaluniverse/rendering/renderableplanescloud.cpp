@@ -278,8 +278,6 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _sluminosity(1.f)
     , _transformationMatrix(glm::dmat4(1.0))        
 {
-    using File = ghoul::filesystem::File;
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -431,7 +429,6 @@ void RenderablePlanesCloud::initialize() {
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
-        return;
     }
 
     createPlanes();
@@ -468,8 +465,10 @@ void RenderablePlanesCloud::deinitialize() {
     }        
 }
 
-void RenderablePlanesCloud::renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
-    const glm::dmat4& projectionMatrix) {
+void RenderablePlanesCloud::renderPlanes(const RenderData&,
+                                         const glm::dmat4& modelViewMatrix,
+                                         const glm::dmat4& projectionMatrix)
+{
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabled(GL_BLEND);
     GLenum blendEquationRGB;
@@ -580,7 +579,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
         break;
     }
     
-    for (const auto pair : _labelData) {
+    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;

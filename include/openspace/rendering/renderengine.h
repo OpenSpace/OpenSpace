@@ -67,7 +67,8 @@ public:
     enum class FrametimeType {
         DtTimeAvg = 0,
         FPS,
-        FPSAvg
+        FPSAvg,
+        None
     };
 
     RenderEngine();
@@ -111,8 +112,8 @@ public:
 
     void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
     void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
-    void unregisterScreenSpaceRenderable(std::string name);
-    std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(std::string name);
+    void unregisterScreenSpaceRenderable(const std::string& name);
+    std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(const std::string& name);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
@@ -171,8 +172,6 @@ public:
     // Temporary fade functionality
     void startFading(int direction, float fadeDuration);
 
-    void sortScreenspaceRenderables();
-
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
 
@@ -180,7 +179,7 @@ public:
     
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
-    RendererImplementation rendererFromString(const std::string& method);
+    RendererImplementation rendererFromString(const std::string& method) const;
 
     void renderInformation();
 
@@ -189,7 +188,7 @@ private:
     std::unique_ptr<RaycasterManager> _raycasterManager;
     std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
-    properties::BoolProperty _performanceMeasurements;
+    properties::BoolProperty _doPerformanceMeasurements;
     std::unique_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;

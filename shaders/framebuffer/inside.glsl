@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 void getEntry(inout vec3 entryPos, inout float entryDepth) {
     entryPos = cameraPosInRaycaster;
     entryDepth = 0;

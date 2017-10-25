@@ -5,6 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableSphere",
+            Enabled = false,
             Size = 3975.41417036064E23,
             Segments = 80,
             Alpha = 0.5,
@@ -18,6 +19,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableSphere",
+            Enabled = false,
             Size = 3975.41417036064E23,
             Segments = 80,
             Alpha = 0.5,
@@ -31,6 +33,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableSphere",
+            Enabled = false,
             Size = 3975.41417036064E23,
             Segments = 80,
             Alpha = 0.5,
