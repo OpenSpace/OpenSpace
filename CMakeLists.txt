@@ -107,6 +107,7 @@ add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
 target_link_libraries(libOpenSpace Ghoul)
 set_property(TARGET Lua PROPERTY FOLDER "External")
 set_property(TARGET lz4 PROPERTY FOLDER "External")
+link_directories("${GHOUL_LIBRARY_DIRS}")
 
 # SGCT
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
