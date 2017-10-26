@@ -4,6 +4,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.65,
             --ScaleFactor = 10.0,
@@ -30,6 +31,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.65,
             --ScaleFactor = 10.0,
@@ -47,6 +49,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.65,
             --ScaleFactor = 10.0,
@@ -64,6 +67,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableDUMeshes",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.4,
             ScaleFactor = 1.0,
@@ -82,6 +86,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableDUMeshes",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.4,
             ScaleFactor = 1.0,
@@ -100,6 +105,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableDUMeshes",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.4,
             ScaleFactor = 1.0,
@@ -118,6 +124,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableDUMeshes",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.4,
             ScaleFactor = 1.0,
@@ -136,6 +143,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableDUMeshes",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.4,
             ScaleFactor = 1.0,

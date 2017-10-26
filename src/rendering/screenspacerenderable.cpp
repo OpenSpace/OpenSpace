@@ -34,8 +34,6 @@
 #include <openspace/util/factorymanager.h>
 
 namespace {
-    const char* _loggerCat = "ScreenSpaceRenderable";
-
     const char* KeyType = "Type";
     const char* KeyTag = "Tag";
     const float PlaneDepth = -2.f;

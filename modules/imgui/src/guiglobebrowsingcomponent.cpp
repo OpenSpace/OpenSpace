@@ -64,7 +64,6 @@ void GuiGlobeBrowsingComponent::render() {
     using Layer = GlobeBrowsingModule::Layer;
 
     bool e = _isEnabled;
-    e = e;
 
     ImGui::Begin("Globe Browsing", &e, WindowSize, 0.5f);
     _isEnabled = e;

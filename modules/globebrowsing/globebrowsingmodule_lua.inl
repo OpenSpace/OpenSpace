@@ -221,6 +221,8 @@ int loadWMSCapabilities(lua_State* L) {
         std::move(globe),
         std::move(url)
     );
+
+    return 0;
 }
 
 int removeWMSServer(lua_State* L) {

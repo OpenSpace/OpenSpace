@@ -143,6 +143,10 @@ void Scene::updateNodeRegistry() {
     _dirtyNodeRegistry = false;
 }
 
+void Scene::addSceneLicense(SceneLicense license) {
+    _licenses.push_back(std::move(license));
+}
+
 void Scene::sortTopologically() {
     _topologicallySortedNodes.insert(
         _topologicallySortedNodes.end(),
@@ -267,7 +271,6 @@ const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
     return _topologicallySortedNodes;
 }
 
-
 SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
@@ -342,6 +345,11 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
 
     rawNodePointer->setDependencies(dependencies);
     return rawNodePointer;
+}
+
+void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
+    SceneLicenseWriter writer(_licenses);
+    writer.writeDocumentation(path);
 }
 
 std::string Scene::generateJson() const {
@@ -486,6 +494,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 {},
                 "string",
                 "Removes the SceneGraphNode identified by name"
+            },
+            {
+                "hasSceneGraphNode",
+                &luascriptfunctions::hasSceneGraphNode,
+                {},
+                "string",
+                "Checks whether the specifies SceneGraphNode is present in the current "
+                "scene"
             }
         }
     };

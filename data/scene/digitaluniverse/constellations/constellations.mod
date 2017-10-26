@@ -5,6 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableDUMeshes",
+            Enabled = false,
             Color = { 1.0, 0.4, 0.2 },
             Transparency = 1.0,
             ScaleFactor = 1.0,
@@ -23,6 +24,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableDUMeshes",
+            Enabled = false,
             Color = { 1.0, 0.4, 0.2 },
             Transparency = 1.0,
             ScaleFactor = 1.0,

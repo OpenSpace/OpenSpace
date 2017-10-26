@@ -49,7 +49,7 @@ const char* configurationFile = "imgui.ini";
 //const char* GuiFont = "${FONTS}/ubuntu/Ubuntu-Regular.ttf";
 const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
 const float FontSize = 14.f;
-const ImVec2 size = ImVec2(350, 500);
+const ImVec2 size = ImVec2(500, 500);
 
 //GLuint fontTex = 0;
 // A VBO max size of 0 will cause a lazy instantiation of the buffer
@@ -385,6 +385,7 @@ void GUI::initialize() {
     _globalProperty.initialize();
     _globalProperty.setHasRegularProperties(true);
     _featuredProperties.initialize();
+    _featuredProperties.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _filePath.initialize();
 #ifdef GLOBEBROWSING_USE_GDAL    

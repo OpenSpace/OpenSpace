@@ -397,4 +397,16 @@ int removeSceneGraphNode(lua_State* L) {
     return 1;
 }
 
+
+int hasSceneGraphNode(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    SCRIPT_CHECK_ARGUMENTS("removeSceneGraphNode", L, 1, nArguments);
+
+    std::string nodeName = luaL_checkstring(L, -1);
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
+
+    lua_pushboolean(L, node != nullptr);
+    return 1;
+}
+
 }  // namespace openspace::luascriptfunctions

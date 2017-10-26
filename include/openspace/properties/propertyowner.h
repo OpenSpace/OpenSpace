@@ -224,11 +224,19 @@ public:
     std::vector<std::string> tags() const;
 
     /**
-     * Adds a tag to the Property's list of assigned tags. Tags are useful for creating
-     * groups of Properties that can be used in batch operations.
+     * Adds a tag to the PropertyOwner's list of assigned tags. Tags are useful for
+     * creating oups of Properties that can be used in batch operations or to mark up
+     * PropertyOwners for other usages (such signalling to GUI applications).
      * \param tag The string that is to be assigned to the Property
      */
     void addTag(std::string tag);
+
+    /**
+     * Removes a tag from this PropertyOwner. No error is reported if the tag does not 
+     * exist
+     * @param tag The tag is that is to be removed from this PropertyOwner
+     */
+    void removeTag(const std::string& tag);
 
 private:
     /// The name of this PropertyOwner

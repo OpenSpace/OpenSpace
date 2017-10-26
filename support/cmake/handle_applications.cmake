@@ -30,17 +30,19 @@ function (handle_applications)
     list(REMOVE_ITEM appDirs ".DS_Store")
 
     message(STATUS "Configuration application")
+    # First create all of the options for the applications. In case that one of the
+    # applications fail to include later, we still want all of them listed
     foreach (app ${appDirs})
         set(app_dir "${OPENSPACE_APPS_DIR}/${app}")
         string(TOUPPER ${app} upper_app)
 
-        option(OPENSPACE_APPLICATION_${upper_app} "${app} Application" OFF)
-
         get_application_attribute_default(${app_dir} is_default_application)
-        if (${is_default_application})
-            option(OPENSPACE_APPLICATION_${upper_app} "Build ${app} application" ${is_default_application})
-        endif ()
+        option(OPENSPACE_APPLICATION_${upper_app} "Build ${app} application" ${is_default_application})
+    endforeach ()
 
+    foreach (app ${appDirs})
+        set(app_dir "${OPENSPACE_APPS_DIR}/${app}")
+        string(TOUPPER ${app} upper_app)
         if (OPENSPACE_APPLICATION_${upper_app})
             message(STATUS "Adding application ${app}")
             add_subdirectory(${app_dir})

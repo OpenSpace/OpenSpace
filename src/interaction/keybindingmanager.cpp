@@ -138,7 +138,7 @@ std::string KeyBindingManager::generateJson() const {
     }
 
     return jsonString;
-}    
+}
 
 scripting::LuaLibrary KeyBindingManager::luaLibrary() {
     return {

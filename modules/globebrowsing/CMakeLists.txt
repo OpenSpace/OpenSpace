@@ -168,6 +168,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroupid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.cpp
 

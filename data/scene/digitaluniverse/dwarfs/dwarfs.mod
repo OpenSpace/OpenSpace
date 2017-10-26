@@ -5,6 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
+            Enabled = false,
             Color = { 0.5, 1.0, 0.2 },
             Transparency = 0.999,
             File = "speck/dwarfs.speck",

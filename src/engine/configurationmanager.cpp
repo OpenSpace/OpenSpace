@@ -58,7 +58,9 @@ const string ConfigurationManager::KeyPropertyDocumentation = "PropertyDocumenta
 const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
 const string ConfigurationManager::KeyDocumentation = "Documentation";
 const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
+
 const string ConfigurationManager::KeyConfigAsset = "Asset";
+const string ConfigurationManager::KeySceneLicenseDocumentation = "LicenseDocumentation";
 const string ConfigurationManager::KeyConfigTasksRoot = "TasksRoot";
 
 const string ConfigurationManager::KeyLogging = "Logging";

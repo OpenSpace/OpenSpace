@@ -41,7 +41,6 @@ namespace {
     const char* KeyPathScene = "ScenePath";
     const char* KeyAssets = "Assets";
     const char* AssetExtension = ".asset";
-
     const char* KeyCamera = "Camera";
     const char* KeyCameraFocus = "Focus";
     const char* KeyCameraPosition = "Position";

@@ -5,6 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
+            Enabled = false,
             Color = { 0.8, 0.8, 0.0 },
             Transparency = 0.35,
             File = "speck/gc.speck",

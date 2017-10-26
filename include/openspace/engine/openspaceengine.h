@@ -81,9 +81,6 @@ public:
     static OpenSpaceEngine& ref();
     static bool isCreated();
 
-    double runTime();
-    void setRunTime(double t);
-
     // callbacks
     void initialize();
     void initializeGL();
@@ -106,6 +103,7 @@ public:
 
     void enableBarrier();
     void disableBarrier();
+
     
     void writeDocumentation();
     void toggleShutdownMode();
@@ -239,8 +237,6 @@ private:
         std::vector<std::function<bool (double, double)>> mouseScrollWheel;
     } _moduleCallbacks;
     
-    double _runTime;
-
     // Structure that is responsible for the delayed shutdown of the application
     struct {
         // Whether the application is currently in shutdown mode (i.e. counting down the

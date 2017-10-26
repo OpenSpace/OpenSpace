@@ -4,12 +4,10 @@ return {
         Name = "Stars Labels - Alternate",
         Parent = "Root",
         Renderable = {
-            --Type = "RenderablePoints",
             Type = "RenderableBillboardsCloud",
+            Enabled = false,
             Color = {1.0, 1.0, 1.0},
             Transparency = 0.65,
-            --ScaleFactor = 10.0,
-            --File = "speck/stars.speck",
             LabelFile = "speck/stars-altlbl.label",
             TextColor = { 0.4, 0.4, 0.4, 1.0 },
             DrawLabels = true,

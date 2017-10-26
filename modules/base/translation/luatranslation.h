@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,42 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_BASE___LUATRANSLATION___H__
+#define __OPENSPACE_MODULE_BASE___LUATRANSLATION___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/scene/translation.h>
 
-in vec4 in_point_position;
+#include <openspace/properties/stringproperty.h>
 
-out vec4 vs_positionScreenSpace;
-out vec4 vs_pointColor;
+#include <ghoul/filesystem/file.h>
+#include <ghoul/lua/luastate.h>
 
-uniform vec3 color;
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform int pointSteps;
+#include <memory>
 
+namespace openspace {
 
-void main() {
-    vec4 positionCameraSpace = modelViewTransform * in_point_position;
-    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
+namespace documentation { struct Documentation; }
+    
+class LuaTranslation : public Translation {
+public:
+    LuaTranslation();
+    LuaTranslation(const ghoul::Dictionary& dictionary);
 
-    gl_Position = vs_positionScreenSpace;
+    virtual void update(const UpdateData& data) override;
 
-    if (mod(gl_VertexID, pointSteps) == 0) {
-        vs_pointColor.rgb = color;
-        gl_PointSize = 5.0f;
-    }
-    else {
-        vs_pointColor.rgb = (color + vec3(0.6, 0.6, 0.6)) / 2.0;
-        gl_PointSize = 2.f;
-    }
+    static documentation::Documentation Documentation();
 
-    // I don't like this random variable k defined in powerScalingMath.hglsl.
-    // Will ignore it and use 10 in protest of psc dependencies. /KB
-    // float maximumDistance = pow(k, 10);
-    float maximumDistance = pow(10, 10);
-    float distanceToCamera = length(positionCameraSpace.xyz);
+private:
+    properties::StringProperty _luaScriptFile;
+    ghoul::lua::LuaState _state;
 
-    vs_pointColor.a = maximumDistance / (distanceToCamera / 100.0);
-}
+    std::unique_ptr<ghoul::filesystem::File> _fileHandle;
+};
+    
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___LUATRANSLATION___H__

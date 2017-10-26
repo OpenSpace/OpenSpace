@@ -147,8 +147,8 @@ namespace openspace::gui {
 GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree, IsTopLevelWindow topLevel)
     : GuiComponent(std::move(name))
     , _useTreeLayout(useTree)
-    , _isTopLevel(topLevel)
     , _currentUseTreeLayout(useTree)
+    , _isTopLevel(topLevel)
 {}
 
 void GuiPropertyComponent::setSource(SourceFunction function) {

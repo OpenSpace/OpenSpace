@@ -201,6 +201,14 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "location will be silently overritten."
         },
         {
+            ConfigurationManager::KeySceneLicenseDocumentation,
+            new StringVerifier,
+            Optional::Yes,
+            "The file that will be created on startup containing the scene license "
+            "information. Any previous file in this location will be silently "
+            "overwritten."
+        },
+        {
             ConfigurationManager::KeyLauncher,
             new TableVerifier({
                 {

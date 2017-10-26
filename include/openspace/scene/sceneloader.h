@@ -27,6 +27,8 @@
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/assetloader.h>
+#include <openspace/scene/scenelicense.h>
+
 #include <openspace/util/camera.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -34,6 +36,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace openspace {
 
@@ -61,11 +64,6 @@ private:
         std::string parent;
         std::unique_ptr<Camera> camera;
     };
-
-    /**
-     * Load a directory.
-     */
-    void loadDirectory(const std::string& path);
 
     /**
      * Load a camera from a dictionary

@@ -32,18 +32,18 @@
 #include <set>
 #include <mutex>
 
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scenelicense.h>
+#include <openspace/scene/scenelicensewriter.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
 #include <ghoul/opengl/programobject.h>
 
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
-
-class SceneGraphNode;
 
 namespace documentation { struct Documentation; }
 
@@ -129,6 +129,8 @@ public:
      */
     void unregisterNode(SceneGraphNode* node);
 
+    void addSceneLicense(SceneLicense license);
+
     /**
     * Mark the node registry as dirty
     */
@@ -138,6 +140,14 @@ public:
      * Return a vector of all scene graph nodes in the scene.
      */
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
+
+    /**
+     * Write information about the license information for the scenegraph nodes that are
+     * contained in this scene
+     * \param path The file path that will contain the documentation about the licenses
+     * used in this scene
+     */
+    void writeSceneLicenseDocumentation(const std::string& path) const;
 
     /**
      * Return a a map from name to scene graph node.
@@ -177,6 +187,8 @@ private:
     std::map<std::string, SceneGraphNode*> _nodesByName;
     bool _dirtyNodeRegistry;
     SceneGraphNode _rootDummy;
+
+    std::vector<SceneLicense> _licenses;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;

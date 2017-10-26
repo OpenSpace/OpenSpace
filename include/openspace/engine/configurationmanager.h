@@ -69,6 +69,8 @@ public:
     static const std::string KeyFactoryDocumentation;
     /// The key that stores the location of the asset file that is initially loaded
     static const std::string KeyConfigAsset;
+    /// The key that stores the scene license documentation values
+    static const std::string KeySceneLicenseDocumentation;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigTasksRoot;
     /// The key that stores the subdirectory containing a list of all startup scripts to

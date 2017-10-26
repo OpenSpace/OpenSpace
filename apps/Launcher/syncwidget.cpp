@@ -454,7 +454,12 @@ void SyncWidget::syncButtonPressed() {
 
             if (QFileInfo(dataFile).exists()) {
                 ghoul::Dictionary dataDictionary;
-                ghoul::lua::loadDictionaryFromFile(dataFile.toStdString(), dataDictionary);
+                try {
+                    ghoul::lua::loadDictionaryFromFile(dataFile.toStdString(), dataDictionary);
+                }
+                catch (const ghoul::lua::LuaLoadingException& exception) {
+                    LWARNINGC(exception.component, exception.message);
+                }
 
                 ghoul::Dictionary directDownloadFiles;
                 ghoul::Dictionary fileRequests;

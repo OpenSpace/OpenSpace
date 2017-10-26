@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,43 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_BASE___LUAROTATION___H__
+#define __OPENSPACE_MODULE_BASE___LUAROTATION___H__
 
-#include "PowerScaling/powerScalingMath.hglsl"
-#include <${SHADERS_GENERATED}/constants.hglsl>:notrack
+#include <openspace/scene/rotation.h>
 
-layout(points) in;
-layout(location = 0) in vec4 vs_point_position[];
-layout(location = 1) in flat int isHour[];
-layout(location = 2) in vec4 vs_point_color[];
+#include <openspace/properties/stringproperty.h>
 
-layout(points, max_vertices = 4) out;
-layout(location = 0) out vec4 gs_point_position;
-layout(location = 1) out vec4 gs_point_color;
+#include <ghoul/lua/luastate.h>
 
-uniform mat4 projection;
-uniform mat4 ViewProjection;
+namespace openspace {
+    
+namespace documentation { struct Documentation; }
+    
+class LuaRotation : public Rotation {
+public:
+    LuaRotation();
+    LuaRotation(const ghoul::Dictionary& dictionary);
 
-const vec2 corners[4] = vec2[4](
-    vec2(0.0, 1.0),
-    vec2(0.0, 0.0),
-    vec2(1.0, 1.0),
-    vec2(1.0, 0.0)
-);
+    void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
 
-void main() {
-    gs_point_color = vs_point_color[0];
-    gs_point_position = vs_point_position[0];
-    if (isHour[0] == 1) {
-        gl_Position =  gl_in[0].gl_Position;
-        EmitVertex();
-        EndPrimitive();
-    }
-    else {
-        gl_Position =  gl_in[0].gl_Position;
-        EmitVertex();
-        EndPrimitive();
-    return;
-    }
-}
+private:
+    properties::StringProperty _luaScriptFile;
+    ghoul::lua::LuaState _state;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___LUAROTATION___H__
