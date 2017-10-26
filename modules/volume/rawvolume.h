@@ -30,6 +30,7 @@
 #include <vector>
 
 namespace openspace {
+namespace volume {
 
 template <typename Type>
 class RawVolume {
@@ -54,6 +55,7 @@ private:
     std::vector<VoxelType> _data;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #include "rawvolume.inl"

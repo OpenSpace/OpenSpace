@@ -133,6 +133,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/scene/scenelicense.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/sceneloader.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
@@ -160,6 +162,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/task.cpp
     ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/threadpool.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timeline.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
@@ -289,6 +292,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicense.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
@@ -300,6 +305,10 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
@@ -322,6 +331,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )

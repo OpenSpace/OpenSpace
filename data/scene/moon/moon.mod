@@ -22,11 +22,10 @@ return {
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
-                    -- LMMP based servers
+                    -- MoonTrek based servers
                     {
-                        Name = "LRO WAC Mosaic [OnMoon]",
-                        FilePath = "map_service_configs/OnMoonColor.xml",
-                        Enabled = true,
+                        Name = "Apollo 16 Metric Cam Image Mosaic",
+                        FilePath = "map_service_configs/MoonTrek/Apollo16_Metric_Cam_Image_Mosaic.wms"
                     },
                     -- Utah based servers
                     {
@@ -38,8 +37,9 @@ return {
                         FilePath = "map_service_configs/Utah/Kaguya.wms"
                     },
                     {
-                        Name = "WAC",
-                        FilePath = "map_service_configs/Utah/Wac.wms"
+                        Name = "WAC Utah",
+                        FilePath = "map_service_configs/Utah/Wac.wms",
+                        Enabled = true
                     }
                 },
                 HeightLayers = {
@@ -60,8 +60,19 @@ return {
                         Settings = { Multiplier = 0.5 },
                     }
                 }
-            }
-        }
+            },
+            ShadowGroup = {
+                Source1 = {
+                    Name = "Sun",
+                    Radius = 696.3E6,
+                },
+                Caster1 = { 
+                    Name = "Earth",
+                    Radius = 6.371E6,
+                },
+            },
+        },
+        GuiPath = "/Solar System/Planets/Earth/Moon"
     },
     -- MoonTrail module
     {   
@@ -77,6 +88,7 @@ return {
             Color = { 0.5, 0.3, 0.3 },
             Period =  27,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Earth/Moon"
     }
 }

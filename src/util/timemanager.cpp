@@ -23,7 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/util/timemanager.h>
+
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/util/timeline.h>
 
@@ -34,7 +36,10 @@ using datamessagestructures::TimeKeyframe;
 void TimeManager::preSynchronization(double dt) {
 //    double now = OsEng.runTime();
     removeKeyframesBefore(_latestConsumedTimestamp);
-    if (_timeline.nKeyframes() == 0) {
+    if (_shouldSetTime) {
+        time().setTime(_timeNextFrame.j2000Seconds());
+        _shouldSetTime = false;
+    } else if (_timeline.nKeyframes() == 0) {
         time().advanceTime(dt);
     } else {
         consumeKeyframes(dt);
@@ -42,7 +47,7 @@ void TimeManager::preSynchronization(double dt) {
 }
 
 void TimeManager::consumeKeyframes(double dt) {
-    double now = OsEng.runTime();
+    double now = OsEng.windowWrapper().applicationTime();
     
     const std::deque<Keyframe<Time>>& keyframes = _timeline.keyframes();
     auto firstFutureKeyframe = std::lower_bound(keyframes.begin(), keyframes.end(), now, &compareKeyframeTimeWithTime);
@@ -111,10 +116,10 @@ void TimeManager::consumeKeyframes(double dt) {
         double parameter = (t1 - t0) / (t2 - t0);
         
         double y0 = time().j2000Seconds();
-        double yPrime0 = time().deltaTime();
+        // double yPrime0 = time().deltaTime();
 
         double y2 = nextTime.j2000Seconds();
-        double yPrime2 = nextTime.deltaTime();
+        // double yPrime2 = nextTime.deltaTime();
 
         double y1 = (1 - parameter) * y0 + parameter * y2;
         double y1Prime = (y1 - y0) / dt;
@@ -139,6 +144,11 @@ void TimeManager::removeKeyframesBefore(double timestamp) {
 
 void TimeManager::clearKeyframes() {
     _timeline.clearKeyframes();
+}
+
+void TimeManager::setTimeNextFrame(Time t) {
+    _shouldSetTime = true;
+    _timeNextFrame = t;
 }
 
 size_t TimeManager::nKeyframes() const {

@@ -1,0 +1,5 @@
+return {
+    FileRequest = {
+        { Identifier = "digitaluniverse_voids_speck", Destination = "speck", Version = 1 }
+    }
+}

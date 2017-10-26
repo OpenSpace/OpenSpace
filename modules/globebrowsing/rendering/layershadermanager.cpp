@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -107,6 +107,8 @@ LayerShaderManager::LayerShaderPreprocessingData
     );
     pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
     pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
+    pairs.emplace_back("useEclipseShadows", std::to_string(generalProps.eclipseShadowsEnabled));
+    pairs.emplace_back("useEclipseHardShadows", std::to_string(generalProps.eclipseHardShadows));
     pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
     pairs.emplace_back("showHeightResolution",
         std::to_string(debugProps.showHeightResolution)

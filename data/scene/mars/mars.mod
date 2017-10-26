@@ -13,7 +13,8 @@ return {
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Mars"
     },
     -- RenderableGlobe module
     {   
@@ -79,20 +80,24 @@ return {
                     },
                     {
                         Name = "Themis IR Day [Utah]",
-                        FilePath = "map_service_configs/Utah/Themis_IR_Day.xml"
+                        FilePath = "map_service_configs/Utah/Themis_IR_Day.xml",
+                        BlendMode = "Color"
                     },
                     {
                         Name = "Themis IR Night [Utah]",
-                        FilePath = "map_service_configs/Utah/Themis_IR_Night.xml"
+                        FilePath = "map_service_configs/Utah/Themis_IR_Night.xml",
+                        BlendMode = "Color"
                     },
 
                     {
                         Name = "Themis IR Day [AWS]",
-                        FilePath = "map_service_configs/AWS/Themis_IR_Day.wms"
+                        FilePath = "map_service_configs/AWS/Themis_IR_Day.wms",
+                        BlendMode = "Color"
                     },
                     {
                         Name = "Themis IR Night [AWS]",
-                        FilePath = "map_service_configs/AWS/Themis_IR_Night.wms"
+                        FilePath = "map_service_configs/AWS/Themis_IR_Night.wms",
+                        BlendMode = "Color"
                     }
                 },
                 Overlays = {
@@ -132,6 +137,7 @@ return {
             }
         },
         Tag = { "planet_solarSystem", "planet_terrestrial" },
+        GuiPath = "/Solar System/Planets/Mars"
     },
 
     -- Mars Atmosphere
@@ -141,7 +147,6 @@ return {
         Renderable = {
             Type = "RenderableAtmosphere",
             Atmosphere = {
-                Type = "RenderableGlobe",
                 -- Atmosphere radius in Km
                 AtmosphereRadius = 3463.17495,
                 --PlanetRadius    = 3396.19,
@@ -187,6 +192,7 @@ return {
                 },   
             },
         },
+        GuiPath = "/Solar System/Planets/Mars"        
     },
 
     -- Trail module
@@ -204,6 +210,7 @@ return {
             Period = 686.973,
             Resolution = 1000
         },
-        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" }
+        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+        GuiPath = "/Solar System/Planets/Mars"
     }
 }

@@ -67,6 +67,12 @@ documentation::Documentation Renderable::Documentation() {
             "of the valid Renderables that are available for creation (see the "
             "FactoryDocumentation for a list of possible Renderables), which depends on "
             "the configration of the application"
+        },
+        {
+            EnabledInfo.identifier,
+            new BoolVerifier,
+            Optional::Yes,
+            EnabledInfo.description
         }
         }
     };
@@ -132,6 +138,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
     if (_startTime != "" && _endTime != "") {
         _hasTimeInterval = true;
+    }
+
+    if (dictionary.hasKey(EnabledInfo.identifier)) {
+        _enabled = dictionary.value<bool>(EnabledInfo.identifier);
     }
 
     addProperty(_enabled);
@@ -216,8 +226,8 @@ bool Renderable::isEnabled() const {
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
-    _enabled.onChange([&] () {
-        callback(isEnabled());
+    _enabled.onChange([this, c{ std::move(callback) }]() {
+        c(isEnabled());
     });
 }
 

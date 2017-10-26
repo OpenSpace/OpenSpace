@@ -9,5 +9,6 @@ return {
             Texture = "textures/halo.png",
             ColorMap = "colorbv.cmap"
         },
+        GuiPath = "/Milky Way/Stars"
     }
 }

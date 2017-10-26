@@ -42,17 +42,17 @@ namespace openspace {
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(const ghoul::Dictionary& tasksDictionary) {
     std::vector<std::unique_ptr<Task>> tasks;
     std::vector<std::string> keys = tasksDictionary.keys();
-    for (const std::string key : keys) {
+    for (const std::string& key : keys) {
         std::string taskName;
         ghoul::Dictionary subTask;
         if (tasksDictionary.getValue(key, taskName)) {
-            std::string path = "${TASKS}/" + taskName + ".task";
+            std::string path = taskName + ".task";
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
         } else if (tasksDictionary.getValue(key, subTask)) {
             std::string taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
-            if (task == nullptr) {
+            if (!task) {
                 LERROR("Failed to create a Task object of type '" << taskType << "'");
             }
             tasks.push_back(std::move(task));
@@ -75,10 +75,10 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         ghoul::lua::loadDictionaryFromFile(
             absTasksFile,
             tasksDictionary
-            );
-    } catch (...) {
+        );
+    } catch (const ghoul::RuntimeError& e) {
         LERROR("Could not load tasks file '" << absTasksFile << "'. " <<
-            "Lua parse error");
+            "Lua error: " << e.message << ": " << e.component);
         return std::vector<std::unique_ptr<Task>>();
     }
     return tasksFromDictionary(tasksDictionary);

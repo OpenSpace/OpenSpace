@@ -1,0 +1,6 @@
+return {
+    FileRequest = {
+        { Identifier = "digitaluniverse_pulsars_speck", Destination = "speck", Version = 1 },
+        { Identifier = "digitaluniverse_pulsars_textures", Destination = "textures", Version = 1 }
+    }
+}

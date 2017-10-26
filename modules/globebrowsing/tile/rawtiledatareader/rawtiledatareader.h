@@ -165,9 +165,6 @@ protected:
     const TileTextureInitData _initData;
     PerformPreprocessing _preprocess;
     TileDepthTransform _depthTransform;
-
-private:
-    bool _hasBeenInitialized;    
 };
 
 } // namespace openspace::globebrowsing

@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -64,13 +64,12 @@ namespace {
     static const char* _loggerCat = "RenderableAtmosphere";
 
     const char* keyFrame        = "Frame";
-    const char* keyShadowGroup  = "Shadow_Group";
+    const char* keyShadowGroup  = "ShadowGroup";
     const char* keyShadowSource = "Source";
     const char* keyShadowCaster = "Caster";
     const char* keyBody         = "Body";
 
     const char* keyAtmosphere               = "Atmosphere";
-    const char* keyAtmosphereType           = "Type";
     const char* keyAtmosphereRadius         = "AtmosphereRadius";
     const char* keyPlanetRadius             = "PlanetRadius";
     const char* keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
@@ -215,6 +214,12 @@ namespace {
         "Enable Sun On Camera Position",
         "" // @TODO Missing documentation
     };
+
+    static const openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
+        "EclipseHardShadowsInfo",
+        "Enable Hard Shadows for Eclipses",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
@@ -268,6 +273,7 @@ namespace openspace {
         , _hdrExpositionP(AtmosphereExposureInfo, 0.4f, 0.01f, 5.0f)
         , _gammaConstantP(AtmosphereGammaInfo, 1.8f, 0.1f, 3.0f)
         , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
+        , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
         , _atmosphereEnabled(false)
         , _ozoneLayerEnabled(false)
         , _sunFollowingCameraEnabled(false)
@@ -289,6 +295,7 @@ namespace openspace {
         , _saveCalculationsToTexture(false)
         , _preCalculatedTexturesScale(1.0)
         , _shadowEnabled(false)
+        , _hardShadows(false)
         , _time(0.f)
     {
         ghoul_precondition(
@@ -311,14 +318,14 @@ namespace openspace {
         bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
         bool disableShadows = false;
         if (success) {
-            std::vector<std::pair<std::string, float>> sourceArray;
-            unsigned int sourceCounter = 1;
+            std::vector<std::pair<std::string, double>> sourceArray;
+            unsigned int sourceCounter = 1; 
             while (success) {
                 std::string sourceName;
                 success = shadowDictionary.getValue(keyShadowSource + 
                     std::to_string(sourceCounter) + ".Name", sourceName);
                 if (success) {
-                    float sourceRadius;
+                    double sourceRadius;
                     success = shadowDictionary.getValue(keyShadowSource + 
                         std::to_string(sourceCounter) + ".Radius", sourceRadius);
                     if (success) {
@@ -337,14 +344,14 @@ namespace openspace {
 
             if (!disableShadows && !sourceArray.empty()) {
                 success = true;
-                std::vector<std::pair<std::string, float>> casterArray;
+                std::vector<std::pair<std::string, double>> casterArray;
                 unsigned int casterCounter = 1;
                 while (success) {
                     std::string casterName;
                     success = shadowDictionary.getValue(keyShadowCaster +
                         std::to_string(casterCounter) + ".Name", casterName);
                     if (success) {
-                        float casterRadius;
+                        double casterRadius;
                         success = shadowDictionary.getValue(keyShadowCaster +
                             std::to_string(casterCounter) + ".Radius", casterRadius);
                         if (success) {
@@ -383,28 +390,6 @@ namespace openspace {
         ghoul::Dictionary atmosphereDictionary;
         success = dictionary.getValue(keyAtmosphere, atmosphereDictionary);
         if (success) {
-            std::string atmTypeString;
-            if (!atmosphereDictionary.getValue(keyAtmosphereType, atmTypeString)) {
-                errorReadingAtmosphereData = true;
-                LWARNING("No Atmosphere Type value expecified for Atmosphere Effects " << name 
-                    << " planet. Types allowed: RenderableGlobe or RenderablePlanet.\nDisabling atmosphere effects for this planet.");
-            }
-            else {
-                if (atmTypeString.compare("RenderableGlobe") == 0) {
-                    _atmosphereType = AtmosphereDeferredcaster::RenderableGlobe;
-                }
-                else if (atmTypeString.compare("RenderablePlanet") == 0) 
-                {
-                    _atmosphereType = AtmosphereDeferredcaster::RenderablePlanet;
-                }
-                else 
-                {
-                    errorReadingAtmosphereData = true;
-                    LWARNING("Wrong atmosphere type specified for " << name 
-                        << " planet. Types allowed: RenderableGlobe or RenderablePlanet.\nDisabling atmosphere effects for this planet.");
-                }
-            }
-
             if (!atmosphereDictionary.getValue(keyAtmosphereRadius, _atmosphereRadius)) {
                 errorReadingAtmosphereData = true;
                 LWARNING("No Atmosphere Radius value expecified for Atmosphere Effects of "
@@ -618,6 +603,12 @@ namespace openspace {
                 _sunFollowingCameraEnabledP = _sunFollowingCameraEnabled;
                 _sunFollowingCameraEnabledP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_sunFollowingCameraEnabledP);
+
+                _hardShadowsEnabledP = _hardShadows;
+                _hardShadowsEnabledP.onChange([this]() { updateAtmosphereParameters(); });
+                if (_shadowEnabled) {
+                    addProperty(_hardShadowsEnabledP);
+                }                
             }
         }
     }
@@ -646,12 +637,16 @@ namespace openspace {
                 _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
                 // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
                 //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
-                _deferredcaster->setRenderableClass(_atmosphereType);
                 _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
 
                 _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
                 if (_saveCalculationsToTexture)
                     _deferredcaster->enablePrecalculationTexturesSaving();
+
+                if (_shadowEnabled) {
+                    _deferredcaster->setShadowConfigArray(_shadowConfArray);
+                    _deferredcaster->setHardShadows(_hardShadows);
+                }
 
                 _deferredcaster->initialize();
             }
@@ -700,12 +695,6 @@ namespace openspace {
         if (_deferredcaster) {
             _deferredcaster->setTime(data.time.j2000Seconds());
             glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
-            if (_atmosphereType == AtmosphereDeferredcaster::RenderablePlanet) {
-                //earth needs to be rotated
-                glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
-                glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
-                modelTransform = modelTransform * rot * roty;
-            }
             _deferredcaster->setModelTransform(modelTransform);
 
             if (_exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground())
@@ -720,7 +709,8 @@ namespace openspace {
             _hdrConstant != _hdrExpositionP ||
             _exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground() ||
             _gammaConstant != _gammaConstantP ||
-            _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP) {
+            _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP ||
+            _hardShadows != _hardShadowsEnabledP) {
             executeComputation = false;
         }
             
@@ -745,6 +735,7 @@ namespace openspace {
         _exposureBackgroundConstant = OsEng.renderEngine().renderer()->hdrBackground();
         _gammaConstant = _gammaConstantP;
         _sunFollowingCameraEnabled = _sunFollowingCameraEnabledP;
+        _hardShadows = _hardShadowsEnabledP;
 
 
         if (_deferredcaster) {
@@ -764,9 +755,13 @@ namespace openspace {
             _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-            _deferredcaster->setRenderableClass(_atmosphereType);
             _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
             //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
+
+            if (_shadowEnabled) {
+                _deferredcaster->setHardShadows(_hardShadows);
+            }
+
             if (executeComputation)
                 _deferredcaster->preCalculateAtmosphereParam();
         }

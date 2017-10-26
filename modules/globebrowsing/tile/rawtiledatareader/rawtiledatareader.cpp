@@ -50,7 +50,6 @@
 #include <unordered_map>
 #include <limits>
 
-#define _USE_MATH_DEFINES
 #include <math.h>
 
 namespace openspace::globebrowsing {
@@ -59,7 +58,6 @@ RawTileDataReader::RawTileDataReader(const TileTextureInitData& initData,
                                      PerformPreprocessing preprocess)
     : _initData(initData)
     , _preprocess(preprocess)
-    , _hasBeenInitialized(false)
 { }
 
 std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {

@@ -67,6 +67,7 @@ float interpretFloat(GDALDataType gdalType, const char* src) {
         default:
             ghoul_assert(false, "Unknown data type");
         }
+    return 0.0f;
 }
 
 size_t numberOfBytes(GDALDataType gdalType) {
@@ -88,23 +89,25 @@ size_t numberOfBytes(GDALDataType gdalType) {
         default:
             ghoul_assert(false, "Unknown data type");
     }
+    return 0ULL;
 }
 
 size_t getMaximumValue(GDALDataType gdalType) {
     switch (gdalType) {
         case GDT_Byte:
-            return 1 << 8;
+            return 1ULL << 8ULL;
         case GDT_UInt16:
-            return 1 << 16;
+            return 1ULL << 16ULL;
         case GDT_Int16:
-            return 1 << 15;
+            return 1ULL << 15ULL;
         case GDT_UInt32:
-            return size_t(1) << 32;
+            return size_t(1) << 32ULL;
         case GDT_Int32:
-            return 1 << 31;
+            return 1ULL << 31ULL;
         default:
             ghoul_assert(false, "Unknown data type");
     }
+    return 0ULL;
 }
 
 TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
@@ -409,10 +412,10 @@ size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
     switch (format) {
         case ghoul::opengl::Texture::Format::Red: return 1;
         case ghoul::opengl::Texture::Format::RG: return 2;
-        case ghoul::opengl::Texture::Format::RGB:; // Intentional fallthrough
-        case ghoul::opengl::Texture::Format::BGR: return 3;
-        case ghoul::opengl::Texture::Format::RGBA:; // Intentional fallthrough
-        case ghoul::opengl::Texture::Format::BGRA: return 4;
+        case ghoul::opengl::Texture::Format::RGB:;
+        [[fallthrough]]; case ghoul::opengl::Texture::Format::BGR: return 3;
+        case ghoul::opengl::Texture::Format::RGBA:;
+        [[fallthrough]]; case ghoul::opengl::Texture::Format::BGRA: return 4;
         default: {
             ghoul_assert(false, "Unknown format");
             return 0;
@@ -441,18 +444,18 @@ size_t numberOfBytes(GLenum glType) {
 size_t getMaximumValue(GLenum glType) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
-            return 1 << 8;
+            return 1ULL << 8ULL;
         case GL_UNSIGNED_SHORT:
-            return 1 << 16;
+            return 1ULL << 16ULL;
         case GL_SHORT:
-            return 1 << 15;
+            return 1ULL << 15ULL;
         case GL_UNSIGNED_INT:
-            return size_t(1) << 32;
+            return 1ULL << 32ULL;
         case GL_INT:
-            return 1 << 31;
+            return 1ULL << 31ULL;
         default: {
             ghoul_assert(false, "Unknown data type");
-            return 0;
+            return 0ULL;
         }
     }
 }

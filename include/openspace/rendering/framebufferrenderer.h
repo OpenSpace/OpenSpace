@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -47,7 +47,6 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-class RenderableVolume;
 class Camera;
 class Scene;
     
@@ -63,6 +62,7 @@ public:
     void updateRaycastData();
     void updateDeferredcastData();
     void updateHDRData();
+    void updateMSAASamplingPattern();
 
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
@@ -73,6 +73,8 @@ public:
     void setGamma(const float gamma) override;
 
     float hdrBackground() const override;
+    const int nAaSamples() const override;
+    const float * mSSAPattern() const override;
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -123,6 +125,8 @@ private:
     float _hdrExposure;
     float _hdrBackground;
     float _gamma;
+
+    float * _mSAAPattern;
 
     ghoul::Dictionary _rendererData;
 };

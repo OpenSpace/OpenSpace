@@ -66,6 +66,75 @@ uniform vec3 lightDirectionCameraSpace;
 uniform float orenNayarRoughness;
 #endif
 
+#if USE_ECLIPSE_SHADOWS
+in vec3 positionWorldSpace;
+
+/*******************************************************************************
+ ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
+ *******************************************************************************/
+// JCC: Remove and use dictionary to 
+// decides the number of shadows
+const uint numberOfShadows = 1;
+
+struct ShadowRenderingStruct {
+        double xu, xp;
+        double rs, rc;
+        dvec3 sourceCasterVec;
+        dvec3 casterPositionVec;
+        bool isShadowing;
+};
+
+// Eclipse shadow data
+// JCC: Remove and use dictionary to 
+// decides the number of shadows
+uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
+uniform int shadows;
+uniform bool hardShadows;
+
+vec4 butterworthFunc(const float d, const float r, const float n) {
+    return vec4(vec3(sqrt(r/(r + pow(d, 2*n)))), 1.0);    
+}
+
+vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], const dvec3 position,
+                const bool ground) {
+    if (shadowInfoArray[0].isShadowing) {
+        dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
+        dvec3 sc_norm = shadowInfoArray[0].sourceCasterVec;
+        dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
+        dvec3 d = pc - pc_proj;
+        
+        float length_d = float(length(d));
+        double length_pc_proj = length(pc_proj);
+        
+        float r_p_pi = float(shadowInfoArray[0].rc * (length_pc_proj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
+        float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu);
+        
+        if ( length_d < r_u_pi ) { // umbra            
+            if (ground) {
+#if USE_ECLIPSE_HARD_SHADOWS                
+                return vec4(0.2, 0.2, 0.2, 1.0);
+#endif
+                return butterworthFunc(length_d, r_u_pi, 4.0);        
+            }
+            else {
+#if USE_ECLIPSE_HARD_SHADOWS                 
+                return vec4(0.5, 0.5, 0.5, 1.0);
+#endif              
+                return vec4(vec3(length_d/r_p_pi), 1.0);       
+            }
+        }
+        else if ( length_d < r_p_pi ) {// penumbra
+#if USE_ECLIPSE_HARD_SHADOWS         
+                return vec4(0.5, 0.5, 0.5, 1.0); 
+#endif                
+                return vec4(vec3(length_d/r_p_pi), 1.0);
+        }
+    }
+     
+    return vec4(1.0);
+}
+#endif
+
 in vec4 fs_position;
 in vec3 fs_normal;
 in vec2 fs_uv;
@@ -175,6 +244,10 @@ Fragment getTileFragment() {
     const vec3 atmosphereColor = vec3(0.5, 0.5, 1.0) * 2.0;
     frag.color += vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
 #endif // USE_ATMOSPHERE
+
+#if USE_ECLIPSE_SHADOWS
+    frag.color *= calcShadow(shadowDataArray, dvec3(positionWorldSpace), true);
+#endif
 
 #if USE_OVERLAY
     frag.color = calculateOverlay(

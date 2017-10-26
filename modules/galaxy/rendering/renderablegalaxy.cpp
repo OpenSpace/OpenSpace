@@ -158,7 +158,7 @@ void RenderableGalaxy::initialize() {
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
     _aspect = _aspect / std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
 
-    RawVolumeReader<glm::tvec4<GLfloat>> reader(_volumeFilename, _volumeDimensions);
+    volume::RawVolumeReader<glm::tvec4<GLfloat>> reader(_volumeFilename, _volumeDimensions);
     _volume = reader.read();
     
     _texture = std::make_unique<ghoul::opengl::Texture>(

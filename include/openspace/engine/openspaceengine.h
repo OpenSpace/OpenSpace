@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
@@ -78,9 +79,6 @@ public:
     static OpenSpaceEngine& ref();
     static bool isCreated();
 
-    double runTime();
-    void setRunTime(double t);
-
     // callbacks
     void initialize();
     void initializeGL();
@@ -100,9 +98,6 @@ public:
     void decode();
 
     void scheduleLoadScene(std::string scenePath);
-
-    void enableBarrier();
-    void disableBarrier();
     
     void writeDocumentation();
     void toggleShutdownMode();
@@ -204,6 +199,11 @@ private:
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+
+    struct {
+        properties::StringProperty versionString;
+        properties::StringProperty sourceControlInformation;
+    } _versionInformation;
     
     bool _scheduledSceneSwitch;
     std::string _scenePath;
@@ -228,8 +228,6 @@ private:
         std::vector<std::function<bool (double, double)>> mouseScrollWheel;
     } _moduleCallbacks;
     
-    double _runTime;
-
     // Structure that is responsible for the delayed shutdown of the application
     struct {
         // Whether the application is currently in shutdown mode (i.e. counting down the

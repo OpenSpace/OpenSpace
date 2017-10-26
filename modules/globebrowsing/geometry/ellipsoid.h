@@ -30,6 +30,8 @@
 
 #include <ghoul/glm.h>
 
+#include <vector>
+
 namespace openspace::globebrowsing {
 
 /**
@@ -43,6 +45,12 @@ namespace openspace::globebrowsing {
  */
 class Ellipsoid {
 public:
+    // Shadow configuration structure
+    struct ShadowConfiguration {
+        std::pair<std::string, double> source;
+        std::pair<std::string, double> caster;
+    };
+
     /**
      * \param radii defines three radii for the Ellipsoid
      */
@@ -83,6 +91,10 @@ public:
     glm::dvec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;
     glm::dvec3 cartesianPosition(const Geodetic3& geodetic3) const;
 
+    void setShadowConfigurationArray(const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray);
+    std::vector<Ellipsoid::ShadowConfiguration> shadowConfigurationArray() const;
+    bool hasEclipseShadows() const;
+
 private:
     struct EllipsoidCache {
         glm::dvec3 _radiiSquared;
@@ -96,6 +108,9 @@ private:
     void updateInternalCache();
 
     glm::dvec3 _radii;
+
+    // Eclipse shadows conf
+    std::vector<Ellipsoid::ShadowConfiguration> _shadowConfArray;
 };
 
 } // namespace openspace::globebrowsing

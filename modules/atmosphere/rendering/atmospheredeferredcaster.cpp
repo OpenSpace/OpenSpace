@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -59,6 +59,7 @@
  */
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
+#include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -71,6 +72,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderer.h>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -91,7 +93,7 @@ namespace {
     const char* GlslDeferredcastVsPath = "${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
 
     const float ATM_EPS = 2.0;
-    const float KM_TO_M = 1000.0;
+    const double KM_TO_M = 1000.0;
 } // namespace
 
 namespace openspace {
@@ -150,9 +152,9 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _exposureConstant(0.4f)
     , _exposureBackgroundConstant(1.8f)
     , _gammaConstant(1.8f)
-    , _renderableClass(NoRenderableClass)
+    , _hardShadowsEnabled(false)    
     , _calculationTextureScale(1.0)
-    , _saveCalculationTextures(false)
+    , _saveCalculationTextures(false)    
 
 
 {}
@@ -192,6 +194,15 @@ void AtmosphereDeferredcaster::deinitialize()
 void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
                                           ghoul::opengl::ProgramObject& program) 
 {    
+    // MSAA pixel position pattern
+    const Renderer * currentRenderer = OsEng.renderEngine().renderer();
+    const float * mssaPatternArray = currentRenderer->mSSAPattern();
+
+    for (int i = 0; i < OsEng.renderEngine().renderer()->nAaSamples() * 3; ++i) {
+        std::cout << mssaPatternArray[i] << " ";
+    }
+    std::cout << std::endl;
+
     // Atmosphere Frustum Culling
     glm::dvec3 tPlanetPosWorld = glm::dvec3(_modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
 
@@ -222,7 +233,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
             program.setUniform("exposure", _exposureConstant);
             program.setUniform("backgroundExposure", _exposureBackgroundConstant);
             program.setUniform("gamma", _gammaConstant);
-            program.setUniform("RenderableClass", static_cast<int>(_renderableClass));
 
             program.setUniform("TRANSMITTANCE_W", _transmittance_table_width);
             program.setUniform("TRANSMITTANCE_H", _transmittance_table_height);
@@ -240,6 +250,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
             // Object Space
             glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
             program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
+            program.setUniform("dModelTransformMatrix", _modelTransform);
 
             // The following scale comes from PSC transformations.
             float fScaleFactor = renderData.camera.scaling().x * pow(10.0, renderData.camera.scaling().y);
@@ -274,20 +285,90 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
                 sunPosObj = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
             }
             else {
-                if (_renderableClass == RenderablePlanet) {
-                    sunPosObj = inverseModelMatrix *
-                        glm::dvec4(sunPosWorld - renderData.position.dvec3(), 1.0);
-                }
-                else if (_renderableClass == RenderableGlobe) {
-                    sunPosObj = inverseModelMatrix *
-                        glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
-                }
+                sunPosObj = inverseModelMatrix * 
+                    glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
             }
 
             // Sun Position in Object Space
             program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
 
             program.setUniform("ellipsoidRadii", _ellipsoidRadii);
+
+            // Shadow calculations..
+            if (!_shadowConfArray.empty()) {
+                std::vector<ShadowRenderingStruct> shadowDataArray;
+                shadowDataArray.reserve(_shadowConfArray.size());
+
+                for (const auto & shadowConf : _shadowConfArray) {
+                    // TO REMEMBER: all distances and lengths in world coordinates are in meters!!! We need to move this to view space...
+                    // Getting source and caster:
+                    glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(shadowConf.source.first, "SUN", "GALACTIC", {}, _time, lt);
+                    sourcePos *= KM_TO_M; // converting to meters
+                    glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, _time, lt);
+                    casterPos *= KM_TO_M; // converting to meters
+                    psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
+
+
+                    // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
+                    glm::dvec3 planetCasterVec = casterPos - renderData.position.dvec3();
+                    glm::dvec3 sourceCasterVec = casterPos - sourcePos;
+                    double sc_length = glm::length(sourceCasterVec);
+                    glm::dvec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) * sourceCasterVec;
+                    double d_test = glm::length(planetCasterVec - planetCaster_proj);
+                    double xp_test = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
+                    double rp_test = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
+
+                    double casterDistSun = glm::length(casterPos - sunPosWorld);
+                    double planetDistSun = glm::length(renderData.position.dvec3() - sunPosWorld);
+
+                    ShadowRenderingStruct shadowData;
+                    shadowData.isShadowing = false;
+
+                    if (((d_test - rp_test) < (_atmospherePlanetRadius * KM_TO_M)) &&
+                    //if (((d_test - rp_test) < (_atmosphereRadius * KM_TO_M)) &&
+                        (casterDistSun < planetDistSun)) {
+                        // The current caster is shadowing the current planet
+                        shadowData.isShadowing = true;
+                        shadowData.rs = shadowConf.source.second;
+                        shadowData.rc = shadowConf.caster.second;
+                        shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
+                        shadowData.xp = xp_test;
+                        shadowData.xu = shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
+                        shadowData.casterPositionVec = casterPos;
+                    }
+                    shadowDataArray.push_back(shadowData);
+                }
+
+                const std::string uniformVarName("shadowDataArray[");
+                unsigned int counter = 0;
+                for (const auto & sd : shadowDataArray) {
+                    std::stringstream ss;
+                    ss << uniformVarName << counter << "].isShadowing";
+                    program.setUniform(ss.str(), sd.isShadowing);
+                    if (sd.isShadowing) {
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].xp";
+                        program.setUniform(ss.str(), sd.xp);
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].xu";
+                        program.setUniform(ss.str(), sd.xu);
+                        /*ss.str(std::string());
+                        ss << uniformVarName << counter << "].rs";
+                        program.setUniform(ss.str(), sd.rs);*/
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].rc";
+                        program.setUniform(ss.str(), sd.rc);
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].sourceCasterVec";
+                        program.setUniform(ss.str(), sd.sourceCasterVec);
+                        ss.str(std::string());
+                        ss << uniformVarName << counter << "].casterPositionVec";
+                        program.setUniform(ss.str(), sd.casterPositionVec);
+                    }
+                    counter++;
+                }
+                program.setUniform("hardShadows", _hardShadowsEnabled);
+            }
             
         }
     }             
@@ -406,9 +487,14 @@ void AtmosphereDeferredcaster::setEllipsoidRadii(const glm::dvec3 & radii) {
     _ellipsoidRadii = radii;
 }
 
-void AtmosphereDeferredcaster::setRenderableClass(const AtmosphereDeferredcaster::AtmospherRenderableClass rc)
-{
-    _renderableClass = rc;
+
+void AtmosphereDeferredcaster::setHardShadows(const bool enabled) {
+    _hardShadowsEnabled = enabled;
+}
+
+void AtmosphereDeferredcaster::setShadowConfigArray(
+    const std::vector<ShadowConfiguration>& shadowConfigArray) {
+    _shadowConfArray = shadowConfigArray;
 }
 
 void AtmosphereDeferredcaster::enableSunFollowing(const bool enable) {
@@ -624,7 +710,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F_ARB, _mu_s_samples * _nu_samples,
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, _mu_s_samples * _nu_samples,
             _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
     }
 
@@ -1084,7 +1170,6 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(std::unique_p
     shaderProg->setUniform("exposure", _exposureConstant);
     shaderProg->setUniform("backgroundExposure", _exposureBackgroundConstant);
     shaderProg->setUniform("gamma", _gammaConstant);
-    shaderProg->setUniform("RenderableClass", static_cast<int>(_renderableClass));
     shaderProg->setUniform("TRANSMITTANCE_W", (int)_transmittance_table_width);
     shaderProg->setUniform("TRANSMITTANCE_H", (int)_transmittance_table_height);
     shaderProg->setUniform("SKY_W", (int)_irradiance_table_width);

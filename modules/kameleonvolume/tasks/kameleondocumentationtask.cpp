@@ -46,6 +46,7 @@ namespace {
 } // namespace
 
 namespace openspace {
+namespace kameleonvolume {
 
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary) {
     openspace::documentation::testSpecificationAndThrow(
@@ -164,4 +165,5 @@ documentation::Documentation KameleonDocumentationTask::documentation() {
     };
 }
 
+} // namespace kameleonvolume
 } // namespace openspace

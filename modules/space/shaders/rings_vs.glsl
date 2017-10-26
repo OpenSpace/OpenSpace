@@ -36,7 +36,6 @@ out vec4 vs_position;
 
 uniform mat4 modelViewProjectionTransform;
 
-
 void main() {
     vs_st = in_st;
 

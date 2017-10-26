@@ -162,19 +162,25 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local dir = openspace.directoryForPath(file)
     dofile(file)
 
-    local color = {
-        Name = Name,
-        Description = Description or "",
-        FilePath = dir .. '/' .. ColorFile,
-        BlendMode = "Color"
-    }
+    local color = nil
+    if ColorFile then
+        color = {
+            Name = Name,
+            Description = Description or "",
+            FilePath = dir .. '/' .. ColorFile,
+            BlendMode = "Color"
+        }
+    end
 
-    local height = {
-        Name = Name,
-        Description = Description or "",
-        FilePath = dir .. '/' .. HeightFile,
-        TilePixelSize = 90
-    }
+    local height = nil
+    if HeightFile then
+        local height = {
+            Name = Name,
+            Description = Description or "",
+            FilePath = dir .. '/' .. HeightFile,
+            TilePixelSize = 90
+        }
+    end
 
     return color, height
 end
@@ -186,8 +192,12 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
         if file:find('.info') then
             c, h = openspace.globebrowsing.parseInfoFile(file)
 
-            openspace.globebrowsing.addLayer(node_name, "ColorLayers", c)
-            openspace.globebrowsing.addLayer(node_name, "HeightLayers", h)
+            if c then
+                openspace.globebrowsing.addLayer(node_name, "ColorLayers", c)
+            end
+            if h then
+                openspace.globebrowsing.addLayer(node_name, "HeightLayers", h)
+            end
         end
     end
 end

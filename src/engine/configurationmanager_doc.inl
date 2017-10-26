@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -53,7 +53,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "the Scene documentation."
         },
         {
-            ConfigurationManager::KeyConfigTask,
+            ConfigurationManager::KeyConfigTasksRoot,
             new StringAnnotationVerifier(
                 "A valid task file as described in the Task documentation"
             ),
@@ -199,6 +199,14 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "documentation which shows the different types of objects that can be "
             "created in the current application configuration. Any previous file in this "
             "location will be silently overritten."
+        },
+        {
+            ConfigurationManager::KeySceneLicenseDocumentation,
+            new StringVerifier,
+            Optional::Yes,
+            "The file that will be created on startup containing the scene license "
+            "information. Any previous file in this location will be silently "
+            "overwritten."
         },
         {
             ConfigurationManager::KeyLauncher,

@@ -28,9 +28,9 @@ project(OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 9)
+set(OPENSPACE_VERSION_MINOR 10)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "prerelease-14 (Astronomy Live)")
+set(OPENSPACE_VERSION_STRING "prerelease-15 (ASTC)")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
@@ -58,6 +58,26 @@ endif ()
 # Set build output directories
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin)
+
+##########################################################################################
+# Main                                                                                   #
+##########################################################################################
+
+# Get the current working branch
+execute_process(
+  COMMAND git rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE OPENSPACE_GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE OPENSPACE_GIT_COMMIT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 

@@ -303,6 +303,8 @@ void RenderableSphericalGrid::update(const UpdateData&) {
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray.data(), GL_STATIC_DRAW);
+
+        _gridIsDirty = false;
     }
 }
 

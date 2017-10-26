@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/other/concurrentqueue.h>
+#include "gtest/gtest.h"
+
+#include <openspace/util/concurrentqueue.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -31,7 +33,7 @@
 class ConcurrentQueueTest : public testing::Test {};
 
 TEST_F(ConcurrentQueueTest, Basic) {
-    using namespace openspace::globebrowsing;
+    using namespace openspace;
 
     ConcurrentQueue<int> q1;
     q1.push(4);
