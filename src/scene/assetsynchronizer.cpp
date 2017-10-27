@@ -68,4 +68,11 @@ void AssetSynchronizer::syncAsset(Asset* asset) {
     // todo...
 }
 
+void AssetSynchronizer::syncUnsynced() {
+}
+
+std::vector<std::shared_ptr<Asset>> AssetSynchronizer::getSynchronizedAssets() {
+    return std::vector<std::shared_ptr<Asset>>();
+}
+
 }

@@ -405,8 +405,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Set up asset loader
     _engine->_assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}", "${SYNC}"),
-        std::make_unique<AssetSynchronizer>(*OsEng._resourceSynchronizer.get())
+        std::move(std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}", "${SYNC}")),
+        std::move(std::make_unique<AssetSynchronizer>(OsEng._resourceSynchronizer.get()))
     );
     //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }

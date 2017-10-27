@@ -130,7 +130,7 @@ std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
     const auto it = _importedAssets.find(path);
 
     return it == _importedAssets.end() ?
-        loadAsset(path) :
+        importAsset(path) :
         it->second;
 }
 
@@ -206,7 +206,7 @@ void AssetLoader::unloadAsset(const std::string & identifier) {
 
 bool AssetLoader::hasLoadedAsset(const std::string & identifier) {
     const auto it = _importedAssets.find(identifier);
-    if (it == _importedAsset.end()) {
+    if (it == _importedAssets.end()) {
         return false;
     }
     return _rootAsset->hasDependency(it->second.get());

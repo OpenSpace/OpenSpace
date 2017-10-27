@@ -38,9 +38,9 @@ namespace {
 namespace openspace {
 AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader, 
    std::unique_ptr<AssetSynchronizer> synchronizer)
-{
-
-}
+    : _assetLoader(std::move(loader))
+    , _assetSynchronizer(std::move(synchronizer))
+{}
 
 void AssetManager::update() {
     std::unordered_map<std::string, std::shared_ptr<Asset>> loadedAssets;
@@ -110,11 +110,7 @@ void AssetManager::update() {
 }
 
 void AssetManager::setTargetAssetState(const std::string& path, AssetState targetState) {
-    ghoul::filesystem::File file(absPath(path));
-    std::string normalizedPath = file.path();
-    // TODO: Use asset loader to normalize path?
-
-    _pendingStateChangeCommands[normalizedPath] = targetState;
+    _pendingStateChangeCommands[path] = targetState;
 }
 
 void AssetManager::clearAllTargetAssets() {
