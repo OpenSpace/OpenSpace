@@ -36,7 +36,6 @@ namespace {
 namespace openspace {
 
 Asset::Asset(AssetLoader* loader)
-    //: PropertyOwner({ "RootAsset", "Root asset" })
     : _readyState(Asset::ReadyState::Loaded)
     , _loader(loader)
     , _hasAssetPath(false)
@@ -45,7 +44,6 @@ Asset::Asset(AssetLoader* loader)
 {}
 
 Asset::Asset(AssetLoader* loader, ghoul::filesystem::File assetPath)
-    //: PropertyOwner({ assetPath, assetPath })
     : _readyState(Asset::ReadyState::Loaded)
     , _loader(loader)
     , _hasAssetPath(true)
@@ -87,12 +85,8 @@ std::vector<std::shared_ptr<ResourceSynchronization>> Asset::synchronizations()
 
 std::vector<std::shared_ptr<Asset>> Asset::allAssets() {
     std::set<std::shared_ptr<Asset>> assets({ shared_from_this() });
-    for (auto& dep : _requiredDependencies) {
+    for (auto& dep : _dependencies) {
         std::vector<std::shared_ptr<Asset>> depAssets = dep->allActiveAssets();
-        std::copy(depAssets.begin(), depAssets.end(), std::inserter(assets, assets.end()));
-    }
-    for (auto& dep : _optionalDependencies) {
-        std::vector<std::shared_ptr<Asset>> depAssets = dep.first->allActiveAssets();
         std::copy(depAssets.begin(), depAssets.end(), std::inserter(assets, assets.end()));
     }
     std::vector<std::shared_ptr<Asset>> assetVector(assets.begin(), assets.end());
@@ -101,15 +95,9 @@ std::vector<std::shared_ptr<Asset>> Asset::allAssets() {
 
 std::vector<std::shared_ptr<Asset >> Asset::allActiveAssets() {
     std::set<std::shared_ptr<Asset>> assets({ shared_from_this() });
-    for (auto& dep : _requiredDependencies) {
+    for (auto& dep : _dependencies) {
         std::vector<std::shared_ptr<Asset>> depAssets = dep->allActiveAssets();
         std::copy(depAssets.begin(), depAssets.end(), std::inserter(assets, assets.end()));
-    }
-    for (auto& dep : _optionalDependencies) {
-        if (dep.second) {
-            std::vector<std::shared_ptr<Asset>> depAssets = dep.first->allActiveAssets();
-            std::copy(depAssets.begin(), depAssets.end(), std::inserter(assets, assets.end()));
-        }
     }
     std::vector<std::shared_ptr<Asset>> assetVector(assets.begin(), assets.end());
     return assetVector;
@@ -117,13 +105,13 @@ std::vector<std::shared_ptr<Asset >> Asset::allActiveAssets() {
 
 bool Asset::isInitReady() const {
     // An asset is ready for initialization if all synchronizations are resolved
-    // and all its required dependencies are ready for initialization.
+    // and all its dependencies are ready for initialization.
     for (const std::shared_ptr<ResourceSynchronization>& sync : _synchronizations) {
         if (!sync->isResolved()) {
             return false;
         }
     }
-    for (const auto& dependency : _requiredDependencies) {
+    for (const auto& dependency : _dependencies) {
         if (!dependency->isInitReady()) {
             return false;
         }
@@ -143,7 +131,7 @@ void Asset::initialize() {
     }
 
     // Initialize dependencies
-    for (auto& dependency : _requiredDependencies) {
+    for (auto& dependency : _dependencies) {
         dependency->initialize();
     }
 
@@ -153,7 +141,7 @@ void Asset::initialize() {
     loader()->callOnInitialize(this);
 
     // Notify dependencies
-    for (auto& dependency : _requiredDependencies) {
+    for (auto& dependency : _dependencies) {
         loader()->callOnDependantInitialize(dependency.get(), this);
     }
 }
@@ -164,7 +152,7 @@ void Asset::deinitialize() {
     }
 
     // Notify dependencies
-    for (auto& dependency : _requiredDependencies) {
+    for (auto& dependency : _dependencies) {
         loader()->callOnDependantDeinitialize(dependency.get(), this);
     }
 
@@ -174,7 +162,7 @@ void Asset::deinitialize() {
     _readyState = Asset::ReadyState::Loaded;
 
     // Make sure no dependencies are left dangling
-    for (auto& dependency : _requiredDependencies) {
+    for (auto& dependency : _dependencies) {
         if (!dependency->hasInitializedDependants()) {
             dependency->deinitialize();
         }
@@ -211,50 +199,50 @@ AssetLoader* Asset::loader() const {
     return _loader;
 }
 
-bool Asset::hasRequiredDependency(const Asset* asset) const {
+bool Asset::hasDependency(const Asset* asset) const {
     const auto it = std::find_if(
-        _requiredDependencies.begin(),
-        _requiredDependencies.end(),
+        _dependencies.begin(),
+        _dependencies.end(),
         [asset](std::shared_ptr<Asset> dep) {
             return dep.get() == asset;
         }
     );
 
-    return it != _requiredDependencies.end();
+    return it != _dependencies.end();
 }
 
-void Asset::addRequiredDependency(std::shared_ptr<Asset> dependency) {
+void Asset::addDependency(std::shared_ptr<Asset> dependency) {
     if (_readyState == Asset::ReadyState::Initialized) {
         // TODO: Throw: cannot add dep while asset is initialized.
         return;
     }
 
     // Do nothing if the dependency already exists.
-    auto it = std::find(_requiredDependencies.begin(),
-                        _requiredDependencies.end(),
+    auto it = std::find(_dependencies.begin(),
+                        _dependencies.end(),
                         dependency);
 
-    if (it != _requiredDependencies.end()) {
+    if (it != _dependencies.end()) {
         return;
     }
 
-    _requiredDependencies.push_back(dependency);
-    dependency->_requiredDependants.push_back(shared_from_this());
+    _dependencies.push_back(dependency);
+    dependency->_dependants.push_back(shared_from_this());
 
     //addPropertySubOwner(dependency);
 }
 
-void Asset::removeRequiredDependency(Asset* dependency) {
-    _requiredDependencies.erase(
-        std::remove_if(_requiredDependencies.begin(),
-            _requiredDependencies.end(),
+void Asset::removeDependency(Asset* dependency) {
+    _dependencies.erase(
+        std::remove_if(_dependencies.begin(),
+            _dependencies.end(),
             [dependency](std::shared_ptr<Asset> asset) {
                 return asset.get() == dependency;
             }
         ),
-        _requiredDependencies.end()
+        _dependencies.end()
     );
-    std::vector<std::weak_ptr<Asset>>& dependants = dependency->_requiredDependants;
+    std::vector<std::weak_ptr<Asset>>& dependants = dependency->_dependants;
     dependants.erase(
         std::remove_if(dependants.begin(), dependants.end(), [this](std::weak_ptr<Asset> asset) {
             return asset.lock().get() == this;
@@ -267,31 +255,29 @@ void Asset::removeRequiredDependency(Asset* dependency) {
     }
 }
 
-void Asset::removeRequiredDependency(const std::string& assetId) {
+void Asset::removeDependency(const std::string& assetId) {
     auto dep = std::find_if(
-        _requiredDependencies.begin(),
-        _requiredDependencies.end(),
+        _dependencies.begin(),
+        _dependencies.end(),
         [&assetId](const std::shared_ptr<Asset>& d) {
             return d->id() == assetId;
         });
 
-    if (dep != _requiredDependencies.end()) {
-       removeRequiredDependency(dep->get());
+    if (dep != _dependencies.end()) {
+       removeDependency(dep->get());
     } else {
         LERROR("No such dependency '" << assetId << "'");
     }
 }
 
+std::vector<std::shared_ptr<Asset>> Asset::dependencies() {
+    return _dependencies;
+}
+
 bool Asset::hasDependants() const {
-    for (const auto& dependant : _requiredDependants) {
+    for (const auto& dependant : _dependants) {
         std::shared_ptr<Asset> d = dependant.lock();
-        if (d && d->hasRequiredDependency(this)) {
-            return true;
-        }
-    }
-    for (const auto& dependant : _optionalDependants) {
-        std::shared_ptr<Asset> d = dependant.lock();
-        if (d && d->hasEnabledOptionalDependency(this)) {
+        if (d && d->hasDependency(this)) {
             return true;
         }
     }
@@ -299,91 +285,15 @@ bool Asset::hasDependants() const {
 }
 
 bool Asset::hasInitializedDependants() const {
-    for (const auto& dependant : _requiredDependants) {
+    for (const auto& dependant : _dependants) {
         std::shared_ptr<Asset> d = dependant.lock();
         if (d && d->readyState() == Asset::ReadyState::Initialized &&
-            d->hasRequiredDependency(this))
-        {
-            return true;
-        }
-    }
-    for (const auto& dependant : _optionalDependants) {
-        std::shared_ptr<Asset> d = dependant.lock();
-        if (d && d->readyState() == Asset::ReadyState::Initialized &&
-            d->hasEnabledOptionalDependency(this))
+            d->hasDependency(this))
         {
             return true;
         }
     }
     return false;
-}
-
-std::vector<std::shared_ptr<Asset>> Asset::optionalAssets() const {
-    std::vector<std::shared_ptr<Asset>> assets(_optionalDependencies.size());
-    std::transform(
-        _optionalDependencies.begin(),
-        _optionalDependencies.end(),
-        assets.begin(),
-        [](const Optional& o) {
-            return o.first;
-        }
-    );
-    return assets;
-}
-
-bool Asset::hasOptionalDependency(const Asset* asset) const {
-    auto it = std::find_if(
-        _optionalDependencies.begin(),
-        _optionalDependencies.end(),
-        [&asset](const Optional& o) {
-            return o.first.get() == asset;
-        }
-    );
-    return it != _optionalDependencies.end();
-}
-
-bool Asset::hasEnabledOptionalDependency(const Asset* asset) const {
-        auto it = std::find_if(
-            _optionalDependencies.begin(),
-            _optionalDependencies.end(),
-        [&asset](const Optional& o) {
-            return o.first.get() == asset && o.second;
-        }
-    );
-    return it != _optionalDependencies.end();
-}
-
-void Asset::setOptionalDependencyEnabled(Asset* asset, bool enabled) {
-    auto it = std::find_if(
-        _optionalDependencies.begin(),
-        _optionalDependencies.end(),
-        [&asset](const Optional& o) {
-            return o.first.get() == asset;
-        }
-    );
-
-    if (it != _optionalDependencies.end()) {
-        it->second = enabled;
-    }
-}
-
-void Asset::removeOptionalDependency(Asset* asset) {
-    _optionalDependencies.erase(
-        std::remove_if(
-            _optionalDependencies.begin(),
-            _optionalDependencies.end(),
-            [&asset](Optional& o) {
-                return o.first.get() == asset;
-            }
-        ),
-        _optionalDependencies.end()
-    );
-    // TODO: Update and validate
-}
-
-void Asset::addOptionalDependency(std::shared_ptr<Asset> asset, bool enabled) {
-    _optionalDependencies.push_back(std::make_pair(asset, enabled));
-    // TODO: Update and validate
 }
 
 }

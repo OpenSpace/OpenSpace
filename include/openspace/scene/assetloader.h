@@ -49,8 +49,7 @@ int onDeinitialize(lua_State* state);
 int onInitializeDependency(lua_State* state);
 int onDeinitializeDependency(lua_State* state);
 int addSynchronization(lua_State* state);
-int importRequiredDependency(lua_State* state);
-int importOptionalDependency(lua_State* state);
+int importDependency(lua_State* state);
 int resolveLocalResource(lua_State* state);
 int resolveSyncedResource(lua_State* state);
 int noOperation(lua_State* state);
@@ -74,26 +73,30 @@ public:
     ~AssetLoader();
 
     /**
-     * Load single asset.
-     *  - Import one asset
-     *  - Unimport all other assets
-     */
-    std::shared_ptr<Asset> loadSingleAsset(const std::string& identifier);
-
-    /**
-     * Import an asset:
-     * Add the asset as an optional on the root asset
-     * The asset is imported synchronously
+     * Load an asset:
+     * Add the asset as a dependency on the root asset
+     * The asset is loaded synchronously
      */
     std::shared_ptr<Asset> loadAsset(const std::string& identifier);
 
     /**
-     * Unimport an asset:
-     * Remove the asset as an optional on the root asset
-     * The asset is unimported synchronously
+     * Unload an asset:
+     * Remove the asset as a dependency on the root asset
+     * The asset is unloaded synchronously
      */
     void unloadAsset(const std::string& identifier);
     
+    /**
+     * Return true if the specified asset is loaded
+     */
+    bool hasLoadedAsset(const std::string& identifier);
+
+    /**
+     * Return all assets loaded using the loadAsset method.
+     * Non-recursive (does not include imports of the loaded assets)
+     */
+    std::vector<std::shared_ptr<Asset>> loadedAssets();
+
     /**
      * Return the lua state
      */
@@ -125,8 +128,7 @@ public:
     std::string generateAssetPath(const std::string& baseDirectory, const std::string& path) const;
 
 private:
-    std::shared_ptr<Asset> importRequiredDependency(const std::string& identifier);
-    std::shared_ptr<Asset> importOptionalDependency(const std::string& identifier, bool enabled = true);
+    std::shared_ptr<Asset> importDependency(const std::string& identifier);
     std::shared_ptr<Asset> importAsset(std::string path);
     std::shared_ptr<Asset> getAsset(std::string path);
     ghoul::filesystem::Directory currentDirectory();
@@ -142,8 +144,7 @@ private:
     int onInitializeDependencyLua(Asset* dependant, Asset* dependency);
     int onDeinitializeDependencyLua(Asset* dependant, Asset* dependency);
     int addSynchronizationLua(Asset* asset);
-    int importRequiredDependencyLua(Asset* asset);
-    int importOptionalDependencyLua(Asset* asset);
+    int importDependencyLua(Asset* asset);
     int resolveLocalResourceLua(Asset* asset);
     int resolveSyncedResourceLua(Asset* asset);
     int exportAssetLua(Asset* asset);
@@ -154,8 +155,7 @@ private:
     friend int assetloader::onInitializeDependency(lua_State* state);
     friend int assetloader::onDeinitializeDependency(lua_State* state);
     friend int assetloader::addSynchronization(lua_State* state);
-    friend int assetloader::importRequiredDependency(lua_State* state);
-    friend int assetloader::importOptionalDependency(lua_State* state);
+    friend int assetloader::importDependency(lua_State* state);
     friend int assetloader::resolveLocalResource(lua_State* state);
     friend int assetloader::resolveSyncedResource(lua_State* state);
     friend int assetloader::exportAsset(lua_State* state);

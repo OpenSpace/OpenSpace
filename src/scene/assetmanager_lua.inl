@@ -24,7 +24,7 @@
 
 namespace openspace::luascriptfunctions {
 
-int importAsset(lua_State* state) {
+int loadAsset(lua_State* state) {
     AssetManager *assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
@@ -37,7 +37,7 @@ int importAsset(lua_State* state) {
     return 0;
 }
 
-int unimportAsset(lua_State* state) {
+int unloadAsset(lua_State* state) {
     AssetManager *assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 

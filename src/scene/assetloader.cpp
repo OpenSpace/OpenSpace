@@ -39,8 +39,7 @@
 namespace {
     const char* AssetGlobalVariableName = "asset";
 
-    const char* ImportRequiredDependencyFunctionName = "import";
-    const char* ImportOptionalDependencyFunctionName = "importOptional";
+    const char* ImportDependencyFunctionName = "import";
     const char* ExportFunctionName = "export";
 
     const char* SyncedResourceFunctionName = "syncedResource";
@@ -178,17 +177,10 @@ int AssetLoader::addSynchronizationLua(Asset* asset) {
     return 0;
 }
 
-std::shared_ptr<Asset> AssetLoader::importRequiredDependency(const std::string& name) {
+std::shared_ptr<Asset> AssetLoader::importDependency(const std::string& name) {
     std::shared_ptr<Asset> asset = getAsset(name);
     std::shared_ptr<Asset> dependant = _assetStack.back();
-    dependant->addRequiredDependency(asset);
-    return asset;
-}
-
-std::shared_ptr<Asset> AssetLoader::importOptionalDependency(const std::string& name, bool enabled) {
-    std::shared_ptr<Asset> asset = getAsset(name);
-    std::shared_ptr<Asset> owner = _assetStack.back();
-    owner->addOptionalDependency(asset, enabled);
+    dependant->addDependency(asset);
     return asset;
 }
 
@@ -200,31 +192,29 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() {
     }
 }
 
-std::shared_ptr<Asset> AssetLoader::loadSingleAsset(const std::string& identifier) {
-    std::shared_ptr<Asset> imported = importOptionalDependency(identifier, true);
-    std::vector<std::shared_ptr<Asset>> optionals = _rootAsset->optionalAssets();
-
-    // Remove all other optionals
-    for (auto& optional : optionals) {
-        if (optional != imported) {
-            _rootAsset->removeOptionalDependency(optional.get());
-        }
-    }
-    return imported;
-}
-
 std::shared_ptr<Asset> AssetLoader::loadAsset(const std::string & identifier) {
     ghoul_assert(_assetStack.size() == 1, "Can only load an asset from the root asset");
-    return importOptionalDependency(identifier);
+    return importDependency(identifier);
 }
 
 
 void AssetLoader::unloadAsset(const std::string & identifier) {
     ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");   
     // TODO: Implement this
-    //_rootAsset->removeOptional(id);
+    //_rootAsset->removeDependency(id);
 }
 
+bool AssetLoader::hasLoadedAsset(const std::string & identifier) {
+    const auto it = _importedAssets.find(identifier);
+    if (it == _importedAsset.end()) {
+        return false;
+    }
+    return _rootAsset->hasDependency(it->second.get());
+}
+
+std::vector<std::shared_ptr<Asset>> AssetLoader::loadedAssets() {
+    return _rootAsset->dependencies();
+}
 
 ghoul::lua::LuaState* AssetLoader::luaState() {
     return _luaState;
@@ -340,7 +330,6 @@ void AssetLoader::pushAsset(std::shared_ptr<Asset> asset) {
        |  |- localResource
        |  |- syncedResource
        |  |- import
-       |  |- importOptional
        |  |- export
        |  |- onInitialize
        |  |- onDeinitialize
@@ -383,14 +372,8 @@ void AssetLoader::pushAsset(std::shared_ptr<Asset> asset) {
     // Register import-dependency function
     // Asset, Dependency import(string path)
     lua_pushlightuserdata(*_luaState, asset.get());
-    lua_pushcclosure(*_luaState, &assetloader::importRequiredDependency, 1);
-    lua_setfield(*_luaState, assetTableIndex, ImportRequiredDependencyFunctionName);
-
-    // Register import-optional function
-    // Asset, Dependency importOptional(string path)
-    lua_pushlightuserdata(*_luaState, asset.get());
-    lua_pushcclosure(*_luaState, &assetloader::importOptionalDependency, 1);
-    lua_setfield(*_luaState, assetTableIndex, ImportOptionalDependencyFunctionName);
+    lua_pushcclosure(*_luaState, &assetloader::importDependency, 1);
+    lua_setfield(*_luaState, assetTableIndex, ImportDependencyFunctionName);
 
     // Register export-dependency function
     // export(string key, any value)
@@ -452,46 +435,13 @@ void AssetLoader::updateLuaGlobals() {
     lua_setglobal(*_luaState, AssetGlobalVariableName);
 }
 
-int AssetLoader::importRequiredDependencyLua(Asset* dependant) {
+int AssetLoader::importDependencyLua(Asset* dependant) {
     int nArguments = lua_gettop(*_luaState);
     SCRIPT_CHECK_ARGUMENTS("import", *_luaState, 1, nArguments);
 
     std::string assetName = luaL_checkstring(*_luaState, 1);
 
-    std::shared_ptr<Asset> dependency = importRequiredDependency(assetName);
-
-    if (!dependency) {
-        return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());
-    }
-
-    addLuaDependencyTable(dependant, dependency.get());
-
-    // Get the exports table
-    lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
-    lua_getfield(*_luaState, -1, dependency->id().c_str());
-    lua_getfield(*_luaState, -1, ExportsTableName);
-    int exportsTableIndex = lua_gettop(*_luaState);
-
-    // Get the dependency table
-    lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
-    lua_getfield(*_luaState, -1, dependency->id().c_str());
-    lua_getfield(*_luaState, -1, DependantsTableName);
-    lua_getfield(*_luaState, -1, dependant->id().c_str());
-    int dependencyTableIndex = lua_gettop(*_luaState);
-
-    lua_pushvalue(*_luaState, exportsTableIndex);
-    lua_pushvalue(*_luaState, dependencyTableIndex);
-    return 2;
-}
-
-int AssetLoader::importOptionalDependencyLua(Asset* dependant) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("importOptional", *_luaState, 2, nArguments);
-
-    std::string assetName = luaL_checkstring(*_luaState, 1);
-    bool enabled = lua_toboolean(*_luaState, 2);
-
-    std::shared_ptr<Asset> dependency = importOptionalDependency(assetName, enabled);
+    std::shared_ptr<Asset> dependency = importDependency(assetName);
 
     if (!dependency) {
         return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());

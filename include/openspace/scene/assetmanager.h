@@ -64,8 +64,8 @@ public:
 private:
 
     std::unordered_map<std::string, AssetState> _pendingStateChangeCommands;
-    std::unordered_set<std::string> _synchronizingAssets;
-    bool _shouldClearAssets;
+    std::unordered_map<std::shared_ptr<Asset>, AssetState> _stateChangesInProgress;
+    std::unordered_map<std::shared_ptr<Asset>, std::unordered_set<std::shared_ptr<Asset>>> _syncAncestors;
     std::unique_ptr<AssetLoader> _assetLoader;
     std::unique_ptr<AssetSynchronizer> _assetSynchronizer;
 };

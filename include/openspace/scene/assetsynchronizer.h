@@ -48,8 +48,10 @@ public:
     void addAsset(std::shared_ptr<Asset> asset);
     void removeAsset(Asset* asset);
     void syncAsset(Asset* asset);
+    void syncUnsynced();
 
-    std::vector<Asset*> getRecentlySynchronizedAssets();
+    std::vector<std::shared_ptr<Asset>> getSynchronizedAssets();
+
 private:
     enum class SynchronizationState : int {
         Added,

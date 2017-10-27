@@ -96,17 +96,17 @@ int passTest(lua_State* state) {
 
 TEST_F(AssetLoaderTest, Assertions) {
     try {
-        _assetLoader->importAsset("passassertion");
+        _assetLoader->loadAsset("passassertion");
     }
     catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();
     }
-    EXPECT_THROW(_assetLoader->importAsset("failassertion"), ghoul::lua::LuaRuntimeException);
+    EXPECT_THROW(_assetLoader->loadAsset("failassertion"), ghoul::lua::LuaRuntimeException);
 }
 
 TEST_F(AssetLoaderTest, BasicExportImport) {
     try {
-        _assetLoader->importAsset("import");
+        _assetLoader->loadAsset("import");
     }
     catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();
@@ -115,7 +115,7 @@ TEST_F(AssetLoaderTest, BasicExportImport) {
 
 TEST_F(AssetLoaderTest, AssetFuncitons) {
     try {
-        _assetLoader->importAsset("assetfunctionsexist");
+        _assetLoader->loadAsset("assetfunctionsexist");
     } catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();
     }
@@ -123,7 +123,7 @@ TEST_F(AssetLoaderTest, AssetFuncitons) {
 
 TEST_F(AssetLoaderTest, DependencyFuncitons) {
     try {
-        _assetLoader->importAsset("dependencyfunctionsexist");
+        _assetLoader->loadAsset("dependencyfunctionsexist");
     }
     catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();
@@ -132,7 +132,7 @@ TEST_F(AssetLoaderTest, DependencyFuncitons) {
 
 TEST_F(AssetLoaderTest, AssetInitialization) {
     try {
-        std::shared_ptr<openspace::Asset> asset = _assetLoader->loadSingleAsset("initialization");
+        std::shared_ptr<openspace::Asset> asset = _assetLoader->loadAsset("initialization");
         asset->initialize();
         EXPECT_TRUE(passed());
     }

@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -70,22 +70,16 @@ int onDeinitializeDependency(lua_State* state) {
 
 
 /**
- * Imports required dependencies
+ * Imports dependencies
  * Gives access to
  *   AssetTable: Exported lua values
  *   Dependency: ...
  * Usage: {AssetTable, Dependency} = asset.import(string assetIdentifier)
  */
-int importRequiredDependency(lua_State* state) {
+int importDependency(lua_State* state) {
     Asset *asset =
         reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    return asset->loader()->importRequiredDependencyLua(asset);
-}
-
-int importOptionalDependency(lua_State* state) {
-    Asset *asset =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    return asset->loader()->importOptionalDependencyLua(asset);
+    return asset->loader()->importDependencyLua(asset);
 }
 
 int resolveLocalResource(lua_State* state) {

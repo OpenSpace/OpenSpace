@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -87,7 +87,7 @@ void SceneLoader::loadScene(Scene* scene, const std::string& path) {
 
     for (const std::string& key : keys) {
         std::string assetName = assetDictionary.value<std::string>(key);
-        _assetLoader->importAsset(assetName);
+        _assetLoader->loadAsset(assetName);
     }
 
     // Sync all resources from assets that are dependencies of root asset.

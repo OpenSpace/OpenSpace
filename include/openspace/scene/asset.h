@@ -78,20 +78,14 @@ public:
     void initialize();
     void deinitialize();
 
-    bool hasRequiredDependency(const Asset* asset) const;
-    void addRequiredDependency(std::shared_ptr<Asset> asset);
-    void removeRequiredDependency(Asset* asset);
-    void removeRequiredDependency(const std::string& assetId);
+    bool hasDependency(const Asset* asset) const;
+    void addDependency(std::shared_ptr<Asset> asset);
+    void removeDependency(Asset* asset);
+    void removeDependency(const std::string& assetId);
+    std::vector<std::shared_ptr<Asset>> dependencies();
 
     bool hasDependants() const;
     bool hasInitializedDependants() const;
-
-    std::vector<std::shared_ptr<Asset>> optionalAssets() const;
-    bool hasOptionalDependency(const Asset* asset) const;
-    bool hasEnabledOptionalDependency(const Asset* asset) const;
-    void setOptionalDependencyEnabled(Asset* asset, bool enabled);
-    void addOptionalDependency(std::shared_ptr<Asset> asset, bool enabled);
-    void removeOptionalDependency(Asset* asset);
 
     std::string resolveLocalResource(std::string resourceName);
     std::string resolveSyncedResource(std::string resourceName);
@@ -107,17 +101,11 @@ private:
     // Absolute path to asset file
     std::string _assetPath;
 
-    // Required dependencies
-    std::vector<std::shared_ptr<Asset>> _requiredDependencies;
+    // Dependencies
+    std::vector<std::shared_ptr<Asset>> _dependencies;
 
-    // Assets that refers to this asset as an required dependency
-    std::vector<std::weak_ptr<Asset>> _requiredDependants;
-
-    // Optional dependencies
-    std::vector<Optional> _optionalDependencies;
-
-    // Assets that refers to this asset as an optional dependency
-    std::vector<std::weak_ptr<Asset>> _optionalDependants;
+    // Assets that refers to this asset as an dependency
+    std::vector<std::weak_ptr<Asset>> _dependants;
 };
 
 } // namespace openspace
