@@ -90,6 +90,10 @@ function postInitialization()
 
     openspace.setPropertyValueSingle("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
 
+    openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", false)
+
+    openspace.setPropertyValue("Earth.RenderableGlobe.PerformShading", false)
+
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
     openspace.printInfo("Done setting default values")
@@ -132,7 +136,7 @@ return {
         -- "satellites",
         
         --"grids",
-        --"digitaluniverse",
+        "digitaluniverse",
         "stars/digitaluniverse",
         "milkyway/digitaluniverse"
     }

@@ -859,8 +859,6 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
         nOneStripProgram->setUniform("currentSample", sample);
         glDrawArrays(GL_TRIANGLES, sample * 6, 6);
     }
-    /*nOneStripProgram->setUniform("currentSample", 0);
-    glDrawArrays(GL_TRIANGLES, 0, 6 * _nAaSamples);*/
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(0);
@@ -872,11 +870,11 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
         _mSAAPattern[d] = 2.0f * _mSAAPattern[d] - 1.0f;
     }
     // Debug;
-    std::cout << "==== Saved Data for oneStrip:" << std::endl;
+    /*std::cout << "==== Saved Data for oneStrip:" << std::endl;
     for (int d = 0; d < _nAaSamples * 3; d += 3) {
         std::cout << "(" << _mSAAPattern[d] << ", " << _mSAAPattern[d + 1] << ", " << _mSAAPattern[d + 2] << ") ";
     }
-    std::cout << std::endl;
+    std::cout << std::endl;*/
 
     nOneStripProgram->deactivate();
         
@@ -1026,30 +1024,30 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         glDrawBuffers(1, dBuffer);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // HDR Image Control and Resolve
-        _hdrBackGroundProgram->activate();
+        //// HDR Image Control and Resolve
+        //_hdrBackGroundProgram->activate();
 
-        ghoul::opengl::TextureUnit mainColorTextureUnit;
-        mainColorTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+        //ghoul::opengl::TextureUnit mainColorTextureUnit;
+        //mainColorTextureUnit.activate();
+        //glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
 
-        _hdrBackGroundProgram->setUniform("mainColorTexture", mainColorTextureUnit);
-        _hdrBackGroundProgram->setUniform("nAaSamples", _nAaSamples);
-        _hdrBackGroundProgram->setUniform("exposure", _hdrExposure);
-        _hdrBackGroundProgram->setUniform("backgroundExposure", _hdrBackground);
-        _hdrBackGroundProgram->setUniform("gamma", _gamma);
+        //_hdrBackGroundProgram->setUniform("mainColorTexture", mainColorTextureUnit);
+        //_hdrBackGroundProgram->setUniform("nAaSamples", _nAaSamples);
+        //_hdrBackGroundProgram->setUniform("exposure", _hdrExposure);
+        //_hdrBackGroundProgram->setUniform("backgroundExposure", _hdrBackground);
+        //_hdrBackGroundProgram->setUniform("gamma", _gamma);
 
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
+        //glDisable(GL_DEPTH_TEST);
+        //glDepthMask(false);
 
-        glBindVertexArray(_screenQuad);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        //glBindVertexArray(_screenQuad);
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
+        //glBindVertexArray(0);
 
-        glDepthMask(true);
-        glEnable(GL_DEPTH_TEST);
+        //glDepthMask(true);
+        //glEnable(GL_DEPTH_TEST);
 
-        _hdrBackGroundProgram->deactivate();        
+        //_hdrBackGroundProgram->deactivate();        
       
         for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
 
@@ -1089,6 +1087,8 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
 
                 deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
+                // 48 = 16 samples * 3 coords
+                deferredcastProgram->setUniform("msaaSamplePatter[48]", _mSAAPattern);
 
                 deferredcaster->preRaycast(deferredcasterTask.renderData,
                     _deferredcastData[deferredcaster],

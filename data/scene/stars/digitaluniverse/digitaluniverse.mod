@@ -5,7 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableStars",
-            File = "speck/stars.speck",
+            File = "speck/stars-new.speck",
             Texture = "textures/halo.png",
             ColorMap = "colorbv.cmap"
         },
