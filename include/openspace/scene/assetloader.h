@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -85,19 +85,14 @@ public:
      * Add the asset as an optional on the root asset
      * The asset is imported synchronously
      */
-    std::shared_ptr<Asset> importAsset(const std::string& identifier);
+    std::shared_ptr<Asset> loadAsset(const std::string& identifier);
 
     /**
      * Unimport an asset:
      * Remove the asset as an optional on the root asset
      * The asset is unimported synchronously
      */
-    void unimportAsset(const std::string& identifier);
-
-    /**
-     * Return the lua library of the asset loader
-     */
-    scripting::LuaLibrary luaLibrary();
+    void unloadAsset(const std::string& identifier);
     
     /**
      * Return the lua state
@@ -132,8 +127,8 @@ public:
 private:
     std::shared_ptr<Asset> importRequiredDependency(const std::string& identifier);
     std::shared_ptr<Asset> importOptionalDependency(const std::string& identifier, bool enabled = true);
-    std::shared_ptr<Asset> loadAsset(std::string name);
-    std::shared_ptr<Asset> getAsset(std::string name);
+    std::shared_ptr<Asset> importAsset(std::string path);
+    std::shared_ptr<Asset> getAsset(std::string path);
     ghoul::filesystem::Directory currentDirectory();
 
     void pushAsset(std::shared_ptr<Asset> asset);

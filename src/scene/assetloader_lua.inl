@@ -22,38 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
-namespace luascriptfunctions {
-
-int importAsset(lua_State* state) {
-    AssetLoader *assetLoader =
-        reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("importAsset", state, 1, nArguments);
-
-    std::string assetName = luaL_checkstring(state, -1);
-
-    assetLoader->importAsset(assetName);
-    return 0;
-}
-
-int unimportAsset(lua_State* state) {
-    AssetLoader *assetLoader =
-        reinterpret_cast<AssetLoader*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("unimportAsset", state, 1, nArguments);
-
-    std::string assetName = luaL_checkstring(state, -1);
-
-    assetLoader->unimportAsset(assetName);
-    return 0;
-}
-
-} // namespace luascriptfunctions
-
-namespace assetloader {
+namespace openspace::assetloader {
 
 /**
  * Adds a Lua function to be called upon asset initialization
@@ -147,8 +116,4 @@ int exportAsset(lua_State* state) {
     return asset->loader()->exportAssetLua(asset);
 }
 
-} // namespace assetloader
-
-
-
-}
+} // namespace openspace::assetloader

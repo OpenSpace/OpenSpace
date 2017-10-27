@@ -127,8 +127,10 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
-    ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/assetloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/scene/assetmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/assetsynchronizer.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
@@ -291,6 +293,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetsynchronizer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h

@@ -46,8 +46,8 @@
 #include <openspace/scripting/scriptengine.h>
 
 #include <openspace/scene/asset.h>
+#include <openspace/scene/assetmanager.h>
 #include <openspace/scene/assetloader.h>
-#include <openspace/scene/assetsynchronizer.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -148,7 +148,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _parallelConnection(new ParallelConnection)
     , _renderEngine(new RenderEngine)
     , _resourceSynchronizer(new ResourceSynchronizer)
-    , _assetSynchronizer(new AssetSynchronizer(_resourceSynchronizer.get()))
     , _settingsEngine(new SettingsEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
@@ -405,8 +404,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
     sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
 
     // Set up asset loader
-    _engine->_assetLoader = std::make_unique<AssetLoader>(
-        *OsEng.scriptEngine().luaState(), "${ASSETS}", "${SYNC}");
+    _engine->_assetManager = std::make_unique<AssetManager>(
+        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}", "${SYNC}"),
+        std::make_unique<AssetSynchronizer>(*OsEng._resourceSynchronizer.get())
+    );
     //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
 
@@ -511,7 +512,7 @@ void OpenSpaceEngine::initialize() {
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(*_scriptEngine);
-    _scriptEngine->addLibrary(_engine->_assetLoader->luaLibrary());
+    _scriptEngine->addLibrary(_engine->_assetManager->luaLibrary());
     
     for (OpenSpaceModule* module : _moduleEngine->modules()) {
         _scriptEngine->addLibrary(module->luaLibrary());
@@ -589,14 +590,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
             _scene = std::make_unique<Scene>();
             _renderEngine->setScene(_scene.get());
-            std::shared_ptr<Asset> asset = _assetLoader->loadSingleAsset(assetPath);
-            std::vector<std::shared_ptr<Asset>> assets = asset->allActiveAssets();
-            for (const auto& asset : assets) {
-                _assetSynchronizer->addAsset(asset);
-            }
-            LINFO("SYNCS");
-
-            asset->initialize();
+            _assetManager->clearAllTargetAssets();
+            _assetManager->setTargetAssetState(assetPath, AssetManager::AssetState::Initialized);
             
         } catch (const ghoul::FileNotFoundError& e) {
             LERRORC(e.component, e.message);
@@ -1111,6 +1106,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdown.timer -= static_cast<float>(_windowWrapper->averageDeltaTime());
     }
 
+    _assetManager->update();
     _renderEngine->updateScene();
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
@@ -1471,19 +1467,14 @@ WindowWrapper& OpenSpaceEngine::windowWrapper() {
     return *_windowWrapper;
 }
 
-AssetLoader & OpenSpaceEngine::assetLoader() {
-    ghoul_assert(_assetLoader, "Asset loader must not be nullptr");
-    return *_assetLoader;
+AssetManager& OpenSpaceEngine::assetManager() {
+    ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
+    return *_assetManager;
 }
 
 ResourceSynchronizer & OpenSpaceEngine::resourceSynchronizer() {
     ghoul_assert(_resourceSynchronizer, "Resource Synchronizer must not be nullptr");
     return *_resourceSynchronizer;
-}
-
-AssetSynchronizer & OpenSpaceEngine::assetSynchronizer() {
-    ghoul_assert(_assetSynchronizer, "Asset Synchronizer must not be nullptr");
-    return *_assetSynchronizer;
 }
 
 ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {

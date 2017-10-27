@@ -41,8 +41,7 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
-class AssetLoader;
-class AssetSynchronizer;
+class AssetManager;
 class ConfigurationManager;
 class DownloadManager;
 class GUI;
@@ -100,17 +99,14 @@ public:
     void decode();
 
     void scheduleLoadSingleAsset(std::string assetPath);
-
-    void enableBarrier();
-    void disableBarrier();
-
-    
+  
     void writeDocumentation();
     void toggleShutdownMode();
 
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
     LuaConsole& console();
+    AssetManager& assetManager();
     DownloadManager& downloadManager();
     ModuleEngine& moduleEngine();
     NetworkEngine& networkEngine();
@@ -119,9 +115,7 @@ public:
     SettingsEngine& settingsEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
-    AssetLoader& assetLoader();
     ResourceSynchronizer& resourceSynchronizer();
-    AssetSynchronizer& assetSynchronizer();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::NavigationHandler& navigationHandler();
     interaction::KeyBindingManager& keyBindingManager();
@@ -185,12 +179,13 @@ private:
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<Scene> _scene;
-    std::unique_ptr<AssetLoader> _assetLoader;
+    std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelConnection> _parallelConnection;
+    std::unique_ptr<ResourceSynchronizer> _resourceSynchronizer;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SettingsEngine> _settingsEngine;
     std::unique_ptr<SyncEngine> _syncEngine;
@@ -200,8 +195,7 @@ private:
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
     std::unique_ptr<interaction::NavigationHandler> _navigationHandler;
     std::unique_ptr<interaction::KeyBindingManager> _keyBindingManager;
-    std::unique_ptr<ResourceSynchronizer> _resourceSynchronizer;
-    std::unique_ptr<AssetSynchronizer> _assetSynchronizer;
+
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;

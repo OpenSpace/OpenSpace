@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -91,7 +91,7 @@ AssetLoader::AssetLoader(
 AssetLoader::~AssetLoader() {
 }
 
-std::shared_ptr<Asset> AssetLoader::loadAsset(std::string path) {
+std::shared_ptr<Asset> AssetLoader::importAsset(std::string path) {
     std::shared_ptr<Asset> asset = std::make_shared<Asset>(this, path);
 
     pushAsset(asset);
@@ -213,16 +213,15 @@ std::shared_ptr<Asset> AssetLoader::loadSingleAsset(const std::string& identifie
     return imported;
 }
 
-std::shared_ptr<Asset> AssetLoader::importAsset(const std::string & identifier) {
-    ghoul_assert(_assetStack.size() == 1, "Can only import an asset from the root asset");
+std::shared_ptr<Asset> AssetLoader::loadAsset(const std::string & identifier) {
+    ghoul_assert(_assetStack.size() == 1, "Can only load an asset from the root asset");
     return importOptionalDependency(identifier);
 }
 
 
-void AssetLoader::unimportAsset(const std::string & identifier) {
-    ghoul_assert(_assetStack.size() == 1, "Can only unimport an asset from the root asset");
-
-    ghoul::filesystem::Directory directory = currentDirectory();
+void AssetLoader::unloadAsset(const std::string & identifier) {
+    ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");   
+    // TODO: Implement this
     //_rootAsset->removeOptional(id);
 }
 
@@ -582,29 +581,6 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
 
     // Register the dependant table on the imported asset's dependants table.
     lua_setfield(*_luaState, dependantsTableIndex, dependantId.c_str());
-}
-
-
-scripting::LuaLibrary AssetLoader::luaLibrary() {
-    return {
-        "",
-        {
-            {
-                "importAsset",
-                &luascriptfunctions::importAsset,
-                {this},
-                "string",
-                ""
-            },
-            {
-                "unimportAsset",
-                &luascriptfunctions::unimportAsset,
-                {this},
-                "string",
-                ""
-            }
-        }
-    };
 }
 
 }
