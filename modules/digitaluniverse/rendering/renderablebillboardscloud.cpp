@@ -671,8 +671,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
         scale = 306391534.73091 * PARSEC;
         break;
     }
-        
-    for (const auto pair : _labelData) {
+
+    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
@@ -690,8 +690,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
             _renderOption.value(),
             "%s",
             pair.second.c_str());
-    }        
-
+    }
 }
 
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {

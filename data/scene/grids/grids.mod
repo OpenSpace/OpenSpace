@@ -5,6 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableSphericalGrid",
+            Enabled = false,
             GridColor = { 0.7, 0.0, 0.0, 0.5},
             LineWidth = 2.0,
             Radius = 9.46377307652E17;
@@ -20,6 +21,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableSphericalGrid",
+            Enabled = false,
             GridColor = { 0.0, 0.0, 1.0, 0.8},
             LineWidth = 2.0,
             Radius = 6.2440846E17,
@@ -35,6 +37,7 @@ return {
         Parent = "SolarSystem",
         Renderable = {
             Type = "RenderableSphericalGrid",
+            Enabled = false,
             LineWidth = 2.0,
             Radius = 9.46377307652E18;
             GridColor = { 0.0, 0.6, 0.6, 0.6}

@@ -30,6 +30,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/invariants.h>
 
+#include <ghoul/logging/logmanager.h>
+
 #include <fstream>
 
 namespace {
@@ -157,6 +159,12 @@ std::string escapedJson(const std::string& text) {
             break;
         case '\\':
             jsonString += "\\\\";
+            break;
+        case '\n':
+            jsonString += "\\\\n";
+            break;
+        case '\r':
+            jsonString += "\\r";
             break;
         default:
             jsonString += c;

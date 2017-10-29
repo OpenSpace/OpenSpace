@@ -154,7 +154,7 @@ private:
     glm::dmat4 _transformationMatrix;
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
-    std::unordered_map<int, RenderingMesh> _renderingMeshesMap;        
+    std::unordered_map<int, RenderingMesh> _renderingMeshesMap;
 };
 
 

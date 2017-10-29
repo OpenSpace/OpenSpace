@@ -32,12 +32,7 @@ return {
                 Fadeable = false,
                 Ghosting = false,
             },
-            Textures = {
-                Type = "simple",
-                Color =  "textures/gray.png",
-                Project = "textures/defaultProj.png",
-                Default = "textures/defaultProj.png"
-            },
+            ColorTexture =  "textures/gray.png",
             Projection = {
                 Sequence   = "InstrumentTimes",
                 SequenceType = "instrument-times",

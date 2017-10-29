@@ -47,7 +47,7 @@ namespace {
         openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
         
         int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
-        if (ImGui::TreeNodeEx(("%s" + missionHashname).c_str(), treeOption, mission.name().c_str())) {
+        if (ImGui::TreeNodeEx(("%s" + missionHashname).c_str(), treeOption, "%s", mission.name().c_str())) {
             if (!mission.description().empty()) {
                 ImGui::Text("%s", mission.description().c_str());
             }
