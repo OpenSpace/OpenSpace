@@ -39,5 +39,10 @@ Fragment getFragment() {
     frag.color = vec4(color, alphaValue);
     frag.depth = vs_screenSpaceDepth;
 
+    // JCC: Need to change the position to camera space
+    frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
+    frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+
     return frag;
 }
