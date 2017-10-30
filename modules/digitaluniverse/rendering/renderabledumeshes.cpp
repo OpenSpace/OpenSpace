@@ -441,7 +441,8 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
+    _program->setUniform("modelViewTransform", modelViewMatrix);
+    _program->setUniform("projectionTransform", projectionMatrix);
     _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);                
 
