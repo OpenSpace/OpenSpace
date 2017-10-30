@@ -863,7 +863,6 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(0);
 
-    saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("test_nOneStripMSAA.ppm"), _nAaSamples, 1);
     saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, &_mSAAPattern);
     // Convert back to [-1, 1] range:
     for (int d = 0; d < _nAaSamples * 3; d += 3) {
