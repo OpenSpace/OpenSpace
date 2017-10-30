@@ -868,13 +868,7 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     for (int d = 0; d < _nAaSamples * 3; d += 3) {
         _mSAAPattern[d] = 2.0f * _mSAAPattern[d] - 1.0f;
     }
-    // Debug;
-    /*std::cout << "==== Saved Data for oneStrip:" << std::endl;
-    for (int d = 0; d < _nAaSamples * 3; d += 3) {
-        std::cout << "(" << _mSAAPattern[d] << ", " << _mSAAPattern[d + 1] << ", " << _mSAAPattern[d + 2] << ") ";
-    }
-    std::cout << std::endl;*/
-
+    
     nOneStripProgram->deactivate();
         
     // Restores default state
