@@ -97,6 +97,7 @@ public:
 
     void renderScreenLog();
     void renderVersionInformation();
+    void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
@@ -201,6 +202,7 @@ private:
     properties::BoolProperty _showInfo;
     properties::BoolProperty _showLog;
     properties::BoolProperty _showVersionInfo;
+    properties::BoolProperty _showCameraInfo;
     
     properties::TriggerProperty _takeScreenshot;
     bool _shouldTakeScreenshot;
