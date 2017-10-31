@@ -112,7 +112,6 @@ std::vector<std::shared_ptr<Asset>> AssetSynchronizer::getSynchronizedAssets() {
         }
     }
 
-
     for (auto& finished : _finishedSynchronizations) {
         auto it = _managedAssets.find(finished);
         if (it != _managedAssets.end()) {

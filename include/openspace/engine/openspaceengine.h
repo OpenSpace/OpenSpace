@@ -175,6 +175,7 @@ private:
     void gatherCommandlineArguments();
     void loadFonts();
     void configureLogging(bool consoleLog);
+    void writeDocumentations();
     
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;

@@ -55,7 +55,7 @@ public:
         Initialized = 3
     };
 
-    void update();
+    bool update();
     void setTargetAssetState(const std::string& path, AssetState targetState);
     AssetState currentAssetState(Asset* asset);
     void clearAllTargetAssets();

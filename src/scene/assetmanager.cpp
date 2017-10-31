@@ -43,7 +43,9 @@ AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader,
     , _assetSynchronizer(std::move(synchronizer))
 {}
 
-void AssetManager::update() {
+bool AssetManager::update() {
+    bool changedInititializations = false;
+
     std::unordered_map<std::string, std::shared_ptr<Asset>> loadedAssets;
 
     // Load and unload assets
@@ -110,7 +112,9 @@ void AssetManager::update() {
             if (initReady) {
                 _stateChangesInProgress.erase(ancestor);
                 if (shouldInit) {
-                    tryInitializeAsset(*ancestor);
+                    if (tryInitializeAsset(*ancestor)) {
+                        changedInititializations = true;
+                    }
                 }
             }
         }
@@ -118,6 +122,7 @@ void AssetManager::update() {
     }
 
     _pendingStateChangeCommands.clear();
+    return changedInititializations;
 }
 
 void AssetManager::setTargetAssetState(const std::string& path, AssetState targetState) {

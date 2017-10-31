@@ -578,77 +578,31 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     );
 
     if (assetPath != "") {
-        try {
-            if (_scene) {
-                _syncEngine->removeSyncables(_timeManager->getSyncables());
-                _syncEngine->removeSyncables(_renderEngine->getSyncables());
-                _renderEngine->setScene(nullptr);
-                _renderEngine->setCamera(nullptr);
-                _navigationHandler->setCamera(nullptr);
-                _scene->clear();
-            }
-
-            _scene = std::make_unique<Scene>();
-            _renderEngine->setScene(_scene.get());
-            _assetManager->clearAllTargetAssets();
-            _assetManager->setTargetAssetState(assetPath, AssetManager::AssetState::Initialized);
-            
-        } catch (const ghoul::FileNotFoundError& e) {
-            LERRORC(e.component, e.message);
-            return;
-        } catch (const Scene::InvalidSceneError& e) {
-            LERRORC(e.component, e.message);
-            return;
-        } catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-            return;
-        } catch (const std::exception& e) {
-            LERROR(e.what());
-            return;
-        } catch (...) {
-            LERROR("Unknown error loading the scene");
-            return;
+        if (_scene) {
+            _syncEngine->removeSyncables(_timeManager->getSyncables());
+            _syncEngine->removeSyncables(_renderEngine->getSyncables());
+            _renderEngine->setScene(nullptr);
+            _renderEngine->setCamera(nullptr);
+            _navigationHandler->setCamera(nullptr);
+            _scene->clear();
         }
+
+        _scene = std::make_unique<Scene>();
+        _scene->setCamera(std::make_unique<Camera>());
+        Camera* camera = _scene->camera();
+        camera->setParent(_scene->root());
+
+        _renderEngine->setCamera(camera);
+        _navigationHandler->setCamera(camera);
+        _navigationHandler->setFocusNode(camera->parent());
+
+        _renderEngine->setScene(_scene.get());
+        _assetManager->clearAllTargetAssets();
+        _assetManager->setTargetAssetState(assetPath, AssetManager::AssetState::Initialized);
     }
 
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
-
-    if (_scene) {
-        Camera* camera = _scene->camera();
-        if (camera) {
-            _renderEngine->setCamera(camera);
-            _navigationHandler->setCamera(camera);
-            _navigationHandler->setFocusNode(camera->parent());
-        }
-        // Write keyboard documentation.
-        if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
-            keyBindingManager().writeDocumentation(
-                absPath(configurationManager().value<std::string>(
-                    ConfigurationManager::KeyKeyboardShortcuts
-                    ))
-            );
-        }
-
-        if (configurationManager().hasKey(ConfigurationManager::KeySceneLicenseDocumentation))
-        {
-            _scene->writeSceneLicenseDocumentation(
-                absPath(configurationManager().value<std::string>(
-                    ConfigurationManager::KeySceneLicenseDocumentation
-                    ))
-            );
-        }
-
-        // If a PropertyDocumentationFile was specified, generate it now.
-        if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
-            _scene->writeDocumentation(
-                absPath(configurationManager().value<std::string>(
-                    ConfigurationManager::KeyPropertyDocumentation
-                    ))
-            );
-        }
-    }
-
     _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
 
@@ -827,6 +781,35 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
         );
     }
 #endif // GHOUL_LOGGING_ENABLE_TRACE
+}
+
+void OpenSpaceEngine::writeDocumentations() {
+    // Write keyboard documentation.
+    if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
+        keyBindingManager().writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyKeyboardShortcuts
+                ))
+        );
+    }
+
+    if (configurationManager().hasKey(ConfigurationManager::KeySceneLicenseDocumentation))
+    {
+        _scene->writeSceneLicenseDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeySceneLicenseDocumentation
+                ))
+        );
+    }
+
+    // If a PropertyDocumentationFile was specified, generate it now.
+    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+        _scene->writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyPropertyDocumentation
+                ))
+        );
+    }
 }
 
 void OpenSpaceEngine::initializeGL() {
@@ -1106,7 +1089,12 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdown.timer -= static_cast<float>(_windowWrapper->averageDeltaTime());
     }
 
-    _assetManager->update();
+
+    const bool updated = _assetManager->update();
+    if (updated) {
+        writeDocumentations();
+    }
+
     _renderEngine->updateScene();
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
