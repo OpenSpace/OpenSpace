@@ -463,7 +463,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   float r0 = length(x0);
   // Normal of intersection point.
   vec3 n = normalize(normal);
-  vec4 groundReflectance = groundColor * vec4(.37);
+  //vec4 groundReflectance = groundColor * vec4(.37);
+  vec4 groundReflectance = groundColor * vec4(.6);
             
   // L0 is not included in the irradiance texture.
   // We first calculate the light attenuation from the top of the atmosphere
@@ -471,16 +472,20 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   float muSun = max(dot(n, s), 0.0);
   // Is direct Sun light arriving at x0? If not, there is no direct light from Sun (shadowed)
   vec3  transmittanceL0 = muSun < -sqrt(1.0f - ((Rg * Rg) / (r0 * r0))) ? vec3(0.0f) : transmittanceLUT(r0, muSun);
-
   // E[L*] at x0
   vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
 
   // R[L0] + R[L*]
-  vec3 groundRadiance = groundReflectance.rgb * (muSun * transmittanceL0 + irradianceReflected)
-    * sunIntensity / M_PI;
-
-  // Night illumination from cities
-  //groundRadiance *= mix(5.0, 1.0, dot(n,s));
+  vec3 groundRadiance = vec3(0.0f);
+  if (muSun < 0.9) {
+    // Night illumination from cities
+    groundRadiance = mix(groundReflectance.rgb * vec3(1.7),
+                         groundReflectance.rgb * (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI,
+                         muSun);
+  } else {
+    groundRadiance = groundReflectance.rgb * (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
+  }
+  //groundRadiance = groundReflectance.rgb * (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
     
   // Specular reflection from sun on oceans and rivers  
   if ((waterReflectance > 0.1) && (muSun > 0.0)) {

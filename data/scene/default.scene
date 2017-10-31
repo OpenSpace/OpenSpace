@@ -94,6 +94,8 @@ function postInitialization()
 
     openspace.setPropertyValue("Earth.RenderableGlobe.PerformShading", false)
 
+    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Settings.Multiplier", 1.0);
+
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
     openspace.printInfo("Done setting default values")
