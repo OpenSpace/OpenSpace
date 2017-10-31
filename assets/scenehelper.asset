@@ -1,0 +1,11 @@
+local markInterestingNodes = function(nodes)
+    for _, n in pairs(nodes) do
+        if openspace.hasSceneGraphNode(n) then
+            openspace.addTag(n, "GUI.Interesting")
+        else 
+        	openspace.printWarning("Cannot mark non-existing node '" .. n .. "' as interesting.")
+        end
+    end
+end
+
+asset.export("markInterestingNodes", markInterestingNodes);

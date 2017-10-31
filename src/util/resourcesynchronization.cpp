@@ -24,19 +24,68 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
+#include <openspace/util/factorymanager.h>
+#include <openspace/documentation/documentationengine.h>
+#include <openspace/documentation/verifier.h>
+
+#include <ghoul/logging/logmanager.h>
+
+#include <memory>
+
+namespace {
+    const char* KeyType = "Type";
+    const char* _loggerCat = "ResourceSynchronization";
+}
+
 namespace openspace {
 
-ResourceSynchronization::ResourceSynchronization() {}
+documentation::Documentation ResourceSynchronization::Documentation() {
+    using namespace openspace::documentation;
+
+    return {
+        "ResourceSynchronization",
+        "resourceSynchronization",
+        {
+            {
+                KeyType,
+                new StringAnnotationVerifier(
+                    "A valid ResourceSyncrhonization created by a factory"
+                ),
+                Optional::No,
+                "This key specifies the type of ResourceSyncrhonization that gets created. "
+                "It has to be one of the valid ResourceSyncrhonizations that are available "
+                "for creation (see the FactoryDocumentation for a list of possible "
+                "ResourceSyncrhonizations), which depends on the configration of the application"
+            }
+        }
+    };
+}
+
+ResourceSynchronization::ResourceSynchronization()
+    : _job(std::make_shared<SynchronizationJob>(this))
+    , _resolved(false)
+{}
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
     const ghoul::Dictionary & dictionary)
 {
-    return std::unique_ptr<ResourceSynchronization>();
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "ResourceSynchronization");
+
+    std::string synchronizationType = dictionary.value<std::string>(KeyType);
+
+    auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
+    ghoul_assert(factory, "ResourceSynchronization factory did not exist");
+    std::unique_ptr<ResourceSynchronization> result = factory->create(synchronizationType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed to create a ResourceSynchronization object of type '" << synchronizationType << "'");
+        return nullptr;
+    }
+
+    return result;
 }
 
-std::shared_ptr<SynchronizationJob> ResourceSynchronization::job()
-{
-    return std::shared_ptr<SynchronizationJob>();
+std::shared_ptr<SynchronizationJob> ResourceSynchronization::job() {
+    return _job;
 }
 
 void ResourceSynchronization::wait() {
@@ -58,18 +107,20 @@ void ResourceSynchronization::updateProgress(float t) {
     _progress = std::min(1.0f, std::max(t, 0.0f));
 }
 
-SynchronizationJob::SynchronizationJob(
-    std::shared_ptr<ResourceSynchronization> synchronization)
-{
+// SynchronizationJob methods
+
+SynchronizationJob::SynchronizationJob(ResourceSynchronization* synchronization) {
     _synchronization = synchronization;
 }
 
-void SynchronizationJob::resolve() {
-    _synchronization->resolve();
+void SynchronizationJob::execute() {
+    _synchronization->synchronize();
 }
 
-void SynchronizationJob::updateProgress(float t) {
-    _synchronization->updateProgress(t);
+std::shared_ptr<SynchronizationProduct> SynchronizationJob::product() {
+    return std::make_shared<SynchronizationProduct>(
+        SynchronizationProduct{ _synchronization }
+    );
 }
 
 }

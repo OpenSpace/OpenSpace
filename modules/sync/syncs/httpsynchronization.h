@@ -31,18 +31,16 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
-    
+
+class HttpSynchronizationJob;
+
 class HttpSynchronization : public ResourceSynchronization {
 public:
     HttpSynchronization(const ghoul::Dictionary& dict);
     static documentation::Documentation Documentation();
-};
 
-class HttpSynchronizationJob : public SynchronizationJob {
-    HttpSynchronizationJob(std::shared_ptr<ResourceSynchronization> synchronization);
-    void execute() override;
+    void synchronize() override;
 };
-
 
 } // namespace openspace
 

@@ -30,38 +30,44 @@
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/misc/dictionary.h>
 
+#include <openspace/documentation/documentation.h>
+
 namespace openspace {
 
 class ResourceSynchronization;
 
 struct SynchronizationProduct {
-    std::shared_ptr<ResourceSynchronization> synchronization;
+    ResourceSynchronization* synchronization;
 };
 
 class SynchronizationJob : public Job<SynchronizationProduct> {
 public:
-    SynchronizationJob(std::shared_ptr<ResourceSynchronization> synchronization);
-    void execute() = 0;
-protected:
-    void resolve();
-    void updateProgress(float t);
+    SynchronizationJob(ResourceSynchronization* synchronization);
+    void execute() override;
+    std::shared_ptr<SynchronizationProduct> product() override;
 private:
-    std::shared_ptr<ResourceSynchronization> _synchronization;
+    ResourceSynchronization* _synchronization;
 };
 
-class ResourceSynchronization {
+class ResourceSynchronization
+    : protected std::enable_shared_from_this<ResourceSynchronization>
+{
 public:
-    ResourceSynchronization();
+    static documentation::Documentation Documentation();
     static std::unique_ptr<ResourceSynchronization> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    virtual std::shared_ptr<SynchronizationJob> job();
+    ResourceSynchronization();
+    virtual void synchronize() = 0;
+
     void wait();
     bool isResolved();
     void resolve();
     float progress();
     void updateProgress(float t);
+    std::shared_ptr<SynchronizationJob> job();
 private:
+    std::shared_ptr<SynchronizationJob> _job;
     std::atomic<bool> _started;
     std::atomic<bool> _resolved;
     std::atomic<float> _progress;

@@ -25,7 +25,11 @@
 #include "httpsynchronization.h"
 
 #include <openspace/util/asynchttprequest.h>
+#include <ghoul/logging/logmanager.h>
 
+namespace {
+    const char* _loggerCat = "HttpSynchronization";
+}
 
 namespace openspace {
 
@@ -39,7 +43,12 @@ documentation::Documentation HttpSynchronization::Documentation() {
     return {};
 }
 
-
-
+void HttpSynchronization::synchronize() {
+    // TODO: Download files, synchronously.
+    // First check if files exist.
+    
+    LINFO("Synchronizing!");
+    resolve();
+}
 
 } // namespace openspace

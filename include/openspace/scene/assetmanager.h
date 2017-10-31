@@ -49,10 +49,13 @@ public:
     );
 
     enum class AssetState : int {
-        Unloaded = 0,
-        Loaded = 1,
-        Synchronized = 2,
-        Initialized = 3
+        Unloaded,
+        Loaded,
+        LoadingFailed,
+        Synchronized,
+        SynchronizatoinFailed,
+        Initialized,
+        InitializationFailed
     };
 
     bool update();
@@ -63,6 +66,7 @@ public:
     scripting::LuaLibrary luaLibrary();
 
 private:
+    std::shared_ptr<Asset> tryLoadAsset(const std::string& path);
     bool tryInitializeAsset(Asset& asset);
 
     std::unordered_map<std::string, AssetState> _pendingStateChangeCommands;

@@ -34,12 +34,29 @@ class ResourceSyncClient {};
 
 class ResourceSynchronizer {
 public:
-    void enqueueSynchronization(std::shared_ptr<ResourceSynchronization> sync, ResourceSyncClient* client);
-    void cancelSynchronization(ResourceSynchronization* sync, ResourceSyncClient* client);
-    std::vector<std::shared_ptr<SynchronizationProduct>> finishedSynchronizations(ResourceSyncClient* client);
+    ResourceSynchronizer();
+
+    void enqueueSynchronization(
+        std::shared_ptr<ResourceSynchronization> sync,
+        ResourceSyncClient* client);
+
+    void cancelSynchronization(
+        ResourceSynchronization* sync,
+        ResourceSyncClient* client);
+
+    std::vector<std::shared_ptr<ResourceSynchronization>>
+        finishedSynchronizations(ResourceSyncClient* client);
+
 private:
-    std::map<std::shared_ptr<ResourceSynchronization>,
-        std::shared_ptr<ResourceSyncClient>> _origin;
+    std::unordered_map<ResourceSynchronization*, ResourceSyncClient*> _clientMap;
+
+    std::unordered_map<ResourceSynchronization*, std::shared_ptr<ResourceSynchronization>>
+        _managedSynchronizations;
+
+    std::unordered_map<ResourceSyncClient*, std::vector<ResourceSynchronization*>>
+        _finishedSynchronizations;
+
+    ConcurrentJobManager<SynchronizationProduct> _jobManager;
 };
 
 

@@ -37,18 +37,12 @@ AssetSynchronizer::AssetSynchronizer(ResourceSynchronizer* resourceSynchronizer)
 }
 
 void AssetSynchronizer::addAsset(std::shared_ptr<Asset> asset) {
-    const bool resolved = assetIsSynchronized(asset.get());
-
     _managedAssets.emplace(asset.get(), 
-        AssetSynchronization{ asset,
-            resolved ?
-                SynchronizationState::Added :
-                SynchronizationState::Synchronized
-        }
+        AssetSynchronization{ asset, SynchronizationState::Added }
     );
 
-    if (resolved) {
-        _finishedSynchronizations.push_back(asset.get());
+    for (const auto& sync : asset->synchronizations()) {
+        _resourceToAssetMap[sync.get()] = asset.get();
     }
 }
 
@@ -70,9 +64,14 @@ void AssetSynchronizer::syncAsset(Asset* asset) {
     std::vector<std::shared_ptr<ResourceSynchronization>> resourceSyncs =
         asset->synchronizations();
 
+    if (resourceSyncs.empty()) {
+        _trivialSynchronizations.push_back(asset);
+    }
+
+    _managedAssets[asset].state = SynchronizationState::Synchronizing;
+
     for (const auto& s : resourceSyncs) {
         if (!s->isResolved()) {
-            _managedAssets[asset].state = SynchronizationState::Synchronizing;
             _resourceSynchronizer->enqueueSynchronization(s, this);
         }
     }
@@ -87,13 +86,11 @@ void AssetSynchronizer::syncUnsynced() {
 }
 
 std::vector<std::shared_ptr<Asset>> AssetSynchronizer::getSynchronizedAssets() {
-    std::vector<std::shared_ptr<SynchronizationProduct>> products =
+    std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
         _resourceSynchronizer->finishedSynchronizations(this);
 
     std::vector<Asset*> affectedAssets;
-    for (const auto& p : products) {
-        std::shared_ptr<ResourceSynchronization> sync = p->synchronization;
-        
+    for (const auto& sync : syncs) {       
         const auto& it = _resourceToAssetMap.find(sync.get());
         if (it != _resourceToAssetMap.end()) {
             affectedAssets.push_back(it->second);
@@ -112,26 +109,27 @@ std::vector<std::shared_ptr<Asset>> AssetSynchronizer::getSynchronizedAssets() {
         }
     }
 
-    for (auto& finished : _finishedSynchronizations) {
+    for (auto& finished : _trivialSynchronizations) {
         auto it = _managedAssets.find(finished);
         if (it != _managedAssets.end()) {
-            synchronizedAssets.push_back(it->second.asset);
+            std::shared_ptr<Asset> asset = it->second.asset;
+            _managedAssets[asset.get()].state = SynchronizationState::Synchronized;
+            synchronizedAssets.push_back(asset);
         }
     }
-    _finishedSynchronizations.clear();
+    _trivialSynchronizations.clear();
 
     return synchronizedAssets;
 }
 
 bool AssetSynchronizer::assetIsSynchronized(Asset * asset) {
     std::vector<std::shared_ptr<ResourceSynchronization>> syncs = asset->synchronizations();
-    bool resolved = true;
     for (const auto& s : syncs) {
         if (!s->isResolved()) {
-            resolved = false;
+            return false;
         }
     }
-    return resolved;
+    return true;
 }
 
 }

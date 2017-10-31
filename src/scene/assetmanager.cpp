@@ -63,9 +63,13 @@ bool AssetManager::update() {
             _assetLoader->unloadAsset(asset.get());
             
         } else if (!isLoaded && shouldBeLoaded) {
-            std::shared_ptr<Asset> loadedAsset = _assetLoader->loadAsset(path);
-            loadedAssets.emplace(path, loadedAsset);
-            _currentStates[loadedAsset.get()] = AssetState::Loaded;
+            std::shared_ptr<Asset> loadedAsset = tryLoadAsset(path);
+            if (loadedAsset) {
+                loadedAssets.emplace(path, loadedAsset);
+                _currentStates[loadedAsset.get()] = AssetState::Loaded;
+            } else {
+                _currentStates[loadedAsset.get()] = AssetState::LoadingFailed;
+            }
         }
     }
 
@@ -81,13 +85,16 @@ bool AssetManager::update() {
             continue;
         }
 
-        std::vector<std::shared_ptr<Asset>> importedAssets = loadedAsset.second->allAssets();
+        std::vector<std::shared_ptr<Asset>> importedAssets =
+            loadedAsset.second->allAssets();
+
         for (const auto& a : importedAssets) {
             _assetSynchronizer->addAsset(a);
             _syncAncestors[a].insert(loadedAsset.second);
         }
         _stateChangesInProgress.emplace(
-            std::make_pair(loadedAsset.second, _pendingStateChangeCommands[loadedAsset.first])
+            loadedAsset.second,
+            _pendingStateChangeCommands[loadedAsset.first]
         );
     }
 
@@ -95,7 +102,9 @@ bool AssetManager::update() {
     _assetSynchronizer->syncUnsynced();
     
     // Collect finished synchronizations and initialize assets
-    std::vector<std::shared_ptr<Asset>> syncedAssets = _assetSynchronizer->getSynchronizedAssets();
+    std::vector<std::shared_ptr<Asset>> syncedAssets =
+        _assetSynchronizer->getSynchronizedAssets();
+
     for (const auto& syncedAsset : syncedAssets) {
         // Retrieve ancestors that were waiting for this asset to sync
         const auto it = _syncAncestors.find(syncedAsset);
@@ -114,7 +123,12 @@ bool AssetManager::update() {
                 if (shouldInit) {
                     if (tryInitializeAsset(*ancestor)) {
                         changedInititializations = true;
+                        _currentStates[ancestor.get()] = AssetState::Initialized;
+                    } else {
+                        _currentStates[ancestor.get()] = AssetState::InitializationFailed;
                     }
+                } else {
+                    _currentStates[ancestor.get()] = AssetState::Synchronized;
                 }
             }
         }
@@ -161,7 +175,7 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
                 ""
             },
             {
-                "unimportAsset",
+                "unloadAsset",
                 &luascriptfunctions::unloadAsset,
                 {this},
                 "string",
@@ -169,6 +183,15 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             }
         }
     };
+}
+
+std::shared_ptr<Asset> AssetManager::tryLoadAsset(const std::string& path) {
+    try {
+        return _assetLoader->loadAsset(path);
+    } catch (const ghoul::RuntimeError& e) {
+        LERROR(e.message);
+        return nullptr;
+    }
 }
 
 bool AssetManager::tryInitializeAsset(Asset& asset) {

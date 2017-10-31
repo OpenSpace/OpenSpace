@@ -4,20 +4,19 @@ local transforms = asset.import('./transforms')
 local sunParentName = transforms.SunIau.Name;
 local texturesPath = asset.syncedResource("textures");
 
-asset.sync = {
-    {
-        Type = "ResourceSynchronization",
-        Destination = texturesPath,
-        Identifier = "sun_textures",
-        Version = 1
-    },
-    {
-        Type = "TorrentSynchronization",
-        Destination = texturesPath,
-        File = "torrentFilePath.torrent",
-    }
-}
 
+asset.addSynchronization({
+    Type = "HttpSynchronization",
+    Destination = texturesPath,
+    Identifier = "sun_textures",
+    Version = 1
+})
+
+--asset.addSynchronization({
+--    Type = "TorrentSynchronization",
+--   Destination = texturesPath,
+--    File = "torrentFilePath.torrent",
+--})
 
 -- Simple sphere to represent the Sun
 local Sun = {

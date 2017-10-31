@@ -70,7 +70,7 @@ private:
 
     std::unordered_map<Asset*, AssetSynchronization> _managedAssets;
     std::unordered_map<ResourceSynchronization*, Asset*> _resourceToAssetMap;
-    std::vector<Asset*> _finishedSynchronizations;
+    std::vector<Asset*> _trivialSynchronizations;
 };
 
 

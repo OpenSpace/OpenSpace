@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -44,12 +44,10 @@ SyncModule::SyncModule()
 {}
 
 void SyncModule::internalInitialize() {
-
-
     auto fSynchronization = FactoryManager::ref().factory<ResourceSynchronization>();
-    ghoul_assert(fSynchronization, "Synchronization factory was not created");
+    ghoul_assert(fSynchronization, "ResourceSynchronization factory was not created");
 
-    fSynchronization->registerClass<HttpSynchronization>("HttpSyncrhonization");
+    fSynchronization->registerClass<HttpSynchronization>("HttpSynchronization");
 }
 
 std::vector<documentation::Documentation> SyncModule::documentations() const {

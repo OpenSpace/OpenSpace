@@ -4,6 +4,78 @@ asset.import("sun/sun")
 asset.import("planets/trails")
 -- asset.import("dwarfplanets/pluto")
 
+local sceneHelper = asset.import("scenehelper")
+
 asset.onInitialize(function ()
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+    openspace.time.setTime(openspace.time.currentWallTime())
+
+
+    -- Toggle night texture, shading, atmosphere and water
+    openspace.bindKey("s",
+        helper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.PerformShading') ..
+        helper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+        "Toggle night texture, shading, atmosphere, and water for Earth."
+    )
+
+    -- Toggle background
+    openspace.bindKey("b",
+        helper.property.invert('MilkyWay.renderable.Enabled') ..
+        helper.property.invert('Stars.renderable.Enabled'),
+        "Toggle background (Stars and Milkyway)."
+    )
+
+    openspace.bindKey("g",
+        helper.property.invert('MilkyWay.renderable.Enabled') ..
+        helper.property.invert('Stars.renderable.Enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.PerformShading') ..
+        helper.property.invert('Mars.RenderableGlobe.PerformShading') ..
+        helper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+        helper.property.invert('Moon.RenderableGlobe.Enabled') ..
+        helper.property.invert('Sun.renderable.Enabled'),
+        "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun"
+    )
+
+    openspace.bindKey("h",
+        "openspace.setPropertyValue('*Trail.renderable.Enabled', false)",
+        "Disables visibility of the trails"
+    )
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${OPENSPACE_DATA}/globebrowsing_servers.lua")
+    )
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+
+    openspace.setPropertyValueSingle("Global Properties.GlobeBrowsing.GdalWrapper.LogGdalErrors", false)
+    --openspace.setPropertyValueSingle("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
+    --openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+
+    openspace.printInfo("Done setting default values")
+
+    -- Add local patches described at the top of this file
+    --for obj, list in pairs(vrt_folders) do
+    --    for _, dir in pairs(list) do
+    --        openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
+    --    end
+    --end
+
+    -- Defined in scene_helper.lua
+    -- Used to create focus buttons for a subset of scenegraph nodes
+    sceneHelper.markInterestingNodes({
+        "Earth", "Mars", "Moon"
+    })
 end)
