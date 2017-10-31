@@ -57,14 +57,18 @@ public:
 
     void update();
     void setTargetAssetState(const std::string& path, AssetState targetState);
+    AssetState currentAssetState(Asset* asset);
     void clearAllTargetAssets();
     std::vector<std::shared_ptr<Asset>> allAssets();
     scripting::LuaLibrary luaLibrary();
 
 private:
+    bool tryInitializeAsset(Asset& asset);
 
     std::unordered_map<std::string, AssetState> _pendingStateChangeCommands;
     std::unordered_map<std::shared_ptr<Asset>, AssetState> _stateChangesInProgress;
+    std::unordered_map<Asset*, AssetState> _currentStates;
+
     std::unordered_map<std::shared_ptr<Asset>, std::unordered_set<std::shared_ptr<Asset>>> _syncAncestors;
     std::unique_ptr<AssetLoader> _assetLoader;
     std::unique_ptr<AssetSynchronizer> _assetSynchronizer;

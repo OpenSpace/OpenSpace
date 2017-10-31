@@ -37,42 +37,102 @@ AssetSynchronizer::AssetSynchronizer(ResourceSynchronizer* resourceSynchronizer)
 }
 
 void AssetSynchronizer::addAsset(std::shared_ptr<Asset> asset) {
-    _synchronizations.push_back({ asset, SynchronizationState::Added });
-    std::vector<std::shared_ptr<ResourceSynchronization>> syncs = asset->synchronizations();
-    for (const auto& s : syncs) {
-        if (!s->isResolved()) {
-            return;
+    const bool resolved = assetIsSynchronized(asset.get());
+
+    _managedAssets.emplace(asset.get(), 
+        AssetSynchronization{ asset,
+            resolved ?
+                SynchronizationState::Added :
+                SynchronizationState::Synchronized
         }
+    );
+
+    if (resolved) {
+        _finishedSynchronizations.push_back(asset.get());
     }
-    _synchronizations.back().state = SynchronizationState::Synchronized;
 }
 
 void AssetSynchronizer::removeAsset(Asset* asset) {
-    std::remove_if(
-        _synchronizations.begin(),
-        _synchronizations.end(),
-        [asset](const AssetSynchronization& a) {
-            return a.asset.get() == asset;
-        }
-    );
+    AssetSynchronization a = _managedAssets[asset];
+
+    std::vector<std::shared_ptr<ResourceSynchronization>> resourceSyncs =
+        asset->synchronizations();
+
+    for (const auto& s : resourceSyncs) {
+        _resourceToAssetMap.erase(s.get());
+        _resourceSynchronizer->cancelSynchronization(s.get(), this);
+    }
+
+    _managedAssets.erase(asset);
 }
 
 void AssetSynchronizer::syncAsset(Asset* asset) {
-    const auto& sync = std::find_if(
-        _synchronizations.begin(),
-        _synchronizations.end(),
-        [asset](const AssetSynchronization& a) {
-            return a.asset.get() == asset;
+    std::vector<std::shared_ptr<ResourceSynchronization>> resourceSyncs =
+        asset->synchronizations();
+
+    for (const auto& s : resourceSyncs) {
+        if (!s->isResolved()) {
+            _managedAssets[asset].state = SynchronizationState::Synchronizing;
+            _resourceSynchronizer->enqueueSynchronization(s, this);
         }
-    );
-    // todo...
+    }
 }
 
 void AssetSynchronizer::syncUnsynced() {
+    for (auto& it : _managedAssets) {
+        if (it.second.state == SynchronizationState::Added) {
+            syncAsset(it.first);
+        }
+    }
 }
 
 std::vector<std::shared_ptr<Asset>> AssetSynchronizer::getSynchronizedAssets() {
-    return std::vector<std::shared_ptr<Asset>>();
+    std::vector<std::shared_ptr<SynchronizationProduct>> products =
+        _resourceSynchronizer->finishedSynchronizations(this);
+
+    std::vector<Asset*> affectedAssets;
+    for (const auto& p : products) {
+        std::shared_ptr<ResourceSynchronization> sync = p->synchronization;
+        
+        const auto& it = _resourceToAssetMap.find(sync.get());
+        if (it != _resourceToAssetMap.end()) {
+            affectedAssets.push_back(it->second);
+        }
+    }
+
+    std::vector<std::shared_ptr<Asset>> synchronizedAssets;
+    for (auto a : affectedAssets) {
+        std::vector<std::shared_ptr<ResourceSynchronization>> syncs = a->synchronizations();
+        if (assetIsSynchronized(a)) {
+            _managedAssets[a].state = SynchronizationState::Synchronized;
+        }
+        const auto it = _managedAssets.find(a);
+        if (it != _managedAssets.end()) {
+            synchronizedAssets.push_back(it->second.asset);
+        }
+    }
+
+
+    for (auto& finished : _finishedSynchronizations) {
+        auto it = _managedAssets.find(finished);
+        if (it != _managedAssets.end()) {
+            synchronizedAssets.push_back(it->second.asset);
+        }
+    }
+    _finishedSynchronizations.clear();
+
+    return synchronizedAssets;
+}
+
+bool AssetSynchronizer::assetIsSynchronized(Asset * asset) {
+    std::vector<std::shared_ptr<ResourceSynchronization>> syncs = asset->synchronizations();
+    bool resolved = true;
+    for (const auto& s : syncs) {
+        if (!s->isResolved()) {
+            resolved = false;
+        }
+    }
+    return resolved;
 }
 
 }

@@ -204,12 +204,26 @@ void AssetLoader::unloadAsset(const std::string & identifier) {
     //_rootAsset->removeDependency(id);
 }
 
+void AssetLoader::unloadAsset(const Asset* asset) {
+    ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");
+    // TODO: Implement this
+    //_rootAsset->removeDependency(id);
+}
+
 bool AssetLoader::hasLoadedAsset(const std::string & identifier) {
     const auto it = _importedAssets.find(identifier);
     if (it == _importedAssets.end()) {
         return false;
     }
     return _rootAsset->hasDependency(it->second.get());
+}
+
+std::shared_ptr<Asset> AssetLoader::loadedAsset(const std::string & identifier) {
+    const auto it = _importedAssets.find(identifier);
+    if (it == _importedAssets.end()) {
+        return nullptr;
+    }
+    return it->second;
 }
 
 std::vector<std::shared_ptr<Asset>> AssetLoader::loadedAssets() {

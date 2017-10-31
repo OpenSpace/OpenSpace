@@ -53,10 +53,11 @@ public:
     std::vector<std::shared_ptr<Asset>> getSynchronizedAssets();
 
 private:
+    bool assetIsSynchronized(Asset* asset);
+
     enum class SynchronizationState : int {
         Added,
         Synchronizing,
-        RecentlySynchronized,
         Synchronized
     };
 
@@ -66,9 +67,10 @@ private:
     };
 
     ResourceSynchronizer* _resourceSynchronizer;
-    std::vector<AssetSynchronization> _synchronizations;
-    
-    std::map<ResourceSynchronization*, Asset*> _resourceToAssetMap;
+
+    std::unordered_map<Asset*, AssetSynchronization> _managedAssets;
+    std::unordered_map<ResourceSynchronization*, Asset*> _resourceToAssetMap;
+    std::vector<Asset*> _finishedSynchronizations;
 };
 
 

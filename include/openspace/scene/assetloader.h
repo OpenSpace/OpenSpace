@@ -85,11 +85,25 @@ public:
      * The asset is unloaded synchronously
      */
     void unloadAsset(const std::string& identifier);
+
+    /**
+    * Unload an asset:
+    * Remove the asset as a dependency on the root asset
+    * The asset is unloaded synchronously
+    */
+    void unloadAsset(const Asset* asset);
     
     /**
      * Return true if the specified asset is loaded
      */
     bool hasLoadedAsset(const std::string& identifier);
+
+
+    /**
+     * Returns the asset identified by the identifier, 
+     * if the asset is loaded. Otherwise return nullptr.
+     */
+    std::shared_ptr<Asset> loadedAsset(const std::string& identifier);
 
     /**
      * Return all assets loaded using the loadAsset method.

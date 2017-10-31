@@ -28,6 +28,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/misc/exception.h>
 
 #include "assetmanager_lua.inl"
 
@@ -51,20 +52,28 @@ void AssetManager::update() {
         const AssetState targetState = c.second;
 
         const bool shouldBeLoaded = targetState != AssetState::Unloaded;
-        const bool isLoaded = _assetLoader->hasLoadedAsset(path);
+
+        const std::shared_ptr<Asset> asset = _assetLoader->loadedAsset(path);
+        const bool isLoaded = asset != nullptr;
 
         if (isLoaded && !shouldBeLoaded) {
-            _assetLoader->unloadAsset(path);
+            _currentStates.erase(asset.get());
+            _assetLoader->unloadAsset(asset.get());
+            
         } else if (!isLoaded && shouldBeLoaded) {
             std::shared_ptr<Asset> loadedAsset = _assetLoader->loadAsset(path);
             loadedAssets.emplace(path, loadedAsset);
+            _currentStates[loadedAsset.get()] = AssetState::Loaded;
         }
     }
 
     // Collect all assets for synchronization
     for (const auto& loadedAsset : loadedAssets) {
         const AssetState targetState = _pendingStateChangeCommands[loadedAsset.first];
-        bool shouldSync = targetState == AssetState::Synchronized || targetState == AssetState::Initialized;
+
+        const bool shouldSync =
+            targetState == AssetState::Synchronized ||
+            targetState == AssetState::Initialized;
 
         if (!shouldSync) {
             continue;
@@ -87,7 +96,7 @@ void AssetManager::update() {
     std::vector<std::shared_ptr<Asset>> syncedAssets = _assetSynchronizer->getSynchronizedAssets();
     for (const auto& syncedAsset : syncedAssets) {
         // Retrieve ancestors that were waiting for this asset to sync
-        const auto& it = _syncAncestors.find(syncedAsset);
+        const auto it = _syncAncestors.find(syncedAsset);
         if (it == _syncAncestors.end()) {
             continue; // Should not happen. (No ancestor to this synchronization)
         }
@@ -95,11 +104,13 @@ void AssetManager::update() {
 
         for (const auto& ancestor : ancestors) {
             const bool initReady = ancestor->isInitReady();
-            const bool shouldInit = _stateChangesInProgress[ancestor] == AssetState::Initialized;
+            const bool shouldInit =
+                _stateChangesInProgress[ancestor] == AssetState::Initialized;
+
             if (initReady) {
                 _stateChangesInProgress.erase(ancestor);
                 if (shouldInit) {
-                    ancestor->initialize();
+                    tryInitializeAsset(*ancestor);
                 }
             }
         }
@@ -111,6 +122,14 @@ void AssetManager::update() {
 
 void AssetManager::setTargetAssetState(const std::string& path, AssetState targetState) {
     _pendingStateChangeCommands[path] = targetState;
+}
+
+AssetManager::AssetState AssetManager::currentAssetState(Asset* asset) {
+    const auto it = _currentStates.find(asset);
+    if (it == _currentStates.end()) {
+        return AssetManager::AssetState::Unloaded;
+    }
+    return it->second;
 }
 
 void AssetManager::clearAllTargetAssets() {
@@ -145,6 +164,16 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             }
         }
     };
+}
+
+bool AssetManager::tryInitializeAsset(Asset& asset) {
+    try {
+        asset.initialize();
+        return true;
+    } catch (const ghoul::RuntimeError& e) {
+        LERROR(e.message);
+        return false;
+    }
 }
 
 

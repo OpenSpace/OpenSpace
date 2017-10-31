@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,8 +34,9 @@ class ResourceSyncClient {};
 
 class ResourceSynchronizer {
 public:
-    void enqueueSynchronization(std::shared_ptr<ResourceSyncClient> client);
-    std::vector<std::shared_ptr<SynchronizationProduct>> getFinishedSynchronizations(ResourceSyncClient* client);
+    void enqueueSynchronization(std::shared_ptr<ResourceSynchronization> sync, ResourceSyncClient* client);
+    void cancelSynchronization(ResourceSynchronization* sync, ResourceSyncClient* client);
+    std::vector<std::shared_ptr<SynchronizationProduct>> finishedSynchronizations(ResourceSyncClient* client);
 private:
     std::map<std::shared_ptr<ResourceSynchronization>,
         std::shared_ptr<ResourceSyncClient>> _origin;

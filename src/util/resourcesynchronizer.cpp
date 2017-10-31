@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -25,6 +25,20 @@
 #include <openspace/util/resourcesynchronizer.h>
 
 namespace openspace {
+void ResourceSynchronizer::enqueueSynchronization(
+    std::shared_ptr<ResourceSynchronization> sync,
+    ResourceSyncClient* client)
+{
+    
+}
 
+void ResourceSynchronizer::cancelSynchronization(ResourceSynchronization * sync, ResourceSyncClient * client) {
+    // TODO: Implement this
+}
+
+std::vector<std::shared_ptr<SynchronizationProduct>> ResourceSynchronizer::finishedSynchronizations(ResourceSyncClient * client)
+{
+    return std::vector<std::shared_ptr<SynchronizationProduct>>();
+}
 
 } // namespace openspace

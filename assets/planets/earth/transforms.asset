@@ -7,7 +7,7 @@ local EarthBarycenter = {
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Body = "EARTH",
+            Target = "EARTH",
             Observer = "SUN"
         }
     }

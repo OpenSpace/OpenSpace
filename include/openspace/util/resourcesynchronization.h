@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -34,8 +34,8 @@ namespace openspace {
 
 class ResourceSynchronization;
 
-class SynchronizationProduct {
-
+struct SynchronizationProduct {
+    std::shared_ptr<ResourceSynchronization> synchronization;
 };
 
 class SynchronizationJob : public Job<SynchronizationProduct> {
