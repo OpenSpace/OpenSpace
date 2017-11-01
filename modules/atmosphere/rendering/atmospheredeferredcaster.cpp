@@ -139,6 +139,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _atmosphereRadius(0.f)
     , _atmospherePlanetRadius(0.f)
     , _planetAverageGroundReflectance(0.f)
+    , _planetGroundRadianceEmittion(0.f)
     , _rayleighHeightScale(0.f)
     , _ozoneHeightScale(0.f)
     , _mieHeightScale(0.f)
@@ -214,6 +215,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
             program.setUniform("Rg", _atmospherePlanetRadius);
             program.setUniform("Rt", _atmosphereRadius);
             program.setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
+            program.setUniform("groundRadianceEmittion", _planetGroundRadianceEmittion);
             program.setUniform("HR", _rayleighHeightScale);
             program.setUniform("betaRayleigh", _rayleighScatteringCoeff);
             program.setUniform("HM", _mieHeightScale);
@@ -423,6 +425,10 @@ void AtmosphereDeferredcaster::setPlanetRadius(const float planetRadius) {
 
 void AtmosphereDeferredcaster::setPlanetAverageGroundReflectance(const float averageGReflectance) {
     _planetAverageGroundReflectance = averageGReflectance;
+}
+
+void AtmosphereDeferredcaster::setPlanetGroundRadianceEmittion(const float groundRadianceEmittion) {
+    _planetGroundRadianceEmittion = groundRadianceEmittion;
 }
 
 void AtmosphereDeferredcaster::setRayleighHeightScale(const float rayleighHeightScale) {
@@ -1155,6 +1161,7 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(std::unique_p
     shaderProg->setUniform("Rg", _atmospherePlanetRadius);
     shaderProg->setUniform("Rt", _atmosphereRadius);
     shaderProg->setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
+    shaderProg->setUniform("groundRadianceEmittion", _planetGroundRadianceEmittion);
     shaderProg->setUniform("HR", _rayleighHeightScale);
     shaderProg->setUniform("betaRayleigh", _rayleighScatteringCoeff);
     shaderProg->setUniform("HM", _mieHeightScale);

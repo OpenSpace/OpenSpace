@@ -153,6 +153,7 @@ return {
                 --PlanetRadius = 3393.0,
                 PlanetRadius = 3386.190,
                 PlanetAverageGroundReflectance = 0.1,
+                GroundRadianceEmittion = 0.37,
                 Rayleigh = {
                     Coefficients = {
                         -- Wavelengths are given in 10^-9m

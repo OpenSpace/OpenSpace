@@ -865,8 +865,10 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
 
     saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, &_mSAAPattern);
     // Convert back to [-1, 1] range:
-    for (int d = 0; d < _nAaSamples * 3; d += 3) {
-        _mSAAPattern[d] = 2.0f * _mSAAPattern[d] - 1.0f;
+    for (int d = 0; d < _nAaSamples; ++d) {        
+        _mSAAPattern[d * 3]       = (2.0f * _mSAAPattern[d * 3] - 1.0f) / static_cast<float>(viewport[2]);
+        _mSAAPattern[(d * 3) + 1] = (2.0f * _mSAAPattern[(d * 3) + 1] - 1.0f) / static_cast<float>(viewport[3]);
+        _mSAAPattern[(d * 3) + 2] = 0.0f;
     }
     
     nOneStripProgram->deactivate();
@@ -1081,7 +1083,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
                 deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
                 // 48 = 16 samples * 3 coords
-                deferredcastProgram->setUniform("msaaSamplePatter[48]", _mSAAPattern);
+                deferredcastProgram->setUniform("msaaSamplePatter", _mSAAPattern, 48);
 
                 deferredcaster->preRaycast(deferredcasterTask.renderData,
                     _deferredcastData[deferredcaster],

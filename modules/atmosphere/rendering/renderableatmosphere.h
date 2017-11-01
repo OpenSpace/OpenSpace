@@ -97,6 +97,7 @@ private:
 
     properties::FloatProperty _atmosphereHeightP;
     properties::FloatProperty _groundAverageReflectanceP;
+    properties::FloatProperty _groundRadianceEmittionP;
     properties::FloatProperty _rayleighHeightScaleP;
     properties::FloatProperty _rayleighScatteringCoeffXP;
     properties::FloatProperty _rayleighScatteringCoeffYP;
@@ -114,7 +115,7 @@ private:
     properties::FloatProperty _mieAsymmetricFactorGP;
     properties::FloatProperty _sunIntensityP;
     properties::FloatProperty _hdrExpositionP;
-    properties::FloatProperty _gammaConstantP;
+    properties::FloatProperty _gammaConstantP;    
     properties::BoolProperty  _sunFollowingCameraEnabledP;
     properties::BoolProperty  _hardShadowsEnabledP;
 
@@ -124,6 +125,7 @@ private:
     float _atmosphereRadius;
     float _atmospherePlanetRadius;
     float _planetAverageGroundReflectance;
+    float _planetGroundRadianceEmittion;
     float _rayleighHeightScale;
     float _ozoneHeightScale;
     float _mieHeightScale;

@@ -62,6 +62,7 @@
 uniform float Rg;
 uniform float Rt;
 uniform float AverageGroundReflectance;
+uniform float groundRadianceEmittion;
 uniform float HR;
 uniform vec3 betaRayleigh;
 uniform float HO;

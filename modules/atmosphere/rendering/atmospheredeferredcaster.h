@@ -75,6 +75,7 @@ public:
     void setAtmosphereRadius(const float atmRadius);
     void setPlanetRadius(const float planetRadius);
     void setPlanetAverageGroundReflectance(const float averageGReflectance);
+    void setPlanetGroundRadianceEmittion(const float groundRadianceEmittion);
     void setRayleighHeightScale(const float rayleighHeightScale);
     void enableOzone(const bool enable);
     void setOzoneHeightScale(const float ozoneHeightScale);
@@ -158,6 +159,7 @@ private:
     float _atmosphereRadius;
     float _atmospherePlanetRadius;
     float _planetAverageGroundReflectance;
+    float _planetGroundRadianceEmittion;
     float _rayleighHeightScale;
     float _ozoneHeightScale;
     float _mieHeightScale;

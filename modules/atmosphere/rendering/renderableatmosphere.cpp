@@ -100,6 +100,12 @@ namespace {
         "Average Ground Reflectance (%)",
         "" // @TODO Missing documentation
     };
+    
+    static const openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
+        "GroundRadianceEmittion",
+        "Percentage of initial radiance emitted from ground",
+        "" // @TODO Missing documentation
+    };
 
     static const openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale", 
@@ -254,6 +260,7 @@ namespace openspace {
         : Renderable(dictionary)
         , _atmosphereHeightP(AtmosphereHeightInfo, 60.0f, 0.1f, 99.0f)
         , _groundAverageReflectanceP(AverageGroundReflectanceInfo, 0.1f, 0.0f, 1.0f)
+        , _groundRadianceEmittionP(GroundRadianceEmittioninfo, 0.3f, 0.0f, 1.0f)
         , _rayleighHeightScaleP(RayleighHeightScaleInfo, 8.0f, 0.1f, 20.0f)
         , _rayleighScatteringCoeffXP(RayleighScatteringCoeffXInfo, 1.0f, 0.01f, 100.0f)
         , _rayleighScatteringCoeffYP(RayleighScatteringCoeffYInfo, 1.0f, 0.01f, 100.0f)
@@ -280,6 +287,7 @@ namespace openspace {
         , _atmosphereRadius(0.f)
         , _atmospherePlanetRadius(0.f)
         , _planetAverageGroundReflectance(0.f)
+        , _planetGroundRadianceEmittion(0.f)
         , _rayleighHeightScale(0.f)
         , _ozoneHeightScale(0.f)
         , _mieHeightScale(0.f)
@@ -408,6 +416,12 @@ namespace openspace {
                     << name << " planet.\nDisabling atmosphere effects for this planet.");
             }
 
+            if (!atmosphereDictionary.getValue(GroundRadianceEmittioninfo.identifier, _planetGroundRadianceEmittion)) {
+                errorReadingAtmosphereData = true;
+                LWARNING("No Ground Radiance Emitted percentage value expecified for Atmosphere Effects of "
+                    << name << " planet.\nDisabling atmosphere effects for this planet.");
+            }
+
             ghoul::Dictionary rayleighDictionary;
             success = atmosphereDictionary.getValue(keyRayleigh, rayleighDictionary);
 
@@ -527,6 +541,10 @@ namespace openspace {
                 _groundAverageReflectanceP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_groundAverageReflectanceP);
 
+                _groundRadianceEmittionP = _planetGroundRadianceEmittion;
+                _groundRadianceEmittionP.onChange([this]() { updateAtmosphereParameters(); });
+                addProperty(_groundRadianceEmittionP);
+
                 _rayleighHeightScaleP = _rayleighHeightScale;
                 _rayleighHeightScaleP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_rayleighHeightScaleP);
@@ -622,6 +640,7 @@ namespace openspace {
                 _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
                 _deferredcaster->setPlanetRadius(_atmospherePlanetRadius);
                 _deferredcaster->setPlanetAverageGroundReflectance(_planetAverageGroundReflectance);
+                _deferredcaster->setPlanetGroundRadianceEmittion(_planetGroundRadianceEmittion);
                 _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
                 _deferredcaster->enableOzone(_ozoneLayerEnabled);
                 _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
@@ -706,6 +725,7 @@ namespace openspace {
         bool executeComputation = true;
 
         if (_sunRadianceIntensity != _sunIntensityP ||
+            _planetGroundRadianceEmittion != _groundRadianceEmittionP ||
             _hdrConstant != _hdrExpositionP ||
             _exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground() ||
             _gammaConstant != _gammaConstantP ||
@@ -715,33 +735,35 @@ namespace openspace {
         }
             
 
-        _atmosphereRadius = _atmospherePlanetRadius + _atmosphereHeightP;
+        _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereHeightP;
         _planetAverageGroundReflectance = _groundAverageReflectanceP;
-        _rayleighHeightScale = _rayleighHeightScaleP;
+        _planetGroundRadianceEmittion   = _groundRadianceEmittionP;
+        _rayleighHeightScale            = _rayleighHeightScaleP;
         _rayleighScatteringCoeff = glm::vec3(_rayleighScatteringCoeffXP * 0.001f, _rayleighScatteringCoeffYP * 0.001f,
             _rayleighScatteringCoeffZP * 0.001f);
-        _ozoneLayerEnabled = _ozoneEnabledP;
-        _ozoneHeightScale = _ozoneHeightScaleP;
+        _ozoneLayerEnabled    = _ozoneEnabledP;
+        _ozoneHeightScale     = _ozoneHeightScaleP;
         _ozoneExtinctionCoeff = glm::vec3(_ozoneCoeffXP.value() * 0.00001f,
             _ozoneCoeffYP.value() * 0.00001f,
             _ozoneCoeffZP.value() * 0.00001f);
-        _mieHeightScale = _mieHeightScaleP;
+        _mieHeightScale     = _mieHeightScaleP;
         _mieScatteringCoeff = glm::vec3(_mieScatteringCoeffXP * 0.001f, _mieScatteringCoeffYP * 0.001f, 
             _mieScatteringCoeffZP * 0.001f);
-        _mieExtinctionCoeff = _mieScatteringCoeff * (1.0f / static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
-        _miePhaseConstant = _mieAsymmetricFactorGP;
-        _sunRadianceIntensity = _sunIntensityP;
-        _hdrConstant = _hdrExpositionP;
+        _mieExtinctionCoeff         = _mieScatteringCoeff * (1.0f / static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
+        _miePhaseConstant           = _mieAsymmetricFactorGP;
+        _sunRadianceIntensity       = _sunIntensityP;
+        _hdrConstant                = _hdrExpositionP;
         _exposureBackgroundConstant = OsEng.renderEngine().renderer()->hdrBackground();
-        _gammaConstant = _gammaConstantP;
-        _sunFollowingCameraEnabled = _sunFollowingCameraEnabledP;
-        _hardShadows = _hardShadowsEnabledP;
+        _gammaConstant              = _gammaConstantP;
+        _sunFollowingCameraEnabled  = _sunFollowingCameraEnabledP;
+        _hardShadows                = _hardShadowsEnabledP;
 
 
         if (_deferredcaster) {
             _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
             _deferredcaster->setPlanetRadius(_atmospherePlanetRadius);
             _deferredcaster->setPlanetAverageGroundReflectance(_planetAverageGroundReflectance);
+            _deferredcaster->setPlanetGroundRadianceEmittion(_planetGroundRadianceEmittion);
             _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
             _deferredcaster->enableOzone(_ozoneLayerEnabled);
             _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
