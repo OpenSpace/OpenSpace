@@ -125,7 +125,9 @@ target_link_libraries(
     ${GLFW_LIBRARIES}
 )
 
-set_property(TARGET sgct_light PROPERTY FOLDER "External")
+if (TARGET sgct_light)
+    set_property(TARGET sgct_light PROPERTY FOLDER "External")
+endif ()
 if (TARGET glew)
     set_property(TARGET glew PROPERTY FOLDER "External/SGCT")
 endif ()
