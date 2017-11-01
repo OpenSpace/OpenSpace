@@ -165,6 +165,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
         properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
     }
+    , _hasScheduledAssetLoading(false)
+    , _scheduledAssetPathToLoad("")
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
@@ -562,6 +564,7 @@ void OpenSpaceEngine::initialize() {
 }
 
 void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
+    _hasScheduledAssetLoading = true;
     _scheduledAssetPathToLoad = assetPath;
 }
 
