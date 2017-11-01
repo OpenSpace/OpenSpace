@@ -32,6 +32,7 @@
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <modules/volume/transferfunctionhandler.h>
 
+
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -47,7 +48,7 @@ class RenderableTimeVaryingVolume : public Renderable {
 public:
     RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
     ~RenderableTimeVaryingVolume();
-    
+
     void initialize() override;
     void deinitialize() override;
     bool isReady() const override;
@@ -101,6 +102,7 @@ private:
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
+
 };
 
 } // namespace volume

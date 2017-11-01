@@ -88,6 +88,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     , _upperValueBound({"upperValueBound", "Upper value bound", "" }, 0.0f, 0.0f, 1000000.0f)
     , _raycaster(nullptr)
     , _transferFunctionHandler(nullptr)
+
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -100,6 +101,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
     _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _transferFunctionHandler = std::make_shared<TransferFunctionHandler>(_transferFunctionPath);
+
 
     _gridType.addOption(static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid");
     _gridType.addOption(static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid");
@@ -121,7 +123,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
         _gridType = (gridType == VolumeGridType::Spherical) ? 1 : 0;
     }
 }
-    
+
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initialize() {
@@ -161,7 +163,9 @@ void RenderableTimeVaryingVolume::initialize() {
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.0f, 1.0f);
         }
-        _transferFunctionHandler->buildHistogram(data);
+
+        //_transferFunctionHandler->buildHistogram(data);
+
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
@@ -180,6 +184,7 @@ void RenderableTimeVaryingVolume::initialize() {
     _transferFunctionHandler->initialize();
     _clipPlanes->initialize();
     _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunctionHandler, _clipPlanes);
+
     _raycaster->initialize();
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
     auto onChange = [&](bool enabled) {
@@ -208,6 +213,7 @@ void RenderableTimeVaryingVolume::initialize() {
     addProperty(_sourceDirectory);
     addPropertySubOwner(_clipPlanes.get());
     addPropertySubOwner(_transferFunctionHandler.get());
+
     addProperty(_triggerTimeJump);
     addProperty(_jumpToTimestep);
     addProperty(_currentTimestep);
@@ -244,7 +250,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.time = Time::convertTime(timeString);
     t.inRam = false;
     t.onGpu = false;
-    
+
     _volumeTimesteps[t.time] = std::move(t);
 }
 
@@ -356,7 +362,7 @@ void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& 
     }
 }
 
- 
+
 
 bool RenderableTimeVaryingVolume::isReady() const {
     return true;

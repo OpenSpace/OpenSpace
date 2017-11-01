@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,56 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float maxStepSize#{id} = 0.02;
-uniform sampler3D volumeTexture_#{id};
-uniform sampler1D transferFunction_#{id};
-uniform int gridType_#{id} = 0;
+#include "gtest/gtest.h"
 
-uniform int nClips_#{id};
-uniform vec3 clipNormals_#{id}[8];
-uniform vec2 clipOffsets_#{id}[8];
+#include <openspace/util/timeline.h>
+#include <openspace/util/time.h>
 
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rawvolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
 
-void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
-                 inout vec3 accumulatedAlpha, inout float stepSize)
-{
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
 
-    vec3 transformedPos = samplePos;
-    if (gridType_#{id} == 1) {
-        transformedPos = kameleon_cartesianToSpherical(samplePos);
-    }
+using namespace openspace;
 
-    float clipAlpha = 1.0;
-    vec3 centerToPos = transformedPos - vec3(0.5);
+class RawVolumeIoTest : public testing::Test {};
 
+TEST_F(RawVolumeIoTest, TinyInputOutput) {
+    using namespace volume;
 
-    for (int i = 0; i < nClips_#{id} && i < 8; i++) {
-        vec3 clipNormal = clipNormals_#{id}[i];
-        float clipBegin = clipOffsets_#{id}[i].x;
-        float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
-        clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
-    }
+    glm::uvec3 dims{ 1, 1, 1 };
+    float value = 0.5;
 
-    if (clipAlpha > 0) {
-        float val = texture(volumeTexture_#{id}, transformedPos).r;
-        vec4 color = texture(transferFunction_#{id}, val);
-        vec3 backColor = color.rgb;
-        vec3 backAlpha = color.aaa;
+    RawVolume<float> vol(dims);
 
-        backColor *= stepSize * clipAlpha;
-        backAlpha *= stepSize * clipAlpha;
+    vol.set({ 0, 0, 0 }, value);
+    ASSERT_EQ(vol.get({ 0, 0, 0 }), value);
 
-        backColor = clamp(backColor, 0.0, 1.0);
-        backAlpha = clamp(backAlpha, 0.0, 1.0);
+    std::string volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
 
-        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
-        accumulatedColor += oneMinusFrontAlpha * backColor;
-        accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
-    }
+    // Write the 1x1x1 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
 
-    stepSize = maxStepSize#{id};
+    // Read the 1x1x1 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    ASSERT_EQ(storedVolume->get({ 0, 0, 0 }), value);
 }
 
-float stepSize#{id}(vec3 samplePos, vec3 dir) {
-    return maxStepSize#{id};
+TEST_F(RawVolumeIoTest, BasicInputOutput) {
+    using namespace volume;
+
+    glm::uvec3 dims{ 2, 4, 8 };
+    auto value = [dims](glm::uvec3 v) {
+        return v.z * 8 * 4 + v.y * 4 + v.x;
+    };
+
+    RawVolume<float> vol(dims);
+    vol.forEachVoxel([&vol, &value](glm::uvec3 x, float v) {
+        vol.set(x, value(x));
+    });
+
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+        ASSERT_EQ(v, value(x));
+    });
+
+    std::string volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
+
+    // Write the 2x4x8 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
+
+    // Read the 2x4x8 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+        ASSERT_EQ(v, value(x));
+    });
 }

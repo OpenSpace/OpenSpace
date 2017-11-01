@@ -22,29 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
-#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
-
-#include <openspace/util/task.h>
+#include <modules/volume/volumegridtype.h>
 
 #include <string>
 
 namespace openspace {
-namespace kameleonvolume {
+namespace volume {
 
-class KameleonMetadataToJsonTask : public Task {
-public:
-    KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation documentation();
-    
-private:
-    std::string _inputPath;
-    std::string _outputPath;
-};
+VolumeGridType parseGridType(const std::string& gridType) {
+    if (gridType == "Cartesian") {
+        return VolumeGridType::Cartesian;
+    }
+    if (gridType == "Spherical") {
+        return VolumeGridType::Spherical;
+    }
+    throw InvalidGridTypeError(gridType);
+}
 
-} // namespace kameleonvolume
+InvalidGridTypeError::InvalidGridTypeError(std::string gt)
+    : RuntimeError("Invalid grid type: '" + gt + "'")
+    , gridType(std::move(gt))
+{}
+
+} // namespace volume
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__

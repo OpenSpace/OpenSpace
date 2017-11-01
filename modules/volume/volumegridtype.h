@@ -25,13 +25,24 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
 #define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
 
+#include <ghoul/misc/exception.h>
+
 namespace openspace {
+namespace volume {
 
 enum class VolumeGridType : int {
     Cartesian = 0,
     Spherical = 1
 };
 
+struct InvalidGridTypeError : public ghoul::RuntimeError {
+	explicit InvalidGridTypeError(std::string gridType);
+	std::string gridType;
+};
+
+VolumeGridType parseGridType(const std::string& gridType);
+
+} // namespace volume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__

@@ -30,6 +30,7 @@
 #include <iterator>
 
 namespace openspace {
+namespace volume {
     
 template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
 class LruCache {
@@ -85,6 +86,7 @@ private:
     size_t _capacity;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___LRUCACHE___H__
