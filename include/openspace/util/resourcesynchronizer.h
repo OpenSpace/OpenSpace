@@ -28,6 +28,8 @@
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/concurrentjobmanager.h>
 
+#include <unordered_map>
+
 namespace openspace {
 
 class ResourceSyncClient {};

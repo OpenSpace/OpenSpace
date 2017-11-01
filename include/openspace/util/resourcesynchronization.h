@@ -50,7 +50,7 @@ private:
 };
 
 class ResourceSynchronization
-    : protected std::enable_shared_from_this<ResourceSynchronization>
+    : public std::enable_shared_from_this<ResourceSynchronization>
 {
 public:
     static documentation::Documentation Documentation();
