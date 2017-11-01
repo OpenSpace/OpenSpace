@@ -2,12 +2,9 @@ local assetHelper = asset.import('assethelper')
 local transforms = asset.import('./transforms')
 
 local sunParentName = transforms.SunIau.Name;
-local texturesPath = asset.syncedResource("textures");
 
-
-asset.addSynchronization({
+local texturesPath = asset.syncedResource({
     Type = "HttpSynchronization",
-    Destination = texturesPath,
     Identifier = "sun_textures",
     Version = 1
 })

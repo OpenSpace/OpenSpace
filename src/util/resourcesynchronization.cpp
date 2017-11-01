@@ -88,6 +88,10 @@ std::shared_ptr<SynchronizationJob> ResourceSynchronization::job() {
     return _job;
 }
 
+void ResourceSynchronization::setSyncRoot(std::string path) {
+    _syncRoot = std::move(path);
+}
+
 void ResourceSynchronization::wait() {
 }
 

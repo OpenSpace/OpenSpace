@@ -44,7 +44,6 @@ namespace {
 
     const char* SyncedResourceFunctionName = "syncedResource";
     const char* LocalResourceFunctionName = "localResource";
-    const char* AddSynchronizationFunctionName = "addSynchronization";
 
     const char* OnInitializeFunctionName = "onInitialize";
     const char* OnDeinitializeFunctionName = "onDeinitialize";
@@ -166,17 +165,6 @@ int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency
     return 0;
 }
 
-int AssetLoader::addSynchronizationLua(Asset* asset) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("addSynchronization", *_luaState, 1, nArguments);
-
-    ghoul::Dictionary d;
-    ghoul::lua::luaDictionaryFromState(*_luaState, d);
-    asset->addSynchronization(ResourceSynchronization::createFromDictionary(d));
-
-    return 0;
-}
-
 std::shared_ptr<Asset> AssetLoader::importDependency(const std::string& name) {
     std::shared_ptr<Asset> asset = getAsset(name);
     std::shared_ptr<Asset> dependant = _assetStack.back();
@@ -295,11 +283,9 @@ void AssetLoader::callOnDependantDeinitialize(Asset* asset, Asset* dependant) {
     }
 }
 
-int AssetLoader::resolveLocalResourceLua(Asset* asset) {
+int AssetLoader::localResourceLua(Asset* asset) {
     int nArguments = lua_gettop(*_luaState);
-    if (nArguments != 1) {
-        return luaL_error(*_luaState, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    SCRIPT_CHECK_ARGUMENTS("localResource", *_luaState, 1, nArguments);
 
     std::string resourceName = luaL_checkstring(*_luaState, -1);
     std::string resolved = asset->resolveLocalResource(resourceName);
@@ -308,16 +294,22 @@ int AssetLoader::resolveLocalResourceLua(Asset* asset) {
     return 1;
 }
 
-int AssetLoader::resolveSyncedResourceLua(Asset* asset) {
+int AssetLoader::syncedResourceLua(Asset* asset) {
     int nArguments = lua_gettop(*_luaState);
-    if (nArguments != 1) {
-        return luaL_error(*_luaState, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    SCRIPT_CHECK_ARGUMENTS("syncedResource", *_luaState, 1, nArguments);
 
-    std::string resourceName = luaL_checkstring(*_luaState, -1);
-    std::string resolved = asset->resolveSyncedResource(resourceName);
+    ghoul::Dictionary d;
+    ghoul::lua::luaDictionaryFromState(*_luaState, d);
 
-    lua_pushstring(*_luaState, resolved.c_str());
+    std::shared_ptr<ResourceSynchronization> sync =
+        ResourceSynchronization::createFromDictionary(d);
+
+    sync->setSyncRoot(_syncRootDirectory);
+    std::string absolutePath = sync->directory();
+
+    asset->addSynchronization(sync);
+
+    lua_pushstring(*_luaState, absolutePath.c_str());
     return 1;
 }
 
@@ -347,13 +339,10 @@ void AssetLoader::pushAsset(std::shared_ptr<Asset> asset) {
        |  |- export
        |  |- onInitialize
        |  |- onDeinitialize
-       |  |- addSynchronization
        |- Dependants (table<dependant, Dependency dep>)
      
      where Dependency is a table:
        Dependency
-       |- localResource
-       |- syncedResource
        |- onInitialize
        |- onDeinitialize
     */ 
@@ -374,13 +363,13 @@ void AssetLoader::pushAsset(std::shared_ptr<Asset> asset) {
     // Register local resource function
     // string localResource(string path)
     lua_pushlightuserdata(*_luaState, asset.get());
-    lua_pushcclosure(*_luaState, &assetloader::resolveLocalResource, 1);
+    lua_pushcclosure(*_luaState, &assetloader::localResource, 1);
     lua_setfield(*_luaState, assetTableIndex, LocalResourceFunctionName);
 
     // Register synced resource function
     // string syncedResource(string path)
     lua_pushlightuserdata(*_luaState, asset.get());
-    lua_pushcclosure(*_luaState, &assetloader::resolveSyncedResource, 1);
+    lua_pushcclosure(*_luaState, &assetloader::syncedResource, 1);
     lua_setfield(*_luaState, assetTableIndex, SyncedResourceFunctionName);
 
     // Register import-dependency function
@@ -406,12 +395,6 @@ void AssetLoader::pushAsset(std::shared_ptr<Asset> asset) {
     lua_pushlightuserdata(*_luaState, asset.get());
     lua_pushcclosure(*_luaState, &assetloader::onDeinitialize, 1);
     lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
-
-    // Register addSynchronization function
-    // void addSynchronization(table synchronization)
-    lua_pushlightuserdata(*_luaState, asset.get());
-    lua_pushcclosure(*_luaState, &assetloader::addSynchronization, 1);
-    lua_setfield(*_luaState, assetTableIndex, AddSynchronizationFunctionName);
 
     // Attach asset table to asset meta table
     lua_setfield(*_luaState, assetMetaTableIndex, AssetTableName);
@@ -527,18 +510,6 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
     lua_pushlightuserdata(*_luaState, dependency);
     lua_pushcclosure(*_luaState, &assetloader::onDeinitializeDependency, 2);
     lua_setfield(*_luaState, currentDependantTableIndex, OnDeinitializeFunctionName);
-
-    // Register local resource function
-    // string localResource(string path)
-    lua_pushlightuserdata(*_luaState, dependency);
-    lua_pushcclosure(*_luaState, &assetloader::resolveLocalResource, 1);
-    lua_setfield(*_luaState, currentDependantTableIndex, LocalResourceFunctionName);
-
-    // Register synced resource function
-    // string syncedResource(string path)
-    lua_pushlightuserdata(*_luaState, dependency);
-    lua_pushcclosure(*_luaState, &assetloader::resolveSyncedResource, 1);
-    lua_setfield(*_luaState, currentDependantTableIndex, SyncedResourceFunctionName);
 
     // duplicate the table reference on the stack, so it remains after assignment.
     lua_pushvalue(*_luaState, -1);

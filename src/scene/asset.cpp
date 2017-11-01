@@ -169,12 +169,6 @@ void Asset::deinitialize() {
     }
 }
 
-std::string Asset::resolveSyncedResource(std::string resourceName) {
-    return syncDirectory() +
-        ghoul::filesystem::FileSystem::PathSeparator + 
-        resourceName;
-}
-
 std::string Asset::id() const {
     return _hasAssetPath ? _assetPath : "$root";
 }

@@ -1,11 +1,16 @@
 local AssetHelper = asset.import("assethelper")
-local kernels = {
-    -- Leapseconds:
-    asset.syncedResource("naif0012.tls"),
 
-    -- Orientation and radii of sun, planets, asteroids, satellites, comets:
-    asset.syncedResource("pck00010.tpc"),
-    asset.syncedResource("de430_1850-2150.bsp")
+local kernelsDirectory = asset.syncedResource({
+	Type = "HttpSynchronization",
+	Identifier = "base_kernels",
+	Version = 1
+})
+
+local kernels = {
+	kernelsDirectory .. "/naif0012.tls",
+    -- Leapseconds:
+    kernelsDirectory .. "/pck00010.tpc",
+    kernelsDirectory .. "/de430_1850-2150.bsp"
 }
 
 AssetHelper.registerSpiceKernels(asset, kernels)

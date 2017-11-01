@@ -189,7 +189,7 @@ std::shared_ptr<Asset> AssetManager::tryLoadAsset(const std::string& path) {
     try {
         return _assetLoader->loadAsset(path);
     } catch (const ghoul::RuntimeError& e) {
-        LERROR(e.message);
+        LERROR(e.component << ": " << e.message);
         return nullptr;
     }
 }
@@ -199,7 +199,7 @@ bool AssetManager::tryInitializeAsset(Asset& asset) {
         asset.initialize();
         return true;
     } catch (const ghoul::RuntimeError& e) {
-        LERROR(e.message);
+        LERROR(e.component << ": " << e.message);
         return false;
     }
 }

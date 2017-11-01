@@ -39,7 +39,13 @@ public:
     HttpSynchronization(const ghoul::Dictionary& dict);
     static documentation::Documentation Documentation();
 
+    std::string directory() override;
     void synchronize() override;
+
+private:
+    bool directoryExists();
+    std::string _identifier;
+    int _version;
 };
 
 } // namespace openspace

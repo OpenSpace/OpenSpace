@@ -59,13 +59,17 @@ public:
 
     ResourceSynchronization();
     virtual void synchronize() = 0;
+    virtual std::string directory() = 0;
 
+    void setSyncRoot(std::string path);
     void wait();
     bool isResolved();
     void resolve();
     float progress();
     void updateProgress(float t);
     std::shared_ptr<SynchronizationJob> job();
+protected:
+    std::string _syncRoot;
 private:
     std::shared_ptr<SynchronizationJob> _job;
     std::atomic<bool> _started;

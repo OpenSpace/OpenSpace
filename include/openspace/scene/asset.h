@@ -88,7 +88,6 @@ public:
     bool hasInitializedDependants() const;
 
     std::string resolveLocalResource(std::string resourceName);
-    std::string resolveSyncedResource(std::string resourceName);
 private:
     ReadyState _readyState;
     AssetLoader* _loader;

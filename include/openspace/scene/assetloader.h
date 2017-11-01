@@ -48,10 +48,9 @@ int onInitialize(lua_State* state);
 int onDeinitialize(lua_State* state);
 int onInitializeDependency(lua_State* state);
 int onDeinitializeDependency(lua_State* state);
-int addSynchronization(lua_State* state);
 int importDependency(lua_State* state);
-int resolveLocalResource(lua_State* state);
-int resolveSyncedResource(lua_State* state);
+int localResource(lua_State* state);
+int syncedResource(lua_State* state);
 int noOperation(lua_State* state);
 int exportAsset(lua_State* state);
 } // namespace assetloader
@@ -157,10 +156,9 @@ private:
     int onDeinitializeLua(Asset* asset);
     int onInitializeDependencyLua(Asset* dependant, Asset* dependency);
     int onDeinitializeDependencyLua(Asset* dependant, Asset* dependency);
-    int addSynchronizationLua(Asset* asset);
     int importDependencyLua(Asset* asset);
-    int resolveLocalResourceLua(Asset* asset);
-    int resolveSyncedResourceLua(Asset* asset);
+    int localResourceLua(Asset* asset);
+    int syncedResourceLua(Asset* asset);
     int exportAssetLua(Asset* asset);
 
     // Friend c closures (callable from lua, and maps to lua functions above)
@@ -168,10 +166,9 @@ private:
     friend int assetloader::onDeinitialize(lua_State* state);
     friend int assetloader::onInitializeDependency(lua_State* state);
     friend int assetloader::onDeinitializeDependency(lua_State* state);
-    friend int assetloader::addSynchronization(lua_State* state);
     friend int assetloader::importDependency(lua_State* state);
-    friend int assetloader::resolveLocalResource(lua_State* state);
-    friend int assetloader::resolveSyncedResource(lua_State* state);
+    friend int assetloader::localResource(lua_State* state);
+    friend int assetloader::syncedResource(lua_State* state);
     friend int assetloader::exportAsset(lua_State* state);
 
     std::shared_ptr<Asset> _rootAsset;

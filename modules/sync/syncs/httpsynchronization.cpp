@@ -26,9 +26,13 @@
 
 #include <openspace/util/asynchttprequest.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <openspace/documentation/verifier.h>
 
 namespace {
     const char* _loggerCat = "HttpSynchronization";
+    const char* KeyIdentifier = "Identifier";
+    const char* KeyVersion = "Version";
 }
 
 namespace openspace {
@@ -36,11 +40,44 @@ namespace openspace {
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict)
     : openspace::ResourceSynchronization()
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dict,
+        "HttpSynchroniztion"
+    );
 
+    _identifier = dict.value<std::string>(KeyIdentifier);
+    _version = static_cast<int>(dict.value<double>(KeyVersion));
 }
 
 documentation::Documentation HttpSynchronization::Documentation() {
-    return {};
+    using namespace openspace::documentation;
+    return {
+        "HttpSynchronization",
+        "http_synchronization",
+        {
+            {
+                KeyIdentifier,
+                new StringVerifier,
+                Optional::No,
+                "A unique identifier for this resource"
+            },
+            {
+                KeyVersion,
+                new IntVerifier,
+                Optional::No,
+                "The version of this resource"
+            }
+        }
+    };
+}
+
+std::string HttpSynchronization::directory() {
+    return _syncRoot +
+        ghoul::filesystem::FileSystem::PathSeparator +
+        _identifier +
+        ghoul::filesystem::FileSystem::PathSeparator +
+        std::to_string(_version);
 }
 
 void HttpSynchronization::synchronize() {

@@ -82,22 +82,16 @@ int importDependency(lua_State* state) {
     return asset->loader()->importDependencyLua(asset);
 }
 
-int resolveLocalResource(lua_State* state) {
+int localResource(lua_State* state) {
     Asset *asset =
         reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    return asset->loader()->resolveLocalResourceLua(asset);
+    return asset->loader()->localResourceLua(asset);
 }
 
-int resolveSyncedResource(lua_State* state) {
+int syncedResource(lua_State* state) {
     Asset *asset =
         reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    return asset->loader()->resolveSyncedResourceLua(asset);
-}
-
-int addSynchronization(lua_State* state) {
-    Asset *asset =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    return asset->loader()->addSynchronizationLua(asset);
+    return asset->loader()->syncedResourceLua(asset);
 }
 
 int noOperation(lua_State*) {
