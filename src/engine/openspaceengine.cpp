@@ -1233,6 +1233,12 @@ void OpenSpaceEngine::postDraw() {
     if (isGuiWindow) {
         _renderEngine->renderScreenLog();
         _renderEngine->renderVersionInformation();
+
+        if (!_shutdown.inShutdown) {
+            // We render the camera information in the same location as the shutdown info
+            // and we won't need this if we are shutting down
+            _renderEngine->renderCameraInformation();
+        }
         _console->render();
     }
 
