@@ -58,6 +58,10 @@ public:
     bool followingNodeRotation() const;    
     SceneGraphNode* focusNode() const;
 
+    bool hasRotationalFriction() const;
+    bool hasZoomFriction() const;
+    bool hasRollFriction() const;
+
 private:
     struct CameraRotationDecomposition {
         glm::dquat localRotation;
