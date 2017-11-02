@@ -75,15 +75,15 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
 
-bool ScreenSpaceFramebuffer::initialize() {
-    ScreenSpaceRenderable::initialize();
+bool ScreenSpaceFramebuffer::initializeGL() {
+    ScreenSpaceRenderable::initializeGL();
     createFragmentbuffer();
 
     return isReady();
 }
 
-bool ScreenSpaceFramebuffer::deinitialize() {
-    ScreenSpaceRenderable::deinitialize();
+bool ScreenSpaceFramebuffer::deinitializeGL() {
+    ScreenSpaceRenderable::deinitializeGL();
 
     _framebuffer->detachAll();
     removeAllRenderFunctions();

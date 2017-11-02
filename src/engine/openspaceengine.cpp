@@ -75,6 +75,8 @@
 
 #include <glbinding/callbacks.h>
 
+#include <random>
+
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
 #endif
@@ -613,7 +615,25 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
-    scene->initialize();
+    // TODO remove after moving OpenGL out of initialize
+    std::atomic_bool initializeFinished = false;
+    std::thread t([scene, &initializeFinished]() {
+        scene->initialize();
+        initializeFinished = true;
+    });
+
+    std::random_device rd; 
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+    while (!initializeFinished) {
+        glClearColor(dis(gen), dis(gen), dis(gen), 1.0);
+        glClear(ClearBufferMask::GL_COLOR_BUFFER_BIT);
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        _windowWrapper->swapBuffer();
+    }
+        
+    scene->initializeGL();
+
     // Update the scene so that position of objects are set in case they are used in
     // post sync scripts
     _renderEngine->updateScene();

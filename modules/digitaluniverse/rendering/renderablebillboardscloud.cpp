@@ -475,13 +475,6 @@ bool RenderableBillboardsCloud::isReady() const {
 }
 
 void RenderableBillboardsCloud::initialize() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-        
-    _program = renderEngine.buildRenderProgram("RenderableBillboardsCloud",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl");
-                
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -490,8 +483,17 @@ void RenderableBillboardsCloud::initialize() {
     if (!_colorOptionString.empty()) {
         // Following DU behavior here. The last colormap variable 
         // entry is the one selected by default.
-        _colorOption.setValue(_colorRangeData.size()-1);
-    }        
+        _colorOption.setValue(_colorRangeData.size() - 1);
+    }
+}
+
+void RenderableBillboardsCloud::initializeGL() {
+    RenderEngine& renderEngine = OsEng.renderEngine();
+        
+    _program = renderEngine.buildRenderProgram("RenderableBillboardsCloud",
+        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl",
+        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl",
+        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl");
 
     if (_hasPolygon) {
         createPolygonTexture();
@@ -509,7 +511,7 @@ void RenderableBillboardsCloud::initialize() {
     }
 }
 
-void RenderableBillboardsCloud::deinitialize() {
+void RenderableBillboardsCloud::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);

@@ -190,7 +190,7 @@ bool RenderableDebugPlane::isReady() const {
     return ready;
 }
 
-void RenderableDebugPlane::initialize() {
+void RenderableDebugPlane::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -204,7 +204,7 @@ void RenderableDebugPlane::initialize() {
     }
 }
 
-void RenderableDebugPlane::deinitialize() {
+void RenderableDebugPlane::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 

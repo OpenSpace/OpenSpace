@@ -49,8 +49,8 @@ public:
     RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
     ~RenderableKameleonVolume();
     
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;

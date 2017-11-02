@@ -184,7 +184,7 @@ bool RenderableRings::isReady() const {
     return _shader && _texture;
 }
 
-void RenderableRings::initialize() {
+void RenderableRings::initializeGL() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("RingProgram",
@@ -202,7 +202,7 @@ void RenderableRings::initialize() {
     loadTexture();
 }
 
-void RenderableRings::deinitialize() {
+void RenderableRings::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 

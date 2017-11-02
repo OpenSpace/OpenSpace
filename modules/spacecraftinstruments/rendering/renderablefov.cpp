@@ -297,7 +297,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     addProperty(_colors.square);
 }
 
-void RenderableFov::initialize() {
+void RenderableFov::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "FovProgram",
@@ -409,7 +409,7 @@ void RenderableFov::initialize() {
     glBindVertexArray(0);
 }
 
-void RenderableFov::deinitialize() {
+void RenderableFov::deinitializeGL() {
     OsEng.renderEngine().removeRenderProgram(_programObject);
     _programObject = nullptr;
 

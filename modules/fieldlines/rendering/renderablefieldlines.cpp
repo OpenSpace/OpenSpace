@@ -232,7 +232,7 @@ bool RenderableFieldlines::isReady() const {
     return programReady && vectorFieldReady && fieldlineReady && seedPointsReady;
 }
 
-void RenderableFieldlines::initialize() {
+void RenderableFieldlines::initializeGL() {
     if (_vectorFieldInfo.empty() || _fieldlineInfo.empty() || _seedPointsInfo.empty()) {
         throw ghoul::RuntimeError("Error initializing");
     }
@@ -245,7 +245,7 @@ void RenderableFieldlines::initialize() {
     );
 }
 
-void RenderableFieldlines::deinitialize() {
+void RenderableFieldlines::deinitializeGL() {
     glDeleteVertexArrays(1, &_fieldlineVAO);
     _fieldlineVAO = 0;
     glDeleteBuffers(1, &_vertexPositionBuffer);

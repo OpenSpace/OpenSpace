@@ -44,8 +44,8 @@ public:
     RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlanetProjection();
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -57,7 +57,6 @@ public:
 protected:
     bool loadTextures();
     void attitudeParameters(double time);
-
 
 private:
     void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);

@@ -182,11 +182,10 @@ SceneGraphNode::SceneGraphNode()
     }
 {}
 
-SceneGraphNode::~SceneGraphNode() {
-    deinitialize();
-}
+SceneGraphNode::~SceneGraphNode() {}
 
 void SceneGraphNode::initialize() {
+    LDEBUG("Initialize: " << name());
     if (_renderable) {
         _renderable->initialize();
     }
@@ -203,16 +202,24 @@ void SceneGraphNode::initialize() {
     }
 }
 
+void SceneGraphNode::initializeGL() {
+    if (_renderable) {
+        _renderable->initializeGL();
+    }
+}
+
 void SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
 
     if (_renderable) {
         _renderable->deinitialize();
-        _renderable = nullptr;
     }
-    _children.clear();
+}
 
-    _parent = nullptr;
+void SceneGraphNode::deinitializeGL() {
+    if (_renderable) {
+        _renderable->deinitializeGL();
+    }
 }
 
 void SceneGraphNode::traversePreOrder(std::function<void(SceneGraphNode*)> fn) {

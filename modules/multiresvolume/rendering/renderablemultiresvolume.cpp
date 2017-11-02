@@ -419,7 +419,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
     return false;
 }
 
-void RenderableMultiresVolume::initialize() {
+void RenderableMultiresVolume::initializeGL() {
     bool success = _tsp && _tsp->load();
 
     unsigned int maxNumBricks = _tsp->header().xNumBricks_ * _tsp->header().yNumBricks_ * _tsp->header().zNumBricks_;
@@ -481,7 +481,7 @@ void RenderableMultiresVolume::initialize() {
     }
 }
 
-void RenderableMultiresVolume::deinitialize() {
+void RenderableMultiresVolume::deinitializeGL() {
     _tsp = nullptr;
     _transferFunction = nullptr;
 }

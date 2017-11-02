@@ -225,6 +225,18 @@ void Scene::initialize() {
     }
 }
 
+void Scene::initializeGL() {
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        try {
+            node->initializeGL();
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERROR(node->name() << " not initialized.");
+            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+        }
+    }
+}
+
 void Scene::update(const UpdateData& data) {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {

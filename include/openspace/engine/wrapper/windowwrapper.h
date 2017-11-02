@@ -270,6 +270,8 @@ public:
      */
     virtual void takeScreenshot(bool applyWarping = false) const;
 
+    virtual void swapBuffer() const;
+
     struct WindowWrapperException : public ghoul::RuntimeError {
         explicit WindowWrapperException(const std::string& msg);
     };

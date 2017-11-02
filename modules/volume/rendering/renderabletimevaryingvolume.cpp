@@ -124,7 +124,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
-void RenderableTimeVaryingVolume::initialize() {
+void RenderableTimeVaryingVolume::initializeGL() {
 
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
@@ -360,7 +360,7 @@ bool RenderableTimeVaryingVolume::isReady() const {
 }
 
 
-void RenderableTimeVaryingVolume::deinitialize() {
+void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;

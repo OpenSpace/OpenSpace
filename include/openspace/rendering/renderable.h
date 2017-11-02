@@ -65,7 +65,9 @@ public:
     virtual ~Renderable();
 
     virtual void initialize();
+    virtual void initializeGL();
     virtual void deinitialize();
+    virtual void deinitializeGL();
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;

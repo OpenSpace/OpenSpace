@@ -254,6 +254,13 @@ namespace openspace {
     }
 
     void RenderablePoints::initialize() {
+        bool success = loadData();
+        if (!success) {
+            throw ghoul::RuntimeError("Error loading data");
+        }
+    }
+
+    void RenderablePoints::initializeGL() {
         RenderEngine& renderEngine = OsEng.renderEngine();
         if (_hasSpriteTexture) {
             _program = renderEngine.buildRenderProgram("RenderablePoints",
@@ -266,14 +273,9 @@ namespace openspace {
                 "${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl");// ,
                 //"${MODULE_DIGITALUNIVERSE}/shaders/points_gs.glsl");
         }
-        
-        bool success = loadData();
-        if (!success) {
-            throw ghoul::RuntimeError("Error loading data");
-        }
     }
 
-    void RenderablePoints::deinitialize() {
+    void RenderablePoints::deinitializeGL() {
         glDeleteBuffers(1, &_vbo);
         _vbo = 0;
         glDeleteVertexArrays(1, &_vao);

@@ -69,7 +69,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     
 RenderableToyVolume::~RenderableToyVolume() {}
 
-void RenderableToyVolume::initialize() {
+void RenderableToyVolume::initializeGL() {
     _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
     _raycaster->initialize();
 
@@ -94,7 +94,7 @@ void RenderableToyVolume::initialize() {
     addProperty(_color);
 }
     
-void RenderableToyVolume::deinitialize() {
+void RenderableToyVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;

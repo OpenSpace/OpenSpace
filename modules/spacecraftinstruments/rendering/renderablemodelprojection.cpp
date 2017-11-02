@@ -180,7 +180,7 @@ bool RenderableModelProjection::isReady() const {
     return ready;
 }
 
-void RenderableModelProjection::initialize() {
+void RenderableModelProjection::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram("ModelShader",
         "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl",
@@ -207,7 +207,7 @@ void RenderableModelProjection::initialize() {
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
 }
 
-void RenderableModelProjection::deinitialize() {
+void RenderableModelProjection::deinitializeGL() {
     if (_geometry) {
         _geometry->deinitialize();
     }

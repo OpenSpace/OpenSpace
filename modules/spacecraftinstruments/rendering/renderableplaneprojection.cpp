@@ -94,7 +94,7 @@ bool RenderablePlaneProjection::isReady() const {
     return _shader && _texture;
 }
 
-void RenderablePlaneProjection::initialize() {
+void RenderablePlaneProjection::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     
@@ -110,7 +110,7 @@ void RenderablePlaneProjection::initialize() {
     loadTexture();
 }
 
-void RenderablePlaneProjection::deinitialize() {
+void RenderablePlaneProjection::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);

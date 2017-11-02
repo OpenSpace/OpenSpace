@@ -179,7 +179,7 @@ bool RenderablePlane::isReady() const {
     return _shader && _texture;
 }
 
-void RenderablePlane::initialize() {
+void RenderablePlane::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -192,7 +192,7 @@ void RenderablePlane::initialize() {
     loadTexture();
 }
 
-void RenderablePlane::deinitialize() {
+void RenderablePlane::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 

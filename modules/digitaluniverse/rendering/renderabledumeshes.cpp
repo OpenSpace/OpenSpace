@@ -371,7 +371,7 @@ bool RenderableDUMeshes::isReady() const {
     return (_program != nullptr) && (!_renderingMeshesMap.empty() || (!_labelData.empty()));
 }
 
-void RenderableDUMeshes::initialize() {
+void RenderableDUMeshes::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("RenderableDUMeshes",
         "${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl",
@@ -396,7 +396,7 @@ void RenderableDUMeshes::initialize() {
     }
 }
 
-void RenderableDUMeshes::deinitialize() {
+void RenderableDUMeshes::deinitializeGL() {
     for (const std::pair<int, RenderingMesh>& pair : _renderingMeshesMap) {
         for (int i = 0; i < pair.second.numU; ++i) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);

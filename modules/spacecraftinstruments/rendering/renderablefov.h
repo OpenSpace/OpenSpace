@@ -49,8 +49,8 @@ class RenderableFov : public Renderable {
 public:
     RenderableFov(const ghoul::Dictionary& dictionary);
     
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 

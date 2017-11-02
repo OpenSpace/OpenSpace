@@ -45,8 +45,8 @@ public:
     ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
     ~ScreenSpaceFramebuffer();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    bool initializeGL() override;
+    bool deinitializeGL() override;
     void render() override;
     void update() override;
     bool isReady() const override;

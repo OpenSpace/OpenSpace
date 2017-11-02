@@ -68,8 +68,8 @@ public:
     bool setSelectorType(Selector selector);
     bool initializeSelector();
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 

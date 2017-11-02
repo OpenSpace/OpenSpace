@@ -420,17 +420,19 @@ bool RenderablePlanesCloud::isReady() const {
 }
 
 void RenderablePlanesCloud::initialize() {
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+}
+
+void RenderablePlanesCloud::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     
     _program = renderEngine.buildRenderProgram("RenderablePlanesCloud",
         "${MODULE_DIGITALUNIVERSE}/shaders/plane2_vs.glsl",
         "${MODULE_DIGITALUNIVERSE}/shaders/plane2_fs.glsl");
             
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
-
     createPlanes();
 
     loadTextures();
@@ -455,7 +457,7 @@ void RenderablePlanesCloud::deleteDataGPU() {
     }
 }
 
-void RenderablePlanesCloud::deinitialize() {
+void RenderablePlanesCloud::deinitializeGL() {
     deleteDataGPU();
    
     RenderEngine& renderEngine = OsEng.renderEngine();

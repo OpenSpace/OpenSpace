@@ -51,8 +51,8 @@ class RenderableModel : public Renderable {
 public:
     RenderableModel(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 

@@ -153,7 +153,7 @@ namespace openspace {
     
 RenderableGalaxy::~RenderableGalaxy() {}
 
-void RenderableGalaxy::initialize() {
+void RenderableGalaxy::initializeGL() {
     // Aspect is currently hardcoded to cubic voxels.
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
     _aspect = _aspect / std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
@@ -275,7 +275,7 @@ void RenderableGalaxy::initialize() {
     glBindVertexArray(0);
 }
     
-void RenderableGalaxy::deinitialize() {
+void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;

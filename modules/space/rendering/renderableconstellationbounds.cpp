@@ -195,7 +195,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     }
 }
 
-void RenderableConstellationBounds::initialize() {
+void RenderableConstellationBounds::initializeGL() {
     _program = OsEng.renderEngine().buildRenderProgram(
         "ConstellationBounds",
         "${MODULE_SPACE}/shaders/constellationbounds_vs.glsl",
@@ -222,7 +222,7 @@ void RenderableConstellationBounds::initialize() {
     glBindVertexArray(0);
 }
 
-void RenderableConstellationBounds::deinitialize() {
+void RenderableConstellationBounds::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);

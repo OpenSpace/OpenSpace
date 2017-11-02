@@ -258,4 +258,11 @@ void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
     sgct::Engine::instance()->takeScreenshot();
 }
 
+void SGCTWindowWrapper::swapBuffer() const {
+    GLFWwindow* w = glfwGetCurrentContext();
+    glfwSwapBuffers(w);
+
+    glfwPollEvents();
+}
+
 } // namespace openspace

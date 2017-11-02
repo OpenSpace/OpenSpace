@@ -217,7 +217,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addProperty(_renderingModes);
 }
 
-void RenderableTrail::initialize() {
+void RenderableTrail::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "EphemerisProgram",
@@ -228,7 +228,7 @@ void RenderableTrail::initialize() {
     setRenderBin(Renderable::RenderBin::Overlay);
 }
 
-void RenderableTrail::deinitialize() {
+void RenderableTrail::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_programObject) {
         renderEngine.removeRenderProgram(_programObject);

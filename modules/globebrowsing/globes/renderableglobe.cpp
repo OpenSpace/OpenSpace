@@ -264,12 +264,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _chunkedLodGlobe->recompileShaders();
 }
 
-void RenderableGlobe::initialize() {
-    _distanceSwitch.initialize();
+void RenderableGlobe::initializeGL() {
+    _distanceSwitch.initializeGL();
 }
 
-void RenderableGlobe::deinitialize() {
-    _distanceSwitch.deinitialize();
+void RenderableGlobe::deinitializeGL() {
+    _distanceSwitch.deinitializeGL();
 }
 
 bool RenderableGlobe::isReady() const {

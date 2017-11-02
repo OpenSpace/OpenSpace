@@ -251,7 +251,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
 
-void RenderableKameleonVolume::initialize() {
+void RenderableKameleonVolume::initializeGL() {
     load();
     
     _volumeTexture->uploadTexture();
@@ -443,7 +443,7 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
     writer.write(*_rawVolume);
 }
     
-void RenderableKameleonVolume::deinitialize() {
+void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
