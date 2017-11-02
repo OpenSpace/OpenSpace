@@ -59,7 +59,6 @@
 
 #version __CONTEXT__
 
-#define EPSILON 0.0001f
 #include "floatoperations.glsl"
 
 #include "hdr.glsl"
@@ -69,7 +68,7 @@ out vec4 renderTarget;
 in vec3 interpolatedNDCPos;
 
 uniform int nAaSamples;
-uniform float msaaSamplePatter[48];
+uniform double msaaSamplePatter[48];
 uniform int cullAtmosphere;
 
 // Background exposure hack
@@ -194,7 +193,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
   dvec3  l  = planetPosition - ray.origin.xyz;
   double s  = dot(l, ray.direction.xyz);
   double l2 = dot(l, l);
-  double r2 = (atmRadius - EPSILON) *  (atmRadius - EPSILON); // avoiding surface acne
+  double r2 = atmRadius * atmRadius; // avoiding surface acne
 
   // Ray origin (eye position) is behind sphere
   if ((s < 0.0) && (l2 > r2)) {
@@ -252,10 +251,9 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
   // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
   // Using the interpolated coords:
   // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
-  dvec3 samplePos = dvec3(0.0);
-  samplePos[0] = double(msaaSamplePatter[mssaSample]);
-  samplePos[1] = double(msaaSamplePatter[mssaSample+1]);
-  dvec4 clipCoords = dvec4(interpolatedNDCPos + samplePos, 1.0) / gl_FragCoord.w; 
+  dvec2 samplePos = dvec2(msaaSamplePatter[mssaSample],
+                          msaaSamplePatter[mssaSample+1]);
+  dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, interpolatedNDCPos.z, 1.0) / gl_FragCoord.w; 
 
   // Clip to SGCT Eye
   dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
@@ -276,6 +274,7 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
   // JCC: Applying the inverse of the model transformation on the object postion in World 
   // space results in imprecision. 
   planetPositionObjectCoords = dvec4(0.0,0.0,0.0,1.0);//dInverseModelTransformMatrix * dvec4(dObjpos.xyz, 1.0);
+  //planetPositionObjectCoords = dInverseModelTransformMatrix * dvec4(dObjpos.xyz, 1.0);
 
   // Camera Position in Object Space
   cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);
@@ -344,10 +343,14 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   if ((pixelDepth > 0.0) && (pixelDepth < maxLength)) {    
     t = float(pixelDepth);  
     groundHit = true;
+    
     // Transmittance from point r, direction mu, distance t
     // By Analytical calculation
-    attenuation = analyticTransmittance(r, mu, t);
-
+    //attenuation = analyticTransmittance(r, mu, t);
+    // JCC: change from analytical to LUT transmittance to avoid
+    // acme on planet surface when looking from far away. (11/02/2017)
+    attenuation = transmittance(r, mu, t); 
+    
     // Here we use the idea of S[L](a->b) = S[L](b->a), and get the S[L](x0, v, s)
     // Then we calculate S[L] = S[L]|x - T(x, x0)*S[L]|x0        
     // The "infinite" ray hist something inside the atmosphere, so we need to remove
@@ -361,7 +364,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   } else {
     attenuation = analyticTransmittance(r, mu, t);
   }
-      
+
   // cos(PI-thetaH) = dist/r
   // cos(thetaH) = - dist/r
   // muHorizon = -sqrt(r^2-Rg^2)/r = -sqrt(1-(Rg/r)^2)
@@ -464,21 +467,22 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   // Normal of intersection point.
   vec3  n                  = normalize(normal);
   //vec4 groundReflectance = groundColor * vec4(.37);
-  vec4 groundReflectance   = groundColor
-    *   vec4(groundRadianceEmittion, groundRadianceEmittion, groundRadianceEmittion, 1.0f);
-            
+  vec4 groundReflectance   = groundColor * 
+      vec4(groundRadianceEmittion, groundRadianceEmittion, groundRadianceEmittion, 1.0f);
+
   // L0 is not included in the irradiance texture.
   // We first calculate the light attenuation from the top of the atmosphere
   // to x0.
   float dotNS = dot(n, s);
-  float muSun = max(dotNS, 0.0);
+  float muSun = max(dotNS, 0.0f);
+
   // Is direct Sun light arriving at x0? If not, there is no direct light from Sun (shadowed)
   vec3  transmittanceL0     = muSun < -sqrt(1.0f - ((Rg * Rg) / (r0 * r0))) ? vec3(0.0f) : transmittanceLUT(r0, muSun);
   // E[L*] at x0
   vec3  irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
 
   // R[L0] + R[L*]
-  vec3 groundRadiance = (dotNS < -0.2f ? groundReflectance.rgb * 10 : groundReflectance.rgb) *
+  vec3 groundRadiance = (dotNS < -0.2f ? groundReflectance.rgb * 15 : groundReflectance.rgb) *
     (muSun * transmittanceL0 + irradianceReflected) *
     sunIntensity / M_PI;
 
@@ -493,12 +497,12 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     // (After adding the sunRadiance and the attenuation of the Sun through atmosphere)
     groundRadiance += waterReflectance * max(waterBrdf, 0.0) * transmittanceL0 * sunIntensity;
   }
-  
+  //return groundRadiance;  
   // Finally, we attenuate the surface Radiance from the the point x0 to the camera location.
   reflectedRadiance = attenuationXtoX0 * groundRadiance;    
     
   // Returns reflectedRadiance = 0.0 if the ray doesn't hit the ground.
-  return reflectedRadiance;
+  return reflectedRadiance;  
 }
 
 /* 
@@ -548,10 +552,10 @@ void main() {
         if (complex) {
             nSamples = nAaSamples;
         }
-
+        
         for (int i = 0; i < nSamples; i++) {
-            vec4 normal = texelFetch(mainNormalTexture, ivec2(gl_FragCoord), i);
-            vec4 color  = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+            vec4 normal     = texelFetch(mainNormalTexture, ivec2(gl_FragCoord), i);
+            vec4 color      = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
             // Data in the mainPositionTexture are written in view space (view plus camera rig)
             vec4 position   = texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
             vec4 otherData  = texelFetch(otherDataTexture, ivec2(gl_FragCoord), i);
@@ -584,14 +588,8 @@ void main() {
             // transfRay.direction.y *= 1000.0/ellipsoidRadii.z;
             // transfRay.direction.xyz = normalize(transfRay.direction.xyz);
 
-            // intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay, 1.0,
-            //                                               insideATM, offset, maxLength );
-
-            // intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  Rt+EPSILON,
-            //                                       insideATM, offset, maxLength );
-          
             intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  
-                                                  Rt - 10*EPSILON, insideATM, offset, maxLength );
+                                                  Rt - ATM_EPSILON/100.0, insideATM, offset, maxLength );
 
             if ( intersectATM ) {
                 // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
@@ -616,6 +614,7 @@ void main() {
                 
                 if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {        
                       atmosphereFinalColor += vec4(HDR(color.xyz * backgroundExposure), color.a);                      
+                      //discard;
                 } else {
                       // Following paper nomenclature      
                       double t = offset;                  
@@ -635,15 +634,15 @@ void main() {
                       // we also need to adjust the pixelDepth for tdCalculateRayRenderableGlobehis offset so the
                       // next comparison with the planet's ground make sense:
                       pixelDepth -= offset;
-
-                      float irradianceFactor = 0.0;
-
-                      dvec4 onATMPos = dModelTransformMatrix * dvec4(x*1000.0, 1.0);
-                      vec4 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos.xyz, false);            
+                      
+                      dvec4 onATMPos           = dModelTransformMatrix * dvec4(x*1000.0, 1.0);
+                      vec4 eclipseShadowATM    = calcShadow(shadowDataArray, onATMPos.xyz, false);            
                       vec4 eclipseShadowPlanet = calcShadow(shadowDataArray, fragWorldCoords.xyz, true);
                     
                       float sunIntensityInscatter = sunRadiance * eclipseShadowATM.x;
                       float sunIntensityGround    = sunRadiance * eclipseShadowPlanet.x;
+
+                      float irradianceFactor = 0.0;
 
                       vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v,
                                                               s, r, mu, attenuation, 
@@ -656,7 +655,7 @@ void main() {
                       vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
                       
                       // Final Color of ATM plus terrain:
-                      vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+                      vec4 finalRadiance  = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
                       
                       atmosphereFinalColor += finalRadiance;
                 }

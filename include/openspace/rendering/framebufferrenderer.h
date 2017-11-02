@@ -74,7 +74,7 @@ public:
 
     float hdrBackground() const override;
     const int nAaSamples() const override;
-    const float * mSSAPattern() const override;
+    const double * mSSAPattern() const override;
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -126,7 +126,7 @@ private:
     float _hdrBackground;
     float _gamma;
 
-    float * _mSAAPattern;
+    double * _mSAAPattern;
 
     ghoul::Dictionary _rendererData;
 };

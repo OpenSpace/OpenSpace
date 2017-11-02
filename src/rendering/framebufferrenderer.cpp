@@ -69,7 +69,7 @@ void saveTextureToPPMFile(const GLenum color_buffer_attachment,
     const std::string & fileName,
     const int width, const int height);
 void saveTextureToMemory(const GLenum color_buffer_attachment, 
-    const int width, const int height, float ** memory);
+    const int width, const int height, double ** memory);
 
 FramebufferRenderer::FramebufferRenderer()
     : _camera(nullptr)
@@ -864,11 +864,11 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     glBindVertexArray(0);
 
     saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, &_mSAAPattern);
-    // Convert back to [-1, 1] range:
+    // Convert back to [-1, 1] range and then scale for the current viewport size:
     for (int d = 0; d < _nAaSamples; ++d) {        
-        _mSAAPattern[d * 3]       = (2.0f * _mSAAPattern[d * 3] - 1.0f) / static_cast<float>(viewport[2]);
-        _mSAAPattern[(d * 3) + 1] = (2.0f * _mSAAPattern[(d * 3) + 1] - 1.0f) / static_cast<float>(viewport[3]);
-        _mSAAPattern[(d * 3) + 2] = 0.0f;
+        _mSAAPattern[d * 3]       = (2.0 * _mSAAPattern[d * 3] - 1.0) / static_cast<double>(viewport[2]);
+        _mSAAPattern[(d * 3) + 1] = (2.0 * _mSAAPattern[(d * 3) + 1] - 1.0) / static_cast<double>(viewport[3]);
+        _mSAAPattern[(d * 3) + 2] = 0.0;
     }
     
     nOneStripProgram->deactivate();
@@ -1224,7 +1224,7 @@ const int FramebufferRenderer::nAaSamples() const {
     return _nAaSamples;
 }
 
-const float * FramebufferRenderer::mSSAPattern() const {
+const double * FramebufferRenderer::mSSAPattern() const {
     return _mSAAPattern;
 }
 
@@ -1277,23 +1277,27 @@ void saveTextureToPPMFile(const GLenum color_buffer_attachment,
 }
 
 void saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, float ** memory) {
+    const int width, const int height, double ** memory) {
     
     if (*memory != nullptr) {
         delete[] *memory;
     }
 
-    *memory = new float[width*height * 3];
-    
+    *memory = new double[width*height * 3];
+    float *tempMemory = new float[width*height * 3];
+
     if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
         glReadBuffer(color_buffer_attachment);
-        glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, *memory);
+        glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tempMemory);
 
     }
     else {
-        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, *memory);
+        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory);
     }
 
+    for (auto i = 0; i < width*height * 3; ++i) {
+        (*memory)[i] = static_cast<double>(tempMemory[i]);
+    }
 }
 
 

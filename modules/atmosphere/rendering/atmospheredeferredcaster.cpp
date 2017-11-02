@@ -195,10 +195,6 @@ void AtmosphereDeferredcaster::deinitialize()
 void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
                                           ghoul::opengl::ProgramObject& program) 
 {    
-    // MSAA pixel position pattern
-    const Renderer * currentRenderer = OsEng.renderEngine().renderer();
-    const float * mssaPatternArray = currentRenderer->mSSAPattern();
-
     // Atmosphere Frustum Culling
     glm::dvec3 tPlanetPosWorld = glm::dvec3(_modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
 

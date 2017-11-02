@@ -539,9 +539,11 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glBindVertexArray(0);
 
     saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, &_mSAAPattern);
-    // Convert back to [-1, 1] range:
-    for (int d = 0; d < _nAaSamples * 3; d += 3) {
-        _mSAAPattern[d] = 2.0f * _mSAAPattern[d] - 1.0f;
+    // Convert back to [-1, 1] range and then scales to the current viewport size:
+    for (int d = 0; d < _nAaSamples; ++d) {
+        _mSAAPattern[d * 3] = (2.0 * _mSAAPattern[d * 3] - 1.0) / static_cast<double>(viewport[2]);
+        _mSAAPattern[(d * 3) + 1] = (2.0 * _mSAAPattern[(d * 3) + 1] - 1.0) / static_cast<double>(viewport[3]);
+        _mSAAPattern[(d * 3) + 2] = 0.0;
     }
     
     nOneStripProgram->deactivate();
@@ -765,7 +767,7 @@ const int ABufferRenderer::nAaSamples() const {
     return _nAaSamples;
 }
 
-const float * ABufferRenderer::mSSAPattern() const {
+const double * ABufferRenderer::mSSAPattern() const {
     return _mSAAPattern;
 }
 
@@ -995,13 +997,13 @@ void ABufferRenderer::updateRendererData() {
 }
 
 void ABufferRenderer::saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, float ** memory) const {
+    const int width, const int height, double ** memory) const {
 
     if (*memory != nullptr) {
         delete[] * memory;
     }
 
-    *memory = new float[width*height * 3];
+    *memory = new double[width*height * 3];
 
     if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
         glReadBuffer(color_buffer_attachment);
