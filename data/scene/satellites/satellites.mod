@@ -76,7 +76,8 @@ function  getSat(title, file, lineNum)
               Type = "StaticScale",
               Scale = 1,
           }
-      }
+      },
+      GuiPath = "/Solar System/Planets/Earth/Satellites"
   }
 end
 
@@ -99,7 +100,7 @@ function getSatTrail(title, file, lineNum, per, color)
           Period = per,
           Resolution = 160
       },
-      GuiName = "/Satellites/" .. trailName
+      GuiPath = "/Solar System/Planets/Earth/Satellites"
   }
 end
 

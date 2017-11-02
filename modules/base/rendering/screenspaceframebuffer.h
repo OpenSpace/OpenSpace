@@ -31,8 +31,6 @@
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <modules/base/rendering/screenspaceimage.h>
-
 namespace openspace {
 
 namespace documentation { struct Documentation; }

@@ -41,7 +41,7 @@ namespace openspace::globebrowsing {
 /**
  * Function for passing GDAL error messages to the GHOUL logging system.
  */
-static void gdalErrorHandler(CPLErr eErrClass, int errNo, const char* msg);
+void gdalErrorHandler(CPLErr eErrClass, int errNo, const char* msg);
 
 /**
  * Singleton class interfacing with global GDAL functions.

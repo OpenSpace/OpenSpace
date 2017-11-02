@@ -39,7 +39,8 @@ return {
                 SourceFrame = "IAU_SUN",
                 DestinationFrame = "GALACTIC"
             }
-        }
+        },
+        GuiPath = "/Solar System/Sun"
     },
 
     {
@@ -60,13 +61,15 @@ return {
                 Observer = "SSB",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        }
+        },
+        GuiPath = "/Solar System/Sun"
     },
 
     {
         Name = "SunMarker",
         Parent = "Sun",
         Renderable = {
+            Enabled = false,
             Type = "RenderablePlane",
             Size = 3.0E11,
             Origin = "Center",
@@ -79,6 +82,7 @@ return {
                 Type = "StaticTranslation",
                 Position = {0, 0, 0, 5}
             }
-        }
+        },
+        GuiPath = "/Solar System/Sun"
     }
 }

@@ -107,6 +107,13 @@ public:
     virtual double deltaTime() const;
 
     /**
+     * Returns the time that has passed (in seconds) since application start
+     * \return The time that has passed (in seconds) since application start
+     * @return [description]
+     */
+    virtual double applicationTime() const;
+
+    /**
      * Returns the location of the mouse cursor in pixel screen coordinates. On default,
      * this method returns <code>0,0</code>.
      * \return The location of the mouse cursor in pixel screen coordinates

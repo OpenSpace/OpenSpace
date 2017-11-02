@@ -257,6 +257,53 @@ struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVe
     std::string type() const override;
 };
 
+/**
+* A Verifier that checks whether all values contained in a Table are of 
+* type <code>glm::tvec2<T></code>
+*/
+template <typename T>
+struct Vector2ListVerifier : public TableVerifier {
+    Vector2ListVerifier(std::string elementDocumentation = "") : TableVerifier({
+            { "*", new Vector2Verifier<T>, Optional::No, std::move(elementDocumentation) }
+    })
+    {}
+
+    std::string type() const override {
+        return "List of ints";
+    }
+};
+
+/**
+* A Verifier that checks whether all values contained in a Table are of
+* type <code>glm::tvec3<T></code>
+*/
+template <typename T>
+struct Vector3ListVerifier : public TableVerifier {
+    Vector3ListVerifier(std::string elementDocumentation = "") : TableVerifier({
+        { "*", new Vector3Verifier<T>, Optional::No, std::move(elementDocumentation) }
+    })
+    {}
+
+    std::string type() const override {
+        return "List of ints";
+    }
+};
+
+/**
+* A Verifier that checks whether all values contained in a Table are of
+* type <code>glm::tvec4<T></code>
+*/
+template <typename T>
+struct Vector4ListVerifier : public TableVerifier {
+    Vector4ListVerifier(std::string elementDocumentation = "") : TableVerifier({
+        { "*", new Vector4Verifier<T>, Optional::No, std::move(elementDocumentation) }
+    })
+    {}
+
+    std::string type() const override {
+        return "List of ints";
+    }
+};
 //----------------------------------------------------------------------------------------
 // Matrix verifiers
 //----------------------------------------------------------------------------------------

@@ -40,6 +40,7 @@ namespace {
     const char* KeyPathScene = "ScenePath";
     const char* KeyModules = "Modules";
     const char* ModuleExtension = ".mod";
+    const char* LicenseExtension = ".license";
     //const char* KeyPathModule = "ModulePath";
 
     //const char* RootNodeName = "Root";
@@ -95,20 +96,39 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     // inside the modules to toggle settings.
     ghoul::lua::runScriptFile(state, absScenePath);
     std::vector<std::string> keys = moduleDictionary.keys();
-    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
 
     std::vector<SceneLoader::LoadedNode> allNodes;
+    std::vector<SceneLicense> allLicenses;
 
-    for (const std::string& key : keys) {
-        std::string fullModuleName = moduleDictionary.value<std::string>(key);
-        std::replace(fullModuleName.begin(), fullModuleName.end(), '/', FileSys.PathSeparator);
-        std::string modulePath = FileSys.pathByAppendingComponent(modulesPath, fullModuleName);
+    {
+        // Inside loadDirectory the working directory is changed (for now), so we need
+        // to save the old state
+        ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
+        
+        // Placing this head to guard against exceptions in the directory loading that
+        // would otherwise mess up the working directory for everyone else
+        OnExit([&]() { FileSys.setCurrentDirectory(oldDirectory); });
 
-        std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(modulePath, state);
-        std::move(nodes.begin(), nodes.end(), std::back_inserter(allNodes));
+        for (const std::string& key : keys) {
+            std::string fullName = moduleDictionary.value<std::string>(key);
+            std::replace(fullName.begin(), fullName.end(), '/', FileSys.PathSeparator);
+            std::string path = FileSys.pathByAppendingComponent(modulesPath, fullName);
+
+            std::pair<std::vector<SceneLoader::LoadedNode>, std::vector<SceneLicense>>
+            nodes = loadDirectory(path, state);
+
+            std::move(
+                nodes.first.begin(),
+                nodes.first.end(),
+                std::back_inserter(allNodes)
+            );
+            std::move(
+                nodes.second.begin(),
+                nodes.second.end(),
+                std::back_inserter(allLicenses)
+            );
+        }
     }
-
-    FileSys.setCurrentDirectory(oldDirectory);
     
     std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
@@ -117,6 +137,10 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     scene->setRoot(std::move(rootNode));
 
     addLoadedNodes(*scene, std::move(allNodes));
+
+    for (SceneLicense& l : allLicenses) {
+        scene->addSceneLicense(std::move(l));
+    }
 
     ghoul::Dictionary cameraDictionary;
     sceneDictionary.getValue(KeyCamera, cameraDictionary);
@@ -138,7 +162,8 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     return scene;
 }
 
-std::vector<SceneGraphNode*> SceneLoader::importDirectory(Scene& scene, const std::string& path) {
+std::pair<std::vector<SceneGraphNode*>, std::vector<SceneLicense>>
+SceneLoader::importDirectory(Scene& scene, const std::string& path) {
     lua_State* state = ghoul::lua::createNewLuaState();
     OnExit(
         // Delete the Lua state at the end of the scope, no matter what.
@@ -149,9 +174,11 @@ std::vector<SceneGraphNode*> SceneLoader::importDirectory(Scene& scene, const st
     std::string absDirectoryPath = absPath(path);
 
     ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
-    std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(path, state);
+    std::pair<std::vector<SceneLoader::LoadedNode>, std::vector<SceneLicense>>
+    nodes = loadDirectory(path, state);
+
     FileSys.setCurrentDirectory(oldDirectory);
-    return addLoadedNodes(scene, std::move(nodes));
+    return { addLoadedNodes(scene, std::move(nodes.first)), nodes.second };
 }
 
 SceneGraphNode* SceneLoader::importNodeDictionary(Scene& scene, const ghoul::Dictionary& dict) {
@@ -191,14 +218,15 @@ SceneLoader::LoadedCamera SceneLoader::loadCamera(const ghoul::Dictionary& camer
 }
 
 
-std::vector<SceneLoader::LoadedNode> SceneLoader::loadDirectory(
+std::pair<std::vector<SceneLoader::LoadedNode>, std::vector<SceneLicense>>
+SceneLoader::loadDirectory(
     const std::string& path,
     lua_State* luaState)
 {
     std::string::size_type pos = path.find_last_of(FileSys.PathSeparator);
     if (pos == std::string::npos) {
         LERROR("Error parsing directory name '" << path << "'");
-        return std::vector<SceneLoader::LoadedNode>();
+        return {};
     }
     std::string moduleName = path.substr(pos + 1);
     std::string moduleFile = FileSys.pathByAppendingComponent(path, moduleName) + ModuleExtension;
@@ -206,12 +234,23 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadDirectory(
     if (FileSys.fileExists(moduleFile)) {
         // TODO: Get rid of changing the working directory (global state is bad) -- emiax
         // This requires refactoring all renderables to not use relative paths in constructors.
+        // For now, no need to reset the directory here as it is done from the outside
+        // function calling this method
         FileSys.setCurrentDirectory(ghoul::filesystem::Directory(path));
         
         // We have a module file, so it is a direct include.
-        return loadModule(moduleFile, luaState);
+        std::vector<SceneLoader::LoadedNode> nodes = loadModule(moduleFile, luaState);
+
+        std::vector<SceneLicense> licenses;
+        std::string licenseFile = FileSys.pathByAppendingComponent(path, moduleName) + LicenseExtension;
+        if (FileSys.fileExists(licenseFile)) {
+            licenses = loadLicense(licenseFile, moduleName);
+        }
+
+        return { std::move(nodes), licenses };
     } else {
         std::vector<SceneLoader::LoadedNode> allLoadedNodes;
+        std::vector<SceneLicense> allLicenses;
         // If we do not have a module file, we have to include all subdirectories.
         using ghoul::filesystem::Directory;
         using std::string;
@@ -221,14 +260,25 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadDirectory(
 
         if (!FileSys.directoryExists(directoryPath)) {
             LERROR("The directory " << directoryPath << " does not exist.");
-            return std::vector<SceneLoader::LoadedNode>();
+            return {};
         }
 
         for (const string& subdirectory : directory.readDirectories()) {
-            std::vector<SceneLoader::LoadedNode> loadedNodes = loadDirectory(subdirectory, luaState);
-            std::move(loadedNodes.begin(), loadedNodes.end(), std::back_inserter(allLoadedNodes));
+            std::pair<std::vector<SceneLoader::LoadedNode>, std::vector<SceneLicense>>
+            loadedNodes = loadDirectory(subdirectory, luaState);
+
+            std::move(
+                loadedNodes.first.begin(),
+                loadedNodes.first.end(),
+                std::back_inserter(allLoadedNodes)
+            );
+            std::move(
+                loadedNodes.second.begin(),
+                loadedNodes.second.end(),
+                std::back_inserter(allLicenses)
+            );
         }
-        return allLoadedNodes;
+        return { std::move(allLoadedNodes), std::move(allLicenses) };
     }
 }
 
@@ -298,6 +348,19 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& 
         }
     }
     return loadedNodes;
+}
+
+std::vector<SceneLicense> SceneLoader::loadLicense(const std::string& path, std::string module) {
+    ghoul::Dictionary licenseDictionary;
+    try {
+        ghoul::lua::loadDictionaryFromFile(path, licenseDictionary);
+    } catch (const ghoul::lua::LuaRuntimeException& e) {
+        LERRORC(e.component, e.message);
+        return {};
+    }
+
+    SceneLicense license(licenseDictionary, module);
+    return { license };
 }
 
 std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& loadedNodes) {

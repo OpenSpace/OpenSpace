@@ -1,3 +1,5 @@
+dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
+
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -8,7 +10,7 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2016-07-05T10:05:00.00")
+    openspace.time.setTime("2016-07-01T10:05:00.00")
 
     dofile(openspace.absPath('${SCRIPTS}/common.lua'))
     openspace.clearKeys()
@@ -36,6 +38,10 @@ function postInitialization()
     openspace.setPropertyValue('Jupiter.renderable.PerformShading', false);
 
     openspace.printInfo("Done setting default values")
+
+    mark_interesting_nodes({
+        "Jupiter", "Juno"
+    })
 end
 
 return {
@@ -43,7 +49,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Juno",
-        Position = {1, 0, 0, 5},
+        Position = {1837386367.601345, -389860693812.834839, 714830404470.398926},
+        Rotation = {-0.336540, 0.711402, -0.099212, 0.608937},
     },
     Modules = {
         "sun",

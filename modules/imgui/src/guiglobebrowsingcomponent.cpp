@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef GLOBEBROWSING_USE_GDAL
+
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
@@ -62,7 +64,6 @@ void GuiGlobeBrowsingComponent::render() {
     using Layer = GlobeBrowsingModule::Layer;
 
     bool e = _isEnabled;
-    e = e;
 
     ImGui::Begin("Globe Browsing", &e, WindowSize, 0.5f);
     _isEnabled = e;
@@ -332,3 +333,5 @@ void GuiGlobeBrowsingComponent::render() {
 }
 
 } // namespace openspace::gui
+
+#endif  // GLOBEBROWSING_USE_GDAL

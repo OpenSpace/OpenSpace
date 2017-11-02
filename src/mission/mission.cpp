@@ -70,7 +70,13 @@ documentation::Documentation MissionPhase::Documentation() {
             },
             {
                 KeyPhases,
-                new ReferencingVerifier("core_mission_mission"),
+                new TableVerifier({
+                    {
+                        "*",
+                        new ReferencingVerifier("core_mission_mission"),
+                        Optional::Yes
+                    }
+                }),
                 Optional::Yes,
                 "The phases into which this mission or mission phase is separated."
             }
@@ -164,7 +170,7 @@ MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
 }
 
 void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
-    ghoul_assert(maxDepth >= 0, "maxDepth must not be negative");
+    //ghoul_assert(maxDepth >= 0, "maxDepth must not be negative");
     
     if (maxDepth == 0) {
         return;

@@ -55,13 +55,14 @@ public:
         const ghoul::Dictionary& dictionary);
 
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable();
+    virtual ~ScreenSpaceRenderable() = default;
 
-    virtual void render() = 0;
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
+    virtual void render();
+    
+    virtual bool initialize();
+    virtual bool deinitialize();
     virtual void update() = 0;
-    virtual bool isReady() const = 0;
+    virtual bool isReady() const;
     bool isEnabled() const;
     
     glm::vec3 euclideanPosition() const;
