@@ -41,6 +41,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
@@ -74,8 +75,6 @@
 #include <ghoul/systemcapabilities/systemcapabilities>
 
 #include <glbinding/callbacks.h>
-
-#include <random>
 
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
@@ -615,22 +614,24 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
-    // TODO remove after moving OpenGL out of initialize
+    // We can initialize all SceneGraphNodes in a separate thread since none of them use
+    // an OpenGL context
     std::atomic_bool initializeFinished = false;
     std::thread t([scene, &initializeFinished]() {
         scene->initialize();
         initializeFinished = true;
     });
 
-    std::random_device rd; 
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0, 1.0);
+    
+
+    LoadingScreen loadingScreen(_windowWrapper->currentWindowResolution());
+    // While the SceneGraphNodes initialize themselves, we can hand over control to the
+    // Loading screen rendering
     while (!initializeFinished) {
-        glClearColor(dis(gen), dis(gen), dis(gen), 1.0);
-        glClear(ClearBufferMask::GL_COLOR_BUFFER_BIT);
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        _windowWrapper->swapBuffer();
+        loadingScreen.render();
     }
+
+    t.join();
         
     scene->initializeGL();
 
