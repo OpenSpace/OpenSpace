@@ -11,7 +11,8 @@ return {
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Earth"
     },
     {
     -- The default reference frame for Earth-orbiting satellites
@@ -23,7 +24,8 @@ return {
                 SourceFrame = "J2000",
                 DestinationFrame = "GALACTIC"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Earth"
     },
     -- EarthTrail module
     {
@@ -44,7 +46,7 @@ return {
             Resolution = 1000
         },
         Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
-        GuiName = "/Solar/EarthTrail"
+        GuiPath = "/Solar System/Planets/Earth"
     },
     -- RenderableGlobe module
     {
@@ -57,7 +59,6 @@ return {
                 DestinationFrame = "GALACTIC",
             }
         },
-        Tag = { "planet_solarSystem", "planet_terrestrial" },
         Renderable = {
             Type = "RenderableGlobe",
             Radii = earthEllipsoid,
@@ -212,6 +213,8 @@ return {
                     }
                 }
             }
-        }
+        },
+        Tag = { "planet_solarSystem", "planet_terrestrial" },
+        GuiPath = "/Solar System/Planets/Earth"
     }
 }

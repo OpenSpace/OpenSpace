@@ -19,6 +19,7 @@ return {
             StartTime = "2007 SEP 27 08:15:00",
             EndTime = "2012 SEP 12 23:57:00"
         },
+        GuiPath = "/Solar System/Missions/Dawn",
         Ephemeris = {
             Type = "Spice",
             Body = "DAWN",
@@ -637,6 +638,7 @@ return {
                 Destination = "GALACTIC"
             },
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
 
      -- Dawn Solar Array module 2
@@ -660,6 +662,7 @@ return {
             StartTime = "2007 SEP 27 08:15:00",
             EndTime = "2012 SEP 12 12:00:00"
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
 
         -- Dawn Trail Module
@@ -702,6 +705,7 @@ return {
             EndTime = "2012 SEP 12 12:00:00",
             SampleInterval = 3600 * 24
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
  --
 --          -- Dawn Trail Module
@@ -753,6 +757,7 @@ return {
                 "CERES"
             }
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
 
      -- DawnFov 1
@@ -779,5 +784,6 @@ return {
                 "CERES"
             }
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
 }

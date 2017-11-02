@@ -130,10 +130,10 @@ void PerformanceManager::destroyGlobalSharedMemory() {
     sharedMemory.releaseLock();
 }
     
-PerformanceManager::PerformanceManager()
+PerformanceManager::PerformanceManager(std::string loggingDirectory, std::string prefix)
     : _loggingEnabled(false)
-    , _logDir(absPath("${BASE_PATH}"))
-    , _prefix("PM-")
+    , _logDir(absPath(std::move(loggingDirectory)))
+    , _prefix(std::move(prefix))
     , _ext("log")
     , _clearLogs(true)
     , _performanceMemory(nullptr)

@@ -58,6 +58,8 @@ StaticScale::StaticScale()
     : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6)
 {
     addProperty(_scaleValue);
+
+    _scaleValue.onChange([&](){ _scale = _scaleValue; });
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
@@ -66,10 +68,6 @@ StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
     
     _scaleValue = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
-}
-
-double StaticScale::scaleValue() const {
-    return _scaleValue;
 }
 
 } // namespace openspace

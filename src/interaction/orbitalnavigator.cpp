@@ -300,6 +300,18 @@ SceneGraphNode* OrbitalNavigator::focusNode() const {
     return _focusNode;
 }
 
+bool OrbitalNavigator::hasRotationalFriction() const {
+    return _friction.rotational;
+}
+
+bool OrbitalNavigator::hasZoomFriction() const {
+    return _friction.zoom;
+}
+
+bool OrbitalNavigator::hasRollFriction() const {
+    return _friction.roll;
+}
+
 OrbitalNavigator::CameraRotationDecomposition
     OrbitalNavigator::decomposeCameraRotation(
         const glm::dvec3& cameraPosition,

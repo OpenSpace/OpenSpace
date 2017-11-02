@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- #version __CONTEXT__
+#version __CONTEXT__
 
 in vec2 in_position;
 

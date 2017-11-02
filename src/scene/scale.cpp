@@ -72,12 +72,17 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
 
 Scale::Scale()
     : properties::PropertyOwner({ "Scale" })
+    , _scale(1.0)
 {}
 
 bool Scale::initialize() {
     return true;
 }
-    
+
+double Scale::scaleValue() const {
+    return _scale;
+}
+
 void Scale::update(const UpdateData&) {}
 
 } // namespace openspace

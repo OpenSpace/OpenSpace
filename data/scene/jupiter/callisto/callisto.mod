@@ -29,7 +29,8 @@ return {
                     }
                 }
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     },
 
     -- Trail module
@@ -46,6 +47,7 @@ return {
             Color = { 0.4, 0.3, 0.01 },
             Period = 17,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     }
 }

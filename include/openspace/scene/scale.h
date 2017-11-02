@@ -47,10 +47,13 @@ public:
     virtual ~Scale() = default;
 
     virtual bool initialize();
-    virtual double scaleValue() const = 0;
+    virtual double scaleValue() const;
     virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
+
+protected:
+    double _scale;
 };
 
 }  // namespace openspace

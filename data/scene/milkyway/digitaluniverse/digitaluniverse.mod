@@ -4,11 +4,13 @@ return {
         Parent = "SolarSystem",
         Renderable = {
             Type = "RenderableSphere",
-            Size = 10E22,
+            Size = 9.2E20,
             Segments = 40,
-            Alpha = 0.2,
+            Alpha = 0.4,
             Texture = "textures/DarkUniverse_mellinger_8k.jpg",
-            Orientation = "Inside/Outside"
-        }
+            Orientation = "Inside/Outside",
+            FadeOutThreshould = 0.01
+        },
+        GuiPath = "/Milky Way/Milky Way"
     }
 }

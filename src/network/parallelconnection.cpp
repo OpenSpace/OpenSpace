@@ -587,7 +587,7 @@ void ParallelConnection::initializationMessageReceived(){
 double ParallelConnection::calculateBufferedKeyframeTime(double originalTime) {
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
 
-    double timeDiff = OsEng.runTime() - originalTime;
+    double timeDiff = OsEng.windowWrapper().applicationTime() - originalTime;
     if (_latencyDiffs.size() == 0) {
         _initialTimeDiff = timeDiff;
     }
@@ -1084,7 +1084,7 @@ void ParallelConnection::preSynchronization() {
         if (OsEng.timeManager().time().timeJumped()) {
             _timeJumped = true;
         }
-        double now = OsEng.runTime();
+        double now = OsEng.windowWrapper().applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
@@ -1156,7 +1156,7 @@ void ParallelConnection::sendCameraKeyframe() {
     kf._focusNode = focusNode->name();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.runTime();
+    kf._timestamp = OsEng.windowWrapper().applicationTime();
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;
@@ -1180,7 +1180,7 @@ void ParallelConnection::sendTimeKeyframe() {
     kf._time = time.j2000Seconds();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.runTime();
+    kf._timestamp = OsEng.windowWrapper().applicationTime();
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;

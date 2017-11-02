@@ -9,7 +9,7 @@ function remove(node) {
   node.parentNode.removeChild(node);
 }
 
-function scrollTo(selector) {
+function scrollToPosition(selector) {
   var element = document.querySelector(selector);
   if (element && element.scrollIntoView) {
     element.scrollIntoView();
@@ -34,7 +34,7 @@ function pluralize(nItems, singular, plural) {
 }
 
 function scrollLink(content, selector) {
-  var html =  '<a onclick="scrollTo(\'' + selector + '\')">' + content + "</a>";
+  var html =  '<a onclick="scrollToPosition(\'' + selector + '\')">' + content + "</a>";
   return html;
 }
 

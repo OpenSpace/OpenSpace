@@ -30,6 +30,8 @@
 #include <QLabel>
 #include <QProgressBar>
 
+#include <libtorrent/torrent_status.hpp>
+
 InfoWidget::InfoWidget(QString name, int totalBytes)
     : QGroupBox(nullptr)
     , _name(nullptr)

@@ -63,7 +63,7 @@ private:
     std::string _pointsFilename;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
-    std::unique_ptr<RawVolume<glm::tvec4<GLfloat>>> _volume;
+    std::unique_ptr<volume::RawVolume<glm::tvec4<GLfloat>>> _volume;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     glm::mat4 _pointTransform;
     glm::vec3 _aspect;

@@ -128,6 +128,8 @@ public:
     const Renderable* renderable() const;
     Renderable* renderable();
 
+    const std::string& guiPath() const;
+
     static documentation::Documentation Documentation();
 
 private:
@@ -144,6 +146,8 @@ private:
     PerformanceRecord _performanceRecord;
 
     std::unique_ptr<Renderable> _renderable;
+
+    std::string _guiPath;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {
