@@ -461,13 +461,20 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         selectedPoints.push_back(sb.coordinates);
 
         std::vector<TuioCursor>::const_iterator c = std::find_if(list.begin(), list.end(), [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; });
-        screenPoints.push_back(glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))); // normalized -1 to 1 coordinates on screen
+        if (c != list.end()) {
+            screenPoints.push_back(glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))); // normalized -1 to 1 coordinates on screen
+        } else {
+            OsEng.moduleEngine().module<ImGUIModule>()->touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
+            resetAfterInput();
+            return;
+        }
     }
+
     FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, _selected.at(0).node, _lmstat, _currentRadius };
     void* dataPtr = reinterpret_cast<void*>(&fData);
 
     // finds best transform values for the new camera state and stores them in par
-    _lmSuccess = levmarq(nDOF, par.data(), nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); 
+    _lmSuccess = levmarq(nDOF, par.data(), screenPoints.size(), NULL, distToMinimize, gradient, dataPtr, &_lmstat);
 
     if (_lmSuccess && !_unitTest) { // if good values were found set new camera state
         _vel.orbit = glm::dvec2(par.at(0), par.at(1));
@@ -641,7 +648,18 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
     double minDiff = 1000;
     int id = 0;
     for (const TuioCursor& c : list) {
-        TuioPoint point = std::find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
+        auto it = std::find_if(
+            lastProcessed.begin(),
+            lastProcessed.end(),
+            [&c](const Point& p) {
+                return p.first == c.getSessionID();
+        });
+
+        if (it == lastProcessed.end()) {
+            continue;
+        }
+
+        TuioPoint point = it->second;
         double diff = c.getX() - point.getX() + c.getY() - point.getY();
         if (!c.isMoving()) {
             diff = minDiff = 0.0;
@@ -674,6 +692,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 #ifdef TOUCH_DEBUG_PROPERTIES
     _debugProperties.normalizedCentroidDistance = normalizedCentroidDistance;
     _debugProperties.rollOn = rollOn;
+    _debugProperties.minDiff = minDiff;
 #endif
 
     if (_doubleTap) {
@@ -1035,6 +1054,10 @@ TouchInteraction::DebugProperties::DebugProperties()
         { "normalizedCentroidDistance", "Normalized Centroid Distance", "" },
         0.f, 0.f, 0.01f
     )
+    , minDiff(
+        { "minDiff", "Movement of slowest moving finger", "" },
+        0.f, 0.f, 100.f
+    )
     , rollOn(
         { "rollOn", "Roll On", "" },
         0.f, 0.f, 100.f
@@ -1044,6 +1067,7 @@ TouchInteraction::DebugProperties::DebugProperties()
     addProperty(nFingers);
     addProperty(interpretedInteraction);
     addProperty(normalizedCentroidDistance);
+    addProperty(minDiff);
     addProperty(rollOn);
 }
 

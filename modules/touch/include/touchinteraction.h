@@ -188,6 +188,7 @@ private:
         properties::IntProperty nFingers;
         properties::StringProperty interpretedInteraction;
         properties::FloatProperty normalizedCentroidDistance;
+        properties::FloatProperty minDiff;
         properties::FloatProperty rollOn;
     } _debugProperties;
 #endif
