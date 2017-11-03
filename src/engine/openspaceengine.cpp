@@ -160,6 +160,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
+    , _loadingScreen(nullptr)
     , _versionInformation{
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
         properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
@@ -614,24 +615,28 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
+    _loadingScreen = std::make_unique<LoadingScreen>();
+
     // We can initialize all SceneGraphNodes in a separate thread since none of them use
     // an OpenGL context
     std::atomic_bool initializeFinished = false;
-    std::thread t([scene, &initializeFinished]() {
+    std::thread t([scene, &initializeFinished, this]() {
         scene->initialize();
+        postLoadingScreenMessage("Finished initializing");
         initializeFinished = true;
     });
 
     
 
-    LoadingScreen loadingScreen(_windowWrapper->currentWindowResolution());
     // While the SceneGraphNodes initialize themselves, we can hand over control to the
     // Loading screen rendering
-    while (!initializeFinished) {
-        loadingScreen.render();
+
+   while (!initializeFinished) {
+        _loadingScreen->render();
     }
 
     t.join();
+    _loadingScreen = nullptr;
         
     scene->initializeGL();
 
@@ -1366,6 +1371,10 @@ void OpenSpaceEngine::toggleShutdownMode() {
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
     }
+}
+
+void OpenSpaceEngine::postLoadingScreenMessage(std::string message) {
+    _loadingScreen->queueMessage(std::move(message));
 }
 
 scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {

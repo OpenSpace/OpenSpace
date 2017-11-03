@@ -25,9 +25,11 @@
 #version __CONTEXT__
 
 in vec2 in_position;
+in vec2 in_st;
 
-uniform mat4 ortho;
+out vec2 st;
 
 void main() {
-    gl_Position = ortho * vec4(in_position, 0.0, 1.0);
+    gl_Position = vec4(in_position, 0.0, 1.0);
+    st = in_st;
 }

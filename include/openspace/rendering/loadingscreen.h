@@ -29,6 +29,11 @@
 #include <ghoul/opengl/ghoul_gl.h>
 
 #include <memory>
+#include <mutex>
+
+namespace ghoul::fontrendering {
+    class Font;
+} // namespace ghoul::fontrendering
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -39,19 +44,27 @@ namespace openspace {
 
 class LoadingScreen {
 public:
-    LoadingScreen(glm::vec2 windowSize);
+    LoadingScreen();
     ~LoadingScreen();
 
     void render();
+
+    void queueMessage(std::string message);
 
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 
-    glm::vec2 _windowSize;
+    std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
+    std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
 
-    GLuint _vao;
-    GLuint _vbo;
+    struct {
+        GLuint vao;
+        GLuint vbo;
+    } _logo;
+
+    std::vector<std::string> _messageQueue;
+    std::mutex _messageQueueMutex;
 };
 
 } // namespace openspace

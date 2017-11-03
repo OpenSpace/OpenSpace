@@ -214,14 +214,25 @@ void Scene::sortTopologically() {
 }
 
 void Scene::initialize() {
+    std::vector<std::thread> threads;
     for (SceneGraphNode* node : _topologicallySortedNodes) {
-        try {
-            node->initialize();
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERROR(node->name() << " not initialized.");
-            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
-        }
+        std::thread t(
+            [node]() {
+                try {
+                    OsEng.postLoadingScreenMessage(node->name());
+                    node->initialize();
+                }
+                catch (const ghoul::RuntimeError& e) {
+                    LERROR(node->name() << " not initialized.");
+                    LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+                }
+            }
+        );
+        threads.push_back(std::move(t));
+    }
+
+    for (std::thread& t : threads) {
+        t.join();
     }
 }
 

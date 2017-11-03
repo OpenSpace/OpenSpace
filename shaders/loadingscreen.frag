@@ -24,10 +24,11 @@
 
 #version __CONTEXT__
 
+in vec2 st;
 out vec4 FragColor;
 
-uniform vec4 color;
+uniform sampler2D logoTexture;
 
 void main() {
-    FragColor = color;
+    FragColor = texture(logoTexture, st);
 }

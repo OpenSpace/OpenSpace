@@ -45,6 +45,7 @@ namespace openspace {
 class ConfigurationManager;
 class DownloadManager;
 class GUI;
+class LoadingScreen;
 class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
@@ -101,6 +102,8 @@ public:
     
     void writeDocumentation();
     void toggleShutdownMode();
+
+    void postLoadingScreenMessage(std::string message);
     
     void runPostInitializationScripts(const std::string& sceneDescription);
 
@@ -199,6 +202,8 @@ private:
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+
+    std::unique_ptr<LoadingScreen> _loadingScreen;
 
     struct {
         properties::StringProperty versionString;
