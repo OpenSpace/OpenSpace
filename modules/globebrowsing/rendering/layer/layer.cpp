@@ -219,6 +219,18 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     addPropertySubOwner(_layerAdjustment);
 }
 
+void Layer::initialize() {
+    if (_tileProvider) {
+        _tileProvider->initialize();
+    }
+}
+
+void Layer::deinitialize() {
+    if (_tileProvider) {
+        _tileProvider->deinitialize();
+    }
+}
+
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     if (_tileProvider) {
         return _tileProvider->getChunkTilePile(tileIndex, pileSize);

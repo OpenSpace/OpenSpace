@@ -55,17 +55,13 @@ TileProvider::TileProvider()
     : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
-{
-    initialize();
-}
+{}
 
 TileProvider::TileProvider(const ghoul::Dictionary&)
     : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
-{
-    initialize();
-}
+{}
 
 float TileProvider::noDataValueAsFloat() {
     ghoul_assert(_initialized, "TileProvider was not initialized.");

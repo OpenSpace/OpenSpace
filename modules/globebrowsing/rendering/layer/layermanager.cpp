@@ -68,6 +68,18 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     }
 }
 
+void LayerManager::initialize() {
+    for (const std::shared_ptr<LayerGroup>& lg : _layerGroups) {
+        lg->initialize();
+    }
+}
+
+void LayerManager::deinitialize() {
+    for (const std::shared_ptr<LayerGroup>& lg : _layerGroups) {
+        lg->deinitialize();
+    }
+}
+
 void LayerManager::addLayer(layergroupid::GroupID groupId, ghoul::Dictionary layerDict) {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
     _layerGroups[groupId]->addLayer(layerDict);

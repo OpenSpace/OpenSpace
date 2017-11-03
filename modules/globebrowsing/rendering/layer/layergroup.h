@@ -46,6 +46,9 @@ struct LayerGroup : public properties::PropertyOwner {
     LayerGroup(layergroupid::GroupID id);
     LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict);
 
+    void initialize();
+    void deinitialize();
+
     /// Updates all layers tile providers within this group
     void update();
 

@@ -79,6 +79,18 @@ LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
     }
 }
 
+void LayerGroup::initialize() {
+    for (const std::shared_ptr<Layer>& l : _layers) {
+        l->initialize();
+    }
+}
+
+void LayerGroup::deinitialize() {
+    for (const std::shared_ptr<Layer>& l : _layers) {
+        l->deinitialize();
+    }
+}
+
 void LayerGroup::update() {
     _activeLayers.clear();
 
@@ -102,7 +114,7 @@ void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
     else {
         _layers.push_back(layer);
-        update();
+        //update();
         if (_onChangeCallback) {
             _onChangeCallback();
         }

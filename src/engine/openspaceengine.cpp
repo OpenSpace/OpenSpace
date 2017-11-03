@@ -577,50 +577,61 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     }
 
     Scene* scene;
-    try {
-        scene = _sceneManager->loadScene(scenePath);
-    } catch (const ghoul::FileNotFoundError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    } catch (const Scene::InvalidSceneError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    } catch (const ghoul::RuntimeError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    }
-    catch (const std::exception& e) {
-        LERROR(e.what());
-        return;
-    }
-    catch (...) {
-        LERROR("Unknown error loading the scene");
-        return;
-    }
 
-    Scene* previousScene = _renderEngine->scene();
-    if (previousScene) {
-        _syncEngine->removeSyncables(_timeManager->getSyncables());
-        _syncEngine->removeSyncables(_renderEngine->getSyncables());
-        _syncEngine->removeSyncable(_scriptEngine.get());
-
-        _renderEngine->setScene(nullptr);
-        _renderEngine->setCamera(nullptr);
-        _sceneManager->unloadScene(*previousScene);
-    }
-
-    // Initialize the RenderEngine
-    _renderEngine->setScene(scene);
-    _renderEngine->setCamera(scene->camera());
-    _renderEngine->setGlobalBlackOutFactor(0.0);
-    _renderEngine->startFading(1, 3.0);
 
     _loadingScreen = std::make_unique<LoadingScreen>();
 
     // We can initialize all SceneGraphNodes in a separate thread since none of them use
     // an OpenGL context
     std::atomic_bool initializeFinished = false;
-    std::thread t([scene, &initializeFinished, this]() {
+    bool errorWhileLoading = false;
+    std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading, this]() {
+        try {
+            scene = _sceneManager->loadScene(scenePath);
+        }
+        catch (const ghoul::FileNotFoundError& e) {
+            LERRORC(e.component, e.message);
+            errorWhileLoading = true;
+            return;
+        }
+        catch (const Scene::InvalidSceneError& e) {
+            LERRORC(e.component, e.message);
+            errorWhileLoading = true;
+            return;
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+            errorWhileLoading = true;
+            return;
+        }
+        catch (const std::exception& e) {
+            LERROR(e.what());
+            errorWhileLoading = true;
+            return;
+        }
+        catch (...) {
+            LERROR("Unknown error loading the scene");
+            errorWhileLoading = true;
+            return;
+        }
+
+        Scene* previousScene = _renderEngine->scene();
+        if (previousScene) {
+            _syncEngine->removeSyncables(_timeManager->getSyncables());
+            _syncEngine->removeSyncables(_renderEngine->getSyncables());
+            _syncEngine->removeSyncable(_scriptEngine.get());
+
+            _renderEngine->setScene(nullptr);
+            _renderEngine->setCamera(nullptr);
+            _sceneManager->unloadScene(*previousScene);
+        }
+
+        // Initialize the RenderEngine
+        _renderEngine->setScene(scene);
+        _renderEngine->setCamera(scene->camera());
+        _renderEngine->setGlobalBlackOutFactor(0.0);
+        _renderEngine->startFading(1, 3.0);
+
         scene->initialize();
         postLoadingScreenMessage("Finished initializing");
         initializeFinished = true;
@@ -638,6 +649,10 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     t.join();
     _loadingScreen = nullptr;
         
+    if (errorWhileLoading) {
+        return;
+    }
+
     scene->initializeGL();
 
     // Update the scene so that position of objects are set in case they are used in

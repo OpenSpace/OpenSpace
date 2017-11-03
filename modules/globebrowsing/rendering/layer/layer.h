@@ -55,6 +55,9 @@ public:
 
     Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
 
+    void initialize();
+    void deinitialize();
+
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     Tile::Status getTileStatus(const TileIndex& index) const;
 
