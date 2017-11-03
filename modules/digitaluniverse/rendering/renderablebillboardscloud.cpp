@@ -582,8 +582,17 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
     _program->setUniform("modelViewTransform", modelViewMatrix);
     _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
 
-    _program->setUniform("cameraPosition", data.camera.positionVec3());
-    _program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
+    glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+
+    _program->setUniform("cameraPosition", glm::dvec3(worldToModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)));
+    _program->setUniform("cameraLookUp", glm::dvec3(worldToModelTransform * glm::dvec4(data.camera.lookUpVectorWorldSpace(),1.0)));
+
+    //_program->setUniform("cameraPosition", data.camera.positionVec3());
+    //_program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
     _program->setUniform("renderOption", _renderOption.value());
     glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0);
     _program->setUniform("centerScreenInWorldPosition", centerScreenWorld);
@@ -702,9 +711,13 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     glm::mat4 viewMatrix = data.camera.viewMatrix();
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * 
+          modelViewMatrix;
 
     glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+    
+    //glm::vec3 viewDirection = glm::vec3(glm::dmat4(OsEng.renderEngine().getSGCTModelMatrix()) * glm::dvec4(data.camera.viewDirectionWorldSpace(), 1.0));
+
     glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
     glm::vec3 right = glm::cross(viewDirection, lookup);
     glm::vec3 up = glm::cross(right, viewDirection);

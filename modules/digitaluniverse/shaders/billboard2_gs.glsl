@@ -57,27 +57,28 @@ const vec2 corners[4] = vec2[4](
 
 
 void main() {
-    vec4 pos = gl_in[0].gl_Position;
+    vec4 pos    = gl_in[0].gl_Position;
     gs_colorMap = colorMap[0];
     
     double scaleMultiply = exp(scaleFactor/10);
-    dvec3 scaledRight = dvec3(0.0);
-    dvec3 scaledUp = dvec3(0.0);
+    dvec3 scaledRight    = dvec3(0.0);
+    dvec3 scaledUp       = dvec3(0.0);
+
     if (renderOption == 0) {
         scaledRight = scaleMultiply * right/2.0f;
-        scaledUp = scaleMultiply * up/2.0f;
+        scaledUp    = scaleMultiply * up/2.0f;
     } else if (renderOption == 1) {
-        dvec3 normal = normalize(cameraPosition - dvec3(pos.xyz));
+        dvec3 normal   = normalize(cameraPosition - dvec3(pos.xyz));
         dvec3 newRight = normalize(cross(cameraLookUp, normal));
-        dvec3 newUp = cross(normal, newRight);
-        scaledRight = scaleMultiply * newRight/2.0f;
-        scaledUp = scaleMultiply * newUp/2.0f;
+        dvec3 newUp    = cross(normal, newRight);
+        scaledRight    = scaleMultiply * newRight/2.0f;
+        scaledUp       = scaleMultiply * newUp/2.0f;
     } else if (renderOption == 2) {
-        dvec3 normal = normalize(centerScreenInWorldPosition.xyz - dvec3(pos.xyz));
+        dvec3 normal   = normalize(centerScreenInWorldPosition.xyz - dvec3(pos.xyz));
         dvec3 newRight = normalize(cross(cameraLookUp, normal));
-        dvec3 newUp = cross(normal, newRight);
-        scaledRight = scaleMultiply * newRight/2.0f;
-        scaledUp = scaleMultiply * newUp/2.0f;
+        dvec3 newUp    = cross(normal, newRight);
+        scaledRight    = scaleMultiply * newRight/2.0f;
+        scaledUp       = scaleMultiply * newUp/2.0f;
     }
 
     double unit = PARSEC;
@@ -101,17 +102,20 @@ void main() {
     dvec4 dpos = dvec4(dvec3(pos.xyz) * unit, 1.0); 
 
     texCoord = corners[0];
-    vec4 initialPosition = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-    vs_screenSpaceDepth = initialPosition.w;
+    vec4 initialPosition = z_normalization(vec4(modelViewProjectionTransform * 
+                            dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+    vs_screenSpaceDepth  = initialPosition.w;
     gl_Position = initialPosition;
     EmitVertex();
 
-    texCoord = corners[1];
-    gl_Position = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+    texCoord    = corners[1];
+    gl_Position = z_normalization(vec4(modelViewProjectionTransform * 
+                    dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
     EmitVertex();
 
     texCoord = corners[2];
-    vec4 crossCorner = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+    vec4 crossCorner = z_normalization(vec4(modelViewProjectionTransform * 
+                        dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
     gl_Position = crossCorner;
     EmitVertex();
     EndPrimitive(); // First Triangle
@@ -125,7 +129,8 @@ void main() {
     EmitVertex();
     
     texCoord = corners[3];
-    gl_Position = z_normalization(vec4(modelViewProjectionTransform * dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+    gl_Position = z_normalization(vec4(modelViewProjectionTransform * 
+                    dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
     EmitVertex();
     EndPrimitive(); // Second Triangle
 }
