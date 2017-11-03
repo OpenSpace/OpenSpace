@@ -180,6 +180,10 @@ TouchInteraction::TouchInteraction()
         0.f,
         1.f
     )
+    , _ignoreGui(
+        { "Ignore GUI", "Disable GUI touch interaction", "" }, // @TODO Missing documentation
+        false
+    )
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
     , _centroid(glm::dvec3(0.0))
@@ -193,6 +197,9 @@ TouchInteraction::TouchInteraction()
     , _doubleTap(false)
     , _lmSuccess(true)
     , _guiON(false)
+#ifdef TOUCH_DEBUG_PROPERTIES
+    , _debugProperties()
+#endif
 {
     addProperty(_touchActive);
     addProperty(_unitTest);
@@ -212,6 +219,11 @@ TouchInteraction::TouchInteraction()
     addProperty(_guiButton);
     addProperty(_friction);
     addProperty(_pickingRadiusMinimum);
+    addProperty(_ignoreGui);
+
+#ifdef TOUCH_DEBUG_PROPERTIES
+    addPropertySubOwner(_debugProperties);
+#endif
     
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
@@ -230,6 +242,10 @@ TouchInteraction::TouchInteraction()
 
 // Called each frame if there is any input
 void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
+#ifdef TOUCH_DEBUG_PROPERTIES
+    _debugProperties.nFingers = list.size();
+#endif
+
     if (_tap) { // check for doubletap
         if (_time.getSessionTime().getTotalMilliseconds() < _maxTapTime) {
             _doubleTap = true;
@@ -240,12 +256,18 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
     
     if (!guiMode(list)) {
         if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
+#ifdef TOUCH_DEBUG_PROPERTIES
+            _debugProperties.interactionMode = "Direct";
+#endif
             directControl(list);
         }
         if (_lmSuccess) {
             findSelectedNode(list);
         }
         if (!_directTouchMode) {
+#ifdef TOUCH_DEBUG_PROPERTIES
+            _debugProperties.interactionMode = "Velocities";
+#endif
             computeVelocities(list, lastProcessed);
         }
 
@@ -256,6 +278,9 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)
 bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
+    if (_ignoreGui) {
+        return false;
+    }
     WindowWrapper& wrapper = OsEng.windowWrapper();
     glm::ivec2 res = wrapper.currentWindowSize();
     glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
@@ -645,6 +670,12 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
             return (diff + res);
     });
 
+    double normalizedCentroidDistance = glm::distance(_centroid, lastCentroid) / list.size();
+#ifdef TOUCH_DEBUG_PROPERTIES
+    _debugProperties.normalizedCentroidDistance = normalizedCentroidDistance;
+    _debugProperties.rollOn = rollOn;
+#endif
+
     if (_doubleTap) {
         return PICK;
     }
@@ -661,7 +692,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
             return PAN;
         }
         // we have roll if one finger is still, or the total roll angles around the centroid is over _rollAngleThreshold (_centroidStillThreshold is used to void misinterpretations)
-        else if (std::abs(minDiff) < _inputStillThreshold || (std::abs(rollOn) < 100.0 && glm::distance(_centroid, lastCentroid) / list.size() < _centroidStillThreshold)) { 
+        else if (std::abs(minDiff) < _inputStillThreshold || (std::abs(rollOn) < 100.0 && normalizedCentroidDistance < _centroidStillThreshold)) {
             return ROLL;
         }
         else {
@@ -673,7 +704,18 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 // Calculate how much interpreted interaction should change the camera state (based on _vel)
 void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
     TuioCursor cursor = list.at(0);
-    int action = interpretInteraction(list, lastProcessed);
+    const int action = interpretInteraction(list, lastProcessed);
+
+#ifdef TOUCH_DEBUG_PROPERTIES
+    const std::map<int, std::string> interactionNames = {
+        {ROT, "Rotation"},
+        {PINCH, "Pinch"},
+        {PAN, "Pan"},
+        {ROLL, "Roll"},
+        {PICK, "Pick"}
+    };
+    _debugProperties.interpretedInteraction = interactionNames.at(action);
+#endif
 
     switch (action) {
         case ROT: { // add rotation velocity
@@ -893,6 +935,11 @@ void TouchInteraction::decelerate(double dt) {
 
 // Called if all fingers are off the screen
 void TouchInteraction::resetAfterInput() {
+#ifdef TOUCH_DEBUG_PROPERTIES
+    _debugProperties.nFingers = 0;
+    _debugProperties.interactionMode = "None";
+#endif
+
     if (_directTouchMode && _selected.size() > 0 && _lmSuccess) {
         double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) { // allow node to start "spinning" after direct-manipulation finger is let go off
@@ -968,6 +1015,36 @@ void TouchInteraction::setCamera(Camera* camera) {
 }
 void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
+}
+
+TouchInteraction::DebugProperties::DebugProperties()
+    : properties::PropertyOwner({ "TouchDebugProperties" })
+    , interactionMode(
+        { "interactionMode", "Current interaction mode", "" },
+        "Unknown"
+    )
+    , nFingers(
+        {"nFingers", "Number of fingers", ""},
+        0, 0, 20
+    )
+    , interpretedInteraction(
+        { "interpretedInteraction", "Interpreted interaction", "" },
+        "Unknown"
+    )
+    , normalizedCentroidDistance(
+        { "normalizedCentroidDistance", "Normalized Centroid Distance", "" },
+        0.f, 0.f, 0.01f
+    )
+    , rollOn(
+        { "rollOn", "Roll On", "" },
+        0.f, 0.f, 100.f
+    )
+{
+    addProperty(interactionMode);
+    addProperty(nFingers);
+    addProperty(interpretedInteraction);
+    addProperty(normalizedCentroidDistance);
+    addProperty(rollOn);
 }
 
 } // openspace namespace

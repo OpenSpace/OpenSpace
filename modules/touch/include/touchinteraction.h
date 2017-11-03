@@ -37,6 +37,8 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 
+#define TOUCH_DEBUG_PROPERTIES
+
 namespace openspace {
 
 class Camera;
@@ -177,6 +179,18 @@ private:
     properties::IVec2Property _guiButton;
     properties::Vec4Property _friction;
     properties::FloatProperty _pickingRadiusMinimum;
+    properties::BoolProperty _ignoreGui;
+
+#ifdef TOUCH_DEBUG_PROPERTIES
+    struct DebugProperties : PropertyOwner {
+        DebugProperties();
+        properties::StringProperty interactionMode;
+        properties::IntProperty nFingers;
+        properties::StringProperty interpretedInteraction;
+        properties::FloatProperty normalizedCentroidDistance;
+        properties::FloatProperty rollOn;
+    } _debugProperties;
+#endif
 
     // Class variables
     VelocityStates _vel;
