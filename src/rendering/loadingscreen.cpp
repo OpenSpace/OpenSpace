@@ -48,6 +48,8 @@ namespace {
 
     const int MaximumMessageQueue = 6;
 
+    const std::chrono::milliseconds TTL(5000);
+
     const std::chrono::milliseconds RefreshRate(16);
 
     const float MinimumAlpha = 0.2f;
@@ -269,6 +271,8 @@ void LoadingScreen::render() {
     {
         std::lock_guard<std::mutex> guard(_itemsMutex);
 
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+
         for (Item& item : _items) {
             if (!item.hasLocation) {
                 // Compute a new location
@@ -281,8 +285,8 @@ void LoadingScreen::render() {
 
                 // The maximum count is in here since we can't control the amount of
                 // screen estate and the number of nodes.  Rather than looping forever
-                // we make use with an overlap in the worst (=10) case
-                int MaxCounts = 30;
+                // we make use with an overlap in the worst (=500) case
+                int MaxCounts = 500;
                 bool foundSpace = false;
 
                 glm::vec2 ll;
@@ -356,10 +360,18 @@ void LoadingScreen::render() {
                     case ItemStatus::Initializing:
                         return glm::vec4(0.7f, 0.7f, 0.f, 1.f);
                     case ItemStatus::Finished:
-                        return glm::vec4(1.f, 1.f, 1.f, 1.f);
+                        return glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+                    default:
+                        return glm::vec4(1.f);
                 }
             }();
             
+            if (item.status == ItemStatus::Finished) {
+                auto t = std::chrono::duration_cast<std::chrono::milliseconds>(now - item.finishedTime);
+
+                color.a = 1.f - static_cast<float>(t.count()) / static_cast<float>(TTL.count());
+            }
+
 
             renderer.render(
                 *_itemFont,
@@ -369,6 +381,22 @@ void LoadingScreen::render() {
                 item.name.c_str()
             );
         }
+
+        _items.erase(
+            std::remove_if(
+                _items.begin(),
+                _items.end(),
+                [now](const Item& i) {
+                    if (i.status == ItemStatus::Finished) {
+                        return i.finishedTime > now + TTL;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            ),
+            _items.end()
+        );
 
     }
 

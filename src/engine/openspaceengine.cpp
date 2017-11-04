@@ -586,6 +586,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     std::atomic_bool initializeFinished = false;
     bool errorWhileLoading = false;
     std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading, this]() {
+        _loadingScreen->postMessage("Creating scene...");
         try {
             scene = _sceneManager->loadScene(scenePath);
         }
