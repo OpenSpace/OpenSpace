@@ -633,7 +633,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         _renderEngine->startFading(1, 3.0);
 
         scene->initialize();
-        postLoadingScreenMessage("Finished initializing");
+        _loadingScreen->postMessage("Finished initializing");
         initializeFinished = true;
     });
 
@@ -1388,10 +1388,6 @@ void OpenSpaceEngine::toggleShutdownMode() {
     }
 }
 
-void OpenSpaceEngine::postLoadingScreenMessage(std::string message) {
-    _loadingScreen->queueMessage(std::move(message));
-}
-
 scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     return {
         "",
@@ -1557,6 +1553,11 @@ SettingsEngine& OpenSpaceEngine::settingsEngine() {
 TimeManager& OpenSpaceEngine::timeManager() {
     ghoul_assert(_timeManager, "Download Manager must not be nullptr");
     return *_timeManager;
+}
+
+LoadingScreen& OpenSpaceEngine::loadingScreen() {
+    ghoul_assert(_loadingScreen, "Loading Screen must not be nullptr");
+    return *_loadingScreen;
 }
 
 WindowWrapper& OpenSpaceEngine::windowWrapper() {

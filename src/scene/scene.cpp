@@ -30,6 +30,7 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/query/query.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneloader.h>
@@ -46,6 +47,7 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/onscopeexit.h>
+#include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -214,26 +216,34 @@ void Scene::sortTopologically() {
 }
 
 void Scene::initialize() {
-    std::vector<std::thread> threads;
+    unsigned int nThreads = std::thread::hardware_concurrency();
+
+    ghoul::ThreadPool pool(nThreads == 0 ? 2 : nThreads - 1);
+
+    OsEng.loadingScreen().postMessage("Initializing scene");
+
     for (SceneGraphNode* node : _topologicallySortedNodes) {
-        std::thread t(
-            [node]() {
-                try {
-                    OsEng.postLoadingScreenMessage(node->name());
-                    node->initialize();
-                }
-                catch (const ghoul::RuntimeError& e) {
-                    LERROR(node->name() << " not initialized.");
-                    LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
-                }
+        pool.queue([node](){
+            try {
+                OsEng.loadingScreen().updateItem(
+                    node->name(),
+                    LoadingScreen::ItemStatus::Initializing
+                );
+                node->initialize();
+                OsEng.loadingScreen().updateItem(
+                    node->name(),
+                    LoadingScreen::ItemStatus::Finished
+                );
             }
-        );
-        threads.push_back(std::move(t));
+            catch (const ghoul::RuntimeError& e) {
+                LERROR(node->name() << " not initialized.");
+                LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+            }
+
+        });
     }
 
-    for (std::thread& t : threads) {
-        t.join();
-    }
+    pool.stop();
 }
 
 void Scene::initializeGL() {

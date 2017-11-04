@@ -44,7 +44,7 @@ namespace {
     const glm::vec2 LogoSize = { 0.4f, 0.4 };
 
     const float LoadingTextPosition = 0.275f;
-    const float StatusMessageOffset = 0.05f;
+    const float StatusMessageOffset = 0.225f;
 
     const int MaximumMessageQueue = 6;
 
@@ -57,7 +57,9 @@ namespace {
 
 namespace openspace {
 
-LoadingScreen::LoadingScreen() {
+LoadingScreen::LoadingScreen() 
+    : _randomEngine(_randomDevice())
+{
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     const glm::ivec2 res =
         glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
@@ -77,6 +79,13 @@ LoadingScreen::LoadingScreen() {
 
 
     _messageFont = OsEng.fontManager().font(
+        "Loading",
+        22,
+        ghoul::fontrendering::FontManager::Outline::No,
+        ghoul::fontrendering::FontManager::LoadGlyphs::No
+    );
+
+    _itemFont = OsEng.fontManager().font(
         "Loading",
         13,
         ghoul::fontrendering::FontManager::Outline::No,
@@ -161,16 +170,16 @@ void LoadingScreen::render() {
         LogoSize.y * textureAspectRatio * screenAspectRatio
     };
 
-    glm::vec2 ll = { LogoCenter.x - size.x,  LogoCenter.y - size.y };
-    glm::vec2 ur = { LogoCenter.x + size.x,  LogoCenter.y + size.y };
+    glm::vec2 logoLl = { LogoCenter.x - size.x,  LogoCenter.y - size.y };
+    glm::vec2 logoUr = { LogoCenter.x + size.x,  LogoCenter.y + size.y };
 
     GLfloat data[] = {
-        ll.x, ll.y, 0.f, 0.f,
-        ur.x, ur.y, 1.f, 1.f,
-        ll.x, ur.y, 0.f, 1.f,
-        ll.x, ll.y, 0.f, 0.f,
-        ur.x, ll.y, 1.f, 0.f,
-        ur.x, ur.y, 1.f, 1.f
+        logoLl.x, logoLl.y, 0.f, 0.f,
+        logoUr.x, logoUr.y, 1.f, 1.f,
+        logoLl.x, logoUr.y, 0.f, 1.f,
+        logoLl.x, logoLl.y, 0.f, 0.f,
+        logoUr.x, logoLl.y, 1.f, 0.f,
+        logoUr.x, logoUr.y, 1.f, 1.f
     };
 
     glBindVertexArray(_logo.vao);
@@ -216,45 +225,151 @@ void LoadingScreen::render() {
         "Loading."
     );
 
+    glm::vec2 loadingLl = glm::vec2(
+        res.x / 2.f - bbox.boundingBox.x / 2.f,
+        res.y * LoadingTextPosition
+    );
+    glm::vec2 loadingUr = loadingLl + bbox.boundingBox;
+
     renderer.render(
         *_loadingFont,
-        glm::vec2(res.x / 2.f - bbox.boundingBox.x / 2.f, res.y * LoadingTextPosition),
+        loadingLl,
         glm::vec4(1.f, 1.f, 1.f, 1.f),
         "%s",
         "Loading..."
     );
 
+    glm::vec2 messageLl;
+    glm::vec2 messageUr;
+    {
+        std::lock_guard<std::mutex> guard(_messageMutex);
+
+        FR::BoundingBoxInformation bboxMessage = renderer.boundingBox(
+            *_messageFont,
+            "%s",
+            _message.c_str()
+        );
+
+        messageLl = glm::vec2(
+            res.x / 2.f - bboxMessage.boundingBox.x / 2.f,
+            res.y * StatusMessageOffset
+        );
+        messageUr = messageLl + bboxMessage.boundingBox;
+
+
+        renderer.render(
+            *_messageFont,
+            messageLl,
+            glm::vec4(1.f, 1.f, 1.f, 1.f),
+            "%s",
+            _message.c_str()
+        );
+    }
 
     {
-        std::lock_guard<std::mutex> guard(_messageQueueMutex);
+        std::lock_guard<std::mutex> guard(_itemsMutex);
 
-        for (int i = 0; i < _messageQueue.size(); ++i) {
-            const std::string& message = _messageQueue[i];
+        for (Item& item : _items) {
+            if (!item.hasLocation) {
+                // Compute a new location
+                
+                FR::BoundingBoxInformation b = renderer.boundingBox(
+                    *_itemFont,
+                    "%s",
+                    item.name.c_str()
+                );
 
-            FR::BoundingBoxInformation bboxMessage = renderer.boundingBox(
-                *_messageFont,
-                "%s",
-                message.c_str()
-            );
+                // The maximum count is in here since we can't control the amount of
+                // screen estate and the number of nodes.  Rather than looping forever
+                // we make use with an overlap in the worst (=10) case
+                int MaxCounts = 30;
+                bool foundSpace = false;
+
+                glm::vec2 ll;
+                glm::vec2 ur;
+                for (int i = 0; i < MaxCounts && !foundSpace; ++i) {
+                    std::uniform_int_distribution<int> distX(
+                        15,
+                        res.x - b.boundingBox.x - 15
+                    );
+                    std::uniform_int_distribution<int> distY(
+                        15,
+                        res.y - b.boundingBox.y - 15
+                    );
+
+                    ll = { distX(_randomEngine), distY(_randomEngine) };
+                    ur = ll + b.boundingBox;
+
+                    // Test against logo and text
+                    bool logoOverlap = !(
+                        (logoUr.x + 1.f) / 2.f * res.x < ll.x ||
+                        (logoLl.x + 1.f) / 2.f * res.x > ur.x ||
+                        (logoUr.y + 1.f) / 2.f * res.y < ll.y ||
+                        (logoLl.y + 1.f) / 2.f * res.y > ur.y
+                    );
+
+                    bool loadingOverlap = !(
+                        loadingUr.x < ll.x ||
+                        loadingLl.x > ur.x ||
+                        loadingUr.y < ll.y ||
+                        loadingLl.y > ur.y
+                    );
+
+                    bool messageOverlap = !(
+                        messageUr.x < ll.x ||
+                        messageLl.x > ur.x ||
+                        messageUr.y < ll.y ||
+                        messageLl.y > ur.y
+                    );
+
+
+                    if (logoOverlap || loadingOverlap || messageOverlap) {
+                        continue;
+                    }
+
+                    
+                    // Test against all other boxes
+                    bool overlap = false;
+                    for (const Item& j : _items) {
+                        overlap |= !(j.ur.x < ll.x || j.ll.x > ur.x || j.ur.y < ll.y || j.ll.y > ur.y);
+
+                        if (overlap) {
+                            break;
+                        }
+                    }
+
+                    if (!overlap) {
+                        break;
+                    }
+                }
+
+                item.ll = ll;
+                item.ur = ur;
+
+                item.hasLocation = true;
+            }
+
+            glm::vec4 color = [status = item.status]() {
+                switch (status) {
+                    case ItemStatus::Started:
+                        return glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+                    case ItemStatus::Initializing:
+                        return glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+                    case ItemStatus::Finished:
+                        return glm::vec4(1.f, 1.f, 1.f, 1.f);
+                }
+            }();
+            
 
             renderer.render(
-                *_messageFont,
-                glm::vec2(
-                    res.x / 2.f - bboxMessage.boundingBox.x / 2.f,
-                    res.y * StatusMessageOffset + i * bboxMessage.boundingBox.y
-                ),
-                glm::vec4(
-                    1.f, 1.f, 1.f,
-                    glm::mix(
-                        MaximumAlpha,
-                        MinimumAlpha,
-                        static_cast<float>(i) / static_cast<float>(MaximumMessageQueue - 1)
-                    )
-                ),
+                *_itemFont,
+                item.ll,
+                color,
                 "%s",
-                message.c_str()
+                item.name.c_str()
             );
         }
+
     }
 
     glEnable(GL_CULL_FACE);
@@ -264,13 +379,42 @@ void LoadingScreen::render() {
     OsEng.windowWrapper().swapBuffer();
 }
 
-void LoadingScreen::queueMessage(std::string message) {
-    std::lock_guard<std::mutex> guard(_messageQueueMutex);
-    _messageQueue.insert(_messageQueue.begin(), std::move(message));
+void LoadingScreen::postMessage(std::string message) {
+    std::lock_guard<std::mutex> guard(_messageMutex);
+    _message = std::move(message);
+}
 
-    // We add one message at a time, so we can also delete one at a time
-    if (_messageQueue.size() > MaximumMessageQueue) {
-        _messageQueue.pop_back();
+void LoadingScreen::updateItem(const std::string& itemName, ItemStatus newStatus) {
+    std::lock_guard<std::mutex> guard(_itemsMutex);
+
+    auto it = std::find_if(
+        _items.begin(),
+        _items.end(),
+        [&itemName](const Item& i) {
+            return i.name == itemName;
+        }
+    );
+    if (it != _items.end()) {
+        it->status = newStatus;
+        if (newStatus == ItemStatus::Finished) {
+            it->finishedTime = std::chrono::system_clock::now();
+        }
+    }
+    else {
+        ghoul_assert(
+            newStatus == ItemStatus::Started,
+            "Item '" + itemName + "' did not exist but first message was not Started"
+        );
+        // We are not computing the location in here since doing it this way might stall
+        // the main thread while trying to find a position for the new item
+        _items.push_back({
+            itemName,
+            ItemStatus::Started,
+            false,
+            {},
+            {},
+            std::chrono::system_clock::from_time_t(0)
+        });
     }
 }
 

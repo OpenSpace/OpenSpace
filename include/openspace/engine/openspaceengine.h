@@ -103,8 +103,6 @@ public:
     void writeDocumentation();
     void toggleShutdownMode();
 
-    void postLoadingScreenMessage(std::string message);
-    
     void runPostInitializationScripts(const std::string& sceneDescription);
 
     // Guaranteed to return a valid pointer
@@ -112,6 +110,7 @@ public:
     LuaConsole& console();
     DownloadManager& downloadManager();
     ModuleEngine& moduleEngine();
+    LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelConnection& parallelConnection();
     RenderEngine& renderEngine();

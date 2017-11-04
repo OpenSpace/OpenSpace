@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <mutex>
+#include <random>
 
 namespace ghoul::fontrendering {
     class Font;
@@ -49,7 +50,18 @@ public:
 
     void render();
 
-    void queueMessage(std::string message);
+    void postMessage(std::string message);
+
+
+    enum class ItemStatus {
+        Started,
+        Initializing,
+        Finished
+    };
+
+    void updateItem(const std::string& itemName, ItemStatus newStatus);
+
+
 
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
@@ -57,14 +69,30 @@ private:
 
     std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
     std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
+    std::shared_ptr<ghoul::fontrendering::Font> _itemFont;
 
     struct {
         GLuint vao;
         GLuint vbo;
     } _logo;
 
-    std::vector<std::string> _messageQueue;
-    std::mutex _messageQueueMutex;
+    std::string _message;
+    std::mutex _messageMutex;
+
+
+    struct Item {
+        std::string name;
+        ItemStatus status;
+        bool hasLocation;
+        glm::vec2 ll;
+        glm::vec2 ur;
+        std::chrono::system_clock::time_point finishedTime;
+    };
+    std::vector<Item> _items;
+    std::mutex _itemsMutex;
+
+    std::random_device _randomDevice;
+    std::default_random_engine _randomEngine;
 };
 
 } // namespace openspace
