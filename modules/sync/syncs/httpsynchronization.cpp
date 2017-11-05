@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 
 #include <sstream>
+#include <fstream>
 
 namespace {
     const char* _loggerCat = "HttpSynchronization";
@@ -78,6 +79,8 @@ std::string HttpSynchronization::directory() {
     ghoul::filesystem::Directory d(
         _syncRoot +
         ghoul::filesystem::FileSystem::PathSeparator +
+        "http" +
+        ghoul::filesystem::FileSystem::PathSeparator +
         _identifier +
         ghoul::filesystem::FileSystem::PathSeparator +
         std::to_string(_version)
@@ -87,7 +90,11 @@ std::string HttpSynchronization::directory() {
 }
 
 void HttpSynchronization::synchronize() {
-    // TODO: First check if files exist.
+    if (hasSyncFile()) {
+        resolve();
+        return;
+    }
+
     std::string listUrl = "http://data.openspaceproject.com/request?identifier=" +
                        _identifier +
                        "&file_version=" +
@@ -95,14 +102,13 @@ void HttpSynchronization::synchronize() {
                         "&application_version=" +
                         std::to_string(1);
 
-    HttpMemoryDownload fileListDownload(listUrl);
     HttpRequest::RequestOptions opt;
     opt.requestTimeoutSeconds = 0;
-    fileListDownload.download(opt);
     
-    const std::vector<char>& buffer = fileListDownload.downloadedData();
+    HttpMemoryDownload fileListDownload(listUrl);
+    fileListDownload.download(opt);
 
-    LINFO(std::string(buffer.begin(), buffer.end()));
+    const std::vector<char>& buffer = fileListDownload.downloadedData();
 
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
     std::string line = "";
@@ -116,8 +122,23 @@ void HttpSynchronization::synchronize() {
         HttpFileDownload fileDownload(line, fileDestination);
         fileDownload.download(opt);
     }
+    createSyncFile();
 
     resolve();
+}
+
+bool HttpSynchronization::hasSyncFile() {
+    std::string path = directory() + ".ossync";
+    return FileSys.fileExists(path);
+}
+
+void HttpSynchronization::createSyncFile() {
+    std::string dir = directory();
+    std::string filepath = dir + ".ossync";
+    FileSys.createDirectory(dir, ghoul::filesystem::Directory::Recursive::Yes);
+    std::ofstream syncFile(filepath, std::ofstream::out);
+    syncFile << "Synchronized";
+    syncFile.close();
 }
 
 } // namespace openspace

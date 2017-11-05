@@ -43,7 +43,9 @@ public:
     void synchronize() override;
 
 private:
-    bool directoryExists();
+    bool hasSyncFile();
+    void createSyncFile();
+
     std::string _identifier;
     int _version;
 };
