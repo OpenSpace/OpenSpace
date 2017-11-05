@@ -38,6 +38,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 #include <random>
+#include <thread>
 
 namespace {
     const glm::vec2 LogoCenter = { 0.f, 0.4f };
