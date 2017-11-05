@@ -578,8 +578,38 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
     Scene* scene;
 
+    bool showMessage = true;
+    std::string kMessage =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowMessage;
+    if (configurationManager().hasKey(kMessage)) {
+        showMessage = configurationManager().value<bool>(kMessage);
+    }
 
-    _loadingScreen = std::make_unique<LoadingScreen>();
+    bool showNodeNames = true;
+    std::string kNames = 
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowNodeNames;
+
+    if (configurationManager().hasKey(kNames)) {
+        showNodeNames = configurationManager().value<bool>(kNames);
+    }
+
+    bool showProgressbar = true;
+    std::string kProgress =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowProgressbar;
+
+    if (configurationManager().hasKey(kProgress)) {
+        showProgressbar = configurationManager().value<bool>(kProgress);
+    }
+ 
+
+    _loadingScreen = std::make_unique<LoadingScreen>(
+        LoadingScreen::ShowMessage(showMessage),
+        LoadingScreen::ShowNodeNames(showNodeNames),
+        LoadingScreen::ShowProgressbar(showProgressbar)
+    );
 
     // We can initialize all SceneGraphNodes in a separate thread since none of them use
     // an OpenGL context
@@ -587,6 +617,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     bool errorWhileLoading = false;
     std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading, this]() {
         _loadingScreen->postMessage("Creating scene...");
+        _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
         try {
             scene = _sceneManager->loadScene(scenePath);
         }
@@ -632,6 +663,8 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         _renderEngine->setCamera(scene->camera());
         _renderEngine->setGlobalBlackOutFactor(0.0);
         _renderEngine->startFading(1, 3.0);
+
+        _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
 
         scene->initialize();
         _loadingScreen->postMessage("Finished initializing");

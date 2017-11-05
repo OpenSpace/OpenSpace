@@ -27,8 +27,15 @@
 in vec2 st;
 out vec4 FragColor;
 
+uniform bool useTexture;
 uniform sampler2D logoTexture;
+uniform vec4 color;
 
 void main() {
-    FragColor = texture(logoTexture, st);
+    if (useTexture) {
+        FragColor = texture(logoTexture, st);
+    }
+    else {
+        FragColor = color;
+    }
 }

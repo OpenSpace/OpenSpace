@@ -104,6 +104,14 @@ const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
 const string ConfigurationManager::KeyCheckOpenGLState = "CheckOpenGLState";
 const string ConfigurationManager::KeyLogEachOpenGLCall = "LogEachOpenGLCall";
 
+const string ConfigurationManager::KeyUseMultithreadedInitialization =
+    "UseMultithreadedInitialization";
+
+const string ConfigurationManager::KeyLoadingScreen = "LoadingScreen";
+const string ConfigurationManager::PartShowMessage = "ShowMessage";
+const string ConfigurationManager::PartShowNodeNames = "ShowNodeNames";
+const string ConfigurationManager::PartShowProgressbar = "ShowProgressbar";
+
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
     

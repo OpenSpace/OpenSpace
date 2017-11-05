@@ -216,34 +216,54 @@ void Scene::sortTopologically() {
 }
 
 void Scene::initialize() {
-    unsigned int nThreads = std::thread::hardware_concurrency();
-
-    ghoul::ThreadPool pool(nThreads == 0 ? 2 : nThreads - 1);
-
-    OsEng.loadingScreen().postMessage("Initializing scene");
-
-    for (SceneGraphNode* node : _topologicallySortedNodes) {
-        pool.queue([node](){
-            try {
-                OsEng.loadingScreen().updateItem(
-                    node->name(),
-                    LoadingScreen::ItemStatus::Initializing
-                );
-                node->initialize();
-                OsEng.loadingScreen().updateItem(
-                    node->name(),
-                    LoadingScreen::ItemStatus::Finished
-                );
-            }
-            catch (const ghoul::RuntimeError& e) {
-                LERROR(node->name() << " not initialized.");
-                LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
-            }
-
-        });
+    bool useMultipleThreads = true;
+    if (OsEng.configurationManager().hasKey(
+        ConfigurationManager::KeyUseMultithreadedInitialization
+    ))
+    {
+        useMultipleThreads = OsEng.configurationManager().value<bool>(
+            ConfigurationManager::KeyUseMultithreadedInitialization
+        );
     }
 
-    pool.stop();
+    auto initFunction = [](SceneGraphNode* node){
+        try {
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Initializing
+            );
+            node->initialize();
+            OsEng.loadingScreen().tickItem();
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Finished
+            );
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERROR(node->name() << " not initialized.");
+            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+        }
+
+    };
+
+    if (useMultipleThreads) {
+        unsigned int nThreads = std::thread::hardware_concurrency();
+
+        ghoul::ThreadPool pool(nThreads == 0 ? 2 : nThreads - 1);
+
+        OsEng.loadingScreen().postMessage("Initializing scene");
+
+        for (SceneGraphNode* node : _topologicallySortedNodes) {
+            pool.queue(initFunction, node);
+        }
+
+        pool.stop();
+    }
+    else {
+        for (SceneGraphNode* node : _topologicallySortedNodes) {
+            initFunction(node);
+        }
+    }
 }
 
 void Scene::initializeGL() {

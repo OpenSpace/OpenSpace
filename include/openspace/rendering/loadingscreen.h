@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___LOADINGSCREEN___H__
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 #include <memory>
@@ -45,12 +46,26 @@ namespace openspace {
 
 class LoadingScreen {
 public:
-    LoadingScreen();
+    using ShowMessage = ghoul::Boolean;
+    using ShowNodeNames = ghoul::Boolean;
+    using ShowProgressbar = ghoul::Boolean;
+
+    LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
+        ShowProgressbar showProgressbar);
     ~LoadingScreen();
 
     void render();
 
     void postMessage(std::string message);
+
+    void setItemNumber(int nItems);
+    void tickItem();
+
+    enum class Phase {
+        Construction,
+        Initialization
+    };
+    void setPhase(Phase phase);
 
 
     enum class ItemStatus {
@@ -61,9 +76,15 @@ public:
 
     void updateItem(const std::string& itemName, ItemStatus newStatus);
 
-
-
 private:
+    bool _showMessage;
+    bool _showNodeNames;
+    bool _showProgressbar;
+
+    Phase _phase;
+    int _iProgress;
+    int _nItems;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 
@@ -76,9 +97,16 @@ private:
         GLuint vbo;
     } _logo;
 
+    struct {
+        GLuint vaoFill;
+        GLuint vboFill;
+
+        GLuint vaoBox;
+        GLuint vboBox;
+    } _progressbar;
+
     std::string _message;
     std::mutex _messageMutex;
-
 
     struct Item {
         std::string name;
