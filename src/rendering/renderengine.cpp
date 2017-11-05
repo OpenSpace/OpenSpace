@@ -131,8 +131,15 @@ namespace {
     static const openspace::properties::Property::PropertyInfo ShowVersionInfo = {
         "ShowVersion",
         "Shows the version on-screen information",
-        "This value determines whether the GIT version information (branch and commit ) "
+        "This value determines whether the Git version information (branch and commit) "
         "hash are shown on the screen."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowCameraInfo = {
+        "ShowCamera",
+        "Shows information about the current camera state, such as friction",
+        "This value determines whether the information about the current camrea state is "
+        "shown on the screen"
     };
 
     static const openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
@@ -206,6 +213,7 @@ RenderEngine::RenderEngine()
     , _showInfo(ShowInfoInfo, true)
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
+    , _showCameraInfo(ShowCameraInfo, true)
     , _takeScreenshot(TakeScreenshotInfo)
     , _shouldTakeScreenshot(false)
     , _applyWarping(ApplyWarpingInfo, false)
@@ -260,6 +268,7 @@ RenderEngine::RenderEngine()
     addProperty(_showInfo);
     addProperty(_showLog);
     addProperty(_showVersionInfo);
+    addProperty(_showCameraInfo);
     
     _nAaSamples.onChange([this](){
         if (_renderer) {
@@ -1299,6 +1308,68 @@ void RenderEngine::renderInformation() {
         }
 #endif
     }
+}
+
+void RenderEngine::renderCameraInformation() {
+    if (!_showCameraInfo) {
+        return;
+    }
+
+    const glm::vec4 enabled = glm::vec4(0.2f, 0.75f, 0.2f, 1.f);
+    const glm::vec4 disabled = glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
+
+    using FR = ghoul::fontrendering::FontRenderer;
+
+    FR::BoundingBoxInformation rotationBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s",
+        "Rotation"
+    );
+
+    float penPosY = fontResolution().y - rotationBox.boundingBox.y;
+
+    const float ySeparation = 5.f;
+    const float xSeparation = 5.f;
+
+    interaction::OrbitalNavigator nav = OsEng.navigationHandler().orbitalNavigator();
+
+    FR::defaultRenderer().render(
+        *_fontInfo,
+        glm::vec2(fontResolution().x - rotationBox.boundingBox.x - xSeparation, penPosY),
+        nav.hasRotationalFriction() ? enabled : disabled,
+        "%s",
+        "Rotation"
+    );
+    penPosY -= rotationBox.boundingBox.y + ySeparation;
+
+    FR::BoundingBoxInformation zoomBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s",
+        "Zoom"
+    );
+
+    FR::defaultRenderer().render(
+        *_fontInfo,
+        glm::vec2(fontResolution().x - zoomBox.boundingBox.x - xSeparation, penPosY),
+        nav.hasZoomFriction() ? enabled : disabled,
+        "%s",
+        "Zoom"
+    );
+    penPosY -= zoomBox.boundingBox.y + ySeparation;
+
+    FR::BoundingBoxInformation rollBox = FR::defaultRenderer().boundingBox(
+        *_fontInfo,
+        "%s",
+        "Roll"
+    );
+
+    FR::defaultRenderer().render(
+        *_fontInfo,
+        glm::vec2(fontResolution().x - rollBox.boundingBox.x - xSeparation, penPosY),
+        nav.hasRollFriction() ? enabled : disabled,
+        "%s",
+        "Roll"
+    );
 }
 
 void RenderEngine::renderVersionInformation() {
