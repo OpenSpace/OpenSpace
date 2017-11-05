@@ -24,10 +24,12 @@
 
 #include "httpsynchronization.h"
 
-#include <openspace/util/asynchttprequest.h>
+#include <openspace/util/httprequest.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/documentation/verifier.h>
+
+#include <sstream>
 
 namespace {
     const char* _loggerCat = "HttpSynchronization";
@@ -73,18 +75,48 @@ documentation::Documentation HttpSynchronization::Documentation() {
 }
 
 std::string HttpSynchronization::directory() {
-    return _syncRoot +
+    ghoul::filesystem::Directory d(
+        _syncRoot +
         ghoul::filesystem::FileSystem::PathSeparator +
         _identifier +
         ghoul::filesystem::FileSystem::PathSeparator +
-        std::to_string(_version);
+        std::to_string(_version)
+    );
+
+    return FileSys.absPath(d);
 }
 
 void HttpSynchronization::synchronize() {
-    // TODO: Download files, synchronously.
-    // First check if files exist.
+    // TODO: First check if files exist.
+    std::string listUrl = "http://data.openspaceproject.com/request?identifier=" +
+                       _identifier +
+                       "&file_version=" +
+                        std::to_string(_version) +
+                        "&application_version=" +
+                        std::to_string(1);
+
+    HttpMemoryDownload fileListDownload(listUrl);
+    HttpRequest::RequestOptions opt;
+    opt.requestTimeoutSeconds = 0;
+    fileListDownload.download(opt);
     
-    LINFO("Synchronizing!");
+    const std::vector<char>& buffer = fileListDownload.downloadedData();
+
+    LINFO(std::string(buffer.begin(), buffer.end()));
+
+    std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
+    std::string line = "";
+    while (fileList >> line) {
+        std::string filename = ghoul::filesystem::File(line, ghoul::filesystem::File::RawPath::Yes).filename();
+
+        std::string fileDestination = directory() +
+            ghoul::filesystem::FileSystem::PathSeparator +
+            filename;
+
+        HttpFileDownload fileDownload(line, fileDestination);
+        fileDownload.download(opt);
+    }
+
     resolve();
 }
 

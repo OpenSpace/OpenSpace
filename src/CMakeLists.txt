@@ -153,6 +153,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
     ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
@@ -317,6 +318,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
