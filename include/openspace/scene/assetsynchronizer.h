@@ -74,9 +74,6 @@ private:
     std::vector<Asset*> _trivialSynchronizations;
 };
 
-
-
-
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___ASSETSYNCHRONIZER___H__

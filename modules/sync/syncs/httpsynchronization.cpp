@@ -36,6 +36,11 @@ namespace {
     const char* _loggerCat = "HttpSynchronization";
     const char* KeyIdentifier = "Identifier";
     const char* KeyVersion = "Version";
+
+    const char* QueryKeyIdentifier = "identifier";
+    const char* QueryKeyFileVersion = "file_version";
+    const char* QueryKeyApplicationVersion = "application_version";
+    const int ApplicationVersion = 1;
 }
 
 namespace openspace {
@@ -77,7 +82,7 @@ documentation::Documentation HttpSynchronization::Documentation() {
 
 std::string HttpSynchronization::directory() {
     ghoul::filesystem::Directory d(
-        _syncRoot +
+        _synchronizationOptions.synchronizationRoot +
         ghoul::filesystem::FileSystem::PathSeparator +
         "http" +
         ghoul::filesystem::FileSystem::PathSeparator +
@@ -95,41 +100,64 @@ void HttpSynchronization::synchronize() {
         return;
     }
 
-    std::string listUrl = "http://data.openspaceproject.com/request?identifier=" +
-                       _identifier +
-                       "&file_version=" +
-                        std::to_string(_version) +
-                        "&application_version=" +
-                        std::to_string(1);
+    std::vector<std::string> listUrls = fileListUrls();
+    for (const auto& url : listUrls) {
+        if (trySyncFromUrl(url)) {
+            resolve();
+            return;
+        }
+    }
+}
+    
+std::vector<std::string> HttpSynchronization::fileListUrls() {
+    std::string query = std::string("?") + QueryKeyIdentifier + "=" + _identifier +
+        "&" + QueryKeyFileVersion + "=" + std::to_string(_version) +
+        "&" + QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);
 
+    std::vector<std::string> urls;
+    for (const auto& repoUrl : _synchronizationOptions.httpSynchronizationRepositories) {
+        urls.push_back(repoUrl + query);
+    }
+
+    return urls;
+}
+
+bool HttpSynchronization::hasSyncFile() {
+    std::string path = directory() + ".ossync";
+    return FileSys.fileExists(path);
+}
+
+bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     HttpRequest::RequestOptions opt;
     opt.requestTimeoutSeconds = 0;
-    
+
     HttpMemoryDownload fileListDownload(listUrl);
     fileListDownload.download(opt);
 
     const std::vector<char>& buffer = fileListDownload.downloadedData();
 
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
+
+    std::vector<std::thread> downloadThreads;
     std::string line = "";
     while (fileList >> line) {
         std::string filename = ghoul::filesystem::File(line, ghoul::filesystem::File::RawPath::Yes).filename();
-
+        
         std::string fileDestination = directory() +
-            ghoul::filesystem::FileSystem::PathSeparator +
-            filename;
+        ghoul::filesystem::FileSystem::PathSeparator +
+        filename;
 
-        HttpFileDownload fileDownload(line, fileDestination);
-        fileDownload.download(opt);
+        std::thread t([opt, line, fileDestination]() {
+            HttpFileDownload fileDownload(line, fileDestination);
+            fileDownload.download(opt);
+        });
+        downloadThreads.push_back(std::move(t));
+    }
+    for (auto& t : downloadThreads) {
+        t.join();
     }
     createSyncFile();
-
-    resolve();
-}
-
-bool HttpSynchronization::hasSyncFile() {
-    std::string path = directory() + ".ossync";
-    return FileSys.fileExists(path);
+    return true;
 }
 
 void HttpSynchronization::createSyncFile() {

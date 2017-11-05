@@ -257,17 +257,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "rendering resolution ('framebuffer'). This value defaults to 'window'."
         },
         {
-            ConfigurationManager::KeyDownloadRequestURL,
-            new OrVerifier(
-                new StringVerifier,
-                new StringListVerifier
-            ),
-            Optional::Yes,
-            "The URL from which files will be downloaded by the Launcher. This can "
-            "either be a single URL or a list of possible URLs from which the "
-            "Launcher can then choose."
-        },
-        {
             ConfigurationManager::KeyRenderingMethod,
             new StringInListVerifier(
                 // List from RenderEngine::setRendererFromString
@@ -294,6 +283,13 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "With some configurations, applying such a transformation complicates the "
             "interaction and it is thus desired to disable the transformation. The "
             "default is false."
+        },
+        {
+            ConfigurationManager::KeyHttpSynchronizationRepositories,
+            new StringListVerifier("URLs to http synchronization repositories"),
+            Optional::Yes,
+            "Configures the list of http synchronization repositories to load "
+            "resources from. The first URL will be tried first."
         },
         {
             ConfigurationManager::KeyHttpProxy,

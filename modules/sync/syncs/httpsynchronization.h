@@ -43,6 +43,8 @@ public:
     void synchronize() override;
 
 private:
+    std::vector<std::string> fileListUrls();
+    bool trySyncFromUrl(std::string url);
     bool hasSyncFile();
     void createSyncFile();
 

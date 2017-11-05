@@ -30,7 +30,7 @@ namespace {
 
 namespace openspace {
 
-ResourceSynchronizer::ResourceSynchronizer() 
+ResourceSynchronizer::ResourceSynchronizer()
     : _jobManager(ThreadPool(NumberOfThreads))
 {}
 

@@ -115,14 +115,13 @@ public:
     static const std::string KeyDisableMasterRendering;
     /// The key that stores whether the master node should apply the scene transformation
     static const std::string KeyDisableSceneOnMaster;
-    /// The key that sets the request URL that is used to request additional data to be
-    /// downloaded
-    static const std::string KeyDownloadRequestURL;
     /// The key that stores the switch for enabling/disabling the rendering on a master
     /// computer
     static const std::string KeyRenderingMethod;
     /// The key that determines whether a new cache folder is used for each scene file
     static const std::string KeyPerSceneCache;
+    // The key that stores the list of urls to http resource sync repositories
+    static const std::string KeyHttpSynchronizationRepositories;
     /// The key that stores the http proxy settings for the downloadmanager
     static const std::string KeyHttpProxy;
     /// The key that stores the address of the http proxy

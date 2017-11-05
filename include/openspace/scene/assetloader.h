@@ -29,6 +29,7 @@
 
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scene/assetsynchronizer.h>
+#include <openspace/util/resourcesynchronization.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/luastate.h>
@@ -63,7 +64,7 @@ public:
     AssetLoader(
         ghoul::lua::LuaState& luaState,
         std::string assetRoot,
-        std::string syncRoot
+        ResourceSynchronizationOptions syncOptions
     );
 
     /**
@@ -177,7 +178,7 @@ private:
 
     AssetSynchronizer* _assetSynchronizer;
     std::string _assetRootDirectory;
-    std::string _syncRootDirectory;
+    ResourceSynchronizationOptions _synchronizationOptions;
     ghoul::lua::LuaState* _luaState;
 
     // References to lua values

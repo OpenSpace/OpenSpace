@@ -145,17 +145,10 @@ DownloadManager::FileFuture::FileFuture(std::string file)
     , abortDownload(false)
 {}
 
-DownloadManager::DownloadManager(std::string requestURL, int applicationVersion,
-                                 bool useMultithreadedDownload)
-    : _applicationVersion(std::move(applicationVersion))
-    , _useMultithreadedDownload(useMultithreadedDownload)
+DownloadManager::DownloadManager(bool useMultithreadedDownload)
+    : _useMultithreadedDownload(useMultithreadedDownload)
 {
     curl_global_init(CURL_GLOBAL_ALL);
-    
-    _requestURL.push_back(std::move(requestURL));
-    
-    // TODO: Check if URL is accessible ---abock
-    // TODO: Allow for multiple requestURLs
 }
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
@@ -313,6 +306,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     return std::async(std::launch::async, downloadFunction);
 }
 
+/*
 std::vector<std::shared_ptr<DownloadManager::FileFuture>>
 DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,
@@ -411,7 +405,7 @@ void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
     else {
         downloadFunction();
     }
-}
+}*/
 
 void DownloadManager::getFileExtension(const std::string& url,
     RequestFinishedCallback finishedCallback){

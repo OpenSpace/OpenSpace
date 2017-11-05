@@ -34,6 +34,11 @@
 
 namespace openspace {
 
+struct ResourceSynchronizationOptions {
+    std::vector<std::string> httpSynchronizationRepositories;
+    std::string synchronizationRoot;
+};
+
 class ResourceSynchronization;
 
 struct SynchronizationProduct {
@@ -58,10 +63,11 @@ public:
         const ghoul::Dictionary& dictionary);
 
     ResourceSynchronization();
+    virtual ~ResourceSynchronization();
     virtual void synchronize() = 0;
     virtual std::string directory() = 0;
 
-    void setSyncRoot(std::string path);
+    void setSynchronizationOptions(ResourceSynchronizationOptions opt);
     void wait();
     bool isResolved();
     void resolve();
@@ -69,7 +75,7 @@ public:
     void updateProgress(float t);
     std::shared_ptr<SynchronizationJob> job();
 protected:
-    std::string _syncRoot;
+    ResourceSynchronizationOptions _synchronizationOptions;
 private:
     std::shared_ptr<SynchronizationJob> _job;
     std::atomic<bool> _started;

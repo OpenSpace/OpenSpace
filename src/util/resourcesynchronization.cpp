@@ -55,7 +55,8 @@ documentation::Documentation ResourceSynchronization::Documentation() {
                 "This key specifies the type of ResourceSyncrhonization that gets created. "
                 "It has to be one of the valid ResourceSyncrhonizations that are available "
                 "for creation (see the FactoryDocumentation for a list of possible "
-                "ResourceSyncrhonizations), which depends on the configration of the application"
+                "ResourceSyncrhonizations), which depends on the configration of the "
+                " application"
             }
         }
     };
@@ -66,18 +67,25 @@ ResourceSynchronization::ResourceSynchronization()
     , _resolved(false)
 {}
 
+ResourceSynchronization::~ResourceSynchronization()
+{}
+
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
     const ghoul::Dictionary & dictionary)
 {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "ResourceSynchronization");
+    documentation::testSpecificationAndThrow(
+        Documentation(), dictionary, "ResourceSynchronization");
 
     std::string synchronizationType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
-    std::unique_ptr<ResourceSynchronization> result = factory->create(synchronizationType, dictionary);
+    std::unique_ptr<ResourceSynchronization> result =
+        factory->create(synchronizationType, dictionary);
+
     if (result == nullptr) {
-        LERROR("Failed to create a ResourceSynchronization object of type '" << synchronizationType << "'");
+        LERROR("Failed to create a ResourceSynchronization object of type '" <<
+               synchronizationType << "'");
         return nullptr;
     }
 
@@ -86,10 +94,6 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
 
 std::shared_ptr<SynchronizationJob> ResourceSynchronization::job() {
     return _job;
-}
-
-void ResourceSynchronization::setSyncRoot(std::string path) {
-    _syncRoot = std::move(path);
 }
 
 void ResourceSynchronization::wait() {
@@ -110,6 +114,13 @@ float ResourceSynchronization::progress() {
 void ResourceSynchronization::updateProgress(float t) {
     _progress = std::min(1.0f, std::max(t, 0.0f));
 }
+
+void ResourceSynchronization::setSynchronizationOptions(
+    openspace::ResourceSynchronizationOptions opt)
+{
+    _synchronizationOptions = std::move(opt);
+}
+
 
 // SynchronizationJob methods
 

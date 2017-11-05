@@ -84,7 +84,7 @@ void HttpRequest::perform(RequestOptions opt) {
 
     curl_easy_setopt(curl, CURLOPT_URL, _url.c_str());
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    
+
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
     
@@ -96,12 +96,7 @@ void HttpRequest::perform(RequestOptions opt) {
     }
 
     CURLcode res = curl_easy_perform(curl);
-    if (res == CURLE_OK) {
-        LINFO("CURL is ok");
-    } else {
-        LINFO("CURL failed");
-    }
-
+    setReadyState(res == CURLE_OK ? ReadyState::Success : ReadyState::Fail);
     curl_easy_cleanup(curl);
 }
     
