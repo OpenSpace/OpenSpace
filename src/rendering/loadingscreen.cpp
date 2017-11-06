@@ -41,12 +41,16 @@
 #include <thread>
 
 namespace {
-    const glm::vec2 LogoCenter = { 0.f, 0.4f };
-    const glm::vec2 LogoSize = { 0.4f, 0.4 };
+    const float LoadingFontSize = 25.f;
+    const float MessageFontSize = 22.f;
+    const float ItemFontSize = 12.f;
 
-    const glm::vec2 ProgressbarCenter = { 0.f, -0.75f };
-    const glm::vec2 ProgressbarSize = { 0.7f, 0.0075f };
-    const float ProgressbarLineWidth = 0.0025f;
+    const glm::vec2 LogoCenter = { 0.f, 0.4f };  // in NDC
+    const glm::vec2 LogoSize = { 0.35f, 0.35 };  // in NDC
+
+    const glm::vec2 ProgressbarCenter = { 0.f, -0.75f };  // in NDC
+    const glm::vec2 ProgressbarSize = { 0.7f, 0.0075f };  // in NDC
+    const float ProgressbarLineWidth = 0.0025f;  // in NDC
 
     const glm::vec4 ProgressbarOutlineColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
 
@@ -57,8 +61,10 @@ namespace {
     const glm::vec4 ItemStatusColorInitializing = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
     const glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
 
-    const float LoadingTextPosition = 0.275f;
-    const float StatusMessageOffset = 0.225f;
+    const float ItemStandoffDistance = 5.f; // in pixels
+
+    const float LoadingTextPosition = 0.275f;  // in NDC
+    const float StatusMessageOffset = 0.225f;  // in NDC
 
     const int MaxNumberLocationSamples = 1000;
 
@@ -68,15 +74,11 @@ namespace {
 
     bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
     {
-        // Standoff value is in pixels 
-        static const float Standoff = 3.f;
-        // static const float Standoff = 0.f;
-
-        lhsLl -= glm::vec2(Standoff / 2.f);
-        lhsUr += glm::vec2(Standoff / 2.f);
+        lhsLl -= glm::vec2(ItemStandoffDistance / 2.f);
+        lhsUr += glm::vec2(ItemStandoffDistance / 2.f);
         
-        rhsLl -= glm::vec2(Standoff / 2.f);
-        rhsUr += glm::vec2(Standoff / 2.f);
+        rhsLl -= glm::vec2(ItemStandoffDistance / 2.f);
+        rhsUr += glm::vec2(ItemStandoffDistance / 2.f);
 
         return !(
             lhsUr.x < rhsLl.x ||
@@ -113,8 +115,6 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     const glm::ivec2 res =
         glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
 
-    float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
-
     _program = ghoul::opengl::ProgramObject::Build(
         "Loading Screen",
         "${SHADERS}/loadingscreen.vert",
@@ -123,7 +123,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
 
     _loadingFont = OsEng.fontManager().font(
         "Loading",
-        25,
+        LoadingFontSize,
         ghoul::fontrendering::FontManager::Outline::No,
         ghoul::fontrendering::FontManager::LoadGlyphs::No
     );
@@ -131,7 +131,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     if (_showMessage) {
         _messageFont = OsEng.fontManager().font(
             "Loading",
-            22,
+            MessageFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
             ghoul::fontrendering::FontManager::LoadGlyphs::No
         );
@@ -140,7 +140,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     if (_showNodeNames) {
         _itemFont = OsEng.fontManager().font(
             "Loading",
-            13,
+            ItemFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
             ghoul::fontrendering::FontManager::LoadGlyphs::No
         );
@@ -152,9 +152,6 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
             absPath("${OPENSPACE_DATA}/openspace-logo.png")
         );
         _logoTexture->uploadTexture();
-
-        float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
-        static_cast<float>(_logoTexture->dimensions().y);
         
         glGenVertexArrays(1, &_logo.vao);
         glBindVertexArray(_logo.vao);
@@ -351,8 +348,10 @@ void LoadingScreen::render() {
         switch (_phase) {
             case Phase::Construction:
                 _program->setUniform("color", PhaseColorConstruction);
+                break;
             case Phase::Initialization:
                 _program->setUniform("color", PhaseColorInitialization);
+                break;
         }
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -489,7 +488,7 @@ void LoadingScreen::render() {
                 glm::vec2 ll;
                 glm::vec2 ur;
                 int i = 0;
-                for (i; i < MaxNumberLocationSamples && !foundSpace; ++i) {
+                for ( /* i */; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
                         res.x - b.boundingBox.x - 15
