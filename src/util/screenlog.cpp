@@ -38,6 +38,7 @@ ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
 ScreenLog::~ScreenLog() {}
 
 void ScreenLog::removeExpiredEntries() {
+    std::lock_guard<std::mutex> guard(_mutex);
     auto t = std::chrono::steady_clock::now();
     auto ttl = _timeToLive;
     
@@ -51,6 +52,7 @@ void ScreenLog::removeExpiredEntries() {
 }
 
 void ScreenLog::log(LogLevel level, const string& category, const string& message) {
+    std::lock_guard<std::mutex> guard(_mutex);
     if (level >= _logLevel) {
         _entries.push_back({
             level,
@@ -62,7 +64,8 @@ void ScreenLog::log(LogLevel level, const string& category, const string& messag
     }
 }
     
-const std::vector<ScreenLog::LogEntry>& ScreenLog::entries() const {
+std::vector<ScreenLog::LogEntry> ScreenLog::entries() const {
+    std::lock_guard<std::mutex> guard(_mutex);
     return _entries;
 }
 

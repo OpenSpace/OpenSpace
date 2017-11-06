@@ -29,6 +29,7 @@
 
 #include <chrono>
 #include <vector>
+#include <mutex>
 
 namespace openspace {
 
@@ -104,7 +105,7 @@ public:
      * Returns the list of all stored LogEntry%s.
      * \return The list of all stored LogEntry%s
      */
-    const std::vector<LogEntry>& entries() const;
+    std::vector<LogEntry> entries() const;
 
 private:
     /// The list of all LogEntry%s stored by this ScreenLog
@@ -113,9 +114,12 @@ private:
     /// The time-to-live for the LogEntry%s in this ScreenLog. Is used by the
     /// #removeExpiredEntries method to remove expired entries.
     std::chrono::seconds _timeToLive;
-    
+
     /// The minimum LogLevel of messages
     LogLevel _logLevel;
+
+    /// A mutex to ensure thread-safety
+    mutable std::mutex _mutex;
 };
     
 } // namespace openspace
