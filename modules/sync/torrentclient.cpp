@@ -71,15 +71,32 @@ void TorrentClient::initialize() {
     libtorrent::error_code ec;
     _session->listen_on(std::make_pair(20280, 20290), ec);
     _session->start_upnp();
+
+    _torrentThread = std::thread([this]() {
+        while (true) {
+            std::vector<libtorrent::alert*> alerts;
+            _session->pop_alerts(&alerts);
+
+            for (lt::alert const* a : alerts) {
+                LINFO(a->message());
+                // if we receive the finished alert or an error, we're done
+                if (lt::alert_cast<lt::torrent_finished_alert>(a)) {
+                    LINFO(a->message());
+                }
+                if (lt::alert_cast<lt::torrent_error_alert>(a)) {
+                    LINFO(a->message());
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+    });
 }
 
-
-int TorrentClient::addTorrent(std::string torrentFile, std::string destination) {
+int TorrentClient::addTorrentFile(std::string torrentFile, std::string destination) {
     if (!_session) {
         LERROR("Torrent session not initialized when adding torrent");
         return -1;
     }
-
     libtorrent::error_code ec;
     libtorrent::add_torrent_params p;
 
@@ -87,11 +104,20 @@ int TorrentClient::addTorrent(std::string torrentFile, std::string destination) 
     p.ti = std::make_shared<libtorrent::torrent_info>(torrentFile, ec, 0);
 
     _session->add_torrent(p, ec);
+}
 
-    std::vector<libtorrent::torrent_handle> handles = _session->get_torrents();
-    libtorrent::torrent_status s = handles[0].status();
+int TorrentClient::addMagnetLink(std::string magnetLink, std::string destination) {
+    if (!_session) {
+        LERROR("Torrent session not initialized when adding torrent");
+        return -1;
+    }
+    libtorrent::error_code ec;
+    libtorrent::add_torrent_params p;
 
-    LINFO("Torrent: " << s.total_wanted_done << " out of " << s.total_wanted);
+    p.save_path = destination;
+    p.url = magnetLink;
+
+    _session->add_torrent(p, ec);
 }
 
 void TorrentClient::removeTorrent(int id) {

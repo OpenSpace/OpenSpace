@@ -48,7 +48,9 @@ public:
     void synchronize() override;
 
 private:
-    std::string _torrentFilePath;
+    std::string uniformResourceName() const;
+    std::string _identifier;
+    std::string _magnetLink;
     std::string _synchronizationRoot;
     TorrentClient* _torrentClient;
 };
