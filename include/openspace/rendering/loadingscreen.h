@@ -33,6 +33,8 @@
 #include <mutex>
 #include <random>
 
+// #define LOADINGSCREEN_DEBUGGING
+
 namespace ghoul::fontrendering {
     class Font;
 } // namespace ghoul::fontrendering
@@ -111,9 +113,14 @@ private:
     struct Item {
         std::string name;
         ItemStatus status;
+
         bool hasLocation;
+#ifdef LOADINGSCREEN_DEBUGGING
+        bool exhaustedSearch;
+#endif // LOADINGSCREEN_DEBUGGING
         glm::vec2 ll;
         glm::vec2 ur;
+
         std::chrono::system_clock::time_point finishedTime;
     };
     std::vector<Item> _items;

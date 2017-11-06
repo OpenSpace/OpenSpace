@@ -45,7 +45,7 @@ namespace {
     const glm::vec2 LogoSize = { 0.4f, 0.4 };
 
     const glm::vec2 ProgressbarCenter = { 0.f, -0.75f };
-    const glm::vec2 ProgressbarSize = { 0.7f, 0.015f };
+    const glm::vec2 ProgressbarSize = { 0.7f, 0.0075f };
     const float ProgressbarLineWidth = 0.0025f;
 
     const glm::vec4 ProgressbarOutlineColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
@@ -60,9 +60,36 @@ namespace {
     const float LoadingTextPosition = 0.275f;
     const float StatusMessageOffset = 0.225f;
 
+    const int MaxNumberLocationSamples = 1000;
+
     const std::chrono::milliseconds TTL(5000);
 
     const std::chrono::milliseconds RefreshRate(16);
+
+    bool rectOverlaps(glm::vec4 lhs, glm::vec4 rhs) {
+        // Standoff value is in pixels 
+        static const float Standoff = 3.f;
+        // static const float Standoff = 0.f;
+
+        glm::vec2 lhsLl = lhs.xy() - glm::vec2(Standoff / 2.f);
+        glm::vec2 lhsUr = lhs.zw() + glm::vec2(Standoff / 2.f);
+        
+        glm::vec2 rhsLl = rhs.xy() - glm::vec2(Standoff / 2.f);
+        glm::vec2 rhsUr = rhs.zw() + glm::vec2(Standoff / 2.f);
+
+        return !(
+            lhsUr.x < rhsLl.x ||
+            lhsLl.x > rhsUr.x ||
+            lhsUr.y < rhsLl.y ||
+            lhsLl.y > rhsUr.y
+        );
+    }
+
+    glm::vec2 ndcToScreen(glm::vec2 ndc, glm::ivec2 res) {
+        ndc.x = (ndc.x + 1.f) / 2.f * res.x;
+        ndc.y = (ndc.y + 1.f) / 2.f * res.y;
+        return ndc;
+    }
 } // namespace
 
 namespace openspace {
@@ -455,13 +482,13 @@ void LoadingScreen::render() {
 
                 // The maximum count is in here since we can't control the amount of
                 // screen estate and the number of nodes.  Rather than looping forever
-                // we make use with an overlap in the worst (=500) case
-                int MaxCounts = 500;
+                // we make use with an overlap in the worst case
                 bool foundSpace = false;
 
                 glm::vec2 ll;
                 glm::vec2 ur;
-                for (int i = 0; i < MaxCounts && !foundSpace; ++i) {
+                int i = 0;
+                for (i; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
                         res.x - b.boundingBox.x - 15
@@ -475,40 +502,30 @@ void LoadingScreen::render() {
                     ur = ll + b.boundingBox;
 
                     // Test against logo and text
-                    bool logoOverlap = !(
-                        (logoUr.x + 1.f) / 2.f * res.x < ll.x ||
-                        (logoLl.x + 1.f) / 2.f * res.x > ur.x ||
-                        (logoUr.y + 1.f) / 2.f * res.y < ll.y ||
-                        (logoLl.y + 1.f) / 2.f * res.y > ur.y
-                    );
-
-                    bool loadingOverlap = !(
-                        loadingUr.x < ll.x ||
-                        loadingLl.x > ur.x ||
-                        loadingUr.y < ll.y ||
-                        loadingLl.y > ur.y
-                    );
-
-                    bool messageOverlap = false;
-                    if (_showMessage) {
-                        messageOverlap = !(
-                            messageUr.x < ll.x ||
-                            messageLl.x > ur.x ||
-                            messageUr.y < ll.y ||
-                            messageLl.y > ur.y
-                        );
-                    }
                     
-                    bool barOverlap = false;
-                    if (_showProgressbar) {
-                        barOverlap = !(
-                           (progressbarUr.x + 1.f) / 2.f * res.x < ll.x ||
-                           (progressbarLl.x + 1.f) / 2.f * res.x > ur.x ||
-                           (progressbarUr.y + 1.f) / 2.f * res.y < ll.y ||
-                           (progressbarLl.y + 1.f) / 2.f * res.y > ur.y
-                        );
-                    }
+                    bool logoOverlap = rectOverlaps(
+                        { ndcToScreen(logoLl, res), ndcToScreen(logoUr, res) },
+                        { ll, ur }
+                    );
 
+                    bool loadingOverlap = rectOverlaps(
+                        { loadingLl, loadingUr },
+                        { ll, ur }
+                    );
+
+                    bool messageOverlap = _showMessage ?
+                        rectOverlaps( { messageLl, messageUr }, { ll, ur } ) :
+                        false;
+
+                    bool barOverlap = _showProgressbar ?
+                        rectOverlaps(
+                            {
+                                ndcToScreen(progressbarLl, res), 
+                                ndcToScreen(progressbarUr, res)
+                            },
+                            { ll, ur }
+                        ) : 
+                    false;
 
                     if (logoOverlap || loadingOverlap || messageOverlap || barOverlap) {
                         continue;
@@ -518,7 +535,7 @@ void LoadingScreen::render() {
                     // Test against all other boxes
                     bool overlap = false;
                     for (const Item& j : _items) {
-                        overlap |= !(j.ur.x < ll.x || j.ll.x > ur.x || j.ur.y < ll.y || j.ll.y > ur.y);
+                        overlap |= rectOverlaps( { j.ll, j.ur }, { ll, ur });
 
                         if (overlap) {
                             break;
@@ -534,6 +551,11 @@ void LoadingScreen::render() {
                 item.ur = ur;
 
                 item.hasLocation = true;
+
+#ifdef LOADINGSCREEN_DEBUGGING
+                item.exhaustedSearch = (i == MaxNumberLocationSamples);
+#endif // LOADINGSCREEN_DEBUGGING
+
             }
 
             glm::vec4 color = [status = item.status]() {
@@ -555,6 +577,11 @@ void LoadingScreen::render() {
                 color.a = 1.f - static_cast<float>(t.count()) / static_cast<float>(TTL.count());
             }
 
+#ifdef LOADINGSCREEN_DEBUGGING
+            if (item.exhaustedSearch) {
+                color = glm::vec4(0.f, 1.f, 1.f, 1.f);
+            }
+#endif // LOADINGSCREEN_DEBUGGING
 
             renderer.render(
                 *_itemFont,
@@ -640,6 +667,9 @@ void LoadingScreen::updateItem(const std::string& itemName, ItemStatus newStatus
             itemName,
             ItemStatus::Started,
             false,
+#ifdef LOADINGSCREEN_DEBUGGING
+            false,
+#endif // LOADINGSCREEN_DEBUGGING
             {},
             {},
             std::chrono::system_clock::from_time_t(0)
