@@ -1,0 +1,2 @@
+asset.import('solarsystem')
+asset.import('missions/newhorizons/spice/spice')

@@ -406,22 +406,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
     sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
 
     // Set up asset loader
-    ResourceSynchronizationOptions syncOptions;
-    syncOptions.synchronizationRoot = absPath("${SYNC}");
-    if (_engine->_configurationManager->hasKey(
-         ConfigurationManager::KeyHttpSynchronizationRepositories))
-    {
-        ghoul::Dictionary dictionary = _engine->_configurationManager->value<ghoul::Dictionary>(
-            ConfigurationManager::KeyHttpSynchronizationRepositories
-        );
-        for (std::string key : dictionary.keys()) {
-            syncOptions.httpSynchronizationRepositories.push_back(
-                dictionary.value<std::string>(key)
-            );
-        }
-    }
     _engine->_assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}", syncOptions),
+        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}"),
         std::make_unique<AssetSynchronizer>(OsEng._resourceSynchronizer.get())
     );
     //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());

@@ -65,7 +65,6 @@ public:
     std::string assetDirectory() const;
     std::string assetName() const;
     AssetLoader* loader() const;
-    std::string syncDirectory() const;
     ReadyState readyState() const;
 
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);

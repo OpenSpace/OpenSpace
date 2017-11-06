@@ -117,7 +117,7 @@ private:
     std::vector<std::string> _backwardScripts;
     
     int _currentIndex = 0;
-    double _currentTime;
+    double _currentTime = 0;
 
 };
 

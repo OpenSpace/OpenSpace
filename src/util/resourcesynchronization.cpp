@@ -23,6 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/util/resourcesynchronization.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
+#include <modules/sync/syncmodule.h>
 
 #include <openspace/util/factorymanager.h>
 #include <openspace/documentation/documentationengine.h>
@@ -89,6 +92,7 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
         return nullptr;
     }
 
+    const SyncModule* syncModule = OsEng.moduleEngine().module<SyncModule>();
     return result;
 }
 
@@ -114,13 +118,6 @@ float ResourceSynchronization::progress() {
 void ResourceSynchronization::updateProgress(float t) {
     _progress = std::min(1.0f, std::max(t, 0.0f));
 }
-
-void ResourceSynchronization::setSynchronizationOptions(
-    openspace::ResourceSynchronizationOptions opt)
-{
-    _synchronizationOptions = std::move(opt);
-}
-
 
 // SynchronizationJob methods
 

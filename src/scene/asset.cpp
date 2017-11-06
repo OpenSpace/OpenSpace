@@ -57,19 +57,6 @@ std::string Asset::resolveLocalResource(std::string resourceName) {
         resourceName;
 }
 
-std::string Asset::syncDirectory() const {
-    std::string currentAssetDirectory = assetDirectory();
-    std::string rootAssetDirectory = loader()->assetRootDirectory();
-    std::string relativePath = FileSys.relativePath(currentAssetDirectory,
-                                                    rootAssetDirectory);
-
-    return loader()->syncRootDirectory() +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        relativePath +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        ghoul::filesystem::File(_assetPath).baseName();
-}
-
 Asset::ReadyState Asset::readyState() const {
     return _readyState;
 }

@@ -22,67 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
-#define __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
+#ifndef __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
+#define __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 
-#include <openspace/util/concurrentjobmanager.h>
+#include <string>
+#include <memory>
 
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/misc/dictionary.h>
-
-#include <openspace/documentation/documentation.h>
+namespace libtorrent {
+    class session;
+}
 
 namespace openspace {
 
-class TorrentClient;
-
-class ResourceSynchronization;
-
-struct SynchronizationProduct {
-    ResourceSynchronization* synchronization;
+struct Torrent {
+    std::string _torrentFile;
+    std::string _destination;
 };
 
-class SynchronizationJob : public Job<SynchronizationProduct> {
+class TorrentClient {
 public:
-    SynchronizationJob(ResourceSynchronization* synchronization);
-    void execute() override;
-    std::shared_ptr<SynchronizationProduct> product() override;
+    TorrentClient();
+    ~TorrentClient();
+    void initialize();
+    int addTorrent(std::string torrentFile, std::string destination);
+    void removeTorrent(int id);
 private:
-    ResourceSynchronization* _synchronization;
+    std::unique_ptr<libtorrent::session> _session;
 };
-
-class ResourceSynchronization
-    : public std::enable_shared_from_this<ResourceSynchronization>
-{
-public:
-    static documentation::Documentation Documentation();
-    static std::unique_ptr<ResourceSynchronization> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
-
-    ResourceSynchronization();
-    virtual ~ResourceSynchronization();
-    virtual void synchronize() = 0;
-    virtual std::string directory() = 0;
-
-    void wait();
-    bool isResolved();
-    void resolve();
-    float progress();
-    void updateProgress(float t);
-    std::shared_ptr<SynchronizationJob> job();
-
-private:
-    std::shared_ptr<SynchronizationJob> _job;
-    std::atomic<bool> _started;
-    std::atomic<bool> _resolved;
-    std::atomic<float> _progress;
-};
-
-
-
-
-
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
+#endif // __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__

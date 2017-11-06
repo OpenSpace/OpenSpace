@@ -1,0 +1,8 @@
+--local assetHelper = asset.import('assethelper')
+
+local kernelsPath = asset.syncedResource({
+    Type = "TorrentSynchronization",
+    TorrentFile = asset.localResource("new_horizons_kernels.torrent")
+})
+
+--AssetHelper.registerSpiceKernels(asset, kernels)

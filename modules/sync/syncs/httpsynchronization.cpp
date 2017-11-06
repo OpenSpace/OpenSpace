@@ -24,7 +24,12 @@
 
 #include "httpsynchronization.h"
 
+#include <modules/sync/syncmodule.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/documentation/verifier.h>
@@ -56,6 +61,13 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict)
 
     _identifier = dict.value<std::string>(KeyIdentifier);
     _version = static_cast<int>(dict.value<double>(KeyVersion));
+
+    // Configure synchronization based on global settings in SyncModule 
+    // TODO: For testability and decreaing deps, make it possible to inject this instead.
+    // For example, allow this configuration to be done by the TemplateFactory.
+    const SyncModule* syncModule = OsEng.moduleEngine().module<SyncModule>();
+    _synchronizationRoot = syncModule->synchronizationRoot();
+    _synchronizationRepositories = syncModule->httpSynchronizationRepositories();
 }
 
 documentation::Documentation HttpSynchronization::Documentation() {
@@ -82,7 +94,7 @@ documentation::Documentation HttpSynchronization::Documentation() {
 
 std::string HttpSynchronization::directory() {
     ghoul::filesystem::Directory d(
-        _synchronizationOptions.synchronizationRoot +
+        _synchronizationRoot +
         ghoul::filesystem::FileSystem::PathSeparator +
         "http" +
         ghoul::filesystem::FileSystem::PathSeparator +
@@ -115,7 +127,7 @@ std::vector<std::string> HttpSynchronization::fileListUrls() {
         "&" + QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);
 
     std::vector<std::string> urls;
-    for (const auto& repoUrl : _synchronizationOptions.httpSynchronizationRepositories) {
+    for (const auto& repoUrl : _synchronizationRepositories) {
         urls.push_back(repoUrl + query);
     }
 
@@ -141,7 +153,8 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     std::vector<std::thread> downloadThreads;
     std::string line = "";
     while (fileList >> line) {
-        std::string filename = ghoul::filesystem::File(line, ghoul::filesystem::File::RawPath::Yes).filename();
+        size_t lastSlash = line.find_last_of('/');
+        std::string filename = line.substr(lastSlash + 1);
         
         std::string fileDestination = directory() +
         ghoul::filesystem::FileSystem::PathSeparator +

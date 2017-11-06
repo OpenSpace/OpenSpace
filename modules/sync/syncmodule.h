@@ -22,25 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SYNCMODULE___H__
-#define __OPENSPACE_MODULE_SPACE___SYNCMODULE___H__
+#ifndef __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+#define __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
+#include <modules/sync/torrentclient.h>
 
 namespace openspace {
 
 class SyncModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "Sync";
-
     SyncModule();
     virtual ~SyncModule() = default;
     std::vector<documentation::Documentation> documentations() const override;
-
+    std::string synchronizationRoot() const;
+    std::vector<std::string> httpSynchronizationRepositories() const;
+    TorrentClient* torrentClient();
 protected:
     void internalInitialize() override;
+private:
+    TorrentClient _torrentClient;
+    std::vector<std::string> _httpSynchronizationRepositories;
+    std::string _synchronizationRoot;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___SYNCMODULE___H__
+#endif // __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__

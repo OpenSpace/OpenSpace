@@ -24,18 +24,20 @@
 
 #include <modules/sync/syncmodule.h>
 
+#include <modules/sync/syncs/httpsynchronization.h>
+#include <modules/sync/syncs/torrentsynchronization.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
 #include <openspace/util/resourcesynchronization.h>
 
-#include <modules/sync/syncs/httpsynchronization.h>
-//#include <modules/sync/syncs/resourcesyncrhonization.h>
-//#include <modules/sync/syncs/torrentsyncrhonization.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
@@ -48,14 +50,45 @@ void SyncModule::internalInitialize() {
     ghoul_assert(fSynchronization, "ResourceSynchronization factory was not created");
 
     fSynchronization->registerClass<HttpSynchronization>("HttpSynchronization");
+    fSynchronization->registerClass<TorrentSynchronization>("TorrentSynchronization");
+
+    _synchronizationRoot = FileSys.absPath("${SYNC}");
+    _torrentClient.initialize();
+
+    if (!OsEng.configurationManager().hasKey(
+        ConfigurationManager::KeyHttpSynchronizationRepositories))
+    {
+        return;
+    }
+
+    ghoul::Dictionary dictionary = OsEng.configurationManager().value<ghoul::Dictionary>(
+        ConfigurationManager::KeyHttpSynchronizationRepositories
+    );
+    for (std::string key : dictionary.keys()) {
+        _httpSynchronizationRepositories.push_back(
+            dictionary.value<std::string>(key)
+        );
+    }
 }
 
 std::vector<documentation::Documentation> SyncModule::documentations() const {
     return {
-        HttpSynchronization::Documentation()
-        //ResourceSynchronization::Documentation(),
-        //TorrentSynchronization::Documentation()
+        HttpSynchronization::Documentation(),
+        TorrentSynchronization::Documentation()
     };
+}
+
+std::string SyncModule::synchronizationRoot() const
+{
+    return _synchronizationRoot;
+}
+
+std::vector<std::string> SyncModule::httpSynchronizationRepositories() const {
+    return _httpSynchronizationRepositories;
+}
+
+TorrentClient* SyncModule::torrentClient() { 
+    return &_torrentClient;
 }
 
 } // namespace openspace

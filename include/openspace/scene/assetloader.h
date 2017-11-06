@@ -63,8 +63,7 @@ public:
      */
     AssetLoader(
         ghoul::lua::LuaState& luaState,
-        std::string assetRoot,
-        ResourceSynchronizationOptions syncOptions
+        std::string assetRoot
     );
 
     /**
@@ -122,11 +121,6 @@ public:
     std::shared_ptr<Asset> rootAsset() const;
 
     /**
-     * Return the sync root directory
-     */
-    const std::string& syncRootDirectory();
-
-    /**
     * Return the asset root directory
     */
     const std::string& assetRootDirectory();
@@ -178,7 +172,6 @@ private:
 
     AssetSynchronizer* _assetSynchronizer;
     std::string _assetRootDirectory;
-    ResourceSynchronizationOptions _synchronizationOptions;
     ghoul::lua::LuaState* _luaState;
 
     // References to lua values

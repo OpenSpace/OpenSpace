@@ -51,11 +51,11 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-#include <libtorrent/entry.hpp>
-#include <libtorrent/bencode.hpp>
-#include <libtorrent/session.hpp>
-#include <libtorrent/alert_types.hpp>
-#include <libtorrent/torrent_info.hpp>
+#include <modules/sync/libtorrent/entry.hpp>
+#include <modules/sync/libtorrent/bencode.hpp>
+#include <modules/sync/libtorrent/session.hpp>
+#include <modules/sync/libtorrent/alert_types.hpp>
+#include <modules/sync/libtorrent/torrent_info.hpp>
 
 #include <fstream>
 #include <mutex>

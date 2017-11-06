@@ -50,6 +50,8 @@ private:
 
     std::string _identifier;
     int _version;
+    std::string _synchronizationRoot;
+    std::vector<std::string> _synchronizationRepositories;
 };
 
 } // namespace openspace

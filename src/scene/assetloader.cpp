@@ -71,13 +71,11 @@ namespace openspace {
 
 AssetLoader::AssetLoader(
     ghoul::lua::LuaState& luaState,
-    std::string assetRootDirectory,
-    ResourceSynchronizationOptions syncOptions
+    std::string assetRootDirectory
 )
     : _luaState(&luaState)
     , _rootAsset(std::make_shared<Asset>(this))
     , _assetRootDirectory(assetRootDirectory)
-    , _synchronizationOptions(std::move(syncOptions))
 {
     pushAsset(_rootAsset);
 
@@ -226,10 +224,6 @@ std::shared_ptr<Asset> AssetLoader::rootAsset() const {
     return _rootAsset;
 }
 
-const std::string& AssetLoader::syncRootDirectory() {
-    return _synchronizationOptions.synchronizationRoot;
-}
-
 const std::string & AssetLoader::assetRootDirectory()
 {
     return _assetRootDirectory;
@@ -304,7 +298,6 @@ int AssetLoader::syncedResourceLua(Asset* asset) {
     std::shared_ptr<ResourceSynchronization> sync =
         ResourceSynchronization::createFromDictionary(d);
 
-    sync->setSynchronizationOptions(_synchronizationOptions);
     std::string absolutePath = sync->directory();
 
     asset->addSynchronization(sync);

@@ -25,9 +25,33 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 
+#include <openspace/util/resourcesynchronization.h>
+#include <openspace/documentation/documentation.h>
+
+#include <ghoul/misc/dictionary.h>
+
+namespace libtorrent {
+    class session;
+    struct torrent_handle;
+}
+
 namespace openspace {
 
+class TorrentSynchronizationJob;
 
+class TorrentSynchronization : public ResourceSynchronization {
+public:
+    TorrentSynchronization(const ghoul::Dictionary& dict);
+    static documentation::Documentation Documentation();
+
+    std::string directory() override;
+    void synchronize() override;
+
+private:
+    std::string _torrentFilePath;
+    std::string _synchronizationRoot;
+    TorrentClient* _torrentClient;
+};
 
 } // namespace openspace
 
