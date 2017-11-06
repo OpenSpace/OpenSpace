@@ -66,16 +66,17 @@ namespace {
 
     const std::chrono::milliseconds RefreshRate(16);
 
-    bool rectOverlaps(glm::vec4 lhs, glm::vec4 rhs) {
+    bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
+    {
         // Standoff value is in pixels 
         static const float Standoff = 3.f;
         // static const float Standoff = 0.f;
 
-        glm::vec2 lhsLl = lhs.xy() - glm::vec2(Standoff / 2.f);
-        glm::vec2 lhsUr = lhs.zw() + glm::vec2(Standoff / 2.f);
+        lhsLl -= glm::vec2(Standoff / 2.f);
+        lhsUr += glm::vec2(Standoff / 2.f);
         
-        glm::vec2 rhsLl = rhs.xy() - glm::vec2(Standoff / 2.f);
-        glm::vec2 rhsUr = rhs.zw() + glm::vec2(Standoff / 2.f);
+        rhsLl -= glm::vec2(Standoff / 2.f);
+        rhsUr += glm::vec2(Standoff / 2.f);
 
         return !(
             lhsUr.x < rhsLl.x ||
@@ -504,26 +505,25 @@ void LoadingScreen::render() {
                     // Test against logo and text
                     
                     bool logoOverlap = rectOverlaps(
-                        { ndcToScreen(logoLl, res), ndcToScreen(logoUr, res) },
-                        { ll, ur }
+                        ndcToScreen(logoLl, res), ndcToScreen(logoUr, res),
+                        ll, ur
                     );
 
                     bool loadingOverlap = rectOverlaps(
-                        { loadingLl, loadingUr },
-                        { ll, ur }
+                        loadingLl, loadingUr,
+                        ll, ur
                     );
 
                     bool messageOverlap = _showMessage ?
-                        rectOverlaps( { messageLl, messageUr }, { ll, ur } ) :
+                        rectOverlaps(messageLl, messageUr, ll, ur) :
                         false;
 
                     bool barOverlap = _showProgressbar ?
                         rectOverlaps(
-                            {
-                                ndcToScreen(progressbarLl, res), 
-                                ndcToScreen(progressbarUr, res)
-                            },
-                            { ll, ur }
+                            ndcToScreen(progressbarLl, res), 
+                            ndcToScreen(progressbarUr, res),
+                            ll,
+                            ur
                         ) : 
                     false;
 
@@ -535,7 +535,7 @@ void LoadingScreen::render() {
                     // Test against all other boxes
                     bool overlap = false;
                     for (const Item& j : _items) {
-                        overlap |= rectOverlaps( { j.ll, j.ur }, { ll, ur });
+                        overlap |= rectOverlaps(j.ll, j.ur, ll, ur);
 
                         if (overlap) {
                             break;
