@@ -48,16 +48,16 @@
 // #define NO_ERROR 0L
 // #endif
 
+#ifndef _ERRNO
+#define _ERRNO errno
+#endif
+#endif
+
 #ifdef WIN32
 using SocketResultType = int;
 #else
 using SocketResultType = size_t;
 #endif // WIN32
-
-#ifndef _ERRNO
-#define _ERRNO errno
-#endif
-#endif
 
 #ifdef WIN32
 #ifndef WIN32_LEAN_AND_MEAN
