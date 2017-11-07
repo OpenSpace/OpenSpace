@@ -34,6 +34,7 @@ uniform sampler2D spriteTexture;
 uniform sampler2D polygonTexture;
 uniform bool hasColorMap;
 uniform bool hasPolygon;
+uniform float fadeInValue;
 
 Fragment getFragment() {      
    
@@ -49,6 +50,8 @@ Fragment getFragment() {
     } else {
         fullColor = vec4(color.rgb * textureColor.rgb, textureColor.a * alphaValue);
     }
+
+    fullColor.a *= fadeInValue;
 
     if (fullColor.a == 0.f) {
         discard;

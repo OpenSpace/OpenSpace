@@ -24,6 +24,8 @@ return {
                 0.67314530211,    0.73127116582,  0.11008126223, 0.0,
                 0.0,              0.0,            0.0,           1.0
                 },
+            -- Fade in value in the same unit as "Unit"
+            FadeInThreshould = 2.0,
             Unit = "Mpc"
         },
         GuiPath = "/Universe/Galaxies"
@@ -49,6 +51,8 @@ return {
                 0.67314530211,    0.73127116582,  0.11008126223, 0.0,
                 0.0,              0.0,            0.0,           1.0
                 },
+            -- Fade in value in the same unit as "Unit"
+            FadeInThreshould = 0.1,
             Unit = "Mpc",
         },        
         GuiPath = "/Universe/Galaxies"

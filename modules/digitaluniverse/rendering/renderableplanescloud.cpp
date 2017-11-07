@@ -150,6 +150,12 @@ namespace {
         "Debug option for rendering of billboards and texts."
     };
 
+    static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
+        "FadeInThreshould",
+        "Fade-In Threshould",
+        "This value determines percentage of the astronomical object is visible before starting "
+        "fading-in it."
+    };
 
 }  // namespace
 
@@ -239,6 +245,12 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 Optional::Yes,
                 ScaleFactorInfo.description,
             },
+            {
+                FadeInThreshouldInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeInThreshouldInfo.description
+            },
         }
     };
 }
@@ -276,6 +288,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _unit(Parsec)
     , _nValuesPerAstronomicalObject(0)
     , _sluminosity(1.f)
+    , _fadeInThreshold(0.0f)
     , _transformationMatrix(glm::dmat4(1.0))        
 {
     documentation::testSpecificationAndThrow(
@@ -413,6 +426,10 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     if (dictionary.hasKey(ScaleLuminosityInfo.identifier)) {
         _sluminosity = static_cast<float>(dictionary.value<double>(ScaleLuminosityInfo.identifier));
     }
+
+    if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
+        _fadeInThreshold = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
+    }
 }
 
 bool RenderablePlanesCloud::isReady() const {
@@ -467,7 +484,8 @@ void RenderablePlanesCloud::deinitialize() {
 
 void RenderablePlanesCloud::renderPlanes(const RenderData&,
                                          const glm::dmat4& modelViewMatrix,
-                                         const glm::dmat4& projectionMatrix)
+                                         const glm::dmat4& projectionMatrix,
+                                         const float fadeInVariable)
 {
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabled(GL_BLEND);
@@ -498,6 +516,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
     _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);
+    _program->setUniform("fadeInValue", fadeInVariable);
     //_program->setUniform("minPlaneSize", 1.f); // in pixels
     
     //bool usingFramebufferRenderer =
@@ -602,6 +621,47 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
 }
 
 void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
+    float scale = 0.0;
+    switch (_unit) {
+    case Meter:
+        scale = 1.0;
+        break;
+    case Kilometer:
+        scale = 1e3;
+        break;
+    case Parsec:
+        scale = PARSEC;
+        break;
+    case Kiloparsec:
+        scale = 1e3 * PARSEC;
+        break;
+    case Megaparsec:
+        scale = 1e6 * PARSEC;
+        break;
+    case Gigaparsec:
+        scale = 1e9 * PARSEC;
+        break;
+    case GigalightYears:
+        scale = 306391534.73091 * PARSEC;
+        break;
+    }
+
+    float fadeInVariable = 1.0f;
+    if (_fadeInThreshold > 0.0) {
+        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
+        double term = std::exp(distCamera / scale - _fadeInThreshold);
+        float func = static_cast<float>(term / (term + 1.0));
+
+        // Let's not waste performance
+        if (func < 0.001) {
+            return;
+        }
+
+        if (!std::isinf(term)) {
+            fadeInVariable = func;
+        }
+    }
+
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -622,7 +682,7 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
 
   
     if (_hasSpeckFile) {
-        renderPlanes(data, modelViewMatrix, projectionMatrix);            
+        renderPlanes(data, modelViewMatrix, projectionMatrix, fadeInVariable);            
     }
     
     if (_hasLabel) {

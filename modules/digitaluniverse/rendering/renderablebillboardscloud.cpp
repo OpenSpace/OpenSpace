@@ -165,6 +165,13 @@ namespace {
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
+
+    static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
+        "FadeInThreshould",
+        "Fade-In Threshould",
+        "This value determines percentage of the astronomical object is visible before starting "
+        "fading-in it."
+    };
 }  // namespace
 
 namespace openspace {
@@ -271,6 +278,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 Optional::Yes,
                 TransformationMatrixInfo.description
             },
+            {
+                FadeInThreshouldInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeInThreshouldInfo.description
+            },
         }
     };
 }
@@ -315,7 +328,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _labelFile("")
     , _colorOptionString("")
     , _unit(Parsec)
-    , _nValuesPerAstronomicalObject(0)
+    , _nValuesPerAstronomicalObject(0)    
+    , _fadeInThreshold(0.0)
     , _transformationMatrix(glm::dmat4(1.0))
     , _vao(0)
     , _vbo(0)
@@ -485,6 +499,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
         _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
     }
+
+    if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
+        _fadeInThreshold = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
+    }
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -549,7 +567,8 @@ void RenderableBillboardsCloud::deinitialize() {
 }
 
 void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-    const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+    const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+    const float fadeInVariable) {
     glDepthMask(false);
 
     // Saving current OpenGL state
@@ -606,6 +625,8 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
     _program->setUniform("up", orthoUp);
     _program->setUniform("right", orthoRight);
 
+    _program->setUniform("fadeInValue", fadeInVariable);
+ 
     ghoul::opengl::TextureUnit spriteTextureUnit;
     if (_hasSpriteTexture) {
         spriteTextureUnit.activate();
@@ -620,7 +641,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
         _program->setUniform("polygonTexture", polygonTextureUnit);
         _program->setUniform("hasPolygon", _hasPolygon);
     }
-
 
     if (_hasColorMapFile) {
         _program->setUniform("hasColorMap", true);
@@ -703,6 +723,48 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
 }
 
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
+    
+    float scale = 0.0;
+    switch (_unit) {
+    case Meter:
+        scale = 1.0;
+        break;
+    case Kilometer:
+        scale = 1e3;
+        break;
+    case Parsec:
+        scale = PARSEC;
+        break;
+    case Kiloparsec:
+        scale = 1e3 * PARSEC;
+        break;
+    case Megaparsec:
+        scale = 1e6 * PARSEC;
+        break;
+    case Gigaparsec:
+        scale = 1e9 * PARSEC;
+        break;
+    case GigalightYears:
+        scale = 306391534.73091 * PARSEC;
+        break;
+    }
+
+    float fadeInVariable = 1.0f;
+    if (_fadeInThreshold > 0.0) {
+        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
+        double term = std::exp(distCamera / scale - _fadeInThreshold);
+        float func = static_cast<float>(term / (term + 1.0));
+
+        // Let's not waste performance
+        if (func < 0.001) {
+            return;
+        }
+
+        if (!std::isinf(term)) {
+            fadeInVariable = func;
+        }
+    }
+    
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -728,7 +790,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
       
     if (_hasSpeckFile) {
-        renderBillboards(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp);
+        renderBillboards(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp, fadeInVariable);
     }
         
     if (_drawLabels && _hasLabel) {

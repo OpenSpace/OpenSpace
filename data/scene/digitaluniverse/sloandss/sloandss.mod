@@ -14,6 +14,8 @@ return {
             ColorOption = {"redshift", "prox5Mpc"},
             ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
             Texture = "textures/point3.png",
+            -- Fade in value in the same unit as "Unit"
+            FadeInThreshould = 40.0,
             Unit = "Mpc"
         },
         GuiPath = "/Universe/Galaxies"

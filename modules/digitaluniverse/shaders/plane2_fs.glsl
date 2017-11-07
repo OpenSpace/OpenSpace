@@ -30,6 +30,7 @@ in vec2 vs_st;
 uniform sampler2D galaxyTexture;
 //uniform bool additiveBlending;
 uniform float alphaValue;
+uniform float fadeInValue;
 
 
 Fragment getFragment() {
@@ -43,6 +44,8 @@ Fragment getFragment() {
 
     frag.color = texture(galaxyTexture, vs_st);
     frag.color *= alphaValue;
+
+    frag.color.a *= fadeInValue;
 
     if (frag.color.a == 0.0) {
         discard;

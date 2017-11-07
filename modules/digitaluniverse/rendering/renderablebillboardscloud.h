@@ -89,7 +89,8 @@ private:
     void loadPolygonGeometryForRendering();
     void renderPolygonGeometry(GLuint vao);
     void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-        const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+        const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        const float fadeInVariable);
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix, 
         const glm::vec3& orthoRight, const glm::vec3& orthoUp);
 
@@ -150,6 +151,8 @@ private:
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::vector<glm::vec2> _colorRangeData;
+
+    float _fadeInThreshold;
 
     int _nValuesPerAstronomicalObject;
 

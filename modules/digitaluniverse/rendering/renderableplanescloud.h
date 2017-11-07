@@ -93,7 +93,7 @@ namespace openspace {
         void deleteDataGPU();
         void createPlanes();        
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
-            const glm::dmat4& projectionMatrix);
+            const glm::dmat4& projectionMatrix, const float fadeInVariable);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
             const glm::vec3& orthoRight, const glm::vec3& orthoUp);
 
@@ -144,6 +144,7 @@ namespace openspace {
         int _nValuesPerAstronomicalObject;
 
         float _sluminosity;
+        float _fadeInThreshold;
 
         glm::dmat4 _transformationMatrix;
 
