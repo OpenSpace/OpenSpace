@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-uniform float exposure;
+//uniform float exposure;
 uniform float gamma;
 
-vec3 exponentialToneMapping(vec3 color) {
+vec3 exponentialToneMapping(vec3 color, const float exposure) {
   color *= exposure;
   
   color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.r);
@@ -35,21 +35,21 @@ vec3 exponentialToneMapping(vec3 color) {
   return color;
 }
 
-vec3 linearToneMapping(vec3 color) {
-  float tExposure = 1.0f;
+vec3 linearToneMapping(vec3 color, const float exposure) {
+  float tExposure = 0.08f;
   color = clamp(tExposure * color, 0.0f, 1.0f);
   color = pow(color, vec3(1.0f / gamma));
   return color;
 }
 
-vec3 simpleReinhardToneMapping(vec3 color) {
+vec3 simpleReinhardToneMapping(vec3 color, const float exposure) {
   float tExposure = 1.5f;
   color *= tExposure/(1.0f + color / tExposure);
   color = pow(color, vec3(1. / gamma));
   return color;
 }
 
-vec3 lumaBasedReinhardToneMapping(vec3 color)
+vec3 lumaBasedReinhardToneMapping(vec3 color, const float exposure)
 {
   float luma = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
   float toneMappedLuma = luma / (1.0f + luma);
@@ -58,7 +58,7 @@ vec3 lumaBasedReinhardToneMapping(vec3 color)
   return color;
 }
 
-vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color)
+vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color, const float exposure)
 {
   float white = 4.0f;
   //float luma = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
@@ -69,21 +69,21 @@ vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color)
   return color;
 }
 
-vec3 RomBinDaHouseToneMapping(vec3 color)
+vec3 RomBinDaHouseToneMapping(vec3 color, const float exposure)
 {
   color = exp( -1.0f / ( 2.72f * color + 0.15f ) );
   color = pow(color, vec3(1.7 / gamma));
   return color;
 }
 
-vec3 filmicToneMapping(vec3 color)
+vec3 filmicToneMapping(vec3 color, const float exposure)
 {
   color = max(vec3(0.0f), color - vec3(0.04f));
   color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 20.0f) + 0.06f);
   return color;
 }
 
-vec3 Uncharted2ToneMapping(vec3 color)
+vec3 Uncharted2ToneMapping(vec3 color, const float exposure)
 {
   float A = 0.15f;
   float B = 0.50f;
@@ -101,19 +101,18 @@ vec3 Uncharted2ToneMapping(vec3 color)
   return color;
 }
 
-vec3 jToneMapping(const vec3 color) {
+vec3 jToneMapping(const vec3 color, const float exposure) {
   return 1.0 - exp(-exposure * color);
 }
 
-vec3 HDR(vec3 color) {
-  //return exponentialToneMapping(color);  
-  //return linearToneMapping(color);
-  //return simpleReinhardToneMapping(color);
-  //return lumaBasedReinhardToneMapping(color);
-  //return whitePreservingLumaBasedReinhardToneMapping(color);
-  //return RomBinDaHouseToneMapping(color);		
-  //return filmicToneMapping(color);
-  //return Uncharted2ToneMapping(color);
-  return jToneMapping(color);
-  
+vec3 HDR(vec3 color, float exposure) {
+  //return exponentialToneMapping(color, exposure);  
+  //return linearToneMapping(color, exposure);
+  //return simpleReinhardToneMapping(color, exposure);
+  //return lumaBasedReinhardToneMapping(color, exposure);
+  //return whitePreservingLumaBasedReinhardToneMapping(color, exposure);
+  //return RomBinDaHouseToneMapping(color, exposure);		
+  //return filmicToneMapping(color, exposure);
+  //return Uncharted2ToneMapping(color, exposure);
+  return jToneMapping(color, exposure); 
 }

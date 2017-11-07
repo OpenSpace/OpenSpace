@@ -46,13 +46,7 @@ struct DeferredcastData;
 struct ShadowConfiguration;
 
 class AtmosphereDeferredcaster : public Deferredcaster {
-public:
-    enum AtmospherRenderableClass {
-        NoRenderableClass = 0,
-        RenderablePlanet = 1,
-        RenderableGlobe = 2
-    };
-
+public:    
     AtmosphereDeferredcaster();
     virtual ~AtmosphereDeferredcaster() = default;
 
@@ -82,15 +76,11 @@ public:
     void setMieHeightScale(const float mieHeightScale);
     void setMiePhaseConstant(const float miePhaseConstant);
     void setSunRadianceIntensity(const float sunRadiance);
-    void setHDRConstant(const float hdrConstant);
-    void setBackgroundConstant(const float backgroundConstant);
-    void setGammaConstant(const float gammaConstant);
     void setRayleighScatteringCoefficients(const glm::vec3 & rayScattCoeff);
     void setOzoneExtinctionCoefficients(const glm::vec3 & ozoneExtCoeff);
     void setMieScatteringCoefficients(const glm::vec3 & mieScattCoeff);
     void setMieExtinctionCoefficients(const glm::vec3 & mieExtCoeff);
     void setEllipsoidRadii(const glm::dvec3 & radii);
-    void setRenderableClass(const AtmosphereDeferredcaster::AtmospherRenderableClass rc);
     void setShadowConfigArray(const std::vector<ShadowConfiguration>& shadowConfigArray);
     void setHardShadows(const bool enabled);
     void enableSunFollowing(const bool enable);
@@ -165,9 +155,6 @@ private:
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
-    float _exposureConstant;
-    float _exposureBackgroundConstant;
-    float _gammaConstant;
     
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _ozoneExtinctionCoeff;
@@ -203,10 +190,7 @@ private:
 
     // Atmosphere Debugging
     float _calculationTextureScale;
-    bool _saveCalculationTextures;
-
-    AtmospherRenderableClass _renderableClass;
-
+    bool _saveCalculationTextures;   
 };
 
 } // openspace

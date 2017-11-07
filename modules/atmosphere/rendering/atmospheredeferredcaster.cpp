@@ -150,9 +150,6 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _mieExtinctionCoeff(glm::vec3(0.f))
     , _ellipsoidRadii(glm::dvec3(0.0))
     , _sunRadianceIntensity(50.0f)
-    , _exposureConstant(0.4f)
-    , _exposureBackgroundConstant(1.8f)
-    , _gammaConstant(1.8f)
     , _hardShadowsEnabled(false)    
     , _calculationTextureScale(1.0)
     , _saveCalculationTextures(false)    
@@ -199,7 +196,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
     glm::dvec3 tPlanetPosWorld = glm::dvec3(_modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0));
 
     if (glm::distance(tPlanetPosWorld, renderData.camera.positionVec3()) > DISTANCE_CULLING) {
-        program.setUniform("cullAtmosphere", 1);
+        program.setUniform("cullAtmosphere", 1);        
     }
     else {
         glm::dmat4 MV = glm::dmat4(renderData.camera.sgctInternal.projectionMatrix()) * renderData.camera.combinedViewMatrix();
@@ -222,11 +219,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
             program.setUniform("ozoneLayerEnabled", _ozoneEnabled);
             program.setUniform("HO", _ozoneHeightScale);
             program.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
-
-            program.setUniform("exposure", _exposureConstant);
-            program.setUniform("backgroundExposure", _exposureBackgroundConstant);
-            program.setUniform("gamma", _gammaConstant);
-
+            
             program.setUniform("TRANSMITTANCE_W", _transmittance_table_width);
             program.setUniform("TRANSMITTANCE_H", _transmittance_table_height);
             program.setUniform("SKY_W", _irradiance_table_width);
@@ -450,18 +443,6 @@ void AtmosphereDeferredcaster::setMiePhaseConstant(const float miePhaseConstant)
 
 void AtmosphereDeferredcaster::setSunRadianceIntensity(const float sunRadiance) {
     _sunRadianceIntensity = sunRadiance;
-}
-
-void AtmosphereDeferredcaster::setHDRConstant(const float hdrConstant) {
-    _exposureConstant = hdrConstant;
-}
-
-void AtmosphereDeferredcaster::setBackgroundConstant(const float backgroundConstant) {
-    _exposureBackgroundConstant = backgroundConstant;
-}
-
-void AtmosphereDeferredcaster::setGammaConstant(const float gammaConstant) {
-    _gammaConstant = gammaConstant;
 }
 
 void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(const glm::vec3 & rayScattCoeff) {
@@ -1165,9 +1146,6 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(std::unique_p
     shaderProg->setUniform("betaMieExtinction", _mieExtinctionCoeff);
     shaderProg->setUniform("mieG", _miePhaseConstant);
     shaderProg->setUniform("sunRadiance", _sunRadianceIntensity);
-    shaderProg->setUniform("exposure", _exposureConstant);
-    shaderProg->setUniform("backgroundExposure", _exposureBackgroundConstant);
-    shaderProg->setUniform("gamma", _gammaConstant);
     shaderProg->setUniform("TRANSMITTANCE_W", (int)_transmittance_table_width);
     shaderProg->setUniform("TRANSMITTANCE_H", (int)_transmittance_table_height);
     shaderProg->setUniform("SKY_W", (int)_irradiance_table_width);

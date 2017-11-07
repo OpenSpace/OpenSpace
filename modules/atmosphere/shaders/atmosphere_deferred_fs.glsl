@@ -71,8 +71,12 @@ uniform int nAaSamples;
 uniform double msaaSamplePatter[48];
 uniform int cullAtmosphere;
 
+// The following uniforms are
+// set into the current Renderer
 // Background exposure hack
-uniform float backgroundExposure;
+uniform float backgroundConstant;
+uniform bool firstPaint;
+uniform float atmExposure;
 
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
@@ -429,7 +433,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
-        return ((r-Rg)/(Rt-Rg))*spaceColor.rgb * backgroundExposure + finalScatteringRadiance;
+        return ((r-Rg)/(Rt-Rg))*spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
     }
     
 }
@@ -539,14 +543,34 @@ void main() {
         // First we determine if the pixel is complex (different fragments on it)
         bool complex = false;
         vec4 oldColor, currentColor;
-        oldColor = texelFetch(mainColorTexture, ivec2(gl_FragCoord), 0);
+        //vec4 colorArray[16];
+        //int colorIndexArray[16];
+
+        oldColor = texelFetch(mainColorTexture, ivec2(gl_FragCoord), 0);        
+        //colorArray[0] = oldColor;
+        //colorIndexArray[0] = 0;
         for (int i = 1; i < nAaSamples; i++) {
             //vec4 normal = texelFetch(mainNormalTexture, ivec2(gl_FragCoord), i);
             vec4 currentColor  = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+            //colorArray[i] = currentColor;
             if (currentColor != oldColor) {
                 complex = true;
                 break;
-            }
+                // for (int c = 0; c < nAaSamples; c++) {
+                //     if (currentColor == colorArray[c]) {
+                //         colorIndexArray[i] = c;
+                //         break;
+                //     }
+                // }                
+            } 
+            //else {
+            //     for (int c = 0; c < nAaSamples; c++) {
+            //         if (currentColor == colorArray[c]) {
+            //             colorIndexArray[i] = c;
+            //             break;
+            //         }
+            //     }
+            // }            
             oldColor = currentColor;
         }
 
@@ -616,7 +640,7 @@ void main() {
                 fragObjectCoords.xyz *= 0.001;
                 
                 if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {
-                    atmosphereFinalColor += vec4(HDR(color.xyz * backgroundExposure), color.a);                      
+                    atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                      
                     //discard;
                 } else {
                     // Following paper nomenclature      
@@ -658,27 +682,33 @@ void main() {
                     vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
                     
                     // Final Color of ATM plus terrain:
-                    vec4 finalRadiance  = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+                    vec4 finalRadiance  = vec4(HDR(inscatterColor + groundColor + sunColor, atmExposure), 1.0);
                     
                     atmosphereFinalColor += finalRadiance;
                 }
             } 
             else { // no intersection
                 //discard;
-                atmosphereFinalColor += vec4(HDR(color.xyz * backgroundExposure), color.a);
+                atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
             }
         }  
 
-        renderTarget = atmosphereFinalColor / float(nSamples);                    
+        renderTarget = atmosphereFinalColor / float(nSamples);        
     } 
     else { // culling
-        discard;
-        // vec4 color = vec4(0.0f);
-        // for (int i = 0; i < nAaSamples; i++) {
-        //     color += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
-        // }
-        // color /= float(nAaSamples);
-        // renderTarget = vec4(HDR(color.xyz * backgroundExposure), color.a);
+        if (firstPaint) {
+            vec4 bColor = vec4(0.0f);
+            for (int f = 0; f < nAaSamples; f++) {
+                bColor += texelFetch(mainColorTexture, ivec2(gl_FragCoord), f);
+            }
+            bColor /= float(nAaSamples);
+            renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
+        } 
+        else {
+            discard;
+        }
+        //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
+        
     }
 }
 

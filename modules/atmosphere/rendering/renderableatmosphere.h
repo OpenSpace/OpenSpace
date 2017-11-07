@@ -92,9 +92,7 @@ public:
 private: 
     glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& transformData);
     void updateAtmosphereParameters();
-    
-    AtmosphereDeferredcaster::AtmospherRenderableClass _atmosphereType;
-
+        
     properties::FloatProperty _atmosphereHeightP;
     properties::FloatProperty _groundAverageReflectanceP;
     properties::FloatProperty _groundRadianceEmittionP;
@@ -114,8 +112,6 @@ private:
     properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
     properties::FloatProperty _mieAsymmetricFactorGP;
     properties::FloatProperty _sunIntensityP;
-    properties::FloatProperty _hdrExpositionP;
-    properties::FloatProperty _gammaConstantP;    
     properties::BoolProperty  _sunFollowingCameraEnabledP;
     properties::BoolProperty  _hardShadowsEnabledP;
 
@@ -131,10 +127,7 @@ private:
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
-    float _hdrConstant;
-    float _exposureBackgroundConstant;
-    float _gammaConstant;
-
+    
     glm::vec3 _mieExtinctionCoeff;
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _ozoneExtinctionCoeff;

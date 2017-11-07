@@ -277,8 +277,6 @@ namespace openspace {
         , _mieScatteringExtinctionPropCoefficientP(MieScatteringExtinctionPropCoeffInfo, 0.9f, 0.01f, 1.0f)
         , _mieAsymmetricFactorGP(MieAsymmetricFactorGInfo, 0.85f, -1.0f, 1.0f)
         , _sunIntensityP(SunIntensityInfo, 50.0f, 0.1f, 1000.0f)
-        , _hdrExpositionP(AtmosphereExposureInfo, 0.4f, 0.01f, 5.0f)
-        , _gammaConstantP(AtmosphereGammaInfo, 1.8f, 0.1f, 3.0f)
         , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
         , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
         , _atmosphereEnabled(false)
@@ -292,10 +290,7 @@ namespace openspace {
         , _ozoneHeightScale(0.f)
         , _mieHeightScale(0.f)
         , _miePhaseConstant(0.f)
-        , _sunRadianceIntensity(50.f)
-        , _hdrConstant(0.f)
-        , _exposureBackgroundConstant(2.8f)
-        , _gammaConstant(1.8f)
+        , _sunRadianceIntensity(50.f)        
         , _mieExtinctionCoeff(glm::vec3(0.f))
         , _rayleighScatteringCoeff(glm::vec3(0.f))
         , _ozoneExtinctionCoeff(glm::vec3(0.f))
@@ -503,14 +498,6 @@ namespace openspace {
                 if (ImageDictionary.getValue(keyToneMappingOp, _preCalculatedTexturesScale)) {
                     LDEBUG("Atmosphere Texture Scaled to " << _preCalculatedTexturesScale);
                 }
-
-                if (ImageDictionary.getValue(keyExposure, _hdrConstant)) {
-                    LDEBUG("Saving Precalculated Atmosphere Textures.");
-                }
-
-                if (ImageDictionary.getValue(keyGamma, _gammaConstant)) {
-                    LDEBUG("Saving Precalculated Atmosphere Textures.");
-                }
             }
 
             ghoul::Dictionary debugDictionary;
@@ -609,15 +596,7 @@ namespace openspace {
                 _sunIntensityP = _sunRadianceIntensity;
                 _sunIntensityP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_sunIntensityP);
-
-                _hdrExpositionP = _hdrConstant;
-                _hdrExpositionP.onChange([this](){ updateAtmosphereParameters(); });
-                addProperty(_hdrExpositionP);
                 
-                _gammaConstantP = _gammaConstant;
-                _gammaConstantP.onChange([this](){ updateAtmosphereParameters(); });
-                addProperty(_gammaConstantP);
-
                 _sunFollowingCameraEnabledP = _sunFollowingCameraEnabled;
                 _sunFollowingCameraEnabledP.onChange([this](){ updateAtmosphereParameters(); });
                 addProperty(_sunFollowingCameraEnabledP);
@@ -647,9 +626,6 @@ namespace openspace {
                 _deferredcaster->setMieHeightScale(_mieHeightScale);
                 _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
                 _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
-                _deferredcaster->setHDRConstant(_hdrConstant);
-                _deferredcaster->setBackgroundConstant(_exposureBackgroundConstant);
-                _deferredcaster->setGammaConstant(_gammaConstant);
                 _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
                 _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
                 _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
@@ -714,10 +690,7 @@ namespace openspace {
         if (_deferredcaster) {
             _deferredcaster->setTime(data.time.j2000Seconds());
             glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
-            _deferredcaster->setModelTransform(modelTransform);
-
-            if (_exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground())
-                updateAtmosphereParameters();
+            _deferredcaster->setModelTransform(modelTransform);            
         }        
     }   
 
@@ -726,9 +699,6 @@ namespace openspace {
 
         if (_sunRadianceIntensity != _sunIntensityP ||
             _planetGroundRadianceEmittion != _groundRadianceEmittionP ||
-            _hdrConstant != _hdrExpositionP ||
-            _exposureBackgroundConstant != OsEng.renderEngine().renderer()->hdrBackground() ||
-            _gammaConstant != _gammaConstantP ||
             _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP ||
             _hardShadows != _hardShadowsEnabledP) {
             executeComputation = false;
@@ -752,9 +722,6 @@ namespace openspace {
         _mieExtinctionCoeff         = _mieScatteringCoeff * (1.0f / static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
         _miePhaseConstant           = _mieAsymmetricFactorGP;
         _sunRadianceIntensity       = _sunIntensityP;
-        _hdrConstant                = _hdrExpositionP;
-        _exposureBackgroundConstant = OsEng.renderEngine().renderer()->hdrBackground();
-        _gammaConstant              = _gammaConstantP;
         _sunFollowingCameraEnabled  = _sunFollowingCameraEnabledP;
         _hardShadows                = _hardShadowsEnabledP;
 
@@ -770,9 +737,6 @@ namespace openspace {
             _deferredcaster->setMieHeightScale(_mieHeightScale);
             _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
             _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
-            _deferredcaster->setHDRConstant(_hdrConstant);
-            _deferredcaster->setBackgroundConstant(_exposureBackgroundConstant);
-            _deferredcaster->setGammaConstant(_gammaConstant);
             _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
             _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
