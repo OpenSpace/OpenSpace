@@ -989,6 +989,8 @@ void RenderEngine::renderInformation() {
                     1.0 / OsEng.windowWrapper().averageDeltaTime()
                 );
                 break;
+            case FrametimeType::None:
+                break;
         }
 
         ParallelConnection::Status status = OsEng.parallelConnection().status();

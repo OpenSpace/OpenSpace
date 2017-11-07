@@ -148,6 +148,8 @@ def check_comment(lines):
     endif_line = lines[index[-1]].strip()
 
     if endif_line != '#endif // ' + ifndef_symbol:
+        print(ifndef_symbol)
+        print(endif_line)
         return '#endif line is not correctly formatted'
     else:
         return ''
@@ -207,8 +209,10 @@ def check_naming_convention_subcomponent(lines, component, file):
     subcomponent_part = subcomponent_part[: subcomponent_part.find('_')]
 
     path_part = file.split(os.sep)[1]
+    second_path_part = file.split(os.sep)[2]
 
-    if path_part.upper() != subcomponent_part:
+
+    if (path_part.upper() != subcomponent_part) and (second_path_part.upper() != subcomponent_part):
         return 'Subcomponent naming convention broken: ' + ifndef_symbol
     else:
         return ''

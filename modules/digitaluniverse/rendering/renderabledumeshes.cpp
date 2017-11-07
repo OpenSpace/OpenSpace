@@ -40,7 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 
 #include <glm/gtx/string_cast.hpp>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <array>
 #include <fstream>
@@ -359,7 +359,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary colorDic = dictionary.value<ghoul::Dictionary>(
             MeshColorInfo.identifier
             );
-        for (int i = 0; i < colorDic.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(colorDic.size()); ++i) {
             _meshColorMap.insert({ i + 1,
                 colorDic.value<glm::vec3>(std::to_string(i + 1)) });
         }
@@ -447,7 +447,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     for (auto pair : _renderingMeshesMap) {
         _program->setUniform("color", _meshColorMap[pair.second.colorIndex]);
-        for (int i = 0; i < pair.second.vaoArray.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(pair.second.vaoArray.size()); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);
             switch (pair.second.style)
             {
@@ -936,7 +936,7 @@ void RenderableDUMeshes::createMeshes() {
                 break;
             }
 
-            for (int v = 0; v < it->second.vertices.size(); ++v) {
+            for (int v = 0; v < static_cast<int>(it->second.vertices.size()); ++v) {
                 it->second.vertices[v] *= scale;
             }
                                 

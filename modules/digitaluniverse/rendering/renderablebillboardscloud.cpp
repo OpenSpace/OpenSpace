@@ -40,7 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 
 #include <glm/gtx/string_cast.hpp>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <array>
 #include <fstream>
@@ -386,7 +386,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             ghoul::Dictionary colorOptionDataDic = dictionary.value<ghoul::Dictionary>(
                 ColorOptionInfo.identifier
                 );
-            for (int i = 0; i < colorOptionDataDic.size(); ++i) {
+            for (int i = 0; i < static_cast<int>(colorOptionDataDic.size()); ++i) {
                 std::string colorMapInUseName(
                     colorOptionDataDic.value<std::string>(std::to_string(i + 1)));
                 _colorOption.addOption(i, colorMapInUseName);
@@ -405,7 +405,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             ghoul::Dictionary rangeDataDic = dictionary.value<ghoul::Dictionary>(
                 ColorRangeInfo.identifier
                 );
-            for (int i = 0; i < rangeDataDic.size(); ++i) {                    
+            for (int i = 0; i < static_cast<int>(rangeDataDic.size()); ++i) {
                 _colorRangeData.push_back(
                     rangeDataDic.value<glm::vec2>(std::to_string(i+1)));
             }
@@ -490,7 +490,7 @@ void RenderableBillboardsCloud::initialize() {
     if (!_colorOptionString.empty()) {
         // Following DU behavior here. The last colormap variable 
         // entry is the one selected by default.
-        _colorOption.setValue(_colorRangeData.size()-1);
+        _colorOption = static_cast<int>(_colorRangeData.size() - 1);
     }        
 
     if (_hasPolygon) {
@@ -504,7 +504,9 @@ void RenderableBillboardsCloud::initialize() {
         if (_font == nullptr) {
             size_t _fontSize = 30;
             _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
+                ghoul::fontrendering::FontManager::Outline::Yes,
+                ghoul::fontrendering::FontManager::LoadGlyphs::No
+            );
         }
     }
 }
@@ -683,7 +685,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 viewMatrix = data.camera.viewMatrix();
+    // glm::mat4 viewMatrix = data.camera.viewMatrix();
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
@@ -979,14 +981,14 @@ bool RenderableBillboardsCloud::readColorMapFile() {
         return false;
     }
  
-    std::size_t numberOfColors = 0;
+    int numberOfColors = 0;
 
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line = "";
     while (true) {
-        std::streampos position = file.tellg();
+        // std::streampos position = file.tellg();
         std::getline(file, line);
 
         if (line[0] == '#' || line.empty()) {
@@ -997,15 +999,15 @@ bool RenderableBillboardsCloud::readColorMapFile() {
         std::locale loc;
         if (std::isdigit(line[0], loc)) {
             std::string::size_type sz;
-            numberOfColors = std::stoi(line, &sz);
+            numberOfColors = static_cast<int>(std::stoi(line, &sz));
             break;
         }
         else if (file.eof()) {
             return false;
-        }            
+        }
     }
-        
-    for (auto i = 0; i < numberOfColors; ++i) {
+
+    for (int i = 0; i < numberOfColors; ++i) {
         std::getline(file, line);
         std::stringstream str(line);
             
@@ -1182,7 +1184,7 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
             for (auto pair : _variableDataPositionMap) {
                 int32_t keySize = static_cast<int32_t>(pair.first.size());
                 fileStream.write(reinterpret_cast<const char*>(&keySize), sizeof(int32_t));
-                for (int c = 0; c < pair.first.size(); ++c) {
+                for (int c = 0; c < static_cast<int>(pair.first.size()); ++c) {
                     int32_t keyChar = static_cast<int32_t>(pair.first[c]);
                     fileStream.write(reinterpret_cast<const char*>(&keyChar), sizeof(int32_t));
                 }
@@ -1217,7 +1219,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         glm::vec2 currentColorRange = _colorRangeData[_colorOption.value()];
         float colorMapBinSize = (currentColorRange.y - currentColorRange.x) / static_cast<float>(_colorMapData.size());            
         float bin = colorMapBinSize;
-        for (int i = 0; i < _colorMapData.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(_colorMapData.size()); ++i) {
             colorBins.push_back(bin);
             bin += colorMapBinSize;
         }
@@ -1228,7 +1230,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
             
         if (_hasColorMapFile) {
-            for (auto j = 0; j < 4; ++j) {
+            for (int j = 0; j < 4; ++j) {
                 _slicedData.push_back(position[j]);
             }
             // Finds from which bin to get the color.
@@ -1236,14 +1238,15 @@ void RenderableBillboardsCloud::createDataSlice() {
             // is the outliers color.
             glm::vec4 itemColor;                
             float variableColor = _fullData[i + 3 + colorMapInUse];
-            int c = colorBins.size()-1;
+            int c = static_cast<int>(colorBins.size() - 1);
+            // Float vs int comparison?
             while (variableColor < colorBins[c]) {
                 --c;
                 if (c == 0)
                     break;
             }
                 
-            int colorIndex = c == colorBins.size() - 1 ? 0 : c + 1;
+            int colorIndex = (c == static_cast<int>(colorBins.size())) - 1 ? 0 : c + 1;
                 
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(_colorMapData[colorIndex][j]);

@@ -71,7 +71,9 @@ public:
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
 
+    using Renderer::preRaycast;
     void preRaycast(const RaycasterTask& raycasterTask);
+    using Renderer::postRaycast;
     void postRaycast(const RaycasterTask& raycasterTask);
 
     void update() override;

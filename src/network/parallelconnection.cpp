@@ -35,17 +35,24 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+
 #ifndef SOCKET_ERROR
 #define SOCKET_ERROR (-1)
 #endif
 
 #ifndef INVALID_SOCKET
-#define INVALID_SOCKET (_SOCKET)(~0)
+#define INVALID_SOCKET static_cast<_SOCKET>(~0)
 #endif
 
-#ifndef NO_ERROR
-#define NO_ERROR 0L
-#endif
+// #ifndef NO_ERROR
+// #define NO_ERROR 0L
+// #endif
+
+#ifdef WIN32
+using SocketResultType = int;
+#else
+using SocketResultType = size_t;
+#endif // WIN32
 
 #ifndef _ERRNO
 #define _ERRNO errno
@@ -697,8 +704,7 @@ void ParallelConnection::queueOutMessage(const Message& message) {
     _sendCondition.notify_all();
 }
         
-void ParallelConnection::sendFunc(){
-    int result;
+void ParallelConnection::sendFunc() {
     // While we're connected
     while (_isConnected && !_disconnect) {
         // Wait for signal then lock mutex and send first queued message
@@ -737,7 +743,9 @@ void ParallelConnection::sendFunc(){
                 reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
             );
 
-            result = send(
+            // result is most likely size_t, but send might return a different type on
+            // different platforms
+            auto result = send(
                 _clientSocket,
                 header.data(),
                 static_cast<int>(header.size()),
@@ -976,8 +984,8 @@ void ParallelConnection::listenCommunication() {
 int ParallelConnection::receiveData(_SOCKET& socket, std::vector<char>& buffer,
                                     int length, int flags)
 {
-    int result = 0;
-    int received = 0;
+    SocketResultType result = 0;
+    SocketResultType received = 0;
     while (result < length) {
         received = recv(socket, buffer.data() + result, length - result, flags);
 
@@ -992,9 +1000,9 @@ int ParallelConnection::receiveData(_SOCKET& socket, std::vector<char>& buffer,
         }
     }
 
-    return result;
+    return static_cast<int>(result);
 }
-        
+
 void ParallelConnection::setPort(std::string port){
     _port = std::move(port);
 }

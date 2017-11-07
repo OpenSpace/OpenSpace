@@ -40,7 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 
 #include <glm/gtx/string_cast.hpp>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <array>
 #include <fstream>
@@ -1040,9 +1040,9 @@ void RenderablePlanesCloud::createPlanes() {
         LDEBUG("Creating planes");
 
         int planeNumber = 0;
-        for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
+        for (int p = 0; p < static_cast<int>(_fullData.size()); p += _nValuesPerAstronomicalObject) {
             glm::vec4 transformedPos = glm::vec4(_transformationMatrix * 
-                glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));                
+                glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));
 
             // Plane vectors u and v
             glm::vec4 u = glm::vec4(_transformationMatrix *

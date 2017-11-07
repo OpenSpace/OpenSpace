@@ -919,15 +919,43 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     const unsigned int MaxObj = 64;
     const unsigned int WinSiz = 10000;
     
+#if defined __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif defined __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
-    
+
+#if defined __clang__
+#pragma clang diagnostic pop
+#elif defined __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
     ckobj_c(path.c_str(), &ids);
     throwOnSpiceError("Error finding Ck Coverage");
     
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
+#if defined __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif defined __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
         SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
-        
+
+#if defined __clang__
+#pragma clang diagnostic pop
+#elif defined __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
         scard_c(0, &cover);
         ckcov_c(path.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
         throwOnSpiceError("Error finding Ck Coverage");
@@ -955,15 +983,43 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     const unsigned int MaxObj = 64;
     const unsigned int WinSiz = 10000;
     
+#if defined __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif defined __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
-    
+
+#if defined __clang__
+#pragma clang diagnostic pop
+#elif defined __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
     spkobj_c(path.c_str(), &ids);
     throwOnSpiceError("Error finding Spk Converage");
     
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
+#if defined __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif defined __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
         SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
-        
+
+#if defined __clang__
+#pragma clang diagnostic pop
+#elif defined __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
         scard_c(0, &cover);
         spkcov_c(path.c_str(), obj, &cover);
         throwOnSpiceError("Error finding Spk Converage");

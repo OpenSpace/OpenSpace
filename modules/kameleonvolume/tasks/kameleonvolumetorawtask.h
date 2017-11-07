@@ -56,4 +56,4 @@ private:
 } // namespace kameleon
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATORAWTASK___H__
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETORAWTASK___H__

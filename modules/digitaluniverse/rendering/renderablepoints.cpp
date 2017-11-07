@@ -364,8 +364,8 @@ namespace openspace {
             if (_hasColorMapFile) {
                 
                 const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
-                const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-                GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
+                // const size_t nValues = _slicedData.size() / nAstronomicalObjects;
+                // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
                 
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribLPointer(
@@ -540,14 +540,14 @@ namespace openspace {
             return false;
         }
  
-        std::size_t numberOfColors = 0;
+        int numberOfColors = 0;
 
         // The beginning of the speck file has a header that either contains comments
         // (signaled by a preceding '#') or information about the structure of the file
         // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
         std::string line = "";
         while (true) {
-            std::streampos position = file.tellg();
+            // std::streampos position = file.tellg();
             std::getline(file, line);
 
             if (line[0] == '#' || line.empty()) {
@@ -558,7 +558,7 @@ namespace openspace {
             std::locale loc;
             if (std::isdigit(line[0], loc)) {
                 std::string::size_type sz;
-                numberOfColors = std::stoi(line, &sz);
+                numberOfColors = static_cast<int>(std::stoi(line, &sz));
                 break;
             }
             else if (file.eof()) {
@@ -566,7 +566,7 @@ namespace openspace {
             }            
         }
         
-        for (auto i = 0; i < numberOfColors; ++i) {
+        for (int i = 0; i < numberOfColors; ++i) {
             std::getline(file, line);
             std::stringstream str(line);
             
@@ -674,20 +674,23 @@ namespace openspace {
             glm::dvec4 position(p, 1.0);
 
             if (_hasColorMapFile) {
-                for (auto j = 0; j < 4; ++j) {
+                for (int j = 0; j < 4; ++j) {
                     _slicedData.push_back(position[j]);
                 }
-                for (auto j = 0; j < 4; ++j) {
+                for (int j = 0; j < 4; ++j) {
                     _slicedData.push_back(_colorMapData[colorIndex][j]);
                 }
             }
             else {
-                for (auto j = 0; j < 4; ++j) {
+                for (int j = 0; j < 4; ++j) {
                     _slicedData.push_back(position[j]);
                 }
             }
             
-            colorIndex = (colorIndex == (_colorMapData.size() - 1)) ? 0 : colorIndex + 1;
+            colorIndex =
+                (colorIndex == (static_cast<int>(_colorMapData.size()) - 1)) ?
+                0 :
+                colorIndex + 1;
         }
     }
     

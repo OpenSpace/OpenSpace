@@ -64,9 +64,9 @@ namespace {
     class QLog : public ghoul::logging::Log {
     public:
         void log(
-            ghoul::logging::LogLevel level,
-            const std::string& category,
-            const std::string& message
+            [[maybe_unused]] ghoul::logging::LogLevel level,
+            [[maybe_unused]] const std::string& category,
+            [[maybe_unused]] const std::string& message
         ) {
             //qDebug() << QString::fromStdString(category) << ": " << QString::fromStdString(message);
         }
