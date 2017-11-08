@@ -912,7 +912,6 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
     }
 
     if (_hasLabel && _labelDataIsDirty) {
-
         _labelDataIsDirty = false;
     }
 }
@@ -1209,6 +1208,9 @@ bool RenderableBillboardsCloud::readLabelFile() {
         dummy.clear();
 
         while (str >> dummy) {
+            if (dummy == "#") {
+                break;
+            }
             label += " " + dummy;
             dummy.clear();
         }

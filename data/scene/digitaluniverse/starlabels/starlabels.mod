@@ -8,7 +8,7 @@ return {
             Enabled = false,
             Color = { 1.0, 1.0, 1.0 },
             Transparency = 0.65,
-            LabelFile = "speck/stars-new.label",
+            LabelFile = "speck/stars.label",
             TextColor = { 0.4, 0.4, 0.4, 1.0 },
             DrawLabels = true,
             TextSize = 14.7,

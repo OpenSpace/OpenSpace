@@ -678,9 +678,6 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
         }
 
         fadeInVariable = funcValue > 1.0 ? 1.0 : funcValue;
-/*
-        std::cout << "==== Distance: " << distCamera << ", fadeInVariable = " 
-            << fadeInVariable << ", func: " << funcValue << " ======" << std::endl;*/
     }
 
     glm::dmat4 modelMatrix =
