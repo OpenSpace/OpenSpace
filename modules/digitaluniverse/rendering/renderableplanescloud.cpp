@@ -310,6 +310,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.addOption(2, "Screen center Position Normal");
     addProperty(_renderOption);
+    _renderOption.set(1);
 
     if (dictionary.hasKey(keyUnit)) {
         std::string unit = dictionary.value<std::string>(keyUnit);
@@ -648,7 +649,7 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.0f;
     if (_fadeInThreshold > 0.0) {
-        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
+        float distCamera = glm::length(data.camera.positionVec3());
         double term = std::exp(distCamera / scale - _fadeInThreshold);
         float func = static_cast<float>(term / (term + 1.0));
 
