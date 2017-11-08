@@ -53,11 +53,11 @@ public:
 
     ModelGeometry(const ghoul::Dictionary& dictionary);
     virtual ~ModelGeometry() = default;
-    
+
     virtual bool initialize(Renderable* parent);
     virtual void deinitialize();
     void render();
-    
+
     virtual bool loadModel(const std::string& filename) = 0;
     void changeRenderMode(const GLenum mode);
     //bool getVertices(std::vector<Vertex>* vertexList);

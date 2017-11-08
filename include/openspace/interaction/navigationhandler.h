@@ -58,7 +58,7 @@ public:
     void resetCameraDirection();
 
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);    
-    
+
     void updateCamera(double deltaTime);
 
     // Accessors

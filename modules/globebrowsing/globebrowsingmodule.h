@@ -85,7 +85,6 @@ protected:
     void internalInitialize() override;
 
 private:
-    
     void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
                    bool resetCameraDirection);
     void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,

@@ -61,7 +61,7 @@ namespace {
 
     const int8_t CurrentCacheVersion = 1;
     const float PARSEC = 0.308567756E17;
-    
+
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
@@ -258,7 +258,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableDUMeshes"
     );
-        
+
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
         _hasSpeckFile = true;
@@ -320,7 +320,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             );
     }
     addProperty(_scaleFactor);
-    
+
     if (dictionary.hasKey(DrawLabelInfo.identifier)) {
         _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
     }
@@ -383,7 +383,7 @@ void RenderableDUMeshes::initialize() {
     }
 
     createMeshes();
-        
+
     if (_hasLabel) {
         if (_fontRenderer == nullptr)
             _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
@@ -403,7 +403,7 @@ void RenderableDUMeshes::deinitialize() {
             glDeleteBuffers(1, &pair.second.vboArray[i]);
         }            
     }
-        
+
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
         renderEngine.removeRenderProgram(_program);
@@ -462,9 +462,9 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
             default:
                 break;
             }
-        }                        
+        }
     }
-      
+
     glBindVertexArray(0);
 
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
@@ -650,7 +650,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
-            
+
         if (file.eof()) {
             break;
         }
@@ -716,7 +716,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 dummy.clear();
                 str >> dummy;
             } while (dummy != "{");
-                
+
             std::getline(file, line);
             std::stringstream dim(line);
             dim >> mesh.numU; // numU
@@ -751,9 +751,9 @@ bool RenderableDUMeshes::readSpeckFile() {
             else {
                 return false;
             }
-        }            
-    }       
-        
+        }
+    }
+
     return true;
 }
 
@@ -939,7 +939,7 @@ void RenderableDUMeshes::createMeshes() {
             for (int v = 0; v < static_cast<int>(it->second.vertices.size()); ++v) {
                 it->second.vertices[v] *= scale;
             }
-                                
+
             for (int i = 0; i < it->second.numU; ++i) {
                 GLuint vao, vbo;
                 glGenVertexArrays(1, &vao);

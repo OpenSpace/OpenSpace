@@ -114,7 +114,7 @@ double GeodeticPatch::minLon() const {
 double GeodeticPatch::maxLon() const {
     return _center.lon + _halfSize.lon;
 }
-    
+
 bool GeodeticPatch::contains(const Geodetic2& p) const {
     Geodetic2 diff = _center - p;
     return glm::abs(diff.lat) <= _halfSize.lat && glm::abs(diff.lon) <= _halfSize.lon;
@@ -158,11 +158,11 @@ Geodetic2 GeodeticPatch::closestCorner(const Geodetic2& p) const {
 
     // LatLon vector from patch center to the point
     Geodetic2 centerToPoint = p - _center;
-    
+
     // Normalize the difference angles to be centered around 0.
     Ang latDiff = Ang::fromRadians(centerToPoint.lat).normalizeAround(Ang::ZERO);
     Ang lonDiff = Ang::fromRadians(centerToPoint.lon).normalizeAround(Ang::ZERO);
-        
+
     // If latDiff > 0 
     //    --> point p is north of the patch center 
     //    --> the closest corner to the point must be a northern one
@@ -204,7 +204,6 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     // 
     // Just doing this actually makes points returned from this methods being the
     // true closest point, great-circle distance-wise. 
-    
 
     using Ang = Angle<double>;
 

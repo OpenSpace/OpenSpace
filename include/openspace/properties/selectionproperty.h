@@ -39,7 +39,7 @@ public:
     };
 
     SelectionProperty(Property::PropertyInfo info);
-    
+
     void addOption(Option option);
     void removeOptions();
     const std::vector<Option>& options() const;

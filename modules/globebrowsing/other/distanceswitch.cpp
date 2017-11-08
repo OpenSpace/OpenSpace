@@ -52,7 +52,7 @@ void DistanceSwitch::render(const RenderData& data, RendererTasks& tasks) {
     // view is 'fov' radians and the screen resolution is 'res' pixels.
     const double fov = 2 * glm::pi<double>() / 6; // 60 degrees
     int res = 2880;
-        
+
     // linear search through nodes to find which Renderable to render
     for (std::shared_ptr<Renderable> renderable : _renderables) {
         const double distance = res * renderable->boundingSphere() / tan(fov / 2);

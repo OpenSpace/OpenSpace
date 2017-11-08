@@ -32,7 +32,7 @@
  * @{
  * \addtogroup properties 
  * @{
- 
+
  * \class CharProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>char</code>.

@@ -42,7 +42,7 @@
 #include <openspace/util/updatestructures.h>
 
 namespace ghoul {
-    
+
 namespace filesystem { class File; }
 
 namespace opengl {
@@ -57,7 +57,7 @@ namespace openspace {
 class RenderableVolume;
 class Camera;
 class Scene;
-    
+
 class ABufferRenderer : public Renderer, public RaycasterListener {
 public:
     ABufferRenderer();
@@ -87,12 +87,11 @@ public:
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
 
 private:
-
     void clear();
     void updateResolution();
     void updateRaycastData();
     void updateResolveDictionary();
-    
+
     Camera* _camera;
     Scene* _scene;
     glm::ivec2 _resolution;
@@ -101,9 +100,9 @@ private:
     bool _dirtyRendererData;
     bool _dirtyRaycastData;
     bool _dirtyResolveDictionary;
-    
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
-    
+
     /**
      * When a volume is attached or detached from the scene graph,
      * the resolve program needs to be recompiled.

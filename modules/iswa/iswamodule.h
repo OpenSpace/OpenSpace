@@ -34,7 +34,7 @@ public:
     constexpr static const char* Name = "Iswa";
 
     IswaModule();
-    
+
     scripting::LuaLibrary luaLibrary() const override;
 
 protected:

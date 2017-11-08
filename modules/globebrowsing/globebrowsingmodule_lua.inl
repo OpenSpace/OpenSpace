@@ -61,13 +61,13 @@ int addLayer(lua_State* L) {
     if (!node) {
         return luaL_error(L, ("Unknown globe name: " + GlobeName).c_str());
     }
-  
+
     // Get the renderable globe
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
     if (!globe) {
         return luaL_error(L, ("Renderable is not a globe: " + GlobeName).c_str());
     }
-  
+
     // Get the layer group
     layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(LayerGroupName);
     if (groupID == layergroupid::GroupID::Unknown) {
@@ -85,7 +85,7 @@ int addLayer(lua_State* L) {
     }
 
     globe->layerManager()->addLayer(groupID, d);
-    
+
     return 0;
 }
 
@@ -115,13 +115,13 @@ int deleteLayer(lua_State* L) {
     if (!node) {
         return luaL_error(L, ("Unknown globe name: " + GlobeName).c_str());
     }
-  
+
     // Get the renderable globe
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
     if (!globe) {
         return luaL_error(L, ("Renderable is not a globe: " + GlobeName).c_str());
     }
-  
+
     // Get the layer group
     layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(LayerGroupName);
     if (groupID == layergroupid::GroupID::Unknown) {
@@ -129,7 +129,7 @@ int deleteLayer(lua_State* L) {
     }
 
     globe->layerManager()->deleteLayer(groupID, LayerName);
-    
+
     return 0;
 }
 
@@ -251,7 +251,7 @@ int capabilities(lua_State* L) {
     lua_newtable(L);
     for (unsigned long i = 0; i < cap.size(); ++i) {
         const GlobeBrowsingModule::Layer& l = cap[i];
-        
+
         lua_newtable(L);
 
         lua_pushstring(L, "Name");
@@ -268,6 +268,5 @@ int capabilities(lua_State* L) {
     return 1;
 }
 #endif // GLOBEBROWSING_USE_GDAL
-
 
 } // namespace openspace::globebrowsing::luascriptfunctions

@@ -120,7 +120,7 @@ void LuaTranslation::update(const UpdateData& data) {
         _state,
         duration_cast<milliseconds>(now.time_since_epoch()).count()
     );
-    
+
     // Execute the scaling function
     int success = lua_pcall(_state, 2, 3, 0);
     if (success != 0) {

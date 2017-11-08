@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
- 
+
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/pointglobe.h>
@@ -182,7 +182,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _debugPropertyOwner({ "Debug" })
 {
     setName("RenderableGlobe");
-        
+
     dictionary.getValue(keyFrame, _frame);
 
     // Read the radii in to its own dictionary
@@ -216,17 +216,17 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _layerManager
         );
     //_pointGlobe = std::make_shared<PointGlobe>(*this);
-        
+
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
     //_distanceSwitch.addSwitchValue(_pointGlobe);
-        
+
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
-        
+
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
@@ -242,7 +242,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.collectStats);
     _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
-  
+
     auto notifyShaderRecompilation = [&](){
         _chunkedLodGlobe->notifyShaderRecompilation();
     };
@@ -357,7 +357,7 @@ const RenderableGlobe::DebugProperties&
     RenderableGlobe::debugProperties() const{
     return _debugProperties;
 }
-    
+
 const RenderableGlobe::GeneralProperties&
     RenderableGlobe::generalProperties() const{
     return _generalProperties;

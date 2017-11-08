@@ -27,7 +27,7 @@
 
 #include <openspace/util/task.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <string>
 
@@ -40,7 +40,7 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
-    
+
 private:
     std::string _inputPath;
     std::string _rawVolumeOutputPath;

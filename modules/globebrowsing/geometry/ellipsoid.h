@@ -66,12 +66,12 @@ public:
 
     glm::dvec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(const glm::dvec3& p) const;
     glm::dvec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
-    
+
     const glm::dvec3& radii() const;
     const glm::dvec3& radiiSquared() const;
     const glm::dvec3& oneOverRadiiSquared() const;
     const glm::dvec3& radiiToTheFourth() const;
-    
+
     double minimumRadius() const;
     double maximumRadius() const;
     double averageRadius() const;

@@ -35,7 +35,7 @@
 namespace {
     static const int LegendHeight = 105;
     static const int TimeWidth = 200;
-    
+
     static const int TextOffset = 5;
 
     QMap<QString, QColor> InstrumentColors = {
@@ -127,7 +127,7 @@ void TimelineWidget::setData(std::vector<Image> images, std::map<uint8_t, std::s
 void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
     QRectF timelineRect(0, 0, rect.width() - TimeWidth, rect.height());
     QRectF dateRect(rect.width() - TimeWidth, 0, TimeWidth, rect.height());
-    
+
     // Draw background
     //painter.setBrush(QBrush(Qt::lightGray));  painter.drawRect(timelineRect);
     painter.setBrush(QBrush(QColor(85, 85, 85)));  painter.drawRect(timelineRect);

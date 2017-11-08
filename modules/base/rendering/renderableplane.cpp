@@ -107,7 +107,6 @@ documentation::Documentation RenderablePlane::Documentation() {
     };
 }
 
-
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
@@ -237,7 +236,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
-    
+
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
@@ -330,7 +329,7 @@ void RenderablePlane::createPlane() {
         sizeof(GLfloat) * 6,
         nullptr
     );
-    
+
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1, 

@@ -219,7 +219,7 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
 
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
-    
+
     _program->deactivate();
 }
 
@@ -249,7 +249,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     //catch (const SpiceManager::SpiceException& e) {
         //LERROR(e.what());
     //}
-    
+
     glm::vec4 target(boresight[0], boresight[1], boresight[2], 12);
     target = glm::dmat4(tm) * target;
 

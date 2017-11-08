@@ -54,7 +54,6 @@ class TouchMarker : public properties::PropertyOwner {
 
         void render(const std::vector<TUIO::TuioCursor>& list);
 
-
     private:
         void createVertexList(const std::vector<TUIO::TuioCursor>& list);
 
@@ -65,7 +64,7 @@ class TouchMarker : public properties::PropertyOwner {
         properties::Vec3Property _color;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-        
+
         GLuint _quad;
         GLuint _vertexPositionBuffer;
         int _numFingers;

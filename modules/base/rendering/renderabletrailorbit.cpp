@@ -382,7 +382,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // The previously oldest permanent point has been moved nNewPoints steps into the
         // future
         _firstPointTime += nNewPoints * secondsPerPoint;
-        
+
         return { true, nNewPoints };
     }
     else {

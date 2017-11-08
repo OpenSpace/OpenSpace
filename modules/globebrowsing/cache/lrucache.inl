@@ -25,7 +25,7 @@
 #include <ghoul/misc/assert.h>
 
 namespace openspace::globebrowsing::cache {
-    
+
 template<typename KeyType, typename ValueType, typename HasherType>
 LRUCache<KeyType, ValueType, HasherType>::LRUCache(size_t size)
     : _maximumCacheSize(size)

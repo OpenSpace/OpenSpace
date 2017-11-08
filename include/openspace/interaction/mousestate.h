@@ -36,7 +36,7 @@ struct MouseState {
     MouseState(double scaleFactor);
     void setFriction(double friction);
     void setVelocityScaleFactor(double scaleFactor);
-    
+
     glm::dvec2 previousPosition;
     DelayedVariable<glm::dvec2, double> velocity;
 };

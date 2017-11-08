@@ -45,14 +45,14 @@ TextureSliceVolumeReader<VoxelType>::TextureSliceVolumeReader(std::vector<std::s
     : _initialized(false)
     , _paths(paths)
     , _cache(sliceCacheCapacity, sliceCacheNIndices) {}
-    
+
 template <typename VoxelType>
 void TextureSliceVolumeReader<VoxelType>::initialize() {
     ghoul_assert(_paths.size() > 0, "No paths to read slices from.");
 
     std::shared_ptr<ghoul::opengl::Texture> firstSlice =
         ghoul::io::TextureReader::ref().loadTexture(_paths[0]);
-    
+
     glm::uvec3 dimensions = firstSlice->dimensions();
     _sliceDimensions = glm::uvec2(dimensions.x, dimensions.y);
     _initialized = true;
@@ -69,11 +69,11 @@ ghoul::opengl::Texture& TextureSliceVolumeReader<VoxelType>::getSlice(int sliceI
     ghoul_assert(_initialized, "Volume is not initialized");
     ghoul_assert(sliceIndex >= 0 && sliceIndex < _paths.size(),
                  "Slice index " + std::to_string(sliceIndex) + "is outside the range.");
-    
+
     if (!_cache.has(sliceIndex)) {
         std::shared_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(_paths[sliceIndex]);
-        
+
         glm::uvec3 dimensions = texture->dimensions();
         glm::ivec2 dims = glm::uvec2(dimensions.x, dimensions.y);
         ghoul_assert(dims == _sliceDimensions, "Slice dimensions do not agree.");

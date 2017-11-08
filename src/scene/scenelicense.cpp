@@ -45,7 +45,7 @@ namespace openspace {
 
 documentation::Documentation SceneLicense::Documentation() {
     using namespace documentation;
-    
+
     return {
         "License Information",
         "core_license",
@@ -84,7 +84,7 @@ SceneLicense::SceneLicense(const ghoul::Dictionary& dictionary, std::string m)
     ghoul_assert(!module.empty(), "Module name must not be empty");
 
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "SceneLicense");
-    
+
     name = dictionary.value<std::string>(LicenseKeyName);
     attribution = dictionary.value<std::string>(LicenseKeyAttribution);
     dictionary.getValue(LicenseKeyUrl, url);

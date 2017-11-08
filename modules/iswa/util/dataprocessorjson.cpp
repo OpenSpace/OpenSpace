@@ -107,7 +107,7 @@ std::vector<float*> DataProcessorJson::processData(std::string data, properties:
 
         std::vector<int> selectedOptions = dataOptions.value();
 //        int numSelected = selectedOptions.size();
-        
+
         auto options = dataOptions.options();
         int numOptions = options.size();
 

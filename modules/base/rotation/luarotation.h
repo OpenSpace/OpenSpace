@@ -32,9 +32,9 @@
 #include <ghoul/lua/luastate.h>
 
 namespace openspace {
-    
+
 namespace documentation { struct Documentation; }
-    
+
 class LuaRotation : public Rotation {
 public:
     LuaRotation();

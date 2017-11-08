@@ -71,7 +71,7 @@ bool TouchModule::hasNewInput() {
         touch.tap();
         return true;
     }
-    
+
     // Return true if we got new input
     if (listOfContactPoints.size() == lastProcessed.size() && !listOfContactPoints.empty()) {
         bool newInput = true;

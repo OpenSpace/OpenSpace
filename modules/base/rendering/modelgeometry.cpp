@@ -78,7 +78,7 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
     }
 
     const std::string geometryType = dictionary.value<std::string>(KeyType);
-    
+
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
     return factory->create(geometryType, dictionary);;
 }
@@ -134,7 +134,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
     if (_vertices.empty()) {
         return false;
     }
-    
+
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vbo);
     glGenBuffers(1, &_ibo);

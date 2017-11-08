@@ -250,7 +250,7 @@ void Histogram::generateEqualizer(){
     float previousCdf = 0.0f;
     _equalizer = std::vector<float>(_numBins, 0.0f);
     for(int i = 0; i < _numBins; i++){
-        
+
         float probability = _data[i] / static_cast<float>(_numValues);
         float cdf  = previousCdf + probability;
         cdf = std::min(1.0f, cdf);
@@ -285,7 +285,7 @@ float Histogram::equalize(float value){
     // If value == _maxValues then bin == _numBins, which is a invalid index.
     bin = std::min(_numBins-1, bin);
     bin = std::max(0 , bin);
-    
+
     return _equalizer[bin];
 }
 

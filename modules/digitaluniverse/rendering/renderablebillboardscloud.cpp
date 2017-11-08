@@ -69,7 +69,7 @@ namespace {
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."        
     };
-    
+
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
@@ -324,7 +324,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _hasSpeckFile = _hasSpeckFile == true? false : true; });
         addProperty(_drawElements);
     }
-        
+
     // DEBUG:
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
@@ -409,13 +409,13 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
                 _colorRangeData.push_back(
                     rangeDataDic.value<glm::vec2>(std::to_string(i+1)));
             }
-                
+
         }
 
     } else if (dictionary.hasKey(keyColor)) {
         _pointColor = dictionary.value<glm::vec3>(keyColor);
         addProperty(_pointColor);
-    }                        
+    }
 
     if (dictionary.hasKey(TransparencyInfo.identifier)) {
         _alphaValue = static_cast<float>(
@@ -446,7 +446,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         _labelFile = absPath(dictionary.value<std::string>(
             LabelFileInfo.identifier
-        ));                
+        ));
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
@@ -465,7 +465,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
-        }         
+        }
         addProperty(_textMinSize);
     }
 }
@@ -476,12 +476,12 @@ bool RenderableBillboardsCloud::isReady() const {
 
 void RenderableBillboardsCloud::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-        
+
     _program = renderEngine.buildRenderProgram("RenderableBillboardsCloud",
         "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl",
         "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl",
         "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl");
-                
+
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -491,7 +491,7 @@ void RenderableBillboardsCloud::initialize() {
         // Following DU behavior here. The last colormap variable 
         // entry is the one selected by default.
         _colorOption = static_cast<int>(_colorRangeData.size() - 1);
-    }        
+    }
 
     if (_hasPolygon) {
         createPolygonTexture();
@@ -572,7 +572,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
     _program->setUniform("renderOption", _renderOption.value());
     glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0);
     _program->setUniform("centerScreenInWorldPosition", centerScreenWorld);
-        
+
     _program->setUniform("minBillboardSize", 1.f); // in pixels
     _program->setUniform("color", _pointColor);
     _program->setUniform("sides", 4);
@@ -631,7 +631,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-        
+
     float scale = 0.0;
     switch (_unit) {
     case Meter:
@@ -698,14 +698,14 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
     glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
 
-      
+
     if (_hasSpeckFile) {
         renderBillboards(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp);
     }
-        
+
     if (_drawLabels && _hasLabel) {
         renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
-    }                
+    }
 }
 
 void RenderableBillboardsCloud::update(const UpdateData&) {  
@@ -734,13 +734,13 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
             GL_STATIC_DRAW
         );
         GLint positionAttrib = _program->attributeLocation("in_position");
-            
+
         if (_hasColorMapFile) {
-                
+
             /*const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
             const size_t nValues = _slicedData.size() / nAstronomicalObjects;
             GLsizei stride = static_cast<GLsizei>(sizeof(float) * nValues);*/
-                
+
             glEnableVertexAttribArray(positionAttrib);
             glVertexAttribPointer(
                 positionAttrib,
@@ -762,7 +762,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 reinterpret_cast<void*>(sizeof(float)*4)
             );
         }
-        else {                                                
+        else {
             glEnableVertexAttribArray(positionAttrib);
             glVertexAttribPointer(
                 positionAttrib,
@@ -796,11 +796,10 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
                 );
         }
-        _spriteTextureIsDirty = false;            
+        _spriteTextureIsDirty = false;
     }
 
     if (_hasLabel && _labelDataIsDirty) {
-
         _labelDataIsDirty = false;
     }
 }
@@ -880,7 +879,7 @@ bool RenderableBillboardsCloud::loadData() {
 
         // }
     }
-        
+
     return success;
 }
 
@@ -941,7 +940,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
             _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject });                
 
             _nValuesPerAstronomicalObject += 1; // We want the number, but the index is 0 based
-        }            
+        }
     }
 
     _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
@@ -964,7 +963,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
         std::stringstream str(line);
 
         for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-            str >> values[i];                
+            str >> values[i];
         }
 
         _fullData.insert(_fullData.end(), values.begin(), values.end());
@@ -980,7 +979,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
         LERROR("Failed to open Color Map file '" << _file << "'");
         return false;
     }
- 
+
     int numberOfColors = 0;
 
     // The beginning of the speck file has a header that either contains comments
@@ -1010,7 +1009,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
     for (int i = 0; i < numberOfColors; ++i) {
         std::getline(file, line);
         std::stringstream str(line);
-            
+
         glm::vec4 color;
         for (auto j = 0; j < 4; ++j) {
             str >> color[j];
@@ -1018,7 +1017,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
 
         _colorMapData.push_back(color);
     }
-        
+
     return true;
 }
 
@@ -1029,7 +1028,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
         LERROR("Failed to open Label file '" << _file << "'");
         return false;
     }
-        
+
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
@@ -1091,7 +1090,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
 
         std::string dummy;
         str >> dummy; // text keyword
-            
+
         std::string label;
         str >> label;
         dummy.clear();
@@ -1102,7 +1101,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
         }
 
         _labelData.push_back(std::make_pair(position, label));
-            
+
     } while (!file.eof());
 
     return true;
@@ -1135,7 +1134,7 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
             for (int i = 0; i < nItems; ++i) {
                 int32_t keySize = 0;
                 fileStream.read(reinterpret_cast<char*>(&keySize), sizeof(int32_t));
-                std::string key;                    
+                std::string key;
                 for (int c = 0; c < keySize; ++c) {
                     char t[2];
                     t[1] = '\0';
@@ -1173,7 +1172,7 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
 
         int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(_nValuesPerAstronomicalObject);
         fileStream.write(reinterpret_cast<const char*>(&nValuesPerAstronomicalObject), sizeof(int32_t));            
-            
+
         size_t nBytes = nValues * sizeof(_fullData[0]);
         fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
 
@@ -1201,7 +1200,7 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
         return false;
     }
 }
-    
+
 void RenderableBillboardsCloud::createDataSlice() {
     _slicedData.clear();
     if (_hasColorMapFile) {
@@ -1223,12 +1222,12 @@ void RenderableBillboardsCloud::createDataSlice() {
             colorBins.push_back(bin);
             bin += colorMapBinSize;
         }
-    }        
+    }
 
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) { 
         glm::dvec4 transformedPos = glm::dvec4(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2], 1.0);
         glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
-            
+
         if (_hasColorMapFile) {
             for (int j = 0; j < 4; ++j) {
                 _slicedData.push_back(position[j]);
@@ -1236,7 +1235,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             // Finds from which bin to get the color.
             // Note: the first color in the colormap file
             // is the outliers color.
-            glm::vec4 itemColor;                
+            glm::vec4 itemColor;
             float variableColor = _fullData[i + 3 + colorMapInUse];
             int c = static_cast<int>(colorBins.size() - 1);
             // Float vs int comparison?
@@ -1245,9 +1244,9 @@ void RenderableBillboardsCloud::createDataSlice() {
                 if (c == 0)
                     break;
             }
-                
+
             int colorIndex = (c == static_cast<int>(colorBins.size())) - 1 ? 0 : c + 1;
-                
+
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(_colorMapData[colorIndex][j]);
             }
@@ -1256,7 +1255,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(position[j]);
             }
-        }            
+        }
     }
 }
 
@@ -1278,7 +1277,7 @@ void RenderableBillboardsCloud::createPolygonTexture() {
         this),
         std::bind(&openspace::RenderableBillboardsCloud::renderPolygonGeometry, 
         this, std::placeholders::_1),
-        _pTexture, 256, 256);          
+        _pTexture, 256, 256);
 }
 
 void RenderableBillboardsCloud::renderToTexture(
@@ -1286,7 +1285,7 @@ void RenderableBillboardsCloud::renderToTexture(
     std::function<void(GLuint)> renderFunction,
     GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight) {
     LDEBUG("Rendering to Texture");
-        
+
     // Saves initial Application's OpenGL State
     GLint defaultFBO;
     GLint viewport[4];
@@ -1300,12 +1299,12 @@ void RenderableBillboardsCloud::renderToTexture(
     glDrawBuffers(1, drawBuffers);
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
-        
+
     glViewport(0, 0, textureWidth, textureHeight);
-       
+
     geometryLoadingFunction();
     renderFunction(_polygonVao);
-        
+
     // Restores Applications' OpenGL State
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -1317,7 +1316,7 @@ void RenderableBillboardsCloud::renderToTexture(
     if (_polygonVao) {
         glDeleteVertexArrays(1, &_polygonVao);
     }
-    glDeleteFramebuffers(1, &textureFBO);        
+    glDeleteFramebuffers(1, &textureFBO);
 }
 
 void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {

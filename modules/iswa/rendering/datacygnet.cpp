@@ -112,7 +112,7 @@ bool DataCygnet::updateTexture(){
 
     if(data.empty())
         return false;
-    
+
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
 
@@ -253,7 +253,7 @@ void DataCygnet::readTransferFunctions(std::string tfPath){
 
         tfFile.close();
     }
-    
+
     if(!tfs.empty()){
         _transferFunctions.clear();
         _transferFunctions = tfs;
@@ -262,7 +262,7 @@ void DataCygnet::readTransferFunctions(std::string tfPath){
 
 void DataCygnet::fillOptions(std::string& source){
     std::vector<std::string> options = _dataProcessor->readMetadata(source, _textureDimensions);
-     
+
     for(int i=0; i<options.size(); i++){
         _dataOptions.addOption({i, options[i]});
         _textures.push_back(nullptr);
@@ -281,7 +281,7 @@ void DataCygnet::setPropertyCallbacks(){
         _dataProcessor->normValues(_normValues.value());
         updateTexture();
     });
-    
+
     _useLog.onChange([this](){
         _dataProcessor->useLog(_useLog.value());
         updateTexture();

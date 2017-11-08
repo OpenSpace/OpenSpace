@@ -116,7 +116,7 @@ std::string LabelParser::decode(std::string line){
         std::size_t value = line.find(key.first);
         if (value != std::string::npos){
             std::string toTranslate = line.substr(value);
-            
+
             //if (_fileTranslation.find(toTranslate) == _fileTranslation.end()) {
             //    // not found
             //    _badDecoding = true;
@@ -173,7 +173,7 @@ bool LabelParser::create() {
                         LERROR("Failed to open label file '" << currentFile.path() << "'");
                         return false;
                     }
-                    
+
                     int count = 0;
 
                     // open up label files
@@ -217,7 +217,7 @@ bool LabelParser::create() {
                     //        return false;
                     //    }
 
-                        
+
                         if (read == "START_TIME"){
                             std::string start = line.substr(line.find("=") + 1);
                             start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
@@ -279,7 +279,7 @@ bool LabelParser::create() {
             }
         }
     }
-    
+
     std::vector<Image> tmp;
     for (auto key : _subsetMap){
         for (auto image : key.second._subset){

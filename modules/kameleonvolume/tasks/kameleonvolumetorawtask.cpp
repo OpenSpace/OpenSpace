@@ -70,7 +70,7 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
     _variable = dictionary.value<std::string>(KeyVariable);
     _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
-    
+
     if (!dictionary.getValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound)) {
         _autoDomainBounds = true;
     }
@@ -102,7 +102,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
             reader.maxValue(variables[2]));
     }
 
-    
+
     std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
         _dimensions,
         _variable,
@@ -115,7 +115,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     writer.write(*rawVolume);
 
     progressCallback(0.9f);
-    
+
     ghoul::Dictionary inputMetadata = reader.readMetaData();
     ghoul::Dictionary outputMetadata;
 

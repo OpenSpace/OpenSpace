@@ -41,6 +41,7 @@ guards for correctness. At the moment this includes:
  * Checking for duplicates between all files
  * Checking that no file includes glm header directly
  * Checking whether any files starts with the UTF-8 Byte-order mark
+ * Checking whether a file as empty-only lines
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
 be passed, otherwise the first and only argument has to point to the base directory.
@@ -54,6 +55,7 @@ import re
 import sys
 
 current_year = '2017'
+is_strict_mode = False
 
 def get_ifndef_symbol(lines):
     index = [i for i,s in enumerate(lines) if '#ifndef ' in s]
@@ -279,6 +281,20 @@ def check_end_of_line(lines):
         return ''
 
 
+
+def check_empty_only_line(lines):
+    # Disable this check in non-strict mode
+    if not is_strict_mode:
+        return ''
+
+    index = [i + 1 for i, s in enumerate(lines) if s.translate({ord(c): None for c in '\n\r'}).isspace()]
+    if (len(index) > 0):
+        return index
+    else:
+        return ''
+
+
+
 previousSymbols  = {}
 def check_header_file(file, component):
     with open(file, 'r+') as f:
@@ -355,6 +371,10 @@ def check_header_file(file, component):
         if bom:
             print(file, '\t', 'Byte order mark failed:', bom)
 
+        empty_only_lines = check_empty_only_line(lines)
+        if empty_only_lines:
+            print(file, '\t', 'Empty only line: ', empty_only_lines)
+
 
 
 def check_inline_file(file, component):
@@ -381,6 +401,10 @@ def check_inline_file(file, component):
         bom = check_byte_order_mark_character(lines)
         if bom:
             print(file, '\t', 'Byte order mark failed:', bom)
+
+        empty_only_lines = check_empty_only_line(lines)
+        if empty_only_lines:
+            print(file, '\t', 'Empty only line: ', empty_only_lines)
 
         if (not '_doc.inl' in file):
             # The _doc.inl files are allowed to use using namespace as they are inclued
@@ -416,6 +440,10 @@ def check_source_file(file, component):
         if bom:
             print(file, '\t', 'Byte order mark failed:', bom)
 
+        empty_only_lines = check_empty_only_line(lines)
+        if empty_only_lines:
+            print(file, '\t', 'Empty only line: ', empty_only_lines)
+
 
 
 def check_files(positiveList, negativeList, component, check_function):
@@ -433,7 +461,12 @@ def check_files(positiveList, negativeList, component, check_function):
 
 basePath = './'
 if len(sys.argv) > 1:
-    basePath = sys.argv[1] + '/'
+    if sys.argv[1] != "strict":
+        basePath = sys.argv[1] + '/'
+
+for a in sys.argv:
+    if a == "strict":
+        is_strict_mode = True
 
 # Check header files
 print("Checking header files")

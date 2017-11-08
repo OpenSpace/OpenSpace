@@ -45,7 +45,7 @@ class SceneGraphNode;
 class TouchInteraction : public properties::PropertyOwner {
 public:
     using Point = std::pair<int, TUIO::TuioPoint>;
-    
+
     TouchInteraction();
 
     // for interpretInteraction()

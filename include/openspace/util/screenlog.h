@@ -44,7 +44,7 @@ class ScreenLog : public ghoul::logging::Log {
 public:
     /// Just a shortcut for the LogLevel access
     using LogLevel = ghoul::logging::LogLevel;
-    
+
     /**
      * This struct stores the incoming log entries with their #level, #timeString,
      * #category, #message, and the generated #timeStamp used for the expiry calculation.
@@ -52,16 +52,16 @@ public:
     struct LogEntry {
         /// The ghoul::logging::LogLevel of the log message
         LogLevel level;
-        
+
         /// The timepoint when the log message arrived at the ScreenLog
         std::chrono::time_point<std::chrono::steady_clock> timeStamp;
-        
+
         /// The time string as retrieved from the log message
         std::string timeString;
-        
+
         /// The category as retrieved from the log message
         std::string category;
-        
+
         /// The actual message of the log entry
         std::string message;
     };
@@ -91,7 +91,7 @@ public:
      */
     void log(ghoul::logging::LogLevel level, const std::string& category,
         const std::string& message) override;
-    
+
     /**
      * This method removes all the stored LogEntry%s that have expired, calculated by
      * their <code>timeStamp</code> and the #_timeToLive value.
@@ -100,7 +100,7 @@ public:
      * time when this method was last called
      */
     void removeExpiredEntries();
-    
+
     /**
      * Returns the list of all stored LogEntry%s.
      * \return The list of all stored LogEntry%s
@@ -121,7 +121,7 @@ private:
     /// A mutex to ensure thread-safety
     mutable std::mutex _mutex;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCREENLOG___H__

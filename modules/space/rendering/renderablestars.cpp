@@ -183,7 +183,6 @@ documentation::Documentation RenderableStars::Documentation() {
     };
 }
 
-
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
@@ -244,7 +243,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     }
     _colorOption.onChange([&] { _dataIsDirty = true; });
     addProperty(_colorOption);
-    
 
     _pointSpreadFunctionTexturePath.onChange(
         [&]{ _pointSpreadFunctionTextureIsDirty = true; }
@@ -342,7 +340,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
     _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
-    
+
     setPscUniforms(*_program.get(), data.camera, data.position);
     _program->setUniform("scaling", scaling);
 
@@ -364,7 +362,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _program->setIgnoreUniformLocationError(IgnoreError::No);
     _program->deactivate();
-    
+
     glDepthMask(true);
 }
 
@@ -423,7 +421,7 @@ void RenderableStars::update(const UpdateData&) {
                 stride,
                 reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor))
             );
-            
+
             break;
         case ColorOption::Velocity:
             {
@@ -493,7 +491,7 @@ void RenderableStars::update(const UpdateData&) {
         glBindVertexArray(0);
 
         _dataIsDirty = false;
-    }    
+    }
 
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
@@ -502,7 +500,7 @@ void RenderableStars::update(const UpdateData&) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_pointSpreadFunctionTexturePath)
             );
-            
+
             if (_pointSpreadFunctionTexture) {
                 LDEBUG("Loaded texture from '" <<
                     absPath(_pointSpreadFunctionTexturePath) << "'"
@@ -752,8 +750,6 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 layout.value.position = { {
                     position[0], position[1], position[2], position[3]
                 } };
-                    
-
 
 #ifdef USING_STELLAR_TEST_GRID
                 layout.value.bvColor = _fullData[i + 3];

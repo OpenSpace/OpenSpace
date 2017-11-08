@@ -55,7 +55,7 @@ private:
     std::string _source;
     std::string _target;
     std::string _referenceFrame;
-    
+
     glm::vec4 _lineColorBegin;
     glm::vec4 _lineColorEnd;
 

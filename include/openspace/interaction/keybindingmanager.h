@@ -42,7 +42,7 @@ class KeyBindingManager : public DocumentationGenerator {
 public:
     KeyBindingManager();
     ~KeyBindingManager() = default;
-    
+
     void resetKeyBindings();
 
     void bindKeyLocal(
@@ -72,7 +72,7 @@ private:
         Synchronized synchronization;
         std::string documentation;
     };
-    
+
     std::string generateJson() const override;
 
     std::multimap<KeyWithModifier, KeyInformation> _keyLua;

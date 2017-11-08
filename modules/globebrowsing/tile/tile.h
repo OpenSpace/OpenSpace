@@ -73,7 +73,7 @@ public:
          */
         OK
     };
-    
+
     Tile(ghoul::opengl::Texture* texture,
          std::shared_ptr<TileMetaData> metaData,
          Status status);

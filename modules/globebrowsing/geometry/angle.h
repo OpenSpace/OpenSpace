@@ -120,7 +120,7 @@ public:
     Angle<T> getClamped(const Angle<T>& min = ZERO, const Angle<T>& max = FULL) const;
 
     Angle<T> getAbs() const;
-    
+
 private:
     T _radians;
 };

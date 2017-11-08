@@ -84,7 +84,7 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
             throw ghoul::MissingCaseException();
     }
 }
-    
+
 std::string to_string(openspace::documentation::TestResult::Warning::Reason reason) {
     switch (reason) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
@@ -106,7 +106,7 @@ SpecificationError::SpecificationError(TestResult res, std::string comp)
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
-    
+
     message += " (";
     for (const TestResult::Offense& o : result.offenses) {
         message += o.offender + ',';

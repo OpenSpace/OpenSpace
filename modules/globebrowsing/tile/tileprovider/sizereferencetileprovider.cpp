@@ -61,7 +61,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
 {
     GeodeticPatch patch(tileIndex);
     bool aboveEquator = patch.isNorthern();
-        
+
     double tileLongitudalLength = roundedLongitudalLength(tileIndex);
 
     std::string unit = "m";

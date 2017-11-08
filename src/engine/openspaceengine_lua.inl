@@ -148,7 +148,7 @@ int removeAllVirtualProperties(lua_State* L) {
     if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
     }
-    
+
     std::vector<properties::Property*> ps = OsEng.virtualPropertyManager().properties();
     for (properties::Property* p : ps) {
         OsEng.virtualPropertyManager().removeProperty(p);

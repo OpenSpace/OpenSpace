@@ -35,7 +35,7 @@ public:
     ~IswaKameleonGroup();
 
     virtual void clearGroup() override;
-    
+
     std::vector<int> fieldlineValue();
     void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
     void changeCdf(std::string path);

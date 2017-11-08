@@ -89,7 +89,7 @@ public:
      */
     void renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
         RGBA rgba = { 1, 0, 0, 1 }) const;
-        
+
     /**
      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
      *  The box corners should be ordered from smaller to larger,
@@ -140,7 +140,7 @@ public:
         RGBA rgba = { 1, 1, 1, 0.3 }) const;
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
-        
+
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     /**
       * Takes a AABB3 in screen space and returns vertices representing the corner points 
@@ -149,7 +149,7 @@ public:
       */
     const Vertices verticesFor(const globebrowsing::AABB3& screenSpaceAABB) const;
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        
+
 protected:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 

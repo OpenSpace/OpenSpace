@@ -185,7 +185,7 @@ std::vector<std::string> KameleonVolumeReader::variableNames() const {
     }
     return variableNames;
 }
-    
+
 std::vector<std::string> KameleonVolumeReader::variableAttributeNames() const {
     return _model->getVariableAttributeNames();
 }

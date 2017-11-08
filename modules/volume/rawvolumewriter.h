@@ -45,11 +45,11 @@ public:
 
     size_t coordsToIndex(const glm::uvec3& coords) const;
     glm::ivec3 indexToCoords(size_t linear) const;
-    
+
 private:
     glm::ivec3 _dimensions;
     std::string _path;
-    size_t _bufferSize;    
+    size_t _bufferSize;
 };
 
 } // namespace volume

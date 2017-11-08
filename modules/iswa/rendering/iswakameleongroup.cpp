@@ -94,7 +94,7 @@ void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::st
 void IswaKameleonGroup::registerProperties(){
     //OsEng.gui()._iswa.registerProperty(&_resolution);
     //OsEng.gui()._iswa.registerProperty(&_fieldlines);
-    
+
     _resolution.onChange([this]{
         LDEBUG("Group " + name() + " published resolutionChanged");
         _groupEvent->publish("resolutionChanged", ghoul::Dictionary({{"resolution", _resolution.value()}}));

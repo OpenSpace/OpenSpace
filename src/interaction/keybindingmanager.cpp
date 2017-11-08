@@ -109,7 +109,7 @@ void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
         }
     });
 }
-    
+
 std::string KeyBindingManager::generateJson() const {
     std::stringstream json;
     json << "[";
@@ -127,7 +127,7 @@ std::string KeyBindingManager::generateJson() const {
         json << "}";
     }
     json << "]";
-    
+
     std::string jsonString = "";
     for (const char& c : json.str()) {
         if (c == '\'') {

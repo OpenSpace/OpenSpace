@@ -38,15 +38,14 @@ namespace {
     const char* GlslHelperPath = "${MODULE_VOLUME}/shaders/helper.glsl";
     const char* GlslBoundsVsPath = "${MODULE_VOLUME}/shaders/boundsvs.glsl";
     const char* GlslBoundsFsPath = "${MODULE_VOLUME}/shaders/boundsfs.glsl";
-}
+} // namespace
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
-    std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
-    std::shared_ptr<TransferFunction> transferFunction,
-    std::shared_ptr<VolumeClipPlanes> clipPlanes)
+                                    std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
+                                       std::shared_ptr<TransferFunction> transferFunction,
+                                             std::shared_ptr<VolumeClipPlanes> clipPlanes)
     : _volumeTexture(volumeTexture)
     , _transferFunction(transferFunction)
     , _clipPlanes(clipPlanes)
@@ -62,20 +61,20 @@ BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
 void BasicVolumeRaycaster::initialize() {
     _boundingBox.initialize();
 }
-    
+
 void BasicVolumeRaycaster::deinitialize() {}
-    
+
 void BasicVolumeRaycaster::renderEntryPoints(
     const RenderData& data,
     ghoul::opengl::ProgramObject& program)
 {
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
-    
+
     // Cull back face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
+
     // Render bounding geometry
     _boundingBox.render();
 }
@@ -90,7 +89,6 @@ glm::dmat4 BasicVolumeRaycaster::modelViewTransform(const RenderData& data) {
     return data.camera.combinedViewMatrix() * modelTransform;
 }
 
-    
 void BasicVolumeRaycaster::renderExitPoints(
     const RenderData& data,
     ghoul::opengl::ProgramObject& program)
@@ -101,14 +99,14 @@ void BasicVolumeRaycaster::renderExitPoints(
     // Cull front face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
-    
+
     // Render bounding geometry
     _boundingBox.render();
-    
+
     // Restore defaults
     glCullFace(GL_BACK);
 }
-    
+
 void BasicVolumeRaycaster::preRaycast(
     const RaycastData& data,
     ghoul::opengl::ProgramObject& program)
@@ -146,7 +144,7 @@ void BasicVolumeRaycaster::preRaycast(
     program.setUniform("rUpperBound_" + id, _rUpperBound);
     program.setUniform("valueRemapping_" + id, _valueRemapping);
 }
-    
+
 void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&)
 {
     // For example: release texture units
@@ -154,11 +152,8 @@ void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::Progra
     _tfUnit = nullptr;
 }
 
-
-
-bool BasicVolumeRaycaster::cameraIsInside(
-    const RenderData & data,
-    glm::vec3 & localPosition)
+bool BasicVolumeRaycaster::cameraIsInside(const RenderData& data,
+                                          glm::vec3& localPosition)
 {
     glm::vec4 modelPos =
         glm::inverse(modelViewTransform(data)) * glm::vec4(0.0, 0.0, 0.0, 1.0);
@@ -169,11 +164,11 @@ bool BasicVolumeRaycaster::cameraIsInside(
             localPosition.y > 0 && localPosition.y < 1 &&
             localPosition.z > 0 && localPosition.z < 1);
 }
-    
+
 std::string BasicVolumeRaycaster::getBoundsVsPath() const {
     return GlslBoundsVsPath;
 }
-    
+
 std::string BasicVolumeRaycaster::getBoundsFsPath() const {
     return GlslBoundsFsPath;
 }
@@ -223,7 +218,7 @@ float BasicVolumeRaycaster::rNormalization() const {
 }
 
 void BasicVolumeRaycaster::setRUpperBound(float rUpperBound) {
-   _rUpperBound = rUpperBound;
+    _rUpperBound = rUpperBound;
 }
 
 float BasicVolumeRaycaster::rUpperBound() const {
@@ -246,5 +241,4 @@ void BasicVolumeRaycaster::setModelTransform(const glm::mat4 & transform) {
     _modelTransform = transform;
 }
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

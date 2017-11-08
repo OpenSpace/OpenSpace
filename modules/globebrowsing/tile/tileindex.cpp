@@ -111,18 +111,16 @@ int TileIndex::manhattan(const TileIndex& other) const {
     return std::abs(x - other.x) + std::abs(y - other.y);
 }
 
-/**
-Creates a hash which can be used as key in hash maps.
-    
-+-------+------------+-------+------------+
-| USAGE | BIT RANGE  | #BITS | MAX VALUE  |
-+-------+------------+-------+------------+
-| level |   0 -  5   |   5   |         31 |
-|     x |   5 - 35   |  30   | 1073741824 |
-|     y |  35 - 64   |  29   |  536870912 |
-+-------+------------+-------+------------+
-     
-*/
+// Creates a hash which can be used as key in hash maps.
+// 
+// +-------+------------+-------+------------+
+// | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+// +-------+------------+-------+------------+
+// | level |   0 -  5   |   5   |         31 |
+// |     x |   5 - 35   |  30   | 1073741824 |
+// |     y |  35 - 64   |  29   |  536870912 |
+// +-------+------------+-------+------------+
+
 TileIndex::TileHashKey TileIndex::hashKey() const {
     TileHashKey key = 0LL;
     key |= level;

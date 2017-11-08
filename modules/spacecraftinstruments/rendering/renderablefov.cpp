@@ -241,10 +241,10 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableFov"
     );
-    
+
     _instrument.spacecraft = dictionary.value<std::string>(KeyBody);
     _instrument.referenceFrame = dictionary.value<std::string>(KeyFrame);
-    
+
     _instrument.name = dictionary.value<std::string>(
         std::string(KeyInstrument) + "." + KeyInstrumentName
     );
@@ -506,7 +506,6 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 
             //intersects[i] = r.interceptFound;
 
-
             if (r.interceptFound) {
                 // This point intersected the target
                 first.color = RenderInformation::VertexColorTypeIntersectionStart;
@@ -546,7 +545,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
     // After finding the positions for the field of view boundaries, we can create the
     // vertices for the orthogonal plane as well, reusing the computations we performed
     // earlier
-    
+
     // Each boundary in _instrument.bounds has 'InterpolationSteps' steps between
     auto indexForBounds = [](size_t idx) -> size_t {
         return idx * InterpolationSteps;
@@ -572,7 +571,6 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             // item (the first one is (0,0,0)) and replicate it 'InterpolationSteps' times
             copyFieldOfViewValues(i, indexForBounds(i), indexForBounds(i + 1));
         }
-
     }
     else {
         // At least one point will intersect
@@ -642,10 +640,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                         RenderInformation::VertexColorTypeSquare
                     };
                 }
-
             }
-
-
         }
     }
 
@@ -705,7 +700,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                         // _orthogonalPlane-space
                         const size_t p1 = static_cast<size_t>(indexForBounds(i) + t1 * InterpolationSteps);
                         const size_t p2 = static_cast<size_t>(indexForBounds(i) + t2 * InterpolationSteps);
-                        
+
                         // We can copy the non-intersecting parts
                         copyFieldOfViewValues(i, indexForBounds(i), p1);
                         copyFieldOfViewValues(i, p2, indexForBounds(j));
@@ -852,17 +847,17 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
         else {
             bodyfixed = _instrument.referenceFrame;
         }
-        
+
         SpiceManager::SurfaceInterceptResult res =
             SpiceManager::ref().surfaceIntercept(target, _instrument.spacecraft,
                 _instrument.name, bodyfixed, _instrument.aberrationCorrection, data.time, _instrument.bounds[r]);
-        
+
         if (convert) {
             res.surfaceVector = SpiceManager::ref().frameTransformationMatrix(bodyfixed, _instrument.referenceFrame, data.time) * res.surfaceVector;
         }
-        
+
         interceptTag[r] = res.interceptFound;
-        
+
         // if not found, use the orthogonal projected point
         glm::dvec3 b;
         if (!interceptTag[r]) {
@@ -1030,7 +1025,7 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
             glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-        
+
         glm::mat4 modelViewProjectionTransform =
             data.camera.projectionMatrix() *
             glm::mat4(data.camera.combinedViewMatrix() *

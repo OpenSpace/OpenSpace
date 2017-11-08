@@ -75,5 +75,5 @@ void GPULayerGroup::deactivate() {
         l->deactivate();
     }
 }
-    
+
 }  // namespace openspace::globebrowsing

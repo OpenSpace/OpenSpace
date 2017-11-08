@@ -40,7 +40,7 @@ namespace {
 } // namespace
 
 namespace openspace::globebrowsing::tileprovider {
-    
+
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : _tile(nullptr, nullptr, Tile::Status::Unavailable)
     , _filePath(FilePathInfo)
@@ -92,7 +92,7 @@ void SingleImageProvider::reset() {
         throw std::runtime_error(std::string("Unable to load texture '")
             + _filePath.value() + "'");
     }
- 
+
     _tileTexture->uploadTexture();
     _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 

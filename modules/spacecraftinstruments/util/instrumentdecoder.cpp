@@ -36,7 +36,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-   
+
 InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
     bool success = dictionary.getValue(keyDetector, _type);
     ghoul_assert(success, "Instrument has not provided detector type");
@@ -55,7 +55,6 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
     ghoul::Dictionary spiceDictionary;
     success = dictionary.getValue(keySpice, spiceDictionary);
     ghoul_assert(success, "Instrument did not provide spice ids");
-
 
     _spiceIDs.resize(spiceDictionary.size());
     for (size_t i = 0; i < _spiceIDs.size(); ++i) {
