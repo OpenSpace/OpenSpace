@@ -329,8 +329,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.1, 10.0)
-    , _disableFadeInDistance(DisableFadeInInfo, false)
+    , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.1, 100.0)
+    , _disableFadeInDistance(DisableFadeInInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _polygonTexture(nullptr)
     , _spriteTexture(nullptr)
@@ -343,7 +343,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _colorOptionString("")
     , _unit(Parsec)
     , _nValuesPerAstronomicalObject(0)    
-    , _fadeInThreshold(0.0)
     , _transformationMatrix(glm::dmat4(1.0))
     , _vao(0)
     , _vbo(0)
@@ -516,10 +515,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
 
     if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
-        _fadeInThreshold = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));        
-    }
-    addProperty(_fadeInDistance);
-    addProperty(_disableFadeInDistance);
+        float fadeInValue = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
+        _fadeInDistance.set(fadeInValue);
+        _disableFadeInDistance.set(false);
+        addProperty(_fadeInDistance);
+        addProperty(_disableFadeInDistance);
+    }    
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -727,7 +728,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
         _fontRenderer->render(
             *_font,
             scaledPos,
-            _textColor,
+            //_textColor,
+            textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
             modelViewProjectionMatrix,
@@ -769,13 +771,14 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     float fadeInVariable = 1.0f;
-    if (_fadeInThreshold > 0.0) {
-        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
-        double term = std::exp(distCamera / scale - _fadeInThreshold);
+    if (!_disableFadeInDistance) {
+        //float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
+        float distCamera = glm::length(data.camera.positionVec3());
+        double term = std::exp(distCamera / scale - _fadeInDistance);
         float func = static_cast<float>(term / (term + 1.0));
 
         // Let's not waste performance
-        if (func < 0.001) {
+        if (func < 0.01) {
             return;
         }
 

@@ -25,7 +25,7 @@ return {
                 0.0,              0.0,            0.0,           1.0
                 },
             -- Fade in value in the same unit as "Unit"
-            FadeInThreshould = 2.0,
+            FadeInThreshould = 5.5,
             Unit = "Mpc"
         },
         GuiPath = "/Universe/Galaxies"
@@ -37,7 +37,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderablePlanesCloud",
-            Enabled = false,
+            Enabled = true,
             Color = { 1.0, 1.0, 1.0 },
             Transparency = 0.99,
             ScaleFactor = 1.0,

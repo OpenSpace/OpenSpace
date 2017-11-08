@@ -688,8 +688,8 @@ void main() {
                 }
             } 
             else { // no intersection
-                discard;
-                //atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
+                //discard;
+                atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
             }
         }  
 

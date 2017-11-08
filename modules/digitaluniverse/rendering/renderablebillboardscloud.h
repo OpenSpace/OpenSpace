@@ -153,9 +153,7 @@ private:
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::vector<glm::vec2> _colorRangeData;
-
-    float _fadeInThreshold;
-
+    
     int _nValuesPerAstronomicalObject;
 
     glm::dmat4 _transformationMatrix;
