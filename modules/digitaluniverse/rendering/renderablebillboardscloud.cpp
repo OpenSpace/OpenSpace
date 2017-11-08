@@ -1245,7 +1245,10 @@ void RenderableBillboardsCloud::createDataSlice() {
                     break;
             }
 
-            int colorIndex = (c == static_cast<int>(colorBins.size())) - 1 ? 0 : c + 1;
+            int colorIndex = 0;
+            if (c != static_cast<int>(colorBins.size() - 1)) {
+                colorIndex = c + 1;
+            }
 
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(_colorMapData[colorIndex][j]);
