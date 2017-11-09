@@ -69,15 +69,15 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary
 Rotation::Rotation() 
     : properties::PropertyOwner({ "Rotation" })
 {}
-    
+
 Rotation::Rotation(const ghoul::Dictionary&)
     : properties::PropertyOwner({ "Rotation" })
 {}
-    
+
 bool Rotation::initialize() {
     return true;
 }
-    
+
 const glm::dmat3& Rotation::matrix() const {
     return _matrix;
 }

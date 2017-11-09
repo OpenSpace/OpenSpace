@@ -66,7 +66,7 @@ public:
      * \pre \p timeString must not be empty
      */
     static double convertTime(const std::string& time);
-    
+
     Time(double secondsJ2000 = -1);
     Time(const Time& other);
 
@@ -87,7 +87,6 @@ public:
 
     static Time now();
 
-    
     /**
      * Sets the current time to the specified value in seconds past the J2000 epoch. This
      * value can be negative to represent dates before the epoch.
@@ -128,7 +127,7 @@ public:
     * \return The current time as a ISO 8601 formatted string
     */
     std::string ISO8601() const;
-    
+
     /**
      * Sets the delta time value that is the number of seconds that should pass for each
      * real-time second. This value is used in the advanceTime(double) method to easily
@@ -177,7 +176,7 @@ public:
     bool timeJumped() const;
 
     void setTimeJumped(bool jumped);
-    
+
     bool paused() const;
 
     /**
@@ -197,7 +196,7 @@ private:
     double _time;
     double _dt;
     bool _timeJumped;
-    bool _timePaused = false;    
+    bool _timePaused = false;
 };
 
 } // namespace openspace

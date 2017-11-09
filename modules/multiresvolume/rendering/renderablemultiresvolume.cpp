@@ -63,8 +63,6 @@
 #include <algorithm>
 #include <chrono>
 
-
-
 namespace {
     const char* _loggerCat = "RenderableMultiresVolume";
     const char* KeyDataSource = "Source";
@@ -158,7 +156,6 @@ namespace {
         "Euler rotation",
         "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace {
@@ -327,7 +324,6 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     addProperty(_scalingExponent);
     addProperty(_translation);
     addProperty(_rotation);
-
 
     //_brickSelector = new ShenBrickSelector(_tsp, -1, -1);
 }
@@ -747,7 +743,6 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         transform = glm::rotate(transform, eulerRotation.z, glm::vec3(0, 0, 1));
         transform = glm::scale(transform, static_cast<glm::vec3>(_scaling) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
 
-    
         _raycaster->setStepSizeCoefficient(_stepSizeCoefficient);
         _raycaster->setModelTransform(transform);
         //_raycaster->setTime(data.time);

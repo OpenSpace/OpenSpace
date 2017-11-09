@@ -62,7 +62,7 @@ public:
 
     /// Deinitializes the component with things that do not require an OpenGL context
     virtual void deinitialize();
-    
+
     /// Deinitializes the component with things that require an OpenGL context
     virtual void deinitializeGL();
 

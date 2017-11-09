@@ -38,7 +38,7 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
-    
+
 private:
     std::string _inputPath;
     std::string _outputPath;

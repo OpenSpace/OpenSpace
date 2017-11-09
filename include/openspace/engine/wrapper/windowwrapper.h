@@ -76,7 +76,7 @@ public:
     * disables it
     */
     virtual void setSynchronization(bool enabled);
-    
+
     /**
      * This method clears all the rendering windows with the specified \p clearColor. In
      * most OpenGL cases, this will end up with one or mode <code>glClear</code> calls.
@@ -84,7 +84,7 @@ public:
      * \param clearColor The color with which to clear all windows
      */
     virtual void clearAllWindows(const glm::vec4& clearColor);
-    
+
     /**
      * Returns whether the current window has been resized recently. On default, this
      * method always returns <code>false</code>.
@@ -119,7 +119,7 @@ public:
      * \return The location of the mouse cursor in pixel screen coordinates
      */
     virtual glm::vec2 mousePosition() const;
-    
+
     /**
      * Returns a bitmask of the status of all available mouse buttons. Bit <code>i</code>
      * is <code>1</code> if mouse button <code>i</code> is pressed down;
@@ -129,28 +129,28 @@ public:
      * \return A bitmask showing the status of all mouse buttons (up to \p maxNumber)
      */
     virtual uint32_t mouseButtons(int maxNumber = 8) const;
-    
+
     /**
      * Returns the size of the currently active window in pixel coordinates. On default,
      * this method returns a window size of <code>0,0</code>.
      * \return The size of the currently active window in pixel coordinates
      */
     virtual glm::ivec2 currentWindowSize() const;
-    
+
     /**
      * Returns the resolution of the currently active window in pixel coordinates. On
      * default, this method returns the same size as #currentWindowSize.
      * \return The resolution of the currently active window in pixel coordinates
      */
     virtual glm::ivec2 currentWindowResolution() const;
-    
+
     /**
      * Returns the resolution of the currently active framebuffer in pixel coordinates.
      * On default, this method returns the same size as #currentWindowSize.
      * \return The resolution of the currently active window in pixel coordinates
      */
     virtual glm::ivec2 currentDrawBufferResolution() const;
-    
+
     /**
      * Returns the DPI scaling factor for the current window. This is normally 1 on all
      * regular monitors and 2 on Retina screens.
@@ -187,7 +187,7 @@ public:
      * \return Whether the current rendering window is GUI-only
      */
     virtual bool isGuiWindow() const;
-    
+
     /**
      * Returns <code>true</code> if this application is the master for a clustered
      * environment.
@@ -218,7 +218,7 @@ public:
      * \return The currently employed model matrix
      */
     virtual glm::mat4 modelMatrix() const;
-    
+
     /**
      * Sets the near and far clipping planes of the rendering window. This method defaults
      * to a no-op.
@@ -226,7 +226,7 @@ public:
      * \param far The far clipping plane
      */
     virtual void setNearFarClippingPlane(float near, float far);
-    
+
     /**
      * Sets the stereo eye separation distance for the render engine.
      * \param distance The distance between eyes for stereo rendering.
@@ -241,7 +241,7 @@ public:
      * \return The location and size of the current viewport
      */
     virtual glm::ivec4 viewportPixelCoordinates() const;
-    
+
     /**
      * Returns <code>true</code> if there is an external control connected, i.e., an
      * application that can receive control commands. On default, this method will return
@@ -249,13 +249,13 @@ public:
      * \return If there is an external control connected
      */
     virtual bool isExternalControlConnected() const;
-    
+
     /**
      * Sends a \p message to an external control. This method defaults to a no-op.
      * \param message The message to be sent
      */
     virtual void sendMessageToExternalControl(const std::vector<char>& message) const;
-    
+
     /**
      * Returns <code>true</code> if the rendering is a single viewport with an single
      * window; <code>false</code> otherwise. On default, this method returns

@@ -78,7 +78,7 @@ private:
     properties::OptionProperty _aberration;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    
+
     glm::dmat3 _stateMatrix;
 
     GLuint _vao;

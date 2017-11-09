@@ -74,7 +74,7 @@ public:
     void clearEnqueuedTasks();
 
 private:
-    
+
     struct DefaultHasher {
         unsigned long long operator()(const KeyType& key) const {
             return static_cast<unsigned long long>(key);

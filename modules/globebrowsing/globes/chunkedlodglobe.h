@@ -36,7 +36,7 @@
 namespace openspace::globebrowsing {
 
 namespace chunklevelevaluator { class Evaluator; }
-    
+
 namespace culling { class ChunkCuller; }
 
 class Chunk;
@@ -51,7 +51,7 @@ public:
     ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
         std::shared_ptr<LayerManager> layerManager);
     ~ChunkedLodGlobe();
-    
+
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -86,7 +86,7 @@ public:
      * its siblings. 
      */
     int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
-        
+
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
      * heigh mapped surface.
@@ -118,7 +118,7 @@ public:
     std::shared_ptr<LayerManager> layerManager() const;
 
     StatsCollector stats;
-    
+
 private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
 
@@ -127,7 +127,7 @@ private:
     static const TileIndex RIGHT_HEMISPHERE_INDEX;
 
     const RenderableGlobe& _owner;
-  
+
     // Covers all negative longitudes
     std::unique_ptr<ChunkNode> _leftRoot;
 

@@ -49,7 +49,7 @@ std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
     const TileIndex& tileIndex);
 
 void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv);
-    
+
 } // namespace openspace::globebrowsing::tileselector
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_SELECTOR___H__

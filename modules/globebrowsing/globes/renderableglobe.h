@@ -68,7 +68,7 @@ public:
         properties::BoolProperty limitLevelByAvailableData;
         properties::IntProperty modelSpaceRenderingCutoffLevel;
     };
-    
+
     struct GeneralProperties {
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
@@ -77,7 +77,7 @@ public:
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
     };
-    
+
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 
@@ -91,7 +91,7 @@ public:
     // Getters that perform calculations
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
     float getHeight(glm::dvec3 position);
-    
+
     // Getters
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe() const;
     LayerManager* layerManager() const;
@@ -119,7 +119,7 @@ private:
     std::shared_ptr<LayerManager> _layerManager;
     DistanceSwitch _distanceSwitch;
     std::shared_ptr<Camera> _savedCamera;
-    
+
     std::string _frame;
     double _time;
 

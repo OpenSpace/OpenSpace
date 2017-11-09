@@ -113,7 +113,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
         defaultFieldlineColor,
         glm::vec4(0.f),
         glm::vec4(1.f)
-      )
+    )
     , _seedPointSource(SeedPointSourceInfo)
     , _seedPointSourceFile(SeedPointFileInfo)
     , _program(nullptr)
@@ -126,7 +126,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
         "Renderable does not have a name"
     );
-    
+
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
     setName(name);
@@ -188,24 +188,27 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
 void RenderableFieldlines::initializeDefaultPropertyValues() {
     bool success;
-    
+
     // Step size
     float stepSize;
     success = _fieldlineInfo.getValue(keyFieldlinesStepSize, stepSize);
-    if (success)
+    if (success) {
         _stepSize = stepSize;
+    }
 
     // Classification
     bool classification;
     success = _fieldlineInfo.getValue(keyFieldlinesClassification, classification);
-    if (success)
+    if (success) {
         _classification = classification;
+    }
 
     // Fieldline Color
     glm::vec4 color;
     success = _fieldlineInfo.getValue(keyFieldlinesColor, color);
-    if (success)
+    if (success) {
         _fieldlineColor = color;
+    }
 
     // Seedpoints Type
     std::string sourceType;
@@ -283,8 +286,9 @@ void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableFieldlines::update(const UpdateData&) {
-    if (_program->isDirty())
+    if (_program->isDirty()) {
         _program->rebuildFromFile();
+    }
 
     if (_seedPointsAreDirty) {
         loadSeedPoints();
@@ -295,8 +299,9 @@ void RenderableFieldlines::update(const UpdateData&) {
     if (_fieldLinesAreDirty) {
         std::vector<Line> fieldlines = generateFieldlines();
 
-        if (fieldlines.empty())
+        if (fieldlines.empty()) {
             return ;
+        }
 
         int prevEnd = 0;
         std::vector<LinePoint> vertexData;
@@ -309,12 +314,14 @@ void RenderableFieldlines::update(const UpdateData&) {
         }
         LDEBUG("Number of vertices : " << vertexData.size());
 
-        if (_fieldlineVAO == 0)
+        if (_fieldlineVAO == 0) {
             glGenVertexArrays(1, &_fieldlineVAO);
+        }
         glBindVertexArray(_fieldlineVAO);
 
-        if (_vertexPositionBuffer == 0)
+        if (_vertexPositionBuffer == 0) {
             glGenBuffers(1, &_vertexPositionBuffer);
+        }
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
         glBufferData(GL_ARRAY_BUFFER, vertexData.size()*sizeof(LinePoint), &vertexData.front(), GL_STATIC_DRAW);
@@ -388,8 +395,9 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
         return {};
     }
 
-    if (type == vectorFieldTypeVolumeKameleon)
+    if (type == vectorFieldTypeVolumeKameleon) {
         return generateFieldlinesVolumeKameleon();
+    }
     else {
         LERROR(keyVectorField << "." << keyVectorFieldType <<
             " does not name a valid type");
@@ -451,12 +459,12 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         KameleonWrapper kw(fileName);
         return kw.getClassifiedFieldLines(xVariable, yVariable, zVariable, _seedPoints, _stepSize);
     }
-    
+
     if (lorentzForce) {
         KameleonWrapper kw(fileName);
         return kw.getLorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
-    
+
     ghoul_assert(false, "Should not reach this");
     return {};
 }

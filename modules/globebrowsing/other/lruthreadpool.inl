@@ -49,7 +49,7 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
 
             // get the task from the queue
             task = _pool._queuedTasks.popMRU().second;
-            
+
         }// release lock
 
         // execute the task

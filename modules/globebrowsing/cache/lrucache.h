@@ -40,7 +40,7 @@ class LRUCache {
 public:
     using Item = std::pair<KeyType, ValueType>;
     using Items = std::list<Item>;
-    
+
     /**
      * \param size is the maximum size of the cache given in number of cached items.
      */
@@ -62,7 +62,7 @@ public:
      * Pops the front of the queue.
      */
     Item popMRU();
-    
+
     /**
      * Pops the back of the queue.
      */

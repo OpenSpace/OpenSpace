@@ -40,7 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 
 #include <glm/gtx/string_cast.hpp>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <array>
 #include <fstream>
@@ -61,7 +61,7 @@ namespace {
 
     const int8_t CurrentCacheVersion = 1;
     const float PARSEC = 0.308567756E17;
-    
+
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
@@ -258,7 +258,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableDUMeshes"
     );
-        
+
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
         _hasSpeckFile = true;
@@ -320,7 +320,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
             );
     }
     addProperty(_scaleFactor);
-    
+
     if (dictionary.hasKey(DrawLabelInfo.identifier)) {
         _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
     }
@@ -359,7 +359,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary colorDic = dictionary.value<ghoul::Dictionary>(
             MeshColorInfo.identifier
             );
-        for (int i = 0; i < colorDic.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(colorDic.size()); ++i) {
             _meshColorMap.insert({ i + 1,
                 colorDic.value<glm::vec3>(std::to_string(i + 1)) });
         }
@@ -383,7 +383,7 @@ void RenderableDUMeshes::initializeGL() {
     }
 
     createMeshes();
-        
+
     if (_hasLabel) {
         if (_fontRenderer == nullptr)
             _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
@@ -403,7 +403,7 @@ void RenderableDUMeshes::deinitializeGL() {
             glDeleteBuffers(1, &pair.second.vboArray[i]);
         }            
     }
-        
+
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
         renderEngine.removeRenderProgram(_program);
@@ -447,7 +447,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     for (auto pair : _renderingMeshesMap) {
         _program->setUniform("color", _meshColorMap[pair.second.colorIndex]);
-        for (int i = 0; i < pair.second.vaoArray.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(pair.second.vaoArray.size()); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);
             switch (pair.second.style)
             {
@@ -462,9 +462,9 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
             default:
                 break;
             }
-        }                        
+        }
     }
-      
+
     glBindVertexArray(0);
 
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
@@ -650,7 +650,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
-            
+
         if (file.eof()) {
             break;
         }
@@ -716,7 +716,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 dummy.clear();
                 str >> dummy;
             } while (dummy != "{");
-                
+
             std::getline(file, line);
             std::stringstream dim(line);
             dim >> mesh.numU; // numU
@@ -751,9 +751,9 @@ bool RenderableDUMeshes::readSpeckFile() {
             else {
                 return false;
             }
-        }            
-    }       
-        
+        }
+    }
+
     return true;
 }
 
@@ -936,10 +936,10 @@ void RenderableDUMeshes::createMeshes() {
                 break;
             }
 
-            for (int v = 0; v < it->second.vertices.size(); ++v) {
+            for (int v = 0; v < static_cast<int>(it->second.vertices.size()); ++v) {
                 it->second.vertices[v] *= scale;
             }
-                                
+
             for (int i = 0; i < it->second.numU; ++i) {
                 GLuint vao, vbo;
                 glGenVertexArrays(1, &vao);

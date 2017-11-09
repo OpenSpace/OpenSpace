@@ -50,7 +50,7 @@ namespace {
         UpperRight,
         Center
     };
-    
+
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -259,13 +259,13 @@ void RenderableDebugPlane::createPlane() {
     const GLfloat size = _size;
 
     const GLfloat vertex_data[] = {
-        //      x      y     z     w     s     t
+        //  x      y    z    w    s    t
         -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-        -size, size, 0.f, 0.f, 0.f, 1.f,
+         size,  size, 0.f, 0.f, 1.f, 1.f,
+        -size,  size, 0.f, 0.f, 0.f, 1.f,
         -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, -size, 0.f, 0.f, 1.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
+         size, -size, 0.f, 0.f, 1.f, 0.f,
+         size,  size, 0.f, 0.f, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad); // bind array

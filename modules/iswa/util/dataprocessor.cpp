@@ -116,7 +116,7 @@ float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mea
 
     float value = standardScore*(zScoreMax+zScoreMin)-zScoreMin;
     value = value*sd+mean; 
-    
+
     // std::cout << value << std::endl; 
     return value;
     // float standardScore = ( value - mean ) / sd;
@@ -163,10 +163,10 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions) {
                 mean = (1.0/_numValues[option])*_sum[option];
                 standardDeviation = _standardDeviation[option];
                 histogram = _histograms[option];
-                
+
                 filterMid = histogram->highestBinValue(_useHistogram);
                 filterWidth = mean+histogram->binWidth();
-                
+
                 filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation, _normValues);
                 filterWidth = fabs(0.5-normalizeWithStandardScore(filterWidth, mean, standardDeviation, _normValues));
             } else {
@@ -210,7 +210,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues,
         _sum[i] += sum[i];
         _standardDeviation[i] = sqrt(pow(standardDeviation, 2) + pow(_standardDeviation[i], 2));
         _numValues[i] += numValues;
-        
+
 
         mean = (1.0f/_numValues[i])*_sum[i];
         float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], _histNormValues);
@@ -250,7 +250,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues,
         }
 
         _histograms[i]->generateEqualizer();
-        
+
         std::cout << std::endl;
         _histograms[i]->print();
         std::cout << std::endl;

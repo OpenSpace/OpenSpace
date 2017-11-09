@@ -67,7 +67,7 @@ TimeRange::TimeRange(double startTime, double endTime)
     : start(startTime)
     , end(endTime)
 {}
-    
+
 TimeRange::TimeRange(const ghoul::Dictionary& dict) {
     if (!initializeFromDictionary(dict, *this)) {
         throw std::runtime_error("Unable to read TimeRange from dictionary");

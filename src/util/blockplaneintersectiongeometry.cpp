@@ -106,7 +106,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     if (nIntersections <3) return; // Gotta love intersections
 
     // Construct vectors vectors (vectors1 .. vectorsN) between the N points
-    
+
     std::vector< std::pair<int, float> > angles(nIntersections-1);
 
     glm::vec3 vector1 = glm::normalize(intersections[1] - intersections[0]);
@@ -149,7 +149,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
 
     glBindVertexArray(0);
 }
-    
+
 bool BlockPlaneIntersectionGeometry::initialize() {
     if (_vaoId == 0)
         glGenVertexArrays(1, &_vaoId);
@@ -174,5 +174,4 @@ void BlockPlaneIntersectionGeometry::render() {
     //glEnable(GL_CULL_FACE);
 }
 
-}
-    
+} // namespace openspace

@@ -146,7 +146,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     _colorTexturePath = absPath(dictionary.value<std::string>(
         ColorTextureInfo.identifier
     ));
-        
+
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
 
@@ -156,7 +156,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     _projectionComponent.initialize(
         dictionary.value<ghoul::Dictionary>(keyProjection)
     );
-    
+
     float boundingSphereRadius = 1.0e9;
     dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
     setBoundingSphere(boundingSphereRadius);
@@ -252,7 +252,7 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
     glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
-        
+
     _programObject->setUniform("_performShading", _performShading);
     _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
@@ -261,7 +261,7 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
 
 
     _geometry->setUniforms(*_programObject);
-    
+
     ghoul::opengl::TextureUnit unit[2];
     unit[0].activate();
     _baseTexture->bind();
@@ -272,7 +272,7 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform("projectionTexture", unit[1]);
 
     _geometry->render();
-        
+
     _programObject->deactivate();
 }
 
@@ -286,7 +286,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
     }
 
     _projectionComponent.update();
-        
+
     if (_depthFboProgramObject->isDirty()) {
         _depthFboProgramObject->rebuildFromFile();
     }
@@ -303,9 +303,9 @@ void RenderableModelProjection::update(const UpdateData& data) {
             );
         }
     }
-        
+
     _stateMatrix = data.modelTransform.rotation;
-    
+
     glm::dvec3 p =
         OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
@@ -395,7 +395,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     );
 
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
- 
+
     position[3] += 4;
     glm::vec3 cpos = position.vec3();
 

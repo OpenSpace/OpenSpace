@@ -302,7 +302,7 @@ void RenderablePlanetProjection::imageProjectGPU(
     unitFbo.activate();
     projectionTexture->bind();
     _fboProgramObject->setUniform("projectionTexture", unitFbo);
-        
+
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform" , _transform);
     _fboProgramObject->setUniform("_scaling"       , _camScaling);
@@ -373,7 +373,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         lightTime
     );
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-   
+
     //change to KM and add psc camera scaling. 
     position[3] += (3 + _camScaling[1]);
     //position[3] += 3;
@@ -472,7 +472,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _heightMapTexture->bind();
         _programObject->setUniform("heightTexture", unit[2]);
     }
-    
+
     _geometry->render();
     _programObject->deactivate();
 }

@@ -87,7 +87,7 @@ bool IswaBaseGroup::isType(std::string type){
 void IswaBaseGroup::updateGroup(){
     LDEBUG("Group " + name() + " published updateGroup");
     _groupEvent->publish("updateGroup", ghoul::Dictionary());
-    
+
 }
 
 void IswaBaseGroup::clearGroup(){

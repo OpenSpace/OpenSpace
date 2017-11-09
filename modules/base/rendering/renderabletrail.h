@@ -91,7 +91,7 @@ protected:
 
     /// Returns the documentation entries that the con
     static documentation::Documentation Documentation();
-   
+
     /// The layout of the VBOs
     struct TrailVBOLayout {
         float x, y, z;

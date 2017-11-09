@@ -45,9 +45,9 @@ enum CardinalDirection {
 
 struct TileIndex {
     using TileHashKey = uint64_t;
-    
+
     int x, y, level;
-    
+
     TileIndex(int x = 0, int y = 0, int level = 0);
     TileIndex(const TileIndex& other);
 
@@ -68,7 +68,7 @@ struct TileIndex {
     }
 
     TileIndex parent() const;
-    
+
     TileIndex& operator--();
     TileIndex operator--(int);
 

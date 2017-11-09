@@ -183,7 +183,7 @@ void RenderableModel::deinitializeGL() {
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
-    
+
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation

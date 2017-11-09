@@ -72,7 +72,7 @@ private:
     GPUChunkTilePile gpuChunkTilePile;
     GPULayerRenderSettings gpuRenderSettings;
     GPULayerAdjustment gpuLayerAdjustment;
-    
+
     GPUData<glm::ivec2> paddingStartOffset;
     GPUData<glm::ivec2> paddingSizeDifference;
     // Adjustment layer stuff

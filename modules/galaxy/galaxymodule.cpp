@@ -44,5 +44,5 @@ void GalaxyModule::internalInitialize() {
     fTask->registerClass<MilkywayConversionTask>("MilkywayConversionTask");
     fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");
 }
- 
+
 } // namespace openspace

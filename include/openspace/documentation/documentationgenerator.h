@@ -29,7 +29,7 @@
 #include <vector>
 
 namespace openspace {
-    
+
 /*
  * This abstract class is used for instances when another class has the ability to
  * generate a Handlebar generated documentation file that contains valuable information
@@ -51,7 +51,7 @@ public:
         std::string name; ///< The name of the Handlebar template defined in \m filename
         std::string filename; ///< The filename referenced in the \m name
     };
-    
+
     /**
      * The constructor that is used to set the member variables later used in the
      * writeDocumentation method.
@@ -72,7 +72,7 @@ public:
 
     /// Default constructor
     virtual ~DocumentationGenerator() = default;
-    
+
     /**
      * Create the documentation into the provided filename. Any existing file will be
      * silently overwritten. This method will call the generateJson method that can be
@@ -81,7 +81,7 @@ public:
      * \param filename The filename in which the documentation is written
      */
     void writeDocumentation(const std::string& filename);
-    
+
 protected:
     /**
      * This abstract method is used by concrete subclasses to provide the actual data that
@@ -92,14 +92,13 @@ protected:
      * DocumentationGenerator constructor
      */
     virtual std::string generateJson() const = 0;
-    
+
 private:
     const std::string _name;
     const std::string _jsonName;
     const std::vector<HandlebarTemplate> _handlebarTemplates;
     const std::string _javascriptFile;
 };
-    
 
 /**
  * This function takes a \p text and escapes all necessary characters () that JSON

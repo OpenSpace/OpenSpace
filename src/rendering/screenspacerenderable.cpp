@@ -234,7 +234,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         }
         useEuclideanCoordinates(_useFlatScreen);
     });
-   
+
     addProperty(_depth);
     addProperty(_scale);
     addProperty(_alpha);
@@ -248,7 +248,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         _useFlatScreen = dictionary.value<bool>(FlatScreenInfo.identifier);
     }
     useEuclideanCoordinates(_useFlatScreen);
-    
+
     if (_useFlatScreen) {
         if (dictionary.hasKey(EuclideanPositionInfo.identifier)) {
             _euclideanPosition = dictionary.value<glm::vec2>(
@@ -388,7 +388,7 @@ void ScreenSpaceRenderable::createPlane() {
         sizeof(GLfloat) * 4,
         nullptr
     );
-    
+
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1,
@@ -412,7 +412,7 @@ void ScreenSpaceRenderable::useEuclideanCoordinates(bool b) {
 glm::vec2 ScreenSpaceRenderable::toEuclidean(const glm::vec2& spherical, float r) {
     float x = r * sin(spherical[0]) * sin(spherical[1]);
     float y = r * cos(spherical[1]);
-    
+
     return glm::vec2(x, y);
 }
 
@@ -452,7 +452,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
     //to scale the plane
     float textureRatio =
         static_cast<float>(_texture->height()) / static_cast<float>(_texture->width());
-        
+
     float scalingRatioX = _originalViewportSize.x / resolution.x;
     float scalingRatioY = _originalViewportSize.y / resolution.y;
     return glm::scale(
@@ -508,7 +508,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
         "ViewProjectionMatrix",
         OsEng.renderEngine().camera()->viewProjectionMatrix()
     );
-    
+
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
@@ -516,7 +516,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    
+
     glEnable(GL_CULL_FACE);
 
     _shader->deactivate();

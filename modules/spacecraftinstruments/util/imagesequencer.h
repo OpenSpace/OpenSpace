@@ -141,7 +141,7 @@ public:
 
 private:
     void sortData();
-    
+
     /*
      * _fileTranslation handles any types of ambiguities between the data and 
      * spice/openspace -calls. This map is composed of a key that is a string in 

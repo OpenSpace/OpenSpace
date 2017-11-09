@@ -65,10 +65,10 @@ InstrumentTimesParser::InstrumentTimesParser(const std::string& name,
     , _target("")
     , _detectorType("CAMERA")
 {
-    
+
     _target = inputDict.value<std::string>(KeyTargetBody);
     ghoul::Dictionary instruments = inputDict.value<ghoul::Dictionary>(KeyInstruments);
-    
+
     for (const auto& instrumentKey : instruments.keys()) {
         ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(instrumentKey);
         ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(KeyInstrumentFiles);
@@ -86,7 +86,7 @@ bool InstrumentTimesParser::create() {
         return a.first < b.first;
     };
 
-    
+
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
     if (!FileSys.directoryExists(sequenceDir)) {
@@ -98,7 +98,7 @@ bool InstrumentTimesParser::create() {
         std::string instrumentID = it->first;
         for (std::string filename: it->second) {
             std::string filepath = FileSys.pathByAppendingComponent(sequenceDir.path(), filename);
-            
+
             if (!FileSys.fileExists(filepath)) {
                 LERROR("Unable to read file " << filepath << ". Skipping file.");
                 continue;
@@ -118,7 +118,7 @@ bool InstrumentTimesParser::create() {
                         successfulRead = false;
                         break;
                     }
-                    
+
                     TimeRange captureTimeRange;
                     try { // parse date strings
                         std::string start = matches[1].str();
@@ -155,7 +155,7 @@ bool InstrumentTimesParser::create() {
             }
         }
     }
-    
+
     std::stable_sort(_captureProgression.begin(), _captureProgression.end());
     //std::stable_sort(_instrumentTimes.begin(), _instrumentTimes.end());
     std::stable_sort(_targetTimes.begin(), _targetTimes.end(), targetComparer);

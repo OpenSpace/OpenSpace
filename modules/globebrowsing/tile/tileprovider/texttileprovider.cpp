@@ -41,7 +41,7 @@
 using namespace ghoul::fontrendering;
 
 namespace openspace::globebrowsing::tileprovider {
-    
+
 TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t fontSize)
     : _initData(initData)
     , _fontSize(fontSize)
@@ -126,7 +126,7 @@ Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
 
     glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT);
-        
+
     ghoul_assert(_fontRenderer != nullptr, "_fontRenderer must not be null");
     renderText(*_fontRenderer, tileIndex);
 

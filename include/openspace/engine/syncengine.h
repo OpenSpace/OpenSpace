@@ -71,7 +71,7 @@ public:
      * Invokes the postsync method of all added Syncables
      */
     void postSynchronization(IsMaster isMaster);
-    
+
     /**
      * Add a Syncable to be synchronized over the SGCT cluster.
      * \pre syncable must not be nullptr

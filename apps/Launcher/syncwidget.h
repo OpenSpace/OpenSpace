@@ -52,7 +52,7 @@ Q_OBJECT
 public:
     SyncWidget(QWidget* parent, Qt::WindowFlags f = 0);
     ~SyncWidget();
-    
+
     void setSceneFiles(QMap<QString, QString> sceneFiles);
 
 private slots:

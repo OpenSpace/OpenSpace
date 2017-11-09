@@ -40,15 +40,15 @@ namespace openspace::globebrowsing::tileprovider {
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     std::string name = "Name unspecified";
     dictionary.getValue("Name", name);
-  
+
     layergroupid::GroupID layerGroupID;
     dictionary.getValue(KeyLayerGroupID, layerGroupID);
-  
+
     ghoul::Dictionary providers;
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyProviders)) {
         providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
     }
-    
+
     for (size_t i = 0; i < providers.size(); i++) {
         std::string dictKey = std::to_string(i + 1);
         ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
@@ -62,7 +62,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             );
         }
         maxLevel = std::round(floatMaxLevel);
-            
+
         ghoul::Dictionary providerDict;
         if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict)) {
             throw std::runtime_error(
@@ -93,12 +93,12 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         providerDict.getValue("Name", providerName);
         _levelTileProviders.back()->setName(providerName);
         addPropertySubOwner(_levelTileProviders.back().get());
-        
+
         // Ensure we can represent the max level
         if (static_cast<int>(_providerIndices.size()) < maxLevel) {
             _providerIndices.resize(maxLevel+1, -1);
         }
-            
+
         // map this level to the tile provider index
         _providerIndices[maxLevel] = static_cast<int>(_levelTileProviders.size()) - 1;
     }

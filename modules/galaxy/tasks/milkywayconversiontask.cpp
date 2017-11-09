@@ -42,7 +42,7 @@ namespace {
 } // namespace 
 
 namespace openspace {
-    
+
 MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
     std::string inFilenamePrefix;
     if (dictionary.getValue(KeyInFilenamePrefix, inFilenamePrefix)) {
@@ -77,8 +77,7 @@ MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictiona
 
 MilkywayConversionTask::~MilkywayConversionTask() {}
 
-std::string MilkywayConversionTask::description()
-{
+std::string MilkywayConversionTask::description() {
     return std::string();
 }
 
@@ -89,7 +88,7 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallb
     for (int i = 0; i < _inNSlices; i++) {
         filenames.push_back(_inFilenamePrefix + std::to_string(i + _inFirstIndex) + _inFilenameSuffix);
     }
-    
+
     TextureSliceVolumeReader<glm::tvec4<GLfloat>> sliceReader(filenames, _inNSlices, 10);
     sliceReader.initialize();
 
@@ -109,9 +108,8 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallb
     rawWriter.write(sampleFunction, progressCallback);
 }
 
-documentation::Documentation MilkywayConversionTask::documentation()
-{
+documentation::Documentation MilkywayConversionTask::documentation() {
     return documentation::Documentation();
 }
 
-}
+} // namespace openspace

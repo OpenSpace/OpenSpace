@@ -27,7 +27,7 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
-   
+
 ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCANNER") {
     std::string value;
     for (size_t k = 0; k < dictionary.size(); k++) {

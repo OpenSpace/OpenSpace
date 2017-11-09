@@ -114,9 +114,9 @@ const string ConfigurationManager::PartShowProgressbar = "ShowProgressbar";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
-    
+
     Directory directory = FileSys.currentDirectory();
-    
+
     while (true) {
         std::string fullPath = FileSys.pathByAppendingComponent(
             directory,
@@ -127,12 +127,12 @@ string ConfigurationManager::findConfiguration(const string& filename) {
             // We have found the configuration file and can bail out
             return fullPath;
         }
-        
+
         // Otherwise, we traverse the directory tree up
         Directory nextDirectory = directory.parentDirectory(
             ghoul::filesystem::Directory::AbsolutePath::Yes
         );
-        
+
         if (directory.path() == nextDirectory.path()) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
@@ -143,13 +143,13 @@ string ConfigurationManager::findConfiguration(const string& filename) {
         directory = nextDirectory;
     }
 }
-    
+
 void ConfigurationManager::loadFromFile(const string& filename) {
     using ghoul::filesystem::FileSystem;
-    
+
     ghoul_assert(!filename.empty(), "Filename must not be empty");
     ghoul_assert(FileSys.fileExists(filename), "File must exist");
-    
+
     // ${BASE_PATH}
     string basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
         + FileSystem::TokenClosingBraces;
@@ -158,9 +158,9 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     string absolutePath = FileSys.absolutePath(filename);
     string basePath = ghoul::filesystem::File(absolutePath).directoryName();
     FileSys.registerPathToken(basePathToken, basePath);
-    
+
     ghoul::lua::LuaState state;
-    
+
     if (FileSys.fileExists(absPath(_initialConfigHelper))) {
         ghoul::lua::runScriptFile(state, absPath(_initialConfigHelper));
     }
@@ -183,7 +183,7 @@ void ConfigurationManager::loadFromFile(const string& filename) {
         std::string fullKey =
             FileSystem::TokenOpeningBraces + key + FileSystem::TokenClosingBraces;
         LDEBUGC("ConfigurationManager", "Registering path " << fullKey << ": " << p);
-        
+
         bool override = (basePathToken == fullKey);
         if (override) {
             LINFOC("ConfigurationManager", "Overriding base path with '" << p << "'");

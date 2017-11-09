@@ -55,7 +55,7 @@ namespace {
     const char* keyShadowGroup                   = "Shadow_Group";
     const char* keyShadowSource                  = "Source";
     const char* keyShadowCaster                  = "Caster";
-    
+
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
         "Color Base Texture",
@@ -411,7 +411,7 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 
     // scale the planet to appropriate size since the planet is a unit sphere
     //glm::mat4 transform = glm::mat4(1);
-    
+
     //earth needs to be rotated for that to work.
     glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), glm::half_pi<double>(), glm::dvec3(1, 0, 0));
     glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), glm::half_pi<double>(), glm::dvec3(0, -1, 0));
@@ -435,9 +435,9 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 
 //    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
 //        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
-    
+
     setPscUniforms(*_programObject.get(), data.camera, data.position);
-    
+
     _programObject->setUniform("_performShading", _performShading);
 
     _programObject->setUniform("_hasHeightMap", _hasHeightTexture);
@@ -447,7 +447,6 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit dayUnit;
     ghoul::opengl::TextureUnit nightUnit;
     ghoul::opengl::TextureUnit heightUnit;
-
 
     dayUnit.activate();
     _texture->bind();
@@ -486,7 +485,6 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
             casterPos           *= 1000.0; // converting to meters
             psc caster_pos       = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
 
-            
             // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
             glm::vec3 planetCasterVec   = (caster_pos - data.position).vec3();
             glm::vec3 sourceCasterVec   = glm::vec3(casterPos - sourcePos);
@@ -495,7 +493,7 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
             float d_test                = glm::length(planetCasterVec - planetCaster_proj);
             float xp_test               = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
             float rp_test               = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
-                        
+
             double casterDistSun = glm::length(casterPos);
             float planetDistSun = glm::length(data.position.vec3());
 
@@ -607,4 +605,4 @@ void RenderablePlanet::loadTexture() {
     }
 }
 
-}  // namespace openspace
+} // namespace openspace

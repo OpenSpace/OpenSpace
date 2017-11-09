@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #ifndef __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 #define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
@@ -58,7 +58,7 @@ public:
     virtual ~ScreenSpaceRenderable() = default;
 
     virtual void render();
-    
+
     virtual bool initialize();
     virtual bool initializeGL();
     virtual bool deinitialize();
@@ -67,11 +67,11 @@ public:
     virtual void update() = 0;
     virtual bool isReady() const;
     bool isEnabled() const;
-    
+
     glm::vec3 euclideanPosition() const;
     glm::vec3 sphericalPosition() const;
     float depth() const;
-    
+
     static documentation::Documentation Documentation();
 
 protected:

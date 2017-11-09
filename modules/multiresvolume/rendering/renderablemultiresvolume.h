@@ -46,7 +46,7 @@ namespace ghoul::opengl {
 }
 
 namespace openspace {
-    
+
 class TSP;
 class AtlasManager;
 class BrickSelector;
@@ -76,8 +76,6 @@ public:
     virtual void update(const UpdateData& data) override;
     virtual void render(const RenderData& data, RendererTasks& tasks);
 
-  
-     
     //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
     //virtual std::string getHeaderPath() override;
     //virtual std::string getHelperPath() override;

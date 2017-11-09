@@ -107,7 +107,6 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
                 _vertices[j + currentPosition].tex[0] = shapes[i].mesh.texcoords[2 * j + 0];
                 _vertices[j + currentPosition].tex[1] = shapes[i].mesh.texcoords[2 * j + 1];
             }
-            
         }
         currentPosition += shapes[i].mesh.positions.size() / 3;
 

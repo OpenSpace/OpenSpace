@@ -74,17 +74,17 @@ scripting::LuaLibrary WindowWrapper::luaLibrary() {
 }
 
 void WindowWrapper::terminate() {}
-    
+
 void WindowWrapper::setBarrier(bool) {}
 
 void WindowWrapper::setSynchronization(bool) {}
-    
+
 void WindowWrapper::clearAllWindows(const glm::vec4&) {}
 
 bool WindowWrapper::windowHasResized() const {
     return false;
 }
-    
+
 double WindowWrapper::averageDeltaTime() const {
     return 0.0;
 }
@@ -116,7 +116,7 @@ glm::ivec2 WindowWrapper::currentWindowResolution() const {
 glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
     return currentWindowSize();
 }
-    
+
 glm::vec2 WindowWrapper::dpiScaling() const {
     return glm::vec2(1.f);
 }
@@ -148,7 +148,6 @@ bool WindowWrapper::isSwapGroupMaster() const {
 bool WindowWrapper::isUsingSwapGroups() const {
     return false;
 }
-
 
 glm::mat4 WindowWrapper::viewProjectionMatrix() const {
     return glm::mat4(1.f);

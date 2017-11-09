@@ -80,7 +80,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Frame",_data->frame);
     dictionary.getValue("CoordinateType", _data->coordinateType);
     dictionary.getValue("XOffset", xOffset);
-    
+
     _data->id = (int) renderableId;
     _data->updateTime = (int) updateTime;
     _data->spatialScale = spatialScale;
@@ -118,7 +118,7 @@ IswaCygnet::~IswaCygnet(){}
 
 void IswaCygnet::initialize() {
     _textures.push_back(nullptr);
-    
+
     if (!_data->groupName.empty()) {
         initializeGroup();
     } else {
@@ -130,7 +130,7 @@ void IswaCygnet::initialize() {
             );
         });
     }
-    
+
     initializeTime();
     createGeometry();
     createShader();
@@ -149,14 +149,17 @@ void IswaCygnet::deinitialize() {
 
 bool IswaCygnet::isReady() const{
     bool ready = true;
-    if (!_shader)
+    if (!_shader) {
         ready &= false;
+    }
     return ready;
 }
 
 void IswaCygnet::render(const RenderData& data, RendererTasks&){
-    if(!readyToRender()) return;
-    
+    if (!readyToRender()) {
+        return;
+    }
+
     psc position = data.position;
     glm::mat4 transform = glm::mat4(1.0);
 
@@ -168,7 +171,7 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&){
     transform = transform*_rotation;
 
     position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.w);
-    
+
     // Activate shader
     _shader->activate();
     glEnable(GL_ALPHA_TEST);

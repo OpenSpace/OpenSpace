@@ -45,7 +45,7 @@
 struct CPLXMLNode;
 
 namespace openspace::globebrowsing::tileprovider {
-    
+
 /**
  * Interface for stringifying OpenSpace Time instances.
  *
@@ -97,7 +97,7 @@ struct YYYY_MM_DDThhColonmmColonssZ : public TimeFormat {
     virtual ~YYYY_MM_DDThhColonmmColonssZ() override = default;
     virtual std::string stringify(const Time& t) const override;
 };
-    
+
 /**
  * Stringifies OpenSpace to the format "YYYY-MM-DDThh:mm:ssZ"
  * Example: 2016-09-08T23:05:05Z
@@ -211,8 +211,7 @@ public:
     virtual void reset() override;
     virtual int maxLevel() override;
 
-
-    typedef std::string TimeKey;
+    using TimeKey = std::string;
 
     std::shared_ptr<TileProvider> getTileProvider(
         const Time& t = OsEng.timeManager().time());
@@ -263,7 +262,6 @@ private:
         static const char* TIME_FORMAT;
     };
 
-        
     /**
      * Create a GDAL dataset description based on the time t
      * \param t Time to generate a GDAL dataset description for
@@ -316,7 +314,7 @@ private:
      * Ensures that the TemporalTileProvider is up to date.
      */
     void ensureUpdated();
-  
+
     bool readFilePath();
 
     // Used for creation of time specific instances of CachingTileProvider
@@ -328,7 +326,7 @@ private:
 
 
     std::shared_ptr<TileProvider> _currentTileProvider;
-        
+
     TimeFormat* _timeFormat;
     TimeQuantizer _timeQuantizer;
 

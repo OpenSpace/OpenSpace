@@ -74,7 +74,7 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
             objectPosition = corners[i];
         }
     }
-        
+
     return isCullable(cameraPosition, globePosition, objectPosition,
                         maxHeight, minimumGlobeRadius);
 }
@@ -88,16 +88,16 @@ bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
     double distanceToHorizon =
         sqrt(pow(length(cameraPosition - globePosition), 2) -
         pow(minimumGlobeRadius, 2));
-    
+
     double minimumAllowedDistanceToObjectFromHorizon = sqrt(
         pow(length(objectPosition - globePosition), 2) -
         pow(minimumGlobeRadius - objectBoundingSphereRadius, 2));
-    
+
     // Minimum allowed for the object to be occluded
     double minimumAllowedDistanceToObjectSquared =
         pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2)
         + pow(objectBoundingSphereRadius, 2);
-    
+
     double distanceToObjectSquared = pow(length(objectPosition - cameraPosition), 2);
     return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
 }

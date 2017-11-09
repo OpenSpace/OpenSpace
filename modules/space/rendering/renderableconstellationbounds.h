@@ -103,12 +103,12 @@ private:
 
     /// Determines the color of the constellation lines
     properties::Vec3Property _color;
-    
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
-    
+
     using Vertex = std::array<float, 3>;
     std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
 

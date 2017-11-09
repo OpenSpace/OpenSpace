@@ -69,9 +69,9 @@ public:
     const OtherTypesProperties& otherTypesProperties() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
-    
+
     void onChange(std::function<void(void)> callback);
-    
+
     void update();
 
     glm::ivec2 tilePixelStartOffset() const;
@@ -88,7 +88,7 @@ private:
     void removeVisibleProperties();
 
     LayerGroup& _parent;
-    
+
     properties::OptionProperty _typeOption;
     properties::OptionProperty _blendModeOption;
     properties::BoolProperty _enabled;
@@ -105,7 +105,7 @@ private:
     glm::ivec2 _padTilePixelSizeDifference;
 
     const layergroupid::GroupID _layerGroupId;
-  
+
     std::function<void(void)> _onChangeCallback;
   };
 

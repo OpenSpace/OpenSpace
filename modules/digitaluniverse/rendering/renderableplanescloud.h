@@ -72,7 +72,6 @@ namespace openspace {
         static documentation::Documentation Documentation();
 
     private:
-        
         enum Unit {
             Meter = 0,
             Kilometer = 1,
@@ -87,12 +86,12 @@ namespace openspace {
         struct RenderingPlane {
             int planeIndex;
             GLuint vao;
-            GLuint vbo;            
+            GLuint vbo;
             GLfloat vertexData[PLANES_VERTEX_DATA_SIZE];
         };
 
         void deleteDataGPU();
-        void createPlanes();        
+        void createPlanes();
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
@@ -104,7 +103,7 @@ namespace openspace {
         bool readLabelFile();
         bool loadCachedFile(const std::string& file);
         bool saveCachedFile(const std::string& file) const;
-        
+
         bool _hasSpeckFile;
         bool _dataIsDirty;
         bool _textColorIsDirty;
@@ -113,7 +112,7 @@ namespace openspace {
 
         int _textMinSize;
         int _planeStartingIndexPos;
-        int _textureVariableIndex;        
+        int _textureVariableIndex;
 
         properties::FloatProperty _alphaValue;
         properties::FloatProperty _scaleFactor;
@@ -135,13 +134,13 @@ namespace openspace {
         std::string _labelFile;
         std::string _texturesPath;
         std::string _luminosityVar;
-        
+
         Unit _unit;
 
         std::vector<float> _fullData;
         std::vector<std::pair<glm::vec3, std::string>> _labelData;
         std::unordered_map<std::string, int> _variableDataPositionMap;
-        
+
         int _nValuesPerAstronomicalObject;
 
         float _sluminosity;

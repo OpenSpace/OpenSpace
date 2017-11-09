@@ -32,20 +32,19 @@
 #include <modules/newhorizons/util/projectioncomponent.h>
 #include <modules/newhorizons/util/sequenceparser.h>
 
-namespace openspace {
-namespace globebrowsing {
-
+namespace openspace::globebrowsing {
 class AsyncTileDataProvider;
 class RawTile;
-    
-namespace tileprovider {
+} // namespace openspace::globebrowsing
+
+namespace openspace::globebrowsing::tileprovider {
 
 class ProjectionTileProvider : public TileProvider {
 public:
     ProjectionTileProvider(const ghoul::Dictionary& dictionary);
 
     virtual ~ProjectionTileProvider() override;
-        
+
     virtual Tile getTile(const TileIndex& tileIndex) override;
 
     virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
@@ -85,7 +84,7 @@ private:
     //properties::FloatProperty _debugProjectionTextureRotation;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
-    
+
     glm::vec2 _camScaling;
     glm::vec3 _up;
     glm::mat4 _transform;
@@ -106,15 +105,10 @@ private:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
 
-
-
-
 private:
     Tile _defaultTile;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_TILE_PROVIDER___H__

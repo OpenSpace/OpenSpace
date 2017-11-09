@@ -219,7 +219,7 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
 
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
-    
+
     _program->deactivate();
 }
 
@@ -228,12 +228,12 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
         _program->rebuildFromFile();
     }
 
-    glm::dmat3 transformMatrix = SpiceManager::ref().positionTransformMatrix(
-        _source,
-        //"ECLIPJ2000",
-        "GALACTIC",
-        data.time.j2000Seconds()
-    );
+    // glm::dmat3 transformMatrix = SpiceManager::ref().positionTransformMatrix(
+    //     _source,
+    //     //"ECLIPJ2000",
+    //     "GALACTIC",
+    //     data.time.j2000Seconds()
+    // );
 
     glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(_instrumentName, "ECLIPJ2000", data.time.j2000Seconds());
 
@@ -249,9 +249,9 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     //catch (const SpiceManager::SpiceException& e) {
         //LERROR(e.what());
     //}
-    
+
     glm::vec4 target(boresight[0], boresight[1], boresight[2], 12);
-    //target = glm::dmat4(tm) * target;
+    target = glm::dmat4(tm) * target;
 
     //_positions[TargetPosition] = target;
     //_positions[TargetPosition] = {

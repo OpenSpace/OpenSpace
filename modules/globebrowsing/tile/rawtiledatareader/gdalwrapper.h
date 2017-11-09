@@ -77,9 +77,9 @@ public:
 private:
     GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
     ~GdalWrapper() = default;
-    
+
     void setGdalProxyConfiguration();
-    
+
     properties::BoolProperty _logGdalErrors;
     properties::IntProperty _gdalMaximumCacheSize;
 

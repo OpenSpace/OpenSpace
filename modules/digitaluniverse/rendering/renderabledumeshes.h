@@ -67,7 +67,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-        
+
     enum Unit {
         Meter = 0,
         Kilometer = 1,
@@ -123,7 +123,7 @@ private:
     bool _hasLabel;
     bool _labelDataIsDirty;
 
-    int _textMinSize;        
+    int _textMinSize;
 
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
@@ -136,12 +136,11 @@ private:
 
     // DEBUG:
     properties::OptionProperty _renderOption;
-        
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
-        
+
     std::string _speckFile;
     std::string _labelFile;
 

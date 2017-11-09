@@ -84,7 +84,7 @@ public:
         Enabled enabled = Enabled::Yes, const std::string& delimiter = ",");
 
     ~StatsCollector();
-        
+
     void startNewRecord();
 
     void setEnabled(bool enabled);

@@ -64,7 +64,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
             //std::string abort = decoders[i] + "." + keyStopCommand;
             for (size_t j = 0; j < keys.size(); ++j) {
                 std::string currentKey = decoders[i] + "." + keys[j];
-                
+
                 ghoul::Dictionary decoderDictionary;
                 translationDictionary.getValue(currentKey, decoderDictionary);
 
@@ -153,7 +153,7 @@ bool HongKangParser::create() {
 
                 while (!file.eof()) {
                     std::getline(file, line);
-                    
+
                     std::string event = line.substr(0, line.find_first_of(" ")); 
 
                     auto it = _fileTranslation.find(event);
@@ -165,7 +165,7 @@ bool HongKangParser::create() {
                     if (foundEvent){
                         //store the time, this is used for getNextCaptureTime() 
                         _captureProgression.push_back(time);
-                        
+
                         if (it->second->getDecoderType() == "CAMERA") {
                             if (capture_start == -1) {
                                 //encountered new camera sequence- store start time
@@ -270,7 +270,7 @@ bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft,
     // we have (?) to cast to int, unfortunately
     // Why? --abock
     // because: old comment --m
-    
+
     int exposureTime = image.timeRange.duration();
     if (exposureTime == 0) {
         exposureTime = 1;

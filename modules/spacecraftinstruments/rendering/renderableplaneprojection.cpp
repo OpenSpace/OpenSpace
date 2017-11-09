@@ -97,7 +97,7 @@ bool RenderablePlaneProjection::isReady() const {
 void RenderablePlaneProjection::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    
+
     // Image Plane Program
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
@@ -156,16 +156,16 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
 void RenderablePlaneProjection::update(const UpdateData& data) {
     double time = data.time.j2000Seconds();
     const Image img = openspace::ImageSequencer::ref().getLatestImageForInstrument(_instrument);
-    
+
     if (img.path == "")
         return;
     else
         _hasImage = true;
 
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_target.frame, GalacticFrame, time);
-    
+
     double timePast = std::abs(img.timeRange.start - _previousTime);
-    
+
     std::string tex = _texturePath;
     if (_moving || _planeIsDirty)
         updatePlane(img, time);
@@ -264,7 +264,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
             thisNode->setParent(*newParent);
         }   
     }
-    
+
     const GLfloat vertex_data[] = { // square of two triangles drawn within fov in target coordinates
         //      x      y     z     w     s     t
         projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0, // Lower left 1

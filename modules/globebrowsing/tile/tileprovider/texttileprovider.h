@@ -72,7 +72,7 @@ public:
      * \returns hashkey used for in LRU cache for this tile
      */
     virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
-        
+
     /**
      * Uses the fontRenderer to render some text onto the tile texture provided in 
      * backgroundTile(const TileIndex& tileIndex). 
@@ -92,9 +92,9 @@ private:
     Tile
         createChunkIndexTile(const TileIndex& tileIndex);
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-    
+
     GLuint _fbo;
-  
+
     cache::MemoryAwareTileCache* _tileCache;
 };
 

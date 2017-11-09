@@ -288,7 +288,7 @@ void RenderableShadowCylinder::deinitializeGL() {
 bool RenderableShadowCylinder::isReady() const {
     return true;
 }
-    
+
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _shader->activate();
@@ -309,7 +309,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("shadowColor", _shadowColor);
     //setPscUniforms(*_shader.get(), data.camera, data.position);
-    
+
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
     glBindVertexArray(0);
@@ -358,7 +358,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         time,
         _numberOfPoints
     );
-    
+
     std::vector<psc> terminatorPoints;
     std::transform(
         res.terminatorPoints.begin(),
@@ -370,7 +370,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
             return coord;
         }
     );
-    
+
     double lt;
     glm::dvec3 vecLightSource = SpiceManager::ref().targetPosition(
         _body,

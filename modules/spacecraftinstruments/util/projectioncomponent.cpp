@@ -378,14 +378,14 @@ bool ProjectionComponent::initializeGL() {
         texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     _placeholderTexture = std::move(texture);
-    
+
     if (_dilation.isEnabled) {
         _dilation.program = ghoul::opengl::ProgramObject::Build(
             "Dilation",
             "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_vs.glsl",
             "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_fs.glsl"
         );
-        
+
         const GLfloat plane[] = {
             -1, -1,
             1,  1,
@@ -694,7 +694,7 @@ void ProjectionComponent::imageProjectEnd() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         _dilation.program->deactivate();
-    
+
         glEnable(GL_BLEND);
     }
 
@@ -935,7 +935,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
         _projectionTexture->uploadTexture();
         //_projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     }
-    
+
     if (_dilation.isEnabled) {
         _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(size, 1),

@@ -43,7 +43,7 @@ namespace openspace::globebrowsing {
 class Grid {
 public:
     Grid(int xSegments, int ySegments);
-    
+
     virtual ~Grid() = default;
 
     TriangleSoup& geometry();
@@ -53,7 +53,7 @@ public:
      * in the x direction is xResolution + 1.
      */
     virtual int xSegments() const = 0;
-    
+
     /**
      * Returns the number of grid cells in the y direction. Hence the number of vertices
      * in the y direction is xResolution + 1.
@@ -67,14 +67,14 @@ protected:
      * of segments + 1.
      */
     virtual std::vector<GLuint> createElements(int xSegments, int ySegments) = 0;
-    
+
     /**
      * Should return the positions of vertices for a grid with size <code>xSegments</code>
      * * <code>ySegments</code>. Where the number of vertices in each direction is the
      * number of segments + 1.
      */
     virtual std::vector<glm::vec4> createPositions(int xSegments, int ySegments) = 0;
-    
+
     /**
      * Should return the texture coordinates of vertices for a grid with size
      * <code>xSegments</code> * <code>ySegments</code>. Where the number of vertices in
@@ -82,7 +82,7 @@ protected:
      */
     virtual std::vector<glm::vec2>
         createTextureCoordinates(int xSegments, int ySegments) = 0;
-    
+
     /**
      * Should return the normals of vertices for a grid with size <code>xSegments</code> *
      * <code>ySegments</code>. Where the number of vertices in each direction is the number

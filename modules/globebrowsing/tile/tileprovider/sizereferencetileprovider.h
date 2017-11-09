@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
 namespace openspace::globebrowsing::tileprovider {
-    
+
 /**
  * Constructed with an ellipsoid and uses that to render the longitudal length of each
  * of each tile.

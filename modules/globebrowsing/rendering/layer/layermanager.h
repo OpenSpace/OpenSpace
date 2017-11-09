@@ -35,7 +35,7 @@
 #include <functional>
 
 namespace openspace::globebrowsing {
-    
+
 struct LayerGroup;
 
 /**

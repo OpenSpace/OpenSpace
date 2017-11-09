@@ -42,7 +42,7 @@ public:
     constexpr static const char* Name = "ImGUI";
 
     ImGUIModule();
-    
+
     gui::GUI gui;
     Touch touchInput = { false, glm::vec2(0), 0 };
 };
