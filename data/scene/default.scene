@@ -128,16 +128,16 @@ return {
     Modules = {
         -- # Solar system objects
         "sun",
-        --"mercury",
-        --"venus",
+        "mercury",
+        "venus",
         "earth",
         "moon",
         "mars",
-        --"jupiter",
-        --"saturn",
-        --"uranus",
-        --"neptune",
-        -- "satellites",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        --"satellites",
         
         "grids",
         "digitaluniverse",
