@@ -772,19 +772,21 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.0f;
     if (!_disableFadeInDistance) {
-        float distCamera = glm::length(data.camera.positionVec3());
+        // Exponential Fading
+        //float distCamera = glm::length(data.camera.positionVec3());
         //double term      = std::exp(distCamera/scale - _fadeInDistance);
         //float func       = static_cast<float>(term / (term + 1.0));        
 
-        // Let's not waste performance
-        /*if (func < 0.01) {
-            return;
-        }
+        //// Let's not waste performance
+        //if (func < 0.01) {
+        //    return;
+        //}
 
-        if (!std::isinf(term)) {
-            fadeInVariable = func;
-        }
-        */
+        //if (!std::isinf(term)) {
+        //    fadeInVariable = func;
+        //}
+        
+        // Linear Fading
         float funcValue = static_cast<float>((1.0 / double(_fadeInDistance*scale))*(distCamera));
         fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
 
@@ -806,7 +808,8 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
     glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
     
-    //glm::vec3 viewDirection = glm::vec3(glm::dmat4(OsEng.renderEngine().getSGCTModelMatrix()) * glm::dvec4(data.camera.viewDirectionWorldSpace(), 1.0));
+    /*glm::vec3 viewDirection = glm::vec3(glm::dmat4(OsEng.renderEngine().getSGCTModelMatrix()) * 
+        glm::dvec4(data.camera.viewDirectionWorldSpace(), 1.0));*/
 
     glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
     glm::vec3 right = glm::cross(viewDirection, lookup);
