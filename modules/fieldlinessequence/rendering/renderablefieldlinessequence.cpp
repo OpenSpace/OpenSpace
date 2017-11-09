@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 
@@ -114,7 +115,10 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("particleSize",    _pFlowParticleSize);
         _shaderProgram->setUniform("particleSpacing", _pFlowParticleSpacing);
         _shaderProgram->setUniform("particleSpeed",   _pFlowSpeed);
-        _shaderProgram->setUniform("time", OsEng.runTime() * (_pFlowReversed ? -1 : 1));
+        _shaderProgram->setUniform(
+            "time",
+            OsEng.windowWrapper().applicationTime() * (_pFlowReversed ? -1 : 1)
+        );
 
         bool additiveBlending = false;
         if (_pColorABlendEnabled) {
