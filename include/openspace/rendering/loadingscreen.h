@@ -73,7 +73,8 @@ public:
     enum class ItemStatus {
         Started,
         Initializing,
-        Finished
+        Finished,
+        Failed
     };
 
     void updateItem(const std::string& itemName, ItemStatus newStatus);

@@ -60,6 +60,7 @@ namespace {
     const glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
     const glm::vec4 ItemStatusColorInitializing = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
     const glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    const glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
 
     const float ItemStandoffDistance = 5.f; // in pixels
 
@@ -565,6 +566,8 @@ void LoadingScreen::render() {
                         return ItemStatusColorInitializing;
                     case ItemStatus::Finished:
                         return ItemStatusColorFinished;
+                    case ItemStatus::Failed:
+                        return ItemStatusColorFailed;
                     default:
                         return glm::vec4(1.f);
                 }

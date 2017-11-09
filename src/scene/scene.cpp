@@ -243,6 +243,10 @@ void Scene::initialize() {
         catch (const ghoul::RuntimeError& e) {
             LERROR(node->name() << " not initialized.");
             LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Failed
+            );
         }
 
     };
