@@ -78,7 +78,7 @@ std::vector<int> IswaKameleonGroup::fieldlineValue(){
 }
 
 void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile,
-                                         std::string kameleonPath
+                                         std::string kameleonPath)
 {
     if (fieldlineIndexFile != _fieldlineIndexFile) {
         _fieldlineIndexFile = fieldlineIndexFile;
