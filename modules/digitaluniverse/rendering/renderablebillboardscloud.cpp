@@ -169,8 +169,14 @@ namespace {
     static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
         "FadeInThreshould",
         "Fade-In Threshould",
-        "This value determines percentage of the astronomical object is visible before starting "
-        "fading-in it."
+        "This value determines distance from the center of our galaxy from which the" 
+        "astronomical object is visible before starting fading-in it."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+        "DisableFadeIn",
+        "Disable Fade-in effect",
+        "Enables/Disables the Fade-in effect."
     };
 }  // namespace
 
@@ -284,6 +290,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 Optional::Yes,
                 FadeInThreshouldInfo.description
             },
+            {
+                DisableFadeInInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInInfo.description
+            },
         }
     };
 }
@@ -317,6 +329,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.1, 100.0)
+    , _disableFadeInDistance(DisableFadeInInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _polygonTexture(nullptr)
     , _spriteTexture(nullptr)
@@ -329,7 +343,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _colorOptionString("")
     , _unit(Parsec)
     , _nValuesPerAstronomicalObject(0)    
-    , _fadeInThreshold(0.0)
     , _transformationMatrix(glm::dmat4(1.0))
     , _vao(0)
     , _vbo(0)
@@ -357,6 +370,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.addOption(2, "Screen center Position Normal");
     addProperty(_renderOption);
+    _renderOption.set(1);
 
     if (dictionary.hasKey(keyUnit)) {
         std::string unit = dictionary.value<std::string>(keyUnit);
@@ -501,8 +515,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
 
     if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
-        _fadeInThreshold = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
-    }
+        float fadeInValue = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
+        _fadeInDistance.set(fadeInValue);
+        _disableFadeInDistance.set(false);
+        addProperty(_fadeInDistance);
+        addProperty(_disableFadeInDistance);
+    }    
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -671,7 +689,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
 }
 
 void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-    const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+    const glm::vec3& orthoRight, const glm::vec3& orthoUp, const float fadeInVariable) {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
@@ -701,6 +719,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
         break;
     }
 
+    glm::vec4 textColor = _textColor;
+    textColor.a *= fadeInVariable;
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
@@ -708,7 +728,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
         _fontRenderer->render(
             *_font,
             scaledPos,
-            _textColor,
+            //_textColor,
+            textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
             modelViewProjectionMatrix,
@@ -750,18 +771,25 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     float fadeInVariable = 1.0f;
-    if (_fadeInThreshold > 0.0) {
-        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
-        double term = std::exp(distCamera / scale - _fadeInThreshold);
-        float func = static_cast<float>(term / (term + 1.0));
+    if (!_disableFadeInDistance) {
+        float distCamera = glm::length(data.camera.positionVec3());
+        //double term      = std::exp(distCamera/scale - _fadeInDistance);
+        //float func       = static_cast<float>(term / (term + 1.0));        
 
         // Let's not waste performance
-        if (func < 0.001) {
+        /*if (func < 0.01) {
             return;
         }
 
         if (!std::isinf(term)) {
             fadeInVariable = func;
+        }
+        */
+        float funcValue = static_cast<float>((1.0 / double(_fadeInDistance*scale))*(distCamera));
+        fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
+
+        if (funcValue < 0.01) {
+            return;
         }
     }
     
@@ -794,7 +822,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     }
         
     if (_drawLabels && _hasLabel) {
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
     }                
 }
 
@@ -890,7 +918,6 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
     }
 
     if (_hasLabel && _labelDataIsDirty) {
-
         _labelDataIsDirty = false;
     }
 }
@@ -1187,6 +1214,9 @@ bool RenderableBillboardsCloud::readLabelFile() {
         dummy.clear();
 
         while (str >> dummy) {
+            if (dummy == "#") {
+                break;
+            }
             label += " " + dummy;
             dummy.clear();
         }

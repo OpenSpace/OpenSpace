@@ -5,13 +5,15 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
-            Enabled = false,
+            Enabled = true,
             Color = { 1.0, 0.4, 0.2 },
             Transparency = 1.0,
             File = "speck/quasars.speck",
             Texture = "textures/point3.png",
             Unit = "Mpc",
-            ScaleFactor = 537.31
+            ScaleFactor = 537.31,
+            -- Fade in value in the same unit as "Unit"
+            FadeInThreshould = 1000.0,
         },
         GuiPath = "/Universe/Quasars"
     }

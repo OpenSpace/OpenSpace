@@ -92,7 +92,7 @@ private:
         const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp,
         const float fadeInVariable);
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix, 
-        const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+        const glm::vec3& orthoRight, const glm::vec3& orthoUp, const float fadeInVariable);
 
     bool loadData();
     bool readSpeckFile();
@@ -125,6 +125,8 @@ private:
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
     properties::OptionProperty _colorOption;
+    properties::FloatProperty _fadeInDistance;
+    properties::BoolProperty _disableFadeInDistance;
 
     // DEBUG:
     properties::OptionProperty _renderOption;
@@ -151,9 +153,7 @@ private:
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::vector<glm::vec2> _colorRangeData;
-
-    float _fadeInThreshold;
-
+    
     int _nValuesPerAstronomicalObject;
 
     glm::dmat4 _transformationMatrix;

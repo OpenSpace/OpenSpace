@@ -95,7 +95,7 @@ namespace openspace {
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix, const float fadeInVariable);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+            const glm::vec3& orthoRight, const glm::vec3& orthoUp, const float fadeInVarible);
 
         bool loadData();
         bool loadTextures();
@@ -120,6 +120,8 @@ namespace openspace {
         properties::FloatProperty _textSize;
         properties::BoolProperty _drawElements;
         properties::OptionProperty _blendMode;
+        properties::FloatProperty _fadeInDistance;
+        properties::BoolProperty _disableFadeInDistance;
 
         // DEBUG:
         properties::OptionProperty _renderOption;
@@ -144,8 +146,7 @@ namespace openspace {
         int _nValuesPerAstronomicalObject;
 
         float _sluminosity;
-        float _fadeInThreshold;
-
+        
         glm::dmat4 _transformationMatrix;
 
         std::unordered_map<int, RenderingPlane> _renderingPlanesMap;       

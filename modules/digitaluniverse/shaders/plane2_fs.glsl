@@ -45,7 +45,7 @@ Fragment getFragment() {
     frag.color = texture(galaxyTexture, vs_st);
     frag.color *= alphaValue;
 
-    frag.color.a *= fadeInValue;
+    frag.color *= fadeInValue;
 
     if (frag.color.a == 0.0) {
         discard;
@@ -55,7 +55,7 @@ Fragment getFragment() {
     //     frag.blend = BLEND_MODE_ADDITIVE;
     // }
 
-    frag.color = texture(galaxyTexture, vs_st);
+    //frag.color = texture(galaxyTexture, vs_st);
     frag.depth = vs_screenSpaceDepth;
     frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
     frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);

@@ -153,8 +153,14 @@ namespace {
     static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
         "FadeInThreshould",
         "Fade-In Threshould",
-        "This value determines percentage of the astronomical object is visible before starting "
-        "fading-in it."
+        "This value determines distance from the center of our galaxy from which the"
+        "astronomical object is visible before starting fading-in it."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+        "DisableFadeIn",
+        "Disable Fade-in effect",
+        "Enables/Disables the Fade-in effect."
     };
 
 }  // namespace
@@ -251,6 +257,12 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 Optional::Yes,
                 FadeInThreshouldInfo.description
             },
+            {
+                DisableFadeInInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInInfo.description
+            },
         }
     };
 }
@@ -277,6 +289,8 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)        
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.1, 1000.0)
+    , _disableFadeInDistance(DisableFadeInInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
     , _fontRenderer(nullptr)
@@ -288,7 +302,6 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _unit(Parsec)
     , _nValuesPerAstronomicalObject(0)
     , _sluminosity(1.f)
-    , _fadeInThreshold(0.0f)
     , _transformationMatrix(glm::dmat4(1.0))        
 {
     documentation::testSpecificationAndThrow(
@@ -310,6 +323,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.addOption(2, "Screen center Position Normal");
     addProperty(_renderOption);
+    _renderOption.set(1);
 
     if (dictionary.hasKey(keyUnit)) {
         std::string unit = dictionary.value<std::string>(keyUnit);
@@ -428,7 +442,11 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     }
 
     if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
-        _fadeInThreshold = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
+        float fadeInValue = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
+        _fadeInDistance.set(fadeInValue);
+        _disableFadeInDistance.set(false);
+        addProperty(_fadeInDistance);
+        addProperty(_disableFadeInDistance);
     }
 }
 
@@ -568,7 +586,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
 }
 
 void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-    const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+    const glm::vec3& orthoRight, const glm::vec3& orthoUp, const float fadeInVariable) {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
@@ -598,6 +616,8 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
         break;
     }
     
+    glm::vec4 textColor = _textColor;
+    textColor.a *= fadeInVariable;
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
@@ -605,7 +625,8 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
         _fontRenderer->render(
             *_font,
             scaledPos,                
-            _textColor,
+            //_textColor,
+            textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
             modelViewProjectionMatrix,
@@ -621,7 +642,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
 }
 
 void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
-    float scale = 0.0;
+    double scale = 0.0;
     switch (_unit) {
     case Meter:
         scale = 1.0;
@@ -647,19 +668,16 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     float fadeInVariable = 1.0f;
-    if (_fadeInThreshold > 0.0) {
-        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
-        double term = std::exp(distCamera / scale - _fadeInThreshold);
-        float func = static_cast<float>(term / (term + 1.0));
-
+    if (!_disableFadeInDistance) {
+        double distCamera = glm::length(data.camera.positionVec3());
+        float funcValue = static_cast<float>((1.0 / double(_fadeInDistance))*(distCamera / scale));
+        
         // Let's not waste performance
-        if (func < 0.001) {
+        if (funcValue < 0.01) {
             return;
         }
 
-        if (!std::isinf(term)) {
-            fadeInVariable = func;
-        }
+        fadeInVariable = funcValue > 1.0 ? 1.0 : funcValue;
     }
 
     glm::dmat4 modelMatrix =
@@ -686,7 +704,7 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     }
     
     if (_hasLabel) {
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
     }                
 }
 
