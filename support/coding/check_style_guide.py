@@ -295,6 +295,19 @@ def check_empty_only_line(lines):
 
 
 
+def check_line_length(lines):
+    # Disable this check in non-strict mode
+    if not is_strict_mode:
+        return ''
+
+    index = [i + 1 for i, s in enumerate(lines) if len(s) > (90 + 1)]
+    if len(index) > 0:
+        return index
+    else:
+        return ''
+
+
+
 previousSymbols  = {}
 def check_header_file(file, component):
     with open(file, 'r+') as f:
@@ -375,6 +388,10 @@ def check_header_file(file, component):
         if empty_only_lines:
             print(file, '\t', 'Empty only line: ', empty_only_lines)
 
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
+
 
 
 def check_inline_file(file, component):
@@ -413,6 +430,10 @@ def check_inline_file(file, component):
             if using_namespaces:
                 print(file, '\t', 'Using namespace found in inline file')
 
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
+
 
 
 def check_source_file(file, component):
@@ -443,6 +464,10 @@ def check_source_file(file, component):
         empty_only_lines = check_empty_only_line(lines)
         if empty_only_lines:
             print(file, '\t', 'Empty only line: ', empty_only_lines)
+
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
 
 
 
