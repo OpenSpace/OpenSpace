@@ -52,7 +52,7 @@ struct LayerGroup : public properties::PropertyOwner {
     /// Updates all layers tile providers within this group
     void update();
 
-    void addLayer(const ghoul::Dictionary& layerDict);
+    std::shared_ptr<Layer> addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
 
     /// @returns const vector of all layers

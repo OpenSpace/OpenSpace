@@ -171,12 +171,16 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
         }
     });
 
-    _remove.onChange([&](){
-        if (_tileProvider) {
-            _tileProvider->reset();
+    _remove.onChange([&]() {
+        try {
+            if (_tileProvider) {
+                _tileProvider->reset();
+            }
         }
-
-        _parent.deleteLayer(name());
+        catch (...) {
+            _parent.deleteLayer(name());
+            throw;
+        }
     });
 
     _typeOption.onChange([&](){

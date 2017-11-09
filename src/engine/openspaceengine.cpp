@@ -679,6 +679,8 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         _loadingScreen->render();
     }
 
+   _windowWrapper->swapBuffer();
+
     t.join();
     _loadingScreen = nullptr;
         

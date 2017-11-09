@@ -80,9 +80,11 @@ void LayerManager::deinitialize() {
     }
 }
 
-void LayerManager::addLayer(layergroupid::GroupID groupId, ghoul::Dictionary layerDict) {
+std::shared_ptr<Layer> LayerManager::addLayer(layergroupid::GroupID groupId,
+                                              ghoul::Dictionary layerDict)
+{
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-    _layerGroups[groupId]->addLayer(layerDict);
+    return _layerGroups[groupId]->addLayer(layerDict);
 }
 
 void LayerManager::deleteLayer(layergroupid::GroupID groupId, std::string layerName) {

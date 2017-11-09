@@ -84,7 +84,10 @@ int addLayer(lua_State* L) {
         return 0;
     }
 
-    globe->layerManager()->addLayer(groupID, d);
+    std::shared_ptr<Layer> layer = globe->layerManager()->addLayer(groupID, d);
+    if (layer) {
+        layer->initialize();
+    }
 
     return 0;
 }

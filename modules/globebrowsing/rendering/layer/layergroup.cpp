@@ -102,15 +102,17 @@ void LayerGroup::update() {
     }
 }
 
-void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+std::shared_ptr<Layer> LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     if (!layerDict.hasKeyAndValue<std::string>("Name")) {
         LERROR("'Name' must be specified for layer.");
-        return;
+        return nullptr;
     }
     auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);
     layer->onChange(_onChangeCallback);
     if (hasPropertySubOwner(layer->name())) {
         LINFO("Layer with name " + layer->name() + " already exists.");
+        _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+        return nullptr;
     }
     else {
         _layers.push_back(layer);
@@ -119,15 +121,16 @@ void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
             _onChangeCallback();
         }
         addPropertySubOwner(layer.get());
+        _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+        return layer;
     }
-
-    _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
 }
 
 void LayerGroup::deleteLayer(const std::string& layerName) {
     for (std::vector<std::shared_ptr<Layer>>::iterator it = _layers.begin(); it != _layers.end(); ++it) {
         if (it->get()->name() == layerName) {
             removePropertySubOwner(it->get());
+            (*it)->deinitialize();
             _layers.erase(it);
             update();
             if (_onChangeCallback) {
