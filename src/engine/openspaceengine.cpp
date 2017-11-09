@@ -1214,18 +1214,11 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         func();
     }
 
-    if (isGuiWindow && _shutdown.inShutdown) {
-        _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
-    }
-
     LTRACE("OpenSpaceEngine::render(end)");
 }
 
-void OpenSpaceEngine::postDraw() {
-    LTRACE("OpenSpaceEngine::postDraw(begin)");
-
-    _renderEngine->postDraw();
-
+void OpenSpaceEngine::drawOverlays() {
+    LTRACE("OpenSpaceEngine::drawOverlays(begin)");
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
 
@@ -1241,6 +1234,18 @@ void OpenSpaceEngine::postDraw() {
         _console->render();
     }
 
+    for (const auto& func : _moduleCallbacks.draw2D) {
+        func();
+    }
+
+    LTRACE("OpenSpaceEngine::drawOverlays(end)");
+}
+
+void OpenSpaceEngine::postDraw() {
+    LTRACE("OpenSpaceEngine::postDraw(begin)");
+
+    _renderEngine->postDraw();
+
     for (const auto& func : _moduleCallbacks.postDraw) {
         func();
     }
@@ -1249,6 +1254,7 @@ void OpenSpaceEngine::postDraw() {
         _windowWrapper->setSynchronization(true);
         _isFirstRenderingFirstFrame = false;
     }
+
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
 }
@@ -1429,6 +1435,9 @@ void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption opt
             break;
         case CallbackOption::Render:
             _moduleCallbacks.render.push_back(std::move(function));
+            break;
+        case CallbackOption::Draw2D:
+            _moduleCallbacks.draw2D.push_back(std::move(function));
             break;
         case CallbackOption::PostDraw:
             _moduleCallbacks.postDraw.push_back(std::move(function));

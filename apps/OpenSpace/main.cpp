@@ -359,6 +359,20 @@ void mainRenderFunc() {
     LTRACE("main::mainRenderFunc(end)");
 }
 
+void mainDraw2DFunc() {
+    LTRACE("main::mainDraw2DFunc(begin)");
+
+    OsEng.drawOverlays();
+
+    // SGCT gets angry if we change this in our function
+    glEnable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+
+
+    LTRACE("main::mainDraw2DFunc(end)");
+}
+
 void mainPostDrawFunc() {
     LTRACE("main::mainPostDrawFunc(begin)");
 
@@ -525,6 +539,7 @@ int main_main(int argc, char** argv) {
     SgctEngine->setPreSyncFunction(mainPreSyncFunc);
     SgctEngine->setPostSyncPreDrawFunction(mainPostSyncPreDrawFunc);
     SgctEngine->setDrawFunction(mainRenderFunc);
+    SgctEngine->setDraw2DFunction(mainDraw2DFunc);
     SgctEngine->setPostDrawFunction(mainPostDrawFunc);
     SgctEngine->setKeyboardCallbackFunction(mainKeyboardCallback);
     SgctEngine->setMouseButtonCallbackFunction(mainMouseButtonCallback);
