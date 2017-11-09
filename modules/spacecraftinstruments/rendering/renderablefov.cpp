@@ -306,7 +306,9 @@ void RenderableFov::initializeGL() {
     );
 
     // Fetch information about the specific instrument
-    SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrument.name);
+    SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
+        _instrument.name
+    );
 
     // Right now, we can only deal with rectangles or polygons. Circles and ellipses only
     // return one or two bound vectors that have to used to construct an approximation
@@ -365,7 +367,7 @@ void RenderableFov::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(RenderInformation::VBOData),
-        nullptr // = reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, position))
+        nullptr
     );
     glEnableVertexAttribArray(1);
     glVertexAttribIPointer(
@@ -395,7 +397,7 @@ void RenderableFov::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(RenderInformation::VBOData),
-        nullptr // = reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, position))
+        nullptr
     );
     glEnableVertexAttribArray(1);
     glVertexAttribIPointer(
@@ -425,16 +427,28 @@ bool RenderableFov::isReady() const {
 }
 
 // Orthogonal projection next to planets surface
-glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double time, const std::string& target) const {
-    glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(target, _instrument.spacecraft, _instrument.referenceFrame, _instrument.aberrationCorrection, time);
-    glm::dvec3 fov = SpiceManager::ref().frameTransformationMatrix(_instrument.name, _instrument.referenceFrame, time) * vecFov;
+glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double time,
+                                               const std::string& target) const 
+{
+    glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
+        target,
+        _instrument.spacecraft,
+        _instrument.referenceFrame,
+        _instrument.aberrationCorrection,
+        time
+    );
+    glm::dvec3 fov = SpiceManager::ref().frameTransformationMatrix(
+        _instrument.name,
+        _instrument.referenceFrame,
+        time
+    ) * vecFov;
     glm::dvec3 p = glm::proj(vecToTarget, fov);
     return p  * 1000.0; // km -> m
 }
 
 template <typename Func>
 double bisect(const glm::dvec3& p1, const glm::dvec3& p2, Func testFunction,
-           const glm::dvec3& previousHalf = glm::dvec3(std::numeric_limits<double>::max()))
+    const glm::dvec3& previousHalf = glm::dvec3(std::numeric_limits<double>::max()))
 {
     const double Tolerance = 0.00000001;
     const glm::dvec3 half = glm::mix(p1, p2, 0.5);
@@ -450,8 +464,12 @@ double bisect(const glm::dvec3& p1, const glm::dvec3& p2, Func testFunction,
     }
 }
 
-void RenderableFov::computeIntercepts(const UpdateData& data, const std::string& target, bool isInFov) {
-    auto makeBodyFixedReferenceFrame = [&target](std::string ref) -> std::pair<std::string, bool> {
+void RenderableFov::computeIntercepts(const UpdateData& data, const std::string& target,
+                                      bool isInFov)
+{
+    auto makeBodyFixedReferenceFrame =
+        [&target](std::string ref) -> std::pair<std::string, bool>
+    {
         bool convert = (ref.find("IAU_") == std::string::npos);
         if (convert) {
             return { SpiceManager::ref().frameFromBody(target), true };
@@ -487,7 +505,8 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 
             second = {
                 { o.x, o.y, o.z },
-                RenderInformation::VertexColorTypeDefaultEnd // This had a different color (0.4) before ---abock
+                 // This had a different color (0.4) before ---abock
+                RenderInformation::VertexColorTypeDefaultEnd
             };
         }
         else {
@@ -533,7 +552,11 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             }
             else {
                 // This point did not intersect the target though others did
-                glm::vec3 o = orthogonalProjection(bound, data.time.j2000Seconds(), target);
+                glm::vec3 o = orthogonalProjection(
+                    bound,
+                    data.time.j2000Seconds(),
+                    target
+                );
                 second = {
                     { o.x, o.y, o.z },
                     RenderInformation::VertexColorTypeInFieldOfView
@@ -597,15 +620,16 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             // the intercept vector is in meter and contains a standoff distance offset
             auto interceptVector = [&](const glm::dvec3& probe) -> glm::dvec3 {
                 auto ref = makeBodyFixedReferenceFrame(_instrument.referenceFrame);
-                SpiceManager::SurfaceInterceptResult r = SpiceManager::ref().surfaceIntercept(
-                    target,
-                    _instrument.spacecraft,
-                    _instrument.name,
-                    ref.first,
-                    _instrument.aberrationCorrection,
-                    data.time.j2000Seconds(),
-                    probe
-                );
+                SpiceManager::SurfaceInterceptResult r =
+                    SpiceManager::ref().surfaceIntercept(
+                        target,
+                        _instrument.spacecraft,
+                        _instrument.name,
+                        ref.first,
+                        _instrument.aberrationCorrection,
+                        data.time.j2000Seconds(),
+                        probe
+                    );
 
                 if (ref.second) {
                     r.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
@@ -633,7 +657,11 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     };
                 }
                 else {
-                    const glm::vec3 o = orthogonalProjection(tBound, data.time.j2000Seconds(), target);
+                    const glm::vec3 o = orthogonalProjection(
+                        tBound,
+                        data.time.j2000Seconds(),
+                        target
+                    );
 
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
                         { o.x, o.y, o.z },
@@ -698,8 +726,12 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 
                         // OBS: i and j are in bounds-space,  p1, p2 are in
                         // _orthogonalPlane-space
-                        const size_t p1 = static_cast<size_t>(indexForBounds(i) + t1 * InterpolationSteps);
-                        const size_t p2 = static_cast<size_t>(indexForBounds(i) + t2 * InterpolationSteps);
+                        const size_t p1 = static_cast<size_t>(
+                            indexForBounds(i) + t1 * InterpolationSteps
+                        );
+                        const size_t p2 = static_cast<size_t>(
+                            indexForBounds(i) + t2 * InterpolationSteps
+                        );
 
                         // We can copy the non-intersecting parts
                         copyFieldOfViewValues(i, indexForBounds(i), p1);
@@ -717,7 +749,11 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                         }
                     }
                     else {
-                        copyFieldOfViewValues(i, indexForBounds(i), indexForBounds(i + 1));
+                        copyFieldOfViewValues(
+                            i,
+                            indexForBounds(i),
+                            indexForBounds(i + 1)
+                        );
                     }
                     break;
                 }
@@ -741,15 +777,24 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             //if (intercepts[i] == false) { // If point is non-interceptive, project it.
 
 
-            //    insertPoint(_fovPlane, glm::vec4(orthogonalProjection(current, data.time, target), 0.0), tmp);
+            //    insertPoint(
+            //        _fovPlane,
+            //        glm::vec4(
+            //            orthogonalProjection(current, data.time, target),
+            //            0.0
+            //        ),
+            //        tmp
+            //    );
             //    _rebuild = true;
             //    if (intercepts[i + 1] == false) {
-            //        // IFF incident point is also non-interceptive BUT something is within FOV
+            //        // IFF incident point is also non-interceptive BUT something is
+            //        // within FOV
             //        // we need then to check if this segment makes contact with surface
             //        glm::dvec3 half = interpolate(current, next, 0.5f);
 
             //        std::string bodyfixed = "IAU_";
-            //        bool convert = (_instrument.referenceFrame.find(bodyfixed) == std::string::npos);
+            //        bool convert = (_instrument.referenceFrame.find(bodyfixed) ==
+            //                        std::string::npos);
             //        if (convert) {
             //            bodyfixed = SpiceManager::ref().frameFromBody(target);
             //        }
@@ -758,11 +803,23 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             //        }
 
             //        SpiceManager::SurfaceInterceptResult res =
-            //            SpiceManager::ref().surfaceIntercept(target, _instrument.spacecraft,
-            //                _instrument.name, bodyfixed, _instrument.aberrationCorrection, data.time, half);
+            //            SpiceManager::ref().surfaceIntercept(
+            //                target,
+            //                _instrument.spacecraft,
+            //                _instrument.name, 
+            //                bodyfixed,
+            //                _instrument.aberrationCorrection,
+            //                data.time,
+            //                half
+            //            );
 
             //        if (convert) {
-            //            res.surfaceVector = SpiceManager::ref().frameTransformationMatrix(bodyfixed, _instrument.referenceFrame, data.time) * res.surfaceVector;
+            //            res.surfaceVector =
+            //                SpiceManager::ref().frameTransformationMatrix(
+            //                    bodyfixed,
+            //                    _instrument.referenceFrame,
+            //                    data.time
+            //                ) * res.surfaceVector;
             //        }
 
             //        bool intercepted = res.interceptFound;
@@ -772,43 +829,81 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             //            glm::dvec3 root1 = bisection(half, current, data.time, target);
             //            glm::dvec3 root2 = bisection(half, next, data.time, target);
 
-            //            insertPoint(_fovPlane, glm::vec4(orthogonalProjection(root1, data.time, target), 0.0), squareColor(diffTime));
+            //            insertPoint(
+            //                _fovPlane,
+            //                glm::vec4(
+            //                    orthogonalProjection(
+            //                        root1,
+            //                        data.time,
+            //                        target
+            //                    ),
+            //                    0.0
+            //                ),
+            //                squareColor(diffTime)
+            //            );
             //            for (int j = 1; j < InterpolationSteps; ++j) {
             //                float t = (static_cast<float>(j) / InterpolationSteps);
             //                interpolated = interpolate(root1, root2, t);
-            //                glm::dvec3 ivec = checkForIntercept(interpolated, data.time, target);
-            //                insertPoint(_fovPlane, glm::vec4(ivec, 0.0), squareColor(diffTime));
+            //                glm::dvec3 ivec = checkForIntercept(
+            //                    interpolated,
+            //                    data.time,
+            //                    target
+            //                );
+            //                insertPoint(
+            //                    _fovPlane,
+            //                    glm::vec4(ivec, 0.0),
+            //                    squareColor(diffTime)
+            //                );
             //            }
-            //            insertPoint(_fovPlane, glm::vec4(orthogonalProjection(root2, data.time, target), 0.0), squareColor(diffTime));
+            //            insertPoint(
+            //                _fovPlane,
+            //                glm::vec4(
+            //                    orthogonalProjection(root2, data.time, target), 0.0
+            //                ),
+            //                squareColor(diffTime)
+            //            );
             //        }
             //    }
             //}
-            //if (interceptTag[i] == true && interceptTag[i + 1] == false) { // current point is interceptive, next is not
-            //                                                               // find outer most point for interpolation
+            //if (interceptTag[i] == true && interceptTag[i + 1] == false) {
+            //  // current point is interceptive, next is not
+            //  // find outer most point for interpolation
             //    mid = bisection(current, next, data.time, target);
             //    for (int j = 1; j <= InterpolationSteps; ++j) {
             //        float t = (static_cast<float>(j) / InterpolationSteps);
             //        interpolated = interpolate(current, mid, t);
-            //        glm::dvec3 ivec = (j < InterpolationSteps) ? checkForIntercept(interpolated, data.time, target) : orthogonalProjection(interpolated, data.time, target);
+            //        glm::dvec3 ivec =
+            //            (j < InterpolationSteps) ?
+            //            checkForIntercept(interpolated, data.time, target) :
+            //            orthogonalProjection(interpolated, data.time, target);
             //        insertPoint(_fovPlane, glm::vec4(ivec, 0.0), squareColor(diffTime));
             //        _rebuild = true;
             //    }
             //}
-            //if (interceptTag[i] == false && interceptTag[i + 1] == true) { // current point is non-interceptive, next is
+            //if (interceptTag[i] == false && interceptTag[i + 1] == true) {
+            //    // current point is non-interceptive, next is
             //    mid = bisection(next, current, data.time, target);
             //    for (int j = 1; j <= InterpolationSteps; ++j) {
             //        float t = (static_cast<float>(j) / InterpolationSteps);
             //        interpolated = interpolate(mid, next, t);
-            //        glm::dvec3 ivec = (j > 1) ? checkForIntercept(interpolated, data.time, target) : orthogonalProjection(interpolated, data.time, target);
+            //        glm::dvec3 ivec =
+            //            (j > 1) ?
+            //            checkForIntercept(interpolated, data.time, target) :
+            //            orthogonalProjection(interpolated, data.time, target);
             //        insertPoint(_fovPlane, glm::vec4(ivec, 0.0), squareColor(diffTime));
             //        _rebuild = true;
             //    }
             //}
-            //if (interceptTag[i] == true && interceptTag[i + 1] == true) { // both points intercept
+            //if (interceptTag[i] == true && interceptTag[i + 1] == true) {
+            //    // both points intercept
             //    for (int j = 0; j <= InterpolationSteps; ++j) {
             //        float t = (static_cast<float>(j) / InterpolationSteps);
             //        interpolated = interpolate(current, next, t);
-            //        glm::dvec3 ivec = checkForIntercept(interpolated, data.time, target);
+            //        glm::dvec3 ivec = checkForIntercept(
+            //            interpolated,
+            //            data.time,
+            //            target
+            //        );
             //        insertPoint(_fovPlane, glm::vec4(ivec, 0.0), squareColor(diffTime));
             //        _rebuild = true;
             //    }
@@ -821,7 +916,9 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 }
 
 #if 0
-void RenderableFov::computeIntercepts(const UpdateData& data, const std::string& target, bool inFOV) {
+void RenderableFov::computeIntercepts(const UpdateData& data, const std::string& target,
+                                      bool inFOV)
+{
     double t2 = (openspace::ImageSequencer::ref().getNextCaptureTime());
     double diff = (t2 - data.time);
     float diffTime = 0.0;
@@ -849,11 +946,22 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
         }
 
         SpiceManager::SurfaceInterceptResult res =
-            SpiceManager::ref().surfaceIntercept(target, _instrument.spacecraft,
-                _instrument.name, bodyfixed, _instrument.aberrationCorrection, data.time, _instrument.bounds[r]);
+            SpiceManager::ref().surfaceIntercept(
+                target,
+                _instrument.spacecraft,
+                _instrument.name,
+                bodyfixed,
+                _instrument.aberrationCorrection,
+                data.time,
+                _instrument.bounds[r]
+            );
 
         if (convert) {
-            res.surfaceVector = SpiceManager::ref().frameTransformationMatrix(bodyfixed, _instrument.referenceFrame, data.time) * res.surfaceVector;
+            res.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
+                bodyfixed,
+                _instrument.referenceFrame,
+                data.time
+            ) * res.surfaceVector;
         }
 
         interceptTag[r] = res.interceptFound;
@@ -863,13 +971,17 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
         if (!interceptTag[r]) {
             b = orthogonalProjection(_instrument.bounds[r], data.time, target);
         }
-
-        glm::vec4 fovOrigin = glm::vec4(0); //This will have to be fixed once spacecraft is 1:1!
+        //This will have to be fixed once spacecraft is 1:1!
+        glm::vec4 fovOrigin = glm::vec4(0);
 
         if (interceptTag[r]) {
             // INTERCEPTIONS
             insertPoint(_fovBounds, fovOrigin, _colors.intersectionStart);
-            insertPoint(_fovBounds, glm::vec4(res.surfaceVector, 0.0), endColor(diffTime));
+            insertPoint(
+                _fovBounds,
+                glm::vec4(res.surfaceVector, 0.0),
+                endColor(diffTime)
+            );
         }
         else if (inFOV) {
             // OBJECT IN FOV, NO INTERCEPT FOR THIS FOV-RAY
@@ -908,15 +1020,21 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             next = bounds[k];
 
             if (interceptTag[i] == false) { // If point is non-interceptive, project it.
-                insertPoint(_fovPlane, glm::vec4(orthogonalProjection(current, data.time, target), 0.0), tmp);
+                insertPoint(
+                    _fovPlane,
+                    glm::vec4(orthogonalProjection(current, data.time, target), 0.0), 
+                    tmp
+                );
                 _rebuild = true;
                 if (interceptTag[i + 1] == false && inFOV) {
-                    // IFF incident point is also non-interceptive BUT something is within FOV
+                    // IFF incident point is also non-interceptive BUT something is within
+                    // FOV
                     // we need then to check if this segment makes contact with surface
                     glm::dvec3 half = interpolate(current, next, 0.5f);
 
                     std::string bodyfixed = "IAU_";
-                    bool convert = (_instrument.referenceFrame.find(bodyfixed) == std::string::npos);
+                    bool convert = (_instrument.referenceFrame.find(bodyfixed) ==
+                                    std::string::npos);
                     if (convert) {
                         bodyfixed = SpiceManager::ref().frameFromBody(target);
                     }
@@ -925,11 +1043,22 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     }
 
                     SpiceManager::SurfaceInterceptResult res =
-                        SpiceManager::ref().surfaceIntercept(target, _instrument.spacecraft,
-                            _instrument.name, bodyfixed, _instrument.aberrationCorrection, data.time, half);
+                        SpiceManager::ref().surfaceIntercept(
+                            target,
+                            _instrument.spacecraft,
+                            _instrument.name,
+                            bodyfixed,
+                            _instrument.aberrationCorrection,
+                            data.time,
+                            half
+                        );
 
                     if (convert) {
-                        res.surfaceVector = SpiceManager::ref().frameTransformationMatrix(bodyfixed, _instrument.referenceFrame, data.time) * res.surfaceVector;
+                        res.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
+                            bodyfixed,
+                            _instrument.referenceFrame,
+                            data.time
+                        ) * res.surfaceVector;
                     }
 
                     bool intercepted = res.interceptFound;
@@ -939,39 +1068,70 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                         glm::dvec3 root1 = bisection(half, current, data.time, target);
                         glm::dvec3 root2 = bisection(half, next, data.time, target);
 
-                        insertPoint(_fovPlane, glm::vec4(orthogonalProjection(root1, data.time, target), 0.0), squareColor(diffTime));
+                        insertPoint(
+                            _fovPlane,
+                            glm::vec4(
+                                orthogonalProjection(root1, data.time, target),
+                                0.0
+                            ),
+                            squareColor(diffTime)
+                        );
                         for (int j = 1; j < InterpolationSteps; ++j) {
                             float t = (static_cast<float>(j) / InterpolationSteps);
                             interpolated = interpolate(root1, root2, t);
-                            glm::dvec3 ivec = checkForIntercept(interpolated, data.time, target);
-                            insertPoint(_fovPlane, glm::vec4(ivec,0.0) , squareColor(diffTime));
+                            glm::dvec3 ivec = checkForIntercept(
+                                interpolated,
+                                data.time,
+                                target
+                            );
+                            insertPoint(
+                                _fovPlane,
+                                glm::vec4(ivec,0.0),
+                                squareColor(diffTime)
+                            );
                         }
-                        insertPoint(_fovPlane, glm::vec4(orthogonalProjection(root2, data.time, target), 0.0), squareColor(diffTime));
+                        insertPoint(
+                            _fovPlane,
+                            glm::vec4(
+                                orthogonalProjection(root2, data.time, target),
+                                0.0
+                            ),
+                            squareColor(diffTime)
+                        );
                     }
                 }
             }
-            if (interceptTag[i] == true && interceptTag[i + 1] == false) { // current point is interceptive, next is not
-                                                     // find outer most point for interpolation
+            if (interceptTag[i] == true && interceptTag[i + 1] == false) {
+                // current point is interceptive, next is not
+                // find outer most point for interpolation
                 mid = bisection(current, next, data.time, target);
                 for (int j = 1; j <= InterpolationSteps; ++j) {
                     float t = (static_cast<float>(j) / InterpolationSteps);
                     interpolated = interpolate(current, mid, t);
-                    glm::dvec3 ivec = (j < InterpolationSteps) ? checkForIntercept(interpolated, data.time, target) : orthogonalProjection(interpolated, data.time, target);
+                    glm::dvec3 ivec =
+                        (j < InterpolationSteps) ?
+                        checkForIntercept(interpolated, data.time, target) :
+                        orthogonalProjection(interpolated, data.time, target);
                     insertPoint(_fovPlane, glm::vec4(ivec, 0.0), squareColor(diffTime));
                     _rebuild = true;
                 }
             }
-            if (interceptTag[i] == false && interceptTag[i + 1] == true) { // current point is non-interceptive, next is
+            if (interceptTag[i] == false && interceptTag[i + 1] == true) {
+                // current point is non-interceptive, next is
                 mid = bisection(next, current, data.time, target);
                 for (int j = 1; j <= InterpolationSteps; ++j) {
                     float t = (static_cast<float>(j) / InterpolationSteps);
                     interpolated = interpolate(mid, next, t);
-                    glm::dvec3 ivec = (j > 1) ? checkForIntercept(interpolated, data.time, target) : orthogonalProjection(interpolated, data.time, target);
+                    glm::dvec3 ivec = 
+                        (j > 1) ?
+                        checkForIntercept(interpolated, data.time, target) :
+                        orthogonalProjection(interpolated, data.time, target);
                     insertPoint(_fovPlane, glm::vec4(ivec, 0.0), squareColor(diffTime));
                     _rebuild = true;
                 }
             }
-            if (interceptTag[i] == true && interceptTag[i + 1] == true) { // both points intercept
+            if (interceptTag[i] == true && interceptTag[i + 1] == true) {
+                // both points intercept
                 for (int j = 0; j <= InterpolationSteps; ++j) {
                     float t = (static_cast<float>(j) / InterpolationSteps);
                     interpolated = interpolate(current, next, t);
@@ -989,7 +1149,11 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
     //
 
     glm::mat4 spacecraftRotation = glm::mat4(
-        SpiceManager::ref().positionTransformMatrix(_instrument.name, _instrument.referenceFrame, data.time)
+        SpiceManager::ref().positionTransformMatrix(
+            _instrument.name,
+            _instrument.referenceFrame,
+            data.time
+        )
     );
 
     glm::vec3 aim = (spacecraftRotation * glm::vec4(_instrument.boresight, 1));
@@ -1003,7 +1167,11 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
         data.time,
         lt
     );
-    psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(position.x, position.y, position.z);
+    psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+        position.x,
+        position.y,
+        position.z
+    );
     pss length = p.length();
     if (length[0] < DBL_EPSILON) {
         _drawFOV = false;
@@ -1022,7 +1190,7 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
 
         // Model transform and view transform needs to be in double precision
         glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
             glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
@@ -1031,12 +1199,18 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
             glm::mat4(data.camera.combinedViewMatrix() *
             modelTransform);
 
-        _programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
+        _programObject->setUniform(
+            "modelViewProjectionTransform",
+            modelViewProjectionTransform
+        );
 
         _programObject->setUniform("defaultColorStart", _colors.defaultStart);
         _programObject->setUniform("defaultColorEnd", _colors.defaultEnd);
         _programObject->setUniform("activeColor", _colors.active);
-        _programObject->setUniform("targetInFieldOfViewColor", _colors.targetInFieldOfView);
+        _programObject->setUniform(
+            "targetInFieldOfViewColor",
+            _colors.targetInFieldOfView
+        );
         _programObject->setUniform("intersectionStartColor", _colors.intersectionStart);
         _programObject->setUniform("intersectionEndColor", _colors.intersectionEnd);
         _programObject->setUniform("squareColor", _colors.square);
@@ -1118,7 +1292,9 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
             _instrument.potentialTargets.begin(),
             _instrument.potentialTargets.end(),
             distances.begin(),
-            [&o = _instrument.spacecraft, &f = _instrument.referenceFrame, &t = time](const std::string& pt) {
+            [&o = _instrument.spacecraft, &f = _instrument.referenceFrame, &t = time]
+            (const std::string& pt)
+            {
                 double lt;
                 glm::dvec3 p = SpiceManager::ref().targetPosition(pt, o, f, {}, t, lt);
                 return glm::length(p);
@@ -1157,27 +1333,54 @@ void RenderableFov::updateGPU() {
 
 
     //glBindBuffer(GL_ARRAY_BUFFER, _bounds.vbo);
-    //glBufferSubData(GL_ARRAY_BUFFER, 0, _bounds.size * sizeof(GLfloat), _fovBounds.data());
+    //glBufferSubData(
+    //    GL_ARRAY_BUFFER,
+    //    0,
+    //    _bounds.size * sizeof(GLfloat),
+    //    _fovBounds.data()
+    //);
 
     ////LINFOC(_instrument, _boundsV.size);
 
     //if (!_rebuild) {
     //    // no new points
     //    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
-    //    glBufferSubData(GL_ARRAY_BUFFER, 0, _orthogonalPlane.size * sizeof(GLfloat), _fovPlane.data());
+    //    glBufferSubData(
+    //        GL_ARRAY_BUFFER,
+    //        0,
+    //        _orthogonalPlane.size * sizeof(GLfloat),
+    //        _fovPlane.data()
+    //    );
     //}
     //else {
     //    // new points - memory change 
     //    glBindVertexArray(_orthogonalPlane.vao);
     //    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
-    //    glBufferData(GL_ARRAY_BUFFER, _orthogonalPlane.size * sizeof(GLfloat), NULL, GL_STATIC_DRAW); // orphaning the buffer, sending NULL data.
-    //    glBufferSubData(GL_ARRAY_BUFFER, 0, _orthogonalPlane.size * sizeof(GLfloat), _fovPlane.data());
+    //    glBufferData(
+    //        GL_ARRAY_BUFFER,
+    //        _orthogonalPlane.size * sizeof(GLfloat),
+    //        NULL,
+    //        GL_STATIC_DRAW
+    //    ); // orphaning the buffer, sending NULL data.
+    //    glBufferSubData(
+    //        GL_ARRAY_BUFFER,
+    //        0,
+    //        _orthogonalPlane.size * sizeof(GLfloat),
+    //        _fovPlane.data()
+    //    );
 
     //    GLsizei st = sizeof(GLfloat) * Stride;
     //    glEnableVertexAttribArray(0);
     //    glEnableVertexAttribArray(1);
     //    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, st, (void*)0);
-    //    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, st, (void*)(4 * sizeof(GLfloat)));
+    //    glVertexAttribPointer(
+    //        1,
+    //        4,
+    //        GL_FLOAT,
+    //        GL_FALSE,
+    //        st,
+    //        (void*)(4 * sizeof(GLfloat))
+    //    );
     //}
 
     //glBindVertexArray(0);

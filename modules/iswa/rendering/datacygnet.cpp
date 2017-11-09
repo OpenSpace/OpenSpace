@@ -116,27 +116,29 @@ bool DataCygnet::updateTexture(){
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
 
-    for(int option: selectedOptions){
+    for (int option : selectedOptions) {
         float* values = data[option];
-        if(!values) continue;
+        if (!values) {
+            continue;
+        }
 
-        if(!_textures[option]){
-            std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
-                                                                    values, 
-                                                                    _textureDimensions,
-                                                                    ghoul::opengl::Texture::Format::Red,
-                                                                    GL_RED, 
-                                                                    GL_FLOAT,
-                                                                    ghoul::opengl::Texture::FilterMode::Linear,
-                                                                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
-                                                                );
+        if (!_textures[option]) {
+            auto texture =  std::make_unique<ghoul::opengl::Texture>(
+                values, 
+                _textureDimensions,
+                ghoul::opengl::Texture::Format::Red,
+                GL_RED, 
+                GL_FLOAT,
+                ghoul::opengl::Texture::FilterMode::Linear,
+                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            );
 
-            if(texture){
+            if (texture) {
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
                 _textures[option] = std::move(texture);
             }
-        }else{
+        } else {
             _textures[option]->setPixelData(values);
             _textures[option]->uploadTexture();
         }
@@ -149,7 +151,10 @@ bool DataCygnet::downloadTextureResource(double timestamp){
     if(_futureObject.valid())
         return false;
 
-    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id, timestamp);
+    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(
+        _data->id,
+        timestamp
+    );
 
     if(future.valid()){
         _futureObject = std::move(future);
@@ -176,14 +181,14 @@ bool DataCygnet::readyToRender() const{
 }
 
 /**
- * Set both transfer function textures and data textures in same function so that they bind to 
- * the right texture units. If separate in to two functions a list of ghoul::TextureUnit
- * needs to be passed as an argument to both.
+ * Set both transfer function textures and data textures in same function so that they
+ * bind to the right texture units. If separate in to two functions a list of
+ * ghoul::TextureUnit needs to be passed as an argument to both.
  */
 void DataCygnet::setTextureUniforms(){
     std::vector<int> selectedOptions = _dataOptions.value();
     int activeTextures = std::min((int)selectedOptions.size(), MAX_TEXTURES);
-    int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);    
+    int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);
 
     // Set Textures
     ghoul::opengl::TextureUnit txUnits[MAX_TEXTURES];
@@ -243,10 +248,12 @@ void DataCygnet::readTransferFunctions(std::string tfPath){
 
     std::vector<std::shared_ptr<TransferFunction>> tfs;
 
-    if(tfFile.is_open()){
-        while(getline(tfFile, line)){
-            std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(absPath(line));
-            if(tf){
+    if (tfFile.is_open()) {
+        while (getline(tfFile, line)) {
+            std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(
+                absPath(line)
+            );
+            if (tf) {
                 tfs.push_back(tf);
             }
         }
@@ -254,23 +261,30 @@ void DataCygnet::readTransferFunctions(std::string tfPath){
         tfFile.close();
     }
 
-    if(!tfs.empty()){
+    if (!tfs.empty()) {
         _transferFunctions.clear();
         _transferFunctions = tfs;
     }
 }
 
-void DataCygnet::fillOptions(std::string& source){
-    std::vector<std::string> options = _dataProcessor->readMetadata(source, _textureDimensions);
+void DataCygnet::fillOptions(std::string& source) {
+    std::vector<std::string> options = _dataProcessor->readMetadata(
+        source,
+        _textureDimensions
+    );
 
-    for(int i=0; i<options.size(); i++){
+    for (int i = 0; i < options.size(); i++) {
         _dataOptions.addOption({i, options[i]});
         _textures.push_back(nullptr);
     }
 
-    if(_group){
-        std::dynamic_pointer_cast<IswaDataGroup>(_group)->registerOptions(_dataOptions.options());
-        _dataOptions.setValue(std::dynamic_pointer_cast<IswaDataGroup>(_group)->dataOptionsValue());
+    if (_group) {
+        std::dynamic_pointer_cast<IswaDataGroup>(_group)->registerOptions(
+            _dataOptions.options()
+        );
+        _dataOptions.setValue(
+            std::dynamic_pointer_cast<IswaDataGroup>(_group)->dataOptionsValue()
+        );
     } else {
         _dataOptions.setValue(std::vector<int>(1,0));
     }
@@ -326,7 +340,7 @@ void DataCygnet::subscribeToGroup(){
         }
     });
 
-    groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(name() + " Event backgroundValuesChanged");
         glm::vec2 values;
         bool success = dict.getValue("backgroundValues", values);
@@ -335,27 +349,28 @@ void DataCygnet::subscribeToGroup(){
         }
     });
 
-    groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict)
+    {
         LDEBUG(name() + " Event transferFunctionsChanged");
         _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
     });
 
-    groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
+    groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict) {
         LDEBUG(name() + " Event useLogChanged");
         _useLog.setValue(dict.value<bool>("useLog"));
     });
 
-    groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(name() + " Event useHistogramChanged");
         _useHistogram.setValue(dict.value<bool>("useHistogram"));
     });
 
-    groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(name() + " Event autoFilterChanged");
         _autoFilter.setValue(dict.value<bool>("autoFilter"));
     });
 
-    groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict) {
         LDEBUG(name() + " Event updateGroup");
         if(_autoFilter.value())
             _backgroundValues.setValue(_dataProcessor->filterValues());

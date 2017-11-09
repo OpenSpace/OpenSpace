@@ -250,14 +250,21 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation) * // Rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)); // Scale
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
-    glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+    glm::vec3 directionToSun = glm::normalize(
+        _sunPosition.vec3() - glm::vec3(bodyPosition)
+    );
+    glm::vec3 directionToSunViewSpace = glm::mat3(
+        data.camera.combinedViewMatrix()
+    ) * directionToSun;
 
     _programObject->setUniform("_performShading", _performShading);
     _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _programObject->setUniform("_projectionFading", _projectionComponent.projectionFading());
+    _programObject->setUniform(
+        "_projectionFading",
+        _projectionComponent.projectionFading()
+    );
 
 
     _geometry->setUniforms(*_programObject);

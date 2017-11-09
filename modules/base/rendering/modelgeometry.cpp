@@ -113,7 +113,12 @@ double ModelGeometry::boundingRadius() const {
 void ModelGeometry::render() {
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glDrawElements(_mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(
+        _mode,
+        static_cast<GLsizei>(_indices.size()),
+        GL_UNSIGNED_INT,
+        nullptr
+    );
     glBindVertexArray(0);
 }
 
@@ -245,8 +250,14 @@ bool ModelGeometry::saveCachedFile(const std::string& filename) {
         int64_t iSize = _indices.size();
         fileStream.write(reinterpret_cast<const char*>(&iSize), sizeof(int64_t));
 
-        fileStream.write(reinterpret_cast<const char*>(_vertices.data()), sizeof(Vertex) * vSize);
-        fileStream.write(reinterpret_cast<const char*>(_indices.data()), sizeof(int) * iSize);
+        fileStream.write(
+            reinterpret_cast<const char*>(_vertices.data()),
+            sizeof(Vertex) * vSize
+        );
+        fileStream.write(
+            reinterpret_cast<const char*>(_indices.data()),
+            sizeof(int) * iSize
+        );
 
         return fileStream.good();
     }
@@ -280,7 +291,10 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
         _vertices.resize(vSize);
         _indices.resize(iSize);
 
-        fileStream.read(reinterpret_cast<char*>(_vertices.data()), sizeof(Vertex) * vSize);
+        fileStream.read(
+            reinterpret_cast<char*>(_vertices.data()),
+            sizeof(Vertex) * vSize
+        );
         fileStream.read(reinterpret_cast<char*>(_indices.data()), sizeof(int) * iSize);
 
         return fileStream.good();

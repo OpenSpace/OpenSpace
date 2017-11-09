@@ -336,7 +336,10 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             }
         }
         else {
-            LWARNING("No playbook translation provided, please make sure all spice calls match playbook!");
+            LWARNING(
+                "No playbook translation provided, please make sure \
+                all spice calls match playbook!"
+            );
         }
     }
 }
@@ -369,7 +372,9 @@ bool ProjectionComponent::initializeGL() {
     using ghoul::opengl::Texture;
     using ghoul::io::TextureReader;
 
-    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(placeholderFile));
+    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+        absPath(placeholderFile)
+    );
     if (texture) {
         texture->uploadTexture();
         // TODO: AnisotropicMipMap crashes on ATI cards ---abock
@@ -814,12 +819,16 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::
     glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
     glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
 
-    glm::mat4 projViewMatrix = glm::mat4(e1.x, e2.x, e3.x, 0.f,
-                                         e1.y, e2.y, e3.y, 0.f,
-                                         e1.z, e2.z, e3.z, 0.f,
-                                         glm::dot(e1, -loc), glm::dot(e2, -loc), glm::dot(e3, -loc), 1.f);
+    glm::mat4 projViewMatrix = glm::mat4(
+        e1.x, e2.x, e3.x, 0.f,
+        e1.y, e2.y, e3.y, 0.f,
+        e1.z, e2.z, e3.z, 0.f,
+        glm::dot(e1, -loc), glm::dot(e2, -loc), glm::dot(e3, -loc), 1.f
+    );
     // create perspective projection matrix
-    glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane);
+    glm::mat4 projProjectionMatrix = glm::perspective(
+        glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane
+    );
 
     return projProjectionMatrix*projViewMatrix;
 }
@@ -877,7 +886,12 @@ void ProjectionComponent::clearAllProjections() {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     //counter = 0;
-    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
+    glViewport(
+        0,
+        0,
+        static_cast<GLsizei>(_projectionTexture->width()),
+        static_cast<GLsizei>(_projectionTexture->height())
+    );
 
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 
@@ -933,7 +947,9 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
     );
     if (_projectionTexture) {
         _projectionTexture->uploadTexture();
-        //_projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        //_projectionTexture->setFilter(
+        //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        //);
     }
 
     if (_dilation.isEnabled) {
@@ -944,7 +960,9 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
 
         if (_dilation.texture) {
             _dilation.texture->uploadTexture();
-            //_dilation.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            //_dilation.texture->setFilter(
+            //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            //);
         }
 
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
@@ -956,7 +974,9 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
 
         if (_dilation.stencilTexture) {
             _dilation.stencilTexture->uploadTexture();
-            //_dilation.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            //_dilation.texture->setFilter(
+            //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            //);
         }
     }
 

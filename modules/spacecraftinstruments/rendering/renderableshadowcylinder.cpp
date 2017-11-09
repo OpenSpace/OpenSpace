@@ -365,7 +365,8 @@ void RenderableShadowCylinder::createCylinder(double time) {
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
         [](const glm::dvec3& p) {
-            PowerScaledCoordinate coord = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+            PowerScaledCoordinate coord =
+                PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
             coord[3] += 3;
             return coord;
         }
@@ -389,7 +390,11 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource *= _shadowLength;
     _vertices.clear();
 
-    psc endpoint = psc::CreatePowerScaledCoordinate(vecLightSource.x, vecLightSource.y, vecLightSource.z);
+    psc endpoint = psc::CreatePowerScaledCoordinate(
+            vecLightSource.x,
+            vecLightSource.y,
+            vecLightSource.z
+        );
     for (const auto& v : terminatorPoints) {
         _vertices.push_back({ v[0], v[1], v[2], v[3] });
         glm::vec4 f = psc_addition(v.vec4(), endpoint.vec4());
@@ -400,8 +405,18 @@ void RenderableShadowCylinder::createCylinder(double time) {
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(CylinderVBOLayout), nullptr, GL_DYNAMIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, _vertices.size() * sizeof(CylinderVBOLayout), &_vertices[0]);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertices.size() * sizeof(CylinderVBOLayout),
+        nullptr,
+        GL_DYNAMIC_DRAW
+    );
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        0,
+        _vertices.size() * sizeof(CylinderVBOLayout),
+        &_vertices[0]
+    );
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);

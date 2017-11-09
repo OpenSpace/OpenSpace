@@ -209,7 +209,9 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     _texturePath.onChange([this]() { loadTexture(); });
 
     if (dictionary.hasKey(FadeOutThreshouldInfo.identifier)) {
-        _fadeOutThreshold = static_cast<float>(dictionary.value<double>(FadeOutThreshouldInfo.identifier));
+        _fadeOutThreshold = static_cast<float>(
+            dictionary.value<double>(FadeOutThreshouldInfo.identifier)
+        );
     }
 
 }
@@ -257,10 +259,18 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     setPscUniforms(*_shader.get(), data.camera, data.position);
 
     if (_fadeOutThreshold > -1.0) {
-        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
-        double term = std::exp((-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold));
+        float distCamera = glm::distance(
+            data.camera.positionVec3(),
+            data.position.dvec3()
+        );
+        double term = std::exp(
+            (-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold)
+        );
 
-        _shader->setUniform("alpha", _transparency * static_cast<float>(term / (term + 1.0)));
+        _shader->setUniform(
+            "alpha",
+            _transparency * static_cast<float>(term / (term + 1.0))
+        );
     }
     else {
         _shader->setUniform("alpha", _transparency);
@@ -275,10 +285,12 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glCullFace(GL_BACK);
 
     bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::Framebuffer;
 
     bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
         _shader->setUniform("additiveBlending", true);
@@ -314,7 +326,10 @@ void RenderableSphere::update(const UpdateData&) {
 
 void RenderableSphere::loadTexture() {
     if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+        using TR = ghoul::io::TextureReader;
+        std::unique_ptr<ghoul::opengl::Texture> texture = TR::ref().loadTexture(
+            _texturePath
+        );
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
@@ -322,7 +337,8 @@ void RenderableSphere::loadTexture() {
             );
             texture->uploadTexture();
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than
+            // linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);

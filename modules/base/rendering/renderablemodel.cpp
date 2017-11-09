@@ -188,11 +188,14 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale));
+        glm::scale(
+            glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale)
+        );
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
-    glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+    glm::vec3 directionToSunViewSpace =
+        glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
     _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
@@ -223,7 +226,9 @@ void RenderableModel::update(const UpdateData&) {
 void RenderableModel::loadTexture() {
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
         if (_texture) {
             LDEBUGC(
                 "RenderableModel",

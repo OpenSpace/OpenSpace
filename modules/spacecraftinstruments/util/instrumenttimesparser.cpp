@@ -70,9 +70,16 @@ InstrumentTimesParser::InstrumentTimesParser(const std::string& name,
     ghoul::Dictionary instruments = inputDict.value<ghoul::Dictionary>(KeyInstruments);
 
     for (const auto& instrumentKey : instruments.keys()) {
-        ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(instrumentKey);
-        ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(KeyInstrumentFiles);
-        _fileTranslation[instrumentKey] = Decoder::createFromDictionary(instrument, KeyInstrument);
+        ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(
+            instrumentKey
+        );
+        ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(
+            KeyInstrumentFiles
+        );
+        _fileTranslation[instrumentKey] = Decoder::createFromDictionary(
+            instrument,
+            KeyInstrument
+        );
         for (size_t i = 0; i < files.size(); i++) {
             std::string filename = files.value<std::string>(std::to_string(i + 1));
             _instrumentFiles[instrumentKey].push_back(filename);
@@ -97,7 +104,10 @@ bool InstrumentTimesParser::create() {
     for (auto it = _instrumentFiles.begin(); it != _instrumentFiles.end(); it++) {
         std::string instrumentID = it->first;
         for (std::string filename: it->second) {
-            std::string filepath = FileSys.pathByAppendingComponent(sequenceDir.path(), filename);
+            std::string filepath = FileSys.pathByAppendingComponent(
+                sequenceDir.path(),
+                filename
+            );
 
             if (!FileSys.fileExists(filepath)) {
                 LERROR("Unable to read file " << filepath << ". Skipping file.");
@@ -113,8 +123,10 @@ bool InstrumentTimesParser::create() {
             while (std::getline(inFile, line)) {
                 if (std::regex_match(line, matches, _pattern)) {
                     if (matches.size() != 3) {
-                        LERROR("Bad event data formatting. Must \
-                                have regex 3 matches (source string, start time, stop time).");
+                        LERROR(
+                            "Bad event data formatting. Must \
+                            have regex 3 matches (source string, start time, stop time)."
+                        );
                         successfulRead = false;
                         break;
                     }
@@ -123,8 +135,10 @@ bool InstrumentTimesParser::create() {
                     try { // parse date strings
                         std::string start = matches[1].str();
                         std::string stop = matches[2].str();
-                        captureTimeRange.start = SpiceManager::ref().ephemerisTimeFromDate(start);
-                        captureTimeRange.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
+                        captureTimeRange.start =
+                            SpiceManager::ref().ephemerisTimeFromDate(start);
+                        captureTimeRange.end =
+                            SpiceManager::ref().ephemerisTimeFromDate(stop);
                     }
                     catch (const SpiceManager::SpiceException& e){
                         LERROR(e.what());
