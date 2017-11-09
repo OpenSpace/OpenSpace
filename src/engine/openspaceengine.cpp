@@ -678,10 +678,11 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
    while (!initializeFinished) {
         _loadingScreen->render();
     }
-
-   _windowWrapper->swapBuffer();
+   _loadingScreen->postMessage("Initializing OpenGL");
+   _loadingScreen->finalize();
 
     t.join();
+    // It's okay to delete it since the last rendered image will remain on screen
     _loadingScreen = nullptr;
         
     if (errorWhileLoading) {

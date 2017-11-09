@@ -357,46 +357,47 @@ void LoadingScreen::render() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glBindVertexArray(_progressbar.vaoBox);
-        float w = ProgressbarLineWidth;
+        float w = ProgressbarLineWidth / screenAspectRatio;
+        float h = ProgressbarLineWidth;
         GLfloat dataBox[] = {
             // In order to avoid the deprecated glLineWidth, we split the lines into
             // separate triangles instead
 
             // Left side
-            progressbarLl.x - w , progressbarLl.y - w,
-            progressbarLl.x + w,  progressbarUr.y + w,
-            progressbarLl.x - w, progressbarUr.y + w,
+            progressbarLl.x - w , progressbarLl.y - h,
+            progressbarLl.x + w,  progressbarUr.y + h,
+            progressbarLl.x - w, progressbarUr.y + h,
 
-            progressbarLl.x - w , progressbarLl.y - w,
-            progressbarLl.x + w , progressbarLl.y - w,
-            progressbarLl.x + w,  progressbarUr.y + w,
+            progressbarLl.x - w , progressbarLl.y - h,
+            progressbarLl.x + w , progressbarLl.y - h,
+            progressbarLl.x + w,  progressbarUr.y + h,
 
             // Top side
-            progressbarLl.x - w, progressbarUr.y - w,
-            progressbarUr.x + w, progressbarUr.y + w,
-            progressbarLl.x - w, progressbarUr.y + w,
+            progressbarLl.x - w, progressbarUr.y - h,
+            progressbarUr.x + w, progressbarUr.y + h,
+            progressbarLl.x - w, progressbarUr.y + h,
 
-            progressbarLl.x - w, progressbarUr.y - w,
-            progressbarUr.x + w, progressbarUr.y - w,
-            progressbarUr.x + w, progressbarUr.y + w,
+            progressbarLl.x - w, progressbarUr.y - h,
+            progressbarUr.x + w, progressbarUr.y - h,
+            progressbarUr.x + w, progressbarUr.y + h,
 
             // Right side
-            progressbarUr.x - w, progressbarLl.y - w,
-            progressbarUr.x + w, progressbarUr.y + w,
-            progressbarUr.x - w, progressbarUr.y - w,
+            progressbarUr.x - w, progressbarLl.y - h,
+            progressbarUr.x + w, progressbarUr.y + h,
+            progressbarUr.x - w, progressbarUr.y - h,
 
-            progressbarUr.x - w, progressbarLl.y - w,
-            progressbarUr.x + w, progressbarLl.y - w,
-            progressbarUr.x + w, progressbarUr.y + w,
+            progressbarUr.x - w, progressbarLl.y - h,
+            progressbarUr.x + w, progressbarLl.y - h,
+            progressbarUr.x + w, progressbarUr.y + h,
 
             // Bottom side
-            progressbarLl.x - w, progressbarLl.y - w,
-            progressbarUr.x + w, progressbarLl.y + w,
-            progressbarLl.x - w, progressbarLl.y + w,
+            progressbarLl.x - w, progressbarLl.y - h,
+            progressbarUr.x + w, progressbarLl.y + h,
+            progressbarLl.x - w, progressbarLl.y + h,
 
-            progressbarLl.x - w, progressbarLl.y - w,
-            progressbarUr.x + w, progressbarLl.y - w,
-            progressbarUr.x + w, progressbarLl.y + w,
+            progressbarLl.x - w, progressbarLl.y - h,
+            progressbarUr.x + w, progressbarLl.y - h,
+            progressbarUr.x + w, progressbarLl.y + h,
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, _progressbar.vboBox);
@@ -623,6 +624,29 @@ void LoadingScreen::postMessage(std::string message) {
     std::lock_guard<std::mutex> guard(_messageMutex);
     _message = std::move(message);
 }
+
+void LoadingScreen::finalize() {
+    _items.erase(
+        std::remove_if(
+            _items.begin(),
+            _items.end(),
+            [](const Item& i) {
+                return i.status != ItemStatus::Failed;
+            }
+        ),
+        _items.end()
+    );
+
+    //for (Item& i : _items) {
+    //    if (i.status != ItemStatus::Failed) {
+    //        i.status = ItemStatus::Finished;
+    //    }
+    //    i.finishedTime = std::chrono::system_clock::now() + TTL;
+    //}
+
+    render();
+}
+
 
 void LoadingScreen::setItemNumber(int nItems) {
     _nItems = nItems;

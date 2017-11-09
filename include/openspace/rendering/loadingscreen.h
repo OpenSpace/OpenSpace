@@ -60,6 +60,8 @@ public:
 
     void postMessage(std::string message);
 
+    void finalize();
+
     void setItemNumber(int nItems);
     void tickItem();
 
