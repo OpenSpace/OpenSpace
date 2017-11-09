@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #ifndef __OPENSPACE_CORE___SCENELICENSE___H__
 #define __OPENSPACE_CORE___SCENELICENSE___H__
 
@@ -39,20 +39,20 @@ namespace openspace {
 struct SceneLicense {
     // module must not be empty
     SceneLicense(const ghoul::Dictionary& dictionary, std::string module);
-    
+
     std::string module;
-    
+
     std::string name;
     std::string attribution;
     std::string url;
     std::string licenseText;
-    
+
     static documentation::Documentation Documentation();
 };
 
 void writeSceneLicenseDocumentation(const std::vector<SceneLicense>& licenses,
     const std::string& file, const std::string& type);
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCENELICENSE___H__

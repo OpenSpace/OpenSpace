@@ -32,7 +32,7 @@ namespace openspace::globebrowsing {
 struct Geodetic2 {
     Geodetic2(double latitude = 0.0, double longitude = 0.0);
     Geodetic2(const Geodetic2& src);
-    
+
     //static Geodetic2 fromCartesian(const Vec3& v);
     //Vec3 asUnitCartesian() const;
 

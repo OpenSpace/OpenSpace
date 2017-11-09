@@ -64,7 +64,7 @@ namespace openspace {
         static documentation::Documentation Documentation();
 
     private:
-        
+
         enum Unit {
             Meter = 0,
             Kilometer = 1,
@@ -93,7 +93,7 @@ namespace openspace {
         properties::FloatProperty _scaleFactor;
         properties::Vec3Property _pointColor;
         properties::StringProperty _spriteTexturePath;
-        
+
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
         std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;

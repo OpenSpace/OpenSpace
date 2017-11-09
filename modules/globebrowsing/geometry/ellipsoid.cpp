@@ -41,7 +41,7 @@ void Ellipsoid::updateInternalCache() {
 
     _cached._oneOverRadiiSquared = glm::dvec3(1) / _cached._radiiSquared;
     _cached._radiiToTheFourth = _cached._radiiSquared * _cached._radiiSquared;
-        
+
     std::vector<double> radii = { _radii.x, _radii.y, _radii.z };
     std::sort(radii.begin(), radii.end());
     _cached._minimumRadius = radii[0];
@@ -58,7 +58,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     double beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
     double n = glm::length(beta * p * _cached._oneOverRadiiSquared);
     double alpha = (1.0 - beta) * (glm::length(p) / n);
-        
+
     glm::dvec3 p2 = p * p;
     glm::dvec3 d, d2, d3;
 
@@ -72,7 +72,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
         d = glm::dvec3(1.0) + alpha * _cached._oneOverRadiiSquared;
         d2 = d * d;
         d3 = d * d2;
-            
+
         s = glm::dot(p2 / (_cached._radiiSquared * d2), glm::dvec3(1.0)) - 1.0;
 
         dSdA = -2.0 * glm::dot(p2 / (_cached._radiiToTheFourth * d3), glm::dvec3(1.0));
@@ -98,7 +98,6 @@ glm::dvec3 Ellipsoid::geodeticSurfaceNormal(Geodetic2 geodetic2) const {
 const glm::dvec3& Ellipsoid::radii() const {
     return _radii;
 }
-
 
 const glm::dvec3& Ellipsoid::radiiSquared() const {
     return _cached._radiiSquared;

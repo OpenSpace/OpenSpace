@@ -56,7 +56,7 @@ public:
         std::string name;
         std::string description = "";
     };
-    
+
     /// The constructor initializing the PropertyOwner's name to <code>""</code>
     PropertyOwner(PropertyOwnerInfo info);
 
@@ -85,7 +85,6 @@ public:
     void setDescription(std::string description);
 
     std::string description() const;
-    
 
     /**
      * Returns a list of all Propertys directly owned by this PropertyOwner. This list not
@@ -123,7 +122,7 @@ public:
      * <code>false</code> otherwise.
      */
     bool hasProperty(const std::string& URI) const;
-    
+
     void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
     PropertyOwner* owner() const { return _owner; }
 
@@ -171,7 +170,7 @@ public:
      * <code>groupID</code>
      */
     std::string propertyGroupName(const std::string& groupID) const;
-    
+
     /**
      * Assigns the Property <code>prop</code> to this PropertyOwner. This method will
      * check if the name of the Property is unique amongst Propertys and sub-owners in
@@ -180,10 +179,10 @@ public:
      * \param prop The Property whose ownership is changed.
      */
     void addProperty(Property* prop);
-    
+
     /// \see Property::addProperty(Property*)
     void addProperty(Property& prop);
-    
+
     /**
      * Adds the provided PropertyOwner to the list of sub-owners for this PropertyOwner.
      * This means that the name of the <code>owner</code> has to be unique amonst the
@@ -206,7 +205,7 @@ public:
 
     /// \see PropertyOwner::removeProperty(Property*)
     void removeProperty(Property& prop);
-    
+
     /**
      * Removes the sub-owner from this PropertyOwner.
      * \param owner The PropertyOwner that should be removed

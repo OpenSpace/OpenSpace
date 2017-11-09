@@ -66,7 +66,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_fieldlines);
 
     dictionary.getValue("kwPath", _kwPath);
-    
+
     std::string fieldlineIndexFile;
     dictionary.getValue("fieldlineSeedsIndexFile", _fieldlineIndexFile);
 
@@ -109,7 +109,7 @@ void KameleonPlane::initialize() {
     if (!_data->groupName.empty()) {
         initializeGroup();
     }
-    
+
     initializeTime();
     createGeometry();
     createShader();
@@ -137,14 +137,14 @@ void KameleonPlane::initialize() {
             }
         });
     }
-    
+
     fillOptions(_kwPath);
 
     readTransferFunctions(_transferFunctionsFile.value());
 
     // Set Property Callbacks of DataCygnet (must be called after fillOptions)
     setPropertyCallbacks();
-    
+
     // Set Property callback specific to KameleonPlane
     _resolution.onChange([this](){
         for(int i=0; i<_textures.size(); i++){
@@ -159,7 +159,7 @@ void KameleonPlane::initialize() {
     _slice.onChange([this](){
         updateTextureResource();
     });
-    
+
     _fieldlines.onChange([this](){ 
         updateFieldlineSeeds();
     });
@@ -177,7 +177,7 @@ void KameleonPlane::initialize() {
 bool KameleonPlane::createGeometry() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    
+
     // ============================
     //         GEOMETRY (quad)
     // ============================
@@ -270,7 +270,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             if (OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) == nullptr) {
                 return;
             }
-            
+
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             OsEng.scriptEngine().queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",

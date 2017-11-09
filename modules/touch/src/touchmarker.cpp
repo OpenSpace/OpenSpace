@@ -33,7 +33,8 @@
 
 namespace {
     const std::string _loggerCat = "TouchMarker";
-}
+} // namespace
+
 namespace openspace {
 
 TouchMarker::TouchMarker()
@@ -56,7 +57,6 @@ TouchMarker::TouchMarker()
     addProperty(_thickness);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
-    
 }
 
 bool TouchMarker::initialize() {

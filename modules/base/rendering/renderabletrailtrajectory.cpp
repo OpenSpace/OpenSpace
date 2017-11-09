@@ -87,7 +87,7 @@ namespace openspace {
 
 documentation::Documentation RenderableTrailTrajectory::Documentation() {
     using namespace documentation;
-    
+
     documentation::Documentation doc {
         "RenderableTrailTrajectory",
         "base_renderable_renderabletrailtrajectory",
@@ -244,7 +244,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        
+
         // We clear the indexArray just in case. The base class will take care not to use
         // it if it is empty
         _indexArray.clear();
@@ -252,7 +252,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         _subsamplingIsDirty = true;
         _needsFullSweep = false;
     }
-    
+
     // This has to be done every update step;
     if (_renderFullTrail) {
         // If the full trail should be rendered at all times, we can directly render the
@@ -273,14 +273,16 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
     // If we are inside the valid time, we additionally want to draw a line from the last
     // correct point to the current location of the object
-    if (data.time.j2000Seconds() >= _start && data.time.j2000Seconds() <= _end && !_renderFullTrail) {
+    if (data.time.j2000Seconds() >= _start &&
+        data.time.j2000Seconds() <= _end && !_renderFullTrail)
+    {
         // Copy the last valid location
         glm::dvec3 v0(
             _vertexArray[_primaryRenderInformation.count - 1].x,
             _vertexArray[_primaryRenderInformation.count - 1].y,
             _vertexArray[_primaryRenderInformation.count - 1].z
         );
-        
+
         // And get the current location of the object
         glm::dvec3 p = _translation->position(data.time.j2000Seconds());
         glm::dvec3 v1 = { p.x, p.y, p.z };

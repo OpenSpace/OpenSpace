@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -663,11 +662,11 @@ void LuaConsole::render() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
     }
-  
+
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     const glm::ivec2 res =
         glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
-  
+
 
     // Render background
     glDisable(GL_CULL_FACE);
@@ -786,7 +785,7 @@ void LuaConsole::render() {
         "> %s",
         currentCommand.c_str()
     );
-    
+
     // Just offset the ^ marker slightly for a nicer look
     inputLocation.y += 3 * dpiScaling.y;
 
@@ -797,7 +796,7 @@ void LuaConsole::render() {
         _entryTextColor,
         (std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^").c_str()
     );
-    
+
     glm::vec2 historyInputLocation = glm::vec2(
         HistoryFontSize / 2.f,
         res.y - HistoryFontSize * 1.5f + _fullHeight - _currentHeight

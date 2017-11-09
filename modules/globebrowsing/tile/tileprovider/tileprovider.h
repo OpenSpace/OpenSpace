@@ -37,7 +37,7 @@
 #include <vector>
 
 namespace openspace::globebrowsing::tileprovider {
-    
+
 /**
  * Interface for providing <code>Tile</code>s given a 
  * <code>TileIndex</code>. 
@@ -136,7 +136,7 @@ public:
      * that this TileProvider is able provide.
      */
     virtual int maxLevel() = 0;
-        
+
     /**
      * \returns the no data value for the dataset. Default is the minimum float avalue.
      */
@@ -151,13 +151,14 @@ public:
 
 protected:
     std::string _name;
+
 private:
     void initializeDefaultTile();
 
     static unsigned int _numTileProviders;
     unsigned int _uniqueIdentifier;
     bool _initialized;
-  
+
     std::unique_ptr<ghoul::opengl::Texture> _defaultTileTexture;
     Tile _defaultTile;
 };

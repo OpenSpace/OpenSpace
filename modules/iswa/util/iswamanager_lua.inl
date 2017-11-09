@@ -44,19 +44,20 @@ int iswa_addCygnet(lua_State* L) {
     if (nArguments > 2) {
         group = luaL_checkstring(L, 3);
     }
-    
+
     IswaManager::ref().addIswaCygnet(id, type, group);
 
     return 0;
 }
 
-int iswa_addScreenSpaceCygnet(lua_State* L){
+int iswa_addScreenSpaceCygnet(lua_State* L) {
     static const std::string _loggerCat = "addScreenSpaceCygnet";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     ghoul::Dictionary d;
     try {
@@ -69,9 +70,9 @@ int iswa_addScreenSpaceCygnet(lua_State* L){
 
     float id;
     d.getValue("CygnetId", id);
-    
+
     auto cygnetInformation = IswaManager::ref().cygnetInformation(); 
-    if(cygnetInformation.find((int)id) == cygnetInformation.end()){
+    if (cygnetInformation.find((int)id) == cygnetInformation.end()) {
         LWARNING("Could not find Cygnet with id = " + std::to_string(id));
         return 0;
     }
@@ -80,11 +81,11 @@ int iswa_addScreenSpaceCygnet(lua_State* L){
     std::string name = info->name;
     int updateInterval = info->updateInterval;
     info->selected = true;
- 
-    if(OsEng.renderEngine().screenSpaceRenderable(name)){
+
+    if (OsEng.renderEngine().screenSpaceRenderable(name)) {
         LERROR("A cygnet with the name \"" + name +"\" already exist");
         return 0;
-    }else{
+    } else {
         d.setValue("Name", name);
         d.setValue("Type", "ScreenSpaceCygnet");
         d.setValue("UpdateInterval", (float) updateInterval);
@@ -115,7 +116,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L){
 //     return 0;
 // }
 
-int iswa_removeCygnet(lua_State* L){
+int iswa_removeCygnet(lua_State* L) {
     std::string name = luaL_checkstring(L, -1);
     OsEng.scriptEngine().queueScript(
         "openspace.removeSceneGraphNode('" + name + "')",
@@ -125,13 +126,13 @@ int iswa_removeCygnet(lua_State* L){
     return 0;
 }
 
-int iswa_removeScrenSpaceCygnet(lua_State* L){
+int iswa_removeScrenSpaceCygnet(lua_State* L) {
     static const std::string _loggerCat = "removeScreenSpaceCygnet";
 
     int id = static_cast<int>(lua_tonumber(L, 1));
 
     auto cygnetInformation = IswaManager::ref().cygnetInformation(); 
-    if(cygnetInformation.find(id) == cygnetInformation.end()){
+    if (cygnetInformation.find(id) == cygnetInformation.end()) {
         LWARNING("Could not find Cygnet with id = " + std::to_string(id));
         return 0;
     }
@@ -147,25 +148,26 @@ int iswa_removeScrenSpaceCygnet(lua_State* L){
     return 0;
 }
 
-int iswa_removeGroup(lua_State* L){
+int iswa_removeGroup(lua_State* L) {
     std::string name = luaL_checkstring(L, -1);
     // IswaManager::ref().unregisterGroup(id);
 
     auto groups = IswaManager::ref().groups(); 
-    if(groups.find(name) != groups.end())
+    if (groups.find(name) != groups.end()) {
         groups[name]->clearGroup();
+    }
 
     return 0;
 }
 
-int iswa_addCdfFiles(lua_State* L){
+int iswa_addCdfFiles(lua_State* L) {
     std::string path = luaL_checkstring(L, 1);
     IswaManager::ref().addCdfFiles(path);
 
     return 0;
 }
 
-int iswa_addKameleonPlanes(lua_State* L){
+int iswa_addKameleonPlanes(lua_State* L) {
     std::string group = luaL_checkstring(L, 1);
     int pos = static_cast<int>(lua_tonumber(L, 2));
     IswaManager::ref().addKameleonCdf(group, pos);
@@ -173,12 +175,12 @@ int iswa_addKameleonPlanes(lua_State* L){
     return 0;
 }
 
-int iswa_setBaseUrl(lua_State* L){
+int iswa_setBaseUrl(lua_State* L) {
     std::string url = luaL_checkstring(L, 1);
     IswaManager::ref().setBaseUrl(url);
     return 0;
 }
 
-}// namespace luascriptfunctions
+} // namespace luascriptfunctions
 
-}// namespace openspace
+} // namespace openspace

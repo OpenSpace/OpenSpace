@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLETIMEVARYINGVOLUME___H__
+#define __OPENSPACE_MODULE_VOLUME___RENDERABLETIMEVARYINGVOLUME___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -47,7 +47,7 @@ class RenderableTimeVaryingVolume : public Renderable {
 public:
     RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
     ~RenderableTimeVaryingVolume();
-    
+
     void initialize() override;
     void deinitialize() override;
     bool isReady() const override;
@@ -106,4 +106,4 @@ private:
 } // namespace volume
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
+#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLETIMEVARYINGVOLUME___H__

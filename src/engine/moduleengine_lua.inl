@@ -43,7 +43,7 @@ int isLoaded(lua_State* L) {
     std::string moduleName = lua_tostring(L, -1);
 
     std::vector<OpenSpaceModule*> modules = OsEng.moduleEngine().modules();
-    
+
     auto it = std::find_if(
         modules.begin(),
         modules.end(),

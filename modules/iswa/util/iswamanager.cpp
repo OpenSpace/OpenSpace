@@ -251,7 +251,7 @@ void IswaManager::registerGroup(std::string groupName, std::string type) {
     if (_groups.find(groupName) == _groups.end()) {
         bool dataGroup =    (type == typeid(DataPlane).name()) ||
                             (type == typeid(DataSphere).name());
-                            
+
         bool kameleonGroup = (type == typeid(KameleonPlane).name());
         if (dataGroup) {
             _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaDataGroup>(groupName, type)));
@@ -360,7 +360,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             "XOffset = "+ std::to_string(xOffset) + ","
             "}"
         "}";
-        
+
         return table;
     }
     return "";
@@ -371,7 +371,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) {
         const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
         if(extension == "cdf"){
             KameleonWrapper kw = KameleonWrapper(absPath(info.path));
-     
+
             std::string parent  = kw.getParent();
             std::string frame   = kw.getFrame();
             glm::vec3   min     = kw.getGridMin();
@@ -464,7 +464,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
         "Group = '"+ data->group + "',"
         "}"
     "}";
-    
+
     return table;
 }
 
@@ -490,7 +490,7 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data) {
         } else {
             type = typeid(TexturePlane).name();
         }
-        
+
         registerGroup(data->group, type);
 
         auto it = _groups.find(data->group);
@@ -627,7 +627,7 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
 void IswaManager::fillCygnetInfo(std::string jsonString) {
     if (jsonString != "") {
         json j = json::parse(jsonString);
-        
+
         std::set<std::string> lists  =  {"listOfPriorityCygnets", "listOfOKCygnets"
                                         // ,"listOfStaleCygnets", "listOfInactiveCygnets",
                                         };
@@ -657,7 +657,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
     if (FileSys.fileExists(cdfpath)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
         std::ifstream jsonFile(cdfpath);
-        
+
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
             for(int i=0; i<cdfGroups.size(); i++){
@@ -665,7 +665,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
                 std::string groupName = cdfGroup["group"];
                 std::string fieldlineSeedsIndexFile = cdfGroup["fieldlinefile"];
-                
+
                 if (_cdfInformation.find(groupName) != _cdfInformation.end()) {
                     LWARNING("CdfGroup with name" + groupName + " already exists.");
                     return;
@@ -680,7 +680,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
                     std::string name = cdf["name"];
                     std::string path = cdf["path"];
                     std::string date = cdf["date"];
-            
+
                     _cdfInformation[groupName].push_back({
                         name,
                         path,

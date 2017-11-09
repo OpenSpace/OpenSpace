@@ -136,7 +136,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     );
     setGdalProxyConfiguration();
     CPLSetErrorHandler(gdalErrorHandler);
-  
+
     _gdalMaximumCacheSize.onChange([&] {
         // MB to Bytes
         GDALSetCacheMax64(

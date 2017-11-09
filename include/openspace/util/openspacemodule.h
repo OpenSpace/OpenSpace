@@ -51,7 +51,7 @@ public:
      * \pre \p name must not be empty
      */
     OpenSpaceModule(std::string name);
-    
+
     /// Default destructor
     virtual ~OpenSpaceModule() = default;
 
@@ -62,7 +62,7 @@ public:
      * internalInitialize method for further customization for each subclass.
      */
     void initialize();
-    
+
     /**
      * Empty deinitialization method that will call the internalDeinitialize method for
      * module-specific customization.
@@ -74,7 +74,7 @@ public:
      * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
     virtual std::vector<documentation::Documentation> documentations() const;
-    
+
     /**
      * Returns the Lua library with functions defined by this OpenSpaceModule. The default
      * implementation returns an empty library.
@@ -95,13 +95,13 @@ protected:
      * by the initiailze method.
      */
     virtual void internalInitialize();
-    
+
     /**
      * Customization point for each derived class. The internalDeinitialize method is
      * called by the deinitialize method.
      */
     virtual void internalDeinitialize();
-    
+
     /**
      * Returns the path for this module, possibly containing ghoul::filesystem::FileSystem
      * path tokens.

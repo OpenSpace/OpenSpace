@@ -55,7 +55,7 @@ public:
 private:
     void addVisibleProperties();
     void removeVisibleProperties();
-    
+
     properties::OptionProperty _typeOption;
     layergroupid::AdjustmentTypeID _type;
 

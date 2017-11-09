@@ -224,7 +224,7 @@ TouchInteraction::TouchInteraction()
 #ifdef TOUCH_DEBUG_PROPERTIES
     addPropertySubOwner(_debugProperties);
 #endif
-    
+
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
@@ -253,7 +253,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         }
         _time.initSession();
     }
-    
+
     if (!guiMode(list)) {
         if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -505,7 +505,6 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 
 // Traces the touch input into the scene and finds the surface coordinates of touched planets (if occuring)
 void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
-    
     //trim list to only contain visible nodes that make sense
     std::string selectables[30] = { "Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
         "Moon", "Titan", "Rhea", "Mimas", "Iapetus", "Enceladus", "Dione", "Io", "Ganymede", "Europa",
@@ -515,7 +514,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         for (std::string name : selectables)
             if (node->name() == name)
                 selectableNodes.push_back(node);
-                
+
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
     std::vector<SelectedBody> newSelected;
@@ -828,7 +827,7 @@ void TouchInteraction::step(double dt) {
         dvec3 centerToBoundingSphere;
         double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
         _currentRadius = boundingSphere / std::max(distance * _projectionScaleFactor, 1.0);
-        
+
         { // Roll
             dquat camRollRot = angleAxis(_vel.roll*dt, dvec3(0.0, 0.0, 1.0));
             localCamRot = localCamRot * camRollRot;
@@ -979,7 +978,7 @@ void TouchInteraction::resetAfterInput() {
         module.touchInput.active = false;
         module.touchInput.action = 0;
     }
-    
+
     _lmSuccess = true;
     // Ensure that _guiON is consistent with properties in OnScreenGUI and
     _guiON = module.gui.isEnabled();

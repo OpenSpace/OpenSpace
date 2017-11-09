@@ -49,7 +49,6 @@
 
 
 class TuioEar : public TUIO::TuioListener {
-    
     public:
         TuioEar();
         ~TuioEar() {
@@ -57,7 +56,7 @@ class TuioEar : public TUIO::TuioListener {
             delete _tuioClient;
             delete _oscReceiver;
         }
-        
+
         /**
         * Callback functions, listens to the TUIO server
         */
@@ -94,7 +93,7 @@ class TuioEar : public TUIO::TuioListener {
         * Clears the input list, function called after getInput() each frame
         */
         void clearInput();
-        
+
     private:
         bool _tap = false;
         TUIO::TuioCursor _tapCo = TUIO::TuioCursor(-1, -1, -1.0f, -1.0f);
@@ -103,14 +102,12 @@ class TuioEar : public TUIO::TuioListener {
         TUIO::TuioClient *_tuioClient;
         TUIO::OscReceiver *_oscReceiver;
 
-        
         std::vector<TUIO::TuioCursor> _list;
 
         /**
         * A list that tracks all of the cursor ID's that got removed since last frame
         */
         std::vector<int> _removeList;
-        
 };
 
 #endif // __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__

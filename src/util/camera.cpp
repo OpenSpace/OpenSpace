@@ -73,7 +73,7 @@ namespace openspace {
     void Camera::setPositionVec3(Vec3 pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _position = pos;
-      
+
         _cachedCombinedViewMatrix.isDirty = true;
     }
 
@@ -110,7 +110,7 @@ namespace openspace {
     void Camera::rotate(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _rotation = rotation * static_cast<glm::dquat>(_rotation);
-      
+
         _cachedViewDirection.isDirty = true;
         _cachedLookupVector.isDirty = true;
         _cachedViewRotationMatrix.isDirty = true;
@@ -205,7 +205,7 @@ namespace openspace {
         _cachedCombinedViewMatrix.isDirty = true;
     }
 
-    
+
     void Camera::serialize(std::ostream& os) const {
         Vec3 p = positionVec3();
         Quat q = rotationQuaternion();

@@ -59,7 +59,7 @@ void GuiIswaComponent::render() {
     ImGui::Begin("ISWA", &e, WindowSize, 0.5f);
 
     _isEnabled = e;
-    
+
     ImGui::Text("Global Magnetosphere");
     ImGui::Checkbox("Gm From Data", &_gmData); ImGui::SameLine();
     ImGui::Checkbox("Gm From Images", &_gmImage);
@@ -215,7 +215,7 @@ void GuiIswaComponent::render() {
             }
         }
     }
-    
+
     ImGui::End();
 #endif
 }

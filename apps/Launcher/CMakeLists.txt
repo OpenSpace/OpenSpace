@@ -67,8 +67,8 @@ target_link_libraries(
 #####
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
-SET(LIBTORRENT_encryption OFF)
-SET(LIBTORRENT_shared OFF)
+SET(LIBTORRENT_encryption OFF CACHE BOOL "Use OpenSSL Encryption" FORCE)
+SET(LIBTORRENT_shared OFF CACHE BOOL "Use Libtorrent as shared library" FORCE)
 
 include_external_library(
     Launcher

@@ -42,7 +42,7 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
         * viewTransform * modelTransform;
 
     const std::vector<glm::dvec4>& corners = chunk.getBoundingPolyhedronCorners();
-        
+
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
     std::vector<glm::vec4> clippingSpaceCorners(8);
@@ -53,7 +53,7 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
         glm::dvec3 ndc = glm::dvec3((1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace);
         bounds.expand(ndc);
     }
-        
+
     return !(_viewFrustum.intersects(bounds));
 }
 

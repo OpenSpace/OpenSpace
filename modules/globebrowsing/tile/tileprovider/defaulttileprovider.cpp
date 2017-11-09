@@ -69,7 +69,7 @@ namespace {
 }
 
 namespace openspace::globebrowsing::tileprovider {
-    
+
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
     , _filePath(FilePathInfo, "")
@@ -102,7 +102,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     _padTiles = true;
     dictionary.getValue<bool>(KeyPadTiles, _padTiles);
-    
+
     TileTextureInitData initData(LayerManager::getTileTextureInitData(
         _layerGroupID, _padTiles, tilePixelSize));
     _tilePixelSize.setValue(initData.dimensions().x);

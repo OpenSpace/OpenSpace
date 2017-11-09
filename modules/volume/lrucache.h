@@ -31,7 +31,7 @@
 
 namespace openspace {
 namespace volume {
-    
+
 template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
 class LruCache {
 public:
@@ -73,6 +73,7 @@ public:
     size_t capacity() {
         return _capacity;
     };
+
 private:
     void insert(const KeyType& key, const ValueType& value) {
         if (_cache.size() == _capacity) {

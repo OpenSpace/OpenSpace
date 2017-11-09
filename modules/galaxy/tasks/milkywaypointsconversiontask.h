@@ -51,7 +51,7 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _inFilename;    
+    std::string _inFilename;
     std::string _outFilename;
 };
 

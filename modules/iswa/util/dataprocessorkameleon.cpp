@@ -75,7 +75,7 @@ void DataProcessorKameleon::addDataValues(std::string path, properties::Selectio
         std::vector<float> sum(numOptions, 0.0f);
         std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
         auto options = dataOptions.options();
-        
+
         int numValues = _dimensions.x*_dimensions.y*_dimensions.z;
 
         float* values;
@@ -106,7 +106,7 @@ std::vector<float*> DataProcessorKameleon::processData(std::string path, propert
 
 std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions,  glm::size3_t& dimensions){
     int numOptions =  dataOptions.options().size();
-    
+
     if(!path.empty()){
         if(path != _kwPath || !_kw)
             initializeKameleonWrapper(path);

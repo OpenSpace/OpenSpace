@@ -55,7 +55,7 @@ namespace {
     const char* keyShadowGroup                   = "Shadow_Group";
     const char* keyShadowSource                  = "Source";
     const char* keyShadowCaster                  = "Caster";
-    
+
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
         "Color Base Texture",
@@ -411,11 +411,22 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 
     // scale the planet to appropriate size since the planet is a unit sphere
     //glm::mat4 transform = glm::mat4(1);
-    
+
     //earth needs to be rotated for that to work.
-    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), glm::half_pi<double>(), glm::dvec3(1, 0, 0));
-    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), glm::half_pi<double>(), glm::dvec3(0, -1, 0));
-    //glm::dmat4 rotProp = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0));
+    glm::dmat4 rot = glm::rotate(
+        glm::dmat4(1.0),
+        glm::half_pi<double>(),
+        glm::dvec3(1, 0, 0)
+    );
+    glm::dmat4 roty = glm::rotate(
+        glm::dmat4(1.0),
+        glm::half_pi<double>(),
+        glm::dvec3(0, -1, 0)
+    );
+    //glm::dmat4 rotProp = glm::rotate(
+    //    glm::dmat4(1.0),
+    //    glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0)
+    //);
     modelTransform = modelTransform * rot * roty /** rotProp*/;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
@@ -429,15 +440,18 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 
     // Normal Transformation
     //glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
-    //glm::mat4 translateCamTrans = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
+    //glm::mat4 translateCamTrans = glm::translate(
+    //    glm::mat4(1.0),
+    //    -data.camera.position().vec3()
+    //);
     //float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
     //glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
 
 //    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
 //        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
-    
+
     setPscUniforms(*_programObject.get(), data.camera, data.position);
-    
+
     _programObject->setUniform("_performShading", _performShading);
 
     _programObject->setUniform("_hasHeightMap", _hasHeightTexture);
@@ -447,7 +461,6 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit dayUnit;
     ghoul::opengl::TextureUnit nightUnit;
     ghoul::opengl::TextureUnit heightUnit;
-
 
     dayUnit.activate();
     _texture->bind();
@@ -478,24 +491,49 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
         shadowDataArray.reserve(_shadowConfArray.size());
 
         for (const auto & shadowConf : _shadowConfArray) {
-            // TO REMEMBER: all distances and lengths in world coordinates are in meters!!! We need to move this to view space...
+            // TO REMEMBER: all distances and lengths in world coordinates are in meters!!
+            // We need to move this to view space...
             // Getting source and caster:
-            glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(shadowConf.source.first, "SUN", "GALACTIC", {}, _time, lt);
+            glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
+                shadowConf.source.first,
+                "SUN",
+                "GALACTIC",
+                {},
+                _time,
+                lt
+            );
             sourcePos           *= 1000.0; // converting to meters
-            glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, _time, lt);
+            glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
+                shadowConf.caster.first,
+                "SUN",
+                "GALACTIC",
+                {},
+                _time,
+                lt
+            );
             casterPos           *= 1000.0; // converting to meters
-            psc caster_pos       = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
+            psc caster_pos       = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+                casterPos.x,
+                casterPos.y,
+                casterPos.z
+            );
 
-            
-            // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
-            glm::vec3 planetCasterVec   = (caster_pos - data.position).vec3();
-            glm::vec3 sourceCasterVec   = glm::vec3(casterPos - sourcePos);
-            float sc_length             = glm::length(sourceCasterVec);
-            glm::vec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) * sourceCasterVec;
-            float d_test                = glm::length(planetCasterVec - planetCaster_proj);
-            float xp_test               = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
-            float rp_test               = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
-                        
+            // First we determine if the caster is shadowing the current planet (all
+            // calculations in World Coordinates):
+            glm::vec3 planetCasterVec = (caster_pos - data.position).vec3();
+            glm::vec3 sourceCasterVec = glm::vec3(casterPos - sourcePos);
+            float sc_length = glm::length(sourceCasterVec);
+            glm::vec3 planetCaster_proj =
+                (glm::dot(planetCasterVec, sourceCasterVec) /
+                (sc_length*sc_length)) * sourceCasterVec;
+            float d_test = glm::length(planetCasterVec - planetCaster_proj);
+            float xp_test =
+                shadowConf.caster.second * sc_length /
+                (shadowConf.source.second + shadowConf.caster.second);
+            float rp_test =
+                shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) /
+                xp_test;
+
             double casterDistSun = glm::length(casterPos);
             float planetDistSun = glm::length(data.position.vec3());
 
@@ -505,12 +543,13 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
             if (((d_test - rp_test) < _planetRadius) &&
                 (casterDistSun < planetDistSun) ) {
                 // The current caster is shadowing the current planet
-                shadowData.isShadowing       = true;
-                shadowData.rs                = shadowConf.source.second;
-                shadowData.rc                = shadowConf.caster.second;
-                shadowData.sourceCasterVec   = sourceCasterVec;
-                shadowData.xp                = xp_test;
-                shadowData.xu                = shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
+                shadowData.isShadowing = true;
+                shadowData.rs = shadowConf.source.second;
+                shadowData.rc = shadowConf.caster.second;
+                shadowData.sourceCasterVec = sourceCasterVec;
+                shadowData.xp = xp_test;
+                shadowData.xu =
+                    shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
                 shadowData.casterPositionVec = glm::vec3(casterPos);
             }
             shadowDataArray.push_back(shadowData);
@@ -557,14 +596,20 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 void RenderablePlanet::update(const UpdateData& data) {
     // set spice-orientation in accordance to timestamp
     _stateMatrix = data.modelTransform.rotation;
-    //_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
+    //_stateMatrix = SpiceManager::ref().positionTransformMatrix(
+    //    _frame,
+    //    "GALACTIC",
+    //    data.time
+    //);
     _time = data.time.j2000Seconds();
 }
 
 void RenderablePlanet::loadTexture() {
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
         if (_texture) {
             if (_texture->numberOfChannels() == 1) {
                 _texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_RED });
@@ -573,7 +618,8 @@ void RenderablePlanet::loadTexture() {
             LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
             _texture->uploadTexture();
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than
+            // linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -583,12 +629,16 @@ void RenderablePlanet::loadTexture() {
     if (_hasNightTexture) {
         _nightTexture = nullptr;
         if (_nightTexturePath.value() != "") {
-            _nightTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath));
+            _nightTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_nightTexturePath)
+            );
             if (_nightTexture) {
                 LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
                 _nightTexture->uploadTexture();
                 _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                //_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                //_nightTexture->setFilter(
+                //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+                //);
             }
         }
     }
@@ -596,15 +646,19 @@ void RenderablePlanet::loadTexture() {
     if (_hasHeightTexture) {
         _heightMapTexture = nullptr;
         if (_heightMapTexturePath.value() != "") {
-            _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_heightMapTexturePath));
+            _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_heightMapTexturePath)
+            );
             if (_heightMapTexture) {
                 LDEBUG("Loaded texture from '" << _heightMapTexturePath << "'");
                 _heightMapTexture->uploadTexture();
                 _heightMapTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                //_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                //_nightTexture->setFilter(
+                //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+                //);
             }
         }
     }
 }
 
-}  // namespace openspace
+} // namespace openspace

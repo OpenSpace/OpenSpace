@@ -144,7 +144,7 @@ bool Time::timeJumped() const {
 void Time::setTimeJumped(bool jumped) {
     _timeJumped = jumped;
 }
-    
+
 bool Time::paused() const {
     return _timePaused;
 }

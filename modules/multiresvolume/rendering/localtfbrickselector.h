@@ -52,8 +52,8 @@ public:
     void setMemoryBudget(int memoryBudget);
     void setStreamingBudget(int streamingBudget);
     bool calculateBrickErrors();
- private:
 
+private:
     TSP* _tsp;
     LocalErrorHistogramManager* _histogramManager;
     TransferFunction* _transferFunction;
@@ -68,7 +68,6 @@ public:
 
     int _memoryBudget;
     int _streamingBudget;
-    
 };
 
 } // namespace openspace

@@ -250,7 +250,7 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
     IntProperty::ValueType value = *p;
     int min = p->minValue();
     int max = p->maxValue();
-    
+
     ImGui::SliderInt(name.c_str(), &value, min, max);
     renderTooltip(prop);
 
@@ -268,7 +268,7 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
     IVec2Property* p = static_cast<IVec2Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
-    
+
     IVec2Property::ValueType value = *p;
     int min = std::min(p->minValue().x, p->minValue().y);
     int max = std::max(p->maxValue().x, p->maxValue().y);
@@ -279,7 +279,7 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
         max
     );
     renderTooltip(prop);
-    
+
     if (value != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
@@ -287,7 +287,7 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
             isRegular
         );
     }
-    
+
     ImGui::PopID();
 }
 
@@ -298,11 +298,11 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
     IVec3Property* p = static_cast<IVec3Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
-    
+
     IVec3Property::ValueType value = *p;
     int min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
     int max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
-    
+
     ImGui::SliderInt3(
         name.c_str(),
         &value.x,
@@ -310,7 +310,7 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
         max
     );
     renderTooltip(prop);
-    
+
     if (value != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
@@ -329,7 +329,7 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
     IVec4Property* p = static_cast<IVec4Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
-    
+
     IVec4Property::ValueType value = *p;
     int min = std::min(std::min(std::min(
         p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w
@@ -337,7 +337,7 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
     int max = std::max(std::max(std::max(
         p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w
     );
-    
+
     ImGui::SliderInt4(
         name.c_str(),
         &value.x,
@@ -345,7 +345,7 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
         max
     );
     renderTooltip(prop);
-    
+
     if (value != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),

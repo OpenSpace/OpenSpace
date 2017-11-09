@@ -104,7 +104,7 @@ void NetworkEngine::publishStatusMessage() {
     Time& currentTime = OsEng.timeManager().time();
 
     uint16_t messageSize = 0;
-    
+
     double time = currentTime.j2000Seconds();
     std::string timeString = currentTime.UTC();
     double delta = currentTime.deltaTime();
@@ -117,7 +117,7 @@ void NetworkEngine::publishStatusMessage() {
 
     unsigned int currentLocation = 0;
     std::vector<char> buffer(messageSize);
-    
+
     std::memmove(buffer.data() + currentLocation, &time, sizeof(time));
     currentLocation += sizeof(time);
     std::memmove(

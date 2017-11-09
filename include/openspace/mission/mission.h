@@ -114,7 +114,7 @@ protected:
      * \pre maxDepth must not be negative
      */
     void phaseTrace(double time, Trace& trace, int maxDepth) const;
-    
+
     /// The name of the MissionPhase
     std::string _name;
     /// The description of the MissionPhase

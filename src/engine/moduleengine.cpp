@@ -58,7 +58,7 @@ void ModuleEngine::deinitialize() {
 
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m) {
     ghoul_assert(m, "Module must not be nullptr");
-    
+
     auto it = std::find_if(
         _modules.begin(),
         _modules.end(),
@@ -72,7 +72,7 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m) {
             "ModuleEngine"
         );
     }
-    
+
     LDEBUG("Registering module '" << m->name() << "'");
     m->initialize();
     LDEBUG("Registered module '" << m->name() << "'");

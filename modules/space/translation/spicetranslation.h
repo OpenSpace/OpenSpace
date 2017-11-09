@@ -30,11 +30,11 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
-    
+
 class SpiceTranslation : public Translation {
 public:
     SpiceTranslation(const ghoul::Dictionary& dictionary);
-    
+
     glm::dvec3 position() const override;
     void update(const UpdateData& data) override;
 
@@ -47,7 +47,7 @@ private:
 
     glm::dvec3 _position;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___SPICETRANSLATION___H__

@@ -89,7 +89,7 @@ private:
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
     glm::dquat _previousFocusNodeRotation;
-    
+
     Interpolator<double> _rotateToFocusNodeInterpolator;
     Interpolator<double> _followRotationInterpolator;
 
@@ -117,14 +117,14 @@ private:
      */
     glm::dquat rotateLocally(double deltaTime,
                              const glm::dquat& localCameraRotation) const;
-    
+
     /**
      * Interpolates the local rotation towards a 0 rotation.
      * \returns a modified local rotation interpolated towards 0.
      */
     glm::dquat interpolateLocalRotation(double deltaTime,
                                         const glm::dquat& localCameraRotation);
-    
+
     /**
      * Translates the horizontal direction. If far from the focus object, this will
      * result in an orbital rotation around the object. This function does not affect the

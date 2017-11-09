@@ -77,7 +77,7 @@ LayerShaderManager::LayerShaderPreprocessingData
 
         const LayerGroup& layerGroup = layerManager->layerGroup(i);
         std::vector<std::shared_ptr<Layer>> layers = layerGroup.activeLayers();
-        
+
         // This check was implicit before;  not sure if it will fire or will be handled
         // elsewhere
         //ghoul_assert(
@@ -97,11 +97,11 @@ LayerShaderManager::LayerShaderPreprocessingData
 
         preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
     }
-        
+
     const RenderableGlobe::GeneralProperties& generalProps = globe.generalProperties();
     const RenderableGlobe::DebugProperties& debugProps = globe.debugProperties();
     auto& pairs = preprocessingData.keyValuePairs;
-        
+
     pairs.emplace_back("useAccurateNormals",
         std::to_string(generalProps.useAccurateNormals)
     );
@@ -127,7 +127,7 @@ LayerShaderManager::LayerShaderManager(const std::string& shaderName,
     , _fsPath(fsPath)
     , _updatedOnLastCall(false)
 {}
-    
+
 LayerShaderManager::~LayerShaderManager() {
     if (_programObject) {
         RenderEngine& renderEngine = OsEng.renderEngine();

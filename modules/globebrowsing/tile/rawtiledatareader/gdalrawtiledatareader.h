@@ -99,7 +99,7 @@ private:
 
     // GDAL Helper methods
     GDALDataset* openGdalDataset(const std::string& filePath);
-    
+
     /**
      * Use as a helper function when determining the maximum tile level. This function
      * returns the negated number of overviews requred to downscale the highest overview
@@ -110,7 +110,7 @@ private:
     // Member variables
     std::string _initDirectory;
     std::string _datasetFilePath;
-  
+
     GDALDataset* _dataset;
 
     struct GdalDatasetMetaDataCached {

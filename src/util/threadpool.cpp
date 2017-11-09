@@ -49,7 +49,7 @@ void Worker::operator()() {
             task = pool.tasks.front();
             pool.tasks.pop_front();
 
-        }// release lock
+        } // release lock
 
         // execute the task
         task();
@@ -92,7 +92,7 @@ void ThreadPool::enqueue(std::function<void()> f) {
         tasks.push_back(f);
     } // release lock
 
-        // wake up one thread
+    // wake up one thread
     condition.notify_one();
 }
 

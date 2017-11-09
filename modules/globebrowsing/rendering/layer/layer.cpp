@@ -118,7 +118,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     bool padTiles = true;
     layerDict.getValue<bool>(KeyPadTiles, padTiles);
-    
+
     TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId,
                                                                         padTiles);
     _padTilePixelStartOffset = initData.tilePixelStartOffset();
