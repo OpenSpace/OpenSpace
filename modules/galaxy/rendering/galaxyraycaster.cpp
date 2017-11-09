@@ -58,7 +58,9 @@ void GalaxyRaycaster::initialize() {
 void GalaxyRaycaster::deinitialize() {
 }
 
-void GalaxyRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
+void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
+                                        ghoul::opengl::ProgramObject& program)
+{
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
     program.setUniform("blendMode", static_cast<unsigned int>(1));
@@ -73,7 +75,9 @@ void GalaxyRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::P
     _boundingBox.render();
 }
 
-void GalaxyRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {   
+void GalaxyRaycaster::renderExitPoints(const RenderData& data,
+                                       ghoul::opengl::ProgramObject& program)
+{
     // Uniforms
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
@@ -91,12 +95,15 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::Pr
     glCullFace(GL_BACK);
 }
 
-void GalaxyRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+void GalaxyRaycaster::preRaycast(const RaycastData& data,
+                                 ghoul::opengl::ProgramObject& program)
+{
     std::string colorUniformName = "color" + std::to_string(data.id);
     std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
     std::string galaxyTextureUniformName = "galaxyTexture" + std::to_string(data.id);
     std::string volumeAspectUniformName = "aspect" + std::to_string(data.id);
-    std::string opacityCoefficientUniformName = "opacityCoefficient" + std::to_string(data.id);
+    std::string opacityCoefficientUniformName =
+        "opacityCoefficient" + std::to_string(data.id);
 
     program.setUniform(volumeAspectUniformName, _aspect);
     program.setUniform(stepSizeUniformName, _stepSize);
@@ -108,7 +115,9 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::Program
     program.setUniform(galaxyTextureUniformName, *_textureUnit);
 }
 
-void GalaxyRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+void GalaxyRaycaster::postRaycast(const RaycastData& data,
+                                  ghoul::opengl::ProgramObject& program)
+{
     _textureUnit = nullptr; // release texture unit.
 }
 
@@ -134,7 +143,9 @@ bool GalaxyRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPos
     glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * camWorldPos;
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
-    return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 && localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
+    return (localPosition.x > 0 && localPosition.y > 0 &&
+            localPosition.z > 0 && localPosition.x < 1 &&
+            localPosition.y < 1 && localPosition.z < 1);
 }
 
 std::string GalaxyRaycaster::getBoundsVsPath() const {

@@ -339,7 +339,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
-    _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
+    _program->setUniform(
+        "screenSize",
+        glm::vec2(OsEng.renderEngine().renderingResolution())
+    );
 
     setPscUniforms(*_program.get(), data.camera, data.position);
     _program->setUniform("scaling", scaling);
@@ -507,7 +510,9 @@ void RenderableStars::update(const UpdateData&) {
                );
                 _pointSpreadFunctionTexture->uploadTexture();
             }
-            _pointSpreadFunctionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _pointSpreadFunctionTexture->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            );
 
             _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
                 _pointSpreadFunctionTexturePath
@@ -525,7 +530,9 @@ void RenderableStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (_colorTexturePath.value() != "") {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_colorTexturePath)
+            );
             if (_colorTexture) {
                 LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
                 _colorTexture->uploadTexture();

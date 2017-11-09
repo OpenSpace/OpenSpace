@@ -235,7 +235,11 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     //     data.time.j2000Seconds()
     // );
 
-    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(_instrumentName, "ECLIPJ2000", data.time.j2000Seconds());
+    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(
+        _instrumentName,
+        "ECLIPJ2000",
+        data.time.j2000Seconds()
+    );
 
     //_positions[SourcePosition] = { 0.f, 0.f, 0.f, 0.f };
 
@@ -267,7 +271,11 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
             { _lineColorBegin.r, _lineColorBegin.g, _lineColorBegin.b, _lineColorBegin.a }
         },
         {
-            { target.x * powf(10, target.w), target.y * powf(10, target.w), target.z * powf(10, target.w) },
+            {
+                target.x * powf(10, target.w),
+                target.y * powf(10, target.w),
+                target.z * powf(10, target.w)
+            },
             { _lineColorEnd.r,  _lineColorEnd.g,  _lineColorEnd.b,  _lineColorEnd.a }
         }
     };

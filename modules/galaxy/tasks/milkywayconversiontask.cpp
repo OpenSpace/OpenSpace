@@ -86,7 +86,9 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallb
 
     std::vector<std::string> filenames;
     for (int i = 0; i < _inNSlices; i++) {
-        filenames.push_back(_inFilenamePrefix + std::to_string(i + _inFirstIndex) + _inFilenameSuffix);
+        filenames.push_back(
+            _inFilenamePrefix + std::to_string(i + _inFirstIndex) + _inFilenameSuffix
+        );
     }
 
     TextureSliceVolumeReader<glm::tvec4<GLfloat>> sliceReader(filenames, _inNSlices, 10);
@@ -96,14 +98,20 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallb
     rawWriter.setDimensions(_outDimensions);
 
     glm::vec3 resolutionRatio =
-        static_cast<glm::vec3>(sliceReader.dimensions()) / static_cast<glm::vec3>(rawWriter.dimensions());
+        static_cast<glm::vec3>(sliceReader.dimensions()) /
+        static_cast<glm::vec3>(rawWriter.dimensions());
 
-    VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(sliceReader, resolutionRatio);
-    std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction = [&](glm::ivec3 outCoord) {
-        glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5)) * resolutionRatio) - glm::vec3(0.5);
-        glm::tvec4<GLfloat> value = sampler.sample(inCoord);
-        return value;
-    };
+    VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
+        sliceReader,
+        resolutionRatio
+    );
+    std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =
+        [&](glm::ivec3 outCoord) {
+            glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5)) *
+                                 resolutionRatio) - glm::vec3(0.5);
+            glm::tvec4<GLfloat> value = sampler.sample(inCoord);
+            return value;
+        };
 
     rawWriter.write(sampleFunction, progressCallback);
 }

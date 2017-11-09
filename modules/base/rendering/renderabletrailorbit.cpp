@@ -229,7 +229,10 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             if (_indexBufferDirty) {
                 // We only need to upload the index buffer if it has been invalidated
                 // by changing the number of values we want to represent
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _primaryRenderInformation._iBufferID);
+                glBindBuffer(
+                    GL_ELEMENT_ARRAY_BUFFER,
+                    _primaryRenderInformation._iBufferID
+                );
                 glBufferData(
                     GL_ELEMENT_ARRAY_BUFFER,
                     _indexArray.size() * sizeof(unsigned int),
@@ -411,7 +414,8 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                 _primaryRenderInformation.first = 0;
             }
             else {
-                // Move the current pointer fowards one step  to be used as the new floating
+                // Move the current pointer fowards one step  to be used as the new
+                // floating
                 ++_primaryRenderInformation.first;
             }
         }
