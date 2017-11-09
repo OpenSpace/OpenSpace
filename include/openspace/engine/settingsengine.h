@@ -34,7 +34,7 @@
 #include <vector>
 
 namespace openspace {
-    
+
 class OpenSpaceModule;
 
 class SettingsEngine : public properties::PropertyOwner {
@@ -42,7 +42,7 @@ public:
     SettingsEngine();
 
     void initialize();
-    
+
     void setModules(const std::vector<OpenSpaceModule*>& modules);
 
 private:

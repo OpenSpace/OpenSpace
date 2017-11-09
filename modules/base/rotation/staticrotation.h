@@ -30,9 +30,9 @@
 #include <openspace/properties/matrix/dmat3property.h>
 
 namespace openspace {
-    
+
 namespace documentation { struct Documentation; }
-    
+
 class StaticRotation : public Rotation {
 public:
     StaticRotation();
@@ -43,7 +43,7 @@ public:
 private:
     properties::DMat3Property _rotationMatrix;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___STATICROTATION___H__

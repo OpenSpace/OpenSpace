@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -93,17 +93,18 @@ private:
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _nightTexturePath;
     properties::StringProperty _heightMapTexturePath;
-    properties::FloatProperty _heightExaggeration;
-    properties::BoolProperty _performShading;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _nightTexture;    
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-        
+
+    properties::FloatProperty _heightExaggeration;
+
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
-    
+    properties::BoolProperty _performShading;
+
     float _alpha;
     float _planetRadius;
     bool _hasNightTexture;

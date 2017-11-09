@@ -68,7 +68,7 @@ int bindKey(lua_State* L) {
         std::move(command),
         std::move(documentation)
     );
-        
+
     return 0;
 }
 

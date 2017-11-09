@@ -27,7 +27,7 @@
 #include <ghoul/misc/assert.h>
 
 namespace openspace::globebrowsing {
-   
+
 PixelRegion::PixelRegion(const PixelCoordinate& pixelStart,
                          const PixelRange& numberOfPixels)
     : start(pixelStart)
@@ -94,7 +94,7 @@ void PixelRegion::align(Side side, int pos) {
 void PixelRegion::alignLeft(int x) { 
     start.x = x; 
 }
-    
+
 void PixelRegion::alignTop(int y) { 
     start.y = y; 
 }

@@ -165,7 +165,7 @@ void ABufferRenderer::initialize() {
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
 }
-    
+
 void ABufferRenderer::deinitialize() {
     LINFO("Deinitializing ABufferRenderer");
     glDeleteBuffers(1, &_fragmentBuffer);
@@ -184,10 +184,10 @@ void ABufferRenderer::deinitialize() {
 void ABufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
     _dirtyRaycastData = true;
 }
-    
+
 void ABufferRenderer::update() {
     PerfMeasure("ABufferRenderer::update");
-    
+
     // Make sure that the fragment buffer has the correct resoliution
     // according to the output render buffer size
     if (_dirtyResolution) {
@@ -211,7 +211,7 @@ void ABufferRenderer::update() {
     // Make sure that the resolve dictionary is up to date.
     // The resolve dictionary contains information for all
     // ray casters, including shader include paths.
-    
+
     if (_dirtyResolveDictionary) {
         updateResolveDictionary();
         ghoul::Dictionary dict;

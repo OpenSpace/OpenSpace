@@ -147,8 +147,8 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
     };
 }
 
-RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dict)
+    : Renderable(dict)
     , _colorTexturePath(ColorTextureInfo)
     , _heightMapTexturePath(HeightTextureInfo)
     , _programObject(nullptr)
@@ -161,44 +161,44 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
-        dictionary,
+        dict,
         "RenderablePlanetProjection"
     );
 
     std::string name;
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+    bool success = dict.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "");
 
     ghoul::Dictionary geometryDictionary;
-    success = dictionary.getValue(KeyGeometry, geometryDictionary);
+    success = dict.getValue(KeyGeometry, geometryDictionary);
     if (success) {
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
         using planetgeometry::PlanetGeometry;
         _geometry = PlanetGeometry::createFromDictionary(geometryDictionary);
     }
 
-    _projectionComponent.initialize(dictionary.value<ghoul::Dictionary>(KeyProjection));
+    _projectionComponent.initialize(dict.value<ghoul::Dictionary>(KeyProjection));
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
     std::string texturePath = "";
-    success = dictionary.getValue(ColorTextureInfo.identifier, texturePath);
+    success = dict.getValue(ColorTextureInfo.identifier, texturePath);
     if (success) {
         _colorTexturePath = absPath(texturePath); 
     }
 
     std::string heightMapPath = "";
-    success = dictionary.getValue(HeightTextureInfo.identifier, heightMapPath);
+    success = dict.getValue(HeightTextureInfo.identifier, heightMapPath);
     if (success) {
         _heightMapTexturePath = absPath(heightMapPath);
     }
 
-    if (dictionary.hasKeyAndValue<bool>(MeridianShiftInfo.identifier)) {
-        _meridianShift = dictionary.value<bool>(MeridianShiftInfo.identifier);
+    if (dict.hasKeyAndValue<bool>(MeridianShiftInfo.identifier)) {
+        _meridianShift = dict.value<bool>(MeridianShiftInfo.identifier);
     }
 
     float radius = std::pow(10.f, 9.f);
-    dictionary.getValue(KeyRadius, radius);
+    dict.getValue(KeyRadius, radius);
     setBoundingSphere(radius);
 
     addPropertySubOwner(_geometry.get());
@@ -210,9 +210,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_heightMapTexturePath);
     _heightMapTexturePath.onChange([&]() { loadTextures(); });
 
-    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
+    if (dict.hasKey(HeightExaggerationInfo.identifier)) {
         _heightExaggeration = static_cast<float>(
-            dictionary.value<double>(HeightExaggerationInfo.identifier)
+            dict.value<double>(HeightExaggerationInfo.identifier)
         );
     }
 
@@ -302,7 +302,7 @@ void RenderablePlanetProjection::imageProjectGPU(
     unitFbo.activate();
     projectionTexture->bind();
     _fboProgramObject->setUniform("projectionTexture", unitFbo);
-        
+
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform" , _transform);
     _fboProgramObject->setUniform("_scaling"       , _camScaling);
@@ -355,7 +355,9 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
 
     glm::dvec3 bs;
     try {
-        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_projectionComponent.instrumentId());
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
+            _projectionComponent.instrumentId()
+        );
         bs = std::move(res.boresightVector);
     }
     catch (const SpiceManager::SpiceException& e) {
@@ -373,7 +375,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         lightTime
     );
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-   
+
     //change to KM and add psc camera scaling. 
     position[3] += (3 + _camScaling[1]);
     //position[3] += 3;
@@ -417,8 +419,14 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     _imageTimes.clear();
 
     double  lt;
-    glm::dvec3 p =
-        SpiceManager::ref().targetPosition("SUN", _projectionComponent.projecteeId(), "GALACTIC", {}, _time, lt);
+    glm::dvec3 p = SpiceManager::ref().targetPosition(
+        "SUN",
+        _projectionComponent.projecteeId(),
+        "GALACTIC",
+        {},
+        _time,
+        lt
+    );
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // Main renderpass
@@ -452,11 +460,10 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
     _programObject->setUniform("_meridianShift", _meridianShift);
-    _programObject->setUniform("_projectionFading", _projectionComponent.projectionFading());
-
-    //_programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
-
-    //setPscUniforms(*_programObject.get(), data.camera, data.position);
+    _programObject->setUniform(
+        "_projectionFading",
+        _projectionComponent.projectionFading()
+    );
 
     ghoul::opengl::TextureUnit unit[3];
     unit[0].activate();
@@ -472,7 +479,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _heightMapTexture->bind();
         _programObject->setUniform("heightTexture", unit[2]);
     }
-    
+
     _geometry->render();
     _programObject->deactivate();
 }

@@ -122,7 +122,7 @@ bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
 } // namespace openspace
 
 namespace std {
- 
+
 std::string to_string(openspace::Key key) {
     for (const auto& p : openspace::KeyMapping) {
         if (p.second == key) {
@@ -134,11 +134,11 @@ std::string to_string(openspace::Key key) {
 
 std::string to_string(openspace::KeyModifier mod) {
     using namespace openspace;
-    
+
     if (mod == KeyModifier::NoModifier) {
         return "";
     }
-    
+
     std::string result;
     for (const auto& p : KeyModifierMapping) {
         if (hasKeyModifier(mod, p.second)) {
@@ -158,5 +158,5 @@ std::string to_string(openspace::KeyWithModifier key) {
         return to_string(key.modifier) + "+" + to_string(key.key);
     }
 }
-    
+
 } // namespace std

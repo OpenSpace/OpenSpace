@@ -107,7 +107,6 @@ documentation::Documentation RenderablePlane::Documentation() {
     };
 }
 
-
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
@@ -212,9 +211,13 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
     //if (_projectionListener){
     //    //get parent node-texture and set with correct dimensions  
-    //    SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
+    //    SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(
+    //        _nodeName
+    //    )->parent();
     //    if (textureNode != nullptr){
-    //        RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
+    //        RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(
+    //            textureNode->renderable()
+    //        );
     //        _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
     //        unsigned int h = _texture->height();
     //        unsigned int w = _texture->width();
@@ -233,7 +236,8 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
         rotationTransform *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
         glm::dmat4(1.0);
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 modelViewTransform =
+        data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
@@ -247,10 +251,12 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("texture1", unit);
 
     bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::Framebuffer;
 
     bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
         _shader->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
@@ -298,13 +304,16 @@ void RenderablePlane::loadTexture() {
             );
             texture->uploadTexture();
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than
+            // linear
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
             _texture = std::move(texture);
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
+            _textureFile->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
         }
     }
 }
@@ -333,7 +342,7 @@ void RenderablePlane::createPlane() {
         sizeof(GLfloat) * 6,
         nullptr
     );
-    
+
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1, 

@@ -323,12 +323,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
+
     bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::Framebuffer;
 
     bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
         _shader->setUniform("additiveBlending", true);
@@ -364,7 +366,10 @@ void RenderableSphere::update(const UpdateData&) {
 
 void RenderableSphere::loadTexture() {
     if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+        using TR = ghoul::io::TextureReader;
+        std::unique_ptr<ghoul::opengl::Texture> texture = TR::ref().loadTexture(
+            _texturePath
+        );
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
@@ -372,7 +377,8 @@ void RenderableSphere::loadTexture() {
             );
             texture->uploadTexture();
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than
+            // linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);

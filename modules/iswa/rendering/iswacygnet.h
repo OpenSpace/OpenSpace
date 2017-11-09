@@ -93,7 +93,7 @@ protected:
      * @return true if successful creation
      */
     bool createShader();
-    
+
     // Subclass interface
     // ==================
     virtual bool createGeometry() = 0;

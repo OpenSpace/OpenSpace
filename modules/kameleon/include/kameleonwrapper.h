@@ -73,7 +73,7 @@ public:
         SOUTH,
         FAROUT
     };
-    
+
     enum class GridType {
         Cartesian,
         Spherical,
@@ -156,7 +156,7 @@ private:
         const glm::vec3& seedPoint,
         float stepsize, 
         float eCharge);
-    
+
     void getGridVariables(std::string& x, std::string& y, std::string& z);
     GridType getGridType(
         const std::string& x, 

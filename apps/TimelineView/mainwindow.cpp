@@ -228,7 +228,7 @@ void MainWindow::readTcpData() {
         fullyConnected();
         continuousData.clear();
         break;
-        
+
     default:
         qDebug() << QString(data);
     }
@@ -309,7 +309,7 @@ QByteArray MainWindow::handlePlaybook(QByteArray data) {
 
         image.beginningString = readFromBuffer<std::string>(buffer, currentReadLocation);
         image.endingString = readFromBuffer<std::string>(buffer, currentReadLocation);
-        
+
         uint8_t targetId = readFromBuffer<uint8_t>(buffer, currentReadLocation);
         uint16_t instrumentId = readFromBuffer<uint16_t>(buffer, currentReadLocation);
         image.target = targetMap[targetId];

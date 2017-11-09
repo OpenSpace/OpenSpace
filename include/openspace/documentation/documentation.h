@@ -68,7 +68,7 @@ struct TestResult {
         /// The Reason that caused this offense
         Reason reason;
     };
-    
+
     /**
      * A warning is some value that that does not exactly adhere to the specification, but
      * that also does not violate so badly to warrant an Offense. This, for example, could

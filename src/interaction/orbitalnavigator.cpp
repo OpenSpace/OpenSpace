@@ -402,8 +402,8 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 
     // Vector logic
     glm::dvec3 posDiff = cameraPosition - objectPosition;
-    glm::dvec3 centerToReferenceSurface = glm::dmat3(modelTransform) *
-        positionHandle.centerToReferenceSurface;
+    // glm::dvec3 centerToReferenceSurface = glm::dmat3(modelTransform) *
+        // positionHandle.centerToReferenceSurface;
     glm::dvec3 centerToActualSurfaceModelSpace = positionHandle.centerToReferenceSurface +
         positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;
     glm::dvec3 centerToActualSurface = glm::dmat3(modelTransform) *
@@ -488,8 +488,8 @@ glm::dvec3 OrbitalNavigator::translateVertically(
 
     glm::dvec3 posDiff = cameraPosition - objectPosition;
 
-    glm::dvec3 centerToReferenceSurface =
-        glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
+    // glm::dvec3 centerToReferenceSurface =
+        // glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
     glm::dvec3 centerToActualSurfaceModelSpace =
         positionHandle.centerToReferenceSurface +
         positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;
@@ -533,8 +533,8 @@ glm::dvec3 OrbitalNavigator::pushToSurface(
     glm::dvec3 posDiff = cameraPosition - objectPosition;
     glm::dvec3 referenceSurfaceOutDirection =
         glm::dmat3(modelTransform) * positionHandle.referenceSurfaceOutDirection;
-    glm::dvec3 centerToReferenceSurface =
-        glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
+    // glm::dvec3 centerToReferenceSurface =
+        // glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
     glm::dvec3 centerToActualSurfaceModelSpace =
         positionHandle.centerToReferenceSurface +
         positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;

@@ -98,10 +98,10 @@ public:
     void decode();
 
     void scheduleLoadScene(std::string scenePath);
-    
+
     void writeDocumentation();
     void toggleShutdownMode();
-    
+
     void runPostInitializationScripts(const std::string& sceneDescription);
 
     // Guaranteed to return a valid pointer
@@ -123,7 +123,7 @@ public:
     scripting::ScriptScheduler& scriptScheduler();
     VirtualPropertyManager& virtualPropertyManager();
 
-    
+
     // This method is only to be called from Modules
     enum class CallbackOption {
         Initialize = 0,  // Callback for the end of the initialization
@@ -135,14 +135,14 @@ public:
         Render,          // Callback for the end of the render function
         PostDraw         // Callback for the end of the post-draw function
     };
-    
+
     // Registers a callback for a specific CallbackOption
     void registerModuleCallback(CallbackOption option, std::function<void()> function);
-    
+
     // Registers a callback that is called when a new keyboard event is received
     void registerModuleKeyboardCallback(
         std::function<bool (Key, KeyModifier, KeyAction)> function);
-    
+
     // Registers a callback that is called when a new character event is received
     void registerModuleCharCallback(
         std::function<bool (unsigned int, KeyModifier)> function);
@@ -150,16 +150,16 @@ public:
     // Registers a callback that is called when a new mouse button is received
     void registerModuleMouseButtonCallback(
        std::function<bool (MouseButton, MouseAction)> function);
-    
+
     // Registers a callback that is called when a new mouse movement is received
     void registerModuleMousePositionCallback(
         std::function<void (double, double)> function);
-    
+
     // Registers a callback that is called when a scroll wheel change is received
     void registerModuleMouseScrollWheelCallback(
         std::function<bool (double, double)> function
     );
-    
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.
@@ -175,7 +175,7 @@ private:
     void loadFonts();
     void runPreInitializationScripts(const std::string& sceneDescription);
     void configureLogging();
-    
+
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<SceneManager> _sceneManager;
@@ -204,30 +204,30 @@ private:
         properties::StringProperty versionString;
         properties::StringProperty sourceControlInformation;
     } _versionInformation;
-    
+
     bool _scheduledSceneSwitch;
     std::string _scenePath;
 
     struct {
         std::vector<std::function<void()>> initialize;
         std::vector<std::function<void()>> deinitialize;
-        
+
         std::vector<std::function<void()>> initializeGL;
         std::vector<std::function<void()>> deinitializeGL;
-        
+
         std::vector<std::function<void()>> preSync;
         std::vector<std::function<void()>> postSyncPreDraw;
         std::vector<std::function<void()>> render;
         std::vector<std::function<void()>> postDraw;
-        
+
         std::vector<std::function<bool (Key, KeyModifier, KeyAction)>> keyboard;
         std::vector<std::function<bool (unsigned int, KeyModifier)>> character;
-        
+
         std::vector<std::function<bool (MouseButton, MouseAction)>> mouseButton;
         std::vector<std::function<void (double, double)>> mousePosition;
         std::vector<std::function<bool (double, double)>> mouseScrollWheel;
     } _moduleCallbacks;
-    
+
     // Structure that is responsible for the delayed shutdown of the application
     struct {
         // Whether the application is currently in shutdown mode (i.e. counting down the

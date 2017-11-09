@@ -37,7 +37,7 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
     ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
     std::unique_ptr<Decoder> result = factory->create(type, dictionary);
 
-    if (result == nullptr) {
+    if (!result) {
         throw ghoul::RuntimeError(
             "Failed creating payload object of type '" + type + '"',
             "Decoder"
@@ -47,5 +47,5 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
 }
 
 Decoder::~Decoder() {}
-    
+
 } // namespace openspace

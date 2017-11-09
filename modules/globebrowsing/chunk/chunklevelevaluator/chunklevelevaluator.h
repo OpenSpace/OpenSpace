@@ -28,7 +28,7 @@
 namespace openspace { struct RenderData; }
 
 namespace openspace::globebrowsing { class Chunk; }
-    
+
 namespace openspace::globebrowsing::chunklevelevaluator {
 
 /**

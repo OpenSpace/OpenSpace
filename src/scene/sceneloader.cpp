@@ -104,7 +104,7 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
         // Inside loadDirectory the working directory is changed (for now), so we need
         // to save the old state
         ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
-        
+
         // Placing this head to guard against exceptions in the directory loading that
         // would otherwise mess up the working directory for everyone else
         OnExit([&]() { FileSys.setCurrentDirectory(oldDirectory); });
@@ -129,7 +129,7 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
             );
         }
     }
-    
+
     std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
     std::unique_ptr<SceneGraphNode> rootNode = std::make_unique<SceneGraphNode>();
@@ -208,12 +208,12 @@ SceneLoader::LoadedCamera SceneLoader::loadCamera(const ghoul::Dictionary& camer
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
 
     LoadedCamera loadedCamera(focus, std::move(camera));
-    
+
     if (!readSuccessful) {
         throw Scene::InvalidSceneError(
             "Position, Rotation and Focus need to be defined for camera dictionary.");
     }
-    
+
     return loadedCamera;
 }
 
@@ -237,7 +237,7 @@ SceneLoader::loadDirectory(
         // For now, no need to reset the directory here as it is done from the outside
         // function calling this method
         FileSys.setCurrentDirectory(ghoul::filesystem::Directory(path));
-        
+
         // We have a module file, so it is a direct include.
         std::vector<SceneLoader::LoadedNode> nodes = loadModule(moduleFile, luaState);
 
@@ -383,7 +383,7 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
         SceneGraphNode* node = loadedNode.node.get();
         addedNodes[name] = node;
     }
-    
+
     // Find a node by name among the exising nodes and the added nodes.
     auto findNode = [&existingNodes, &addedNodes](const std::string name) {
         std::map<std::string, SceneGraphNode*>::iterator it;
@@ -398,7 +398,7 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
 
     std::vector<SceneGraphNode*> attachedBranches;
     std::vector<std::unique_ptr<SceneGraphNode>> badNodes;
-    
+
     // Attach each node to its parent and set up dependencies.
     for (auto& loadedNode : loadedNodes) {
         std::string parentName = loadedNode.parent;
@@ -410,7 +410,7 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
             badNodes.push_back(std::move(loadedNode.node));
             continue;
         }
-        
+
         std::vector<SceneGraphNode*> dependencies;
         bool foundAllDeps = true;
         for (const auto& depName : dependencyNames) {

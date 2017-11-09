@@ -38,7 +38,7 @@
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
-    
+
 struct LinePoint;
 
 class RenderableFieldlines : public Renderable {

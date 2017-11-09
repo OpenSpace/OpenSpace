@@ -64,14 +64,14 @@ public:
     bool isMaster() const override;
     bool isUsingSwapGroups() const override;
     bool isSwapGroupMaster() const override;
-    
+
     glm::mat4 viewProjectionMatrix() const override;
     glm::mat4 modelMatrix() const override;
     void setNearFarClippingPlane(float near, float far) override;
     void setEyeSeparationDistance(float distance) override;
-    
+
     glm::ivec4 viewportPixelCoordinates() const override;
-    
+
     bool isExternalControlConnected() const override;
     void sendMessageToExternalControl(const std::vector<char>& message) const override;
 

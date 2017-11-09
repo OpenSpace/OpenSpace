@@ -288,7 +288,7 @@ void RenderableShadowCylinder::deinitialize() {
 bool RenderableShadowCylinder::isReady() const {
     return true;
 }
-    
+
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _shader->activate();
@@ -309,7 +309,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("shadowColor", _shadowColor);
     //setPscUniforms(*_shader.get(), data.camera, data.position);
-    
+
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
     glBindVertexArray(0);
@@ -358,19 +358,20 @@ void RenderableShadowCylinder::createCylinder(double time) {
         time,
         _numberOfPoints
     );
-    
+
     std::vector<psc> terminatorPoints;
     std::transform(
         res.terminatorPoints.begin(),
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
         [](const glm::dvec3& p) {
-            PowerScaledCoordinate coord = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+            PowerScaledCoordinate coord =
+                PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
             coord[3] += 3;
             return coord;
         }
     );
-    
+
     double lt;
     glm::dvec3 vecLightSource = SpiceManager::ref().targetPosition(
         _body,
@@ -389,7 +390,11 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource *= _shadowLength;
     _vertices.clear();
 
-    psc endpoint = psc::CreatePowerScaledCoordinate(vecLightSource.x, vecLightSource.y, vecLightSource.z);
+    psc endpoint = psc::CreatePowerScaledCoordinate(
+            vecLightSource.x,
+            vecLightSource.y,
+            vecLightSource.z
+        );
     for (const auto& v : terminatorPoints) {
         _vertices.push_back({ v[0], v[1], v[2], v[3] });
         glm::vec4 f = psc_addition(v.vec4(), endpoint.vec4());
@@ -400,8 +405,18 @@ void RenderableShadowCylinder::createCylinder(double time) {
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(CylinderVBOLayout), nullptr, GL_DYNAMIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, _vertices.size() * sizeof(CylinderVBOLayout), &_vertices[0]);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertices.size() * sizeof(CylinderVBOLayout),
+        nullptr,
+        GL_DYNAMIC_DRAW
+    );
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        0,
+        _vertices.size() * sizeof(CylinderVBOLayout),
+        &_vertices[0]
+    );
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);

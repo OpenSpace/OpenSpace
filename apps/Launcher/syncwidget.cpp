@@ -281,7 +281,7 @@ void SyncWidget::handleDirectFiles() {
 
 void SyncWidget::handleFileRequest() {
     LDEBUG("File Requests");
-        
+
     for (const FileRequest& f : _fileRequests) {
         LDEBUG(f.identifier.toStdString() << " (" << f.version << ") -> " << f.destination.toStdString()); 
 
@@ -405,18 +405,18 @@ void SyncWidget::syncButtonPressed() {
         for (int i = 1; i <= modules.size(); ++i) {
             std::string module = modules.value<std::string>(std::to_string(i));
             std::string shortModule = module;
-            
+
             std::string::size_type pos = module.find_last_of(FileSys.PathSeparator);
             if (pos != std::string::npos) {
                 shortModule = module.substr(pos+1);
             }
-            
+
             QString m = QString::fromStdString(module);
-            
+
             QString dataFile = sceneDir.absoluteFilePath(
                 QString::fromStdString(module) + "/" + QString::fromStdString(shortModule) + ".data"
             );
-            
+
             if (QFileInfo(dataFile).exists()) {
                 modulesList.append({
                     QString::fromStdString(module),
@@ -427,13 +427,13 @@ void SyncWidget::syncButtonPressed() {
             else {
                 QDir metaModuleDir = sceneDir;
                 metaModuleDir.cd(QString::fromStdString(module));
-                
+
                 QDirIterator it(metaModuleDir.absolutePath(), QStringList() << "*.data", QDir::Files, QDirIterator::Subdirectories);
                 while (it.hasNext()) {
                     QString v = it.next();
                     QDir d(v);
                     d.cdUp();
-                    
+
                     modulesList.append({
                         d.dirName(),
                         v,
@@ -533,7 +533,7 @@ void SyncWidget::syncButtonPressed() {
                             continue;
                         }
                         std::string file = d.value<std::string>(FileKey);
-                        
+
                         std::string dest;
                         if (d.hasKeyAndValue<std::string>(DestinationKey))
                             dest = d.value<std::string>(DestinationKey);

@@ -73,7 +73,7 @@ public:
 
     RenderEngine();
     ~RenderEngine();
-    
+
     void initialize();
     void initializeGL();
     void deinitialize();
@@ -88,8 +88,6 @@ public:
     RaycasterManager& raycasterManager();
     DeferredcasterManager& deferredcasterManager();
 
-    // sgct wrapped functions
-    
 
     void updateShaderPrograms();
     void updateFade();
@@ -157,13 +155,13 @@ public:
      * as a 'rendererData' variable in the dictionary.
      */
     void setRendererData(const ghoul::Dictionary& rendererData);
-    
+
     /**
     * Lets the renderer update the data to be brought into the post rendererer programs
     * as a 'resolveData' variable in the dictionary.
     */
     void setResolveData(const ghoul::Dictionary& resolveData);
-    
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
@@ -177,7 +175,7 @@ public:
     glm::ivec2 fontResolution() const;
 
     std::vector<Syncable*> getSyncables();
-    
+
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method) const;
@@ -207,7 +205,7 @@ private:
     properties::BoolProperty _showLog;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
-    
+
     properties::TriggerProperty _takeScreenshot;
     bool _shouldTakeScreenshot;
     properties::BoolProperty _applyWarping;
@@ -228,7 +226,7 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
-    
+
     std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;

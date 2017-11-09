@@ -38,7 +38,7 @@ public:
     virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;
     virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 };
- 
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___DATAPROCESSORJSON___H__

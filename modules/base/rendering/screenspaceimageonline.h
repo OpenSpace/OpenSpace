@@ -31,9 +31,9 @@
 #include <openspace/properties/stringproperty.h>
 
 #include <ghoul/opengl/texture.h>
- 
+
 namespace openspace {
-    
+
 namespace documentation { struct Documentation; }
 
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {

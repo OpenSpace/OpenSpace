@@ -37,7 +37,7 @@
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-    
+
 class LuaTranslation : public Translation {
 public:
     LuaTranslation();
@@ -53,7 +53,7 @@ private:
 
     std::unique_ptr<ghoul::filesystem::File> _fileHandle;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___LUATRANSLATION___H__

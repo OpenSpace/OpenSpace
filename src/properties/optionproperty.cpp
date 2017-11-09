@@ -29,7 +29,7 @@ namespace {
 } // namespace
 
 namespace openspace::properties {
-    
+
 const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(PropertyInfo info)

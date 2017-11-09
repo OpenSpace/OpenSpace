@@ -172,6 +172,12 @@ TouchInteraction::TouchInteraction()
         glm::vec4(0.f),
         glm::vec4(0.2f)
     )
+    , _pickingRadiusMinimum(
+        { "Picking Radius", "Minimum radius for picking in NDC coordinates", "" },
+        0.1f,
+        0.f,
+        1.f
+    )
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
     , _centroid(glm::dvec3(0.0))
@@ -203,7 +209,8 @@ TouchInteraction::TouchInteraction()
     addProperty(_slerpTime);
     addProperty(_guiButton);
     addProperty(_friction);
-    
+    addProperty(_pickingRadiusMinimum);
+
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
@@ -228,7 +235,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         }
         _time.initSession();
     }
-    
+
     if (!guiMode(list)) {
         if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
             directControl(list);
@@ -462,7 +469,6 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 
 // Traces the touch input into the scene and finds the surface coordinates of touched planets (if occuring)
 void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
-    
     //trim list to only contain visible nodes that make sense
     std::string selectables[30] = { "Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
         "Moon", "Titan", "Rhea", "Mimas", "Iapetus", "Enceladus", "Dione", "Io", "Ganymede", "Europa",
@@ -472,10 +478,19 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         for (std::string name : selectables)
             if (node->name() == name)
                 selectableNodes.push_back(node);
-                
+
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
     std::vector<SelectedBody> newSelected;
+
+    struct PickingInfo {
+        SceneGraphNode* node;
+        double pickingDistanceNDC;
+        double pickingDistanceWorld;
+    };
+    std::vector<PickingInfo> pickingInfo;
+
+
     for (const TuioCursor& c : list) {
         double xCo = 2 * (c.getX() - 0.5);
         double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
@@ -484,7 +499,8 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
 
         int id = c.getSessionID();
-        for (SceneGraphNode* node : selectableNodes) {
+
+       for (SceneGraphNode* node : selectableNodes) {
             double boundingSphere = node->boundingSphere();
             glm::dvec3 camToSelectable = node->worldPosition() - camPos;
             double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere;
@@ -492,8 +508,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                 // finds intersection closest point between boundingsphere and line in world coordinates, assumes line direction is normalized
                 double d = glm::dot(raytrace, camToSelectable);
                 double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
-                if (root > 0) // two intersection points (take the closest one)
+                if (root > 0) { // two intersection points (take the closest one)
                     d -= sqrt(root);
+                }
                 glm::dvec3 intersectionPoint = camPos + d * raytrace;
                 glm::dvec3 pointInModelView = glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition());
 
@@ -510,9 +527,65 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                     newSelected.push_back({ id, node, pointInModelView });
                 }
             }
+
+            // Compute locations in view space to perform the picking
+            glm::dvec4 clip = glm::dmat4(_camera->projectionMatrix()) * _camera->combinedViewMatrix() * glm::vec4(node->worldPosition(), 1.0);
+            glm::dvec2 ndc = clip / clip.w;
+
+            // If the object is not in the screen, we dont want to consider it at all
+            if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0) {
+                glm::dvec2 cursor = { xCo, yCo };
+
+                double ndcDist = glm::length(ndc - cursor);
+                // We either want to select the object if it's bounding sphere as been touched
+                // (checked by the first part of this loop above) or if the touch point is
+                // within a minimum distance of the center
+                if (dist <= 0.0 || (ndcDist <= _pickingRadiusMinimum)) {
+
+                    // If the user touched the planet directly, this is definitely the one they are
+                    // interested in  =>  minimum distance
+                    if (dist <= 0.0) {
+                        LINFOC(node->name(), "Picking candidate based on direct touch");
+                        pickingInfo.push_back({
+                            node, 
+                            -std::numeric_limits<double>::max(),
+                            -std::numeric_limits<double>::max()
+                        });
+                    }
+                    else {
+                        // The node was considered due to minimum picking distance radius
+                        LINFOC(node->name(), "Picking candidate based on proximity");
+                        pickingInfo.push_back({
+                            node,
+                            ndcDist,
+                            dist
+                        });
+                    }
+                }
+            }
         }
     }
-    _selected = newSelected;
+
+
+    // After we are done with all of the nodes, we can sort the picking list and pick the
+    // one that fits best (= is closest or was touched directly)
+    std::sort(
+        pickingInfo.begin(),
+        pickingInfo.end(),
+        [](const PickingInfo& lhs, const PickingInfo& rhs) {
+            return lhs.pickingDistanceWorld < rhs.pickingDistanceWorld;
+        }
+    );
+
+    // If an item has been picked, it's in the first position of the vector now
+    if (!pickingInfo.empty()) {
+        _pickingSelected = pickingInfo.begin()->node;
+        LINFOC("Picking", "Picked node: " + _pickingSelected->name());
+    }
+
+    LINFOC("Picking", "============");
+
+    _selected = std::move(newSelected);
 }
 
 // Interprets the input gesture to a specific interaction
@@ -634,8 +707,8 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, co
             break;
         }
         case PICK: { // pick something in the scene as focus node
-            if (_selected.size() == 1 && _selected.at(0).node) {
-                setFocusNode(_selected.at(0).node);
+            if (_pickingSelected) {
+                setFocusNode(_pickingSelected);
                 OsEng.navigationHandler().setFocusNode(_focusNode); // cant do setFocusNode() since TouchInteraction is not subclass of InteractionMode
 
                 // rotate camera to look at new focus, using slerp quat
@@ -685,7 +758,7 @@ void TouchInteraction::step(double dt) {
         dvec3 centerToBoundingSphere;
         double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
         _currentRadius = boundingSphere / std::max(distance * _projectionScaleFactor, 1.0);
-        
+
         { // Roll
             dquat camRollRot = angleAxis(_vel.roll*dt, dvec3(0.0, 0.0, 1.0));
             localCamRot = localCamRot * camRollRot;
@@ -771,6 +844,7 @@ void TouchInteraction::unitTest() {
 
         // clear everything
         _selected.clear();
+        _pickingSelected = nullptr;
         _vel.orbit = glm::dvec2(0.0, 0.0);
         _vel.zoom = 0.0;
         _vel.roll = 0.0;
@@ -827,7 +901,7 @@ void TouchInteraction::resetAfterInput() {
         module.touchInput.active = false;
         module.touchInput.action = 0;
     }
-    
+
     _lmSuccess = true;
     // Ensure that _guiON is consistent with properties in OnScreenGUI and
     _guiON = module.gui.isEnabled();
@@ -838,6 +912,7 @@ void TouchInteraction::resetAfterInput() {
     _lastVel.roll = 0.0;
     _lastVel.pan = glm::dvec2(0.0, 0.0);
     _selected.clear();
+    _pickingSelected = nullptr;
 }
 
 // Reset all property values to default

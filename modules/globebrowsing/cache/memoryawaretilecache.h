@@ -107,7 +107,7 @@ private:
     void createDefaultTextureContainers();
     void assureTextureContainerExists(const TileTextureInitData& initData);
     void resetTextureContainerSize(size_t numTexturesPerTextureType);
-    
+
     using TileCache = LRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
     using TextureContainerTileCache =
         std::pair<std::unique_ptr<TextureContainer>, std::unique_ptr<TileCache>>;

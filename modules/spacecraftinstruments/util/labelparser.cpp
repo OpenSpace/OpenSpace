@@ -79,7 +79,10 @@ LabelParser::LabelParser(std::string name, std::string fileName,
                 ghoul::Dictionary decoderDictionary =
                     translationDictionary.value<ghoul::Dictionary>(currentKey);
 
-                auto decoder = Decoder::createFromDictionary(decoderDictionary, decoders[i]);
+                auto decoder = Decoder::createFromDictionary(
+                    decoderDictionary,
+                    decoders[i]
+                );
                 //insert decoder to map - this will be used in the parser to determine
                 //behavioral characteristics of each instrument
                 _fileTranslation[keys[j]] = std::move(decoder);
@@ -116,7 +119,7 @@ std::string LabelParser::decode(std::string line){
         std::size_t value = line.find(key.first);
         if (value != std::string::npos){
             std::string toTranslate = line.substr(value);
-            
+
             //if (_fileTranslation.find(toTranslate) == _fileTranslation.end()) {
             //    // not found
             //    _badDecoding = true;
@@ -124,7 +127,8 @@ std::string LabelParser::decode(std::string line){
             //           "\nPlease check label files");
             //    return "";
             //}
-            return _fileTranslation[toTranslate]->getTranslation()[0]; //lbls always 1:1 -> single value return
+            // //lbls always 1:1 -> single value return
+            return _fileTranslation[toTranslate]->getTranslation()[0];
 
         }
     }
@@ -170,10 +174,12 @@ bool LabelParser::create() {
                     std::ifstream file(currentFile.path());
 
                     if (!file.good()){
-                        LERROR("Failed to open label file '" << currentFile.path() << "'");
+                        LERROR(
+                            "Failed to open label file '" << currentFile.path() << "'"
+                        );
                         return false;
                     }
-                    
+
                     int count = 0;
 
                     // open up label files
@@ -186,9 +192,17 @@ bool LabelParser::create() {
                         std::getline(file, line);
 
 
-                        line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
-                        line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-                        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+                        line.erase(
+                            std::remove(line.begin(), line.end(), '"'),
+                            line.end()
+                        );
+                        line.erase(
+                            std::remove(line.begin(), line.end(), ' '),
+                            line.end()
+                        );
+                        line.erase(
+                            std::remove(line.begin(), line.end(), '\r'), line.end()
+                        );
 
                         std::string read = line.substr(0, line.find_first_of("="));
 
@@ -217,17 +231,29 @@ bool LabelParser::create() {
                     //        return false;
                     //    }
 
-                        
+
                         if (read == "START_TIME"){
                             std::string start = line.substr(line.find("=") + 1);
-                            start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
+                            start.erase(
+                                std::remove(start.begin(), start.end(), ' '),
+                                start.end()
+                            );
                             startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                             count++;
 
                             getline(file, line);
-                            line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
-                            line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-                            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+                            line.erase(
+                                std::remove(line.begin(), line.end(), '"'),
+                                line.end()
+                            );
+                            line.erase(
+                                std::remove(line.begin(), line.end(), ' '),
+                                line.end()
+                            );
+                            line.erase(
+                                std::remove(line.begin(), line.end(), '\r'),
+                                line.end()
+                            );
 
                             read = line.substr(0, line.find_first_of("="));
                             if (read == "STOP_TIME"){
@@ -244,8 +270,14 @@ bool LabelParser::create() {
                                 count++;
                             }
                             else{
-                                LERROR("Label file " + currentFile.path() + " deviates from generic standard!");
-                                LINFO("Please make sure input data adheres to format https://pds.jpl.nasa.gov/documents/qs/labels.html");
+                                LERROR(
+                                    "Label file " + currentFile.path() +
+                                    " deviates from generic standard!"
+                                );
+                                LINFO(
+                                    "Please make sure input data adheres to format \
+                                     https://pds.jpl.nasa.gov/documents/qs/labels.html"
+                                );
                             }
                         }
                         if (count == static_cast<int>(_specsOfInterest.size())) {
@@ -262,13 +294,23 @@ bool LabelParser::create() {
                                     Image image;
                                     std::vector<std::string> spiceInstrument;
                                     spiceInstrument.push_back(_instrumentID);
-                                    createImage(image, startTime, stopTime, spiceInstrument, _target, path);
+                                    createImage(
+                                        image,
+                                        startTime,
+                                        stopTime,
+                                        spiceInstrument,
+                                        _target,
+                                        path
+                                    );
 
                                     _subsetMap[image.target]._subset.push_back(image);
                                     _subsetMap[image.target]._range.include(startTime);
 
                                     _captureProgression.push_back(startTime);
-                                    std::stable_sort(_captureProgression.begin(), _captureProgression.end());
+                                    std::stable_sort(
+                                        _captureProgression.begin(),
+                                        _captureProgression.end()
+                                    );
 
                                     break;
                                 }
@@ -279,7 +321,7 @@ bool LabelParser::create() {
             }
         }
     }
-    
+
     std::vector<Image> tmp;
     for (auto key : _subsetMap){
         for (auto image : key.second._subset){
@@ -291,14 +333,20 @@ bool LabelParser::create() {
     for (auto image : tmp){
         if (previousTarget != image.target){
             previousTarget = image.target;
-            std::pair<double, std::string> v_target = std::make_pair(image.timeRange.start, image.target);
+            std::pair<double, std::string> v_target = std::make_pair(
+                image.timeRange.start,
+                image.target
+            );
             _targetTimes.push_back(v_target);
             std::sort(_targetTimes.begin(), _targetTimes.end(), targetComparer);
         }
     }
 
     for (auto target : _subsetMap){
-        _instrumentTimes.push_back(std::make_pair(lblName, _subsetMap[target.first]._range));
+        _instrumentTimes.push_back(std::make_pair(
+            lblName,
+            _subsetMap[target.first]._range
+        ));
 
     //    std::string min, max;
     //    SpiceManager::ref().getDateFromET(target.second._range._min, min);
@@ -326,7 +374,10 @@ bool LabelParser::create() {
     return true;
 }
 
-void LabelParser::createImage(Image& image, double startTime, double stopTime, std::vector<std::string> instr, std::string targ, std::string pot) {
+void LabelParser::createImage(Image& image, double startTime, double stopTime,
+                              std::vector<std::string> instr, std::string targ,
+                              std::string pot)
+{
     image.timeRange = { startTime , stopTime };
     ghoul_assert(image.timeRange.isDefined(), "Invalid time range!");
     image.path = pot;

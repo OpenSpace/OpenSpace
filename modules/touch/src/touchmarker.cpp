@@ -34,7 +34,8 @@
 namespace {
     const std::string _loggerCat = "TouchMarker";
     const int MAX_FINGERS = 20;
-}
+} // namespace
+
 namespace openspace {
 
 TouchMarker::TouchMarker()
@@ -58,7 +59,6 @@ TouchMarker::TouchMarker()
     addProperty(_thickness);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
-    
 }
 
 bool TouchMarker::initialize() {

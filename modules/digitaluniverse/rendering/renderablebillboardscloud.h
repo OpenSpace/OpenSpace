@@ -69,7 +69,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-        
+
     enum Unit {
         Meter = 0,
         Kilometer = 1,
@@ -100,7 +100,7 @@ private:
     bool readLabelFile();
     bool loadCachedFile(const std::string& file);
     bool saveCachedFile(const std::string& file) const;
-        
+
     bool _hasSpeckFile;
     bool _dataIsDirty;
     bool _textColorIsDirty;
@@ -112,7 +112,7 @@ private:
     bool _labelDataIsDirty;
 
     int _polygonSides;
-        
+
     GLuint _pTexture;
 
     properties::FloatProperty _alphaValue;

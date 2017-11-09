@@ -56,7 +56,7 @@ public:
      * Render the volume's exit points (back face of the bounding geometry)
      */
     //virtual void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) = 0;
-    
+
     /**
      * Prepare the volume for the ABuffer's resolve step.
      * Make sure textures are up to date, bind them to texture units, set program uniforms etc.
@@ -93,7 +93,7 @@ public:
      *   A #{namespace} variable (unique per helper file)
      */ 
     //virtual std::string getBoundsFsPath() = 0;
-    
+
     /**
      * Return a path to a file with all the uniforms, functions etc
      * required to perform ray casting through this volume.

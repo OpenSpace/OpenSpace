@@ -78,7 +78,7 @@ public:
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
-    
+
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData

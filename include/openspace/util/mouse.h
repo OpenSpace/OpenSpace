@@ -74,7 +74,7 @@ enum class MouseAction {
 #undef Button4
 #undef Button5
 #endif // unix
-    
+
 enum class MouseButton {
     Button1 = 0,
     Button2 = 1,

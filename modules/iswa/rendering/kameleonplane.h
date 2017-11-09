@@ -103,7 +103,7 @@ private:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
 };
- 
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___KAMELEONPLANE___H__

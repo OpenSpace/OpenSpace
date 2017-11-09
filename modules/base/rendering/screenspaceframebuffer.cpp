@@ -107,7 +107,7 @@ void ScreenSpaceFramebuffer::render() {
         );
         GLint defaultFBO = _framebuffer->getActiveObject();
         _framebuffer->activate();
-        
+
         glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_ALPHA_TEST);
@@ -123,7 +123,7 @@ void ScreenSpaceFramebuffer::render() {
             static_cast<GLsizei>(resolution.x),
             static_cast<GLsizei>(resolution.y)
         );
-        
+
         glm::mat4 rotation = rotationMatrix();
         glm::mat4 translation = translationMatrix();
         glm::mat4 scale = scaleMatrix();

@@ -30,7 +30,7 @@ ghoul::TemplateFactory<T>* FactoryManager::factory() const {
         if (f.factory->baseClassType() == typeid(T))
             return dynamic_cast<ghoul::TemplateFactory<T>*>(f.factory.get());
     }
-    
+
     throw FactoryNotFoundError(typeid(T).name());
 }
 

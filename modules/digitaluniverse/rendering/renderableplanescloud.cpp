@@ -40,7 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 
 #include <glm/gtx/string_cast.hpp>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <array>
 #include <fstream>
@@ -317,7 +317,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
             _hasSpeckFile = _hasSpeckFile == true? false : true; });
         addProperty(_drawElements);
     }
-    
+
     // DEBUG:
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
@@ -374,11 +374,11 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _scaleFactor.onChange([&]() {
         _dataIsDirty = true;
     });
-  
+
     if (dictionary.hasKey(LabelFileInfo.identifier)) {
         _labelFile = absPath(dictionary.value<std::string>(
             LabelFileInfo.identifier
-            ));                
+        ));
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
@@ -397,7 +397,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
-        }         
+        }
     }
 
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
@@ -456,11 +456,11 @@ bool RenderablePlanesCloud::isReady() const {
 
 void RenderablePlanesCloud::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-    
+
     _program = renderEngine.buildRenderProgram("RenderablePlanesCloud",
         "${MODULE_DIGITALUNIVERSE}/shaders/plane2_vs.glsl",
         "${MODULE_DIGITALUNIVERSE}/shaders/plane2_fs.glsl");
-            
+
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -492,12 +492,12 @@ void RenderablePlanesCloud::deleteDataGPU() {
 
 void RenderablePlanesCloud::deinitialize() {
     deleteDataGPU();
-   
+
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
-    }        
+    }
 }
 
 void RenderablePlanesCloud::renderPlanes(const RenderData&,
@@ -536,7 +536,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("fadeInValue", fadeInVariable);
     //_program->setUniform("minPlaneSize", 1.f); // in pixels
-    
+
     //bool usingFramebufferRenderer =
     //    OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
 
@@ -552,7 +552,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     //    //glDepthMask(false);
     //    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     //}
-    
+
     for (auto pair : _renderingPlanesMap) {
         ghoul::opengl::TextureUnit unit;
         unit.activate();
@@ -560,14 +560,14 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         _program->setUniform("galaxyTexture", unit);
 
         glBindVertexArray(pair.second.vao);
-        glDrawArrays(GL_TRIANGLES, 0, 6);                  
-    }               
-    
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
     //if (additiveBlending) {
     //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //    //glDepthMask(true);
     //}
-    
+
     glBindVertexArray(0);
 
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
@@ -582,7 +582,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
 
     if (!blendEnabled) {
         glDisable(GL_BLEND);
-    }        
+    }
 }
 
 void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
@@ -590,7 +590,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-            
+
     float scale = 0.0;
     switch (_unit) {
     case Meter:
@@ -637,8 +637,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
             _renderOption.value(),
             "%s",
             pair.second.c_str());
-    }        
-
+    }
 }
 
 void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
@@ -698,11 +697,11 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
     glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
 
-  
+
     if (_hasSpeckFile) {
         renderPlanes(data, modelViewMatrix, projectionMatrix, fadeInVariable);            
     }
-    
+
     if (_hasLabel) {
         renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
     }                
@@ -717,7 +716,7 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 }
 
 bool RenderablePlanesCloud::loadData() {
-    bool success = false;        
+    bool success = false;
     if (_hasSpeckFile) {
         std::string _file = _speckFile;
         // I disabled the cache as it didn't work on Mac --- abock
@@ -751,7 +750,7 @@ bool RenderablePlanesCloud::loadData() {
             //success &= saveCachedFile(cachedFile);
         // }
     }
-    
+
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
         // I disabled the cache as it didn't work on Mac --- abock
@@ -782,7 +781,7 @@ bool RenderablePlanesCloud::loadData() {
 
         // }
     }
-    
+
     return success;
 }
 
@@ -800,7 +799,7 @@ bool RenderablePlanesCloud::loadTextures() {
                 it->second->uploadTexture();
                 it->second->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
             }
-        }            
+        }
     }
     else {
         return false;
@@ -870,7 +869,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
             }
             else {
                 _nValuesPerAstronomicalObject += 1; // We want the number, but the index is 0 based
-            }                
+            }
         }
 
         if (line.substr(0, 10) == "polyorivar") {
@@ -895,9 +894,9 @@ bool RenderablePlanesCloud::readSpeckFile() {
 
         if (line.substr(0, 8) == "texture ") {
             std::stringstream str(line);
-            
+
             int textureIndex = 0;
-            
+
             std::string dummy;
             str >> dummy; // command
             str >> textureIndex;
@@ -925,7 +924,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
         if (line.empty()) {
             continue;
         }
-        
+
         std::stringstream str(line);
 
         glm::vec3 u(0.0f), v(0.0f);
@@ -976,7 +975,7 @@ bool RenderablePlanesCloud::readLabelFile() {
         LERROR("Failed to open Label file '" << _file << "'");
         return false;
     }
-    
+
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
@@ -1013,7 +1012,7 @@ bool RenderablePlanesCloud::readLabelFile() {
         }
     }
 
-    
+
     do {
         std::vector<float> values(_nValuesPerAstronomicalObject);
 
@@ -1038,7 +1037,7 @@ bool RenderablePlanesCloud::readLabelFile() {
 
         std::string dummy;
         str >> dummy; // text keyword
-        
+
         std::string label;
         str >> label;
         dummy.clear();
@@ -1118,9 +1117,9 @@ void RenderablePlanesCloud::createPlanes() {
         LDEBUG("Creating planes");
 
         int planeNumber = 0;
-        for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
+        for (int p = 0; p < static_cast<int>(_fullData.size()); p += _nValuesPerAstronomicalObject) {
             glm::vec4 transformedPos = glm::vec4(_transformationMatrix * 
-                glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));                
+                glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));
 
             // Plane vectors u and v
             glm::vec4 u = glm::vec4(_transformationMatrix *
@@ -1151,21 +1150,21 @@ void RenderablePlanesCloud::createPlanes() {
 
             RenderingPlane plane; 
             plane.planeIndex = _fullData[p + _textureVariableIndex];
-            
+
             // JCC: Ask Abbott about these points refeering to a non-existing texture.
             if (plane.planeIndex == 30) {
                 //std::cout << "--- Creating planes - index: " << plane.planeIndex << std::endl;
                 plane.planeIndex = 0;
             }
-                
+
             glGenVertexArrays(1, &plane.vao);
             glGenBuffers(1, &plane.vbo);
-            
+
             glm::vec4 vertex0 = transformedPos - u - v; // same as 3
             glm::vec4 vertex1 = transformedPos + u + v; // same as 5
             glm::vec4 vertex2 = transformedPos - u + v;
             glm::vec4 vertex4 = transformedPos + u - v;
-                                         
+
             float scale = 0.0;
             switch (_unit) {
             case Meter:
@@ -1221,7 +1220,7 @@ void RenderablePlanesCloud::createPlanes() {
                 sizeof(GLfloat) * 6,
                 nullptr
             );
-            
+
             // texture coords
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(
@@ -1231,7 +1230,7 @@ void RenderablePlanesCloud::createPlanes() {
                 GL_FALSE,
                 sizeof(GLfloat) * 6,
                 reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
-            );                                
+            );
 
             _renderingPlanesMap.insert({planeNumber++, plane});
         }
@@ -1242,7 +1241,6 @@ void RenderablePlanesCloud::createPlanes() {
     }
 
     if (_hasLabel && _labelDataIsDirty) {
-
         _labelDataIsDirty = false;
     }
 }

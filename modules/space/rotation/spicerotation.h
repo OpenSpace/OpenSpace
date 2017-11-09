@@ -29,9 +29,9 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
-    
+
 namespace documentation { struct Documentation; }
-    
+
 class SpiceRotation : public Rotation {
 public:
     SpiceRotation(const ghoul::Dictionary& dictionary);
@@ -44,7 +44,7 @@ private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___SPICEROTATION___H__

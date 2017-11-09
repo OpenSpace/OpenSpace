@@ -105,7 +105,7 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     createDataProcessor();
     registerProperties();
 }
- 
+
 IswaDataGroup::~IswaDataGroup(){}
 
 void IswaDataGroup::registerProperties(){

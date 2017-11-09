@@ -177,7 +177,7 @@ void ChunkNode::merge() {
         }
         _children[i] = nullptr;
     }
-    
+
     ghoul_assert(isLeaf(), "ChunkNode must be leaf after merge");
 }
 

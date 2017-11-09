@@ -45,7 +45,7 @@
 class GdalWmsTest : public testing::Test {};
 
 TEST_F(GdalWmsTest, Simple) {
-    GDALDataset *poDataset;
+    GDALDatasetH poDataset;
     GDALAllRegister();
 
     
@@ -55,7 +55,7 @@ TEST_F(GdalWmsTest, Simple) {
 
     std::string testFile = absPath("${TESTDIR}/gdal/TERRA_CR_B143_2016-04-12.wms");
 
-    poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
+    poDataset = GDALOpen(testFile.c_str(), GA_ReadOnly);
 
     // This assertion fails
     //ASSERT_NE(poDataset, nullptr) << "Failed to load testFile";

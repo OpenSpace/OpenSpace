@@ -70,7 +70,7 @@ public:
         const std::string& texturePath,
         bool isPlaceholder = false
     );
-    
+
     glm::mat4 computeProjectorMatrix(
         const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up,
         const glm::dmat3& instrumentMatrix,

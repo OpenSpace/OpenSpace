@@ -59,7 +59,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         [&](){
             LDEBUGC("ImGUIModule", "Initializing GUI");
             gui.initialize();
-            
+
             gui._globalProperty.setSource(
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
@@ -73,7 +73,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     return res;
                 }
             );
-            
+
             gui._screenSpaceProperty.setSource(
                 []() {
                    const std::vector<ScreenSpaceRenderable*>& ssr =
@@ -81,7 +81,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                    return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
                 }
             );
-            
+
             gui._property.setSource(
                 []() {
                     const std::vector<SceneGraphNode*>& nodes =
@@ -122,7 +122,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             );
         }
     );
-    
+
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Deinitialize,
         [&](){
@@ -130,7 +130,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             gui.deinitialize();
         }
     );
-    
+
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::InitializeGL,
         [&](){
@@ -138,7 +138,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             gui.initializeGL();
         }
     );
-    
+
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::DeinitializeGL,
         [&](){
@@ -160,7 +160,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
-                
+
                 double dt = std::max(wrapper.averageDeltaTime(), 0.0);
                 if (touchInput.active && mouseButtons == 0) {
                     mouseButtons = touchInput.action;
@@ -180,7 +180,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             }
         }
     );
-    
+
     OsEng.registerModuleKeyboardCallback(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             if (gui.isEnabled()) {
@@ -191,7 +191,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             }
         }
     );
-    
+
     OsEng.registerModuleCharCallback(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             if (gui.isEnabled()) {
@@ -202,7 +202,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             }
         }
     );
-    
+
     OsEng.registerModuleMouseButtonCallback(
         [&](MouseButton button, MouseAction action) -> bool {
             if (gui.isEnabled()) {
@@ -213,7 +213,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             }
         }
     );
-    
+
     OsEng.registerModuleMouseScrollWheelCallback(
         [&](double, double posY) -> bool {
             if (gui.isEnabled()) {
@@ -225,5 +225,5 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 }
-    
+
 } // namespace openspace

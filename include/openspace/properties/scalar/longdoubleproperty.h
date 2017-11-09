@@ -32,7 +32,7 @@
  * @{
  * \addtogroup properties 
  * @{
- 
+
  * \class LongDoubleProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>long double</code>.

@@ -45,7 +45,7 @@ class SceneGraphNode;
 class TouchInteraction : public properties::PropertyOwner {
 public:
     using Point = std::pair<int, TUIO::TuioPoint>;
-    
+
     TouchInteraction();
 
     // for interpretInteraction()
@@ -176,6 +176,7 @@ private:
     properties::FloatProperty _slerpTime;
     properties::IVec2Property _guiButton;
     properties::Vec4Property _friction;
+    properties::FloatProperty _pickingRadiusMinimum;
 
     // Class variables
     VelocityStates _vel;
@@ -194,6 +195,7 @@ private:
     bool _lmSuccess;
     bool _guiON;
     std::vector<SelectedBody> _selected;
+    SceneGraphNode* _pickingSelected;
     LMstat _lmstat;
     glm::dquat _toSlerp;
     glm::dvec3 _centroid;

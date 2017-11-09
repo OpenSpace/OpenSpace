@@ -79,7 +79,7 @@ Translation::Translation()
 bool Translation::initialize() {
     return true;
 }
-    
+
 void Translation::update(const UpdateData&) {}
 
 glm::dvec3 Translation::position() const {

@@ -288,13 +288,13 @@ RenderEngine::RenderEngine()
         { static_cast<int>(FrametimeType::None), "None" }
     });
     addProperty(_frametimeType);
-    
+
     addProperty(_showDate);
     addProperty(_showInfo);
     addProperty(_showLog);
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
-    
+
     _nAaSamples.onChange([this](){
         if (_renderer) {
             _renderer->setNAaSamples(_nAaSamples);
@@ -321,14 +321,14 @@ RenderEngine::RenderEngine()
     addProperty(_hdrBackground);
     addProperty(_gamma);
     addProperty(_applyWarping);
-    
+
     _takeScreenshot.onChange([this](){
         _shouldTakeScreenshot = true;
     });
     addProperty(_takeScreenshot);
-    
+
     addProperty(_showFrameNumber);
-    
+
     addProperty(_disableSceneTranslationOnMaster);
     addProperty(_disableMasterRendering);
 }
@@ -466,7 +466,7 @@ void RenderEngine::updateScene() {
         currentTime,
         _performanceManager != nullptr
     });
-    
+
     LTRACE("RenderEngine::updateSceneGraph(end)");
 }
 
@@ -578,7 +578,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
     }
     _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
-    
+
     bool masterEnabled = wrapper.isMaster() ? !_disableMasterRendering : true;
     if (masterEnabled && !wrapper.isGuiWindow() && _globalBlackOutFactor > 0.f) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
@@ -597,9 +597,9 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
         RenderFont(*_fontBig, penPosition, "%i", _frameNumber);
     }
-    
+
     ++_frameNumber;
-    
+
     for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
         if (ssr->isEnabled() && ssr->isReady()) {
             ssr->render();
@@ -1040,6 +1040,8 @@ void RenderEngine::renderInformation() {
                     1.0 / OsEng.windowWrapper().averageDeltaTime()
                 );
                 break;
+            case FrametimeType::None:
+                break;
         }
 
             ParallelConnection::Status status = OsEng.parallelConnection().status();
@@ -1218,7 +1220,6 @@ void RenderEngine::renderInformation() {
             glm::vec4 brigther_active(0.9, 1, 0.75, 1);
 
             if (remaining > 0) {
-            
                 std::string progress = progressToStr(25, t);
                 brigther_active *= (1 - t);
 
@@ -1487,7 +1488,6 @@ void RenderEngine::renderScreenLog() {
         std::make_pair(entries.rbegin(), entries.rbegin() + max) :
         std::make_pair(entries.rbegin(), entries.rend());
 
-
     size_t nr = 1;
     auto now = std::chrono::steady_clock::now();
     for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
@@ -1569,4 +1569,4 @@ std::vector<Syncable*> RenderEngine::getSyncables() {
     }
 }
 
-}// namespace openspace
+} // namespace openspace
