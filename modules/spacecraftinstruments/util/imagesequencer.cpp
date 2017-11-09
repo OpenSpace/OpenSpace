@@ -154,7 +154,7 @@ std::pair<double, std::vector<std::string>> ImageSequencer::getIncidentTargetLis
         findEqualToThis,
         compareTime
     );
-    
+
     if (it != _targetTimes.end() && it != _targetTimes.begin()){
         // move the iterator to the first element of the range
         std::advance(it, -(range + 1));
@@ -290,7 +290,7 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
         // for readability we store the iterators
         auto begin = _subsetMap[projectee]._subset.begin(); 
         auto end   = _subsetMap[projectee]._subset.end();
-        
+
         // create temporary storage
         std::vector<Image> captureTimes;
         // what to look for 
@@ -301,7 +301,7 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
         // find the two iterators that correspond to the latest time jump
         auto curr = std::lower_bound(begin, end, findCurrent , compareTime);
         auto prev = std::lower_bound(begin, end, findPrevious, compareTime);
-    
+
         if (curr != begin && curr != end  && prev != begin && prev != end && prev < curr){
             if (curr->timeRange.start >= prev->timeRange.start){
                 std::copy_if(prev, curr, back_inserter(captureTimes), 
@@ -323,13 +323,13 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
                             auto before = std::prev(it);
                             beforeDist = std::abs(before->timeRange.start - it->timeRange.start);
                         }
-                        
+
                         double nextDist = std::numeric_limits<double>::max();
                         if (it != captures.end() - 1) {
                             auto next = std::next(it);
                             nextDist = std::abs(next->timeRange.start - it->timeRange.start);
                         }
-                        
+
                         if (beforeDist < 1.0 || nextDist < 1.0) {
                             toDelete.push_back(
                                 static_cast<int>(std::distance(captures.begin(), it))
@@ -418,14 +418,14 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
                     }    
                     return min;
                 };
-                
+
                 // find the smallest separation of images in time
                 double epsilon;
                 //epsilon = findMin(source);
                 epsilon = findMin(destination);
                 // set epsilon as 1% smaller than min
-                epsilon -= min*0.01;
-                
+                epsilon -= min * 0.01;
+
                 // IFF images have same time as mission planned capture, erase that event from 
                 // 'predicted event file' (mission-playbook)
                 for (size_t i = 0; i < source.size(); i++) {

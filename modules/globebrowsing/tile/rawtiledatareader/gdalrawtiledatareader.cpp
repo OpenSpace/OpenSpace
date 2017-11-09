@@ -132,7 +132,7 @@ void GdalRawTileDataReader::initialize() {
     _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
     _gdalDatasetMetaDataCached.noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
     _gdalDatasetMetaDataCached.dataType = tiledatatype::getGdalDataType(_initData.glType());
-    
+
     CPLErr err = _dataset->GetGeoTransform(&_gdalDatasetMetaDataCached.padfTransform[0]);
     if (err == CE_Failure) {
         _gdalDatasetMetaDataCached.padfTransform = RawTileDataReader::getGeoTransform();
@@ -175,7 +175,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     // handle requested write region. Note -= since flipped y axis
     dataDest -= io.write.region.start.y * io.write.bytesPerLine;
     dataDest += io.write.region.start.x * _initData.bytesPerPixel();
-  
+
     GDALRasterBand* gdalRasterBand = _dataset->GetRasterBand(rasterBand);
     CPLErr readError = CE_Failure;
     readError = gdalRasterBand->RasterIO(
@@ -191,7 +191,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
         static_cast<int>(_initData.bytesPerPixel()), // Pixel spacing
         static_cast<int>(-io.write.bytesPerLine)     // Line spacing
     );
-  
+
     // Convert error to RawTile::ReadError
     RawTile::ReadError error;
     switch (readError) {

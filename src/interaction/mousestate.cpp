@@ -58,7 +58,7 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState,
     bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
     bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl);
     bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift);
-    
+
     // Update the mouse states
     if (button1Pressed && !keyShiftPressed) {
         if (keyCtrlPressed) {

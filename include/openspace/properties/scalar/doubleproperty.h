@@ -32,7 +32,7 @@
  * @{
  * \addtogroup properties 
  * @{
- 
+
  * \class DoubleProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>double</code>.

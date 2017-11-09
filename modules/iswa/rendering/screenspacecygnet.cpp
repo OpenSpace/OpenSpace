@@ -42,14 +42,14 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     float cygnetid;
     dictionary.getValue("CygnetId", cygnetid);
     _cygnetId = (int)cygnetid;
-    
+
     float interval;
     dictionary.getValue("UpdateInterval", interval);
     _updateTime = (int) interval;
 
     _downloadImage = true;
     _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
-        
+
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
     _lastUpdateOpenSpaceTime = _openSpaceTime;
 

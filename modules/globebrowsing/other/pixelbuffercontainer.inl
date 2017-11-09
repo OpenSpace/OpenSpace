@@ -66,12 +66,12 @@ void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset
 {
     typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     bool notFoundAmongMappedBuffers = iter == _indexMap.end();
-    
+
     if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
         ghoul_assert(_pixelBuffers[iter->second], "Incorrect index map");
         return nullptr;
     }
-  
+
     // Find a pixel buffer that is unmapped
     for (int i = 0; i < _pixelBuffers.size(); ++i) {
         bool bufferIsMapped = _pixelBuffers[i]->isMapped();

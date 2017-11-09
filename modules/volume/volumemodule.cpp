@@ -37,9 +37,9 @@ using namespace volume;
 VolumeModule::VolumeModule()  : OpenSpaceModule(Name) {}
 
 void VolumeModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
+    auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(factory, "No renderable factory existed");
+    factory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
 }
 
 } // namespace openspace

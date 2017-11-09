@@ -48,7 +48,7 @@ namespace openspace {
 
 class Camera;
 class Scene;
-    
+
 class FramebufferRenderer : public Renderer, public RaycasterListener {
 public:
     FramebufferRenderer();
@@ -59,7 +59,7 @@ public:
 
     void updateResolution();
     void updateRaycastData();
-    
+
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
@@ -67,7 +67,7 @@ public:
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
-    
+
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData

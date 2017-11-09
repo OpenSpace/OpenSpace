@@ -34,7 +34,7 @@ public:
     constexpr static const char* Name = "SpacecraftInstruments";
 
     SpacecraftInstrumentsModule();
-    
+
     std::vector<documentation::Documentation> documentations() const override;
 
 protected:

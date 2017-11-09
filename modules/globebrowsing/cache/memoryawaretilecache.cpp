@@ -111,9 +111,9 @@ MemoryAwareTileCache::MemoryAwareTileCache()
     _tileCacheSize.setMaxValue(
         static_cast<int>(CpuCap.installedMainMemory() * 0.25)
     );
-  
+
     setSizeEstimated(_tileCacheSize * 1024 * 1024);
-  
+
     _cpuAllocatedTileData.setReadOnly(true);
     _gpuAllocatedTileData.setReadOnly(true);
 
@@ -166,7 +166,7 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
     LINFO("Resetting tile cache size");
     ghoul_assert(_textureContainerMap.size() > 0, "Texture containers must exist.");
-  
+
     size_t sumTextureTypeSize = std::accumulate(
         _textureContainerMap.cbegin(),
         _textureContainerMap.cend(),
@@ -177,7 +177,7 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
             return s + p.second.first->tileTextureInitData().totalNumBytes();
         }
     );
-  
+
     size_t numTexturesPerType = estimatedSize / sumTextureTypeSize;
     resetTextureContainerSize(numTexturesPerType);
     LINFO("Tile cache size was reset");
@@ -243,14 +243,14 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
 {
     ghoul_precondition(rawTile, "RawTile can not be null");
     using ghoul::opengl::Texture;
-    
+
     if (rawTile->error != RawTile::ReadError::None) {
         return;
     }
     else {
         const TileTextureInitData& initData = *rawTile->textureInitData;
         Texture* texture = getTexture(initData);
-        
+
         // Re-upload texture, either using PBO or by using RAM data
         if (rawTile->pbo != 0) {
             texture->reUploadTextureFromPBO(rawTile->pbo);

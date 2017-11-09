@@ -46,7 +46,7 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    
+
 private:
     const RenderableGlobe& _owner;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;

@@ -32,7 +32,7 @@
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing::chunklevelevaluator {
-    
+
 int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
@@ -47,13 +47,13 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     glm::dvec3 cameraToEllipsoidCenter = -cameraPosition;
 
     Geodetic2 cameraGeodeticPos = ellipsoid.cartesianToGeodetic2(cameraPosition);       
-        
+
     // Approach:
     // The projected area of the chunk will be calculated based on a small area that
     // is close to the camera, and the scaled up to represent the full area.
     // The advantage of doing this is that it will better handle the cases where the 
     // full patch is very curved (e.g. stretches from latitude 0 to 90 deg).
-        
+
     const Geodetic2 center = chunk.surfacePatch().center();
     const Geodetic2 closestCorner = chunk.surfacePatch().closestCorner(cameraGeodeticPos);
 
@@ -71,12 +71,12 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     //    |      center     |
     //    |                 |
     //    +-----------------+  <-- south east corner
-        
+
     Chunk::BoundingHeights heights = chunk.getBoundingHeights();
     const Geodetic3 c = { center, heights.min };
     const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
     const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };
-        
+
     //  Camera
     //  |
     //  V

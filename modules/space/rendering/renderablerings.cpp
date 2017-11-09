@@ -44,7 +44,7 @@ namespace {
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for these rings."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
@@ -158,13 +158,12 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
         _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
-    
 
     _texturePath.onChange([&]() { loadTexture(); });
     addProperty(_texturePath);
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
-    
+
     if (dictionary.hasKey(NightFactorInfo.identifier)) {
         _nightFactor = static_cast<float>(
             dictionary.value<double>(NightFactorInfo.identifier)
@@ -223,7 +222,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-    
+
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->setUniform(
@@ -232,20 +231,20 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     );
     _shader->setUniform("textureOffset", _offset);
     _shader->setUniform("transparency", _transparency);
-    
+
     _shader->setUniform("_nightFactor", _nightFactor);
     _shader->setUniform(
         "sunPosition",
         _sunPosition
     );
-    
+
     setPscUniforms(*_shader, data.camera, data.position);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
     _shader->setUniform("texture1", unit);
-    
+
     glDisable(GL_CULL_FACE);
 
     glBindVertexArray(_quad);
@@ -306,7 +305,7 @@ void RenderableRings::createPlane() {
         GLfloat s;
         GLfloat t;
     };
-    
+
     VertexData data[] = {
         { -size, -size, 0.f, 0.f },
         {  size,  size, 1.f, 1.f },

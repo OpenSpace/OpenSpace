@@ -63,7 +63,7 @@ void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::
     size_t size = static_cast<size_t>(dims.x) *
         static_cast<size_t>(dims.y) *
         static_cast<size_t>(dims.z);
-    
+
     std::vector<VoxelType> buffer(_bufferSize);
     std::ofstream file(_path, std::ios::binary);
 
@@ -91,7 +91,7 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
 
     const char* const buffer = reinterpret_cast<const char*>(volume.data());
     size_t length = volume.nCells() * sizeof(VoxelType);
-    
+
     std::ofstream file(_path, std::ios::binary);
     file.write(buffer, length);
     file.close();

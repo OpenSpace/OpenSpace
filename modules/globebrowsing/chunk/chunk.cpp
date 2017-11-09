@@ -155,7 +155,7 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
             break;
         }
     }
-        
+
     return boundingHeights;
 }
 
@@ -184,7 +184,7 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
     double y1 = tan(halfSize.lat);
     double y2 = tan(halfSize.lon);
     double scaleToCoverCenter = sqrt(1 + pow(y1, 2) + pow(y2, 2));
-        
+
     double maxCornerHeight = maxCenterRadius * scaleToCoverCenter - patchCenterRadius;
 
     bool chunkIsNorthOfEquator = patch.isNorthern();
@@ -192,11 +192,11 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
     // The minimum height offset, however, we can simply 
     double minCornerHeight = boundingHeight.min;
     std::vector<glm::dvec4> corners(8);
-        
+
     double latCloseToEquator = patch.edgeLatitudeNearestEquator();
     Geodetic3 p1Geodetic = { { latCloseToEquator, patch.minLon() }, maxCornerHeight };
     Geodetic3 p2Geodetic = { { latCloseToEquator, patch.maxLon() }, maxCornerHeight };
-        
+
     glm::vec3 p1 = ellipsoid.cartesianPosition(p1Geodetic);
     glm::vec3 p2 = ellipsoid.cartesianPosition(p2Geodetic);
     glm::vec3 p = 0.5f * (p1 + p2);
@@ -207,7 +207,7 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
         Quad q = static_cast<Quad>(i % 4);
         double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
         Geodetic3 cornerGeodetic = { patch.getCorner(q), cornerHeight };
-            
+
         bool cornerIsNorthern = !((i / 2) % 2);
         bool cornerCloseToEquator = chunkIsNorthOfEquator ^ cornerIsNorthern;
         if (cornerCloseToEquator) {

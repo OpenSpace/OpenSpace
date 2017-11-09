@@ -51,14 +51,14 @@ struct CameraKeyframe {
     std::string _focusNode;
 
     double _timestamp;
-                
+
     void serialize(std::vector<char> &buffer){
         // Add position
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
-                    
+
         // Add orientation
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_rotation), reinterpret_cast<char*>(&_rotation) + sizeof(_rotation));
-        
+
         // Follow focus node rotation?
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_followNodeRotation), reinterpret_cast<char*>(&_followNodeRotation) + sizeof(_followNodeRotation));
 
@@ -71,11 +71,11 @@ struct CameraKeyframe {
         // Add timestamp
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
     };
-                
+
     void deserialize(const std::vector<char> &buffer){
         int offset = 0;
         int size = 0;
-                    
+
         // Position
         size = sizeof(_position);
         memcpy(&_position, buffer.data() + offset, size);
@@ -99,13 +99,13 @@ struct CameraKeyframe {
         size = nodeNameLength;
         _focusNode = std::string(buffer.data() + offset, buffer.data() + offset + size);
         offset += size;
-                    
+
         // Timestamp
         size = sizeof(_timestamp);
         memcpy(&_timestamp, buffer.data() + offset, size);
     };
 };
-            
+
 struct TimeKeyframe {
     TimeKeyframe() {}
     TimeKeyframe(const std::vector<char> &buffer) {
@@ -117,43 +117,43 @@ struct TimeKeyframe {
     bool _paused;
     bool _requiresTimeJump;
     double _timestamp;
-                
+
     void serialize(std::vector<char> &buffer){
         // Add current time
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_time), reinterpret_cast<char*>(&_time) + sizeof(_time));
-                    
+
         // Add delta time
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_dt), reinterpret_cast<char*>(&_dt) + sizeof(_dt));
-                    
+
         // Add whether time is paused or not
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_paused), reinterpret_cast<char*>(&_paused) + sizeof(_paused));
-                    
+
         // Add whether a time jump is necessary (recompute paths etc)
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_requiresTimeJump), reinterpret_cast<char*>(&_requiresTimeJump) + sizeof(_requiresTimeJump));
 
         // Add timestamp
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
     };
-                
+
     void deserialize(const std::vector<char> &buffer){
         int offset = 0;
         int size = 0;
-                    
+
         // Current time
         size = sizeof(_time);
         memcpy(&_time, buffer.data() + offset, size);
         offset += size;
-                    
+
         // Delta time
         size = sizeof(_dt);
         memcpy(&_dt, buffer.data() + offset, size);
         offset += size;
-                    
+
         // Is time paused?
         size = sizeof(_paused);
         memcpy(&_paused, buffer.data() + offset, size);
         offset += sizeof(_paused);
-    
+
         // Is a time jump required?
         size = sizeof(_requiresTimeJump);
         memcpy(&_requiresTimeJump, buffer.data() + offset, size);
@@ -165,7 +165,7 @@ struct TimeKeyframe {
         offset += size;
     };
 };
-            
+
 struct ScriptMessage {
     ScriptMessage() {}
     ScriptMessage(const std::vector<char> &buffer) {
@@ -173,16 +173,16 @@ struct ScriptMessage {
     }
 
     std::string _script;
-                
+
     void serialize(std::vector<char> &buffer){
         buffer.insert(buffer.end(), _script.begin(), _script.end());
     };
-                
+
     void deserialize(const std::vector<char> &buffer){
         _script.assign(buffer.begin(), buffer.end());
     };
 };
-            
+
 } // namespace openspace::messagestructures
 
 #endif // __OPENSPACE_CORE___MESSAGESTRUCTURES___H__

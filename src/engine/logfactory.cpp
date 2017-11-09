@@ -216,5 +216,5 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
         throw ghoul::MissingCaseException();
     }
 }
-    
+
 } // namespace openspace

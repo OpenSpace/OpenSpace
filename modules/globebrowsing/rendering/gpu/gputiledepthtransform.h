@@ -55,7 +55,7 @@ public:
      */
     void bind(ghoul::opengl::ProgramObject* programObject,
         const std::string& nameBase);
-    
+
 private:
     GPUData<float> _gpuDepthOffset;
     GPUData<float> _gpuDepthScale;

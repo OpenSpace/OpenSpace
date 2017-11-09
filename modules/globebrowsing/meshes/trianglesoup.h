@@ -53,7 +53,7 @@ public:
         Positions usePositions = Positions::No,
         TextureCoordinates useTextures = TextureCoordinates::No,
         Normals useNormals = Normals::No);
-    
+
     ~TriangleSoup();
 
     // Setters

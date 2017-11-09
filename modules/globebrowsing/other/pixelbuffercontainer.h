@@ -62,7 +62,7 @@ public:
      * is already mapped or if something else failed.
      */
     void* mapBuffer(KeyType key, PixelBuffer::Access access);
-    
+
     /**
      * Finds a Pixel buffer and maps a range of it if it is available.
      * \param key is the identifier for the pixel buffer which can be used later when
@@ -100,7 +100,7 @@ private:
     const globebrowsing::PixelBuffer::Usage _usage;
 
     std::vector<std::unique_ptr<PixelBuffer>> _pixelBuffers;
-    
+
     // Maps from KeyType to index of mapped buffers
     std::map<KeyType, int> _indexMap;
 };

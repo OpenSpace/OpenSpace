@@ -42,8 +42,7 @@ void TextureContainer::reset() {
         _initData.shouldAllocateDataOnCPU() ?
         ghoul::opengl::Texture::AllocateData::Yes :
         ghoul::opengl::Texture::AllocateData::No;
-    for (size_t i = 0; i < _numTextures; ++i)
-    {
+    for (size_t i = 0; i < _numTextures; ++i) {
         auto tex = std::make_unique<ghoul::opengl::Texture>(
             _initData.dimensions(),
             _initData.ghoulTextureFormat(),
@@ -53,11 +52,11 @@ void TextureContainer::reset() {
             ghoul::opengl::Texture::WrappingMode::ClampToEdge,
             allocate
         );
-        
+
         tex->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
         tex->uploadTexture();
         tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        
+
         _textures.push_back(std::move(tex));
     }
 }

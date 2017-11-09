@@ -54,7 +54,7 @@ class RenderablePlaneProjection : public Renderable {
 public:
     RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlaneProjection();
-    
+
     void initialize() override;
     void deinitialize() override;
 
@@ -69,7 +69,7 @@ private:
     void setTarget(std::string body);
 
     std::string _texturePath;
-        
+
     bool _planeIsDirty;
 
     glm::dmat3 _stateMatrix;

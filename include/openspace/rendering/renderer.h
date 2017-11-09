@@ -44,14 +44,14 @@ namespace openspace {
 class RenderableVolume;
 class Camera;
 class Scene;
-    
+
 class Renderer {
 public:
     virtual ~Renderer() = default;
 
     virtual void initialize() = 0;
     virtual void deinitialize() = 0;
-    
+
     virtual void setCamera(Camera* camera) = 0;
     virtual void setScene(Scene* scene) = 0;
     virtual void setResolution(glm::ivec2 res) = 0;
@@ -69,13 +69,13 @@ public:
 
 
     virtual void update() = 0;
+
     virtual void render(float blackoutFactor, bool doPerformanceMeasurements) = 0;
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() = 0;
-    
 };
 
 } // openspace

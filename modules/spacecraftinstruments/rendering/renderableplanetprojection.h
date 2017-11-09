@@ -77,7 +77,7 @@ private:
     properties::BoolProperty _meridianShift;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
-    
+
     glm::vec2 _camScaling;
     glm::vec3 _up;
     glm::mat4 _transform;

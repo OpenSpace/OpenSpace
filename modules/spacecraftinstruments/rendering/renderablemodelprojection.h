@@ -100,7 +100,7 @@ private:
     double _time;
 
     bool _capture;
-        
+
     psc _sunPosition;
     properties::BoolProperty _performShading;
 };

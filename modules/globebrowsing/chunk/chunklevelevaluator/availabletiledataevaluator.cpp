@@ -32,12 +32,12 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace::globebrowsing::chunklevelevaluator {
-    
+
 int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData&) const {
     auto layerManager = chunk.owner().chunkedLodGlobe()->layerManager();
     // auto layers = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
     int currLevel = chunk.tileIndex().level;
-        
+
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         for (const auto& layer : layerManager->layerGroup(i).activeLayers()) {
             Tile::Status status = layer->getTileStatus(chunk.tileIndex());

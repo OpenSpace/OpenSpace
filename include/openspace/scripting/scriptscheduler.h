@@ -45,13 +45,12 @@ public:
     struct ScheduledScript {
         ScheduledScript() = default;
         ScheduledScript(const ghoul::Dictionary& dict);
-        
+
         double time;
         std::string forwardScript;
         std::string backwardScript;
     };
 
-    
     /**
     * Load a schedule from a ghoul::Dictionary \p dictionary and adds the
      * ScheduledScript%s to the list of stored scripts.
@@ -95,7 +94,7 @@ public:
     std::pair<
         std::vector<std::string>::const_iterator, std::vector<std::string>::const_iterator
     > progressTo(double newTime);
-    
+
     /**
     * Returns the the j2000 time value that the script scheduler is currently at 
     */
@@ -108,17 +107,16 @@ public:
 
 
     static LuaLibrary luaLibrary();
-    
+
     static documentation::Documentation Documentation();
 
 private:
     std::vector<double> _timings;
     std::vector<std::string> _forwardScripts;
     std::vector<std::string> _backwardScripts;
-    
+
     int _currentIndex = 0;
     double _currentTime;
-
 };
 
 } // namespace openspace::scripting

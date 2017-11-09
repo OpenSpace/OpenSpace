@@ -56,7 +56,7 @@ private:
                             std::string spacecraft, 
                             std::vector<std::string> payload, 
                             std::vector<std::string> potentialTargets);
-        
+
     std::string _name;
     std::string _fileName;
     std::string _spacecraft;

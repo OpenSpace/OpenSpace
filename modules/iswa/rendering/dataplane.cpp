@@ -78,7 +78,7 @@ void DataPlane::initialize() {
 bool DataPlane::createGeometry() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    
+
     // ============================
     //         GEOMETRY (quad)
     // ============================

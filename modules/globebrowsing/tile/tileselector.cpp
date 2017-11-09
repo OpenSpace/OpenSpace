@@ -39,7 +39,7 @@ ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup,
         Tile::TileUnavailable, uvTransform, TileDepthTransform()
     };
     mostHighResolution.tile = Tile::TileUnavailable;
-    
+
 
     for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
         ChunkTile chunkTile = layer->tileProvider()->getChunkTile(tileIndex);

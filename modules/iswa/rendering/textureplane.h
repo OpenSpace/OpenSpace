@@ -48,7 +48,7 @@ private:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
 };
- 
+
  } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___TEXTUREPLANE___H__

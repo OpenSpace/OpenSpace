@@ -41,7 +41,7 @@ namespace {
 namespace openspace {
 
 FactoryManager* FactoryManager::_manager = nullptr;
-    
+
 FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
     : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
     , type(std::move(t))
@@ -71,7 +71,7 @@ void FactoryManager::deinitialize() {
     delete _manager;
     _manager = nullptr;
 }
-    
+
 bool FactoryManager::isInitialized() {
     return _manager != nullptr;
 }

@@ -41,13 +41,13 @@ struct IODescription {
         PixelRegion region;
         PixelRegion fullRegion;
     } read;
-    
+
     struct WriteData {
         PixelRegion region;
         size_t bytesPerLine;
         size_t totalNumBytes;
     } write;
-    
+
     IODescription cut(PixelRegion::Side side, int pos);
 };
 

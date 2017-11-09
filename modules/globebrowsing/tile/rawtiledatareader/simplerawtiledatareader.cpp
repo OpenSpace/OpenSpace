@@ -194,7 +194,7 @@ IODescription SimpleRawTileDataReader::adjustIODescription(const IODescription& 
         modifiedIO.read.fullRegion.numPixels.y -
         modifiedIO.read.region.numPixels.y -
         modifiedIO.read.region.start.y;
-  
+
     return modifiedIO;
 }
 

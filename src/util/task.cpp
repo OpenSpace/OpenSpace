@@ -57,7 +57,7 @@ std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictio
         dictionary,
         "Task"
     );
-    
+
     std::string taskType = dictionary.value<std::string>("Type");
     auto factory = FactoryManager::ref().factory<Task>();
 

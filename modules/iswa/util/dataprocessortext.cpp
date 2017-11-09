@@ -154,7 +154,7 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         float value;
 
         int first, last, option, lineSize;
-        
+
         std::vector<float*> dataOptions(numOptions, nullptr);
         for (int option : selectedOptions) {
             dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
@@ -164,7 +164,6 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         while (getline(memorystream, line)) {
             if (line.find("#") == 0) continue;
 
-            
             // ----------- OLD METHODS ------------------------
             // values = std::vector<float>();
             // std::stringstream ss(line);
@@ -197,13 +196,13 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             option = -3;
             lineSize = line.size();
 
-            while(last < lineSize){
+            while (last < lineSize) {
 
                 first = line.find_first_not_of(" \t", last);
                 last =  line.find_first_of(" \t", first);
                 last = (last > 0)? last : lineSize;
-                
-                if(option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end()){
+
+                if (option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end()){
                     // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::float_, value);                
                     value = std::stof(line.substr(first, last));
                     dataOptions[option][numValues] = processDataPoint(value, option);

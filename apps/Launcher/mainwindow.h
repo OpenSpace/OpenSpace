@@ -53,7 +53,7 @@ private slots:
     void shortcutButtonPressed();
     void syncButtonPressed();
     void startButtonPressed();
-    
+
     void newsNetworkError();
     void newsReadyRead();
 
@@ -64,7 +64,7 @@ private:
     void configureLogging();
 
     QNetworkReply* _newsReply;
-    
+
     QTextEdit* _informationWidget;
 
     QComboBox* _configurations;
@@ -72,7 +72,7 @@ private:
 
     QComboBox* _scenes;
     QMap<QString, QString> _sceneFiles;
-    
+
     ShortcutWidget* _shortcutWidget;
     SyncWidget* _syncWidget;
 

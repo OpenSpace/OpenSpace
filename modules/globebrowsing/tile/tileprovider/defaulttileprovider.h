@@ -37,7 +37,7 @@ namespace openspace::globebrowsing {
     class AsyncTileDataProvider;
     struct RawTile;
 } // namespace openspace::globebrowsing
-    
+
 namespace openspace::globebrowsing::tileprovider {
 
 /**
@@ -50,7 +50,7 @@ public:
     DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
 
     virtual ~DefaultTileProvider() override;
-        
+
     /**
     * \returns a Tile with status OK iff it exists in in-memory 
     * cache. If not, it may enqueue some IO operations on a 
@@ -77,7 +77,7 @@ private:
     void initAsyncTileDataReader(TileTextureInitData initData);
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-  
+
     cache::MemoryAwareTileCache* _tileCache;
 
     properties::StringProperty _filePath;

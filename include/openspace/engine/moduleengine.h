@@ -57,7 +57,7 @@ public:
      * name
     */
     void initialize();
-    
+
     /**
      * Deinitializes all of the contained OpenSpaceModule%s by calling the
      * OpenSpaceModule::deinitialize methods.
@@ -73,14 +73,14 @@ public:
      * \pre \p module must not be nullptr
      */
     void registerModule(std::unique_ptr<OpenSpaceModule> module);
-    
+
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with
      * this ModuleEngine. All returned OpenSpaceModule%s are guaranteed to be initialized.
      * \return A list of all registered OpenSpaceModule%s
      */
     std::vector<OpenSpaceModule*> modules() const;
-    
+
     /**
      * Get the module subclass with given template argument. Requires the module subclass
      * to have the public static member variable <code>name</code> which must be equal to

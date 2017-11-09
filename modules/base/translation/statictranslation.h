@@ -32,7 +32,7 @@
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-    
+
 class StaticTranslation : public Translation {
 public:
     StaticTranslation();
@@ -43,7 +43,7 @@ public:
 private:
     properties::DVec3Property _position;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__

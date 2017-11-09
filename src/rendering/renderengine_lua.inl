@@ -56,7 +56,7 @@ int toggleFade(lua_State* L) {
     }
 
     double t = luaL_checknumber(L, -1);
-    
+
     float fadedIn = 1.0;
     int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
 
@@ -76,7 +76,7 @@ int fadeIn(lua_State* L) {
     }
 
     double t = luaL_checknumber(L, -1);
-            
+
     OsEng.renderEngine().startFading(1, static_cast<float>(t));
     return 0;
 }
@@ -116,7 +116,7 @@ int registerScreenSpaceRenderable(lua_State* L) {
 
     std::shared_ptr<ScreenSpaceRenderable> s( ScreenSpaceRenderable::createFromDictionary(d) );
     OsEng.renderEngine().registerScreenSpaceRenderable(s);
-      
+
     return 1;
 }
 
@@ -137,7 +137,7 @@ int unregisterScreenSpaceRenderable(lua_State* L) {
     }
 
     OsEng.renderEngine().unregisterScreenSpaceRenderable(s);
-      
+
     return 1;
 }
 

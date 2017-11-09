@@ -451,9 +451,9 @@ void GUI::initializeGL() {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vboMaxSize, nullptr, GL_DYNAMIC_DRAW);
-    
+
     glGenBuffers(1, &vboElements);
-    
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -770,7 +770,7 @@ void GUI::render() {
 
     ImGui::End();
 }
-    
+
 void GUI::renderAndUpdatePropertyVisibility() {
     // Fragile! Keep this in sync with properties::Property::Visibility
     using V = properties::Property::Visibility;

@@ -42,7 +42,7 @@ struct TimeRange {
     * is OK.
     */
     TimeRange(double startTime, double endTime);
-    
+
     /**
     * Throws exception if unable to parse the provided \class ghoul::Dictionary
     */
@@ -56,7 +56,7 @@ struct TimeRange {
     void include(double val);
 
     void include(const TimeRange& other);
-    
+
     double duration() const;
 
     bool isDefined() const;

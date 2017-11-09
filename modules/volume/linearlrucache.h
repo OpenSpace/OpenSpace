@@ -31,7 +31,7 @@
 
 namespace openspace {
 namespace volume {
-    
+
 template <typename ValueType>
 class LinearLruCache {
 public:
