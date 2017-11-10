@@ -9,7 +9,7 @@ return {
             Alpha = 0.4,
             Texture = "textures/DarkUniverse_mellinger_8k.jpg",
             Orientation = "Inside/Outside",
-            FadeOutThreshould = 0.18
+            FadeOutThreshould = 0.25
         },
         GuiPath = "/Milky Way/Milky Way"
     }

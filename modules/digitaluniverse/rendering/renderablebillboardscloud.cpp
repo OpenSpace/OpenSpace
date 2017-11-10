@@ -650,6 +650,10 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
     _program->setUniform("right", orthoRight);
 
     _program->setUniform("fadeInValue", fadeInVariable);
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    _program->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
  
     ghoul::opengl::TextureUnit spriteTextureUnit;
     if (_hasSpriteTexture) {

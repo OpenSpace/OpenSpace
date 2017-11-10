@@ -38,6 +38,7 @@ uniform dvec3 cameraPosition;
 uniform dvec3 cameraLookUp;
 uniform dvec4 centerScreenInWorldPosition;
 uniform int renderOption;
+uniform vec2 screenSize;
 
 
 in vec4 colorMap[];
@@ -101,36 +102,70 @@ void main() {
     //dvec4 dpos = transformMatrix * dvec4(dvec3(pos.xyz) * unit, 1.0); 
     dvec4 dpos = dvec4(dvec3(pos.xyz) * unit, 1.0); 
 
-    texCoord = corners[0];
+    // texCoord = corners[0];
     vec4 initialPosition = z_normalization(vec4(modelViewProjectionTransform * 
                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
     vs_screenSpaceDepth  = initialPosition.w;
-    gl_Position = initialPosition;
-    EmitVertex();
+    // gl_Position = initialPosition;
+    // EmitVertex();
 
-    texCoord    = corners[1];
-    gl_Position = z_normalization(vec4(modelViewProjectionTransform * 
+    // texCoord    = corners[1];
+    vec4 secondPosition = z_normalization(vec4(modelViewProjectionTransform * 
                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-    EmitVertex();
+    // gl_Position = secondPosition;
+    // EmitVertex();
 
-    texCoord = corners[2];
+    //texCoord = corners[2];
     vec4 crossCorner = z_normalization(vec4(modelViewProjectionTransform * 
                         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-    gl_Position = crossCorner;
-    EmitVertex();
-    EndPrimitive(); // First Triangle
+    // gl_Position = crossCorner;
+    // EmitVertex();
+    // EndPrimitive(); // First Triangle
 
-    texCoord = corners[0];
-    gl_Position = initialPosition;
-    EmitVertex();
+    // texCoord = corners[0];
+    // gl_Position = initialPosition;
+    // EmitVertex();
 
-    texCoord = corners[2];
-    gl_Position = crossCorner;
-    EmitVertex();
+    // texCoord = corners[2];
+    // gl_Position = crossCorner;
+    // EmitVertex();
     
-    texCoord = corners[3];
-    gl_Position = z_normalization(vec4(modelViewProjectionTransform * 
+    // texCoord = corners[3];
+    vec4 thirdPosition = z_normalization(vec4(modelViewProjectionTransform * 
                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    EmitVertex();
-    EndPrimitive(); // Second Triangle
+    // gl_Position = thirdPosition;
+    // EmitVertex();
+    // EndPrimitive(); // Second Triangle
+
+    // Testing size:
+    vec4 topLeft = thirdPosition/thirdPosition.w;
+    topLeft =  ((topLeft + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
+    vec4 bottomLeft = initialPosition/initialPosition.w;
+    bottomLeft = ((bottomLeft + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
+
+    if ((topLeft.y - bottomLeft.y) > (0.2 * screenSize.y)) {
+        return;
+    } else {
+        // Build primitive
+        texCoord    = corners[0];
+        gl_Position = initialPosition;
+        EmitVertex();
+        texCoord    = corners[1];
+        gl_Position = secondPosition;
+        EmitVertex();
+        texCoord    = corners[2];
+        gl_Position = crossCorner;
+        EmitVertex();
+        EndPrimitive(); // First Triangle
+        texCoord    = corners[0];
+        gl_Position = initialPosition;
+        EmitVertex();
+        texCoord    = corners[2];
+        gl_Position = crossCorner;
+        EmitVertex();
+        texCoord    = corners[3];
+        gl_Position = thirdPosition;
+        EmitVertex();
+        EndPrimitive(); // Second Triangle
+    }
 }
