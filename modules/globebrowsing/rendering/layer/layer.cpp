@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -239,7 +239,7 @@ ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) 
     if (_tileProvider) {
         return _tileProvider->getChunkTilePile(tileIndex, pileSize);
     }
-    else {   
+    else {
         ChunkTilePile chunkTilePile;
         chunkTilePile.resize(pileSize);
         for (int i = 0; i < pileSize; ++i) {
@@ -366,7 +366,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
             if (tileProviderInitDict.hasKeyAndValue<std::string>(keyName)) {
                 std::string name;
                 tileProviderInitDict.getValue(keyName, name);
-                LDEBUG("Initializing tile provider for layer: '" + name + "'"); 
+                LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
                 tileprovider::TileProvider::createFromDictionary(typeId, tileProviderInitDict)

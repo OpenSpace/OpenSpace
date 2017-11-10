@@ -45,7 +45,7 @@ class LayerManager;
  * algorithm for rendering.
 
  * The renderable uses a <code>DistanceSwitch</code> to determine if the renderable
- * should be rendered. 
+ * should be rendered.
  */
 class RenderableGlobe : public Renderable {
 public:
@@ -107,7 +107,7 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);
 
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                             const glm::dvec3& targetModelSpace) override; 
+                                             const glm::dvec3& targetModelSpace) override;
 
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier

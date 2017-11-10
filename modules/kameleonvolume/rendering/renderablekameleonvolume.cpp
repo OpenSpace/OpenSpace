@@ -173,7 +173,9 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     std::string transferFunctionPath;
     if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
         _transferFunctionPath = transferFunctionPath;
-        _transferFunction = std::make_shared<TransferFunction>(absPath(transferFunctionPath));
+        _transferFunction = std::make_shared<TransferFunction>(
+            absPath(transferFunctionPath)
+        );
     }
 
     std::string sourcePath;
@@ -235,8 +237,14 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         _cache = cache;
     }
 
-    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid");
-    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid");
+    _gridType.addOption(
+        static_cast<int>(volume::VolumeGridType::Cartesian),
+        "Cartesian grid"
+    );
+    _gridType.addOption(
+        static_cast<int>(volume::VolumeGridType::Spherical),
+        "Spherical grid"
+    );
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
     std::string gridType;
@@ -257,7 +265,11 @@ void RenderableKameleonVolume::initializeGL() {
     _volumeTexture->uploadTexture();
     _transferFunction->update();
 
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(_volumeTexture, _transferFunction, _clipPlanes);
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        _volumeTexture,
+        _transferFunction,
+        _clipPlanes
+    );
 
     _raycaster->setStepSize(_stepSize);
     _gridType.onChange([this] {
@@ -410,7 +422,12 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     }
 
     ghoul::Dictionary dict = reader.readMetaData();
-    _rawVolume = reader.readFloatVolume(_dimensions, _variable, _lowerDomainBound, _upperDomainBound);
+    _rawVolume = reader.readFloatVolume(
+        _dimensions,
+        _variable,
+        _lowerDomainBound,
+        _upperDomainBound
+    );
     updateTextureFromVolume();
 }
 

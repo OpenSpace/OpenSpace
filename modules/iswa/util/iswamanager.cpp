@@ -140,7 +140,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group) {
         }
 
         // This callback determines what geometry should be used and creates the right cygbet
-        auto metadataCallback = 
+        auto metadataCallback =
         [this, metaFuture](const DownloadManager::MemoryFile& file) {
             //Create a string from downloaded file
             std::string res;
@@ -201,7 +201,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
                     std::to_string(id) + ": " + err
                 );
             }
-        ) );   
+        ) );
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp) {
@@ -219,7 +219,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, do
                     std::to_string(id) + ": " + err
                 );
             }
-        ) );   
+        ) );
 }
 
 std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) {
@@ -228,15 +228,15 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) {
         url = _baseUrl + type+"/" + std::to_string(-id) + "/";
     } else {
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
-    }        
+    }
 
-    //std::string t = Time::ref().currentTimeUTC(); 
+    //std::string t = Time::ref().currentTimeUTC();
     std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
     std::stringstream ss(t);
     std::string token;
 
     std::getline(ss, token, ' ');
-    url += token + "-"; 
+    url += token + "-";
     std::getline(ss, token, ' ');
     url += _month[token] + "-";
     std::getline(ss, token, 'T');
@@ -347,7 +347,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
         std::string table = "{"
         "Name = '" + data->name +"' , "
         "Parent = '" + parent + "', "
-        "Renderable = {"    
+        "Renderable = {"
             "Type = '" + _type[data->type] + _geom[data->geom] + "', "
             "Id = " + std::to_string(data->id) + ", "
             "Frame = '" + frame + "' , "
@@ -396,8 +396,8 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) {
 
             std::string table = "{"
                 "Name = '" +info.name+ "',"
-                "Parent = '" + parent + "', " 
-                "Renderable = {"    
+                "Parent = '" + parent + "', "
+                "Renderable = {"
                     "Type = 'KameleonPlane', "
                     "Id = 0 ,"
                     "Frame = '" + frame + "' , "
@@ -405,7 +405,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) {
                     "GridMax = " + std::to_string(max) + ", "
                     "SpatialScale = " + std::to_string(spatialScale) + ", "
                     "UpdateTime = 0, "
-                    "kwPath = '" + info.path + "' ," 
+                    "kwPath = '" + info.path + "' ,"
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
                     "Group = '"+ info.group + "',"
@@ -413,7 +413,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) {
                     "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
                     "}"
                 "}"
-                ; 
+                ;
             return table;
         }
     }
@@ -452,7 +452,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
     std::string table = "{"
     "Name = '" + data->name +"' , "
     "Parent = '" + parent + "', "
-    "Renderable = {"    
+    "Renderable = {"
         "Type = '" + _type[data->type] + _geom[data->geom] + "', "
         "Id = " + std::to_string(data->id) + ", "
         "Frame = '" + frame + "' , "
@@ -648,7 +648,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
                 };
                 _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
             }
-        }        
+        }
     }
 }
 

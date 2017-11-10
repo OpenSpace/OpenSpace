@@ -48,7 +48,7 @@ public:
     GeodeticPatch(const TileIndex& tileIndex);
 
     void setCenter(const Geodetic2&);
-    void setHalfSize(const Geodetic2&);    
+    void setHalfSize(const Geodetic2&);
 
     /**
      * Returns the latitude boundary which is closest to the equator

@@ -52,7 +52,7 @@ bool MultiModelGeometry::loadModel(const std::string& filename)  {
         _vertices.push_back(vv);
     }
 
-    _indices.resize(indices.size());                
+    _indices.resize(indices.size());
     std::copy(indices.begin(), indices.end(), _indices.begin());
 
     return true;

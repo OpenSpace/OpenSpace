@@ -142,8 +142,8 @@ REGISTER_NUMERICALPROPERTY_SOURCE(Mat4x3Property, glm::mat4x3, glm::mat4x3(0),
                                     numeric_limits<float>::max()
                                   ),
                                   glm::mat4x3(
-                                    0.01f, 0.01f, 0.01f, 0.01f, 
-                                    0.01f, 0.01f, 0.01f, 0.01f, 
+                                    0.01f, 0.01f, 0.01f, 0.01f,
+                                    0.01f, 0.01f, 0.01f, 0.01f,
                                     0.01f, 0.01f, 0.01f, 0.01f
                                   ),
                                   DEFAULT_FROM_LUA_LAMBDA(glm::mat4x3),

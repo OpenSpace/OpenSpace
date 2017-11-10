@@ -97,7 +97,7 @@ float DataProcessor::processDataPoint(float value, int option) {
 }
 
 float DataProcessor::normalizeWithStandardScore(float value, float mean, float sd,
-                                                glm::vec2 normalizationValues) 
+                                                glm::vec2 normalizationValues)
 {
     float zScoreMin = normalizationValues.x; //10.0f;//_normValues.x;
     float zScoreMax = normalizationValues.y; //10.0f;//_normValues.y;
@@ -105,25 +105,25 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
     // Clamp intresting values
     standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
     //return and normalize
-    return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
+    return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );
 }
 
 float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean,
                                                   float sd, glm::vec2 normalizationValues)
 {
     float zScoreMin = normalizationValues.x;
-    float zScoreMax = normalizationValues.y; 
+    float zScoreMax = normalizationValues.y;
 
     float value = standardScore*(zScoreMax+zScoreMin)-zScoreMin;
-    value = value*sd+mean; 
+    value = value*sd+mean;
 
-    // std::cout << value << std::endl; 
+    // std::cout << value << std::endl;
     return value;
     // float standardScore = ( value - mean ) / sd;
     // // Clamp intresting values
     // standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
     // //return and normalize
-    // return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
+    // return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );
 }
 
 void DataProcessor::initializeVectors(int numOptions){
@@ -179,7 +179,7 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions) {
              _filterValues += glm::vec2(filterMid, filterWidth);
 
         }
-        _filterValues /= numSelected;   
+        _filterValues /= numSelected;
     }
 }
 
@@ -230,7 +230,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues,
             //unnormalize histMin, histMax
             // min = std::min(min, histMin)
             std::shared_ptr<Histogram> newHist = std::make_shared<Histogram>(
-                std::min(min, normalizeWithStandardScore(unNormHistMin, mean, _standardDeviation[i], _histNormValues)), 
+                std::min(min, normalizeWithStandardScore(unNormHistMin, mean, _standardDeviation[i], _histNormValues)),
                 std::min(max, normalizeWithStandardScore(unNormHistMax, mean, _standardDeviation[i], _histNormValues)),
                 numBins
             );

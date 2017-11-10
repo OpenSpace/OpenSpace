@@ -28,9 +28,9 @@
  /**
  * \file uintproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
 
  * \class UIntProperty

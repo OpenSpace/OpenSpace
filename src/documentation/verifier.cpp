@@ -300,7 +300,7 @@ AndVerifier::AndVerifier(Verifier* l, Verifier* r)
 }
 
 TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
-                                   const std::string& key) const 
+                                   const std::string& key) const
 {
     TestResult resLhs = lhs->operator()(dict, key);
     TestResult resRhs = rhs->operator()(dict, key);

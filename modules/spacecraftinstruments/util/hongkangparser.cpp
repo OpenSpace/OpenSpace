@@ -41,7 +41,7 @@ namespace {
 
 namespace openspace {
 
-HongKangParser::HongKangParser(std::string name, std::string fileName, 
+HongKangParser::HongKangParser(std::string name, std::string fileName,
                                std::string spacecraft,
                                ghoul::Dictionary translationDictionary,
                                std::vector<std::string> potentialTargets)
@@ -84,7 +84,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
 }
 
 void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& target) {
-    //remembto add this lua later... 
+    //remembto add this lua later...
     std::transform(
         line.begin(),
         line.end(),
@@ -100,14 +100,14 @@ void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& 
             break;
         }
         else {
-            // not found - we set void until we have more info. 
+            // not found - we set void until we have more info.
             target = "VOID";
         }
     }
 }
 
 bool HongKangParser::create() {
-    //check input for errors. 
+    //check input for errors.
     bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
         throw ghoul::RuntimeError(
@@ -160,7 +160,7 @@ bool HongKangParser::create() {
                 while (!file.eof()) {
                     std::getline(file, line);
 
-                    std::string event = line.substr(0, line.find_first_of(" ")); 
+                    std::string event = line.substr(0, line.find_first_of(" "));
 
                     auto it = _fileTranslation.find(event);
                     bool foundEvent = (it != _fileTranslation.end());
@@ -169,7 +169,7 @@ bool HongKangParser::create() {
                     double time = getETfromMet(met);
 
                     if (foundEvent){
-                        //store the time, this is used for getNextCaptureTime() 
+                        //store the time, this is used for getNextCaptureTime()
                         _captureProgression.push_back(time);
 
                         if (it->second->getDecoderType() == "CAMERA") {
@@ -215,10 +215,10 @@ bool HongKangParser::create() {
                             // store actual image in map. All targets get _only_ their
                             // corresp. subset.
                             _subsetMap[image.target]._subset.push_back(image);
-                            // compute and store the range for each subset 
+                            // compute and store the range for each subset
                             _subsetMap[image.target]._range.include(time);
                         }
-                        if (it->second->getDecoderType() == "SCANNER") { // SCANNER START 
+                        if (it->second->getDecoderType() == "SCANNER") { // SCANNER START
                             scan_start = time;
 
                             InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(
@@ -292,8 +292,8 @@ bool HongKangParser::create() {
     return true;
 }
 
-bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft, 
-                                      std::vector<std::string>, 
+bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft,
+                                      std::vector<std::string>,
                                       std::vector<std::string> potentialTargets)
 {
     image.target = "VOID";
@@ -337,8 +337,6 @@ double HongKangParser::getETfromMet(std::string line) {
 double HongKangParser::getETfromMet(double met) {
     const double referenceET =
         SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
-
-    //_metRef += 3; // MET reference time is off by 3 sec? 
 
     const double diff = std::abs(met - _metRef);
     if (met > _metRef) {

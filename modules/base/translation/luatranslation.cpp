@@ -78,8 +78,8 @@ LuaTranslation::LuaTranslation()
 
     _luaScriptFile.onChange([&](){
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&){
-             notifyObservers(); 
+        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
+             notifyObservers();
          });
     });
 }

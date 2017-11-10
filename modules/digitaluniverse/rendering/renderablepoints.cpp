@@ -62,7 +62,7 @@ namespace {
     static const openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite."        
+        "The path to the texture that should be used as the point sprite."
     };
     
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
@@ -112,7 +112,7 @@ namespace openspace {
                     "The path to the SPECK file that contains information about the astronomical "
                     "object being rendered."
                 },
-                { 
+                {
                     keyColor,
                     new Vector3Verifier<float>,
                     Optional::No,
@@ -184,7 +184,7 @@ namespace openspace {
             }
             else if (unit == KilometerUnit) {
                 _unit = Kilometer;
-            } 
+            }
             else if (unit == ParsecUnit) {
                 _unit = Parsec;
             }
@@ -300,7 +300,7 @@ namespace openspace {
         
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _program->setUniform("modelViewProjectionTransform", glm::dmat4(data.camera.projectionMatrix()) * 
+        _program->setUniform("modelViewProjectionTransform", glm::dmat4(data.camera.projectionMatrix()) *
             data.camera.combinedViewMatrix() * modelMatrix);
 
         _program->setUniform("color", _pointColor);
@@ -336,7 +336,7 @@ namespace openspace {
         glDepthMask(true);
     }
 
-    void RenderablePoints::update(const UpdateData&) {  
+    void RenderablePoints::update(const UpdateData&) {
         if (_dataIsDirty) {
             LDEBUG("Regenerating data");
 
@@ -656,7 +656,7 @@ namespace openspace {
             // Converting untis
             if (_unit == Kilometer) {
                 p *= 1E3;
-            } 
+            }
             else if (_unit == Parsec) {
                 p *= PARSEC;
             }

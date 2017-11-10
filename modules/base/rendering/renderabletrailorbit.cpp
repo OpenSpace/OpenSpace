@@ -39,11 +39,11 @@
 //  ---------------------------------------------------------------------------------
 //  | FF |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |
 //  ---------------------------------------------------------------------------------
-//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15  
+//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 //                    <------ newer in time                                    oldest
 //
 // In the begining the floating value starts at 0; this means that array element 0 is
-// updated and uploaded to the GPU at every frame. The FF+1 element is the newest fixed 
+// updated and uploaded to the GPU at every frame. The FF+1 element is the newest fixed
 // location and FF-1 element is the oldest fixed location (including wrapping around the
 // array) with the times of _lastPointTime and _firstPointTime.
 //
@@ -53,7 +53,7 @@
 //  ---------------------------------------------------------------------------------
 //  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    | FF |
 //  ---------------------------------------------------------------------------------
-//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15  
+//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 //                    <------ newer in time                              oldest
 //
 // Thus making the floating point traverse backwards through the array and element 0 being
@@ -257,7 +257,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // Only update the changed ones
             // Since we are using a ring buffer, the number of updated needed might be
             // bigger than our current points, which means we have to split the upload
-            // into two calls. 
+            // into two calls.
             if (report.nUpdated > 0) {
                 // deltaT is positive, so the pointer is moving backwards and update has
                 // to happen towards the front
@@ -277,7 +277,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                     // The current index is too close to the wrap around part, so we need
                     // to split the upload into two parts:
                     // 1. from the current index to the end of the array
-                    // 2. the rest starting from the beginning of the array 
+                    // 2. the rest starting from the beginning of the array
                     int first = s - i;
                     int second = n - first;
                     upload(i, first);  // 1

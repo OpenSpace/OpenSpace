@@ -317,7 +317,7 @@ void GuiPropertyComponent::render() {
 
             if (header()) {
                 renderPropertyOwner(pOwner);
-            }       
+            }
         };
 
         if (!_currentUseTreeLayout || noGuiGroups) {

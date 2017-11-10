@@ -80,7 +80,7 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
         AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
     );
 
-    _chunkEvaluatorByAvailableTiles = 
+    _chunkEvaluatorByAvailableTiles =
         std::make_unique<chunklevelevaluator::AvailableTileData>();
     _chunkEvaluatorByProjectedArea =
     std::make_unique<chunklevelevaluator::ProjectedArea>();

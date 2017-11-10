@@ -28,9 +28,9 @@
  /**
  * \file wcharproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
 
  * \class WCharProperty

@@ -279,9 +279,11 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                         sourceName, sourceRadius));
                 }
                 else {
-                    LWARNING("No Radius value expecified for Shadow Source Name " 
-                        << sourceName << " from " << name 
-                        << " planet.\nDisabling shadows for this planet.");
+                    LWARNING(
+                        "No Radius value expecified for Shadow Source Name "
+                        << sourceName << " from " << name
+                        << " planet.\nDisabling shadows for this planet."
+                    );
                     disableShadows = true;
                     break;
                 }
@@ -342,14 +344,14 @@ void RenderablePlanet::initializeGL() {
             "shadowNightProgram",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl");
-    } 
+    }
     else if (_programObject == nullptr && _shadowEnabled) {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowProgram",
             "${MODULE_SPACE}/shaders/shadow_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_fs.glsl");
-    } 
+    }
     else if (_programObject == nullptr && _hasNightTexture) {
         // Night texture program
         _programObject = renderEngine.buildRenderProgram(
@@ -433,7 +435,7 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform("transparency", _alpha);
     _programObject->setUniform(
-        "modelViewProjectionTransform", 
+        "modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));

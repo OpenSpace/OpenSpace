@@ -91,7 +91,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceNormal(Geodetic2 geodetic2) const {
     //geodetic2.lon = geodetic2.lon > M_PI ? geodetic2.lon - M_PI * 2 : geodetic2.lon;
     return glm::dvec3(
         cosLat * cos(geodetic2.lon),
-        cosLat * sin(geodetic2.lon), 
+        cosLat * sin(geodetic2.lon),
         sin(geodetic2.lat));
 }
 

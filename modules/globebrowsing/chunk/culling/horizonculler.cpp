@@ -79,7 +79,7 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
                         maxHeight, minimumGlobeRadius);
 }
 
-bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition, 
+bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
                                const glm::dvec3& globePosition,
                                const glm::dvec3& objectPosition,
                                double objectBoundingSphereRadius,

@@ -28,9 +28,9 @@
  /**
  * \file longlongproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
 
  * \class LongLongProperty

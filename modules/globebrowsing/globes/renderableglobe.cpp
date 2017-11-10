@@ -157,11 +157,11 @@ namespace openspace::globebrowsing {
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _debugProperties({
-        BoolProperty(SaveOrThrowInfo, false), 
+        BoolProperty(SaveOrThrowInfo, false),
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(ShowChunkBoundsInfo, false),
         BoolProperty(ShowChunkAABBInfo, false),
-        BoolProperty(HeightResolutionInfo, false), 
+        BoolProperty(HeightResolutionInfo, false),
         BoolProperty(HeightIntensityInfo, false),
         BoolProperty(FrustumCullingInfo, true),
         BoolProperty(HorizonCullingInfo, true),
@@ -375,7 +375,7 @@ const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
 }
 
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace) 
+                                                       const glm::dvec3& targetModelSpace)
 {
     glm::dvec3 centerToEllipsoidSurface =
         _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
@@ -403,7 +403,7 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     };
 }
 
-void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 
+void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) {
     _savedCamera = camera;
 }
 

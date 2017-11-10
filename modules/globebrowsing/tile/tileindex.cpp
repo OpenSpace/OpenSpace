@@ -112,7 +112,7 @@ int TileIndex::manhattan(const TileIndex& other) const {
 }
 
 // Creates a hash which can be used as key in hash maps.
-// 
+//
 // +-------+------------+-------+------------+
 // | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
 // +-------+------------+-------+------------+

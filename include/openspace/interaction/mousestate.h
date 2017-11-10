@@ -46,7 +46,7 @@ public:
     /**
      * \param sensitivity
      * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera. 
+     * interaction. Lower value will make it harder to move the camera.
      */
     MouseStates(double sensitivity, double velocityScaleFactor);
     void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);

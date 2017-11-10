@@ -74,10 +74,10 @@ void ABufferRenderer::initialize() {
     const GLfloat vertex_data[] = {
         //      x      y     s     t
         -size, -size, 0.0f, 1.0f,
-        size,    size, 0.0f, 1.0f, 
-        -size,  size, 0.0f, 1.0f, 
-        -size, -size, 0.0f, 1.0f, 
-        size, -size, 0.0f, 1.0f, 
+        size,    size, 0.0f, 1.0f,
+        -size,  size, 0.0f, 1.0f,
+        -size, -size, 0.0f, 1.0f,
+        size, -size, 0.0f, 1.0f,
         size,    size, 0.0f, 1.0f,
     };
 
@@ -237,7 +237,7 @@ void ABufferRenderer::update() {
 void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
     PerfMeasure("ABufferRenderer::render");
 
-    if (!_scene || !_camera) { 
+    if (!_scene || !_camera) {
         return;
     }
 

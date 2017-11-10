@@ -52,10 +52,10 @@ std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path, g
 
         std::vector<std::string> opts = _kw->getVariables();
         opts.erase( std::remove_if(
-            opts.begin(), 
-            opts.end(), 
+            opts.begin(),
+            opts.end(),
             [this](std::string opt){ return (opt.size() > 3 || _coordinateVariables.find(opt) != _coordinateVariables.end());}
-            ), 
+            ),
         opts.end()
         );
         return opts;
@@ -100,7 +100,7 @@ void DataProcessorKameleon::addDataValues(std::string path, properties::Selectio
 }
 std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions, float slice){
     _slice = slice;
-    // _dimensions = dimensions; 
+    // _dimensions = dimensions;
     return processData(path, dataOptions, dimensions);
 }
 

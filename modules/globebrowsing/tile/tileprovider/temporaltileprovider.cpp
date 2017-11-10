@@ -61,7 +61,7 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_RESOLUTION =
                                                                 "OpenSpaceTimeResolution";
 const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeIdFormat";
 
-TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
+TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : _initDict(dictionary)
     , _filePath(FilePathInfo)
     , _successfulInitialization(false)
@@ -94,7 +94,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     else {
         LERROR("Unable to read file " + _filePath.value());
         _successfulInitialization = false;
-    }  
+    }
 }
 
 
@@ -220,7 +220,7 @@ std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::strin
 TileDepthTransform TemporalTileProvider::depthTransform() {
     if (_successfulInitialization) {
         ensureUpdated();
-        return _currentTileProvider->depthTransform();    
+        return _currentTileProvider->depthTransform();
     }
     else {
         return { 1.0f, 0.0f};
@@ -413,7 +413,7 @@ TimeFormat* TimeIdProviderFactory::getProvider(const std::string& format) {
         init();
     }
     ghoul_assert(
-        _timeIdProviderMap.find(format) != _timeIdProviderMap.end(), 
+        _timeIdProviderMap.find(format) != _timeIdProviderMap.end(),
         "Unsupported Time format: " + format
     );
     return _timeIdProviderMap[format].get();

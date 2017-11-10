@@ -35,7 +35,7 @@
 #include <memory>
 
 namespace ghoul::opengl {
-    class ProgramObject; 
+    class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
 

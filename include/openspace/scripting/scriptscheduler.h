@@ -37,7 +37,7 @@ namespace openspace::documentation { struct Documentation; }
 namespace openspace::scripting {
 
 /**
- * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple 
+ * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple
  * interface for retrieveing scheduled scripts
  */
 class ScriptScheduler {
@@ -72,8 +72,8 @@ public:
     void clearSchedule();
 
     /**
-    * Progresses the script schedulers time and returns all scripts that has been 
-    * scheduled to run between \param newTime and the time provided in the last invocation 
+    * Progresses the script schedulers time and returns all scripts that has been
+    * scheduled to run between \param newTime and the time provided in the last invocation
     * of this method.
     *
     * \param newTime A j2000 time value specifying the new time stamp that
@@ -96,7 +96,7 @@ public:
     > progressTo(double newTime);
 
     /**
-    * Returns the the j2000 time value that the script scheduler is currently at 
+    * Returns the the j2000 time value that the script scheduler is currently at
     */
     double currentTime() const;
 

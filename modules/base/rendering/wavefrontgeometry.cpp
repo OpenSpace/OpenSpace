@@ -35,7 +35,7 @@ namespace openspace {
 namespace modelgeometry {
 
 WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
-    : ModelGeometry(dictionary) 
+    : ModelGeometry(dictionary)
 {
     loadObj(_file);
 }

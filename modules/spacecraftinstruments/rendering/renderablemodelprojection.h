@@ -43,7 +43,7 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; } 
+namespace documentation { struct Documentation; }
 
 struct RenderData;
 struct UpdateData;

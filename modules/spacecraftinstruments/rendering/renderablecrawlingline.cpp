@@ -196,7 +196,7 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() *
         glm::mat4(data.camera.combinedViewMatrix() *
             modelTransform
-        )    
+        )
     ;
     //glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -283,7 +283,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferSubData(
-        GL_ARRAY_BUFFER, 
+        GL_ARRAY_BUFFER,
         0,
         2 * sizeof(VBOData),
         vboData

@@ -171,7 +171,7 @@ glm::vec2 SGCTWindowWrapper::dpiScaling() const {
 
 int SGCTWindowWrapper::currentNumberOfAaSamples() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
-} 
+}
 
 bool SGCTWindowWrapper::isRegularRendering() const {
     sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();

@@ -165,7 +165,7 @@ void RenderableModel::initializeGL() {
 
     loadTexture();
 
-    _geometry->initialize(this); 
+    _geometry->initialize(this);
 }
 
 void RenderableModel::deinitializeGL() {

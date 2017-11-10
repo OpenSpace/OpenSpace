@@ -84,14 +84,14 @@ public:
 
     /*
      * Return a path to a file with the functions, uniforms and fragment shader in variables
-     * required to generate the fragment color and depth. 
+     * required to generate the fragment color and depth.
      *
      * Should define the function:
      * Fragment getFragment()
-     * 
+     *
      * The shader preprocessor will have acceess to
      *   A #{namespace} variable (unique per helper file)
-     */ 
+     */
     virtual std::string getBoundsFsPath() const = 0 ;
 
     /**
@@ -116,7 +116,7 @@ public:
      * This file will be included once per shader program generated,
      * regardless of how many volumes say they require the file.
      * Ideal to avoid redefinitions of helper functions.
-     * 
+     *
      * The shader preprocessor will have access to the #{namespace} variable (unique per helper file)
      * which should be a prefix to all symbols defined by the helper
      */
@@ -125,4 +125,4 @@ public:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___VOLUMERAYCASTER___H__ 
+#endif // __OPENSPACE_CORE___VOLUMERAYCASTER___H__

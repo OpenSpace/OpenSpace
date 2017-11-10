@@ -148,16 +148,12 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     );
 
     OsEng.registerModuleCallback(
-        // This is done in the PostDraw phase so that it will render it on top of
-        // everything else in the case of fisheyes. With this being in the Render callback
-        // the GUI would be rendered on top of each of the cube faces
-        OpenSpaceEngine::CallbackOption::PostDraw,
-        [&](){
+        OpenSpaceEngine::CallbackOption::Draw2D,
+        [&]() {
             WindowWrapper& wrapper = OsEng.windowWrapper();
             bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (wrapper.isMaster() && showGui ) {
+            if (wrapper.isMaster() && showGui) {
                 glm::vec2 mousePosition = wrapper.mousePosition();
-                //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
 
@@ -166,8 +162,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     mouseButtons = touchInput.action;
                     mousePosition = touchInput.pos;
                 }
-                // We don't do any collection of immediate mode user interface, so it is
-                // fine to open and close a frame immediately
+                // We don't do any collection of immediate mode user interface, so it
+                // is fine to open and close a frame immediately
                 gui.startFrame(
                     static_cast<float>(dt),
                     glm::vec2(windowSize),

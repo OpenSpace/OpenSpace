@@ -88,7 +88,7 @@ protected:
     void initializeTime();
     void initializeGroup();
     /**
-     * Creates the shader program. Concrete IswaCygnets must set 
+     * Creates the shader program. Concrete IswaCygnets must set
      * _vsPath, _fsPath and _programName before this function in called.
      * @return true if successful creation
      */
@@ -113,7 +113,7 @@ protected:
      */
     virtual bool updateTextureResource() = 0;
     /**
-     * should send a http request to get the resource it needs to create 
+     * should send a http request to get the resource it needs to create
      * a texture. For Texture cygnets, this should be an image. For DataCygnets,
      * this should be the data file.
      * @return true if update was successfull

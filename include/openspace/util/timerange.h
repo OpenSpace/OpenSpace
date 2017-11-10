@@ -38,7 +38,7 @@ struct TimeRange {
     TimeRange();
 
     /**
-    * Initializes a TimeRange with both start and end time. Initializing empty timeranges 
+    * Initializes a TimeRange with both start and end time. Initializing empty timeranges
     * is OK.
     */
     TimeRange(double startTime, double endTime);

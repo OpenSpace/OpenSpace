@@ -628,7 +628,7 @@ double ParallelConnection::timeTolerance() const {
 
 void ParallelConnection::dataMessageReceived(const std::vector<char>& messageContent) {
     // The type of data message received
-    uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));   
+    uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));
     std::vector<char> buffer(
         messageContent.begin() + sizeof(uint32_t),
         messageContent.end()

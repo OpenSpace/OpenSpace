@@ -41,7 +41,7 @@ namespace documentation {  struct Documentation; }
  * Used to represent a named period of time within a mission. Allows nested phases, i.e.
  * phases within phases. Designed for WORM usage (Write Once, Read Multiple), and,
  * therefore, has only accessors.
- * 
+ *
  * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an
  * optional MissionPhase::description, and optional subphases.
  */

@@ -39,7 +39,7 @@ namespace {
     const char* KeyInNSlices = "InNSlices";
     const char* KeyOutFilename = "OutFilename";
     const char* KeyOutDimensions = "OutDimensions";
-} // namespace 
+} // namespace
 
 namespace openspace {
 

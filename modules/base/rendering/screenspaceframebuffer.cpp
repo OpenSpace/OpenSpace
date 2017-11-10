@@ -54,7 +54,7 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     };
 }
 
-ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary) 
+ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _size(SizeInfo, glm::vec4(0), glm::vec4(0), glm::vec4(16384))
     , _framebuffer(nullptr)

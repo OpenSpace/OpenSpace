@@ -51,7 +51,7 @@ protected:
     /**
      * loads the transferfunctions specified in tfPath into
      * _transferFunctions list.
-     * 
+     *
      * @param tfPath Path to transfer function file
      */
     void readTransferFunctions(std::string tfPath);
@@ -99,7 +99,7 @@ protected:
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _autoFilter;
 
-    std::shared_ptr<DataProcessor> _dataProcessor; 
+    std::shared_ptr<DataProcessor> _dataProcessor;
     std::string _dataBuffer;
     glm::size3_t _textureDimensions;
 

@@ -231,7 +231,7 @@ const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
 
 // Delegating constructors are necessary; automatic template deduction cannot
 // deduce template argument for 'U' if 'default' methods are used as default values in
-// a single constructor    
+// a single constructor
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info)

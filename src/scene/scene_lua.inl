@@ -180,7 +180,7 @@ int property_setValueSingle(lua_State* L) {
         for (properties::Property* prop : allProperties()) {
             std::string propFullId = prop->fullyQualifiedIdentifier();
             //Look for a match in the uri with the group name (first term) removed
-            int propMatchLength = 
+            int propMatchLength =
                 static_cast<int>(propFullId.length()) -
                 static_cast<int>(pathRemainderToMatch.length());
 

@@ -116,7 +116,7 @@ private:
     float _interpolationTime;
 
     struct RenderInformation {
-        // Differentiating different vertex types 
+        // Differentiating different vertex types
         using VertexColorType = int32_t;
         // This needs to be synced with the fov_vs.glsl shader
         static const VertexColorType VertexColorTypeDefaultStart = 0;

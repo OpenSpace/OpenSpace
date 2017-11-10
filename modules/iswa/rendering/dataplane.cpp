@@ -35,7 +35,7 @@ namespace openspace {
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :DataCygnet(dictionary)
-{     
+{
     _programName = "DataPlaneProgram";
     _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
     _fsPath = "${MODULE_ISWA}/shaders/dataplane_fs.glsl";
@@ -54,13 +54,13 @@ void DataPlane::initialize() {
 
         //If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this]() {
-            // If autofiler is selected, use _dataProcessor to set backgroundValues 
+            // If autofiler is selected, use _dataProcessor to set backgroundValues
             // and unregister backgroundvalues property.
             if (_autoFilter.value()) {
                 _backgroundValues.setValue(_dataProcessor->filterValues());
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
-            // else if autofilter is turned off, register backgroundValues 
+            // else if autofilter is turned off, register backgroundValues
             } else {
                 _backgroundValues.setVisibility(properties::Property::Visibility::All);
                 //_backgroundValues.setVisible(true);

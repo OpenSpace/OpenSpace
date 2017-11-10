@@ -40,9 +40,9 @@ namespace ghoul::fontrendering {
 namespace openspace::globebrowsing::tileprovider {
 
 /**
- * Enables a simple way of providing tiles with any type of rendered text. 
- * Internally it handles setting up a FBO for rendering the text, and defines a new 
- * interface, consisting of only a single method for subclasses to implement: 
+ * Enables a simple way of providing tiles with any type of rendered text.
+ * Internally it handles setting up a FBO for rendering the text, and defines a new
+ * interface, consisting of only a single method for subclasses to implement:
  * renderText(const FontRenderer&, const TileIndex&) const;
  */
 class TextTileProvider : public TileProvider {
@@ -65,7 +65,7 @@ public:
     virtual int maxLevel() override;
 
     /**
-     * Allow overriding of hash function. 
+     * Allow overriding of hash function.
      * Default is <code>TileIndex::hashKey()</code>
      *
      * \param tileIndex tileIndex to hash
@@ -74,9 +74,9 @@ public:
     virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
 
     /**
-     * Uses the fontRenderer to render some text onto the tile texture provided in 
-     * backgroundTile(const TileIndex& tileIndex). 
-     * 
+     * Uses the fontRenderer to render some text onto the tile texture provided in
+     * backgroundTile(const TileIndex& tileIndex).
+     *
      * \param fontRenderer used for rendering text onto texture
      * \param tileIndex associated with the tile to be rendered onto
      */

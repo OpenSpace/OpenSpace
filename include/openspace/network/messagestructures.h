@@ -94,7 +94,7 @@ struct CameraKeyframe {
         // Focus node
         int nodeNameLength;
         size = sizeof(int);
-        memcpy(&nodeNameLength, buffer.data() + offset, size);      
+        memcpy(&nodeNameLength, buffer.data() + offset, size);
         offset += size;
         size = nodeNameLength;
         _focusNode = std::string(buffer.data() + offset, buffer.data() + offset + size);
