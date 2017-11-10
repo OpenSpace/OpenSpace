@@ -5,7 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
-            Enabled = false,
+            Enabled = true,
             Color = { 1.0, 0.4, 0.2 },
             Transparency = 0.99,
             ScaleFactor = 502.77,
