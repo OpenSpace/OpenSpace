@@ -210,7 +210,7 @@ void RenderablePlane::deinitialize() {
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
     //if (_projectionListener){
-    //    //get parent node-texture and set with correct dimensions  
+    //    //get parent node-texture and set with correct dimensions
     //    SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(
     //        _nodeName
     //    )->parent();
@@ -342,7 +342,7 @@ void RenderablePlane::createPlane() {
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
-        1, 
+        1,
         2,
         GL_FLOAT,
         GL_FALSE,

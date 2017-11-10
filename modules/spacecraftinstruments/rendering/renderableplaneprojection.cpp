@@ -221,8 +221,8 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     glm::dvec3 boresight;
 
     std::string target = _defaultTarget;
-    // Turned on if the plane should be attached to the closest target, 
-    // rather than the target specified in img 
+    // Turned on if the plane should be attached to the closest target,
+    // rather than the target specified in img
     //if (!_moving) {
     //    target = findClosestTarget(currentTime);
     //}
@@ -290,7 +290,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         );
         if (thisNode && newParent) {
             thisNode->setParent(*newParent);
-        }   
+        }
     }
 
     const GLfloat vertex_data[] = {

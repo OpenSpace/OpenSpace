@@ -30,7 +30,7 @@ template <typename T>
 const T Angle<T>::PI = T(3.14159265358979323846264338327950);
 
 template <typename T>
-const T Angle<T>::EPSILON = 1e-10; // Should depend on the typedef /eb 
+const T Angle<T>::EPSILON = 1e-10; // Should depend on the typedef /eb
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                             STATIC CONSTANTS                                         //

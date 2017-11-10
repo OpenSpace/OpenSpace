@@ -294,7 +294,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     }
 
     _delete.onChange([this](){
-        std::string script = 
+        std::string script =
             "openspace.unregisterScreenSpaceRenderable('" + name() + "');";
         OsEng.scriptEngine().queueScript(
             script,
@@ -454,7 +454,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
             _scale * scalingRatioY * textureRatio,
             1.f
         )
-    ); 
+    );
 }
 
 glm::mat4 ScreenSpaceRenderable::rotationMatrix() {

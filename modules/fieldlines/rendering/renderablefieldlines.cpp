@@ -104,7 +104,7 @@ namespace {
 
 namespace openspace {
 
-RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
+RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _stepSize(StepSizeInfo, defaultFieldlineStepSize, 0.f, 10.f)
     , _classification(Classification, true)
@@ -427,7 +427,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     if (model != vectorFieldKameleonModelBATSRUS) {
         //modelType = KameleonWrapper::Model::BATSRUS;
     //else {
-        LERROR(keyVectorField << "." << keyVectorFieldVolumeModel << " model '" << 
+        LERROR(keyVectorField << "." << keyVectorFieldVolumeModel << " model '" <<
             model << "' not supported");
         return {};
     }

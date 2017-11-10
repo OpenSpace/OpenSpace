@@ -125,8 +125,8 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
             _timeRange.include(overallTimeRange);
         }
         else {
-            // Its OK to not specify an overall time range, the time range for the 
-            // subphases will simply be used. 
+            // Its OK to not specify an overall time range, the time range for the
+            // subphases will simply be used.
             _timeRange.include(timeRangeSubPhases);
         }
     }

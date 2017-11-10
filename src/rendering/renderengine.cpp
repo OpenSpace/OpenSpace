@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/renderengine.h> 
+#include <openspace/rendering/renderengine.h>
 
 #ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
@@ -80,7 +80,7 @@
 namespace {
     const char* _loggerCat = "RenderEngine";
 
-    const char* KeyRenderingMethod = "RenderingMethod";   
+    const char* KeyRenderingMethod = "RenderingMethod";
     const std::chrono::seconds ScreenLogTimeToLive(15);
     const char* DefaultRenderingMethod = "ABuffer";
     const char* RenderFsPath = "${SHADERS}/render.frag";
@@ -375,7 +375,7 @@ void RenderEngine::initialize() {
 
 void RenderEngine::initializeGL() {
     LTRACE("RenderEngine::initializeGL(begin)");
-    // TODO:    Fix the power scaled coordinates in such a way that these 
+    // TODO:    Fix the power scaled coordinates in such a way that these
     //            values can be set to more realistic values
 
     // set the close clip plane and the far clip plane to extreme values while in

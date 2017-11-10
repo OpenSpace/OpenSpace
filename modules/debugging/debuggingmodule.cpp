@@ -43,7 +43,7 @@ void DebuggingModule::internalInitialize() {
     fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
 }
 
-std::vector<documentation::Documentation> DebuggingModule::documentations() const { 
+std::vector<documentation::Documentation> DebuggingModule::documentations() const {
     return {
         RenderableDebugPlane::Documentation()
     };

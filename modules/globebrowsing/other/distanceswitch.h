@@ -38,7 +38,7 @@ namespace openspace {
 namespace openspace::globebrowsing {
 
 /**
- * Selects a specific Renderable to be used for rendering, based on distance to the 
+ * Selects a specific Renderable to be used for rendering, based on distance to the
  * camera
  */
 class DistanceSwitch {
@@ -49,7 +49,7 @@ public:
     bool deinitialize();
 
     /**
-     * Picks the first Renderable with the associated maxDistance greater than the 
+     * Picks the first Renderable with the associated maxDistance greater than the
      * current distance to the camera
      */
     void render(const RenderData& data, RendererTasks& rendererTask);

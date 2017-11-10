@@ -428,7 +428,7 @@ bool RenderableFov::isReady() const {
 
 // Orthogonal projection next to planets surface
 glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double time,
-                                               const std::string& target) const 
+                                               const std::string& target) const
 {
     glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
         target,
@@ -714,13 +714,13 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                         const double t2 = 0.5 + bisect(half, jBound, intercepts);
 
                         //
-                        // The target is sticking out somewhere between i and j, so we 
+                        // The target is sticking out somewhere between i and j, so we
                         // have three regions here:
                         // The first (0,t1) and second (t2,1) are not intersecting
                         // The third between (t1,t2) is intersecting
                         //
-                        //   i       p1    p2       j 
-                        //            *****        
+                        //   i       p1    p2       j
+                        //            *****
                         //   x-------*     *-------x
                         //   0       t1    t2      1
 
@@ -806,7 +806,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             //            SpiceManager::ref().surfaceIntercept(
             //                target,
             //                _instrument.spacecraft,
-            //                _instrument.name, 
+            //                _instrument.name,
             //                bodyfixed,
             //                _instrument.aberrationCorrection,
             //                data.time,
@@ -825,7 +825,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             //        bool intercepted = res.interceptFound;
 
             //        if (intercepted) {
-            //            // find the two outer most points of intersection 
+            //            // find the two outer most points of intersection
             //            glm::dvec3 root1 = bisection(half, current, data.time, target);
             //            glm::dvec3 root2 = bisection(half, next, data.time, target);
 
@@ -1022,7 +1022,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             if (interceptTag[i] == false) { // If point is non-interceptive, project it.
                 insertPoint(
                     _fovPlane,
-                    glm::vec4(orthogonalProjection(current, data.time, target), 0.0), 
+                    glm::vec4(orthogonalProjection(current, data.time, target), 0.0),
                     tmp
                 );
                 _rebuild = true;
@@ -1064,7 +1064,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     bool intercepted = res.interceptFound;
 
                     if (intercepted) {
-                        // find the two outer most points of intersection 
+                        // find the two outer most points of intersection
                         glm::dvec3 root1 = bisection(half, current, data.time, target);
                         glm::dvec3 root2 = bisection(half, next, data.time, target);
 
@@ -1122,7 +1122,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 for (int j = 1; j <= InterpolationSteps; ++j) {
                     float t = (static_cast<float>(j) / InterpolationSteps);
                     interpolated = interpolate(mid, next, t);
-                    glm::dvec3 ivec = 
+                    glm::dvec3 ivec =
                         (j > 1) ?
                         checkForIntercept(interpolated, data.time, target) :
                         orthogonalProjection(interpolated, data.time, target);
@@ -1353,7 +1353,7 @@ void RenderableFov::updateGPU() {
     //    );
     //}
     //else {
-    //    // new points - memory change 
+    //    // new points - memory change
     //    glBindVertexArray(_orthogonalPlane.vao);
     //    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
     //    glBufferData(

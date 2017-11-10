@@ -66,7 +66,7 @@ protected:
     glm::vec2 _normValues;
     glm::vec2 _filterValues;
 
-    std::vector<float> _min; 
+    std::vector<float> _min;
     std::vector<float> _max;
     std::vector<float> _sum;
     std::vector<float> _standardDeviation;

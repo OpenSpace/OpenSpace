@@ -122,7 +122,7 @@ OperatorVerifier<T, Operator>::OperatorVerifier(typename T::Type val)
 
 template <typename T, typename Operator>
 TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& dict,
-                                                     const std::string& key) const 
+                                                     const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {

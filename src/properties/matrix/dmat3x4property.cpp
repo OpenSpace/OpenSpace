@@ -142,8 +142,8 @@ REGISTER_NUMERICALPROPERTY_SOURCE(DMat3x4Property, glm::dmat3x4, glm::dmat3x4(0)
                                     numeric_limits<double>::max()
                                   ),
                                   glm::dmat3x4(
-                                    0.01, 0.01, 0.01, 0.01, 
-                                    0.01, 0.01, 0.01, 0.01, 
+                                    0.01, 0.01, 0.01, 0.01,
+                                    0.01, 0.01, 0.01, 0.01,
                                     0.01, 0.01, 0.01, 0.01
                                   ),
                                   DEFAULT_FROM_LUA_LAMBDA(glm::dmat3x4),

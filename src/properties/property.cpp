@@ -223,7 +223,7 @@ std::string Property::generateBaseDescription() const {
         std::string(TypeKey) + " = \"" + className() + "\", " +
         IdentifierKey + " = \"" + fullyQualifiedIdentifier() + "\", " +
         NameKey + " = \"" + guiName() + "\", " +
-        generateMetaDataDescription() + ", " + 
+        generateMetaDataDescription() + ", " +
         generateAdditionalDescription();
 }
 

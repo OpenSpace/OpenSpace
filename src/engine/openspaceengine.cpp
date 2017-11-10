@@ -832,7 +832,7 @@ void OpenSpaceEngine::configureLogging() {
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogLevel;
     const std::string KeyLogImmediateFlush =
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartImmediateFlush;
-    const std::string KeyLogs = 
+    const std::string KeyLogs =
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogs;
 
     if (configurationManager().hasKeyAndValue<std::string>(KeyLogLevel)) {
@@ -1009,7 +1009,7 @@ void OpenSpaceEngine::initializeGL() {
 
     // The ordering of the KeyCheckOpenGLState and KeyLogEachOpenGLCall are important as
     // the callback mask in glbinding is stateful for each context, and since
-    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the 
+    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the
     // state from KeyCheckOpenGLState
     if (_configurationManager->hasKey(ConfigurationManager::KeyCheckOpenGLState)) {
         const bool val = _configurationManager->value<bool>(

@@ -55,7 +55,7 @@ class GdalRawTileDataReader : public RawTileDataReader {
 public:
 
     /**
-    * Opens a GDALDataset in readonly mode and calculates meta data required for 
+    * Opens a GDALDataset in readonly mode and calculates meta data required for
     * reading tile using a TileIndex.
     *
     * \param filePath, a path to a specific file GDAL can read
@@ -103,7 +103,7 @@ private:
     /**
      * Use as a helper function when determining the maximum tile level. This function
      * returns the negated number of overviews requred to downscale the highest overview
-     * dataset so that it fits within minimumPixelSize pixels in the x-dimension. 
+     * dataset so that it fits within minimumPixelSize pixels in the x-dimension.
      */
     int calculateTileLevelDifference(int minimumPixelSize) const;
 

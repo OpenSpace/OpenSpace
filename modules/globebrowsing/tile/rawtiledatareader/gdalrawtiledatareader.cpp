@@ -167,8 +167,8 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     char* dataDest = dataDestination;
 
     // GDAL reads pixels top to bottom, but we want our pixels bottom to top.
-    // Therefore, we increment the destination pointer to the last line on in the 
-    // buffer, and the we specify in the rasterIO call that we want negative line 
+    // Therefore, we increment the destination pointer to the last line on in the
+    // buffer, and the we specify in the rasterIO call that we want negative line
     // spacing. Doing this compensates the flipped Y axis
     dataDest += (io.write.totalNumBytes - io.write.bytesPerLine);
 

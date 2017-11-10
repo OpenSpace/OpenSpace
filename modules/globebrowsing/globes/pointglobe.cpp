@@ -37,7 +37,7 @@ namespace {
     static const openspace::properties::Property::PropertyInfo IntensityClampInfo = {
         "IntensityClamp",
         "Intensity clamp",
-        "" 
+        ""
     };
 
     static const openspace::properties::Property::PropertyInfo LightIntensityInfo = {
@@ -138,7 +138,7 @@ void PointGlobe::render(const RenderData& data, RendererTasks&) {
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
-        glm::inverse(rotationTransform) * 
+        glm::inverse(rotationTransform) *
         scaleTransform; // Scale
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     //glm::vec3 directionToSun = glm::normalize(glm::vec3(0) - glm::vec3(bodyPosition));

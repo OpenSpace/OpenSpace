@@ -82,7 +82,7 @@ bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRang
     success &= dict.getValue(KeyStart, startTimeStr);
     success &= dict.getValue(KeyEnd, endTimeStr);
     if (success) {
-        // Parse to date. 
+        // Parse to date.
         // @TODO converting string to time stamp should not rely on Spice
         timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);
         timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(endTimeStr);
@@ -118,7 +118,7 @@ double TimeRange::duration() const {
 }
 
 bool TimeRange::isDefined() const {
-    return start <= end; 
+    return start <= end;
 }
 
 bool TimeRange::isEmpty() const {

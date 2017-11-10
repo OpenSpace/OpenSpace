@@ -143,7 +143,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
     }
 
     if (chunk.owner().generalProperties().useAccurateNormals &&
-        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty()) 
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
         glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::SOUTH_WEST));

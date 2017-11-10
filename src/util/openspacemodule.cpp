@@ -40,7 +40,7 @@ namespace {
 
 namespace openspace {
 
-OpenSpaceModule::OpenSpaceModule(std::string name) 
+OpenSpaceModule::OpenSpaceModule(std::string name)
     : properties::PropertyOwner({ std::move(name) })
 {}
 

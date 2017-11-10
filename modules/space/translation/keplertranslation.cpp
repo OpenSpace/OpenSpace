@@ -220,7 +220,7 @@ KeplerTranslation::KeplerTranslation()
     addProperty(_period);
 }
 
-KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary) 
+KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     : KeplerTranslation()
 {
     documentation::testSpecificationAndThrow(

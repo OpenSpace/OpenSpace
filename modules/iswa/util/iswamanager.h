@@ -64,7 +64,7 @@
 namespace openspace {
 
 class IswaBaseGroup;
-class IswaCygnet; 
+class IswaCygnet;
 
 struct CdfInfo {
     std::string name;

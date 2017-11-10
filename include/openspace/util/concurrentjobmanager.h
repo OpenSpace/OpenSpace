@@ -43,7 +43,7 @@ struct Job {
     virtual std::shared_ptr<P> product() = 0;
 };
 
-/* 
+/*
  * Templated Concurrent Job Manager
  * This class is used execute specific jobs on one (1) parallell thread
  */

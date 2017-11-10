@@ -35,8 +35,8 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::filesystem { 
-    class File; 
+namespace ghoul::filesystem {
+    class File;
 }
 
 namespace ghoul::opengl {

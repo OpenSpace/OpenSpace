@@ -48,7 +48,7 @@ public:
     std::string nextTarget() const;
 
 protected:
-    void paintEvent(QPaintEvent* event);  
+    void paintEvent(QPaintEvent* event);
     void drawContent(QPainter& painter, QRectF rect);
     void drawLegend(QPainter& painter, QRectF rect);
     void drawImages(QPainter& painter, QRectF timelineRect, std::vector<Image*> images, double minimumTime, double maximumTime);

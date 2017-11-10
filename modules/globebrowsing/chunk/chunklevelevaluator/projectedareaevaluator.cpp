@@ -46,12 +46,12 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
         glm::dvec3(inverseModelTransform * cameraPositionModelSpace);
     glm::dvec3 cameraToEllipsoidCenter = -cameraPosition;
 
-    Geodetic2 cameraGeodeticPos = ellipsoid.cartesianToGeodetic2(cameraPosition);       
+    Geodetic2 cameraGeodeticPos = ellipsoid.cartesianToGeodetic2(cameraPosition);
 
     // Approach:
     // The projected area of the chunk will be calculated based on a small area that
     // is close to the camera, and the scaled up to represent the full area.
-    // The advantage of doing this is that it will better handle the cases where the 
+    // The advantage of doing this is that it will better handle the cases where the
     // full patch is very curved (e.g. stretches from latitude 0 to 90 deg).
 
     const Geodetic2 center = chunk.surfacePatch().center();
@@ -61,11 +61,11 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     //  |
     //  V
     //
-    //  oo 
+    //  oo
     // [  ]<
     //                     *geodetic space*
-    //     
-    //   closestCorner 
+    // 
+    //   closestCorner
     //    +-----------------+  <-- north east corner
     //    |                 |
     //    |      center     |
@@ -81,7 +81,7 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     //  |
     //  V
     //
-    //  oo 
+    //  oo
     // [  ]<
     //                     *geodetic space*
     //
@@ -103,7 +103,7 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     C = glm::normalize(C);
 
     // Camera                      *cartesian space*
-    // |                    +--------+---+ 
+    // |                    +--------+---+
     // V             __--''   __--''    /
     //              C-------A--------- +
     // oo          /       /          /

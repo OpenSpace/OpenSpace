@@ -42,7 +42,7 @@ struct UpdateData;
 struct RendererTasks;
 struct SurfacePositionHandle;
 
-namespace documentation { struct Documentation; } 
+namespace documentation { struct Documentation; }
 
 // Forward declare to minimize dependencies
 

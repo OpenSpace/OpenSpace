@@ -405,7 +405,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get(); 
+        ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
             exitProgram->activate();
             raycaster->renderExitPoints(raycasterTask.renderData, *exitProgram);

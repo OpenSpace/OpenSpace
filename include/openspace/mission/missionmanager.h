@@ -38,7 +38,7 @@ namespace openspace {
 namespace scripting { struct LuaLibrary; }
 
 /**
-* Singleton class keeping track of space missions. 
+* Singleton class keeping track of space missions.
 */
 class MissionManager : public ghoul::Singleton<MissionManager> {
 public:
@@ -50,7 +50,7 @@ public:
 
     /**
     * Reads a mission from file and maps the mission name to the Mission object. If
-    * this is the first mission to be loaded, the mission will also be set as the 
+    * this is the first mission to be loaded, the mission will also be set as the
     * current active mission.
     * \pre \p filename must not be empty
     * \pre \p filename must not contain tokens
@@ -79,8 +79,8 @@ public:
     bool hasCurrentMission() const;
 
     /**
-    * Returns the latest mission specified to `setCurrentMission()`. If no mission has 
-    * been specified, the first mission loaded will be returned. If no mission has been 
+    * Returns the latest mission specified to `setCurrentMission()`. If no mission has
+    * been specified, the first mission loaded will be returned. If no mission has been
     * loaded, a warning will be printed and a dummy mission will be returned.
     */
     const Mission& currentMission();

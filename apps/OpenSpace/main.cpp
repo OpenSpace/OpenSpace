@@ -268,7 +268,7 @@ void mainInitFunc() {
 
         const sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
         const bool hasStereo =
-            (sm != sgct::SGCTWindow::No_Stereo) && 
+            (sm != sgct::SGCTWindow::No_Stereo) &&
             (sm < sgct::SGCTWindow::Side_By_Side_Stereo);
 
         if (hasStereo) {
@@ -624,7 +624,7 @@ int main_main(int argc, char** argv) {
     cleanup();
 
     // Exit program
-    exit(EXIT_SUCCESS); 
+    exit(EXIT_SUCCESS);
 }
 
 } // namespace

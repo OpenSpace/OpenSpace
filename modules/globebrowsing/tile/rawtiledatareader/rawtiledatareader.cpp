@@ -373,15 +373,15 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
 {
     RawTile::ReadError worstError = RawTile::ReadError::None;
 
-    // NOTE: 
-    // Ascii graphics illustrates the implementation details of this method, for one  
-    // specific case. Even though the illustrated case is specific, readers can 
+    // NOTE:
+    // Ascii graphics illustrates the implementation details of this method, for one 
+    // specific case. Even though the illustrated case is specific, readers can
     // hopefully find it useful to get the general idea.
 
     // Make a copy of the full IO desription as we will have to modify it
     IODescription io = fullIO;
 
-    // Example: 
+    // Example:
     // We have an io description that defines a WRITE and a READ region.
     // In this case the READ region extends outside of the defined io.read.fullRegion,
     // meaning we will have to perform wrapping
@@ -389,12 +389,12 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
     // io.write.region             io.read.region
     //    |                         |
     //    V                         V
-    // +-------+                +-------+ 
-    // |       |                |       |--------+ 
+    // +-------+                +-------+
+    // |       |                |       |--------+
     // |       |                |       |        |
     // |       |                |       |        |
     // +-------+                +-------+        |
-    //                            |              | <-- io.read.fullRegion  
+    //                            |              | <-- io.read.fullRegion
     //                            |              |
     //                            +--------------+
 
@@ -402,27 +402,27 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
         //  Loop through each side: left, top, right, bottom
         for (int i = 0; i < 4; ++i) {
 
-            // Example: 
+            // Example:
             // We are currently considering the left side of the pixel region
             PixelRegion::Side side = static_cast<PixelRegion::Side>(i);
             IODescription cutoff = io.cut(side, io.read.fullRegion.edge(side));
 
-            // Example: 
+            // Example:
             // We cut off the left part that was outside the io.read.fullRegion, and we
-            // now have an additional io description for the cut off region. 
-            // Note that the cut-method used above takes care of the corresponding 
+            // now have an additional io description for the cut off region.
+            // Note that the cut-method used above takes care of the corresponding
             // WRITE region for us.
 
             // cutoff.write.region    cutoff.read.region
             //  |  io.write.region     |  io.read.region
             //  |   |                  |   |
             //  V   V                  V   V
-            // +-+-----+               +-+-----+ 
+            // +-+-----+               +-+-----+
             // | |     |               | |     |--------+
             // | |     |               | |     |        |
             // | |     |               | |     |        |
             // +-+-----+               +-+-----+        |
-            //                           |              | <-- io.read.fullRegion  
+            //                           |              | <-- io.read.fullRegion
             //                           |              |
             //                           +--------------+
 
@@ -435,7 +435,7 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
 
                 // Example:
                 // The cut off region is wrapped to the opposite side of the region,
-                // i.e. "repeated". Note that we don't want WRITE region to change, 
+                // i.e. "repeated". Note that we don't want WRITE region to change,
                 // we're only wrapping the READ region.
 
                 // cutoff.write.region   io.read.region cutoff.read.region
@@ -443,15 +443,15 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
                 //  |   |                     V          V
                 //  V   V                  +-----+      +-+
                 // +-+-----+               |     |------| |
-                // | |     |               |     |      | | 
+                // | |     |               |     |      | |
                 // | |     |               |     |      | |
                 // | |     |               +-----+      +-+
-                // +-+-----+               |              | <-- io.read.fullRegion  
+                // +-+-----+               |              | <-- io.read.fullRegion
                 //                         |              |
                 //                         +--------------+
 
                 // Example:
-                // The cutoff region has been repeated along one of its sides, but 
+                // The cutoff region has been repeated along one of its sides, but
                 // as we can see in this example, it still has a top part outside the
                 // defined gdal region. This is handled through recursion.
                 RawTile::ReadError err = repeatedRasterRead(

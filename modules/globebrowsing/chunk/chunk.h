@@ -66,7 +66,7 @@ public:
      * return Status::WANT_MERGE, if it is larger it will return Status::WANT_SPLIT,
      * otherwise Status::DO_NOTHING.
      *
-     * \returns The Status of the chunk. 
+     * \returns The Status of the chunk.
      */
     Status update(const RenderData& data);
 

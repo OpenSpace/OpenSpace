@@ -85,7 +85,7 @@ void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::
     file.close();
 }
 
-template <typename VoxelType>    
+template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     setDimensions(volume.dimensions());
 

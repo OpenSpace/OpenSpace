@@ -75,7 +75,7 @@ glm::dmat3 TransformationManager::kameleonTransformationMatrix(
     );
 #else
     return glm::dmat3(0.0);
-#endif 
+#endif
 }
 
 glm::dmat3 TransformationManager::frameTransformationMatrix(

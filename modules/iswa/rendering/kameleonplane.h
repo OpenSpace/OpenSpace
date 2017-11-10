@@ -31,7 +31,7 @@
 namespace openspace {
 
 /**
- * KameleonPlane is a concrete IswaCygnet with volume data files from 
+ * KameleonPlane is a concrete IswaCygnet with volume data files from
  * disk as input source. An object of this class will provide a cutplane
  * through a volume of space weather data. It will also give the option
  * to create fieldlines around and intersecting the planes. Interaction
@@ -53,23 +53,23 @@ private:
      */
     bool createGeometry() override;
     bool destroyGeometry() override;
-    bool updateTextureResource() override; 
+    bool updateTextureResource() override;
     void renderGeometry() const override;
     void setUniforms() override;
     std::vector<float*> textureData() override;
 
     void setDimensions();
     /**
-     * Given a path to the json index of seedpoints file, this 
+     * Given a path to the json index of seedpoints file, this
      * method reads, parses and adds them as checkbox options
      * in the _fieldlines SelectionProperty
-     * 
+     *
      * @param indexFile Path to json index file
      */
     void readFieldlinePaths(std::string indexFile);
 
     /**
-     * Updates the _fieldlineState map to match the _fieldlines 
+     * Updates the _fieldlineState map to match the _fieldlines
      * SelectionProperty and creates or removes fieldlines in the scene.
      */
     void updateFieldlineSeeds();
@@ -92,7 +92,7 @@ private:
     glm::vec3 _origOffset;
 
     /**
-     * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple 
+     * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple
      * containing information that is needed to either add or remove a fieldline from the scenegraph.
      * this is the name, path to seedpoints file and a boolean to determine if it is active or inactive.
      */

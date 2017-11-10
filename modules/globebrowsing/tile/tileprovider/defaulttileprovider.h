@@ -41,7 +41,7 @@ namespace openspace::globebrowsing {
 namespace openspace::globebrowsing::tileprovider {
 
 /**
-* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
+* Provides tiles loaded by <code>AsyncTileDataProvider</code> and
 * caches them in memory using LRU caching
 */
 class DefaultTileProvider : public TileProvider {
@@ -52,8 +52,8 @@ public:
     virtual ~DefaultTileProvider() override;
 
     /**
-    * \returns a Tile with status OK iff it exists in in-memory 
-    * cache. If not, it may enqueue some IO operations on a 
+    * \returns a Tile with status OK iff it exists in in-memory
+    * cache. If not, it may enqueue some IO operations on a
     * separate thread.
     */
     virtual Tile getTile(const TileIndex& tileIndex) override;
@@ -68,7 +68,7 @@ public:
 private:
     /**
     * Collects all asynchronously downloaded <code>RawTile</code>
-    * and uses <code>createTile</code> to create <code>Tile</code>s, 
+    * and uses <code>createTile</code> to create <code>Tile</code>s,
     * which are put in the LRU cache - potentially pushing out outdated
     * Tiles.
     */

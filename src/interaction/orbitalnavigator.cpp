@@ -88,7 +88,7 @@ namespace {
 
 namespace openspace::interaction {
 
-OrbitalNavigator::Friction::Friction() 
+OrbitalNavigator::Friction::Friction()
     : properties::PropertyOwner({ "Friction" })
     , roll(RollFrictionInfo, true)
     , rotational(RotationalFrictionInfo, true)
@@ -108,7 +108,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
 {
-    auto smoothStep = 
+    auto smoothStep =
         [](double t) {
             double res = 3.0 * t*t  - 2.0 * t*t*t;
             return glm::clamp(res, 0.0, 1.0);
@@ -261,7 +261,7 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
         );
 
         // Update the camera state
-        camera.setPositionVec3(camPos); 
+        camera.setPositionVec3(camPos);
         camera.setRotation(camRot.globalRotation * camRot.localRotation);
     }
 }
@@ -504,7 +504,7 @@ glm::dvec3 OrbitalNavigator::translateVertically(
 glm::dquat OrbitalNavigator::rotateHorizontally(
     double deltaTime,
     const glm::dquat& globalCameraRotation,
-    const glm::dvec3& /*cameraPosition*/, 
+    const glm::dvec3& /*cameraPosition*/,
     const SurfacePositionHandle& positionHandle) const
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();

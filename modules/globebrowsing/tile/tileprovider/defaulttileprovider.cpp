@@ -70,7 +70,7 @@ namespace {
 
 namespace openspace::globebrowsing::tileprovider {
 
-DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary) 
+DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     : TileProvider(dictionary)
     , _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
@@ -97,7 +97,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     int tilePixelSize = 0;
     if (dictionary.getValue<double>(KeyTilePixelSize, pixelSize)) {
         LDEBUG("Default pixel size overridden: " << pixelSize);
-        tilePixelSize = static_cast<int>(pixelSize); 
+        tilePixelSize = static_cast<int>(pixelSize);
     }
 
     _padTiles = true;

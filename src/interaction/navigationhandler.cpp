@@ -149,7 +149,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
             }
             else {
                 _orbitalNavigator->updateMouseStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);    
+                _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);
             }
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }

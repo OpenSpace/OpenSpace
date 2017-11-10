@@ -630,7 +630,7 @@ public:
     };
 
     /**
-     * Returns the state vector (position and velocity) of a \p target body relative to an 
+     * Returns the state vector (position and velocity) of a \p target body relative to an
      * \p observer in a specific \p referenceFrame, optionally corrected for aberration
      * (\p aberrationCorrection).
      * \param target The target body name or the target body's NAIF ID
@@ -660,7 +660,7 @@ public:
         const std::string& observer, const std::string& referenceFrame,
         AberrationCorrection aberrationCorrection, double ephemerisTime) const;
 
-    /** 
+    /**
      * Returns the state transformation matrix used to convert from the \p sourceFrame to
      * the \p destinationFrame at a specific \p ephemerisTime.
      * \param sourceFrame The name of the source reference frame
@@ -824,7 +824,7 @@ public:
     bool addFrame(std::string body, std::string frame);
 
     /**
-     * This function returns the frame of a body if defined, otherwise it returns 
+     * This function returns the frame of a body if defined, otherwise it returns
      * IAU_ + body (most frames are known by the International Astronomical Union)
      * \param body - the name of the body
      * \return  the frame of the body
@@ -833,7 +833,7 @@ public:
     std::string frameFromBody(const std::string& body) const;
 
     /**
-     * Sets the SpiceManager's exception handling. If UseException::No is passed to this 
+     * Sets the SpiceManager's exception handling. If UseException::No is passed to this
      * function, all subsequent calls will not throw an error, but fail silently instead.
      * If set to UseException::Yes, a SpiceException is thrown whenever an error occurs.
      * \param useException The new exeception handling method that the SpiceManager should

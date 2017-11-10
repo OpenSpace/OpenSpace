@@ -44,15 +44,15 @@ DebugRenderer* DebugRenderer::_reference = nullptr;
 
 DebugRenderer::DebugRenderer()  {
     _programObject = OsEng.renderEngine().buildRenderProgram(
-        "BasicDebugShader", 
+        "BasicDebugShader",
         "${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl",
         "${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl"
         );
 }
 
 DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject)
-    : _programObject(std::move(programObject)) 
-{ 
+    : _programObject(std::move(programObject))
+{
     // nothing to do
 }
 

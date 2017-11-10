@@ -130,7 +130,7 @@ REGISTER_NUMERICALPROPERTY_SOURCE(DMat3x2Property, glm::dmat3x2, glm::dmat3x2(0)
                                     numeric_limits<double>::max()
                                   ),
                                   glm::dmat3x2(
-                                    0.01, 0.01, 0.01, 
+                                    0.01, 0.01, 0.01,
                                     0.01, 0.01, 0.01
                                   ),
                                   DEFAULT_FROM_LUA_LAMBDA(glm::dmat3x2),

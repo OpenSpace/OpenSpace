@@ -32,7 +32,7 @@ ProgressBar::ProgressBar(int end, int width, std::ostream& stream)
     : _width(width)
     , _previous(-1)
     , _end(end)
-    , _stream(stream) 
+    , _stream(stream)
 {
     print(0);
 }

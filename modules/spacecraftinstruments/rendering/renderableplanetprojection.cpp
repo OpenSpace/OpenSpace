@@ -184,7 +184,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     std::string texturePath = "";
     success = dict.getValue(ColorTextureInfo.identifier, texturePath);
     if (success) {
-        _colorTexturePath = absPath(texturePath); 
+        _colorTexturePath = absPath(texturePath);
     }
 
     std::string heightMapPath = "";
@@ -241,7 +241,7 @@ void RenderablePlanetProjection::initialize() {
     _geometry->initialize(this);
 
     //completeSuccess &= auxiliaryRendertarget();
-    // SCREEN-QUAD 
+    // SCREEN-QUAD
     const GLfloat size = 1.f;
     const GLfloat w = 1.f;
     const GLfloat vertex_data[] = {
@@ -308,7 +308,7 @@ void RenderablePlanetProjection::imageProjectGPU(
     _fboProgramObject->setUniform("_scaling"       , _camScaling);
     _fboProgramObject->setUniform("boresight"      , _boresight);
 
-    if (_geometry->hasProperty("Radius")){ 
+    if (_geometry->hasProperty("Radius")) {
         ghoul::any r = _geometry->property("Radius")->get();
         if (glm::vec3* radius = ghoul::any_cast<glm::vec3>(&r)){
             _fboProgramObject->setUniform("_radius", radius);
@@ -339,7 +339,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     );
 
     _transform = glm::mat4(1);
-    //90 deg rotation w.r.t spice req. 
+    //90 deg rotation w.r.t spice req.
     glm::mat4 rot = glm::rotate(
         _transform,
         static_cast<float>(M_PI_2),
@@ -376,7 +376,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     );
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
-    //change to KM and add psc camera scaling. 
+    //change to KM and add psc camera scaling.
     position[3] += (3 + _camScaling[1]);
     //position[3] += 3;
     glm::vec3 cpos = position.vec3();

@@ -46,7 +46,7 @@ struct TileLoadJob : public Job<RawTile> {
     /**
      * No data is allocated unless specified so by the TileTextureInitData of
      * rawTileDataReader but it is assumed that pboDataPtr is a mapped pointer to a pixel
-     * buffer object. 
+     * buffer object.
      */
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
         const TileIndex& tileIndex, char* pboDataPtr);

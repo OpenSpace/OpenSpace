@@ -86,7 +86,7 @@ std::vector<std::string> DataProcessorText::readMetadata(std::string data, glm::
 }
 
 void DataProcessorText::addDataValues(std::string data, properties::SelectionProperty& dataOptions){
-    int numOptions = dataOptions.options().size(); 
+    int numOptions = dataOptions.options().size();
     initializeVectors(numOptions);
 
     if(!data.empty()){
@@ -185,13 +185,13 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             // );
 
             // for(int option : selectedOptions){
-            //     value = values[option]; 
+            //     value = values[option];
             //     //value = values[option+3]; //+3 because options x, y and z in the file
             //     dataOptions[option][numValues] = processDataPoint(value, option);
             // }
             // ----------- OLD METHODS ------------------------
 
-//            first = 0; 
+//            first = 0;
             last = 0;
             option = -3;
             lineSize = line.size();
@@ -202,8 +202,12 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
                 last =  line.find_first_of(" \t", first);
                 last = (last > 0)? last : lineSize;
 
-                if (option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end()){
-                    // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::float_, value);                
+                auto it = std::find(
+                    selectedOptions.begin(),
+                    selectedOptions.end(),
+                    option
+                );
+                if (option >= 0 && it != selectedOptions.end()) {
                     value = std::stof(line.substr(first, last));
                     dataOptions[option][numValues] = processDataPoint(value, option);
                 }

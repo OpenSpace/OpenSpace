@@ -124,10 +124,10 @@ bool DataCygnet::updateTexture(){
 
         if (!_textures[option]) {
             auto texture =  std::make_unique<ghoul::opengl::Texture>(
-                values, 
+                values,
                 _textureDimensions,
                 ghoul::opengl::Texture::Format::Red,
-                GL_RED, 
+                GL_RED,
                 GL_FLOAT,
                 ghoul::opengl::Texture::FilterMode::Linear,
                 ghoul::opengl::Texture::WrappingMode::ClampToEdge
@@ -308,7 +308,7 @@ void DataCygnet::setPropertyCallbacks(){
             _backgroundValues.setValue(_dataProcessor->filterValues());
     });
 
-    _dataOptions.onChange([this](){ 
+    _dataOptions.onChange([this](){
         if(_dataOptions.value().size() > MAX_TEXTURES)
             LWARNING("Too many options chosen, max is " + std::to_string(MAX_TEXTURES));
         updateTexture();
@@ -327,7 +327,7 @@ void DataCygnet::subscribeToGroup(){
         std::vector<int> values;
         bool success = dict.getValue<std::vector<int> >("dataOptions", values);
         if(success){
-            _dataOptions.setValue(values);            
+            _dataOptions.setValue(values);
         }
     });
 
@@ -336,7 +336,7 @@ void DataCygnet::subscribeToGroup(){
         glm::vec2 values;
         bool success = dict.getValue("normValues", values);
         if(success){
-            _normValues.setValue(values);            
+            _normValues.setValue(values);
         }
     });
 
@@ -345,7 +345,7 @@ void DataCygnet::subscribeToGroup(){
         glm::vec2 values;
         bool success = dict.getValue("backgroundValues", values);
         if(success){
-            _backgroundValues.setValue(values);            
+            _backgroundValues.setValue(values);
         }
     });
 

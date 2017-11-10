@@ -57,7 +57,7 @@ namespace openspace {
 
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     : DataCygnet(dictionary)
-    , _fieldlines(FieldLineSeedsInfo) 
+    , _fieldlines(FieldLineSeedsInfo)
     , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
     , _slice(SliceInfo, 0.f, 0.f, 1.f)
 {
@@ -124,13 +124,13 @@ void KameleonPlane::initialize() {
 
         //If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this](){
-            // If autofiler is selected, use _dataProcessor to set backgroundValues 
+            // If autofiler is selected, use _dataProcessor to set backgroundValues
             // and unregister backgroundvalues property.
             if (_autoFilter) {
                 _backgroundValues.setValue(_dataProcessor->filterValues());
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
-            // else if autofilter is turned off, register backgroundValues 
+            // else if autofilter is turned off, register backgroundValues
             } else {
                 _backgroundValues.setVisibility(properties::Property::Visibility::All);
                 //_backgroundValues.setVisible(true);
@@ -160,7 +160,7 @@ void KameleonPlane::initialize() {
         updateTextureResource();
     });
 
-    _fieldlines.onChange([this](){ 
+    _fieldlines.onChange([this](){
         updateFieldlineSeeds();
     });
 
@@ -354,7 +354,7 @@ void KameleonPlane::subscribeToGroup() {
 
 void KameleonPlane::setDimensions() {
     // the cdf files has an offset of 0.5 in normali resolution.
-    // with lower resolution the offset increases. 
+    // with lower resolution the offset increases.
     _data->offset = _origOffset - 0.5f*(100.0f/_resolution.value());
     _dimensions = glm::size3_t(_data->scale*((float)_resolution.value()/100.f));
     _dimensions[_cut] = 1;

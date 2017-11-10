@@ -272,7 +272,7 @@ void RenderableGalaxy::initialize() {
     GLint colorAttrib = _pointsProgram->attributeLocation("inColor");
 
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glEnableVertexAttribArray(positionAttrib);    
+    glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
