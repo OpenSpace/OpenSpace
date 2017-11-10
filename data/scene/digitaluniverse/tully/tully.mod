@@ -27,7 +27,9 @@ return {
             -- Fade in value in the same unit as "Unit"
             --FadeInThreshould = 5.5,
             FadeInThreshould = 1.0,
-            Unit = "Mpc"
+            Unit = "Mpc",
+            -- Max size in pixels
+            BillboardMaxSize = 200.0,
         },
         GuiPath = "/Universe/Galaxies"
     },
