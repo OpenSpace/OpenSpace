@@ -310,7 +310,7 @@ def check_line_length(lines):
 
 previousSymbols  = {}
 def check_header_file(file, component):
-    with open(file, 'r+') as f:
+    with open(file, 'r+', encoding="utf8") as f:
         lines = f.readlines()
 
         correctness = check_correctness(lines)
