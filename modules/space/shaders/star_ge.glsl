@@ -59,12 +59,13 @@ const vec2 corners[4] = vec2[4](
 
 
 void main() {
-    if ((psc_position[0].x == 0.0) &&
-        (psc_position[0].y == 0.0) &&
-        (psc_position[0].z == 0.0))
-    {
-        return;
-    }
+    // JCC: We want to display the Sun.
+    // if ((psc_position[0].x == 0.0) &&
+    //     (psc_position[0].y == 0.0) &&
+    //     (psc_position[0].z == 0.0))
+    // {
+    //     return;
+    // }
 
     ge_brightness = vs_brightness[0];
     ge_velocity = vs_velocity[0];
