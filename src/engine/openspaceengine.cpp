@@ -39,6 +39,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/luaconsole.h>
+#include <openspace/interaction/touchbar.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderable.h>
@@ -656,6 +657,10 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
+
+#ifdef __APPLE__
+    showTouchbar();
+#endif // APPLE
 
     LTRACE("OpenSpaceEngine::loadScene(end)");
 }
