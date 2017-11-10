@@ -715,13 +715,9 @@ void OpenSpaceEngine::loadFonts() {
         LERRORC(err.component, err.message);
     }
 }
-<<<<<<< HEAD
+
     
 void OpenSpaceEngine::configureLogging(bool consoleLog) {
-=======
-
-void OpenSpaceEngine::configureLogging() {
->>>>>>> afa1d6d33edf4eaa62bd629721d5a6d5135e3739
     const std::string KeyLogLevel =
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogLevel;
     const std::string KeyLogImmediateFlush =
@@ -743,14 +739,9 @@ void OpenSpaceEngine::configureLogging() {
             level,
             immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
         );
-<<<<<<< HEAD
         if (consoleLog) {
             LogMgr.addLog(std::make_unique<ConsoleLog>());
         }
-=======
-
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
->>>>>>> afa1d6d33edf4eaa62bd629721d5a6d5135e3739
     }
 
     if (configurationManager().hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {

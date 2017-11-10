@@ -37,8 +37,8 @@
 
 namespace {
     const char* _loggerCat = "TorrentSynchronization";
-
-    const char* KeyTorrentFile = "TorrentFile";
+    const char* KeyIdentifier = "Identifier";
+    const char* KeyMagnet = "Magnet";
 }
 
 namespace openspace {
@@ -52,7 +52,8 @@ TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict)
         "TorrentSynchroniztion"
     );
 
-    _torrentFilePath = dict.value<std::string>(KeyTorrentFile);
+    _identifier = dict.value<std::string>(KeyIdentifier);
+    _magnetLink = dict.value<std::string>(KeyMagnet);
 
     // Configure synchronization based on global settings in SyncModule 
     // TODO: For testability and decreaing deps, make it possible to inject this instead.
@@ -69,13 +70,30 @@ documentation::Documentation TorrentSynchronization::Documentation() {
         "torrent_synchronization",
         {
             {
-                KeyTorrentFile,
+                KeyIdentifier,
                 new StringVerifier,
                 Optional::No,
-                "An absolute path to a torrent file"
+                "A unique identifier for this torrent"
             },
+            {
+                KeyMagnet,
+                new StringVerifier,
+                Optional::No,
+                "A magnet link identifying the torrent"
+            }
         }
     };
+}
+
+std::string TorrentSynchronization::uniformResourceName() const {
+    size_t begin = _magnetLink.find("=urn") + 1;
+    size_t end = _magnetLink.find('&', begin);
+    std::string xs = _magnetLink.substr(begin, end == std::string::npos ? end : (end - begin));
+    std::transform(xs.begin(), xs.end(), xs.begin(), [](char x) {
+        if (x == ':') return '.';
+        return x;
+    });
+    return xs;
 }
 
 std::string TorrentSynchronization::directory() {
@@ -84,16 +102,19 @@ std::string TorrentSynchronization::directory() {
         ghoul::filesystem::FileSystem::PathSeparator +
         "torrent" +
         ghoul::filesystem::FileSystem::PathSeparator +
-        "test"
+        _identifier +
+        ghoul::filesystem::FileSystem::PathSeparator +
+        uniformResourceName()
     );
 
     return FileSys.absPath(d);
 }
 
 void TorrentSynchronization::synchronize() {
-    _torrentClient->addTorrent(_torrentFilePath, directory());
+    _torrentClient->addMagnetLink(_magnetLink, directory());
 
-
+    bool hasSyncFile();
+    void createSyncFile();
 
     resolve();
     return;

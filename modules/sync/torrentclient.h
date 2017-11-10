@@ -27,6 +27,7 @@
 
 #include <string>
 #include <memory>
+#include <thread>
 
 namespace libtorrent {
     class session;
@@ -44,10 +45,12 @@ public:
     TorrentClient();
     ~TorrentClient();
     void initialize();
-    int addTorrent(std::string torrentFile, std::string destination);
+    int addTorrentFile(std::string torrentFile, std::string destination);
+    int addMagnetLink(std::string magnetLink, std::string destination);
     void removeTorrent(int id);
 private:
     std::unique_ptr<libtorrent::session> _session;
+    std::thread _torrentThread;
 };
 
 } // namespace openspace

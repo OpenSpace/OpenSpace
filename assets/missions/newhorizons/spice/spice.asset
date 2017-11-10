@@ -2,7 +2,8 @@
 
 local kernelsPath = asset.syncedResource({
     Type = "TorrentSynchronization",
-    TorrentFile = asset.localResource("new_horizons_kernels.torrent")
+    Identifier = "new_horizons",
+    Magnet = "magnet:?xt=urn:btih:4af38bdd42c5b29a0ef1ce4ab274cd91c017b8cc&dn=new_horizons"
 })
 
 --AssetHelper.registerSpiceKernels(asset, kernels)
