@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 
+#include <atomic>
 #include <string>
 #include <memory>
 #include <thread>
@@ -51,6 +52,7 @@ public:
 private:
     std::unique_ptr<libtorrent::session> _session;
     std::thread _torrentThread;
+    std::atomic_bool _keepRunning = true;
 };
 
 } // namespace openspace

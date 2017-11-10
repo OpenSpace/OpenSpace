@@ -42,7 +42,10 @@ namespace openspace {
 
 TorrentClient::TorrentClient() {}
 
-TorrentClient::~TorrentClient() {}
+TorrentClient::~TorrentClient() {
+    _keepRunning = false;
+    _torrentThread.join();
+}
 
 void TorrentClient::initialize() {
     libtorrent::settings_pack settings;
@@ -73,7 +76,7 @@ void TorrentClient::initialize() {
     _session->start_upnp();
 
     _torrentThread = std::thread([this]() {
-        while (true) {
+        while (_keepRunning) {
             std::vector<libtorrent::alert*> alerts;
             _session->pop_alerts(&alerts);
 

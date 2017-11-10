@@ -1434,7 +1434,7 @@ void RenderEngine::renderScreenLog() {
     const int messageLength = 140;
     std::chrono::seconds fade(5);
 
-    const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
+    const std::vector<ScreenLog::LogEntry> entries = _log->entries();
     auto lastEntries =
         entries.size() > max ?
             std::make_pair(entries.rbegin(), entries.rbegin() + max) :
