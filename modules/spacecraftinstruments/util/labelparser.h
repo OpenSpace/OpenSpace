@@ -52,11 +52,11 @@ private:
     std::string decode(std::string line);
     std::string encode(std::string line);
 
-    bool augmentWithSpice(Image& image, 
-                            std::string spacecraft, 
-                            std::vector<std::string> payload, 
+    bool augmentWithSpice(Image& image,
+                            std::string spacecraft,
+                            std::vector<std::string> payload,
                             std::vector<std::string> potentialTargets);
-        
+
     std::string _name;
     std::string _fileName;
     std::string _spacecraft;

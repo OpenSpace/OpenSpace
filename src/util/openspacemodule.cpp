@@ -40,7 +40,7 @@ namespace {
 
 namespace openspace {
 
-OpenSpaceModule::OpenSpaceModule(std::string name) 
+OpenSpaceModule::OpenSpaceModule(std::string name)
     : properties::PropertyOwner({ std::move(name) })
 {}
 
@@ -52,7 +52,7 @@ void OpenSpaceModule::initialize() {
         upperName.begin(),
         [](char v) { return static_cast<char>(toupper(v)); }
     );
-    
+
     std::string moduleToken =
         ghoul::filesystem::FileSystem::TokenOpeningBraces +
         ModuleBaseToken +
@@ -62,7 +62,7 @@ void OpenSpaceModule::initialize() {
     std::string path = modulePath();
     LDEBUG("Registering module path: " << moduleToken << ": " << path);
     FileSys.registerPathToken(moduleToken, path);
-    
+
     internalInitialize();
 }
 
@@ -73,7 +73,7 @@ void OpenSpaceModule::deinitialize() {
 std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
     return {};
 }
-    
+
 scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }

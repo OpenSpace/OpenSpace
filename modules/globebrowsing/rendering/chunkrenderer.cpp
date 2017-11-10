@@ -85,14 +85,14 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 
     // Now the shader program can be accessed
     ghoul::opengl::ProgramObject* programObject = layeredShaderManager->programObject();
-        
+
     if (layeredShaderManager->updatedOnLastCall()) {
         gpuLayerManager->bind(programObject, *_layerManager);
     }
 
     // Activate the shader program
     programObject->activate();
-        
+
     gpuLayerManager->setValue(programObject, *_layerManager, tileIndex);
 
     // The length of the skirts is proportional to its size
@@ -106,8 +106,8 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     if (chunk.owner().debugProperties().showHeightResolution) {
         programObject->setUniform("vertexResolution",
             glm::vec2(_grid->xSegments(), _grid->ySegments()));
-    }       
-        
+    }
+
     return programObject;
 }
 
@@ -122,7 +122,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         !_layerManager->layerGroup(layergroupid::NightLayers).activeLayers().empty();
     const bool waterLayersActive =
         !_layerManager->layerGroup(layergroupid::WaterMasks).activeLayers().empty();
-    
+
     if (nightLayersActive ||
         waterLayersActive ||
         chunk.owner().generalProperties().atmosphereEnabled ||
@@ -143,7 +143,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
     }
 
     if (chunk.owner().generalProperties().useAccurateNormals &&
-        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty()) 
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
         glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::SOUTH_WEST));
@@ -153,7 +153,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
             chunk.surfacePatch().getCorner(Quad::NORTH_WEST));
         glm::dvec3 corner11 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::NORTH_EAST));
-        
+
         // This is an assumption that the height tile has a resolution of 64 * 64
         // If it does not it will still produce "correct" normals. If the resolution is
         // higher the shadows will be softer, if it is lower, pixels will be visible.
@@ -180,8 +180,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
     }
 }
 
-void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
-
+void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
         _globalLayerShaderManager,
         _globalGpuLayerManager,
@@ -205,11 +204,11 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
         programObject->setUniform("chunkLevel", chunk.tileIndex().level);
     }
-        
+
     // Calculate other uniform variables needed for rendering
     Geodetic2 swCorner = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
     auto patchSize = chunk.surfacePatch().size();
-        
+
     glm::dmat4 modelTransform = chunk.owner().modelTransform();
     glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
     glm::mat4 modelViewTransform = glm::mat4(viewTransform * modelTransform);
@@ -232,7 +231,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     {
         programObject->setUniform("modelViewTransform", modelViewTransform);
     }
-    
+
     if (chunk.owner().generalProperties().useAccurateNormals &&
         !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
@@ -250,16 +249,15 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
 
     // render
     _grid->geometry().drawUsingActiveProgram();
-        
+
     _globalGpuLayerManager->deactivate();
-    
+
     // disable shader
     programObject->deactivate();
-        
+
 }
 
 void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
-        
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
         _localLayerShaderManager,
         _localGpuLayerManager,
@@ -318,8 +316,6 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     }
 
     setCommonUniforms(*programObject, chunk, data);
-    
-    
 
     // OpenGL rendering settings
     glEnable(GL_DEPTH_TEST);
@@ -328,7 +324,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
     // render
     _grid->geometry().drawUsingActiveProgram();
-        
+
     _localGpuLayerManager->deactivate();
 
     // disable shader

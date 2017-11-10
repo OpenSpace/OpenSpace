@@ -85,7 +85,7 @@ NavigationHandler::NavigationHandler()
     _inputState = std::make_unique<InputState>();
     _orbitalNavigator = std::make_unique<OrbitalNavigator>();
     _keyframeNavigator = std::make_unique<KeyframeNavigator>();
-    
+
     // Add the properties
     addProperty(_origin);
     addProperty(_useKeyFrameInteraction);
@@ -149,7 +149,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
             }
             else {
                 _orbitalNavigator->updateMouseStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);    
+                _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);
             }
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
@@ -248,9 +248,9 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
 
         // TODO : Should get the camera state as a dictionary and save the dictionary to
         // a file in form of a lua state and not use ofstreams here.
-        
+
         std::ofstream ofs(fullpath.c_str());
-        
+
         glm::dvec3 p = _camera->positionVec3();
         glm::dquat q = _camera->rotationQuaternion();
 

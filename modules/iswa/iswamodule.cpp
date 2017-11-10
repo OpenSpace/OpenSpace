@@ -48,7 +48,7 @@ IswaModule::IswaModule()
         }
     );
 }
-    
+
 scripting::LuaLibrary IswaModule::luaLibrary() const {
     return IswaManager::luaLibrary();
 }

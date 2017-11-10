@@ -52,10 +52,10 @@ std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path, g
 
         std::vector<std::string> opts = _kw->getVariables();
         opts.erase( std::remove_if(
-            opts.begin(), 
-            opts.end(), 
+            opts.begin(),
+            opts.end(),
             [this](std::string opt){ return (opt.size() > 3 || _coordinateVariables.find(opt) != _coordinateVariables.end());}
-            ), 
+            ),
         opts.end()
         );
         return opts;
@@ -75,7 +75,7 @@ void DataProcessorKameleon::addDataValues(std::string path, properties::Selectio
         std::vector<float> sum(numOptions, 0.0f);
         std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
         auto options = dataOptions.options();
-        
+
         int numValues = _dimensions.x*_dimensions.y*_dimensions.z;
 
         float* values;
@@ -100,13 +100,13 @@ void DataProcessorKameleon::addDataValues(std::string path, properties::Selectio
 }
 std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions, float slice){
     _slice = slice;
-    // _dimensions = dimensions; 
+    // _dimensions = dimensions;
     return processData(path, dataOptions, dimensions);
 }
 
 std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions,  glm::size3_t& dimensions){
     int numOptions =  dataOptions.options().size();
-    
+
     if(!path.empty()){
         if(path != _kwPath || !_kw)
             initializeKameleonWrapper(path);

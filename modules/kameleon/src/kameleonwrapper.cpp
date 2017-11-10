@@ -199,11 +199,11 @@ float* KameleonWrapper::getUniformSampledValues(
 
     double varMin = _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
     double varMax = _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
-    
+
     double stepX = (_xMax-_xMin)/(static_cast<double>(outDimensions.x));
     double stepY = (_yMax-_yMin)/(static_cast<double>(outDimensions.y));
     double stepZ = (_zMax-_zMin)/(static_cast<double>(outDimensions.z));
-    
+
     LDEBUG(var << "Min: " << varMin);
     LDEBUG(var << "Max: " << varMax);
 
@@ -215,26 +215,26 @@ float* KameleonWrapper::getUniformSampledValues(
         double zeroToOne = (val-varMin)/(varMax-varMin);
         zeroToOne *= static_cast<double>(bins);
         int izerotoone = static_cast<int>(zeroToOne);
-        
+
         return glm::clamp(izerotoone, 0, bins-1);
     };
-    
+
     //ProgressBar pb(static_cast<int>(outDimensions.x));
     for (int x = 0; x < static_cast<int>(outDimensions.x); ++x) {
         for (int y = 0; y < static_cast<int>(outDimensions.y); ++y) {
             for (int z = 0; z < static_cast<int>(outDimensions.z); ++z) {
                 unsigned int index = static_cast<unsigned int>(x + y*outDimensions.x + z*outDimensions.x*outDimensions.y);
-                
+
                 if (_gridType == GridType::Spherical) {
                     // Put r in the [0..sqrt(3)] range
                     double rNorm = sqrt(3.0) * static_cast<double>(x) / static_cast<double>(outDimensions.x - 1);
-                    
+
                     // Put theta in the [0..PI] range
                     double thetaNorm = M_PI * static_cast<double>(y) / static_cast<double>(outDimensions.y - 1);
-                    
+
                     // Put phi in the [0..2PI] range
                     double phiNorm = 2.0 * M_PI * static_cast<double>(z) / static_cast<double>(outDimensions.z - 1);
-                    
+
                     // Go to physical coordinates before sampling
                     double rPh = _xMin + rNorm*(_xMax-_xMin);
                     double thetaPh = thetaNorm;
@@ -242,7 +242,7 @@ float* KameleonWrapper::getUniformSampledValues(
                     // range to avoid gaps in the data Subtract a small term to
                     // avoid rounding errors when comparing to phiMax.
                     double phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
-                    
+
                     double value = 0.0;
                     // See if sample point is inside domain
                     if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
@@ -252,7 +252,7 @@ float* KameleonWrapper::getUniformSampledValues(
                         }
                         // Leave values at zero if outside domain
                     } else { // if inside
-                        
+
                         // ENLIL CDF specific hacks!
                         // Convert from meters to AU for interpolator
                         rPh /= ccmc::constants::AU_in_meters;
@@ -268,10 +268,10 @@ float* KameleonWrapper::getUniformSampledValues(
                             static_cast<float>(phiPh));
                         // value = _interpolator->interpolate(var, rPh, phiPh, thetaPh);
                     }
-                    
+
                     doubleData[index] = value;
                     histogram[mapToHistogram(value)]++;
-                    
+
                 } else {
                     // Assume cartesian for fallback purpose
                     double xPos = _xMin + stepX*x;
@@ -285,7 +285,7 @@ float* KameleonWrapper::getUniformSampledValues(
                         continue;
                     }
                     */
-                    
+
                     // get interpolated data value for (xPos, yPos, zPos)
                     // swap yPos and zPos because model has Z as up
                     double value = _interpolator->interpolate(
@@ -377,7 +377,7 @@ float* KameleonWrapper::getUniformSliceValues(
 
     double varMin = _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
     double varMax = _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
-    
+
     double stepX = (_xMax-_xMin)/(static_cast<double>(outDimensions.x));
     double stepY = (_yMax-_yMin)/(static_cast<double>(outDimensions.y));
     double stepZ = (_zMax-_zMin)/(static_cast<double>(outDimensions.z));
@@ -395,7 +395,7 @@ float* KameleonWrapper::getUniformSliceValues(
 
     double maxValue = 0.0;
     double minValue = std::numeric_limits<double>::max();
-    
+
     float missingValue = _model->getMissingValue();
 
     for (int x = 0; x < static_cast<int>(outDimensions.x); ++x) {
@@ -412,13 +412,13 @@ float* KameleonWrapper::getUniformSliceValues(
                         // int z = zSlice; 
                         // Put r in the [0..sqrt(3)] range
                         double rNorm = sqrt(3.0) * static_cast<double>(xi) / static_cast<double>(xDim);
-                        
+
                         // Put theta in the [0..PI] range
                         double thetaNorm = M_PI * static_cast<double>(yi) / static_cast<double>(yDim);
-                        
+
                         // Put phi in the [0..2PI] range
                         double phiNorm = 2.0 * M_PI * static_cast<double>(zi) / static_cast<double>(zDim);
-                        
+
                         // Go to physical coordinates before sampling
                         double rPh = _xMin + rNorm * (_xMax-_xMin);
                         double thetaPh = thetaNorm;
@@ -426,7 +426,7 @@ float* KameleonWrapper::getUniformSliceValues(
                         // range to avoid gaps in the data Subtract a small term to
                         // avoid rounding errors when comparing to phiMax.
                         double phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
-                        
+
                         // See if sample point is inside domain
                         if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
                             thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
@@ -435,7 +435,7 @@ float* KameleonWrapper::getUniformSliceValues(
                             }
                             // Leave values at zero if outside domain
                         } else { // if inside
-                            
+
                             // ENLIL CDF specific hacks!
                             // Convert from meters to AU for interpolator
                             rPh /= ccmc::constants::AU_in_meters;
@@ -451,8 +451,8 @@ float* KameleonWrapper::getUniformSliceValues(
                                 static_cast<float>(thetaPh));
                             // value = _interpolator->interpolate(var, rPh, phiPh, thetaPh);
                         }
-         
-                }else{
+
+                } else {
                     double xPos = _xMin + stepX*xi;
                     double yPos = _yMin + stepY*yi;
                     double zPos = _zMin + stepZ*zi;
@@ -464,10 +464,9 @@ float* KameleonWrapper::getUniformSliceValues(
                         static_cast<float>(xPos),
                         static_cast<float>(zPos),
                         static_cast<float>(yPos));
-
                 }
 
-                if(value != missingValue){
+                if (value != missingValue) {
                     doubleData[index] = value;
                     data[index] = static_cast<float>(value);
                     // if(value > maxValue){
@@ -476,7 +475,7 @@ float* KameleonWrapper::getUniformSliceValues(
                     // if(value < minValue){
                     //     minValue = value;
                     // }
-                }else{
+                } else {
                     // std::cout << "value missing" << std::endl;
                     doubleData[index] = 0;
                 }
@@ -535,7 +534,7 @@ float* KameleonWrapper::getUniformSampledVectorValues(
 
                 unsigned int index = static_cast<unsigned int>(x*channels + y*channels*outDimensions.x + z*channels*outDimensions.x*outDimensions.y);
 
-                if(_gridType == GridType::Cartesian) {
+                if (_gridType == GridType::Cartesian) {
                     float xPos = _xMin + stepX*x;
                     float yPos = _yMin + stepY*y;
                     float zPos = _zMin + stepZ*z;
@@ -674,8 +673,9 @@ KameleonWrapper::Fieldlines KameleonWrapper::getLorentzTrajectories(
 
 glm::vec3 KameleonWrapper::getModelBarycenterOffset() {
     // ENLIL is centered, no need for offset
-    if (_type == Model::ENLIL)
+    if (_type == Model::ENLIL) {
         return glm::vec3(0,0,0);
+    }
 
     glm::vec3 offset;
     offset.x = _xMin+(std::abs(_xMin)+std::abs(_xMax))/2.0f;
@@ -819,12 +819,15 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
     // Save last position. Model has +Z as up
     line.push_back(glm::vec3(pos.x, pos.z, pos.y));
 
-    if (pos.z > 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0))
+    if (pos.z > 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0)) {
         end = FieldlineEnd::NORTH;
-    else if (pos.z < 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0))
+    }
+    else if (pos.z < 0.0 && (pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0)) {
         end = FieldlineEnd::SOUTH;
-    else
+    }
+    else {
         end = FieldlineEnd::FAROUT;
+    }
 
     return line;
 }
@@ -973,37 +976,32 @@ KameleonWrapper::GridType KameleonWrapper::getGridType(
     const std::string& y, 
     const std::string& z) 
 {
-    if(x == "x" && y == "y" && z == "z")
+    if (x == "x" && y == "y" && z == "z") {
         return GridType::Cartesian;
-    if(x == "r" && y == "theta" && z == "phi")
+    }
+    if (x == "r" && y == "theta" && z == "phi") {
         return GridType::Spherical;
-    
+    }
+
     return GridType::Unknown;
 }
 
 KameleonWrapper::Model KameleonWrapper::getModelType() {
     if(_kameleon->doesAttributeExist("model_name")) {
         std::string modelName = (_kameleon->getGlobalAttribute("model_name")).getAttributeString();
-        if (modelName == "open_ggcm" || modelName == "ucla_ggcm")
-        {
+        if (modelName == "open_ggcm" || modelName == "ucla_ggcm") {
             return Model::OpenGGCM;
-        } else if (modelName == "batsrus")
-        {
+        } else if (modelName == "batsrus") {
             return Model::BATSRUS;
-        } else if (modelName == "enlil")
-        {
+        } else if (modelName == "enlil") {
             return Model::ENLIL;
-        } else if (modelName == "mas")
-        {
+        } else if (modelName == "mas") {
             return Model::MAS;
-        } else if (modelName == "ADAPT3D")
-        {
+        } else if (modelName == "ADAPT3D") {
             return Model::Adapt3D;
-        } else if (modelName == "swmf")
-        {
+        } else if (modelName == "swmf") {
             return Model::SWMF;
-        } else if (modelName == "LFM")
-        {
+        } else if (modelName == "LFM") {
             return Model::LFM;
         }
     }

@@ -109,7 +109,7 @@ glm::vec2 SGCTWindowWrapper::mousePosition() const {
     sgct::Engine::instance()->getMousePos(id, &posX, &posY);
     return glm::vec2(posX, posY);
 }
-    
+
 uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
     int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     uint32_t result = 0;
@@ -117,11 +117,11 @@ uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
         bool button = (sgct::Engine::instance()->getMouseButton(id, i) != 0);
         if (button)
             result |= (1 << i);
-        
+
     }
     return result;
 }
-    
+
 glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
     auto window = sgct::Engine::instance()->getCurrentWindowPtr();
     switch (window->getStereoMode()) {
@@ -141,7 +141,7 @@ glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
                 window->getYResolution());
     }
 }
-    
+
 glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
     int x, y;
     auto window = sgct::Engine::instance()->getCurrentWindowPtr();
@@ -171,7 +171,7 @@ glm::vec2 SGCTWindowWrapper::dpiScaling() const {
 
 int SGCTWindowWrapper::currentNumberOfAaSamples() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
-} 
+}
 
 bool SGCTWindowWrapper::isRegularRendering() const {
     sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();

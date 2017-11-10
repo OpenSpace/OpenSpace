@@ -57,7 +57,7 @@ namespace openspace {
 
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     : DataCygnet(dictionary)
-    , _fieldlines(FieldLineSeedsInfo) 
+    , _fieldlines(FieldLineSeedsInfo)
     , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
     , _slice(SliceInfo, 0.f, 0.f, 1.f)
 {
@@ -66,7 +66,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_fieldlines);
 
     dictionary.getValue("kwPath", _kwPath);
-    
+
     std::string fieldlineIndexFile;
     dictionary.getValue("fieldlineSeedsIndexFile", _fieldlineIndexFile);
 
@@ -109,7 +109,7 @@ void KameleonPlane::initialize() {
     if (!_data->groupName.empty()) {
         initializeGroup();
     }
-    
+
     initializeTime();
     createGeometry();
     createShader();
@@ -124,27 +124,27 @@ void KameleonPlane::initialize() {
 
         //If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this](){
-            // If autofiler is selected, use _dataProcessor to set backgroundValues 
+            // If autofiler is selected, use _dataProcessor to set backgroundValues
             // and unregister backgroundvalues property.
             if (_autoFilter) {
                 _backgroundValues.setValue(_dataProcessor->filterValues());
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
-            // else if autofilter is turned off, register backgroundValues 
+            // else if autofilter is turned off, register backgroundValues
             } else {
                 _backgroundValues.setVisibility(properties::Property::Visibility::All);
                 //_backgroundValues.setVisible(true);
             }
         });
     }
-    
+
     fillOptions(_kwPath);
 
     readTransferFunctions(_transferFunctionsFile.value());
 
     // Set Property Callbacks of DataCygnet (must be called after fillOptions)
     setPropertyCallbacks();
-    
+
     // Set Property callback specific to KameleonPlane
     _resolution.onChange([this](){
         for(int i=0; i<_textures.size(); i++){
@@ -159,8 +159,8 @@ void KameleonPlane::initialize() {
     _slice.onChange([this](){
         updateTextureResource();
     });
-    
-    _fieldlines.onChange([this](){ 
+
+    _fieldlines.onChange([this](){
         updateFieldlineSeeds();
     });
 
@@ -177,7 +177,7 @@ void KameleonPlane::initialize() {
 bool KameleonPlane::createGeometry() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    
+
     // ============================
     //         GEOMETRY (quad)
     // ============================
@@ -270,7 +270,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             if (OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) == nullptr) {
                 return;
             }
-            
+
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             OsEng.scriptEngine().queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
@@ -354,7 +354,7 @@ void KameleonPlane::subscribeToGroup() {
 
 void KameleonPlane::setDimensions() {
     // the cdf files has an offset of 0.5 in normali resolution.
-    // with lower resolution the offset increases. 
+    // with lower resolution the offset increases.
     _data->offset = _origOffset - 0.5f*(100.0f/_resolution.value());
     _dimensions = glm::size3_t(_data->scale*((float)_resolution.value()/100.f));
     _dimensions[_cut] = 1;

@@ -138,7 +138,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
-                //    break; 
+                //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }
@@ -192,7 +192,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 case GDT_Float32:
                     format.glFormat = GL_RGB32F;
                     break;
-                // No representation of 64 bit float? 
+                // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
                 //    break;
@@ -224,7 +224,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
-                //    break; 
+                //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }
@@ -264,7 +264,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
-                //    break; 
+                //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }
@@ -306,7 +306,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 case GDT_UInt16:
                     format.glFormat = GL_RGB16UI;
                     break;
-                case GDT_Int16: 
+                case GDT_Int16:
                     format.glFormat = GL_RGB16_SNORM;
                     break;
                 case GDT_UInt32:
@@ -318,7 +318,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 case GDT_Float32:
                     format.glFormat = GL_RGB32F;
                     break;
-                // No representation of 64 bit float? 
+                // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
                 //    break;
@@ -350,7 +350,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
-                //    break; 
+                //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }

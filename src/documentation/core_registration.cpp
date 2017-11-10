@@ -77,7 +77,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
     engine.addLibrary(WindowWrapper::luaLibrary());
     engine.addLibrary(MissionManager::luaLibrary());
-    
+
     engine.addLibrary(scripting::generalSystemCapabilities());
     engine.addLibrary(scripting::openglSystemCapabilities());
 }

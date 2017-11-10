@@ -34,7 +34,7 @@ public:
     constexpr static const char* Name = "Fieldlines";
 
     FieldlinesModule();
-    
+
 protected:
     void internalInitialize() override;
 };

@@ -81,7 +81,7 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     LDEBUG("Create openspace base library");
     lua_newtable(state);
     lua_setglobal(state, OpenSpaceLibraryName.c_str());
-    
+
     LDEBUG("Add OpenSpace modules");
     for (LuaLibrary& lib : _registeredLibraries) {
         registerLuaLibrary(state, lib);
@@ -176,10 +176,10 @@ bool ScriptEngine::runScript(const std::string& script) {
         LERRORC(e.component, e.message);
         return false;
     }
-        
+
     return true;
 }
-    
+
 bool ScriptEngine::runScriptFile(const std::string& filename) {
     if (filename.empty()) {
         LWARNING("Filename was empty");
@@ -189,7 +189,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
         LERROR("Script with name '" << filename << "' did not exist");
         return false;
     }
-    
+
     try {
         ghoul::lua::runScriptFile(_state, filename);
     }
@@ -201,7 +201,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
         LERRORC(e.component, e.message);
         return false;
     }
-    
+
     return true;
 }
 
@@ -214,7 +214,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
             break;
         }
     }
-    
+
     std::vector<scripting::LuaLibrary::Function>::const_iterator funcit;
     //library was found
     if (libit != _registeredLibraries.cend()){
@@ -228,19 +228,19 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
             }
         }
     }
-    
+
     return false;
 }*/
-    
+
 /*void ScriptEngine::cacheScript(const std::string &library, const std::string &function, const std::string &script){
     _cachedScriptsMutex.lock();
     _cachedScripts[library][function] = script;
     _cachedScriptsMutex.unlock();
 }
-    
+
 std::vector<std::string> ScriptEngine::cachedScripts(){
     _cachedScriptsMutex.lock();
-    
+
     std::vector<std::string> retVal;
     std::map<std::string, std::map<std::string, std::string>>::const_iterator outerIt;
     std::map<std::string, std::string>::const_iterator innerIt;
@@ -253,15 +253,15 @@ std::vector<std::string> ScriptEngine::cachedScripts(){
             retVal.push_back(innerIt->second);
         }
     }
-    
+
     _cachedScriptsMutex.unlock();
 
     return retVal;
 }*/
-    
+
 /*
 bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script){
-    
+
     //"deconstruct the script to find library and function name
     //assuming a script looks like: "openspace.library.function()"
     //or openspace.funcion()
@@ -270,7 +270,7 @@ bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::strin
     function.clear();
     //find first "."
     std::size_t pos = script.find(".");
-    
+
     if (pos != std::string::npos){
         //strip "openspace."
         sub = script.substr(pos + 1, script.size());
@@ -411,7 +411,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library, bo
         }
     }
 }
-    
+
 void ScriptEngine::addBaseLibrary() {
 LuaLibrary lib = {
     "",
@@ -540,7 +540,7 @@ LuaLibrary lib = {
     };
     addLibrary(lib);
 }
-    
+
 void ScriptEngine::remapPrintFunction() {
     //ghoul::lua::logStack(_state);
  //   lua_getglobal(_state, _luaGlobalNamespace.c_str());
@@ -777,7 +777,7 @@ void ScriptEngine::queueScript(const std::string &script, ScriptEngine::RemoteSc
     if (script.empty()) {
         return;
     }
-    
+
     _mutex.lock();
     _queuedScripts.insert(_queuedScripts.begin(), std::make_pair(script, remoteScripting));
     _mutex.unlock();

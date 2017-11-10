@@ -40,7 +40,7 @@ bool MultiModelGeometry::loadModel(const std::string& filename)  {
     std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
     std::vector<int> indices;
     ghoul::io::ModelReaderMultiFormat().loadModel(filename, vertices, indices);
-         
+
     _vertices.reserve(vertices.size());
     for (const ghoul::io::ModelReaderBase::Vertex& v : vertices) {
         Vertex vv;
@@ -52,7 +52,7 @@ bool MultiModelGeometry::loadModel(const std::string& filename)  {
         _vertices.push_back(vv);
     }
 
-    _indices.resize(indices.size());                
+    _indices.resize(indices.size());
     std::copy(indices.begin(), indices.end(), _indices.begin());
 
     return true;

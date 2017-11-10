@@ -42,7 +42,7 @@ struct UpdateData;
 struct RendererTasks;
 struct SurfacePositionHandle;
 
-namespace documentation { struct Documentation; } 
+namespace documentation { struct Documentation; }
 
 // Forward declare to minimize dependencies
 
@@ -83,10 +83,10 @@ public:
     bool matchesRenderBinMask(int binMask);
 
     bool isVisible() const;
-    
+
     bool hasTimeInterval();
     bool getInterval(double& start, double& end);
-    
+
     void onEnabledChange(std::function<void(bool)> callback);
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
@@ -95,7 +95,7 @@ public:
 
 protected:
     properties::BoolProperty _enabled;
-    
+
 private:
     RenderBin _renderBin;
     float _boundingSphere;

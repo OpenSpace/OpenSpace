@@ -34,7 +34,7 @@ namespace openspace::globebrowsing {
 
 struct LayerRenderSettings : public properties::PropertyOwner {
     LayerRenderSettings();
-    
+
     properties::TriggerProperty setDefault;
 
     properties::FloatProperty opacity;

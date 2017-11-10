@@ -56,7 +56,7 @@ class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
     BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
-        std::shared_ptr<TransferFunction> transferFunction, 
+        std::shared_ptr<TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
     virtual ~BasicVolumeRaycaster();
     void initialize();
@@ -111,4 +111,4 @@ private:
 } // namespace openspace
 
 
-#endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__ 
+#endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__

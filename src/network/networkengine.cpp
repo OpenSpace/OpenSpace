@@ -49,7 +49,7 @@ namespace {
 
 namespace openspace {
 
-NetworkEngine::NetworkEngine() 
+NetworkEngine::NetworkEngine()
     // -1 is okay as we assign one identifier in this ctor
     : _lastAssignedIdentifier(MessageIdentifier(-1))
     , _shouldPublishStatusMessage(true)
@@ -104,7 +104,7 @@ void NetworkEngine::publishStatusMessage() {
     Time& currentTime = OsEng.timeManager().time();
 
     uint16_t messageSize = 0;
-    
+
     double time = currentTime.j2000Seconds();
     std::string timeString = currentTime.UTC();
     double delta = currentTime.deltaTime();
@@ -117,7 +117,7 @@ void NetworkEngine::publishStatusMessage() {
 
     unsigned int currentLocation = 0;
     std::vector<char> buffer(messageSize);
-    
+
     std::memmove(buffer.data() + currentLocation, &time, sizeof(time));
     currentLocation += sizeof(time);
     std::memmove(
@@ -217,7 +217,7 @@ void NetworkEngine::sendInitialInformation() {
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
         OsEng.windowWrapper().sendMessageToExternalControl(payload);
-        LINFO("Sent initial message: (s=" << m.body.size() << ")" << 
+        LINFO("Sent initial message: (s=" << m.body.size() << ")" <<
               "[i=" << identifier.value << "]"
         );
 

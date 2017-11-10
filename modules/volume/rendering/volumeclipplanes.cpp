@@ -32,7 +32,8 @@ namespace volume {
 
 VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" }) // @TODO Missing name
-    , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10) // @TODO Missing documentation
+    // @TODO Missing documentation
+    , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
 {
     std::vector<std::string> keys = dictionary.keys();
     for (const std::string& key : keys) {

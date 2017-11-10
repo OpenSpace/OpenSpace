@@ -156,16 +156,17 @@ void Scene::sortTopologically() {
     _circularNodes.clear();
 
     ghoul_assert(_topologicallySortedNodes.size() == _nodesByName.size(), "Number of scene graph nodes is inconsistent");
-    
-    if (_topologicallySortedNodes.empty())
+
+    if (_topologicallySortedNodes.empty()) {
         return;
+    }
 
     // Only the Root node can have an in-degree of 0
     SceneGraphNode* root = _nodesByName[SceneGraphNode::RootNodeName];
     if (!root) {
         throw Scene::InvalidSceneError("No root node found");
     }
-    
+
     std::unordered_map<SceneGraphNode*, size_t> inDegrees;
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         size_t inDegree = node->dependencies().size();
@@ -177,7 +178,7 @@ void Scene::sortTopologically() {
 
     std::stack<SceneGraphNode*> zeroInDegreeNodes;
     zeroInDegreeNodes.push(root);
-    
+
     std::vector<SceneGraphNode*> nodes;
     nodes.reserve(_topologicallySortedNodes.size());
     while (!zeroInDegreeNodes.empty()) {
@@ -209,7 +210,7 @@ void Scene::sortTopologically() {
     for (auto it : inDegrees) {
         _circularNodes.push_back(it.first);
     }
-    
+
     _topologicallySortedNodes = nodes;
 }
 
@@ -258,7 +259,7 @@ SceneGraphNode* Scene::root() {
 const SceneGraphNode* Scene::root() const {
     return &_rootDummy;
 }
-    
+
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
     auto it = _nodesByName.find(name);
     if (it != _nodesByName.end()) {

@@ -84,7 +84,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     }
     maxParents -= parents;
 
-    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
+    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside
     //         the range of defined data.
     int maximumLevel = maxLevel();
     while (tileIndex.level > maximumLevel){
@@ -94,9 +94,9 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     if(maxParents < 0){
         return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
     }
-    
-    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
-    //         has a loaded tile ready to use. 
+
+    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
+    //         has a loaded tile ready to use.
     while (tileIndex.level > 1) {
         Tile tile = getTile(tileIndex);
         if (tile.status() != Tile::Status::OK) {
@@ -110,7 +110,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
             return ChunkTile{ tile, uvTransform, TileDepthTransform() };
         }
     }
-    
+
     return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
 }
 
@@ -150,7 +150,7 @@ bool TileProvider::initialize() {
         _numTileProviders--;
         return false;
     }
-  
+
     _initialized = true;
     return true;
 }
@@ -159,7 +159,7 @@ void TileProvider::initializeDefaultTile() {
     ghoul_assert(_defaultTile.texture() == nullptr,
         "Default tile should not have been created");
     using namespace ghoul::opengl;
-        
+
     // Create pixel data
     TileTextureInitData initData(8, 8, GL_UNSIGNED_BYTE, Texture::Format::RGBA,
                                  false,

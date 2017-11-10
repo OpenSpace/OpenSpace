@@ -34,7 +34,7 @@
 #include <sstream>
 
 namespace openspace::globebrowsing {
-    
+
 struct TileMetaData;
 class TileTextureInitData;
 
@@ -55,7 +55,7 @@ struct RawTile {
     TileIndex tileIndex;
     ReadError error;
     GLuint pbo;
-   
+
     static RawTile createDefault(const TileTextureInitData& initData);
 };
 

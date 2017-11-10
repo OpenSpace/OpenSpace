@@ -84,7 +84,7 @@ void LayerAdjustment::setValuesFromDictionary(
     std::string dictType;
     glm::vec3 dictChromaKeyColor;
     float dictChromaKeyTolerance;
-    
+
     if (adjustmentDict.getValue(keyType, dictType)) {
         _typeOption.setValue(
             static_cast<int>(layergroupid::getAdjustmentTypeIDFromName(dictType)));

@@ -38,7 +38,7 @@ int loadFile(lua_State* L) {
     OsEng.scriptScheduler().loadScripts(
         ghoul::lua::loadDictionaryFromFile(missionFileName, L)
     );
-    
+
     return 0;
 }
 

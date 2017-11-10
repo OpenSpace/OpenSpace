@@ -74,7 +74,7 @@ void FramebufferRenderer::initialize() {
         size, -size, 0.0f, 1.0f,
         size,    size, 0.0f, 1.0f
     };
-    
+
     glGenVertexArrays(1, &_screenQuad);
     glBindVertexArray(_screenQuad);
 
@@ -369,7 +369,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             OsEng.renderEngine().performanceManager()
         );
     }
-    
+
     if (!_scene || !_camera) {
         return;
     }
@@ -405,7 +405,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get(); 
+        ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
             exitProgram->activate();
             raycaster->renderExitPoints(raycasterTask.renderData, *exitProgram);
@@ -432,7 +432,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                 raycastProgram->activate();
             }
         }
-        
+
         if (raycastProgram) {
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 

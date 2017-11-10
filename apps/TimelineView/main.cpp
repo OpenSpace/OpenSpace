@@ -112,7 +112,7 @@ QCombobox {
 }
 
 QComboBox:editable {
-    background: lightgrey;    
+    background: lightgrey;
 }
 
 QComboBox QAbstractItemView {

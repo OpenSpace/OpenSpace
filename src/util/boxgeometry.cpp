@@ -57,21 +57,21 @@ bool BoxGeometry::initialize() {
         -x, -y,  z, // blue corner
         x, -y,  z,  // magenta corner
         x,  y,  z,  // white corner
-    
+
         -x, -y, -z, // black corner
         -x,  y, -z, // green
         x,  y, -z,  // yellow corner
         -x, -y, -z, // black
         x,  y, -z, // yellow
         x, -y, -z, // red
-    
+
         x, -y, -z, // red
         x,  y,  z, // yellow
         x, -y,  z, // magenta
         x, -y, -z, // red
         x,  y, -z, // yellow
         x,  y,  z, // white
-    
+
         -x, -y, -z, // black
         -x, -y,  z, // blue
         -x,  y,  z, // cyan
@@ -93,7 +93,7 @@ bool BoxGeometry::initialize() {
         x, -y, -z, // red
         x, -y,  z // magenta
     };
-    
+
     if (_vaoId == 0)
         glGenVertexArrays(1, &_vaoId);
 

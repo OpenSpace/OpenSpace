@@ -140,7 +140,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group) {
         }
 
         // This callback determines what geometry should be used and creates the right cygbet
-        auto metadataCallback = 
+        auto metadataCallback =
         [this, metaFuture](const DownloadManager::MemoryFile& file) {
             //Create a string from downloaded file
             std::string res;
@@ -201,7 +201,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
                     std::to_string(id) + ": " + err
                 );
             }
-        ) );   
+        ) );
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp) {
@@ -219,7 +219,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, do
                     std::to_string(id) + ": " + err
                 );
             }
-        ) );   
+        ) );
 }
 
 std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) {
@@ -228,15 +228,15 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) {
         url = _baseUrl + type+"/" + std::to_string(-id) + "/";
     } else {
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
-    }        
+    }
 
-    //std::string t = Time::ref().currentTimeUTC(); 
+    //std::string t = Time::ref().currentTimeUTC();
     std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
     std::stringstream ss(t);
     std::string token;
 
     std::getline(ss, token, ' ');
-    url += token + "-"; 
+    url += token + "-";
     std::getline(ss, token, ' ');
     url += _month[token] + "-";
     std::getline(ss, token, 'T');
@@ -251,7 +251,7 @@ void IswaManager::registerGroup(std::string groupName, std::string type) {
     if (_groups.find(groupName) == _groups.end()) {
         bool dataGroup =    (type == typeid(DataPlane).name()) ||
                             (type == typeid(DataSphere).name());
-                            
+
         bool kameleonGroup = (type == typeid(KameleonPlane).name());
         if (dataGroup) {
             _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaDataGroup>(groupName, type)));
@@ -347,7 +347,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
         std::string table = "{"
         "Name = '" + data->name +"' , "
         "Parent = '" + parent + "', "
-        "Renderable = {"    
+        "Renderable = {"
             "Type = '" + _type[data->type] + _geom[data->geom] + "', "
             "Id = " + std::to_string(data->id) + ", "
             "Frame = '" + frame + "' , "
@@ -360,7 +360,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             "XOffset = "+ std::to_string(xOffset) + ","
             "}"
         "}";
-        
+
         return table;
     }
     return "";
@@ -371,7 +371,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) {
         const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
         if(extension == "cdf"){
             KameleonWrapper kw = KameleonWrapper(absPath(info.path));
-     
+
             std::string parent  = kw.getParent();
             std::string frame   = kw.getFrame();
             glm::vec3   min     = kw.getGridMin();
@@ -396,8 +396,8 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) {
 
             std::string table = "{"
                 "Name = '" +info.name+ "',"
-                "Parent = '" + parent + "', " 
-                "Renderable = {"    
+                "Parent = '" + parent + "', "
+                "Renderable = {"
                     "Type = 'KameleonPlane', "
                     "Id = 0 ,"
                     "Frame = '" + frame + "' , "
@@ -405,7 +405,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) {
                     "GridMax = " + std::to_string(max) + ", "
                     "SpatialScale = " + std::to_string(spatialScale) + ", "
                     "UpdateTime = 0, "
-                    "kwPath = '" + info.path + "' ," 
+                    "kwPath = '" + info.path + "' ,"
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
                     "Group = '"+ info.group + "',"
@@ -413,7 +413,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) {
                     "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
                     "}"
                 "}"
-                ; 
+                ;
             return table;
         }
     }
@@ -452,7 +452,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
     std::string table = "{"
     "Name = '" + data->name +"' , "
     "Parent = '" + parent + "', "
-    "Renderable = {"    
+    "Renderable = {"
         "Type = '" + _type[data->type] + _geom[data->geom] + "', "
         "Id = " + std::to_string(data->id) + ", "
         "Frame = '" + frame + "' , "
@@ -464,7 +464,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
         "Group = '"+ data->group + "',"
         "}"
     "}";
-    
+
     return table;
 }
 
@@ -490,7 +490,7 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data) {
         } else {
             type = typeid(TexturePlane).name();
         }
-        
+
         registerGroup(data->group, type);
 
         auto it = _groups.find(data->group);
@@ -627,7 +627,7 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
 void IswaManager::fillCygnetInfo(std::string jsonString) {
     if (jsonString != "") {
         json j = json::parse(jsonString);
-        
+
         std::set<std::string> lists  =  {"listOfPriorityCygnets", "listOfOKCygnets"
                                         // ,"listOfStaleCygnets", "listOfInactiveCygnets",
                                         };
@@ -648,7 +648,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
                 };
                 _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
             }
-        }        
+        }
     }
 }
 
@@ -657,7 +657,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
     if (FileSys.fileExists(cdfpath)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
         std::ifstream jsonFile(cdfpath);
-        
+
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
             for(int i=0; i<cdfGroups.size(); i++){
@@ -665,7 +665,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
                 std::string groupName = cdfGroup["group"];
                 std::string fieldlineSeedsIndexFile = cdfGroup["fieldlinefile"];
-                
+
                 if (_cdfInformation.find(groupName) != _cdfInformation.end()) {
                     LWARNING("CdfGroup with name" + groupName + " already exists.");
                     return;
@@ -680,7 +680,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
                     std::string name = cdf["name"];
                     std::string path = cdf["path"];
                     std::string date = cdf["date"];
-            
+
                     _cdfInformation[groupName].push_back({
                         name,
                         path,

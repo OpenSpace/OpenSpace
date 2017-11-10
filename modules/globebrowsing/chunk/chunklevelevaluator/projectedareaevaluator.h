@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
 
 namespace openspace::globebrowsing::chunklevelevaluator {
-    
+
 /**
  * Evaluate the chunk level using the area of the non-heightmapped Chunk projected
  * on a sphere with the center in the position of the camera. A Chunk near the

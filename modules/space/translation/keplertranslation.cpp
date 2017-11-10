@@ -109,12 +109,10 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
         "Orbit period",
         "Specifies the orbital period (in seconds)."
     };
-
-
 } // namespace
 
 namespace openspace {
-    
+
 KeplerTranslation::RangeError::RangeError(std::string off)
     : ghoul::RuntimeError("Value '" + off + "' out of range", "KeplerTranslation")
     , offender(std::move(off))
@@ -122,7 +120,7 @@ KeplerTranslation::RangeError::RangeError(std::string off)
 
 documentation::Documentation KeplerTranslation::Documentation() {
     using namespace openspace::documentation;
-    return{
+    return {
         "Kepler Translation",
         "space_transform_kepler",
         {
@@ -222,7 +220,7 @@ KeplerTranslation::KeplerTranslation()
     addProperty(_period);
 }
 
-KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary) 
+KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     : KeplerTranslation()
 {
     documentation::testSpecificationAndThrow(
@@ -251,7 +249,7 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     // Compute the eccentric anomaly (the location of the spacecraft taking the
     // eccentricity of the orbit into account) using different solves for the regimes in
     // which they are most efficient
-    
+
     if (_eccentricity == 0.0) {
         // In a circular orbit, the eccentric anomaly = mean anomaly
         return meanAnomaly;
@@ -282,7 +280,8 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
             double f = x - s - meanAnomaly;
             double f1 = 1 - c;
             double f2 = s;
-            return x + (-5 * f / (f1 + sign(f1) * sqrt(std::abs(16 * f1 * f1 - 20 * f * f2))));
+            return x + (-5 * f / (f1 + sign(f1) *
+                sqrt(std::abs(16 * f1 * f1 - 20 * f * f2))));
         };
         return solveIteration(solver, e, 0.0, 8);
     }
@@ -319,17 +318,17 @@ void KeplerTranslation::computeOrbitPlane() {
     // z = axis of rotation
     // x = pointing towards the first point of Aries
     // y completes the righthanded coordinate system
-    
+
     // Perform three rotations:
     // 1. Around the z axis to place the location of the ascending node
     // 2. Around the x axis (now aligned with the ascending node) to get the correct
     // inclination
     // 3. Around the new z axis to place the closest approach to the correct location
-    
+
     const glm::vec3 ascendingNodeAxisRot = { 0.f, 0.f, 1.f };
     const glm::vec3 inclinationAxisRot = { 1.f, 0.f, 0.f };
     const glm::vec3 argPeriapsisAxisRot = { 0.f, 0.f, 1.f };
-    
+
     const double asc = glm::radians(_ascendingNode.value());
     const double inc = glm::radians(_inclination.value());
     const double per = glm::radians(_argumentOfPeriapsis.value());
@@ -370,23 +369,23 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;
     };
-    
+
     if (isInRange(eccentricity, 0.0, 1.0)) {
         _eccentricity = eccentricity;
     }
     else {
         throw RangeError("Eccentricity");
     }
-    
+
     _semiMajorAxis = semiMajorAxis;
-    
+
     if (isInRange(inclination, 0.0, 360.0)) {
         _inclination = inclination;
     }
     else {
         throw RangeError("Inclination");
     }
-    
+
     if (isInRange(_ascendingNode, 0.0, 360.0)) {
         _ascendingNode = ascendingNode;
     }
@@ -399,17 +398,17 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     else {
         throw RangeError("Argument of Periapsis");
     }
-    
+
     if (isInRange(_meanAnomalyAtEpoch, 0.0, 360.0)) {
         _meanAnomalyAtEpoch = meanAnomalyAtEpoch;
     }
     else {
         throw RangeError("Mean anomaly at epoch");
     }
-    
+
     _period = orbitalPeriod;
     _epoch = epoch;
-    
+
     computeOrbitPlane();
 }
 

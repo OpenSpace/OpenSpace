@@ -266,7 +266,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     bool usingFramebufferRenderer =
         OsEng.renderEngine().rendererImplementation() ==
         RenderEngine::RendererImplementation::Framebuffer;
-    
+
     if (usingFramebufferRenderer) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -394,7 +394,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     if (renderPoints) {
         glDisable(GL_PROGRAM_POINT_SIZE);
     }
-     
+
     glBindVertexArray(0);
 
     if (usingFramebufferRenderer) {

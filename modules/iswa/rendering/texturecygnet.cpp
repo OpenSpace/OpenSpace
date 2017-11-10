@@ -34,17 +34,18 @@ namespace openspace {
 
 TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
     : IswaCygnet(dictionary)
-{ 
+{
     registerProperties();
 }
 
 TextureCygnet::~TextureCygnet() {}
 
 bool TextureCygnet::updateTexture() {
-    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-                                                        (void*) _imageFile.buffer,
-                                                        _imageFile.size, 
-                                                        _imageFile.format);
+    auto texture = ghoul::io::TextureReader::ref().loadTexture(
+        (void*) _imageFile.buffer,
+        _imageFile.size,
+        _imageFile.format
+    );
 
     if (texture) {
         LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");

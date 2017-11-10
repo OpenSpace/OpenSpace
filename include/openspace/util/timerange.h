@@ -38,11 +38,11 @@ struct TimeRange {
     TimeRange();
 
     /**
-    * Initializes a TimeRange with both start and end time. Initializing empty timeranges 
+    * Initializes a TimeRange with both start and end time. Initializing empty timeranges
     * is OK.
     */
     TimeRange(double startTime, double endTime);
-    
+
     /**
     * Throws exception if unable to parse the provided \class ghoul::Dictionary
     */
@@ -56,7 +56,7 @@ struct TimeRange {
     void include(double val);
 
     void include(const TimeRange& other);
-    
+
     double duration() const;
 
     bool isDefined() const;

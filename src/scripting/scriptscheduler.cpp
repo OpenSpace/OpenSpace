@@ -102,7 +102,7 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dicti
 {
     std::string timeStr = dictionary.value<std::string>(KeyTime);
     time = Time::convertTime(timeStr);
-    
+
     // If a universal script is specified, retrieve it and add a ; as a separator so that
     // it can be added to the other scripts
     std::string universal;
@@ -110,12 +110,12 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dicti
     if (!universal.empty()) {
         universal += ";";
     }
-    
+
     if (dictionary.hasKeyAndValue<std::string>(KeyForwardScript)) {
         forwardScript =
             universal + dictionary.value<std::string>(KeyForwardScript);
     }
-    
+
     if (dictionary.hasKeyAndValue<std::string>(KeyBackwardScript)) {
         backwardScript =
             universal + dictionary.value<std::string>(KeyBackwardScript);
@@ -129,7 +129,7 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
         dictionary,
         "ScriptScheduler"
     );
-    
+
     // Create all the scheduled script first
     std::vector<ScheduledScript> scheduledScripts;
     for (size_t i = 1; i <= dictionary.size(); ++i) {
@@ -148,7 +148,7 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
             return lhs.time < rhs.time;
         }
     );
-    
+
     // Move the scheduled scripts into their SOA alignment
     // For the forward scripts, this is the forwards direction
     // For the backward scripts, we insert them in the opposite order so that we can still
@@ -168,7 +168,7 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
     double lastTime = _currentTime;
     rewind();
     progressTo(lastTime);
-    
+
     ghoul_assert(
         (_timings.size() == _forwardScripts.size()) &&
         (_timings.size() == _backwardScripts.size()),
@@ -206,14 +206,14 @@ ScriptScheduler::progressTo(double newTime)
             _timings.end(),
             newTime
          );
-        
+
         // How many values did we pass over?
         ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
         _currentIndex = static_cast<int>(prevIndex + n);
-        
+
         // Update the new time
         _currentTime = newTime;
-        
+
         return {
             _forwardScripts.begin() + prevIndex,
             _forwardScripts.begin() + _currentIndex
@@ -228,11 +228,11 @@ ScriptScheduler::progressTo(double newTime)
             _timings.begin() + prevIndex, // We can stop at the previous time
             newTime
         );
-        
+
         // How many values did we pass over?
         ptrdiff_t n = std::distance(it, _timings.begin() + prevIndex);
         _currentIndex = static_cast<int>(prevIndex - n);
-        
+
         // Update the new time
         _currentTime = newTime;
 
@@ -244,23 +244,23 @@ ScriptScheduler::progressTo(double newTime)
 }
 
 double ScriptScheduler::currentTime() const {
-    return _currentTime; 
+    return _currentTime;
 }
 
 std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
     std::vector<ScheduledScript> result;
     for (size_t i = 0; i < _timings.size(); ++i) {
-        ScheduledScript script;        
+        ScheduledScript script;
         script.time = _timings[i];
         script.forwardScript = _forwardScripts[i];
         script.backwardScript = _backwardScripts[i];
-        
+
         result.push_back(std::move(script));
     }
     return result;
 }
 
-LuaLibrary ScriptScheduler::luaLibrary() {    
+LuaLibrary ScriptScheduler::luaLibrary() {
     return {
         "scriptScheduler",
         {

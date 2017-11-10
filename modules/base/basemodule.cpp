@@ -68,12 +68,12 @@ void BaseModule::internalInitialize() {
         "ScreenSpaceRenderable"
     );
 
-    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
-    fScreenSpaceRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
-    fScreenSpaceRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
-    fScreenSpaceRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
+    fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
+    fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
+    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
@@ -103,9 +103,9 @@ void BaseModule::internalInitialize() {
     fScale->registerClass<LuaScale>("LuaScale");
     fScale->registerClass<StaticScale>("StaticScale");
 
-    auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
-    ghoul_assert(fModelGeometry, "Model geometry factory was not created");
-    fModelGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
+    auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
+    ghoul_assert(fGeometry, "Model geometry factory was not created");
+    fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {

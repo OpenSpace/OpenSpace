@@ -281,7 +281,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
     if (!tf) return false;
 
     size_t tfWidth = tf->width();
-    
+
     // By changing tfWidth to the correct type size_t, this check is no longer valid since
     // size_t is unsigned ---abock
     //if (tfWidth <= 0) return false;

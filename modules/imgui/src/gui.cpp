@@ -233,7 +233,7 @@ void addScreenSpaceRenderableOnline(std::string texturePath) {
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
 
-} // namespace 
+} // namespace
 
 namespace openspace::gui {
 
@@ -243,7 +243,7 @@ void CaptionText(const char* text) {
     ImGui::PopFont();
 }
 
-GUI::GUI() 
+GUI::GUI()
     : GuiComponent("Main")
     , _globalProperty("Global")
     , _property(
@@ -388,7 +388,7 @@ void GUI::initialize() {
     _featuredProperties.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _filePath.initialize();
-#ifdef GLOBEBROWSING_USE_GDAL    
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initialize();
 #endif // GLOBEBROWSING_USE_GDAL
     _performance.initialize();
@@ -396,7 +396,7 @@ void GUI::initialize() {
     _parallel.initialize();
     _mission.initialize();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _iswa.initialize(); 
+    _iswa.initialize();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
 }
 
@@ -451,9 +451,9 @@ void GUI::initializeGL() {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vboMaxSize, nullptr, GL_DYNAMIC_DRAW);
-    
+
     glGenBuffers(1, &vboElements);
-    
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -493,7 +493,7 @@ void GUI::initializeGL() {
     _globalProperty.initializeGL();
     _featuredProperties.initializeGL();
     _performance.initializeGL();
-    _help.initializeGL();    
+    _help.initializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initializeGL();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -644,7 +644,7 @@ bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
     const bool consumeEvent = io.WantCaptureKeyboard;
     if (consumeEvent) {
         if (action == KeyAction::Press) {
-            io.KeysDown[keyIndex] = true; 
+            io.KeysDown[keyIndex] = true;
         }
         io.KeyShift = hasShift;
         io.KeyCtrl = hasCtrl;
@@ -770,7 +770,7 @@ void GUI::render() {
 
     ImGui::End();
 }
-    
+
 void GUI::renderAndUpdatePropertyVisibility() {
     // Fragile! Keep this in sync with properties::Property::Visibility
     using V = properties::Property::Visibility;

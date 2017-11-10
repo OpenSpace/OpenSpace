@@ -24,14 +24,14 @@
 
 namespace openspace {
 namespace volume {
-    
+
 template <typename VolumeType>
 VolumeSampler<VolumeType>::VolumeSampler(const VolumeType& volume, const glm::vec3& filterSize) {
     // Only accept filter sizes of size 1, 3, 5, 7...
     // Round down to closest odd number.
     _filterSize = static_cast<glm::ivec3>((filterSize - glm::vec3(1.0)) * glm::vec3(0.5)) *
         glm::ivec3(2) + glm::ivec3(1);
-    
+
     _volume = &volume;
 }
 
@@ -74,7 +74,7 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(const glm::vec3
             }
         }
     }
-    
+
     value /= static_cast<float>(_filterSize.x * _filterSize.y * _filterSize.z);
     return value;
 }

@@ -196,7 +196,7 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() *
         glm::mat4(data.camera.combinedViewMatrix() *
             modelTransform
-        )    
+        )
     ;
     //glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -219,7 +219,7 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
 
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
-    
+
     _program->deactivate();
 }
 
@@ -228,14 +228,18 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
         _program->rebuildFromFile();
     }
 
-    glm::dmat3 transformMatrix = SpiceManager::ref().positionTransformMatrix(
-        _source,
-        //"ECLIPJ2000",
-        "GALACTIC",
+    // glm::dmat3 transformMatrix = SpiceManager::ref().positionTransformMatrix(
+    //     _source,
+    //     //"ECLIPJ2000",
+    //     "GALACTIC",
+    //     data.time.j2000Seconds()
+    // );
+
+    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(
+        _instrumentName,
+        "ECLIPJ2000",
         data.time.j2000Seconds()
     );
-
-    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(_instrumentName, "ECLIPJ2000", data.time.j2000Seconds());
 
     //_positions[SourcePosition] = { 0.f, 0.f, 0.f, 0.f };
 
@@ -249,9 +253,9 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     //catch (const SpiceManager::SpiceException& e) {
         //LERROR(e.what());
     //}
-    
+
     glm::vec4 target(boresight[0], boresight[1], boresight[2], 12);
-    //target = glm::dmat4(tm) * target;
+    target = glm::dmat4(tm) * target;
 
     //_positions[TargetPosition] = target;
     //_positions[TargetPosition] = {
@@ -267,7 +271,11 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
             { _lineColorBegin.r, _lineColorBegin.g, _lineColorBegin.b, _lineColorBegin.a }
         },
         {
-            { target.x * powf(10, target.w), target.y * powf(10, target.w), target.z * powf(10, target.w) },
+            {
+                target.x * powf(10, target.w),
+                target.y * powf(10, target.w),
+                target.z * powf(10, target.w)
+            },
             { _lineColorEnd.r,  _lineColorEnd.g,  _lineColorEnd.b,  _lineColorEnd.a }
         }
     };
@@ -275,7 +283,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferSubData(
-        GL_ARRAY_BUFFER, 
+        GL_ARRAY_BUFFER,
         0,
         2 * sizeof(VBOData),
         vboData

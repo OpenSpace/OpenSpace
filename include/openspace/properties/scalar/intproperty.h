@@ -28,11 +28,11 @@
  /**
  * \file intproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class IntProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>int</code>.

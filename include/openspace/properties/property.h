@@ -88,7 +88,7 @@ public:
         Visibility visibility = Visibility::All;
     };
 
-    /// An OnChangeHandle is returned by the onChange method to uniquely identify an 
+    /// An OnChangeHandle is returned by the onChange method to uniquely identify an
     /// onChange callback
     using OnChangeHandle = uint32_t;
 
@@ -102,7 +102,7 @@ public:
      * to be accessed by the GUI elements using the <code>guiName</code> key. The default
      * visibility settings is Visibility::All, whereas the default read-only state is
      * <code>false</code>.
-     * \param info The PropertyInfo structure that contains all the required static 
+     * \param info The PropertyInfo structure that contains all the required static
      * information for initializing this Property.
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
@@ -148,7 +148,7 @@ public:
      * \return The type that is requested by this Property's Property::set method
      */
     virtual const std::type_info& type() const;
-    
+
     /**
      * This method encodes the encapsulated value of this Property at the top of the Lua
      * stack. The specific details of this serialization is up to the property developer
@@ -237,7 +237,7 @@ public:
      * \return The unique identifier of this Property
      */
     const std::string& identifier() const;
-    
+
     /**
      * Returns the fully qualified name for this Property that uniquely identifies this
      * Property within OpenSpace. It consists of the <code>identifier</code> preceded by
@@ -260,7 +260,7 @@ public:
      * \param owner The new PropertyOwner for this Property
      */
     void setPropertyOwner(PropertyOwner* owner);
-    
+
     /**
      * Returns the human-readable GUI name for this Property that has been set in the
      * constructor. This method returns the same value as accessing the metaData object
@@ -399,7 +399,7 @@ protected:
      * <code>generateAdditionalDescription()}</code>, which #generateMetaDataDescription
      * and this method being the override points to customize the behavior.
      * \return The information specific to each subclass of Property
-     */ 
+     */
     virtual std::string generateAdditionalDescription() const;
 
     /**
@@ -409,7 +409,7 @@ protected:
     void notifyListener();
 
     /// The PropetyOwner this Property belongs to, or <code>nullptr</code>
-    PropertyOwner* _owner; 
+    PropertyOwner* _owner;
 
     /// The identifier for this Property
     std::string _identifier;

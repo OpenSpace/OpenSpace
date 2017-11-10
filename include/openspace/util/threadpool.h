@@ -40,7 +40,7 @@ namespace openspace {
 class ThreadPool;
 
 class Worker {
-public: 
+public:
     Worker(ThreadPool& pool);
     void operator()();
 private:

@@ -97,7 +97,7 @@ bool RenderablePlaneProjection::isReady() const {
 void RenderablePlaneProjection::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    
+
     // Image Plane Program
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
@@ -155,17 +155,23 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
 
 void RenderablePlaneProjection::update(const UpdateData& data) {
     double time = data.time.j2000Seconds();
-    const Image img = openspace::ImageSequencer::ref().getLatestImageForInstrument(_instrument);
-    
+    const Image img = openspace::ImageSequencer::ref().getLatestImageForInstrument(
+        _instrument
+    );
+
     if (img.path == "")
         return;
     else
         _hasImage = true;
 
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_target.frame, GalacticFrame, time);
-    
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(
+        _target.frame,
+        GalacticFrame,
+        time
+    );
+
     double timePast = std::abs(img.timeRange.start - _previousTime);
-    
+
     std::string tex = _texturePath;
     if (_moving || _planeIsDirty)
         updatePlane(img, time);
@@ -186,7 +192,10 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
 void RenderablePlaneProjection::loadTexture() {
     if (_texturePath != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        using TR = ghoul::io::TextureReader;
+        std::unique_ptr<ghoul::opengl::Texture> texture = TR::ref().loadTexture(
+            absPath(_texturePath)
+        );
         if (texture) {
             if (texture->format() == ghoul::opengl::Texture::Format::Red)
                 texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
@@ -198,7 +207,9 @@ void RenderablePlaneProjection::loadTexture() {
 
             delete _textureFile;
             _textureFile = new ghoul::filesystem::File(_texturePath);
-            _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
+            _textureFile->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
         }
     }
 }
@@ -210,8 +221,8 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     glm::dvec3 boresight;
 
     std::string target = _defaultTarget;
-    // Turned on if the plane should be attached to the closest target, 
-    // rather than the target specified in img 
+    // Turned on if the plane should be attached to the closest target,
+    // rather than the target specified in img
     //if (!_moving) {
     //    target = findClosestTarget(currentTime);
     //}
@@ -221,11 +232,11 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     setTarget(target);
 
     try {
-        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrument);
+        SpiceManager::FieldOfViewResult r = SpiceManager::ref().fieldOfView(_instrument);
 
-        frame = std::move(res.frameName);
-        bounds = std::move(res.bounds);
-        boresight = std::move(res.boresightVector);
+        frame = std::move(r.frameName);
+        bounds = std::move(r.bounds);
+        boresight = std::move(r.boresightVector);
     }
     catch (const SpiceManager::SpiceException& e) {
         LERROR(e.what());
@@ -238,56 +249,66 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         _target.body,
         _spacecraft,
         GalacticFrame,
-        { SpiceManager::AberrationCorrection::Type::ConvergedNewtonianStellar, SpiceManager::AberrationCorrection::Direction::Reception },
+        {
+            SpiceManager::AberrationCorrection::Type::ConvergedNewtonianStellar,
+            SpiceManager::AberrationCorrection::Direction::Reception
+        },
         currentTime,
         lt
     );
     // The apparent position, CN+S, makes image align best with target
 
     for (size_t j = 0; j < bounds.size(); ++j) {
-        bounds[j] = SpiceManager::ref().frameTransformationMatrix(frame, GalacticFrame, currentTime) * bounds[j];
+        bounds[j] = SpiceManager::ref().frameTransformationMatrix(
+            frame,
+            GalacticFrame,
+            currentTime
+        ) * bounds[j];
         glm::dvec3 cornerPosition = glm::proj(vecToTarget, bounds[j]);
 
         if (!_moving) {
             cornerPosition -= vecToTarget;
         }
-        cornerPosition = SpiceManager::ref().frameTransformationMatrix(GalacticFrame, _target.frame, currentTime) * cornerPosition;
+        cornerPosition = SpiceManager::ref().frameTransformationMatrix(
+            GalacticFrame,
+            _target.frame,
+            currentTime
+        ) * cornerPosition;
 
-        projection[j] = PowerScaledCoordinate::CreatePowerScaledCoordinate(cornerPosition[0], cornerPosition[1], cornerPosition[2]);
+        projection[j] = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+            cornerPosition[0],
+            cornerPosition[1],
+            cornerPosition[2]
+        );
         projection[j][3] += 3;
     }
 
     if (!_moving) {
         SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_name);
-        SceneGraphNode* newParent = OsEng.renderEngine().scene()->sceneGraphNode(_target.node);
+        SceneGraphNode* newParent = OsEng.renderEngine().scene()->sceneGraphNode(
+            _target.node
+        );
         if (thisNode && newParent) {
             thisNode->setParent(*newParent);
-        }   
+        }
     }
-    
-    const GLfloat vertex_data[] = { // square of two triangles drawn within fov in target coordinates
+
+    const GLfloat vertex_data[] = {
+        // square of two triangles drawn within fov in target coordinates
         //      x      y     z     w     s     t
-        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0, // Lower left 1
-        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1, // Upper right 2
-        projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 1, // Upper left 3
-        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0, // Lower left 4 = 1
-        projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 0, // Lower right 5
-        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1, // Upper left 6 = 2
-        //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 1
-        //projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper right 2
-        //projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 0, // Upper left 3
-        //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 4 = 1
-        //projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 1, // Lower right 5
-        //projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper left 6 = 2
-
+        // Lower left 1
+        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0,
+        // Upper right 2
+        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1,
+        // Upper left 3
+        projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 1,
+        // Lower left 4 = 1
+        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0,
+        // Lower right 5
+        projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 0,
+        // Upper left 6 = 2
+        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1,
     };
-    //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 1
-    //    projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper right 2
-    //    projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 0, // Upper left 3
-    //    projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 4 = 1
-    //    projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 1, // Lower right 5
-    //    projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper left 6 = 2
-
 
     glBindVertexArray(_quad); // bind array
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
@@ -295,7 +316,14 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 
     if (!_moving && img.path != "") {
         _texturePath = img.path;
@@ -304,10 +332,9 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
 }
 
 void RenderablePlaneProjection::setTarget(std::string body) {
-    if (body == "")
+    if (body == "") {
         return;
-
-    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
+    }
 
     _target.body = body;
     _target.frame = openspace::SpiceManager::ref().frameFromBody(body);

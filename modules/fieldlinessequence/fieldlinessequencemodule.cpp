@@ -22,57 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCENELOADER___H__
-#define __OPENSPACE_CORE___SCENELOADER___H__
+#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/assetloader.h>
-#include <openspace/scene/scenelicense.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
 
-#include <openspace/util/camera.h>
+#include <ghoul/misc/assert.h>
 
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
-
-#include <memory>
-#include <string>
-#include <utility>
+#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
 namespace openspace {
 
-class Scene;
+FieldlinesSequenceModule::FieldlinesSequenceModule()
+    : OpenSpaceModule("FieldlinesSequence") {}
 
-class SceneLoader {
-public:
-    SceneLoader(AssetLoader* assetLoader);
-    ~SceneLoader() = default;
+void FieldlinesSequenceModule::internalInitialize() {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
 
-    /**
-     * Load a scene file.
-     */
-    void loadScene(Scene* scene, const std::string& path);
-
-private:
-    
-    struct LoadedCamera {
-        LoadedCamera(
-            const std::string& parentName,
-            std::unique_ptr<Camera> c
-            )
-            : parent(parentName)
-            , camera(std::move(c)) {}
-        std::string parent;
-        std::unique_ptr<Camera> camera;
-    };
-
-    /**
-     * Load a camera from a dictionary
-     */
-    std::unique_ptr<SceneLoader::LoadedCamera> loadCamera(const ghoul::Dictionary& dictionary);
-
-    AssetLoader* _assetLoader;
-};
+    fRenderable->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___SCENELOADER___H__

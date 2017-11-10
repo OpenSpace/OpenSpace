@@ -28,7 +28,7 @@
 #include <modules/spacecraftinstruments/util/decoder.h>
 
 namespace openspace {
-    
+
 class InstrumentDecoder : public Decoder {
 public:
     InstrumentDecoder(const ghoul::Dictionary& dictionary);
@@ -42,7 +42,7 @@ private:
     std::string _stopCommand;
     std::vector<std::string> _spiceIDs;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___INSTRUMENTDECODER___H__

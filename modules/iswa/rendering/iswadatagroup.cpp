@@ -85,7 +85,7 @@ namespace {
 
 namespace openspace{
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
-    : IswaBaseGroup(name, type)    
+    : IswaBaseGroup(name, type)
     , _useLog(UseLogInfo, false)
     , _useHistogram(UseHistogramInfo, false)
     , _autoFilter(AutoFilterInfo, true)
@@ -105,7 +105,7 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     createDataProcessor();
     registerProperties();
 }
- 
+
 IswaDataGroup::~IswaDataGroup(){}
 
 void IswaDataGroup::registerProperties(){
@@ -133,13 +133,13 @@ void IswaDataGroup::registerProperties(){
     //If autofiler is on, background values property should be hidden
     _autoFilter.onChange([this](){
         LDEBUG("Group " + name() + " published autoFilterChanged");
-        // If autofiler is selected, use _dataProcessor to set backgroundValues 
+        // If autofiler is selected, use _dataProcessor to set backgroundValues
         // and unregister backgroundvalues property.
         if(_autoFilter.value()){
             _backgroundValues.setValue(_dataProcessor->filterValues());
             _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
             //_backgroundValues.setVisible(false);
-        // else if autofilter is turned off, register backgroundValues 
+        // else if autofilter is turned off, register backgroundValues
         } else {
             _backgroundValues.setVisibility(properties::Property::Visibility::All);
             //_backgroundValues.setVisible(true);

@@ -80,7 +80,7 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
         AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
     );
 
-    _chunkEvaluatorByAvailableTiles = 
+    _chunkEvaluatorByAvailableTiles =
         std::make_unique<chunklevelevaluator::AvailableTileData>();
     _chunkEvaluatorByProjectedArea =
     std::make_unique<chunklevelevaluator::ProjectedArea>();
@@ -93,7 +93,7 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
 // The destructor is defined here to make it feasiable to use a unique_ptr
 // with a forward declaration
 ChunkedLodGlobe::~ChunkedLodGlobe() {}
-    
+
 bool ChunkedLodGlobe::isReady() const {
     return true;
 }
@@ -144,14 +144,14 @@ int ChunkedLodGlobe::getDesiredLevel(
     desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
     return desiredLevel;
 }
-    
+
 float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     float height = 0;
-        
+
     // Get the uv coordinates to sample from
     Geodetic2 geodeticPosition = _owner.ellipsoid().cartesianToGeodetic2(position);
     int chunkLevel = findChunkNode(geodeticPosition).getChunk().tileIndex().level;
-        
+
     TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
     GeodeticPatch patch = GeodeticPatch(tileIndex);
 
@@ -167,7 +167,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     // Get the tile providers for the height maps
     const std::vector<std::shared_ptr<Layer>>& heightMapLayers =
         _layerManager->layerGroup(layergroupid::GroupID::HeightLayers).activeLayers();
-        
+
     for (const std::shared_ptr<Layer>& layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();
         if (!tileProvider) {
@@ -199,7 +199,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         // in range [0,1] and uses the set interpolation method and clamping.
 
         glm::uvec3 dimensions = tileTexture->dimensions();
-            
+
         glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
         samplePos00 = glm::clamp(
@@ -239,7 +239,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             sample01 == tileProvider->noDataValueAsFloat() ||
             sample10 == tileProvider->noDataValueAsFloat() ||
             sample11 == tileProvider->noDataValueAsFloat();
-        
+
         if (anySampleIsNaN || anySampleIsNoData) {
             continue;
         }
@@ -253,8 +253,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         // if the sample is actually a no-data-value (min_float) the interpolated
         // value might not be. Therefore we have a cut-off. Assuming no data value
         // is smaller than -100000
-        if (sample > -100000)
-        {
+        if (sample > -100000) {
             // Perform depth transform to get the value in meters
             height = depthTransform.depthOffset + depthTransform.depthScale * sample;
             // Make sure that the height value follows the layer settings.
@@ -282,7 +281,7 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
         _renderer->recompileShaders(_owner);
         _shadersNeedRecompilation = false;
     }
-        
+
     auto duration = std::chrono::system_clock::now().time_since_epoch();
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     stats.i["time"] = millis;
@@ -311,7 +310,7 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
 
     _leftRoot->breadthFirst(renderJob);
     _rightRoot->breadthFirst(renderJob);
-        
+
     //_leftRoot->reverseBreadthFirst(renderJob);
     //_rightRoot->reverseBreadthFirst(renderJob);
 
@@ -328,7 +327,7 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
             chunk.getBoundingPolyhedronCorners();
         std::vector<glm::vec4> clippingSpaceCorners(8);
         AABB3 screenSpaceBounds;
-            
+
         for (size_t i = 0; i < 8; ++i) {
             const glm::vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
             clippingSpaceCorners[i] = clippingSpaceCorner;
@@ -359,5 +358,5 @@ void ChunkedLodGlobe::update(const UpdateData& data) {
     ));
     _renderer->update();
 }
-    
+
 } // namespace openspace::globebrowsing

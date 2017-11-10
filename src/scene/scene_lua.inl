@@ -45,7 +45,7 @@ properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
 {
     properties::PropertyOwner* tagMatchOwner = nullptr;
     properties::PropertyOwner* owner = prop->owner();
-    
+
     if (owner) {
         std::vector<std::string> tags = owner->tags();
         for (std::string& currTag : tags) {
@@ -54,11 +54,12 @@ properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
                 break;
             }
         }
-        
+
         //Call recursively until we find an owner with matching tag or the top of the
         // ownership list
-        if (tagMatchOwner == nullptr)
+        if (tagMatchOwner == nullptr) {
             tagMatchOwner = findPropertyOwnerWithMatchingGroupTag(owner, tagToMatch);
+        }
     }
     return tagMatchOwner;
 }
@@ -88,7 +89,7 @@ void applyRegularExpression(lua_State* L, std::regex regex,
                     continue;
                 }
             }
-            
+
             if (type != prop->typeLua()) {
                 LERRORC("property_setValue",
                         errorLocation(L) << "Property '" <<
@@ -135,7 +136,7 @@ int setPropertyCall_single(properties::Property* prop, std::string uri, lua_Stat
 {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
-    
+
     if (type != prop->typeLua()) {
         LERRORC("property_setValue", errorLocation(L) << "Property '" << uri <<
             "' does not accept input of type '" << luaTypeToString(type) <<
@@ -173,13 +174,13 @@ int property_setValueSingle(lua_State* L) {
     std::string uri = luaL_checkstring(L, -2);
     const int type = lua_type(L, -1);
     std::string tagToMatch;
-    
+
     if (doesUriContainGroupTag(uri, tagToMatch)) {
         std::string pathRemainderToMatch = extractUriWithoutGroupName(uri);
         for (properties::Property* prop : allProperties()) {
             std::string propFullId = prop->fullyQualifiedIdentifier();
             //Look for a match in the uri with the group name (first term) removed
-            int propMatchLength = 
+            int propMatchLength =
                 static_cast<int>(propFullId.length()) -
                 static_cast<int>(pathRemainderToMatch.length());
 
@@ -236,13 +237,13 @@ int property_setValue(lua_State* L) {
         startPos += 4;
         startPos = regex.find("*", startPos);
     }
-    
+
     if (doesUriContainGroupTag(regex, groupName)) {
         std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
         //Remove group name from start of regex and replace with '.*'
         regex = replaceUriWithGroupName(regex, ".*");
     }
-    
+
     applyRegularExpression(
         L,
         std::regex(regex/*, std::regex_constants::optimize*/),
@@ -273,13 +274,13 @@ int property_setValueRegex(lua_State* L) {
     SCRIPT_CHECK_ARGUMENTS("property_setValueRegex<", L, 2, nArguments);
     std::string regex = luaL_checkstring(L, -2);
     std::string groupName;
-    
+
     if (doesUriContainGroupTag(regex, groupName)) {
         std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
         //Remove group name from start of regex and replace with '.*'
         regex = replaceUriWithGroupName(regex, ".*");
     }
-    
+
     try {
         applyRegularExpression(
             L,
@@ -336,8 +337,8 @@ int loadScene(lua_State* L) {
     SCRIPT_CHECK_ARGUMENTS("loadScene", L, 1, nArguments);
 
     std::string sceneFile = luaL_checkstring(L, -1);
-    
     OsEng.scheduleLoadSingleAsset(sceneFile);
+
     return 0;
 }
 

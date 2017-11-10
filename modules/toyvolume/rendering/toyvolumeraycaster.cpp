@@ -44,30 +44,34 @@ ToyVolumeRaycaster::ToyVolumeRaycaster(glm::vec4 color)
     : _boundingBox(glm::vec3(1.0))
     , _color(color)
 {}
-    
+
 ToyVolumeRaycaster::~ToyVolumeRaycaster() {}
 
 void ToyVolumeRaycaster::initialize() {
     _boundingBox.initialize();
 }
-    
+
 void ToyVolumeRaycaster::deinitialize() {
 }
-    
-void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
+
+void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data,
+                                           ghoul::opengl::ProgramObject& program)
+{
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
     Renderable::setPscUniforms(program, data.camera, data.position);
-    
+
     // Cull back face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
+
     // Render bounding geometry
     _boundingBox.render();
 }
-    
-void ToyVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {   
+
+void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
+                                          ghoul::opengl::ProgramObject& program)
+{
     // Uniforms
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
@@ -76,15 +80,17 @@ void ToyVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl:
     // Cull front face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
-    
+
     // Render bounding geometry
     _boundingBox.render();
-    
+
     // Restore defaults
     glCullFace(GL_BACK);
 }
-    
-void ToyVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+
+void ToyVolumeRaycaster::preRaycast(const RaycastData& data,
+                                    ghoul::opengl::ProgramObject& program)
+{
     std::string colorUniformName = "color" + std::to_string(data.id);
     std::string timeUniformName = "time" + std::to_string(data.id);
     std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
@@ -92,15 +98,15 @@ void ToyVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::Prog
     program.setUniform(stepSizeUniformName, _stepSize);
     program.setUniform(timeUniformName, static_cast<float>(std::fmod(_time, 3600.0)));
 }
-    
+
 void ToyVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
     // For example: release texture units
 }
-    
+
 std::string ToyVolumeRaycaster::getBoundsVsPath() const {
     return GlslBoundsVsPath;
 }
-    
+
 std::string ToyVolumeRaycaster::getBoundsFsPath() const {
     return GlslBoundsFsPath;
 }
@@ -124,9 +130,9 @@ void ToyVolumeRaycaster::setModelTransform(glm::mat4 transform) {
 void ToyVolumeRaycaster::setTime(double time) {
     _time = time;
 }
-    
+
 void ToyVolumeRaycaster::setStepSize(float stepSize) {
     _stepSize = stepSize;
 }
-    
-}
+
+} // namespace openspace

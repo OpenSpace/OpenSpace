@@ -43,7 +43,7 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; } 
+namespace documentation { struct Documentation; }
 
 struct RenderData;
 struct UpdateData;
@@ -100,7 +100,7 @@ private:
     double _time;
 
     bool _capture;
-        
+
     psc _sunPosition;
     properties::BoolProperty _performShading;
 };

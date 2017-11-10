@@ -140,7 +140,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scenelicense.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
-    ${OPENSPACE_BASE_DIR}/src/scene/sceneloader.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -302,7 +301,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicense.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h

@@ -47,11 +47,11 @@ public:
     using TransformMatrix = std::array<double, 36>;
     using UseException = ghoul::Boolean;
     using KernelHandle = unsigned int;
-    
+
     struct SpiceException : public ghoul::RuntimeError {
         explicit SpiceException(const std::string& msg);
     };
-    
+
     /**
      * Specifies the aberration correction method for the #targetPosition function.
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
@@ -77,7 +77,7 @@ public:
          * Direction::Reception
          */
         AberrationCorrection() = default;
-        
+
         /**
          * Constructor initializing the AberrationCorrection to the provided \p type and
          * \p direction
@@ -85,7 +85,7 @@ public:
          * \param direction The used direction (AberrationCorrection::Direction)
          */
         AberrationCorrection(Type type, Direction direction);
-        
+
         /**
          * Converts one of the valid aberration correction strings into its enumeration
          * format. The valid strings are:
@@ -109,13 +109,13 @@ public:
         /// The direction of the aberration correction
         Direction direction = Direction::Reception;
     };
-    
+
     /// The possible values for the method parameter of the targetInFieldOfView method
     enum class FieldOfViewMethod {
         Ellipsoid = 0,
         Point
     };
-    
+
     /**
      * Returns the FieldOfViewMethod for the passed string. The allowed strings are
      * <code>ELLIPSOID</code> and <code>POINT</code>. All other values will result in an
@@ -126,13 +126,13 @@ public:
      * \return The field of view method enum
      */
     static FieldOfViewMethod fieldOfViewMethodFromString(const std::string& method);
-    
+
     /// The possible values for terminator type method of the terminatorEllipse method
     enum class TerminatorType {
         Umbral = 0,
         Penumbral
     };
-    
+
     /**
      * Returns the TerminatorType for the passed string. The allowed strings are
      * <code>UMBRAL</code> and <code>PENUMBRAL</code>. All other values will result in an
@@ -176,7 +176,7 @@ public:
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
     void unloadKernel(KernelHandle kernelId);
-    
+
     /**
      * Unloads a SPICE kernel identified by the \p filePath which was used in the
      * loading call to #loadKernel. The unloading is done by calling the
@@ -189,7 +189,7 @@ public:
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
     void unloadKernel(std::string filePath);
-    
+
     /**
      * Returns whether a given \p target has an Spk kernel covering it at the designated
      * \p et ephemeris time.
@@ -216,7 +216,7 @@ public:
      * \pre \p target must not be empty.
      */
     bool hasCkCoverage(const std::string& frame, double et) const;
-    
+
     /**
      * Determines whether values exist for some \p item for any body, identified by its
      * \p naifId, in the kernel pool by passing it to the <code>bodfnd_c</code> function.
@@ -263,7 +263,7 @@ public:
      * \pre \p body must not be empty.
      */
     bool hasNaifId(const std::string& body) const;
-    
+
     /**
      * Returns the NAIF ID for a specific frame using <code>namfrm_c</code>.
      * \param frame The frame name that should be retrieved
@@ -283,7 +283,7 @@ public:
      * \pre \p frame must not be empty.
      */
     bool hasFrameId(const std::string& frame) const;
-    
+
     /**
      * Retrieves a single \p value for a certain \p body. This method succeeds iff \p body
      * is the name of a valid body, \p value is a value associated with the body, and the
@@ -323,7 +323,6 @@ public:
      */
     void getValue(const std::string& body, const std::string& value, glm::dvec2& v) const;
 
-    
     /**
      * Retrieves a \p value with three components for a certain \p body. This method
      * succeeds iff \p body is the name of a valid body, \p value is a value associated
@@ -511,24 +510,24 @@ public:
          * relative to the reference frame.
          */
         glm::dvec3 surfaceIntercept;
-        
+
         /**
          * If the aberration correction is not AberrationCorrection::Type::None, this
          * value contains the time for which the intercept was computed. Otherwise it is
          * the same as the ephemerisTime.
          */
         double interceptEpoch;
-        
+
         /**
          * The vector from the observer's position to the \p surfaceIntercept position in
          * the provided reference frame.
          */
         glm::dvec3 surfaceVector;
-        
+
         /// <code>true</code> if the ray intersects the body, <code>false</code> otherwise
         bool interceptFound;
     };
-    
+
     /**
      * Given an \p observer and a probing direction vector \p directionVector defining a
      * ray, compute the surface intercept of the ray on a \p target body at a specified
@@ -589,7 +588,7 @@ public:
         const std::string& referenceFrame, const std::string& instrument,
         FieldOfViewMethod method, AberrationCorrection aberrationCorrection,
         double& ephemerisTime) const;
-    
+
     /**
      * Determine whether a specific \p target is in the field-of-view of a specified
      * \p instrument or an \p observer at a given time. The reference frame used is
@@ -616,22 +615,22 @@ public:
     bool isTargetInFieldOfView(const std::string& target, const std::string& observer,
         const std::string& instrument, FieldOfViewMethod method,
         AberrationCorrection aberrationCorrection, double& ephemerisTime) const;
-    
+
     /// Struct that is used as the return value from the #targetState method
     struct TargetStateResult {
         /// The target position
         glm::dvec3 position;
-        
+
         /// The target velocity
         glm::dvec3 velocity;
-        
+
         /// One-way light time between <code>target</code> and <code>observer</code> if
         /// the aberration correction is enabled
         double lightTime;
     };
-    
+
     /**
-     * Returns the state vector (position and velocity) of a \p target body relative to an 
+     * Returns the state vector (position and velocity) of a \p target body relative to an
      * \p observer in a specific \p referenceFrame, optionally corrected for aberration
      * (\p aberrationCorrection).
      * \param target The target body name or the target body's NAIF ID
@@ -661,7 +660,7 @@ public:
         const std::string& observer, const std::string& referenceFrame,
         AberrationCorrection aberrationCorrection, double ephemerisTime) const;
 
-    /** 
+    /**
      * Returns the state transformation matrix used to convert from the \p sourceFrame to
      * the \p destinationFrame at a specific \p ephemerisTime.
      * \param sourceFrame The name of the source reference frame
@@ -725,19 +724,20 @@ public:
             Circle, ///< The shape is circular
             Ellipse ///< The shape is an ellipse
         };
-        
+
         /// The shape of the returned field of view
         Shape shape;
-        
+
         /// The name of the reference frame in which the #bounds are defined
         std::string frameName;
-        
+
         /// The direction towards the center of the field of view
         glm::dvec3 boresightVector;
-        
+
         /// The corners of the field of view's bounding box, not necessarily unit vectors
         std::vector<glm::dvec3> bounds;
     };
+
     /**
      * This method returns the field-of-view (FOV) parameters for a specified
      * \p instrument.
@@ -763,21 +763,21 @@ public:
      * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getfov_c.html
      */
     FieldOfViewResult fieldOfView(int instrument) const;
-    
+
     /// The structure retuned by the #terminatorEllipse method
     struct TerminatorEllipseResult {
         /// The vector from the target body at #targetEphemerisTime to the observer at
         /// the original time
         glm::dvec3 observerPosition;
-        
+
         /// The full list of terminator points specified in the original reference frame
         std::vector<glm::dvec3> terminatorPoints;
-        
+
         /// The local ephemeris time at the target, determined by the original
         /// <code>aberrationCorrection</code> factor
         double targetEphemerisTime;
     };
-    
+
     /**
      * This method computes a set of points on the umbral or penumbral terminator of
      * a specified \p target, where SPICE models the target shape as an ellipsoid.
@@ -813,7 +813,7 @@ public:
         const std::string& lightSource, TerminatorType terminatorType,
         AberrationCorrection aberrationCorrection, double ephemerisTime,
         int numberOfTerminatorPoints);
-    
+
     /**
      * This function adds a frame to a body
      * \param body - the name of the body
@@ -824,7 +824,7 @@ public:
     bool addFrame(std::string body, std::string frame);
 
     /**
-     * This function returns the frame of a body if defined, otherwise it returns 
+     * This function returns the frame of a body if defined, otherwise it returns
      * IAU_ + body (most frames are known by the International Astronomical Union)
      * \param body - the name of the body
      * \return  the frame of the body
@@ -833,7 +833,7 @@ public:
     std::string frameFromBody(const std::string& body) const;
 
     /**
-     * Sets the SpiceManager's exception handling. If UseException::No is passed to this 
+     * Sets the SpiceManager's exception handling. If UseException::No is passed to this
      * function, all subsequent calls will not throw an error, but fail silently instead.
      * If set to UseException::Yes, a SpiceException is thrown whenever an error occurs.
      * \param useException The new exeception handling method that the SpiceManager should
@@ -846,7 +846,7 @@ public:
      * \return The current exception handling strategy.
      */
     UseException exceptionHandling() const;
-    
+
     static scripting::LuaLibrary luaLibrary();
 
 private:
@@ -862,10 +862,10 @@ private:
     SpiceManager(const SpiceManager& c) = delete;
     SpiceManager& operator=(const SpiceManager& r) = delete;
     SpiceManager(SpiceManager&& r) = delete;
-    
+
     /// Default destructor that resets the SPICE settings
     ~SpiceManager();
-    
+
     /**
      * Function to find and store the intervals covered by a ck file, this is done
      * by using mainly the <code>ckcov_c</code> and <code>ckobj_c</code> functions.
@@ -877,7 +877,7 @@ private:
      * \post Coverage times are stored only if loading was successful
      */
     void findCkCoverage(const std::string& path);
-    
+
     /**
      * Function to find and store the intervals covered by a spk file, this is done
      * by using mainly the <code>spkcov_c</code> and <code>spkobj_c</code> functions.
@@ -889,7 +889,7 @@ private:
      * \post Coverage times are stored only if loading was successful
      */
     void findSpkCoverage(const std::string& path);
-    
+
     /**
      * If a position is requested for an uncovered time in the SPK kernels, this function
      * will return an estimated position. If the coverage has not yet started, the first
@@ -917,7 +917,7 @@ private:
         const std::string& observer, const std::string& referenceFrame,
         AberrationCorrection aberrationCorrection, double ephemerisTime,
         double& lightTime) const;
-    
+
     /**
      * If a transform matrix is requested for an uncovered time in the CK kernels, this
      * function will an estimated matrix. If the coverage has not yet started, the first
@@ -936,11 +936,11 @@ private:
      */
     glm::dmat3 getEstimatedTransformMatrix(const std::string& fromFrame,
         const std::string& toFrame, double time) const;
-    
-    
+
+
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;
-    
+
     // Map: id, vector of pairs. Pair: Start time, end time;
     std::map<int, std::vector< std::pair<double, double>>> _ckIntervals;
     std::map<int, std::vector< std::pair<double, double>>> _spkIntervals;
@@ -951,7 +951,7 @@ private:
 
     /// Stores whether the SpiceManager throws exceptions (Yes) or fails silently (No)
     UseException _useExceptions;
-    
+
     /// The last assigned kernel-id, used to determine the next free kernel id
     KernelHandle _lastAssignedKernel = KernelHandle(0);
 };

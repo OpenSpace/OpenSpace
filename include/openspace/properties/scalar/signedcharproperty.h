@@ -28,11 +28,11 @@
  /**
  * \file signedcharproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class SignedCharProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>signed char</code>.

@@ -88,7 +88,7 @@ private:
     std::mutex _finishedJobsMutex;
     /// An LRU thread pool is used since the jobs can be bumped and hence prioritized.
     LRUThreadPool<KeyType> _threadPool;
-    
+
 };
 
 } // namespace openspace::globebrowsing

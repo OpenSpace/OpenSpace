@@ -51,7 +51,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     // Create all the layer groups
     for (const std::string& groupName : layerGroupNamesInDict) {
         layergroupid::GroupID groupId = layergroupid::getGroupIDFromName(groupName);
-        
+
         if (groupId != layergroupid::GroupID::Unknown) {
             ghoul::Dictionary layerGroupDict =
                 layerGroupsDict.value<ghoul::Dictionary>(groupName);
@@ -62,7 +62,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
             LWARNING("Unknown layer group: " + groupName);
         }
     }
-        
+
     for (const std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
         addPropertySubOwner(layerGroup.get());
     }

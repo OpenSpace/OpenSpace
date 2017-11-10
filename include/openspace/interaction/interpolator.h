@@ -44,7 +44,7 @@ public:
     void setTransferFunction(std::function<T(float)> transferFunction);
     void setInterpolationTime(float interpolationTime);
     void step();
-    
+
     float deltaTimeScaled() const;
     T value() const;
     bool isInterpolating() const;

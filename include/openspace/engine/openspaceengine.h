@@ -88,6 +88,7 @@ public:
     void postSynchronizationPreDraw();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
+    void drawOverlays();
     void postDraw();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier mod);
@@ -97,6 +98,7 @@ public:
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
+
 
     void scheduleLoadSingleAsset(std::string assetPath);
   
@@ -124,7 +126,7 @@ public:
     scripting::ScriptScheduler& scriptScheduler();
     VirtualPropertyManager& virtualPropertyManager();
 
-    
+
     // This method is only to be called from Modules
     enum class CallbackOption {
         Initialize = 0,  // Callback for the end of the initialization
@@ -134,16 +136,17 @@ public:
         PreSync,         // Callback for the end of the pre-sync function
         PostSyncPreDraw, // Callback for the end of the post-sync-pre-draw function
         Render,          // Callback for the end of the render function
+        Draw2D,          // Callback for the two-dimensional rendering functions
         PostDraw         // Callback for the end of the post-draw function
     };
-    
+
     // Registers a callback for a specific CallbackOption
     void registerModuleCallback(CallbackOption option, std::function<void()> function);
-    
+
     // Registers a callback that is called when a new keyboard event is received
     void registerModuleKeyboardCallback(
         std::function<bool (Key, KeyModifier, KeyAction)> function);
-    
+
     // Registers a callback that is called when a new character event is received
     void registerModuleCharCallback(
         std::function<bool (unsigned int, KeyModifier)> function);
@@ -151,16 +154,16 @@ public:
     // Registers a callback that is called when a new mouse button is received
     void registerModuleMouseButtonCallback(
        std::function<bool (MouseButton, MouseAction)> function);
-    
+
     // Registers a callback that is called when a new mouse movement is received
     void registerModuleMousePositionCallback(
         std::function<void (double, double)> function);
-    
+
     // Registers a callback that is called when a scroll wheel change is received
     void registerModuleMouseScrollWheelCallback(
         std::function<bool (double, double)> function
     );
-    
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.
@@ -215,23 +218,24 @@ private:
     struct {
         std::vector<std::function<void()>> initialize;
         std::vector<std::function<void()>> deinitialize;
-        
+
         std::vector<std::function<void()>> initializeGL;
         std::vector<std::function<void()>> deinitializeGL;
-        
+
         std::vector<std::function<void()>> preSync;
         std::vector<std::function<void()>> postSyncPreDraw;
         std::vector<std::function<void()>> render;
+        std::vector<std::function<void()>> draw2D;
         std::vector<std::function<void()>> postDraw;
-        
+
         std::vector<std::function<bool (Key, KeyModifier, KeyAction)>> keyboard;
         std::vector<std::function<bool (unsigned int, KeyModifier)>> character;
-        
+
         std::vector<std::function<bool (MouseButton, MouseAction)>> mouseButton;
         std::vector<std::function<void (double, double)>> mousePosition;
         std::vector<std::function<bool (double, double)>> mouseScrollWheel;
     } _moduleCallbacks;
-    
+
     // Structure that is responsible for the delayed shutdown of the application
     struct {
         // Whether the application is currently in shutdown mode (i.e. counting down the

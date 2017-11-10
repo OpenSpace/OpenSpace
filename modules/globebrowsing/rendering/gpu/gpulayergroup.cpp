@@ -58,7 +58,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
     for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
         // should maybe a proper GPULayer factory
         _gpuActiveLayers[i] = (category == layergroupid::GroupID::HeightLayers) ?
-            std::make_unique<GPUHeightLayer>() : 
+            std::make_unique<GPUHeightLayer>() :
             std::make_unique<GPULayer>();
         std::string nameExtension = "[" + std::to_string(i) + "].";
         _gpuActiveLayers[i]->bind(
@@ -75,5 +75,5 @@ void GPULayerGroup::deactivate() {
         l->deactivate();
     }
 }
-    
+
 }  // namespace openspace::globebrowsing

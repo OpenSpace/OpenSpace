@@ -53,12 +53,12 @@
 #include <math.h>
 
 namespace openspace::globebrowsing {
-  
+
 RawTileDataReader::RawTileDataReader(const TileTextureInitData& initData,
                                      PerformPreprocessing preprocess)
     : _initData(initData)
     , _preprocess(preprocess)
-{ }
+{}
 
 std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
     return std::make_shared<RawTile>(RawTile::createDefault(_initData));
@@ -72,7 +72,7 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 
     // Build the RawTile from the data we querred
     std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
-    
+
     if (dataDestination && !pboMappedDataDestination) {
         // Write only to cpu data destination
         memset(dataDestination, 255, _initData.totalNumBytes());
@@ -239,21 +239,21 @@ IODescription RawTileDataReader::adjustIODescription(const IODescription& io) co
 IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
     IODescription io;
     io.read.region = highestResPixelRegion(tileIndex);
-    
+
     // write region starts in origin
     io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
     io.write.region.numPixels = PixelRegion::PixelCoordinate(
         _initData.dimensions().x, _initData.dimensions().y);
-    
+
     io.read.overview = 0;
     io.read.fullRegion = fullPixelRegion();
     // For correct sampling in dataset, we need to pad the texture tile
-    
+
     PixelRegion padding = PixelRegion(
         _initData.tilePixelStartOffset(),
         _initData.tilePixelSizeDifference()
     );
-      
+
     PixelRegion scaledPadding = padding;
     double scale =
         io.read.region.numPixels.x / static_cast<double>(io.write.region.numPixels.x);
@@ -263,7 +263,7 @@ IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) co
     io.read.region.pad(scaledPadding);
     //io.write.region.pad(padding);
     //io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
-    
+
     io.write.bytesPerLine = _initData.bytesPerLine();
     io.write.totalNumBytes = _initData.totalNumBytes();
 
@@ -298,7 +298,7 @@ PixelRegion RawTileDataReader::fullPixelRegion() const {
 
 std::array<double, 6> RawTileDataReader::getGeoTransform() const {
     std::array<double, 6> padfTransform;
-    
+
     GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2.0, M_PI));
     padfTransform[1] = Angle<double>::fromRadians(
         globalCoverage.size().lon).asDegrees() / rasterXSize();
@@ -316,7 +316,7 @@ std::array<double, 6> RawTileDataReader::getGeoTransform() const {
 PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
     const Geodetic2& geo) const {
     std::array<double, 6> padfTransform = getGeoTransform();
-        
+
     double Y = Angle<double>::fromRadians(geo.lat).asDegrees();
     double X = Angle<double>::fromRadians(geo.lon).asDegrees();
 
@@ -372,16 +372,16 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
         int depth) const
 {
     RawTile::ReadError worstError = RawTile::ReadError::None;
-    
-    // NOTE: 
-    // Ascii graphics illustrates the implementation details of this method, for one  
-    // specific case. Even though the illustrated case is specific, readers can 
+
+    // NOTE:
+    // Ascii graphics illustrates the implementation details of this method, for one 
+    // specific case. Even though the illustrated case is specific, readers can
     // hopefully find it useful to get the general idea.
 
     // Make a copy of the full IO desription as we will have to modify it
     IODescription io = fullIO;
 
-    // Example: 
+    // Example:
     // We have an io description that defines a WRITE and a READ region.
     // In this case the READ region extends outside of the defined io.read.fullRegion,
     // meaning we will have to perform wrapping
@@ -389,12 +389,12 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
     // io.write.region             io.read.region
     //    |                         |
     //    V                         V
-    // +-------+                +-------+ 
-    // |       |                |       |--------+ 
+    // +-------+                +-------+
+    // |       |                |       |--------+
     // |       |                |       |        |
     // |       |                |       |        |
     // +-------+                +-------+        |
-    //                            |              | <-- io.read.fullRegion  
+    //                            |              | <-- io.read.fullRegion
     //                            |              |
     //                            +--------------+
 
@@ -402,27 +402,27 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
         //  Loop through each side: left, top, right, bottom
         for (int i = 0; i < 4; ++i) {
 
-            // Example: 
+            // Example:
             // We are currently considering the left side of the pixel region
             PixelRegion::Side side = static_cast<PixelRegion::Side>(i);
             IODescription cutoff = io.cut(side, io.read.fullRegion.edge(side));
 
-            // Example: 
+            // Example:
             // We cut off the left part that was outside the io.read.fullRegion, and we
-            // now have an additional io description for the cut off region. 
-            // Note that the cut-method used above takes care of the corresponding 
+            // now have an additional io description for the cut off region.
+            // Note that the cut-method used above takes care of the corresponding
             // WRITE region for us.
 
             // cutoff.write.region    cutoff.read.region
             //  |  io.write.region     |  io.read.region
             //  |   |                  |   |
             //  V   V                  V   V
-            // +-+-----+               +-+-----+ 
+            // +-+-----+               +-+-----+
             // | |     |               | |     |--------+
             // | |     |               | |     |        |
             // | |     |               | |     |        |
             // +-+-----+               +-+-----+        |
-            //                           |              | <-- io.read.fullRegion  
+            //                           |              | <-- io.read.fullRegion
             //                           |              |
             //                           +--------------+
 
@@ -435,7 +435,7 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
 
                 // Example:
                 // The cut off region is wrapped to the opposite side of the region,
-                // i.e. "repeated". Note that we don't want WRITE region to change, 
+                // i.e. "repeated". Note that we don't want WRITE region to change,
                 // we're only wrapping the READ region.
 
                 // cutoff.write.region   io.read.region cutoff.read.region
@@ -443,15 +443,15 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
                 //  |   |                     V          V
                 //  V   V                  +-----+      +-+
                 // +-+-----+               |     |------| |
-                // | |     |               |     |      | | 
+                // | |     |               |     |      | |
                 // | |     |               |     |      | |
                 // | |     |               +-----+      +-+
-                // +-+-----+               |              | <-- io.read.fullRegion  
+                // +-+-----+               |              | <-- io.read.fullRegion
                 //                         |              |
                 //                         +--------------+
 
                 // Example:
-                // The cutoff region has been repeated along one of its sides, but 
+                // The cutoff region has been repeated along one of its sides, but
                 // as we can see in this example, it still has a top part outside the
                 // defined gdal region. This is handled through recursion.
                 RawTile::ReadError err = repeatedRasterRead(
@@ -461,7 +461,7 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
             }
         }
     }
-        
+
     RawTile::ReadError err = rasterRead(rasterBand, io, dataDestination);
 
     // The return error from a repeated rasterRead is ONLY based on the main region,
@@ -478,7 +478,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
     preprocessData->maxValues.resize(_initData.nRasters());
     preprocessData->minValues.resize(_initData.nRasters());
     preprocessData->hasMissingData.resize(_initData.nRasters());
-        
+
     std::vector<float> noDataValues;
     noDataValues.resize(_initData.nRasters());
 
@@ -523,7 +523,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
             }
         }
     }
-  
+
     if (allIsMissing) {
         rawTile->error = RawTile::ReadError::Failure;
     }
@@ -557,11 +557,11 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
     float missingDataValue = noDataValueAsFloat();
 
     bool hasMissingData = false;
-    
+
     for (size_t c = 0; c < _initData.nRasters(); c++) {
         hasMissingData |= rawTile->tileMetaData->maxValues[c] == missingDataValue;
     }
-    
+
     bool onHighLevel = rawTile->tileIndex.level > 6;
     if (hasMissingData && onHighLevel) {
         return RawTile::ReadError::Fatal;

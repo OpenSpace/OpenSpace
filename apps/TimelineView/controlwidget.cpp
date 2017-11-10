@@ -177,7 +177,6 @@ ControlWidget::ControlWidget(QWidget* parent)
 
         _setDelta->setObjectName("background");
         layout->addWidget(_setDelta, 4, 0, 1, 2);
-        
 
         QWidget* controlContainer = new QWidget;
         controlContainer->setObjectName("background");

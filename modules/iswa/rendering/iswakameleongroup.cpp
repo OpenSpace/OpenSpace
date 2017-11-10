@@ -77,13 +77,15 @@ std::vector<int> IswaKameleonGroup::fieldlineValue(){
     return _fieldlines.value();
 }
 
-void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath){
-    if(fieldlineIndexFile != _fieldlineIndexFile){
+void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile,
+                                         std::string kameleonPath)
+{
+    if (fieldlineIndexFile != _fieldlineIndexFile) {
         _fieldlineIndexFile = fieldlineIndexFile;
         readFieldlinePaths(_fieldlineIndexFile);
     }
 
-    if(kameleonPath != _kameleonPath){
+    if (kameleonPath != _kameleonPath) {
         _kameleonPath = kameleonPath;
         clearFieldlines();
         updateFieldlineSeeds();
@@ -91,13 +93,16 @@ void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::st
 }
 
 
-void IswaKameleonGroup::registerProperties(){
+void IswaKameleonGroup::registerProperties() {
     //OsEng.gui()._iswa.registerProperty(&_resolution);
     //OsEng.gui()._iswa.registerProperty(&_fieldlines);
-    
+
     _resolution.onChange([this]{
         LDEBUG("Group " + name() + " published resolutionChanged");
-        _groupEvent->publish("resolutionChanged", ghoul::Dictionary({{"resolution", _resolution.value()}}));
+        _groupEvent->publish(
+            "resolutionChanged",
+            ghoul::Dictionary({{"resolution", _resolution.value()}})
+        );
     });
 
     _fieldlines.onChange([this]{
@@ -105,7 +110,7 @@ void IswaKameleonGroup::registerProperties(){
     });
 }
 
-void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){
+void IswaKameleonGroup::readFieldlinePaths(std::string indexFile) {
     LINFO("Reading seed points paths from file '" << indexFile << "'");
 
     // Read the index file from disk
@@ -119,7 +124,7 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){
             fileContent += line;
         }
 
-        try{
+        try {
             //Parse and add each fieldline as an selection
             json fieldlines = json::parse(fileContent);
             int i = 0;
@@ -134,8 +139,11 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){
                 i++;
             }
 
-        } catch(const std::exception& e) {
-            LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
+        } catch (const std::exception& e) {
+            LERROR(
+                "Error when reading json file with paths to seedpoints: " +
+                std::string(e.what())
+            );
         }
     }
 }
@@ -146,7 +154,7 @@ void IswaKameleonGroup::updateFieldlineSeeds(){
     // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
     for (auto& seedPath: _fieldlineState) {
         // if this option was turned off
-        if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)==selectedOptions.end() && std::get<2>(seedPath.second)){
+        if (std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)==selectedOptions.end() && std::get<2>(seedPath.second)){
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             OsEng.scriptEngine().queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",

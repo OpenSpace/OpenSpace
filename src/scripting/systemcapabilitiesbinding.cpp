@@ -58,7 +58,7 @@ int cores(lua_State* L) {
     lua_pushnumber(L, CpuCap.cores());
     return 1;
 }
-    
+
 int cacheLineSize(lua_State* L) {
     lua_pushnumber(L, CpuCap.cacheLineSize());
     return 1;
@@ -68,32 +68,31 @@ int L2Associativity(lua_State* L) {
     lua_pushnumber(L, CpuCap.L2Associativity());
     return 1;
 }
-    
+
 int cacheSize(lua_State* L) {
     lua_pushnumber(L, CpuCap.cacheSize());
     return 1;
 }
-    
+
 int extensions(lua_State* L) {
     lua_pushstring(L, CpuCap.extensions().c_str());
     return 1;
-
 }
-    
+
 } // namespace luascripting::general
 
 namespace luascripting::opengl {
-    
+
 int hasOpenGLVersion(lua_State* L) {
     int nArguments = lua_gettop(L);
     SCRIPT_CHECK_ARGUMENTS("hasVersion", L, 1, nArguments);
-    
+
     std::vector<std::string> v = ghoul::tokenizeString(luaL_checkstring(L, -1));
     if (v.size() != 2 && v.size() != 3) {
         LERRORC("hasVersion", ghoul::lua::errorLocation(L) << "Malformed version string");
         return 0;
     }
-    
+
     for (const std::string& i : v) {
         for (char c : i) {
             if (!std::isdigit(c)) {
@@ -102,7 +101,6 @@ int hasOpenGLVersion(lua_State* L) {
                     ghoul::lua::errorLocation(L) << "Malformed version string"
                 );
                 return 0;
-                
             }
         }
     }
@@ -111,81 +109,80 @@ int hasOpenGLVersion(lua_State* L) {
     int minor = std::stoi(v[1]);
     int release = v.size() == 3 ? std::stoi(v[2]) : 0;
     Version version = { major, minor, release };
-    
+
     bool supported = OpenGLCap.openGLVersion() >= version;
-    
+
     lua_pushboolean(L, supported);
-    
     return 1;
 }
-    
+
 int openGLVersion(lua_State* L) {
     lua_pushstring(L, std::to_string(OpenGLCap.openGLVersion()).c_str());
     return 1;
 }
-    
+
 int glslCompiler(lua_State* L) {
     lua_pushstring(L, OpenGLCap.glslCompiler().c_str());
     return 1;
 }
-    
+
 int gpuVendor(lua_State* L) {
     lua_pushstring(L, OpenGLCap.gpuVendorString().c_str());
     return 1;
 }
-    
+
 int extensions(lua_State* L) {
     const std::vector<std::string>& extensions = OpenGLCap.extensions();
-    
+
     lua_newtable(L);
-    
+
     for (size_t i = 1; i <= extensions.size(); ++i) {
         lua_pushstring(L, extensions[i].c_str());
         lua_rawseti(L, -2, i);
     }
     return 1;
 }
-    
+
 int isExtensionSupported(lua_State* L) {
     int nArguments = lua_gettop(L);
     SCRIPT_CHECK_ARGUMENTS("hasVersion", L, 1, nArguments);
 
     std::string extension = luaL_checkstring(L, -1);
-    
+
     lua_pushboolean(L, OpenGLCap.isExtensionSupported(extension));
     return 1;
 }
-    
+
 int maxTextureUnits(lua_State* L) {
     lua_pushnumber(L, OpenGLCap.maxTextureUnits());
     return 1;
 }
-    
+
 int max2DTextureSize(lua_State* L) {
     lua_pushnumber(L, OpenGLCap.max2DTextureSize());
     return 1;
 }
-    
+
 int max3DTextureSize(lua_State* L) {
     lua_pushnumber(L, OpenGLCap.max3DTextureSize());
     return 1;
 }
-    
+
 int maxAtomicCounterBufferBindings(lua_State* L) {
     lua_pushnumber(L, OpenGLCap.maxAtomicCounterBufferBindings());
     return 1;
 }
-    
+
 int maxShaderStorageBufferBindings(lua_State* L) {
     lua_pushnumber(L, OpenGLCap.maxShaderStorageBufferBindings());
     return 1;
 }
-    
+
 int maxUniformBufferBindings(lua_State* L) {
     lua_pushnumber(L, OpenGLCap.maxUniformBufferBindings());
     return 1;
 }
-    
+
 
 } // namespace luascripting::opengl
 
@@ -259,7 +256,7 @@ LuaLibrary generalSystemCapabilities() {
         }
     };
 }
-    
+
 LuaLibrary openglSystemCapabilities() {
     return {
         "openglCapabilities",

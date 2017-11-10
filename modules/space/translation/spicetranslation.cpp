@@ -62,7 +62,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-    
+
 documentation::Documentation SpiceTranslation::Documentation() {
     using namespace openspace::documentation;
 
@@ -167,11 +167,11 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
 
     _observer.onChange(update);
     addProperty(_observer);
-    
+
     _frame.onChange(update);
     addProperty(_frame);
 }
-    
+
 glm::dvec3 SpiceTranslation::position() const {
     return _position;
 }

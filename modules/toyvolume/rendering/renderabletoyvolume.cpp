@@ -33,16 +33,54 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <ghoul/opengl/ghoul_gl.h>
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo ScalingInfo = {
+        "Scaling",
+        "Scaling",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+        "ScalingExponent",
+        "Scaling Exponent",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+        "Translation",
+        "Translation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+        "Rotation",
+        "Euler rotation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
+        "" // @TODO Missing documentation
+    };
+} // namespace
+
 namespace openspace {
 
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scaling({ "Scaling", "Scaling", "" }, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
-    , _scalingExponent({ "ScalingExponent", "Scaling Exponent", "" }, 1, -10, 20)
-    , _stepSize({ "StepSize", "Step Size", "" }, 0.02f, 0.01f, 1.f) // @TODO Missing documentation
-    , _translation({ "Translation", "Translation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(10.f)) // @TODO Missing documentation
-    , _rotation({ "Rotation", "Euler rotation", "" }, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f)) // @TODO Missing documentation
-    , _color({ "Color", "Color", "" }, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f)) // @TODO Missing documentation
+    , _scaling(ScalingInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
+    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f )
+    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
+    , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
 {
     float stepSize, scalingExponent;
     glm::vec3 scaling, translation, rotation;
@@ -66,7 +104,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         _stepSize = stepSize;
     }
 }
-    
+
 RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initialize() {
@@ -93,28 +131,36 @@ void RenderableToyVolume::initialize() {
     addProperty(_rotation);
     addProperty(_color);
 }
-    
+
 void RenderableToyVolume::deinitialize() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
-    
+
 bool RenderableToyVolume::isReady() const {
     // @TODO isReady function needs to be filled
     return true;
 }
-    
+
 void RenderableToyVolume::update(const UpdateData& data) {
     if (_raycaster) {
-        glm::mat4 transform = glm::translate(glm::mat4(1.0), static_cast<glm::vec3>(_translation) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
+        glm::mat4 transform = glm::translate(
+            glm::mat4(1.0),
+            static_cast<glm::vec3>(_translation) *
+                std::pow(10.0f, static_cast<float>(_scalingExponent))
+        );
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
         transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));
         transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
-        transform = glm::scale(transform, static_cast<glm::vec3>(_scaling) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
-        
+        transform = glm::scale(
+            transform,
+            static_cast<glm::vec3>(_scaling) *
+                std::pow(10.0f, static_cast<float>(_scalingExponent))
+        );
+
         _raycaster->setColor(_color);
         _raycaster->setStepSize(_stepSize);
         _raycaster->setModelTransform(transform);
@@ -126,5 +172,5 @@ void RenderableToyVolume::render(const RenderData& data, RendererTasks& tasks) {
     RaycasterTask task{ _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);
 }
-       
+
 } // namespace openspace

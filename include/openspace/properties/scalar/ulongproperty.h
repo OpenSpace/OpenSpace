@@ -28,11 +28,11 @@
  /**
  * \file ulongproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class ULongProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>unsigned long</code>.

@@ -42,7 +42,7 @@ class KeyBindingManager : public DocumentationGenerator {
 public:
     KeyBindingManager();
     ~KeyBindingManager() = default;
-    
+
     void resetKeyBindings();
 
     void bindKeyLocal(
@@ -61,7 +61,7 @@ public:
 
     static scripting::LuaLibrary luaLibrary();
 
-    // Callback functions 
+    // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
 private:
@@ -72,7 +72,7 @@ private:
         Synchronized synchronization;
         std::string documentation;
     };
-    
+
     std::string generateJson() const override;
 
     std::multimap<KeyWithModifier, KeyInformation> _keyLua;

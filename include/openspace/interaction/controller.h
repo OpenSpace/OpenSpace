@@ -39,7 +39,7 @@ public:
     Controller() :
         _handler(nullptr)
     {}
-    
+
     void setHandler(NavigationHandler* handler);
 
 protected:

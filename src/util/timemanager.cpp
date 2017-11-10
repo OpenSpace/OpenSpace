@@ -48,7 +48,7 @@ void TimeManager::preSynchronization(double dt) {
 
 void TimeManager::consumeKeyframes(double dt) {
     double now = OsEng.windowWrapper().applicationTime();
-    
+
     const std::deque<Keyframe<Time>>& keyframes = _timeline.keyframes();
     auto firstFutureKeyframe = std::lower_bound(keyframes.begin(), keyframes.end(), now, &compareKeyframeTimeWithTime);
 
@@ -103,7 +103,7 @@ void TimeManager::consumeKeyframes(double dt) {
 
         double predictedTime = time().j2000Seconds() + time().deltaTime() * (next.timestamp - now);
         bool withinTolerance = std::abs(predictedTime - nextTime.j2000Seconds()) < std::abs(nextTime.deltaTime() * secondsOffTolerance);
-        
+
         if (nextTime.deltaTime() == time().deltaTime() && withinTolerance) {
             time().advanceTime(dt);
             return;
@@ -114,7 +114,7 @@ void TimeManager::consumeKeyframes(double dt) {
         double t2 = next.timestamp;
 
         double parameter = (t1 - t0) / (t2 - t0);
-        
+
         double y0 = time().j2000Seconds();
         // double yPrime0 = time().deltaTime();
 

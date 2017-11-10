@@ -59,7 +59,6 @@
 
 #include "globebrowsingmodule_lua.inl"
 
-
 namespace {
     const char* _loggerCat = "GlobeBrowsingModule";
 
@@ -69,7 +68,6 @@ namespace {
     {
         // Idea:  Iterate over the list of sublayers keeping a current layer and identify it
         //        by its number.  If this number changes, we know that we have a new layer
-
 
         using Layer = openspace::GlobeBrowsingModule::Layer;
         std::vector<Layer> result;
@@ -85,7 +83,6 @@ namespace {
                 &iDataset,
                 IdentifierBuffer
             );
-
 
 
             if (iDataset != currentLayerNumber) {
@@ -146,7 +143,7 @@ void GlobeBrowsingModule::internalInitialize() {
         addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
     });
-  
+
     // Render
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&]{
         _tileCache->update();
@@ -166,7 +163,7 @@ void GlobeBrowsingModule::internalInitialize() {
     auto fTileProvider =
         std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
-  
+
     // Register renderable class
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 
@@ -187,7 +184,7 @@ void GlobeBrowsingModule::internalInitialize() {
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::ByLevelTileLayer)]);
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::ByIndexTileLayer)]);
-  
+
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 }
 
@@ -306,7 +303,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
                                 double altitude)
 {
     using namespace globebrowsing;
-    
+
     Camera* cam = OsEng.navigationHandler().camera();
     goToGeodetic3(
         *cam,
@@ -336,18 +333,18 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, globebrowsing::TileIndex ti,
     glm::dmat4 inverseModelTransform = globe->inverseModelTransform();
     glm::dvec3 cameraPositionModelSpace =
     glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
-    
+
     GeodeticPatch patch(ti);
     Geodetic2 corner = patch.getCorner(SOUTH_WEST);
     Geodetic2 positionOnPatch = patch.getSize();
     positionOnPatch.lat *= uv.y;
     positionOnPatch.lon *= uv.x;
     Geodetic2 pointPosition = corner + positionOnPatch;
-    
+
     glm::dvec3 positionOnEllipsoid =
         globe->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
     double altitude = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
-    
+
     goToGeodetic3(camera, {pointPosition, altitude}, resetCameraDirection);
 }
 
@@ -362,22 +359,23 @@ void GlobeBrowsingModule::goToGeodetic2(Camera& camera,
         LERROR("Focus node must have a RenderableGlobe renderable.");
         return;
     }
-    
+
     glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
     glm::dmat4 inverseModelTransform =
         OsEng.navigationHandler().focusNode()->inverseModelTransform();
     glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-                                                                cameraPositionModelSpace);
-    
+        cameraPositionModelSpace
+    );
+
     glm::dvec3 centerToActualSurface = posHandle.centerToReferenceSurface +
         posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
     double altitude = glm::length(cameraPositionModelSpace - centerToActualSurface);
 
     goToGeodetic3(camera, {geo2, altitude}, resetCameraDirection);
 }
-    
+
 void GlobeBrowsingModule::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3,
                                         bool resetCameraDirection)
 {
@@ -411,24 +409,27 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera, globebrowsing::Ge
 
     // Camera is described in world space
     glm::dmat4 modelTransform = globe->modelTransform();
-    
+
     // Lookup vector
     glm::dvec3 positionModelSpace = globe->ellipsoid().cartesianSurfacePosition(geo2);
     glm::dvec3 slightlyNorth = globe->ellipsoid().cartesianSurfacePosition(
         Geodetic2(geo2.lat + 0.001, geo2.lon));
     glm::dvec3 lookUpModelSpace = glm::normalize(slightlyNorth - positionModelSpace);
     glm::dvec3 lookUpWorldSpace = glm::dmat3(modelTransform) * lookUpModelSpace;
-    
+
     // Lookat vector
     glm::dvec3 lookAtWorldSpace = glm::dvec3(modelTransform * glm::dvec4(positionModelSpace, 1.0));
 
     // Eye position
     glm::dvec3 eye = camera.positionVec3();
-    
+
     // Matrix
     glm::dmat4 lookAtMatrix = glm::lookAt(
-                    eye, lookAtWorldSpace, lookUpWorldSpace);
-    
+        eye,
+        lookAtWorldSpace,
+        lookUpWorldSpace
+    );
+
     // Set rotation
     glm::dquat rotation = glm::quat_cast(inverse(lookAtMatrix));
     camera.setRotation(rotation);
@@ -495,7 +496,7 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
         GDALClose(dataset);
         return cap;
     };
-    
+
     _inFlightCapabilitiesMap[name] = std::async(std::launch::async, downloadFunction, url);
 
     _urlList.emplace(std::move(globe), UrlInfo{ std::move(name), std::move(url) });
@@ -549,7 +550,6 @@ void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
     }
 }
 
-
 std::vector<GlobeBrowsingModule::UrlInfo>
 GlobeBrowsingModule::urlInfo(const std::string& globe) const
 {
@@ -560,7 +560,6 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
     }
     return res;
 }
-
 
 #endif // GLOBEBROWSING_USE_GDAL
 

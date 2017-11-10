@@ -43,7 +43,7 @@ template<typename KeyType> class LRUThreadPool;
 
 template<typename KeyType>
 class LRUThreadPoolWorker {
-public: 
+public:
     LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
     void operator()();
 private:
@@ -74,7 +74,7 @@ public:
     void clearEnqueuedTasks();
 
 private:
-    
+
     struct DefaultHasher {
         unsigned long long operator()(const KeyType& key) const {
             return static_cast<unsigned long long>(key);

@@ -683,18 +683,18 @@ void SceneGraphNode::updateCamera(Camera* camera) const{
     psc origin(worldPosition());
     //int i = 0;
     // the camera position
-    
+
     psc relative = camera->position();
     psc focus = camera->focusPosition();
     psc relative_focus = relative - focus;
 
     psc target = origin + relative_focus;
-    
+
     camera->setPosition(target);
     camera->setFocusPosition(origin);
 
     //printf("target: %f, %f, %f, %f\n", target.vec4().x, target.vec4().y, target.vec4().z, target.vec4().w);
-    
+
 }
 
 }  // namespace openspace

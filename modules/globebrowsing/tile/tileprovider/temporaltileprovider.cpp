@@ -52,7 +52,7 @@ namespace {
 } // namespace
 
 namespace openspace::globebrowsing::tileprovider {
-    
+
 const char* TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
 const char* TemporalTileProvider::TemporalXMLTags::TIME_START = "OpenSpaceTimeStart";
@@ -61,7 +61,7 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_RESOLUTION =
                                                                 "OpenSpaceTimeResolution";
 const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeIdFormat";
 
-TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
+TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : _initDict(dictionary)
     , _filePath(FilePathInfo)
     , _successfulInitialization(false)
@@ -74,10 +74,10 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     catch (const std::runtime_error&) {
         // File path was not a path to a file but a GDAL config or empty
     }
-  
+
     _filePath.setValue(filePath);
     addProperty(_filePath);
-  
+
     if (readFilePath()) {
         const bool hasStart = dictionary.hasKeyAndValue<std::string>(KeyPreCacheStartTime);
         const bool hasEnd = dictionary.hasKeyAndValue<std::string>(KeyPreCacheEndTime);
@@ -99,7 +99,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     else {
         LERROR("Unable to read file " + _filePath.value());
         _successfulInitialization = false;
-    }  
+    }
 }
 
 bool TemporalTileProvider::readFilePath() {
@@ -188,7 +188,7 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
         gdalNode = CPLSearchXMLNode(node, "FilePath");
         gdalDescription = std::string(gdalNode->psChild->pszValue);
     }
-        
+
     return gdalDescription;
 }
 
@@ -210,7 +210,7 @@ std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::strin
 TileDepthTransform TemporalTileProvider::depthTransform() {
     if (_successfulInitialization) {
         ensureUpdated();
-        return _currentTileProvider->depthTransform();    
+        return _currentTileProvider->depthTransform();
     }
     else {
         return { 1.0f, 0.0f};
@@ -321,7 +321,7 @@ std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey tim
     auto tileProvider = std::make_shared<DefaultTileProvider>(_initDict);
     return tileProvider;
 }
-    
+
 std::string TemporalTileProvider::getGdalDatasetXML(Time t) {
     TimeKey timekey = _timeFormat->stringify(t);
     return getGdalDatasetXML(timekey);
@@ -354,7 +354,7 @@ std::string YYYYMMDD_hhmmss::stringify(const Time& t) const {
 
 std::string YYYYMMDD_hhmm::stringify(const Time& t) const {
     std::string ts = t.ISO8601().substr(0, 16);
-    
+
     // YYYY_MM_DDThh_mm -> YYYYMMDD_hhmm
     ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
     ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
@@ -365,7 +365,7 @@ std::string YYYYMMDD_hhmm::stringify(const Time& t) const {
 std::string YYYY_MM_DDThhColonmmColonssZ::stringify(const Time& t) const {
     return t.ISO8601().substr(0, 19) + "Z";
 }
-    
+
 std::string YYYY_MM_DDThh_mm_ssZ::stringify(const Time& t) const {
     std::string timeString = t.ISO8601().substr(0, 19) + "Z";
     replace( timeString.begin(), timeString.end(), ':', '_' );
@@ -402,7 +402,7 @@ TimeFormat* TimeIdProviderFactory::getProvider(const std::string& format) {
         init();
     }
     ghoul_assert(
-        _timeIdProviderMap.find(format) != _timeIdProviderMap.end(), 
+        _timeIdProviderMap.find(format) != _timeIdProviderMap.end(),
         "Unsupported Time format: " + format
     );
     return _timeIdProviderMap[format].get();
@@ -421,7 +421,7 @@ TimeQuantizer::TimeQuantizer(const Time& start, const Time& end,
 double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) {
     const char unit = resoltutionStr.back();
     std::string numberString = resoltutionStr.substr(0, resoltutionStr.length() - 1);
-        
+
     char* p;
     double value = strtol(numberString.c_str(), &p, 10);
     if (*p) { // not a number

@@ -48,7 +48,7 @@ namespace documentation { struct Documentation; }
 class RenderableFov : public Renderable {
 public:
     RenderableFov(const ghoul::Dictionary& dictionary);
-    
+
     void initialize() override;
     void deinitialize() override;
 
@@ -56,7 +56,7 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-    
+
     static documentation::Documentation Documentation();
 
 private:
@@ -116,7 +116,7 @@ private:
     float _interpolationTime;
 
     struct RenderInformation {
-        // Differentiating different vertex types 
+        // Differentiating different vertex types
         using VertexColorType = int32_t;
         // This needs to be synced with the fov_vs.glsl shader
         static const VertexColorType VertexColorTypeDefaultStart = 0;
@@ -152,7 +152,7 @@ private:
         properties::Vec4Property square; // Color for the orthogonal square
     } _colors;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___RENDERABLEFOV___H__

@@ -62,9 +62,9 @@ namespace {
     static const openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite."        
+        "The path to the texture that should be used as the point sprite."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
@@ -112,7 +112,7 @@ namespace openspace {
                     "The path to the SPECK file that contains information about the astronomical "
                     "object being rendered."
                 },
-                { 
+                {
                     keyColor,
                     new Vector3Verifier<float>,
                     Optional::No,
@@ -174,9 +174,9 @@ namespace openspace {
             dictionary,
             "RenderablePoints"
         );
-        
+
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-        
+
         if (dictionary.hasKey(keyUnit)) {
             std::string unit = dictionary.value<std::string>(keyUnit);
             if (unit == MeterUnit) {
@@ -184,7 +184,7 @@ namespace openspace {
             }
             else if (unit == KilometerUnit) {
                 _unit = Kilometer;
-            } 
+            }
             else if (unit == ParsecUnit) {
                 _unit = Parsec;
             }
@@ -266,7 +266,7 @@ namespace openspace {
                 "${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl");// ,
                 //"${MODULE_DIGITALUNIVERSE}/shaders/points_gs.glsl");
         }
-        
+
         bool success = loadData();
         if (!success) {
             throw ghoul::RuntimeError("Error loading data");
@@ -295,17 +295,17 @@ namespace openspace {
         _program->activate();
 
         glm::dmat4 modelMatrix = glm::dmat4(1.0);
-        
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _program->setUniform("modelViewProjectionTransform", glm::dmat4(data.camera.projectionMatrix()) * 
+        _program->setUniform("modelViewProjectionTransform", glm::dmat4(data.camera.projectionMatrix()) *
             data.camera.combinedViewMatrix() * modelMatrix);
 
         _program->setUniform("color", _pointColor);
         _program->setUniform("sides", 4);
         _program->setUniform("alphaValue", _alphaValue);
         _program->setUniform("scaleFactor", _scaleFactor);
-        
+
         if (_hasSpriteTexture) {
             ghoul::opengl::TextureUnit spriteTextureUnit;
             spriteTextureUnit.activate();
@@ -319,12 +319,12 @@ namespace openspace {
         else {
             _program->setUniform("hasColorMap", false);
         }
-     
+
         glEnable(GL_PROGRAM_POINT_SIZE);
         glBindVertexArray(_vao);
         const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() / _nValuesPerAstronomicalObject);
         glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
-        
+
         glDisable(GL_PROGRAM_POINT_SIZE);
         glBindVertexArray(0);
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
@@ -334,7 +334,7 @@ namespace openspace {
         glDepthMask(true);
     }
 
-    void RenderablePoints::update(const UpdateData&) {  
+    void RenderablePoints::update(const UpdateData&) {
         if (_dataIsDirty) {
             LDEBUG("Regenerating data");
 
@@ -362,11 +362,10 @@ namespace openspace {
             GLint positionAttrib = _program->attributeLocation("in_position");
 
             if (_hasColorMapFile) {
-                
                 const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
-                const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-                GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
-                
+                // const size_t nValues = _slicedData.size() / nAstronomicalObjects;
+                // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
+
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribLPointer(
                     positionAttrib,
@@ -386,7 +385,7 @@ namespace openspace {
                     reinterpret_cast<void*>(sizeof(double)*4)
                 );
             }
-            else {                                                
+            else {
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribLPointer(
                     positionAttrib,
@@ -419,7 +418,7 @@ namespace openspace {
                     [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
                     );
             }
-            _spriteTextureIsDirty = false;            
+            _spriteTextureIsDirty = false;
         }
     }
 
@@ -484,7 +483,7 @@ namespace openspace {
         while (true) {
             std::streampos position = file.tellg();
             std::getline(file, line);
-            
+
             if (line[0] == '#' || line.empty()) {
                 continue;
             }
@@ -539,15 +538,15 @@ namespace openspace {
             LERROR("Failed to open Color Map file '" << _file << "'");
             return false;
         }
- 
-        std::size_t numberOfColors = 0;
+
+        int numberOfColors = 0;
 
         // The beginning of the speck file has a header that either contains comments
         // (signaled by a preceding '#') or information about the structure of the file
         // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
         std::string line = "";
         while (true) {
-            std::streampos position = file.tellg();
+            // std::streampos position = file.tellg();
             std::getline(file, line);
 
             if (line[0] == '#' || line.empty()) {
@@ -558,18 +557,18 @@ namespace openspace {
             std::locale loc;
             if (std::isdigit(line[0], loc)) {
                 std::string::size_type sz;
-                numberOfColors = std::stoi(line, &sz);
+                numberOfColors = static_cast<int>(std::stoi(line, &sz));
                 break;
             }
             else if (file.eof()) {
                 return false;
-            }            
+            }
         }
-        
-        for (auto i = 0; i < numberOfColors; ++i) {
+
+        for (int i = 0; i < numberOfColors; ++i) {
             std::getline(file, line);
             std::stringstream str(line);
-            
+
             glm::vec4 color;
             for (auto j = 0; j < 4; ++j) {
                 str >> color[j];
@@ -577,7 +576,7 @@ namespace openspace {
 
             _colorMapData.push_back(color);
         }
-        
+
         return true;
     }
 
@@ -637,7 +636,7 @@ namespace openspace {
             return false;
         }
     }
-    
+
     void RenderablePoints::createDataSlice() {
         _slicedData.clear();
         if (_hasColorMapFile) {
@@ -654,7 +653,7 @@ namespace openspace {
             // Converting untis
             if (_unit == Kilometer) {
                 p *= 1E3;
-            } 
+            }
             else if (_unit == Parsec) {
                 p *= PARSEC;
             }
@@ -674,22 +673,24 @@ namespace openspace {
             glm::dvec4 position(p, 1.0);
 
             if (_hasColorMapFile) {
-                for (auto j = 0; j < 4; ++j) {
+                for (int j = 0; j < 4; ++j) {
                     _slicedData.push_back(position[j]);
                 }
-                for (auto j = 0; j < 4; ++j) {
+                for (int j = 0; j < 4; ++j) {
                     _slicedData.push_back(_colorMapData[colorIndex][j]);
                 }
             }
             else {
-                for (auto j = 0; j < 4; ++j) {
+                for (int j = 0; j < 4; ++j) {
                     _slicedData.push_back(position[j]);
                 }
             }
-            
-            colorIndex = (colorIndex == (_colorMapData.size() - 1)) ? 0 : colorIndex + 1;
+
+            colorIndex =
+                (colorIndex == (static_cast<int>(_colorMapData.size()) - 1)) ?
+                0 :
+                colorIndex + 1;
         }
     }
-    
 
 } // namespace openspace

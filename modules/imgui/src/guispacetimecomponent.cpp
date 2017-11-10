@@ -100,8 +100,8 @@ void GuiSpaceTimeComponent::render() {
         nodeNames += n->name() + '\0';
     }
 
-    auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus); 
-    if (!nodes.empty()) { 
+    auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
+    if (!nodes.empty()) {
         // Only check if we found the current focus node if we have any nodes at all
         // only then it would be a real error
         ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
@@ -218,7 +218,7 @@ void GuiSpaceTimeComponent::render() {
         // UTC returns a string of the type YYYY MMM DDTHH:mm:ss.xxx
         // setTime doesn't like the T in it and wants a space instead
         nowTime[11] = ' ';
-        
+
         OsEng.scriptEngine().queueScript(
             "openspace.time.setTime(\"" + nowTime + "\")",
             scripting::ScriptEngine::RemoteScripting::Yes
@@ -273,7 +273,6 @@ void GuiSpaceTimeComponent::render() {
 
     bool isPaused = OsEng.timeManager().time().paused();
 
-    
     bool pauseChanged = ImGui::Button(isPaused ? "Resume" : "Pause", { ImGui::GetWindowWidth() - 7.5f, 0.f } );
     if (pauseChanged) {
         OsEng.scriptEngine().queueScript(

@@ -100,14 +100,17 @@ void DataProcessorJson::addDataValues(std::string data, properties::SelectionPro
     }
 }
 
-std::vector<float*> DataProcessorJson::processData(std::string data, properties::SelectionProperty& dataOptions,  glm::size3_t& dimensions){
-    if(!data.empty()){
+std::vector<float*> DataProcessorJson::processData(std::string data,
+                                               properties::SelectionProperty& dataOptions,
+                                               glm::size3_t& dimensions)
+{
+    if (!data.empty()) {
         json j = json::parse(data);
-        json variables = j["variables"]; 
+        json variables = j["variables"];
 
         std::vector<int> selectedOptions = dataOptions.value();
 //        int numSelected = selectedOptions.size();
-        
+
         auto options = dataOptions.options();
         int numOptions = options.size();
 

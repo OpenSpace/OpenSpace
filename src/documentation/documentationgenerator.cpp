@@ -60,7 +60,7 @@ DocumentationGenerator::DocumentationGenerator(std::string name,
     }
     ghoul_precondition(!_javascriptFile.empty(), "javascriptFilename must not be empty");
 }
-    
+
 void DocumentationGenerator::writeDocumentation(const std::string& filename) {
     std::ifstream handlebarsInput;
     handlebarsInput.exceptions(~std::ofstream::goodbit);
@@ -97,19 +97,19 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
     std::ofstream file;
     file.exceptions(~std::ofstream::goodbit);
     file.open(filename);
-    
+
     std::string json = generateJson();
     // We probably should escape backslashes here?
-    
+
     file           << "<!DOCTYPE html>"                                           << '\n'
                    << "<html>"                                                    << '\n'
          << "\t"   << "<head>"                                                    << '\n';
-    
+
     for (const HandlebarTemplate& t : _handlebarTemplates) {
         const char* Type = "text/x-handlebars-template";
         file << "\t\t"
                    << "<script id=\"" << t.name << "\" type=\"" << Type << "\">"  << '\n';
-        
+
         std::ifstream templateFilename(absPath(t.filename));
         std::string templateContent(
             std::istreambuf_iterator<char>{templateFilename},
@@ -119,14 +119,14 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
         file << "\t"
                    << "</script>"                                                 << '\n';
     }
-    
+
     const std::string Version =
         "[" +
         std::to_string(OPENSPACE_VERSION_MAJOR) + "," +
         std::to_string(OPENSPACE_VERSION_MINOR) + "," +
         std::to_string(OPENSPACE_VERSION_PATCH) +
         "]";
-    
+
     file
          << "\t"   << "<script>"                                                  << '\n'
          << "\t\t" << "var " << _jsonName << " = JSON.parse('" << json << "');"   << '\n'
@@ -136,7 +136,7 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
          << "\t"   << "</script>"                                                 << '\n'
          << "\t"   << "<style type=\"text/css\">"                                 << '\n'
          << "\t\t" << cssContent                                                  << '\n'
-         << "\t\t" << bootstrapContent                                            << '\n' 
+         << "\t\t" << bootstrapContent                                            << '\n'
          << "\t"   << "</style>"                                                  << '\n'
          << "\t\t" << "<title>" << _name << "</title>"                            << '\n'
          << "\t"   << "</head>"                                                   << '\n'
@@ -144,7 +144,7 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
          << "\t"   << "</body>"                                                   << '\n'
                    << "</html>"                                                   << '\n';
 }
-    
+
 std::string escapedJson(const std::string& text) {
     std::string jsonString = "";
     for (const char& c : text) {
@@ -170,9 +170,7 @@ std::string escapedJson(const std::string& text) {
             jsonString += c;
         }
     }
-
     return jsonString;
 }
-
 
 } // namespace openspace

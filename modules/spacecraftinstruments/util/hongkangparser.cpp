@@ -41,11 +41,13 @@ namespace {
 
 namespace openspace {
 
-HongKangParser::HongKangParser(std::string name, std::string fileName, 
+HongKangParser::HongKangParser(std::string name, std::string fileName,
                                std::string spacecraft,
                                ghoul::Dictionary translationDictionary,
                                std::vector<std::string> potentialTargets)
-    : _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
+    : _defaultCaptureImage(
+        absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png")
+    )
     , _name(std::move(name))
     , _fileName(std::move(fileName))
     , _spacecraft(std::move(spacecraft))
@@ -64,11 +66,14 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
             //std::string abort = decoders[i] + "." + keyStopCommand;
             for (size_t j = 0; j < keys.size(); ++j) {
                 std::string currentKey = decoders[i] + "." + keys[j];
-                
+
                 ghoul::Dictionary decoderDictionary;
                 translationDictionary.getValue(currentKey, decoderDictionary);
 
-                auto decoder = Decoder::createFromDictionary(decoderDictionary, decoders[i]);
+                auto decoder = Decoder::createFromDictionary(
+                    decoderDictionary,
+                    decoders[i]
+                );
                 //insert decoder to map - this will be used in the parser to determine
                 //behavioral characteristics of each instrument
                 _fileTranslation[keys[j]] = std::move(decoder);
@@ -79,7 +84,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
 }
 
 void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& target) {
-    //remembto add this lua later... 
+    //remembto add this lua later...
     std::transform(
         line.begin(),
         line.end(),
@@ -88,20 +93,21 @@ void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& 
     );
     std::vector<std::string> ptarg = _potentialTargets;
     for (const auto& p : ptarg) {
-        // loop over all targets and determine from 4th col which target this instrument points to
+        // loop over all targets and determine from 4th col which target this instrument
+        // points to
         if (line.find(p) != std::string::npos) {
             target = p;
             break;
         }
         else {
-            // not found - we set void until we have more info. 
+            // not found - we set void until we have more info.
             target = "VOID";
         }
     }
 }
 
 bool HongKangParser::create() {
-    //check input for errors. 
+    //check input for errors.
     bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
         throw ghoul::RuntimeError(
@@ -153,8 +159,8 @@ bool HongKangParser::create() {
 
                 while (!file.eof()) {
                     std::getline(file, line);
-                    
-                    std::string event = line.substr(0, line.find_first_of(" ")); 
+
+                    std::string event = line.substr(0, line.find_first_of(" "));
 
                     auto it = _fileTranslation.find(event);
                     bool foundEvent = (it != _fileTranslation.end());
@@ -163,9 +169,9 @@ bool HongKangParser::create() {
                     double time = getETfromMet(met);
 
                     if (foundEvent){
-                        //store the time, this is used for getNextCaptureTime() 
+                        //store the time, this is used for getNextCaptureTime()
                         _captureProgression.push_back(time);
-                        
+
                         if (it->second->getDecoderType() == "CAMERA") {
                             if (capture_start == -1) {
                                 //encountered new camera sequence- store start time
@@ -186,24 +192,38 @@ bool HongKangParser::create() {
                             image.target = cameraTarget;
                             image.isPlaceholder = true;
                             image.projected = false;
-                            //createImage(image, time, time + shutter, cameraSpiceID, cameraTarget, _defaultCaptureImage);
+                            //createImage(
+                            //    image,
+                            //    time,
+                            //    time + shutter,
+                            //    cameraSpiceID,
+                            //    cameraTarget,
+                            //    _defaultCaptureImage
+                            //);
 
-                            //IFF spaccraft has decided to switch target, store in target map (used for: 'next observation focus')
+                            //IFF spaccraft has decided to switch target, store in target
+                            //map (used for: 'next observation focus')
                             if (previousTarget != image.target) {
                                 previousTarget = image.target;
-                                std::pair<double, std::string> v_target = std::make_pair(time, image.target);
+                                std::pair<double, std::string> v_target = std::make_pair(
+                                    time,
+                                    image.target
+                                );
                                 _targetTimes.push_back(v_target);
                             }
 
-                            //store actual image in map. All targets get _only_ their corresp. subset.
+                            // store actual image in map. All targets get _only_ their
+                            // corresp. subset.
                             _subsetMap[image.target]._subset.push_back(image);
-                            //compute and store the range for each subset 
+                            // compute and store the range for each subset
                             _subsetMap[image.target]._range.include(time);
                         }
-                        if (it->second->getDecoderType() == "SCANNER") { // SCANNER START 
+                        if (it->second->getDecoderType() == "SCANNER") { // SCANNER START
                             scan_start = time;
 
-                            InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(it->second.get());
+                            InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(
+                                it->second.get()
+                            );
                             std::string endNominal = scanner->getStopCommand();
 
                             // store current position in file
@@ -222,8 +242,13 @@ bool HongKangParser::create() {
                                     scannerSpiceID = it->second->getTranslation();
 
                                     scanRange = { scan_start, scan_stop };
-                                    ghoul_assert(scanRange.isDefined(), "Invalid time range!");
-                                    _instrumentTimes.push_back(std::make_pair(it->first, scanRange));
+                                    ghoul_assert(
+                                        scanRange.isDefined(),
+                                        "Invalid time range!"
+                                    );
+                                    _instrumentTimes.push_back(
+                                        std::make_pair(it->first, scanRange)
+                                    );
 
                                     //store individual image
                                     Image image;
@@ -242,13 +267,18 @@ bool HongKangParser::create() {
                             file.seekg(len, std::ios_base::beg);
                         }
                     }
-                    else { // we have reached the end of a scan or consecutive capture sequence!
+                    else {
+                        // we have reached the end of a scan or consecutive capture
+                        // sequence!
                         if (capture_start != -1) {
-                            //end of capture sequence for camera, store end time of this sequence
+                            // end of capture sequence for camera, store end time of this
+                            // sequence
                             capture_stop = time;
                             cameraRange = { capture_start, capture_stop };
                             ghoul_assert(cameraRange.isDefined(), "Invalid time range!");
-                            _instrumentTimes.push_back(std::make_pair(previousCamera, cameraRange));
+                            _instrumentTimes.push_back(
+                                std::make_pair(previousCamera, cameraRange)
+                            );
 
                             capture_start = -1;
                         }
@@ -262,15 +292,15 @@ bool HongKangParser::create() {
     return true;
 }
 
-bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft, 
-                                      std::vector<std::string>, 
+bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft,
+                                      std::vector<std::string>,
                                       std::vector<std::string> potentialTargets)
 {
     image.target = "VOID";
     // we have (?) to cast to int, unfortunately
     // Why? --abock
     // because: old comment --m
-    
+
     int exposureTime = image.timeRange.duration();
     if (exposureTime == 0) {
         exposureTime = 1;
@@ -307,8 +337,6 @@ double HongKangParser::getETfromMet(std::string line) {
 double HongKangParser::getETfromMet(double met) {
     const double referenceET =
         SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
-
-    //_metRef += 3; // MET reference time is off by 3 sec? 
 
     const double diff = std::abs(met - _metRef);
     if (met > _metRef) {
