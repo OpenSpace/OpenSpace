@@ -39,7 +39,6 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/luaconsole.h>
-#include <openspace/interaction/touchbar.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderable.h>
@@ -83,6 +82,11 @@
 #ifdef WIN32
 #include <Windows.h>
 #endif
+
+#ifdef __APPLE__
+#include <openspace/interaction/touchbar.h>
+#endif // __APPLE__
+
 
 #include <numeric>
 
