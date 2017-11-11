@@ -347,7 +347,10 @@ DownloadManager::downloadRequestFiles(
             ++nFiles;
 #ifdef __APPLE__
             // @TODO: Fix this so that the ifdef is not necessary anymore ---abock
-          std::string file = ghoul::filesystem::File(line, ghoul::filesystem::File::RawPath::Yes).filename();
+            std::string file = ghoul::filesystem::File(
+                line,
+                ghoul::filesystem::File::RawPath::Yes
+            ).filename();
 #else
             std::string file = ghoul::filesystem::File(line).filename();
 #endif

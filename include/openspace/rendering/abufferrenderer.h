@@ -111,7 +111,9 @@ private:
      * (id, namespace, etc)
      */
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _boundsPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _boundsPrograms;
     std::vector<std::string> _helperPaths;
 
     ghoul::Dictionary _resolveDictionary;

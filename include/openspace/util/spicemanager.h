@@ -64,7 +64,7 @@ public:
             LightTime, ///< One-way light time (<code>LT</code>)
             LightTimeStellar, ///< One-way light time and stellar (<code>LT+S</code>)
             ConvergedNewtonian, ///< Converged newtonian light time (<code>CN</code>)
-            ConvergedNewtonianStellar ///< Converged newtonian + stellar (<code>CN+S</code>)
+            ConvergedNewtonianStellar ///< Converged newtonian+stellar (<code>CN+S</code>)
         };
         /// The direction of the aberration correct
         enum class Direction {
@@ -896,7 +896,8 @@ private:
      * position will be retrieved. If the coverage has ended, the last position will be
      * retrieved. If \p time is in a coverage gap, the position will be interpolated.
      * \param target The body which is missing SPK data for this time
-     * \param observer The observer. The position will be retrieved in relation to this body
+     * \param observer The observer. The position will be retrieved in relation to this
+     *        body
      * \param referenceFrame The reference frame of the output position vector
      * \param aberrationCorrection The aberration correction used for the position
      * calculation

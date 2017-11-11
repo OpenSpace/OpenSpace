@@ -49,9 +49,11 @@ struct TimeRange {
     TimeRange(const ghoul::Dictionary& dict);
 
     /**
-    * \returns true if timeRange could be initialized from the dictionary, false otherwise.
+    * \returns true if timeRange could be initialized from the dictionary,
+    *          false otherwise.
     */
-    static bool initializeFromDictionary(const ghoul::Dictionary& dict, TimeRange& timeRange);
+    static bool initializeFromDictionary(const ghoul::Dictionary& dict,
+        TimeRange& timeRange);
 
     void include(double val);
 

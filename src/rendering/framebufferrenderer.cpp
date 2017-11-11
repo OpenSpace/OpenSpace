@@ -45,10 +45,12 @@
 namespace {
     const char* _loggerCat = "FramebufferRenderer";
     const char* ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
-    const char* RaycastFragmentShaderPath = "${SHADERS}/framebuffer/raycastframebuffer.frag";
+    const char* RaycastFragmentShaderPath =
+        "${SHADERS}/framebuffer/raycastframebuffer.frag";
     const char* GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
     const char* GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
-    const char* RenderFragmentShaderPath = "${SHADERS}/framebuffer/renderframebuffer.frag";
+    const char* RenderFragmentShaderPath =
+        "${SHADERS}/framebuffer/renderframebuffer.frag";
 } // namespace
 
 namespace openspace {

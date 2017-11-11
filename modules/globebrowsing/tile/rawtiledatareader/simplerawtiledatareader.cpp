@@ -187,7 +187,8 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     return RawTile::ReadError::None;
 }
 
-IODescription SimpleRawTileDataReader::adjustIODescription(const IODescription& io) const {
+IODescription SimpleRawTileDataReader::adjustIODescription(const IODescription& io) const
+{
     // Modify to match OpenGL texture layout
     IODescription modifiedIO = io;
     modifiedIO.read.region.start.y =

@@ -147,7 +147,6 @@ int setPropertyCall_single(properties::Property* prop, std::string uri, lua_Stat
         //ensure properties are synced over parallel connection
         std::string value;
         prop->getStringValue(value);
-        //OsEng.parallelConnection().scriptMessage(prop->fullyQualifiedIdentifier(), value);
     }
 
     return 0;
@@ -358,7 +357,10 @@ int addSceneGraphNode(lua_State* L) {
     }
 
     SceneLoader loader;
-    SceneGraphNode* importedNode = loader.importNodeDictionary(*OsEng.renderEngine().scene(), d);
+    SceneGraphNode* importedNode = loader.importNodeDictionary(
+        *OsEng.renderEngine().scene(),
+        d
+    );
     importedNode->initialize();
 
     return 1;

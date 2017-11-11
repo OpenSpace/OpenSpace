@@ -130,8 +130,10 @@ void GdalRawTileDataReader::initialize() {
     _gdalDatasetMetaDataCached.offset = _dataset->GetRasterBand(1)->GetOffset();
     _gdalDatasetMetaDataCached.rasterXSize = _dataset->GetRasterXSize();
     _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
-    _gdalDatasetMetaDataCached.noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
-    _gdalDatasetMetaDataCached.dataType = tiledatatype::getGdalDataType(_initData.glType());
+    _gdalDatasetMetaDataCached.noDataValue =
+        _dataset->GetRasterBand(1)->GetNoDataValue();
+    _gdalDatasetMetaDataCached.dataType =
+        tiledatatype::getGdalDataType(_initData.glType());
 
     CPLErr err = _dataset->GetGeoTransform(&_gdalDatasetMetaDataCached.padfTransform[0]);
     if (err == CE_Failure) {

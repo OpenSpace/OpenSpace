@@ -128,7 +128,10 @@ static void RenderDrawLists(ImDrawData* drawData) {
             GL_STREAM_DRAW
         );
 
-        for (const ImDrawCmd* pcmd = cmdList->CmdBuffer.begin(); pcmd != cmdList->CmdBuffer.end(); pcmd++) {
+        for (const ImDrawCmd* pcmd = cmdList->CmdBuffer.begin();
+             pcmd != cmdList->CmdBuffer.end();
+             pcmd++)
+        {
             if (pcmd->UserCallback) {
                 pcmd->UserCallback(cmdList, pcmd);
             }
@@ -221,16 +224,25 @@ void addScreenSpaceRenderableLocal(std::string texturePath) {
     }
 
     const std::string luaTable =
-        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" + texturePath + "') }";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" +
+        texturePath + "') }";
+    const std::string script = "openspace.registerScreenSpaceRenderable(" +
+        luaTable + ");";
+    OsEng.scriptEngine().queueScript(
+        script,
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void addScreenSpaceRenderableOnline(std::string texturePath) {
     const std::string luaTable =
         "{Type = 'ScreenSpaceImageOnline', TexturePath = '" + texturePath + "' }";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+    const std::string script = "openspace.registerScreenSpaceRenderable(" +
+        luaTable + ");";
+    OsEng.scriptEngine().queueScript(
+        script,
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 } // namespace

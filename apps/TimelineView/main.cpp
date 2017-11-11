@@ -58,7 +58,9 @@ QLineEdit {
 
 QSlider::groove:horizontal {
     border: 1px solid #999999;
-    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+     /* the groove expands to the size of the slider by default. by giving it a height,
+        it has a fixed size */
+    height: 8px;
     background: qlineargradient(
         x1:0, y1:0, x2:1, y2:0,
         stop:0 #c4c4c4,
@@ -72,7 +74,9 @@ QSlider::handle:horizontal {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);
     border: 1px solid #5c5c5c;
     width: 18px;
-    margin: -2px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+     /* handle is placed by default on the contents rect of the groove.
+        Expand outside the groove */
+    margin: -2px 0;
     border-radius: 3px;
 }
 

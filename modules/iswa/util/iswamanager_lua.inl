@@ -90,7 +90,9 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         d.setValue("Type", "ScreenSpaceCygnet");
         d.setValue("UpdateInterval", (float) updateInterval);
 
-        std::shared_ptr<ScreenSpaceRenderable> s( ScreenSpaceRenderable::createFromDictionary(d) );
+        std::shared_ptr<ScreenSpaceRenderable> s(
+            ScreenSpaceRenderable::createFromDictionary(d)
+        );
         OsEng.renderEngine().registerScreenSpaceRenderable(s);
     }
     return 0;
@@ -140,7 +142,10 @@ int iswa_removeScrenSpaceCygnet(lua_State* L) {
     auto info = cygnetInformation[id];
     info->selected = false;
 
-    std::string script = "openspace.unregisterScreenSpaceRenderable('" + cygnetInformation[id]->name + "');";
+    std::string script =
+        "openspace.unregisterScreenSpaceRenderable('" +
+        cygnetInformation[id]->name + "');";
+
     OsEng.scriptEngine().queueScript(
         script,
         scripting::ScriptEngine::RemoteScripting::Yes

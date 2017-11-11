@@ -437,7 +437,7 @@ void FixedRotation::update(const UpdateData&) {
     {
         LWARNINGC(
             "FixedRotation",
-            "Dangerously collinear vectors detected: " << 
+            "Dangerously collinear vectors detected: " <<
             "x: " << x << "  y: " << y << "  z: " << z
         );
         _matrix = glm::dmat3();

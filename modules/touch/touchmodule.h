@@ -47,7 +47,8 @@ namespace openspace {
         TouchInteraction touch;
         TouchMarker markers;
         std::vector<TUIO::TuioCursor> listOfContactPoints;
-        std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
+        // contains an id and the TuioPoint that was processed last frame
+        std::vector<Point> lastProcessed;
     };
 
 } // namespace openspace

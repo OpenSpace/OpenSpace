@@ -33,7 +33,8 @@ namespace openspace {
 
 class TaskLoader {
 public:
-    std::vector<std::unique_ptr<Task>> tasksFromDictionary(const ghoul::Dictionary& dictionary);
+    std::vector<std::unique_ptr<Task>> tasksFromDictionary(
+        const ghoul::Dictionary& dictionary);
     std::vector<std::unique_ptr<Task>> tasksFromFile(const std::string& path);
 };
 

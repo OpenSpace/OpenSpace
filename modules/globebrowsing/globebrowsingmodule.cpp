@@ -66,8 +66,9 @@ namespace {
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
-        // Idea:  Iterate over the list of sublayers keeping a current layer and identify it
-        //        by its number.  If this number changes, we know that we have a new layer
+        // Idea: Iterate over the list of sublayers keeping a current layer and identify
+        //       it by its number.  If this number changes, we know that we have a new
+        //       layer
 
         using Layer = openspace::GlobeBrowsingModule::Layer;
         std::vector<Layer> result;
@@ -104,7 +105,9 @@ namespace {
                 currentLayer.url = value;
             }
             else {
-                LINFOC("GlobeBrowsingGUI", "Unknown subdataset identifier: " + identifier);
+                LINFOC(
+                    "GlobeBrowsingGUI", "Unknown subdataset identifier: " + identifier
+                );
             }
         }
 
@@ -139,18 +142,18 @@ void GlobeBrowsingModule::internalInitialize() {
         // Convert from MB to Bytes
         GdalWrapper::create(
             16ULL * 1024ULL * 1024ULL, // 16 MB
-            static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)); // 25% of total RAM
+            static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024));// 25%
         addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
     });
 
     // Render
-    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&]{
+    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&] {
         _tileCache->update();
     });
 
     // Deinitialize
-    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
+    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&] {
 #ifdef GLOBEBROWSING_USE_GDAL
         GdalWrapper::ref().destroy();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -169,21 +172,35 @@ void GlobeBrowsingModule::internalInitialize() {
 
     // Register TileProvider classes
     fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::DefaultTileLayer)]);
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::DefaultTileLayer
+        )]);
     fTileProvider->registerClass<tileprovider::SingleImageProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::SingleImageTileLayer)]);
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::SingleImageTileLayer
+        )]);
 #ifdef GLOBEBROWSING_USE_GDAL
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::TemporalTileLayer)]);
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::TemporalTileLayer
+        )]);
 #endif // GLOBEBROWSING_USE_GDAL
     fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::TileIndexTileLayer)]);
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::TileIndexTileLayer
+        )]);
     fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::SizeReferenceTileLayer)]);
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::SizeReferenceTileLayer
+        )]);
     fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::ByLevelTileLayer)]);
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::ByLevelTileLayer
+        )]);
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::ByIndexTileLayer)]);
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::ByIndexTileLayer
+        )]);
 
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 }
@@ -381,7 +398,8 @@ void GlobeBrowsingModule::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3
 
     glm::dvec3 positionModelSpace = globe->ellipsoid().cartesianPosition(geo3);
     glm::dmat4 modelTransform = globe->modelTransform();
-    glm::dvec3 positionWorldSpace = glm::dvec3(modelTransform * glm::dvec4(positionModelSpace, 1.0));
+    glm::dvec3 positionWorldSpace = glm::dvec3(modelTransform *
+                                    glm::dvec4(positionModelSpace, 1.0));
     camera.setPositionVec3(positionWorldSpace);
 
     if (resetCameraDirection) {
@@ -389,7 +407,8 @@ void GlobeBrowsingModule::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3
     }
 }
 
-void GlobeBrowsingModule::resetCameraDirection(Camera& camera, globebrowsing::Geodetic2 geo2)
+void GlobeBrowsingModule::resetCameraDirection(Camera& camera,
+                                               globebrowsing::Geodetic2 geo2)
 {
     using namespace globebrowsing;
 
@@ -410,7 +429,8 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera, globebrowsing::Ge
     glm::dvec3 lookUpWorldSpace = glm::dmat3(modelTransform) * lookUpModelSpace;
 
     // Lookat vector
-    glm::dvec3 lookAtWorldSpace = glm::dvec3(modelTransform * glm::dvec4(positionModelSpace, 1.0));
+    glm::dvec3 lookAtWorldSpace = glm::dvec3(modelTransform *
+                                  glm::dvec4(positionModelSpace, 1.0));
 
     // Eye position
     glm::dvec3 eye = camera.positionVec3();
@@ -459,10 +479,13 @@ std::string GlobeBrowsingModule::layerGroupNamesList() {
 std::string GlobeBrowsingModule::layerTypeNamesList() {
     std::string listLayerTypes;
     for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) + ", ";
+        listLayerTypes += std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[i]) +
+                          ", ";
     }
-    listLayerTypes +=
-        " and " + std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[globebrowsing::layergroupid::NUM_LAYER_TYPES - 1]);
+    listLayerTypes += " and " +
+        std::string(globebrowsing::layergroupid::LAYER_TYPE_NAMES[
+            globebrowsing::layergroupid::NUM_LAYER_TYPES - 1
+        ]);
     return listLayerTypes;
 }
 
@@ -489,7 +512,11 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
         return cap;
     };
 
-    _inFlightCapabilitiesMap[name] = std::async(std::launch::async, downloadFunction, url);
+    _inFlightCapabilitiesMap[name] = std::async(
+        std::launch::async,
+        downloadFunction,
+        url
+    );
 
     _urlList.emplace(std::move(globe), UrlInfo{ std::move(name), std::move(url) });
 }

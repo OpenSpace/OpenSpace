@@ -57,7 +57,6 @@ private:
     typedef std::vector<LinePoint> Line;
 
     void initializeDefaultPropertyValues();
-    //std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
     std::vector<Line> getFieldlinesData();
     void loadSeedPoints();
     void loadSeedPointsFromFile();

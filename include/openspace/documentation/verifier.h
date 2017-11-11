@@ -546,7 +546,9 @@ struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Typ
 * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
 */
 template <typename T>
-struct GreaterEqualVerifier : public OperatorVerifier<T, std::greater_equal<typename T::Type>> {
+struct GreaterEqualVerifier : public OperatorVerifier<T,
+                                                     std::greater_equal<typename T::Type>>
+{
     static_assert(
         !std::is_base_of<BoolVerifier, T>::value,
         "T cannot be BoolVerifier"

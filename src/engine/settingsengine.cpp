@@ -61,7 +61,9 @@ void SettingsEngine::initialize() {
     // Load all matching files in the Scene
     // TODO: match regex with either with new ghoul readFiles or local code
     const std::string sceneDir = "${SCENE}";
-    const std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
+    const std::vector<std::string> scenes = ghoul::filesystem::Directory(
+        sceneDir
+    ).readFiles();
 
     for (std::size_t i = 0; i < scenes.size(); ++i) {
         const std::size_t found = scenes[i].find_last_of("/\\");

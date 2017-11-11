@@ -74,7 +74,9 @@ TimeRange::TimeRange(const ghoul::Dictionary& dict) {
     }
 }
 
-bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRange& timeRange) {
+bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict,
+                                         TimeRange& timeRange)
+{
     std::string startTimeStr;
     std::string endTimeStr;
 

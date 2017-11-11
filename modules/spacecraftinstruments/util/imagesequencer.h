@@ -77,8 +77,9 @@ public:
     bool isReady();
 
     /**
-     * Updates sequencer with current <code>time</code>. This is used internally for keeping
-     * track of both current simulation time and the time of the previously rendered frame.
+     * Updates sequencer with current <code>time</code>. This is used internally for
+     * keeping track of both current simulation time and the time of the previously
+     * rendered frame.
      */
     void updateSequencer(const Time& time);
     /**
@@ -98,7 +99,8 @@ public:
     std::pair<double, std::string> getCurrentTarget();
 
     /**
-     * Retrieves current target and (in the list) adjacent targets, the number to retrieve is user set
+     * Retrieves current target and (in the list) adjacent targets, the number to retrieve
+     * is user set
      */
     std::pair<double, std::vector<std::string>> getIncidentTargetList(int range = 2);
 

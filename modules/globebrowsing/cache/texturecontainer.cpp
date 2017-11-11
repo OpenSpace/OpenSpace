@@ -75,7 +75,9 @@ ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
     return texture;
 }
 
-const openspace::globebrowsing::TileTextureInitData& TextureContainer::tileTextureInitData() const {
+const openspace::globebrowsing::TileTextureInitData&
+TextureContainer::tileTextureInitData() const
+{
     return _initData;
 }
 

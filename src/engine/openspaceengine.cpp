@@ -321,15 +321,15 @@ void OpenSpaceEngine::create(int argc, char** argv,
     }
 
     const bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
-    const bool hasCacheConfiguration = _engine->configurationManager().hasKeyAndValue<bool>(
+    const bool hasCacheConfig = _engine->configurationManager().hasKeyAndValue<bool>(
         ConfigurationManager::KeyPerSceneCache
     );
     std::string cacheFolder = absPath("${CACHE}");
-    if (hasCacheCommandline || hasCacheConfiguration) {
+    if (hasCacheCommandline || hasCacheConfig) {
         if (hasCacheCommandline) {
             cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
         }
-        if (hasCacheConfiguration) {
+        if (hasCacheConfig) {
             std::string scene = _engine->configurationManager().value<std::string>(
                 ConfigurationManager::KeyConfigScene
             );
@@ -400,7 +400,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-    if (_engine->parallelConnection().status() != ParallelConnection::Status::Disconnected) {
+    if (_engine->parallelConnection().status() !=
+        ParallelConnection::Status::Disconnected)
+    {
         _engine->parallelConnection().signalDisconnect();
     }
 
@@ -1369,8 +1371,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "toggleShutdown",
                 &luascriptfunctions::toggleShutdown,
                 "",
-                "Toggles the shutdown mode that will close the application after the count"
-                "down timer is reached"
+                "Toggles the shutdown mode that will close the application after the "
+                "count down timer is reached"
             },
             {
                 "writeDocumentation",

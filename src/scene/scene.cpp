@@ -63,18 +63,6 @@
 
 namespace {
     const char* _loggerCat = "Scene";
-    //const char* _moduleExtension = ".mod";
-    //const char* _commonModuleToken = "${COMMON_MODULE}";
-
-    //const char* KeyCamera = "Camera";
-    //const char* KeyFocusObject = "Focus";
-    //const char* KeyPositionObject = "Position";
-    //const char* KeyViewOffset = "Offset";
-
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
-    const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
-    const char* PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
 } // namespace
 
 namespace openspace {
@@ -84,11 +72,20 @@ Scene::Scene()
         "Documented",
         "propertyOwners",
         {
-            { "mainTemplate", MainTemplateFilename },
-            { "propertyOwnerTemplate", PropertyOwnerTemplateFilename },
-            { "propertyTemplate", PropertyTemplateFilename }
+            {
+                "mainTemplate",
+                "${OPENSPACE_DATA}/web/properties/main.hbs"
+            },
+            {
+                "propertyOwnerTemplate",
+                "${OPENSPACE_DATA}/web/properties/propertyowner.hbs"
+            },
+            {
+                "propertyTemplate",
+                "${OPENSPACE_DATA}/web/properties/property.hbs"
+            }
         },
-        JsFilename
+        "${OPENSPACE_DATA}/web/properties/script.js"
     )
 {}
 
@@ -128,7 +125,11 @@ void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
     // Remove the node and all its children.
     node->traversePostOrder([this](SceneGraphNode* n) {
         _topologicallySortedNodes.erase(
-            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), n),
+            std::remove(
+                _topologicallySortedNodes.begin(),
+                _topologicallySortedNodes.end(),
+                n
+            ),
             _topologicallySortedNodes.end()
         );
         _nodesByName.erase(n->name());
@@ -155,7 +156,10 @@ void Scene::sortTopologically() {
     );
     _circularNodes.clear();
 
-    ghoul_assert(_topologicallySortedNodes.size() == _nodesByName.size(), "Number of scene graph nodes is inconsistent");
+    ghoul_assert(
+        _topologicallySortedNodes.size() == _nodesByName.size(),
+        "Number of scene graph nodes is inconsistent"
+    );
 
     if (_topologicallySortedNodes.empty()) {
         return;
@@ -204,7 +208,10 @@ void Scene::sortTopologically() {
         }
     }
     if (inDegrees.size() > 0) {
-        LERROR("The scene contains circular dependencies. " << inDegrees.size() << " nodes will be disabled.");
+        LERROR(
+            "The scene contains circular dependencies. " <<
+            inDegrees.size() << " nodes will be disabled."
+        );
     }
 
     for (auto it : inDegrees) {
@@ -429,7 +436,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
     };
 }
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& error, const std::string& comp)
+Scene::InvalidSceneError::InvalidSceneError(const std::string& error,
+                                            const std::string& comp)
     : ghoul::RuntimeError(error, comp)
 {}
 

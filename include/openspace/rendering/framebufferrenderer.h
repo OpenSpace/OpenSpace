@@ -78,9 +78,15 @@ public:
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _exitPrograms;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _raycastPrograms;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _insideRaycastPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _exitPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _raycastPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _insideRaycastPrograms;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
 

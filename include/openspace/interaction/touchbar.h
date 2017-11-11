@@ -27,7 +27,7 @@
 
 namespace openspace {
 
-// Initializes the touch bar on MacOS (if available) and creates all the buttons and 
+// Initializes the touch bar on MacOS (if available) and creates all the buttons and
 // callbacks
 void showTouchbar();
 

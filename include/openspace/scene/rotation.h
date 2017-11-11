@@ -41,7 +41,8 @@ namespace documentation { struct Documentation; }
 
 class Rotation : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Rotation> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Rotation> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     Rotation(const ghoul::Dictionary& dictionary);
     virtual ~Rotation() = default;

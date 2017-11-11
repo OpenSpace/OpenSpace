@@ -141,15 +141,16 @@ void PointGlobe::render(const RenderData& data, RendererTasks&) {
         glm::inverse(rotationTransform) *
         scaleTransform; // Scale
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    //glm::vec3 directionToSun = glm::normalize(glm::vec3(0) - glm::vec3(bodyPosition));
-    //glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
 
     _programObject->setUniform("lightIntensityClamped", lightIntensityClamped);
     //_programObject->setUniform("lightOverflow", lightOverflow);
     //_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    _programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
+    _programObject->setUniform(
+        "projectionTransform",
+        data.camera.sgctInternal.projectionMatrix()
+    );
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 

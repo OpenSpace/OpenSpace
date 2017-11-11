@@ -255,7 +255,14 @@ void GuiSpaceTimeComponent::render() {
 
 
     float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -100000.f, 100000.f, "%.3f", 5.f);
+    bool changed = ImGui::SliderFloat(
+        "Delta Time",
+        &deltaTime,
+        -100000.f,
+        100000.f,
+        "%.3f",
+        5.f
+    );
     if (changed) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
@@ -273,7 +280,10 @@ void GuiSpaceTimeComponent::render() {
 
     bool isPaused = OsEng.timeManager().time().paused();
 
-    bool pauseChanged = ImGui::Button(isPaused ? "Resume" : "Pause", { ImGui::GetWindowWidth() - 7.5f, 0.f } );
+    bool pauseChanged = ImGui::Button(
+        isPaused ? "Resume" : "Pause",
+        { ImGui::GetWindowWidth() - 7.5f, 0.f }
+    );
     if (pauseChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.togglePause()",

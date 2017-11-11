@@ -42,7 +42,8 @@ namespace documentation {  struct Documentation; }
 
 class Translation : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Translation> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Translation> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     Translation();
     virtual ~Translation() = default;

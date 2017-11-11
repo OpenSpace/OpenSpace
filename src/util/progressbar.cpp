@@ -50,7 +50,8 @@ void ProgressBar::print(int current) {
         int spWidth = _width - pos + 2;
         _stream << "[" << std::setfill('=') << std::setw(eqWidth)
             << ">" << std::setfill(' ') << std::setw(spWidth)
-            << "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r" << std::flush;
+            << "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r"
+            << std::flush;
     }
     _previous = iprogress;
 };
