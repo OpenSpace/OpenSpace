@@ -29,6 +29,9 @@
 #include <string>
 #include <memory>
 #include <thread>
+#include <unordered_map>
+
+#include "libtorrent/torrent_handle.hpp"
 
 namespace libtorrent {
     class session;
@@ -36,20 +39,25 @@ namespace libtorrent {
 
 namespace openspace {
 
-struct Torrent {
-    std::string _torrentFile;
-    std::string _destination;
-};
+
 
 class TorrentClient {
 public:
+    struct Torrent {
+        size_t id;
+        libtorrent::torrent_handle handle;
+    };
+
     TorrentClient();
     ~TorrentClient();
     void initialize();
-    int addTorrentFile(std::string torrentFile, std::string destination);
-    int addMagnetLink(std::string magnetLink, std::string destination);
-    void removeTorrent(int id);
+    size_t addTorrentFile(std::string torrentFile, std::string destination);
+    size_t addMagnetLink(std::string magnetLink, std::string destination);
+    void removeTorrent(size_t id);
+    void pollAlerts();
 private:
+    size_t _nextId = 0;
+    std::unordered_map<size_t, Torrent> _torrents;
     std::unique_ptr<libtorrent::session> _session;
     std::thread _torrentThread;
     std::atomic_bool _keepRunning = true;

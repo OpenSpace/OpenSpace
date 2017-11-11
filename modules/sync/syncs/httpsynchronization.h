@@ -37,10 +37,15 @@ class HttpSynchronizationJob;
 class HttpSynchronization : public ResourceSynchronization {
 public:
     HttpSynchronization(const ghoul::Dictionary& dict);
+    virtual ~HttpSynchronization() = default;
+
     static documentation::Documentation Documentation();
 
     std::string directory() override;
     void synchronize() override;
+    float nSynchronizedBytes() override;
+    float nTotalBytes() override;
+    bool nTotalBytesIsKnown() override;
 
 private:
     std::vector<std::string> fileListUrls();

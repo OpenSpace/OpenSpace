@@ -45,10 +45,19 @@ namespace openspace {
 
 class AssetSynchronizer : public ResourceSyncClient {
 public:
+    enum class SynchronizationState : int {
+        Unknown,
+        Added,
+        Synchronizing,
+        Synchronized
+    };
+
     AssetSynchronizer(ResourceSynchronizer* resourceSynchronizer);
     void addAsset(std::shared_ptr<Asset> asset);
     void removeAsset(Asset* asset);
     void syncAsset(Asset* asset);
+    SynchronizationState assetState(Asset* asset);
+    float assetProgress(Asset* asset);
     void syncUnsynced();
 
     std::vector<std::shared_ptr<Asset>> getSynchronizedAssets();
@@ -56,11 +65,7 @@ public:
 private:
     bool assetIsSynchronized(Asset* asset);
 
-    enum class SynchronizationState : int {
-        Added,
-        Synchronizing,
-        Synchronized
-    };
+
 
     struct AssetSynchronization {
         std::shared_ptr<Asset> asset;

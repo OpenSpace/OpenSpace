@@ -92,7 +92,6 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
         return nullptr;
     }
 
-    const SyncModule* syncModule = OsEng.moduleEngine().module<SyncModule>();
     return result;
 }
 
@@ -112,11 +111,13 @@ void ResourceSynchronization::resolve() {
 }
 
 float ResourceSynchronization::progress() {
-    return _progress;
-}
-
-void ResourceSynchronization::updateProgress(float t) {
-    _progress = std::min(1.0f, std::max(t, 0.0f));
+    if (!nTotalBytesIsKnown()) {
+        return 0.f;
+    }
+    if (nTotalBytes() == 0) {
+        return 1.f;
+    }
+    return static_cast<float>(nSynchronizedBytes()) / static_cast<float>(nTotalBytes());
 }
 
 // SynchronizationJob methods

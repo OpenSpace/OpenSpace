@@ -120,4 +120,16 @@ void TorrentSynchronization::synchronize() {
     return;
 }
 
+float TorrentSynchronization::nSynchronizedBytes() {
+    return 0;
+}
+
+float TorrentSynchronization::nTotalBytes() {
+    return 0;
+}
+
+bool TorrentSynchronization::nTotalBytesIsKnown() {
+    return false;
+}
+
 } // namespace openspace

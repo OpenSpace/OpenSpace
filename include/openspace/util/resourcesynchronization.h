@@ -61,13 +61,16 @@ public:
 
     ResourceSynchronization();
     virtual ~ResourceSynchronization();
-    virtual void synchronize() = 0;
     virtual std::string directory() = 0;
+    virtual void synchronize() = 0;
+    virtual float nSynchronizedBytes() = 0;
+    virtual float nTotalBytes() = 0;
+    virtual bool nTotalBytesIsKnown() = 0;
+    virtual float progress();
 
     void wait();
     bool isResolved();
     void resolve();
-    float progress();
     void updateProgress(float t);
     std::shared_ptr<SynchronizationJob> job();
 
@@ -75,7 +78,6 @@ private:
     std::shared_ptr<SynchronizationJob> _job;
     std::atomic<bool> _started;
     std::atomic<bool> _resolved;
-    std::atomic<float> _progress;
 };
 
 

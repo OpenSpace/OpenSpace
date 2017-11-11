@@ -29,6 +29,7 @@
 #include <libtorrent/session.hpp>
 #include <libtorrent/alert_types.hpp>
 #include <libtorrent/torrent_info.hpp>
+#include <libtorrent/magnet_uri.hpp>
 
 #include <openspace/openspace.h>
 
@@ -36,6 +37,7 @@
 
 namespace {
     const char* _loggerCat = "TorrentClient";
+    std::chrono::milliseconds PollInterval(200);
 }
 
 namespace openspace {
@@ -77,25 +79,29 @@ void TorrentClient::initialize() {
 
     _torrentThread = std::thread([this]() {
         while (_keepRunning) {
-            std::vector<libtorrent::alert*> alerts;
-            _session->pop_alerts(&alerts);
-
-            for (lt::alert const* a : alerts) {
-                LINFO(a->message());
-                // if we receive the finished alert or an error, we're done
-                if (lt::alert_cast<lt::torrent_finished_alert>(a)) {
-                    LINFO(a->message());
-                }
-                if (lt::alert_cast<lt::torrent_error_alert>(a)) {
-                    LINFO(a->message());
-                }
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            pollAlerts();
+            std::this_thread::sleep_for(PollInterval);
         }
     });
 }
 
-int TorrentClient::addTorrentFile(std::string torrentFile, std::string destination) {
+void TorrentClient::pollAlerts() {
+    std::vector<libtorrent::alert*> alerts;
+    _session->pop_alerts(&alerts);
+
+    for (lt::alert const* a : alerts) {
+        LINFO(a->message());
+        // if we receive the finished alert or an error, we're done
+        if (lt::alert_cast<lt::torrent_finished_alert>(a)) {
+            LINFO(a->message());
+        }
+        if (lt::alert_cast<lt::torrent_error_alert>(a)) {
+            LINFO(a->message());
+        }
+    }
+}
+
+size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destination) {
     if (!_session) {
         LERROR("Torrent session not initialized when adding torrent");
         return -1;
@@ -106,24 +112,37 @@ int TorrentClient::addTorrentFile(std::string torrentFile, std::string destinati
     p.save_path = destination;
     p.ti = std::make_shared<libtorrent::torrent_info>(torrentFile, ec, 0);
 
-    _session->add_torrent(p, ec);
+    libtorrent::torrent_handle h = _session->add_torrent(p, ec);
+    if (ec) {
+        LERROR(torrentFile << ": " << ec.message());
+    }
+
+    size_t id = _nextId++;
+    _torrents.emplace(id, Torrent{id, h});
+    return id;
 }
 
-int TorrentClient::addMagnetLink(std::string magnetLink, std::string destination) {
+size_t TorrentClient::addMagnetLink(std::string magnetLink, std::string destination) {
     if (!_session) {
         LERROR("Torrent session not initialized when adding torrent");
         return -1;
     }
     libtorrent::error_code ec;
-    libtorrent::add_torrent_params p;
-
+    libtorrent::add_torrent_params p = libtorrent::parse_magnet_uri(magnetLink, ec);
     p.save_path = destination;
-    p.url = magnetLink;
+    p.storage_mode = libtorrent::storage_mode_allocate;
 
-    _session->add_torrent(p, ec);
+    libtorrent::torrent_handle h = _session->add_torrent(p, ec);
+    if (ec) {
+        LERROR(magnetLink << ": " << ec.message());
+    }
+
+    size_t id = _nextId++;
+    _torrents.emplace(id, Torrent{id, h});
+    return id;
 }
 
-void TorrentClient::removeTorrent(int id) {
+void TorrentClient::removeTorrent(size_t id) {
 }
 
 

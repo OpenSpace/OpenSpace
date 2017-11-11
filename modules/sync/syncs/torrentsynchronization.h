@@ -47,6 +47,10 @@ public:
     std::string directory() override;
     void synchronize() override;
 
+    float nSynchronizedBytes() override;
+    float nTotalBytes() override;
+    bool nTotalBytesIsKnown() override;
+
 private:
     std::string uniformResourceName() const;
     std::string _identifier;

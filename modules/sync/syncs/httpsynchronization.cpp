@@ -182,4 +182,17 @@ void HttpSynchronization::createSyncFile() {
     syncFile.close();
 }
 
+float HttpSynchronization::nSynchronizedBytes() {
+    return 0;
+}
+
+float HttpSynchronization::nTotalBytes() {
+    return 0;
+}
+
+bool HttpSynchronization::nTotalBytesIsKnown() {
+    return false;
+}
+
 } // namespace openspace
+

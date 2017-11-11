@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <numeric>
 
 namespace {
     const char* _loggerCat = "AssetSynchronizer";
@@ -83,6 +84,41 @@ void AssetSynchronizer::syncUnsynced() {
             syncAsset(it.first);
         }
     }
+}
+
+AssetSynchronizer::SynchronizationState AssetSynchronizer::assetState(Asset* asset) {
+    auto it = _managedAssets.find(asset);
+     if (it == _managedAssets.end()) {
+         return SynchronizationState::Unknown;
+     }
+    return it->second.state;
+}
+
+float AssetSynchronizer::assetProgress(Asset* asset) {
+    auto it = _managedAssets.find(asset);
+    if (it == _managedAssets.end()) {
+        return 0.f;
+    }
+    const std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
+        asset->synchronizations();
+
+    size_t nTotalBytes = 0;
+    size_t nSyncedBytes = 0;
+
+    for (const auto& sync : syncs) {
+        if (sync->nTotalBytesIsKnown()) {
+            return 0;
+        } else {
+            nTotalBytes += sync->nTotalBytes();
+            nSyncedBytes += sync->nSynchronizedBytes();
+        }
+    }
+
+    if (nTotalBytes == 0) {
+        return 1.f;
+    }
+
+    return static_cast<float>(nSyncedBytes)/static_cast<float>(nTotalBytes);
 }
 
 std::vector<std::shared_ptr<Asset>> AssetSynchronizer::getSynchronizedAssets() {
