@@ -73,7 +73,8 @@ public:
     SceneGraphNode();
     ~SceneGraphNode();
 
-    static std::unique_ptr<SceneGraphNode> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<SceneGraphNode> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     void initialize();
     void deinitialize();
@@ -95,7 +96,7 @@ public:
     void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
 
     SurfacePositionHandle calculateSurfacePositionHandle(
-                                                      const glm::dvec3& targetModelSpace);
+        const glm::dvec3& targetModelSpace);
 
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;

@@ -53,8 +53,10 @@ public:
 
     bool isMeasuringPerformance() const;
 
-    void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
-    void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
+    void storeIndividualPerformanceMeasurement(std::string identifier,
+        long long nanoseconds);
+    void storeScenePerformanceMeasurements(
+        const std::vector<SceneGraphNode*>& sceneNodes);
 
     void outputLogs();
 

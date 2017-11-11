@@ -78,9 +78,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         // Calculate Model View MatrixProjection
         const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
         const glm::dmat4 modelMat =
-                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-                rotMat *
-                glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            rotMat *
+            glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
         const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
         _shaderProgram->setUniform("modelViewProjection",
@@ -232,12 +232,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
 }
 
-inline bool RenderableFieldlinesSequence::isWithinSequenceInterval(const double currentTime) const {
+inline bool RenderableFieldlinesSequence::isWithinSequenceInterval(
+                                                           const double currentTime) const
+{
     return (currentTime >= _startTimes[0]) && (currentTime < _sequenceEndTime);
 }
 
 // Assumes we already know that currentTime is within the sequence interval
-void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(const double currentTime) {
+void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(const double currentTime)
+{
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if ( iter != _startTimes.begin()) {

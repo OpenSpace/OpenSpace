@@ -130,9 +130,9 @@ public:
     static const std::string PartHttpProxyPort;
     /// The key that stores the authentication method of the http proxy
     static const std::string PartHttpProxyAuthentication;
-    /// The key that stores the username to use for authentication to access the http proxy
+    /// Key that stores the username to use for authentication to access the http proxy
     static const std::string PartHttpProxyUser;
-    /// The key that stores the password to use for authentication to access the http proxy
+    /// Key that stores the password to use for authentication to access the http proxy
     static const std::string PartHttpProxyPassword;
     /// The key that stores the dictionary containing information about debug contexts
     static const std::string KeyOpenGLDebugContext;

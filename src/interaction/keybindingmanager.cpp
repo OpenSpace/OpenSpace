@@ -38,12 +38,6 @@
 
 #include <fstream>
 
-namespace {
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
-    const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
-} // namespace
-
 #include "keybindingmanager_lua.inl"
 
 namespace openspace::interaction {
@@ -53,14 +47,15 @@ KeyBindingManager::KeyBindingManager()
         "Documentation",
         "keybindings",
         {
-            { "keybindingTemplate",  KeybindingTemplateFilename },
-            { "mainTemplate", MainTemplateFilename }
+            { "keybindingTemplate", "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs" },
+            { "mainTemplate", "${OPENSPACE_DATA}/web/keybindings/main.hbs" }
         },
-        JsFilename
+        "${OPENSPACE_DATA}/web/keybindings/script.js"
     )
 { }
 
-void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
+{
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
         // iterate over key bindings
         std::pair<std::multimap<KeyWithModifier, KeyInformation>::iterator,
@@ -122,7 +117,8 @@ std::string KeyBindingManager::generateJson() const {
         json << "{";
         json << "\"key\": \"" << std::to_string(p.first) << "\",";
         json << "\"script\": \"" << p.second.command << "\",";
-        json << "\"remoteScripting\": " << (p.second.synchronization ? "true," : "false,");
+        json << "\"remoteScripting\": "
+             << (p.second.synchronization ? "true," : "false,");
         json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\"";
         json << "}";
     }

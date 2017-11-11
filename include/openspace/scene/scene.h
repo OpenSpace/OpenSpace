@@ -60,7 +60,8 @@ public:
         * \param component The optional compoment that caused this exception to be thrown
         * \pre message may not be empty
         */
-        explicit InvalidSceneError(const std::string& message, const std::string& component = "");
+        explicit InvalidSceneError(const std::string& message,
+            const std::string& component = "");
     };
 
     // constructors & destructor

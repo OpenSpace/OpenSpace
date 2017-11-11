@@ -127,7 +127,8 @@ public:
 
     std::string progressToStr(int size, double t);
 
-    void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
+    void removeRenderProgram(
+        const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.

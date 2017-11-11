@@ -232,13 +232,15 @@ RenderEngine::RenderEngine()
             if (!_performanceManager) {
                 std::string loggingDir = "${BASE_PATH}";
 
-                const std::string KeyDir = ConfigurationManager::KeyLogging + "." + ConfigurationManager::PartLogDir;
+                const std::string KeyDir = ConfigurationManager::KeyLogging + "." +
+                                           ConfigurationManager::PartLogDir;
                 if (OsEng.configurationManager().hasKey(KeyDir)) {
                     loggingDir = OsEng.configurationManager().value<std::string>(KeyDir);
                 }
 
                 std::string prefix = "PM-";
-                const std::string KeyPrefix = ConfigurationManager::KeyLogging + "." + ConfigurationManager::PartLogPerformancePrefix;
+                const std::string KeyPrefix = ConfigurationManager::KeyLogging + "." +
+                                           ConfigurationManager::PartLogPerformancePrefix;
                 if (OsEng.configurationManager().hasKey(KeyPrefix)) {
                     prefix = OsEng.configurationManager().value<std::string>(KeyPrefix);
                 }
@@ -829,14 +831,16 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 &luascriptfunctions::registerScreenSpaceRenderable,
                 {},
                 "table",
-                "Will create a ScreenSpaceRenderable from a lua Table and register it in the RenderEngine"
+                "Will create a ScreenSpaceRenderable from a lua Table and register it in "
+                "the RenderEngine"
             },
             {
                 "unregisterScreenSpaceRenderable",
                 &luascriptfunctions::unregisterScreenSpaceRenderable,
                 {},
                 "string",
-                "Given a ScreenSpaceRenderable name this script will remove it from the renderengine"
+                "Given a ScreenSpaceRenderable name this script will remove it from the "
+                "renderengine"
             },
         },
     };
@@ -1058,8 +1062,8 @@ void RenderEngine::renderInformation() {
     //            static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
     //            //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
     //            static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
-    //            static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
-    //            // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+    //            static const glm::vec4 missionProgressColor = currentMissionColor;
+    //           // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
     //            static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
     //            // Add spacing
@@ -1070,15 +1074,27 @@ void RenderEngine::renderInformation() {
     //            if (phaseTrace.size()) {
     //                const MissionPhase& phase = phaseTrace.back().get();
     //                std::string title = "Current Mission Phase: " + phase.name();
-    //                RenderFontCr(*_fontInfo, penPosition, missionProgressColor, title.c_str());
+    //                RenderFontCr(
+    //                    *_fontInfo,
+    //                    penPosition,
+    //                    missionProgressColor,
+    //                    title.c_str()
+    //                );
     //                double remaining = phase.timeRange().end - currentTime;
-    //                float t = static_cast<float>(1.0 - remaining / phase.timeRange().duration());
+    //                float t = static_cast<float>(
+    //                    1.0 - remaining / phase.timeRange().duration()
+    //                );
     //                std::string progress = progressToStr(25, t);
     //                //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
     //                //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
     //            }
     //            else {
-    //                RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission:");
+    //                RenderFontCr(
+    //                    *_fontInfo,
+    //                    penPosition,
+    //                    nextMissionColor,
+    //                    "Next Mission:"
+    //                );
     //                double remaining = mission.timeRange().start - currentTime;
     //                RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
     //                    "%.0f s", remaining);
@@ -1100,7 +1116,9 @@ void RenderEngine::renderInformation() {
     //                penPosition.x += depth * pixelIndentation;
     //                if (isCurrentPhase) {
     //                    double remaining = phase->timeRange().end - currentTime;
-    //                    float t = static_cast<float>(1.0 - remaining / phase->timeRange().duration());
+    //                    float t = static_cast<float>(
+    //                        1.0 - remaining / phase->timeRange().duration()
+    //                    );
     //                    std::string progress = progressToStr(25, t);
     //                    RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
     //                        "%s  %s %.1f %%",
@@ -1110,14 +1128,22 @@ void RenderEngine::renderInformation() {
     //                        );
     //                }
     //                else {
-    //                    RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, phase->name().c_str());
+    //                    RenderFontCr(
+    //                        *_fontInfo,
+    //                        penPosition,
+    //                        nonCurrentMissionColor,
+    //                        phase->name().c_str()
+    //                    );
     //                }
     //                penPosition.x -= depth * pixelIndentation;
 
     //                if (isCurrentPhase || showAllPhases) {
-    //                    // phases are sorted increasingly by start time, and will be popped
-    //                    // last-in-first-out from the stack, so add them in reversed order.
-    //                    int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
+    //                    // phases are sorted increasingly by start time, and will be
+    //                    // popped last-in-first-out from the stack, so add them in
+    //                    // reversed order.
+    //                    int indexLastPhase = static_cast<int>(
+    //                        phase->phases().size()
+    //                    ) - 1;
     //                    for (int i = indexLastPhase; 0 <= i; --i) {
     //                        S.push({ &phase->phases()[i], depth + 1 });
     //                    }
@@ -1136,9 +1162,19 @@ void RenderEngine::renderInformation() {
             if (hasNewHorizons) {
                 try {
                     double lt;
-                    glm::dvec3 p =
-                        SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
-                    psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+                    glm::dvec3 p = SpiceManager::ref().targetPosition(
+                        "PLUTO",
+                        "NEW HORIZONS",
+                        "GALACTIC",
+                        {},
+                        currentTime,
+                        lt
+                    );
+                    psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+                        p.x,
+                        p.y,
+                        p.z
+                    );
                     float a, b;
                     glm::dvec3 radii;
                     SpiceManager::ref().getValue("PLUTO", "RADII", radii);
@@ -1160,13 +1196,16 @@ void RenderEngine::renderInformation() {
                 }
             }
 
-            double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
-            float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength());
+            double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() -
+                               currentTime;
+            float t = static_cast<float>(
+                1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength()
+            );
 
             std::string str = SpiceManager::ref().dateFromEphemerisTime(
                 ImageSequencer::ref().getNextCaptureTime(),
                 "YYYY MON DD HR:MN:SC"
-                );
+            );
 
             glm::vec4 active(0.6, 1, 0.00, 1);
             glm::vec4 brigther_active(0.9, 1, 0.75, 1);
@@ -1195,8 +1234,10 @@ void RenderEngine::renderInformation() {
                     str.c_str()
                     );
             }
-            std::pair<double, std::string> nextTarget = ImageSequencer::ref().getNextTarget();
-            std::pair<double, std::string> currentTarget = ImageSequencer::ref().getCurrentTarget();
+            std::pair<double, std::string> nextTarget =
+                ImageSequencer::ref().getNextTarget();
+            std::pair<double, std::string> currentTarget =
+                ImageSequencer::ref().getCurrentTarget();
 
             if (currentTarget.first > 0.0) {
                 int timeleft = static_cast<int>(nextTarget.first - currentTime);
@@ -1226,34 +1267,10 @@ void RenderEngine::renderInformation() {
                     hh.c_str(), mm.c_str(), ss.c_str()
                     );
 
-#if 0
-// Why is it (2) in the original? ---abock
-                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(0);
-                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
-                std::string space;
-                glm::vec4 color;
-                size_t isize = incidentTargets.second.size();
-                for (size_t p = 0; p < isize; p++) {
-                    double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
-                    t = (p > isize / 2) ? 1 - t : t;
-                    t += 0.3;
-                    color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
-
-                    RenderFont(*_fontInfo,
-                        penPosition,
-                        color,
-                        "%s%s",
-                        space.c_str(), incidentTargets.second[p].c_str()
-                        );
-
-
-                    for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
-                        space += " ";
-                }
-#endif
                 penPosition.y -= _fontInfo->height();
 
-                std::map<std::string, bool> activeMap = ImageSequencer::ref().getActiveInstruments();
+                std::map<std::string, bool> activeMap =
+                    ImageSequencer::ref().getActiveInstruments();
                 glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
                 glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
 

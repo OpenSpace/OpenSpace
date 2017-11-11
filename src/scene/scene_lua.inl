@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -147,7 +147,6 @@ int setPropertyCall_single(properties::Property* prop, std::string uri, lua_Stat
         //ensure properties are synced over parallel connection
         std::string value;
         prop->getStringValue(value);
-        //OsEng.parallelConnection().scriptMessage(prop->fullyQualifiedIdentifier(), value);
     }
 
     return 0;

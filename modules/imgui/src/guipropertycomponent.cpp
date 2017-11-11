@@ -124,7 +124,9 @@ namespace {
         }
     }
 
-    void renderTree(const TreeNode& node, const std::function<void (openspace::properties::PropertyOwner*)>& renderFunc) {
+    void renderTree(const TreeNode& node,
+            const std::function<void (openspace::properties::PropertyOwner*)>& renderFunc)
+    {
         if (node.path.empty() || ImGui::TreeNode(node.path.c_str())) {
             for (const std::unique_ptr<TreeNode>& c : node.children) {
                 renderTree(*c, renderFunc);
@@ -144,7 +146,8 @@ namespace {
 
 namespace openspace::gui {
 
-GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree, IsTopLevelWindow topLevel)
+GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree,
+                                           IsTopLevelWindow topLevel)
     : GuiComponent(std::move(name))
     , _useTreeLayout(useTree)
     , _currentUseTreeLayout(useTree)
@@ -368,7 +371,9 @@ void GuiPropertyComponent::render() {
 void GuiPropertyComponent::renderProperty(properties::Property* prop,
                                           properties::PropertyOwner* owner)
 {
-    using Func = std::function<void(properties::Property*, const std::string&, IsRegularProperty)>;
+    using Func = std::function<
+        void(properties::Property*, const std::string&, IsRegularProperty)
+    >;
     static const std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
         { "DoubleProperty", &renderDoubleProperty},

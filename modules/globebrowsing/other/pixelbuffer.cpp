@@ -52,7 +52,9 @@ void* PixelBuffer::mapBuffer(Access access) {
     return dataPtr;
 }
 
-void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, BufferAccessMask access) {
+void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length,
+                                  BufferAccessMask access)
+{
     void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
     _isMapped = dataPtr ? true : false;
     return dataPtr;

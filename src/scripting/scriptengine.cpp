@@ -44,10 +44,6 @@ namespace {
     const char* _loggerCat = "ScriptEngine";
 
     const int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
-
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
-    const char* ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
 } // namespace
 
 namespace openspace::scripting {
@@ -59,10 +55,16 @@ ScriptEngine::ScriptEngine()
         "Script Documentation",
         "scripting",
         {
-            { "mainTemplate", MainTemplateFilename },
-            { "scriptingTemplate", ScriptingTemplateFilename }
+            {
+                "mainTemplate",
+                "${OPENSPACE_DATA}/web/luascripting/main.hbs"
+            },
+            {
+                "scriptingTemplate",
+                "${OPENSPACE_DATA}/web/luascripting/scripting.hbs"
+            }
         },
-        JsFilename
+        "${OPENSPACE_DATA}/web/luascripting/script.js"
     )
 {}
 
@@ -205,103 +207,6 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
     return true;
 }
 
-/*bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::string& function) {
-    std::set<LuaLibrary>::const_iterator libit;
-    for (libit = _registeredLibraries.cbegin();
-         libit != _registeredLibraries.cend();
-         ++libit){
-        if (libit->name.compare(library) == 0){
-            break;
-        }
-    }
-
-    std::vector<scripting::LuaLibrary::Function>::const_iterator funcit;
-    //library was found
-    if (libit != _registeredLibraries.cend()){
-        for (funcit = libit->functions.cbegin();
-             funcit != libit->functions.cend();
-             ++funcit){
-            //function was found!
-            if (funcit->name.compare(function) == 0){
-                //is the function of a type that should be shared via parallel connection?
-                return funcit->parallelShared;
-            }
-        }
-    }
-
-    return false;
-}*/
-
-/*void ScriptEngine::cacheScript(const std::string &library, const std::string &function, const std::string &script){
-    _cachedScriptsMutex.lock();
-    _cachedScripts[library][function] = script;
-    _cachedScriptsMutex.unlock();
-}
-
-std::vector<std::string> ScriptEngine::cachedScripts(){
-    _cachedScriptsMutex.lock();
-
-    std::vector<std::string> retVal;
-    std::map<std::string, std::map<std::string, std::string>>::const_iterator outerIt;
-    std::map<std::string, std::string>::const_iterator innerIt;
-    for(outerIt = _cachedScripts.cbegin();
-        outerIt != _cachedScripts.cend();
-        ++outerIt){
-        for(innerIt = outerIt->second.cbegin();
-            innerIt != outerIt->second.cend();
-            ++innerIt){
-            retVal.push_back(innerIt->second);
-        }
-    }
-
-    _cachedScriptsMutex.unlock();
-
-    return retVal;
-}*/
-
-/*
-bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script){
-
-    //"deconstruct the script to find library and function name
-    //assuming a script looks like: "openspace.library.function()"
-    //or openspace.funcion()
-    std::string sub;
-    library.clear();
-    function.clear();
-    //find first "."
-    std::size_t pos = script.find(".");
-
-    if (pos != std::string::npos){
-        //strip "openspace."
-        sub = script.substr(pos + 1, script.size());
-        pos = sub.find(".");
-        //one more "." was found, if the "." comes before first "(" we have a library name
-        if (pos != std::string::npos && pos < sub.find("(")){
-            //assing library name
-            library = sub.substr(0, pos);
-            //strip "library."
-            sub = sub.substr(pos + 1, sub.size());
-
-            pos = sub.find("(");
-            if (pos != std::string::npos && pos > 0){
-                //strip the () and we're left with function name
-                function = sub.substr(0, pos);
-            }
-        }
-        else{
-            //no more "." was found, we have the case of "openspace.funcion()"
-            pos = sub.find("(");
-            if (pos != std::string::npos && pos > 0){
-                //strip the () and we're left with function name
-                function = sub.substr(0, pos);
-            }
-        }
-    }
-
-    //if we found a function all is good
-    return !function.empty();
-}
-*/
 bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
     bool result = false;
     lua_getglobal(state, OpenSpaceLibraryName.c_str());
@@ -351,7 +256,9 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
     return result;
 }
 
-void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library, bool replace) {
+void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
+                                       bool replace)
+{
     ghoul_assert(state, "State must not be nullptr");
     for (LuaLibrary::Function p : library.functions) {
         if (!replace) {
@@ -773,13 +680,18 @@ void ScriptEngine::postsync(bool) {
     }
 }
 
-void ScriptEngine::queueScript(const std::string &script, ScriptEngine::RemoteScripting remoteScripting){
+void ScriptEngine::queueScript(const std::string &script,
+                               ScriptEngine::RemoteScripting remoteScripting)
+{
     if (script.empty()) {
         return;
     }
 
     _mutex.lock();
-    _queuedScripts.insert(_queuedScripts.begin(), std::make_pair(script, remoteScripting));
+    _queuedScripts.insert(
+        _queuedScripts.begin(),
+        std::make_pair(script, remoteScripting)
+    );
     _mutex.unlock();
 }
 

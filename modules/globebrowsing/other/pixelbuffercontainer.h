@@ -92,8 +92,8 @@ public:
     bool unMapBuffer(KeyType key);
 
     /**
-     * \returns the <code>GLuint</code> id of a pixel buffer identified by <code>key</code>
-     * if it currently is mapped.
+     * \returns the <code>GLuint</code> id of a pixel buffer identified by
+     * <code>key</code> if it currently is mapped.
      */
     GLuint idOfMappedBuffer(KeyType key);
 private:

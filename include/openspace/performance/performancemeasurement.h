@@ -37,7 +37,8 @@ class PerformanceManager;
 
 class PerformanceMeasurement {
 public:
-    PerformanceMeasurement(std::string identifier, performance::PerformanceManager* manager);
+    PerformanceMeasurement(std::string identifier,
+        performance::PerformanceManager* manager);
     ~PerformanceMeasurement();
 
 private:

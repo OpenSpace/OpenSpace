@@ -345,7 +345,9 @@ TestResult DeprecatedVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                              const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
-    res.warnings.push_back(TestResult::Warning{ key, TestResult::Warning::Reason::Deprecated });
+    res.warnings.push_back(
+        TestResult::Warning{ key, TestResult::Warning::Reason::Deprecated }
+    );
     return res;
 }
 

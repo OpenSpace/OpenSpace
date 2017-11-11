@@ -102,8 +102,10 @@ public:
     );
 
     std::future<MemoryFile> fetchFile(
-    const std::string& url,
-    SuccessCallback successCallback = SuccessCallback(), ErrorCallback errorCallback = ErrorCallback());
+        const std::string& url,
+        SuccessCallback successCallback = SuccessCallback(),
+        ErrorCallback errorCallback = ErrorCallback());
+
     void getFileExtension(const std::string& url,
         RequestFinishedCallback finishedCallback = RequestFinishedCallback());
 

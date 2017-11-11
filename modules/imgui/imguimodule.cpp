@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -115,13 +115,20 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                             nodes.end(),
                             [](SceneGraphNode* n) {
                                 const std::vector<std::string>& tags = n->tags();
-                                auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
+                                auto it = std::find(
+                                    tags.begin(),
+                                    tags.end(),
+                                    "GUI.Interesting"
+                                );
                                 return it == tags.end();
                             }
                         ),
                         nodes.end()
                     );
-                    return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+                    return std::vector<properties::PropertyOwner*>(
+                        nodes.begin(),
+                        nodes.end()
+                    );
                 }
             );
         }

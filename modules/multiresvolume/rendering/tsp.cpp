@@ -151,7 +151,7 @@ bool TSP::construct() {
     // Loop over the OTs (one per BST node)
     for (unsigned int OT = 0; OT<numBSTNodes_; ++OT) {
 
-        // Start at the root of each OT  
+        // Start at the root of each OT
         unsigned int OTNode = OT*numOTNodes_;
 
         // Calculate BST level (first level is level 0)

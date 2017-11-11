@@ -131,7 +131,9 @@ struct TimeIdProviderFactory {
      */
     static void init();
 
-    static std::unordered_map<std::string, std::unique_ptr<TimeFormat>> _timeIdProviderMap;
+    static std::unordered_map<
+        std::string, std::unique_ptr<TimeFormat>
+    > _timeIdProviderMap;
     static bool initialized;
 };
 
@@ -306,7 +308,8 @@ private:
      * \param defaultVal value to return if key was not found
      * \returns the value of the Key, or defaultVal if key was undefined.
      */
-    std::string getXMLValue(CPLXMLNode* node, const std::string& key, const std::string& defaultVal);
+    std::string getXMLValue(CPLXMLNode* node, const std::string& key,
+        const std::string& defaultVal);
 
     /**
      * Ensures that the TemporalTileProvider is up to date.

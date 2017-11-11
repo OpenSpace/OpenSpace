@@ -52,11 +52,16 @@ public:
     virtual ~GalaxyRaycaster();
     void initialize();
     void deinitialize();
-    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
-    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
-    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
-    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
+    void renderEntryPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    bool cameraIsInside(const RenderData& data,
+        glm::vec3& localPosition) override;
 
 
     std::string getBoundsVsPath() const override;

@@ -72,7 +72,9 @@ const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 const std::string SceneGraphNode::KeyTag = "Tag";
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
+std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     openspace::documentation::testSpecificationAndThrow(
         SceneGraphNode::Documentation(),
         dictionary,
@@ -316,7 +318,11 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
+    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(
+        _worldPositionCached.x,
+        _worldPositionCached.y,
+        _worldPositionCached.z
+    );
 
     RenderData newData = {
         data.camera,
@@ -375,7 +381,8 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
 }
 
 std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
-    ghoul_assert(child._dependentNodes.empty(), "Nodes cannot depend on a node being detached");
+    ghoul_assert(child._dependentNodes.empty(),
+        "Nodes cannot depend on a node being detached");
     ghoul_assert(child._parent != nullptr, "Node must be attached to a parent");
 
     auto iter = std::find_if(
@@ -692,9 +699,6 @@ void SceneGraphNode::updateCamera(Camera* camera) const{
 
     camera->setPosition(target);
     camera->setFocusPosition(origin);
-
-    //printf("target: %f, %f, %f, %f\n", target.vec4().x, target.vec4().y, target.vec4().z, target.vec4().w);
-
 }
 
 }  // namespace openspace

@@ -113,7 +113,10 @@ void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
 }
 
 void LayerGroup::deleteLayer(const std::string& layerName) {
-    for (std::vector<std::shared_ptr<Layer>>::iterator it = _layers.begin(); it != _layers.end(); ++it) {
+    for (std::vector<std::shared_ptr<Layer>>::iterator it = _layers.begin();
+         it != _layers.end();
+         ++it)
+    {
         if (it->get()->name() == layerName) {
             removePropertySubOwner(it->get());
             _layers.erase(it);

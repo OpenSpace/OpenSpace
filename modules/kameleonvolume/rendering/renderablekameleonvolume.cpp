@@ -326,7 +326,7 @@ void RenderableKameleonVolume::updateRaycasterModelTransform() {
     glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
     glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
 
-    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation); 
+    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation);
     modelTransform = glm::scale(modelTransform, scale);
     _raycaster->setModelTransform(modelTransform);
 }
@@ -338,7 +338,7 @@ bool RenderableKameleonVolume::cachingEnabled() {
 
 void RenderableKameleonVolume::load() {
     if (!FileSys.fileExists(_sourcePath)) {
-        LERROR("File " << _sourcePath << " does not exist."); 
+        LERROR("File " << _sourcePath << " does not exist.");
         return;
     }
     if (!cachingEnabled()) {
@@ -417,7 +417,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
         }
         else {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
-        }       
+        }
     }
 
     ghoul::Dictionary dict = reader.readMetaData();

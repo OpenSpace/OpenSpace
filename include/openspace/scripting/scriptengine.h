@@ -92,11 +92,6 @@ public:
 
     std::vector<std::string> allLuaFunctions() const;
 
-    //parallel functions
-    //bool parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script);
-    //bool shouldScriptBeSent(const std::string &library, const std::string &function);
-    //void cacheScript(const std::string &library, const std::string &function, const std::string &script);
-
     static std::string OpenSpaceLibraryName;
 
 private:

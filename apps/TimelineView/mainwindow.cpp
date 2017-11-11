@@ -257,17 +257,23 @@ void MainWindow::handleStatusMessage(QByteArray data) {
         QString::fromStdString(std::string(timeString.begin(), timeString.end())),
         QString::number(delta.value)
     );
-    _timelineWidget->setCurrentTime(std::string(timeString.begin(), timeString.end()), et.value);
+    _timelineWidget->setCurrentTime(
+        std::string(timeString.begin(), timeString.end()),
+        et.value
+    );
 }
 
-std::vector<std::string> instrumentsFromId(uint16_t instrumentId, std::map<uint16_t, std::string> instrumentMap) {
+std::vector<std::string> instrumentsFromId(uint16_t instrumentId,
+                                           std::map<uint16_t, std::string> instrumentMap)
+{
     std::vector<std::string> results;
     for (int i = 0; i < 16; ++i) {
         uint16_t testValue = 1 << i;
         if ((testValue & instrumentId) != 0) {
             std::string t = instrumentMap.at(testValue);
-            if (t.empty())
+            if (t.empty()) {
                 qDebug() << "Empty instrument";
+            }
             results.push_back(t);
         }
     }
@@ -318,15 +324,21 @@ QByteArray MainWindow::handlePlaybook(QByteArray data) {
             qDebug() << "Instruments were empty";
         images.push_back(image);
     }
-    _timelineWidget->setData(std::move(images), std::move(targetMap), std::move(instrumentMap));
+    _timelineWidget->setData(
+        std::move(images),
+        std::move(targetMap),
+        std::move(instrumentMap)
+    );
 
     auto dataSize = data.size();
     auto readSize = currentReadLocation;
     auto extraBytes = dataSize - readSize;
-    if (extraBytes > 0)
+    if (extraBytes > 0) {
         return data.mid(currentReadLocation);
-    else
+    }
+    else {
         return QByteArray();
+    }
 }
 
 void MainWindow::sendScript(QString script) {
@@ -361,7 +373,10 @@ std::string MainWindow::nextTarget() const {
 }
 
 void MainWindow::fullyConnected() {
-    _informationWidget->logInformation("Connected to " + _socket->peerName() + " on port " + QString::number(_socket->peerPort()) + ".");
+    _informationWidget->logInformation(
+        "Connected to " + _socket->peerName() + " on port " +
+        QString::number(_socket->peerPort()) + "."
+    );
 
     _configurationWidget->socketConnected();
     _timeControlWidget->socketConnected();
@@ -379,6 +394,5 @@ void MainWindow::printMapping(QByteArray data) {
         std::string mapping = readFromBuffer<std::string>(buffer, currentReadPosition);
 
         qDebug() << identifier << ": " << QString::fromStdString(mapping);
-
     }
 }

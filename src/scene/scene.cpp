@@ -62,13 +62,6 @@
 
 namespace {
     const char* _loggerCat = "Scene";
-    //const char* _moduleExtension = ".mod";
-    //const char* _commonModuleToken = "${COMMON_MODULE}";
-
-    //const char* KeyCamera = "Camera";
-    //const char* KeyFocusObject = "Focus";
-    //const char* KeyPositionObject = "Position";
-    //const char* KeyViewOffset = "Offset";
 
     const std::string KeyName = "Name";
     const std::string KeyParentName = "Parent";
@@ -86,11 +79,20 @@ Scene::Scene()
         "Documented",
         "propertyOwners",
         {
-            { "mainTemplate", MainTemplateFilename },
-            { "propertyOwnerTemplate", PropertyOwnerTemplateFilename },
-            { "propertyTemplate", PropertyTemplateFilename }
+            {
+                "mainTemplate",
+                "${OPENSPACE_DATA}/web/properties/main.hbs"
+            },
+            {
+                "propertyOwnerTemplate",
+                "${OPENSPACE_DATA}/web/properties/propertyowner.hbs"
+            },
+            {
+                "propertyTemplate",
+                "${OPENSPACE_DATA}/web/properties/property.hbs"
+            }
         },
-        JsFilename
+        "${OPENSPACE_DATA}/web/properties/script.js"
     )
     , _dirtyNodeRegistry(false)
 {   
@@ -155,7 +157,10 @@ void Scene::sortTopologically() {
     );
     _circularNodes.clear();
 
-    ghoul_assert(_topologicallySortedNodes.size() == _nodesByName.size(), "Number of scene graph nodes is inconsistent");
+    ghoul_assert(
+        _topologicallySortedNodes.size() == _nodesByName.size(),
+        "Number of scene graph nodes is inconsistent"
+    );
 
     if (_topologicallySortedNodes.empty()) {
         return;
@@ -204,7 +209,10 @@ void Scene::sortTopologically() {
         }
     }
     if (inDegrees.size() > 0) {
-        LERROR("The scene contains circular dependencies. " << inDegrees.size() << " nodes will be disabled.");
+        LERROR(
+            "The scene contains circular dependencies. " <<
+            inDegrees.size() << " nodes will be disabled."
+        );
     }
 
     for (auto it : inDegrees) {
@@ -508,7 +516,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
     };
 }
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& error, const std::string& comp)
+Scene::InvalidSceneError::InvalidSceneError(const std::string& error,
+                                            const std::string& comp)
     : ghoul::RuntimeError(error, comp)
 {}
 

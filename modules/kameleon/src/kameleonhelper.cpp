@@ -100,10 +100,6 @@ double getTime(ccmc::Kameleon* kameleon) {
                         break;
                 }
             }
-            // else if (seqStartStr.length() < 19 && kameleon->doesAttributeExist("tim_crstart_cal")) {
-            //     seqStartStr =
-            //          kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
-            // }
         } else if (kameleon->doesAttributeExist("tim_obsdate_cal")) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
