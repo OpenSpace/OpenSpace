@@ -66,14 +66,14 @@ IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
     registerProperties();
 }
 
-IswaKameleonGroup::~IswaKameleonGroup(){}
+IswaKameleonGroup::~IswaKameleonGroup() {}
 
-void IswaKameleonGroup::clearGroup(){
+void IswaKameleonGroup::clearGroup() {
     IswaBaseGroup::clearGroup();
     clearFieldlines();
 }
 
-std::vector<int> IswaKameleonGroup::fieldlineValue(){
+std::vector<int> IswaKameleonGroup::fieldlineValue() {
     return _fieldlines.value();
 }
 
@@ -148,13 +148,18 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile) {
     }
 }
 
-void IswaKameleonGroup::updateFieldlineSeeds(){
+void IswaKameleonGroup::updateFieldlineSeeds() {
     std::vector<int> selectedOptions = _fieldlines.value();
 
-    // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
-    for (auto& seedPath: _fieldlineState) {
+    // SeedPath == map<int selectionValue, tuple<string name, string path, bool active>>
+    for (auto& seedPath : _fieldlineState) {
         // if this option was turned off
-        if (std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)==selectedOptions.end() && std::get<2>(seedPath.second)){
+        auto it = std::find(
+            selectedOptions.begin(),
+            selectedOptions.end(),
+            seedPath.first
+        );
+        if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             OsEng.scriptEngine().queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
@@ -162,17 +167,20 @@ void IswaKameleonGroup::updateFieldlineSeeds(){
             );
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
-        } else if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)!=selectedOptions.end() && !std::get<2>(seedPath.second)) {
+        } else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
             LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
-            IswaManager::ref().createFieldline(std::get<0>(seedPath.second), _kameleonPath, std::get<1>(seedPath.second));
+            IswaManager::ref().createFieldline(
+                std::get<0>(seedPath.second),
+                _kameleonPath,
+                std::get<1>(seedPath.second)
+            );
             std::get<2>(seedPath.second) = true;
         }
     }
 }
 
-void IswaKameleonGroup::clearFieldlines(){
-        // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
-    for (auto& seedPath: _fieldlineState) {
+void IswaKameleonGroup::clearFieldlines() {
+    for (auto& seedPath : _fieldlineState) {
         if(std::get<2>(seedPath.second)){
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             OsEng.scriptEngine().queueScript(
@@ -184,7 +192,7 @@ void IswaKameleonGroup::clearFieldlines(){
     }
 }
 
-void IswaKameleonGroup::changeCdf(std::string path){
+void IswaKameleonGroup::changeCdf(std::string path) {
     _kameleonPath = path;
     clearFieldlines();
     updateFieldlineSeeds();

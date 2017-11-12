@@ -62,7 +62,14 @@ bool Chunk::isVisible() const {
 Chunk::Status Chunk::update(const RenderData& data) {
     const auto& savedCamera = _owner.savedCamera();
     const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
-    RenderData myRenderData = { camRef, data.position, data.time, data.doPerformanceMeasurement, data.renderBinMask, data.modelTransform };
+    RenderData myRenderData = {
+        camRef,
+        data.position,
+        data.time,
+        data.doPerformanceMeasurement,
+        data.renderBinMask,
+        data.modelTransform
+    };
 
     _isVisible = true;
     if (_owner.chunkedLodGlobe()->testIfCullable(*this, myRenderData)) {
@@ -100,7 +107,9 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
-    const LayerGroup& heightmaps = layerManager->layerGroup(layergroupid::GroupID::HeightLayers);
+    const LayerGroup& heightmaps = layerManager->layerGroup(
+        layergroupid::GroupID::HeightLayers
+    );
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
         tileselector::getTilesAndSettingsUnsorted(
             heightmaps, _tileIndex);

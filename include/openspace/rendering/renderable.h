@@ -58,7 +58,8 @@ public:
         Overlay = 8
     };
 
-    static std::unique_ptr<Renderable> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Renderable> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
     Renderable(const ghoul::Dictionary& dictionary);
@@ -91,7 +92,8 @@ public:
 
     void onEnabledChange(std::function<void(bool)> callback);
 
-    static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
+    static void setPscUniforms(ghoul::opengl::ProgramObject& program,
+        const Camera& camera, const PowerScaledCoordinate& position);
 
     static documentation::Documentation Documentation();
 

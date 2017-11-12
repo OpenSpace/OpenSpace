@@ -47,7 +47,13 @@ namespace {
         openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
-        if (ImGui::TreeNodeEx(("%s" + missionHashname).c_str(), treeOption, "%s", mission.name().c_str())) {
+        if (ImGui::TreeNodeEx(
+                ("%s" + missionHashname).c_str(),
+                treeOption,
+                "%s",
+                mission.name().c_str())
+            )
+        {
             if (!mission.description().empty()) {
                 ImGui::Text("%s", mission.description().c_str());
             }
@@ -64,7 +70,13 @@ namespace {
             float s = static_cast<float>(startTime.j2000Seconds());
             float e = static_cast<float>(endTime.j2000Seconds());
 
-            ImGui::SliderFloat(missionHashname.c_str(), &v, s, e, OsEng.timeManager().time().UTC().c_str());
+            ImGui::SliderFloat(
+                missionHashname.c_str(),
+                &v,
+                s,
+                e,
+                OsEng.timeManager().time().UTC().c_str()
+            );
             ImGui::SameLine();
             ImGui::Text("%s", endTime.UTC().c_str());
 

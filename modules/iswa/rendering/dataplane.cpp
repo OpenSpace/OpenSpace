@@ -103,9 +103,23 @@ bool DataPlane::createGeometry() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(0)
+    );
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 
     return true;
 }
@@ -155,14 +169,19 @@ std::vector<float*> DataPlane::textureData(){
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     // ===========
-    std::vector<float*> d = _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
+    std::vector<float*> d = _dataProcessor->processData(
+        _dataBuffer,
+        _dataOptions,
+        _textureDimensions
+    );
 
     // FOR TESTING
     // ===========
     end = std::chrono::system_clock::now();
     _numOfBenchmarks++;
     std::chrono::duration<double> elapsed_seconds = end-start;
-    _avgBenchmarkTime = ( (_avgBenchmarkTime * (_numOfBenchmarks-1)) + elapsed_seconds.count() ) / _numOfBenchmarks;
+    _avgBenchmarkTime = ((_avgBenchmarkTime * (_numOfBenchmarks - 1))
+                         + elapsed_seconds.count()) / _numOfBenchmarks;
     std::cout << " processData() " << name() << std::endl;
     std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
     std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
@@ -171,4 +190,4 @@ std::vector<float*> DataPlane::textureData(){
     return d;
 }
 
-}// namespace openspace
+} // namespace openspace

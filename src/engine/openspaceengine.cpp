@@ -84,6 +84,11 @@
 #include <Windows.h>
 #endif
 
+#ifdef __APPLE__
+#include <openspace/interaction/touchbar.h>
+#endif // __APPLE__
+
+
 #include <numeric>
 
 #include "openspaceengine_lua.inl"
@@ -318,15 +323,15 @@ void OpenSpaceEngine::create(int argc, char** argv,
     }
 
     const bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
-    const bool hasCacheConfiguration = _engine->configurationManager().hasKeyAndValue<bool>(
+    const bool hasCacheConfig = _engine->configurationManager().hasKeyAndValue<bool>(
         ConfigurationManager::KeyPerSceneCache
     );
     std::string cacheFolder = absPath("${CACHE}");
-    if (hasCacheCommandline || hasCacheConfiguration) {
+    if (hasCacheCommandline || hasCacheConfig) {
         if (hasCacheCommandline) {
             cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
         }
-        if (hasCacheConfiguration) {
+        if (hasCacheConfig) {
             std::string scene = _engine->configurationManager().value<std::string>(
                 ConfigurationManager::KeyConfigScene
             );
@@ -397,7 +402,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-    if (_engine->parallelConnection().status() != ParallelConnection::Status::Disconnected) {
+    if (_engine->parallelConnection().status() !=
+        ParallelConnection::Status::Disconnected)
+    {
         _engine->parallelConnection().signalDisconnect();
     }
 
@@ -734,6 +741,10 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
+
+#ifdef __APPLE__
+    showTouchbar();
+#endif // APPLE
 
     LTRACE("OpenSpaceEngine::loadScene(end)");
 }
@@ -1438,8 +1449,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "toggleShutdown",
                 &luascriptfunctions::toggleShutdown,
                 "",
-                "Toggles the shutdown mode that will close the application after the count"
-                "down timer is reached"
+                "Toggles the shutdown mode that will close the application after the "
+                "count down timer is reached"
             },
             {
                 "writeDocumentation",

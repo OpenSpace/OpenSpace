@@ -60,7 +60,10 @@ TileTextureInitData::TileTextureInitData(const TileTextureInitData& original)
         original.glType(),
         original.ghoulTextureFormat(),
         original._padTiles,
-        original.shouldAllocateDataOnCPU() ? ShouldAllocateDataOnCPU::Yes : ShouldAllocateDataOnCPU::No)
+        original.shouldAllocateDataOnCPU() ?
+            ShouldAllocateDataOnCPU::Yes :
+            ShouldAllocateDataOnCPU::No
+    )
 {}
 
 glm::ivec3 TileTextureInitData::dimensions() const {

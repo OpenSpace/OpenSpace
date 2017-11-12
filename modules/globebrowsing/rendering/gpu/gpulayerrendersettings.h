@@ -53,7 +53,8 @@ public:
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    void bind(const LayerRenderSettings& layerSettings, ghoul::opengl::ProgramObject* programObject, const std::string& nameBase);
+    void bind(const LayerRenderSettings& layerSettings,
+        ghoul::opengl::ProgramObject* programObject, const std::string& nameBase);
 
 private:
     GPUData<float> gpuOpacity;

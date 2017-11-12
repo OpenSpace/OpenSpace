@@ -164,7 +164,9 @@ void KameleonPlane::initialize() {
         updateFieldlineSeeds();
     });
 
-    std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->dimensions(_dimensions);
+    std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->dimensions(
+        _dimensions
+    );
     _dataProcessor->addDataValues(_kwPath, _dataOptions);
     // if this datacygnet has added new values then reload texture
     // for the whole group, including this datacygnet, and return after.
@@ -263,11 +265,19 @@ void KameleonPlane::setUniforms() {
 void KameleonPlane::updateFieldlineSeeds() {
     std::vector<int> selectedOptions = _fieldlines.value();
 
-    // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
-    for (auto& seedPath: _fieldlineState) {
+    // SeedPath == map<int selectionValue, tuple<string name, string path, bool active>>
+    for (auto& seedPath : _fieldlineState) {
         // if this option was turned off
-        if (std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)==selectedOptions.end() && std::get<2>(seedPath.second)) {
-            if (OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) == nullptr) {
+        auto it = std::find(
+            selectedOptions.begin(),
+            selectedOptions.end(),
+            seedPath.first
+        );
+        if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
+            SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(
+                std::get<0>(seedPath.second)
+            );
+            if (!n) {
                 return;
             }
 
@@ -278,12 +288,20 @@ void KameleonPlane::updateFieldlineSeeds() {
             );
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
-        } else if (std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)!=selectedOptions.end() && !std::get<2>(seedPath.second)) {
-            if (OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) != nullptr) {
+        } else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
+            SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(
+                std::get<0>(seedPath.second)
+            );
+
+            if (n) {
                 return;
             }
             LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
-            IswaManager::ref().createFieldline(std::get<0>(seedPath.second), _kwPath, std::get<1>(seedPath.second));
+            IswaManager::ref().createFieldline(
+                std::get<0>(seedPath.second),
+                _kwPath,
+                std::get<1>(seedPath.second)
+            );
             std::get<2>(seedPath.second) = true;
         }
     }
@@ -321,7 +339,10 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile) {
                 i++;
             }
         } catch (const std::exception& e) {
-            LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
+            LERROR(
+                "Error when reading json file with paths to seedpoints: " +
+                std::string(e.what())
+            );
         }
    }
 }
@@ -332,7 +353,7 @@ void KameleonPlane::subscribeToGroup() {
 
     //Add additional Events specific to KameleonPlane
     auto groupEvent = _group->groupEvent();
-    groupEvent->subscribe(name(), "resolutionChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "resolutionChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(name() + " Event resolutionChanged");
         float resolution;
         bool success = dict.getValue("resolution", resolution);
@@ -341,7 +362,7 @@ void KameleonPlane::subscribeToGroup() {
         }
     });
 
-    groupEvent->subscribe(name(), "cdfChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "cdfChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(name() + " Event cdfChanged");
         std::string path;
         bool success = dict.getValue("path", path);
@@ -355,8 +376,8 @@ void KameleonPlane::subscribeToGroup() {
 void KameleonPlane::setDimensions() {
     // the cdf files has an offset of 0.5 in normali resolution.
     // with lower resolution the offset increases.
-    _data->offset = _origOffset - 0.5f*(100.0f/_resolution.value());
-    _dimensions = glm::size3_t(_data->scale*((float)_resolution.value()/100.f));
+    _data->offset = _origOffset - 0.5f*  (100.f / _resolution.value());
+    _dimensions = glm::size3_t(_data->scale * ((float)_resolution.value() /  100.f));
     _dimensions[_cut] = 1;
 
     if (_cut == 0) {

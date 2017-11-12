@@ -150,7 +150,8 @@ glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
 }
 
 glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
-    sgct_core::Viewport* viewport = sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+    sgct_core::Viewport* viewport =
+                          sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
     if (viewport != nullptr){
         if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
             int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
@@ -242,7 +243,9 @@ bool SGCTWindowWrapper::isExternalControlConnected() const {
     return sgct::Engine::instance()->isExternalControlConnected();
 }
 
-void SGCTWindowWrapper::sendMessageToExternalControl(const std::vector<char>& message) const {
+void SGCTWindowWrapper::sendMessageToExternalControl(
+                                                   const std::vector<char>& message) const
+{
     sgct::Engine::instance()->sendMessageToExternalControl(
         message.data(),
         static_cast<int>(message.size())
@@ -250,7 +253,8 @@ void SGCTWindowWrapper::sendMessageToExternalControl(const std::vector<char>& me
 }
 
 bool SGCTWindowWrapper::isSimpleRendering() const {
-    return (sgct::Engine::instance()->getCurrentRenderTarget() != sgct::Engine::NonLinearBuffer);
+    return (sgct::Engine::instance()->getCurrentRenderTarget() !=
+            sgct::Engine::NonLinearBuffer);
 }
 
 void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {

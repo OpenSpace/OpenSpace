@@ -214,7 +214,10 @@ void PerformanceManager::outputLogs() {
     for (int16_t n = 0; n < layout->nFunctionEntries; n++) {
         const auto function = layout->functionEntries[n];
         const std::string filename = formatLogName(function.name);
-        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
+        std::ofstream out = std::ofstream(
+            absPath(filename),
+            std::ofstream::out | std::ofstream::app
+        );
 
         // Comma separate data
         for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
@@ -230,7 +233,10 @@ void PerformanceManager::outputLogs() {
 
         // Open file
         const std::string filename = formatLogName(node.name);
-        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
+        std::ofstream out = std::ofstream(
+            absPath(filename),
+            std::ofstream::out | std::ofstream::app
+        );
 
         // Comma separate data
         for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
@@ -390,7 +396,8 @@ void PerformanceManager::storeScenePerformanceMeasurements(
 #endif
 
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();
-        PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
+        PerformanceLayout::SceneGraphPerformanceLayout& entry =
+                                                             layout->sceneGraphEntries[i];
 
         // Covert nano to microseconds
         const float micro = 1000.f;
@@ -407,28 +414,32 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::next(std::begin(entry.updateTranslation)),
             std::end(entry.updateTranslation)
         );
-        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / micro;
+        entry.updateTranslation[PerformanceLayout::NumberValues - 1] =
+                                                          r.updateTimeTranslation / micro;
 
         std::rotate(
             std::begin(entry.updateRotation),
             std::next(std::begin(entry.updateRotation)),
             std::end(entry.updateRotation)
         );
-        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / micro;
+        entry.updateRotation[PerformanceLayout::NumberValues - 1] =
+                                                             r.updateTimeRotation / micro;
 
         std::rotate(
             std::begin(entry.updateScaling),
             std::next(std::begin(entry.updateScaling)),
             std::end(entry.updateScaling)
         );
-        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / micro;
+        entry.updateScaling[PerformanceLayout::NumberValues - 1] =
+                                                              r.updateTimeScaling / micro;
 
         std::rotate(
             std::begin(entry.updateRenderable),
             std::next(std::begin(entry.updateRenderable)),
             std::end(entry.updateRenderable)
         );
-        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / micro;
+        entry.updateRenderable[PerformanceLayout::NumberValues - 1] =
+                                                           r.updateTimeRenderable / micro;
     }
     _performanceMemory->releaseLock();
 

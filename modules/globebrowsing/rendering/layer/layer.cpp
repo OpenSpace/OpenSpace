@@ -91,7 +91,9 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
              LayerGroup& parent)
     : properties::PropertyOwner({
         layerDict.value<std::string>(keyName),
-        layerDict.hasKey(keyDescription) ? layerDict.value<std::string>(keyDescription) : ""
+        layerDict.hasKey(keyDescription) ?
+            layerDict.value<std::string>(keyDescription) :
+            ""
     })
     , _parent(parent)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -315,7 +317,8 @@ glm::ivec2 Layer::tilePixelSizeDifference() const {
     return _padTilePixelSizeDifference;
 }
 
-glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
+glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset,
+                                                 glm::vec2 sizeDiff,
                                                  glm::uvec2 resolution, glm::vec2 tileUV)
 {
     glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
@@ -349,7 +352,8 @@ layergroupid::TypeID Layer::parseTypeIdFromDictionary(
     }
 }
 
-void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict) {
+void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict)
+{
     switch (typeId) {
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
@@ -369,7 +373,10 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
-                tileprovider::TileProvider::createFromDictionary(typeId, tileProviderInitDict)
+                tileprovider::TileProvider::createFromDictionary(
+                    typeId,
+                    tileProviderInitDict
+                )
             );
             break;
         }

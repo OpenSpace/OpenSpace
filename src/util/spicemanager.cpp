@@ -509,10 +509,11 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     if (!targetHasCoverage && !observerHasCoverage) {
         if (_useExceptions) {
             throw SpiceException(
-                format("Neither target '{}' nor observer '{}' has SPK coverage at time {}",
-                       target,
-                       observer,
-                       ephemerisTime
+                format(
+                    "Neither target '{}' nor observer '{}' has SPK coverage at time {}",
+                    target,
+                    observer,
+                    ephemerisTime
                 )
             );
         }
@@ -1128,7 +1129,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
         if (_useExceptions) {
             // no coverage
             throw SpiceException(format(
-                "No data available for the transform matrix from '{}' to '{}' at any time",
+                "No data available for transform matrix from '{}' to '{}' at any time",
                 fromFrame, toFrame
             ));
         }

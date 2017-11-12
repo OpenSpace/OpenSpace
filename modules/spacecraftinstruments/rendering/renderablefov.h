@@ -81,10 +81,11 @@ private:
         return _colors.active.value() * t + _colors.targetInFieldOfView.value() * (1 - t);
     }
 
-    void computeIntercepts(const UpdateData& data, const std::string& target , bool inFOV);
-    glm::dvec3 orthogonalProjection(const glm::dvec3& camvec, double time, const std::string& target) const;
-    glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time, const std::string& target) const;
-    //glm::dvec3 bisection(const glm::dvec3& p1, const glm::dvec3& p2, double time, const std::string& target, const glm::dvec3& previousHalf = glm::dvec3(0.0)) const;
+    void computeIntercepts(const UpdateData& data, const std::string& target, bool inFOV);
+    glm::dvec3 orthogonalProjection(const glm::dvec3& camvec, double time,
+        const std::string& target) const;
+    glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time,
+        const std::string& target) const;
 
     // properties
     properties::FloatProperty _lineWidth;

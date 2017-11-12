@@ -50,11 +50,20 @@ void TimeManager::consumeKeyframes(double dt) {
     double now = OsEng.windowWrapper().applicationTime();
 
     const std::deque<Keyframe<Time>>& keyframes = _timeline.keyframes();
-    auto firstFutureKeyframe = std::lower_bound(keyframes.begin(), keyframes.end(), now, &compareKeyframeTimeWithTime);
+    auto firstFutureKeyframe = std::lower_bound(
+        keyframes.begin(),
+        keyframes.end(),
+        now,
+        &compareKeyframeTimeWithTime
+    );
 
-    bool consumingTimeJump = std::find_if(keyframes.begin(), firstFutureKeyframe, [] (const Keyframe<Time>& f) {
-        return f.data.timeJumped();
-    }) != firstFutureKeyframe;
+    bool consumingTimeJump = std::find_if(
+        keyframes.begin(),
+        firstFutureKeyframe,
+        [](const Keyframe<Time>& f) {
+            return f.data.timeJumped();
+        }
+    ) != firstFutureKeyframe;
 
     if (firstFutureKeyframe == keyframes.end()) {
         // All keyframes are in the past.
@@ -101,8 +110,10 @@ void TimeManager::consumeKeyframes(double dt) {
 
         const double secondsOffTolerance = OsEng.parallelConnection().timeTolerance();
 
-        double predictedTime = time().j2000Seconds() + time().deltaTime() * (next.timestamp - now);
-        bool withinTolerance = std::abs(predictedTime - nextTime.j2000Seconds()) < std::abs(nextTime.deltaTime() * secondsOffTolerance);
+        double predictedTime = time().j2000Seconds() + time().deltaTime() *
+                               (next.timestamp - now);
+        bool withinTolerance = std::abs(predictedTime - nextTime.j2000Seconds()) <
+                               std::abs(nextTime.deltaTime() * secondsOffTolerance);
 
         if (nextTime.deltaTime() == time().deltaTime() && withinTolerance) {
             time().advanceTime(dt);

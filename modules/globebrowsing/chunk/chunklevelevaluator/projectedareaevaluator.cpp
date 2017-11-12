@@ -64,7 +64,7 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     //  oo
     // [  ]<
     //                     *geodetic space*
-    // 
+    //
     //   closestCorner
     //    +-----------------+  <-- north east corner
     //    |                 |

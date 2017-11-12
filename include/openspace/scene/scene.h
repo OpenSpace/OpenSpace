@@ -61,7 +61,8 @@ public:
         * \param component The optional compoment that caused this exception to be thrown
         * \pre message may not be empty
         */
-        explicit InvalidSceneError(const std::string& message, const std::string& component = "");
+        explicit InvalidSceneError(const std::string& message,
+            const std::string& component = "");
     };
 
     // constructors & destructor
@@ -124,12 +125,14 @@ public:
     /**
      * Add a node and all its children to the scene.
      */
-    void addNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
+    void addNode(SceneGraphNode* node,
+        UpdateDependencies updateDeps = UpdateDependencies::Yes);
 
     /**
      * Remove a node and all its children from the scene.
      */
-    void removeNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
+    void removeNode(SceneGraphNode* node,
+        UpdateDependencies updateDeps = UpdateDependencies::Yes);
 
     void addSceneLicense(SceneLicense license);
 

@@ -93,8 +93,10 @@ private:
 
     /**
      * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple
-     * containing information that is needed to either add or remove a fieldline from the scenegraph.
-     * this is the name, path to seedpoints file and a boolean to determine if it is active or inactive.
+     * containing information that is needed to either add or remove a fieldline from the
+     * scenegraph.
+     * This is the name, path to seedpoints file and a boolean to determine if it is
+     * active or inactive.
      */
     std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
     std::string _fieldlineIndexFile;

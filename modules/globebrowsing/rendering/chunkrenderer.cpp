@@ -307,7 +307,10 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
                 cornersCameraSpace[Quad::SOUTH_WEST]));
 
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
-    programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
+    programObject->setUniform(
+        "projectionTransform",
+        data.camera.sgctInternal.projectionMatrix()
+    );
 
     if (_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0) {
         // Apply an extra scaling to the height if the object is scaled

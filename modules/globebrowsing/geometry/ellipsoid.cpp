@@ -81,7 +81,9 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     return p / d;
 }
 
-glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(const glm::dvec3& p) const {
+glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(
+                                                                const glm::dvec3& p) const
+{
     glm::dvec3 normal = p * _cached._oneOverRadiiSquared;
     return glm::normalize(normal);
 }

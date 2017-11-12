@@ -53,7 +53,8 @@ public:
         properties::Vec3Property color;
     };
 
-    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
+    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
+        LayerGroup& parent);
 
     void initialize();
     void deinitialize();
@@ -77,12 +78,14 @@ public:
     glm::ivec2 tilePixelStartOffset() const;
     glm::ivec2 tilePixelSizeDifference() const;
     glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
-                                              glm::uvec2 resolution, glm::vec2 tileUV);
+        glm::uvec2 resolution, glm::vec2 tileUV);
     glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                            glm::vec2 tileUV, glm::uvec2 resolution);
+        glm::vec2 tileUV, glm::uvec2 resolution);
 
 private:
-    layergroupid::TypeID parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const;
+    layergroupid::TypeID parseTypeIdFromDictionary(
+        const ghoul::Dictionary& initDict) const;
+
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
     void addVisibleProperties();
     void removeVisibleProperties();

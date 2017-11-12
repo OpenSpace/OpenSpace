@@ -108,12 +108,18 @@ std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaBaseGroup::groupEvent() {
 void IswaBaseGroup::registerProperties(){
     _enabled.onChange([this]{
         LDEBUG("Group " + name() + " published enabledChanged");
-        _groupEvent->publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled.value()}}));
+        _groupEvent->publish(
+            "enabledChanged",
+            ghoul::Dictionary({{"enabled", _enabled.value()}})
+        );
     });
 
     _alpha.onChange([this]{
         LDEBUG("Group " + name() + " published alphaChanged");
-        _groupEvent->publish("alphaChanged", ghoul::Dictionary({{"alpha", _alpha.value()}}));
+        _groupEvent->publish(
+            "alphaChanged",
+            ghoul::Dictionary({{"alpha", _alpha.value()}})
+        );
     });
 
 

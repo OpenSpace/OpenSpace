@@ -34,8 +34,14 @@ void GPULayerAdjustment::setValue(ghoul::opengl::ProgramObject* programObject,
         case layergroupid::AdjustmentTypeID::None:
             break;
         case layergroupid::AdjustmentTypeID::ChromaKey: {
-            gpuChromaKeyColor.setValue(programObject, layerAdjustment.chromaKeyColor.value());
-            gpuChromaKeyTolerance.setValue(programObject, layerAdjustment.chromaKeyTolerance.value());
+            gpuChromaKeyColor.setValue(
+                programObject,
+                layerAdjustment.chromaKeyColor.value()
+            );
+            gpuChromaKeyTolerance.setValue(
+                programObject,
+                layerAdjustment.chromaKeyTolerance.value()
+            );
             break;
         }
         case layergroupid::AdjustmentTypeID::TransferFunction:

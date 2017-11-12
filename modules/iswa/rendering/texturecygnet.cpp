@@ -50,7 +50,7 @@ bool TextureCygnet::updateTexture() {
     if (texture) {
         LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
         texture->uploadTexture();
-        // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+        // Textures of planets looks much smoother with AnisotropicMipMap
         texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         _textures[0]  = std::move(texture);
     }

@@ -48,9 +48,14 @@ GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch)
 {}
 
 GeodeticPatch::GeodeticPatch(const TileIndex& tileIndex) {
-    double deltaLat = (2 * glm::pi<double>()) / (static_cast<double>(1 << tileIndex.level));
-    double deltaLon = (2 * glm::pi<double>()) / (static_cast<double>(1 << tileIndex.level));
-    Geodetic2 nwCorner(glm::pi<double>() / 2 - deltaLat * tileIndex.y, -glm::pi<double>() + deltaLon * tileIndex.x);
+    double deltaLat = (2 * glm::pi<double>()) /
+                      (static_cast<double>(1 << tileIndex.level));
+    double deltaLon = (2 * glm::pi<double>()) /
+                      (static_cast<double>(1 << tileIndex.level));
+    Geodetic2 nwCorner(
+        glm::pi<double>() / 2 - deltaLat * tileIndex.y,
+        -glm::pi<double>() + deltaLon * tileIndex.x
+    );
     _halfSize = Geodetic2(deltaLat / 2, deltaLon / 2);
     _center = Geodetic2(nwCorner.lat - _halfSize.lat, nwCorner.lon + _halfSize.lon);
 }
@@ -224,14 +229,19 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     Ang centerToPointLon = (centerLon - pointLon).normalizeAround(Ang::ZERO);
 
     // Calculate the longitudinal distance to the closest patch edge
-    Ang longitudeDistanceToClosestPatchEdge = centerToPointLon.abs() - Ang::fromRadians(_halfSize.lon);
+    Ang longitudeDistanceToClosestPatchEdge =
+        centerToPointLon.abs() - Ang::fromRadians(_halfSize.lon);
 
     // If the longitude distance to the closest patch edge is larger than 90 deg
     // the latitude will have to be clamped to its closest corner, as explained in
     // the example above.
-    double clampedLat = longitudeDistanceToClosestPatchEdge > Ang::QUARTER  ?
-        clampedLat = glm::clamp((Ang::HALF - pointLat).normalizeAround(centerLat).asRadians(), minLat(), maxLat()) :
-        clampedLat = glm::clamp(pointLat.asRadians(), minLat(), maxLat());
+    double clampedLat =
+        longitudeDistanceToClosestPatchEdge > Ang::QUARTER ?
+        glm::clamp(
+            (Ang::HALF - pointLat).normalizeAround(centerLat).asRadians(),
+            minLat(),
+            maxLat()) :
+        glm::clamp(pointLat.asRadians(), minLat(), maxLat());
 
     // Longitude is just clamped normally
     double clampedLon = glm::clamp(pointLon.asRadians(), minLon(), maxLon());

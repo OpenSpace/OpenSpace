@@ -172,6 +172,13 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/gpudata.cpp
 )
 
+if (APPLE)
+    set(OPENSPACE_SOURCE
+        ${OPENSPACE_SOURCE}
+        ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    )
+endif ()
+
 set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
@@ -333,6 +340,13 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )
+
+if (APPLE)
+    set(OPENSPACE_HEADER
+        ${OPENSPACE_HEADER}
+        ${OPENSPACE_BASE_DIR}/include/openspace/interaction/touchbar.h
+    )
+endif ()
 
 # Place files into source groups
 foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})

@@ -133,12 +133,13 @@ int ChunkedLodGlobe::getDesiredLevel(
         desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
     }
 
-    int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
+    int levelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
         chunk, renderData
     );
-    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
-        _owner.debugProperties().limitLevelByAvailableData) {
-        desiredLevel = glm::min(desiredLevel, desiredLevelByAvailableData);
+    if (levelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
+        _owner.debugProperties().limitLevelByAvailableData)
+    {
+        desiredLevel = glm::min(desiredLevel, levelByAvailableData);
     }
 
     desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
@@ -291,7 +292,8 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
 
     // Calculate the MVP matrix
     glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) * viewTransform;
+    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+                    viewTransform;
     glm::dmat4 mvp = vp * _owner.modelTransform();
 
     // Render function
@@ -315,8 +317,8 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     //_rightRoot->reverseBreadthFirst(renderJob);
 
     auto duration2 = std::chrono::system_clock::now().time_since_epoch();
-    auto millis2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
-    stats.i["chunk globe render time"] = millis2 - millis;
+    auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
+    stats.i["chunk globe render time"] = ms2 - millis;
 }
 
 void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {

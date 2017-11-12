@@ -59,7 +59,8 @@ public:
     /**
      * Import a scene graph node from a dictionary into an existing scene.
      */
-    SceneGraphNode* importNodeDictionary(Scene& scene, const ghoul::Dictionary& dictionary);
+    SceneGraphNode* importNodeDictionary(Scene& scene,
+        const ghoul::Dictionary& dictionary);
 
 private:
     struct LoadedNode {
@@ -99,7 +100,8 @@ private:
     /**
      * Load a mod file.
      */
-    std::vector<SceneLoader::LoadedNode> loadModule(const std::string& path, lua_State* luaState);
+    std::vector<SceneLoader::LoadedNode> loadModule(const std::string& path,
+        lua_State* luaState);
 
     /**
      * Loads an existing license file
@@ -120,7 +122,8 @@ private:
     /**
      * Add loaded nodes to an existing scene
      */
-    std::vector<SceneGraphNode*> addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& nodes);
+    std::vector<SceneGraphNode*> addLoadedNodes(Scene& scene,
+        std::vector<SceneLoader::LoadedNode>&& nodes);
 };
 
 } // namespace openspace

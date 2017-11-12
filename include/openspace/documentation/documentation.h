@@ -60,7 +60,7 @@ struct TestResult {
             ExtraKey,         ///< The exhaustive documentation contained an extra key
             WrongType,        ///< The key's value was not of the expected type
             Verification,     ///< The value did not pass a necessary non-type verifier
-            UnknownIdentifier ///< If the identifier for a ReferencingVerifier did not exist
+            UnknownIdentifier ///< The identifier for a ReferencingVerifier did not exist
         };
         /// The offending key that caused the Offense. In the case of a nested table,
         /// this value will be the fully qualified name of the key

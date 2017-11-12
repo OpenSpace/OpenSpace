@@ -40,7 +40,8 @@ Q_OBJECT
 public:
     TimelineWidget(QWidget* parent);
 
-    void setData(std::vector<Image> images, std::map<uint8_t, std::string> targetMap, std::map<uint16_t, std::string> instrumentMap);
+    void setData(std::vector<Image> images, std::map<uint8_t, std::string> targetMap,
+        std::map<uint16_t, std::string> instrumentMap);
     void setCurrentTime(std::string currentTime, double et);
     void socketConnected();
     void socketDisconnected();
@@ -51,7 +52,8 @@ protected:
     void paintEvent(QPaintEvent* event);
     void drawContent(QPainter& painter, QRectF rect);
     void drawLegend(QPainter& painter, QRectF rect);
-    void drawImages(QPainter& painter, QRectF timelineRect, std::vector<Image*> images, double minimumTime, double maximumTime);
+    void drawImages(QPainter& painter, QRectF timelineRect, std::vector<Image*> images,
+        double minimumTime, double maximumTime);
 
 private:
     std::vector<Image> _images;

@@ -182,9 +182,8 @@ int getGeoPosition(lua_State* L) {
     if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
-
-    RenderableGlobe* globe =
-        OsEng.moduleEngine().module<GlobeBrowsingModule>()->castFocusNodeRenderableToGlobe();
+    GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
+    RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
         return luaL_error(L, "Focus node must be a RenderableGlobe");
     }
@@ -197,8 +196,11 @@ int getGeoPosition(lua_State* L) {
     SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
         cameraPositionModelSpace);
 
-    Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(posHandle.centerToReferenceSurface);
-    double altitude = glm::length(cameraPositionModelSpace - posHandle.centerToReferenceSurface);
+    Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
+        posHandle.centerToReferenceSurface
+    );
+    double altitude = glm::length(cameraPositionModelSpace -
+                                  posHandle.centerToReferenceSurface);
 
     lua_pushnumber(L, Angle<double>::fromRadians(geo2.lat).asDegrees());
     lua_pushnumber(L, Angle<double>::fromRadians(geo2.lon).asDegrees());

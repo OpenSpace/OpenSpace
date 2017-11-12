@@ -40,7 +40,9 @@
 
 namespace openspace {
 
-DigitalUniverseModule::DigitalUniverseModule() : OpenSpaceModule(DigitalUniverseModule::Name) {}
+DigitalUniverseModule::DigitalUniverseModule()
+    : OpenSpaceModule(DigitalUniverseModule::Name)
+{}
 
 void DigitalUniverseModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

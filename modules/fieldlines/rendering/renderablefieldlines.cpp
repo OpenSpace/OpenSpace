@@ -265,7 +265,10 @@ void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
     _program->activate();
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));
-    _program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
+    _program->setUniform(
+        "cameraViewDir",
+        glm::vec3(data.camera.viewDirectionWorldSpace())
+    );
     glDisable(GL_CULL_FACE);
     setPscUniforms(*_program, data.camera, data.position);
 
@@ -310,7 +313,11 @@ void RenderableFieldlines::update(const UpdateData&) {
             _lineStart.push_back(prevEnd);
             _lineCount.push_back(static_cast<int>(fieldlines[j].size()));
             prevEnd = prevEnd + static_cast<int>(fieldlines[j].size());
-            vertexData.insert(vertexData.end(), fieldlines[j].begin(), fieldlines[j].end());
+            vertexData.insert(
+                vertexData.end(),
+                fieldlines[j].begin(),
+                fieldlines[j].end()
+            );
         }
         LDEBUG("Number of vertices : " << vertexData.size());
 
@@ -324,15 +331,34 @@ void RenderableFieldlines::update(const UpdateData&) {
         }
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-        glBufferData(GL_ARRAY_BUFFER, vertexData.size()*sizeof(LinePoint), &vertexData.front(), GL_STATIC_DRAW);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertexData.size() * sizeof(LinePoint),
+            &vertexData.front(),
+            GL_STATIC_DRAW
+        );
 
         GLuint vertexLocation = 0;
         glEnableVertexAttribArray(vertexLocation);
-        glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(LinePoint), reinterpret_cast<void*>(0));
+        glVertexAttribPointer(
+            vertexLocation,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(LinePoint),
+            reinterpret_cast<void*>(0)
+        );
 
         GLuint colorLocation = 1;
         glEnableVertexAttribArray(colorLocation);
-        glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
+        glVertexAttribPointer(
+            colorLocation,
+            4,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(LinePoint),
+            (void*)(sizeof(glm::vec3))
+        );
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -360,7 +386,9 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
 
     std::ifstream seedFile(_seedPointSourceFile);
     if (!seedFile.good())
-        LERROR("Could not open seed points file '" << _seedPointSourceFile.value() << "'");
+        LERROR(
+            "Could not open seed points file '" << _seedPointSourceFile.value() << "'"
+        );
     else {
         std::string line;
         glm::vec3 point;
@@ -457,7 +485,13 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         _vectorFieldInfo.getValue(v3, zVariable);
 
         KameleonWrapper kw(fileName);
-        return kw.getClassifiedFieldLines(xVariable, yVariable, zVariable, _seedPoints, _stepSize);
+        return kw.getClassifiedFieldLines(
+            xVariable,
+            yVariable,
+            zVariable,
+            _seedPoints,
+            _stepSize
+        );
     }
 
     if (lorentzForce) {

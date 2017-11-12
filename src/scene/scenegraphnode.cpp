@@ -72,7 +72,9 @@ const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 const std::string SceneGraphNode::KeyTag = "Tag";
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
+std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     openspace::documentation::testSpecificationAndThrow(
         SceneGraphNode::Documentation(),
         dictionary,
@@ -322,7 +324,11 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
+    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(
+        _worldPositionCached.x,
+        _worldPositionCached.y,
+        _worldPositionCached.z
+    );
 
     RenderData newData = {
         data.camera,
@@ -366,7 +372,8 @@ void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) 
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
     ghoul_assert(
         !updateScene || _scene == parent._scene,
-        "For the scene to be updated, this object must belong to the same scene as the parent"
+        "For the scene to be updated, this object must belong to the same scene as "
+        "the parent"
     );
     ghoul_assert(
         !updateScene || _parent->_scene == parent._scene,
@@ -380,7 +387,9 @@ void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) 
     }
 }
 
-void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene) {
+void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child,
+                                 UpdateScene updateScene)
+{
     ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
 
     child->_parent = this;
@@ -395,8 +404,13 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child, UpdateSc
    }
 }
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child, UpdateScene updateScene) {
-    ghoul_assert(child._dependentNodes.empty(), "Nodes cannot depend on a node being detached");
+std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child,
+                                                            UpdateScene updateScene)
+{
+    ghoul_assert(
+        child._dependentNodes.empty(),
+        "Nodes cannot depend on a node being detached"
+    );
     ghoul_assert(child._parent != nullptr, "Node must be attached to a parent");
 
     // Update of deps is deffered to the removal of the node from the scene
@@ -432,7 +446,8 @@ void SceneGraphNode::addDependency(SceneGraphNode& dependency, UpdateScene updat
     }
 }
 
-void SceneGraphNode::removeDependency(SceneGraphNode& dependency, UpdateScene updateScene) {
+void SceneGraphNode::removeDependency(SceneGraphNode& dependency, UpdateScene updateScene)
+{
     dependency._dependentNodes.erase(std::remove_if(
         dependency._dependentNodes.begin(),
         dependency._dependentNodes.end(),
@@ -470,7 +485,9 @@ void SceneGraphNode::clearDependencies(UpdateScene updateScene) {
     }
 }
 
-void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene) {
+void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& dependencies,
+                                     UpdateScene updateScene)
+{
     clearDependencies(UpdateScene::No);
 
     _dependencies = dependencies;
@@ -679,9 +696,6 @@ void SceneGraphNode::updateCamera(Camera* camera) const{
 
     camera->setPosition(target);
     camera->setFocusPosition(origin);
-
-    //printf("target: %f, %f, %f, %f\n", target.vec4().x, target.vec4().y, target.vec4().z, target.vec4().w);
-
 }
 
 }  // namespace openspace

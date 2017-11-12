@@ -79,7 +79,9 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_filePath);
 
     if (readFilePath()) {
-        const bool hasStart = dictionary.hasKeyAndValue<std::string>(KeyPreCacheStartTime);
+        const bool hasStart = dictionary.hasKeyAndValue<std::string>(
+            KeyPreCacheStartTime
+        );
         const bool hasEnd = dictionary.hasKeyAndValue<std::string>(KeyPreCacheEndTime);
         if (hasStart && hasEnd) {
             const std::string start = dictionary.value<std::string>(KeyPreCacheStartTime);
@@ -276,7 +278,8 @@ void TemporalTileProvider::update() {
 
 void TemporalTileProvider::reset() {
     if (_successfulInitialization) {
-        for (std::pair<const TimeKey, std::shared_ptr<TileProvider>>& it : _tileProviderMap) {
+        using T = std::pair<const TimeKey, std::shared_ptr<TileProvider>>;
+        for (T& it : _tileProviderMap) {
             it.second->reset();
         }
     }
@@ -299,7 +302,7 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(const Time& 
 std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(
     const TimeKey& timekey)
 {
-    std::unordered_map<TimeKey, std::shared_ptr<TileProvider>>::iterator it = _tileProviderMap.find(timekey);
+    auto it = _tileProviderMap.find(timekey);
     if (it != _tileProviderMap.end()) {
         return it->second;
     }
@@ -467,7 +470,9 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) 
 bool TimeQuantizer::quantize(Time& t, bool clamp) const {
     double unquantized = t.j2000Seconds();
     if (_timerange.includes(unquantized)) {
-        double quantized = std::floor((unquantized - _timerange.start) / _resolution) * _resolution + _timerange.start;
+        double quantized = std::floor(
+            (unquantized - _timerange.start) / _resolution) *
+            _resolution + _timerange.start;
         t.setTime(quantized);
         return true;
     }
