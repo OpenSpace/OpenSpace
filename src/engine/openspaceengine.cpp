@@ -619,7 +619,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
     // We can initialize all SceneGraphNodes in a separate thread since none of them use
     // an OpenGL context
-    std::atomic_bool initializeFinished = false;
+    std::atomic_bool initializeFinished(false);
     bool errorWhileLoading = false;
     std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading, this]() {
         _loadingScreen->postMessage("Creating scene...");
