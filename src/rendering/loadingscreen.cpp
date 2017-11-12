@@ -637,13 +637,6 @@ void LoadingScreen::finalize() {
         _items.end()
     );
 
-    //for (Item& i : _items) {
-    //    if (i.status != ItemStatus::Failed) {
-    //        i.status = ItemStatus::Finished;
-    //    }
-    //    i.finishedTime = std::chrono::system_clock::now() + TTL;
-    //}
-
     render();
 }
 
