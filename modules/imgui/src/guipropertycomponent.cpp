@@ -212,7 +212,8 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
     }
 
     for (const std::pair<std::string, Properties>& p : propertiesByGroup) {
-        if (ImGui::TreeNode(p.first.c_str())) {
+        std::string groupName = owner->propertyGroupName(p.first);
+        if (ImGui::TreeNode(groupName.c_str())) {
             for (properties::Property* prop : p.second) {
                 renderProperty(prop, owner);
             }
