@@ -46,7 +46,9 @@ public:
     ~DistanceSwitch();
 
     bool initialize();
+    bool initializeGL();
     bool deinitialize();
+    bool deinitializeGL();
 
     /**
      * Picks the first Renderable with the associated maxDistance greater than the

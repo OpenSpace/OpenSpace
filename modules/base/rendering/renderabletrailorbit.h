@@ -47,12 +47,12 @@ namespace documentation { struct Documentation; }
 class RenderableTrailOrbit : public RenderableTrail {
 public:
     explicit RenderableTrailOrbit(const ghoul::Dictionary& dictionary);
-
-    void initialize() override;
-    void deinitialize() override;
+    
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     void update(const UpdateData& data) override;
-
+    
     static documentation::Documentation Documentation();
 
 private:

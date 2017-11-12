@@ -169,20 +169,20 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 }
 
-void RenderableTrailOrbit::initialize() {
-    RenderableTrail::initialize();
+void RenderableTrailOrbit::initializeGL() {
+    RenderableTrail::initializeGL();
 
     glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
     glGenBuffers(1, &_primaryRenderInformation._vBufferID);
     glGenBuffers(1, &_primaryRenderInformation._iBufferID);
 }
 
-void RenderableTrailOrbit::deinitialize() {
+void RenderableTrailOrbit::deinitializeGL() {
     glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
     glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
     glDeleteBuffers(1, &_primaryRenderInformation._iBufferID);
 
-    RenderableTrail::deinitialize();
+    RenderableTrail::deinitializeGL();
 }
 
 void RenderableTrailOrbit::update(const UpdateData& data) {

@@ -35,14 +35,14 @@
 namespace openspace {
 
 struct RenderData;
-
+    
 class RenderableGalaxy : public Renderable {
 public:
     RenderableGalaxy(const ghoul::Dictionary& dictionary);
     ~RenderableGalaxy();
-
-    void initialize() override;
-    void deinitialize() override;
+    
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;

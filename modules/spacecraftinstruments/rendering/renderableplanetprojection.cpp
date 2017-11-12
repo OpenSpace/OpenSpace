@@ -223,7 +223,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
 
-void RenderablePlanetProjection::initialize() {
+void RenderablePlanetProjection::initializeGL() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "projectiveProgram",
         "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl",
@@ -273,7 +273,7 @@ void RenderablePlanetProjection::initialize() {
     glBindVertexArray(0);
 }
 
-void RenderablePlanetProjection::deinitialize() {
+void RenderablePlanetProjection::deinitializeGL() {
     _projectionComponent.deinitialize();
     _baseTexture = nullptr;
     _geometry = nullptr;

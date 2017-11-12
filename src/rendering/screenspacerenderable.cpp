@@ -304,6 +304,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 }
 
 bool ScreenSpaceRenderable::initialize() {
+    return true;
+}
+
+bool ScreenSpaceRenderable::initializeGL() {
     _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
 
     createPlane();
@@ -313,6 +317,10 @@ bool ScreenSpaceRenderable::initialize() {
 }
 
 bool ScreenSpaceRenderable::deinitialize() {
+    return true;
+}
+
+bool ScreenSpaceRenderable::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 

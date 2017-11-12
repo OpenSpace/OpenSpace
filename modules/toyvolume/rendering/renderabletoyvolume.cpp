@@ -104,10 +104,10 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         _stepSize = stepSize;
     }
 }
-
+    
 RenderableToyVolume::~RenderableToyVolume() {}
 
-void RenderableToyVolume::initialize() {
+void RenderableToyVolume::initializeGL() {
     _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
     _raycaster->initialize();
 
@@ -131,19 +131,19 @@ void RenderableToyVolume::initialize() {
     addProperty(_rotation);
     addProperty(_color);
 }
-
-void RenderableToyVolume::deinitialize() {
+    
+void RenderableToyVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
-
+    
 bool RenderableToyVolume::isReady() const {
     // @TODO isReady function needs to be filled
     return true;
 }
-
+    
 void RenderableToyVolume::update(const UpdateData& data) {
     if (_raycaster) {
         glm::mat4 transform = glm::translate(
@@ -155,11 +155,13 @@ void RenderableToyVolume::update(const UpdateData& data) {
         transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));
         transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
+
         transform = glm::scale(
             transform,
             static_cast<glm::vec3>(_scaling) *
                 std::pow(10.0f, static_cast<float>(_scalingExponent))
         );
+
 
         _raycaster->setColor(_color);
         _raycaster->setStepSize(_stepSize);
@@ -172,5 +174,5 @@ void RenderableToyVolume::render(const RenderData& data, RendererTasks& tasks) {
     RaycasterTask task{ _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);
 }
-
+       
 } // namespace openspace

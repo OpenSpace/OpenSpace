@@ -45,6 +45,7 @@ namespace openspace {
 class ConfigurationManager;
 class DownloadManager;
 class GUI;
+class LoadingScreen;
 class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
@@ -110,6 +111,7 @@ public:
     LuaConsole& console();
     DownloadManager& downloadManager();
     ModuleEngine& moduleEngine();
+    LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelConnection& parallelConnection();
     RenderEngine& renderEngine();
@@ -201,6 +203,8 @@ private:
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+
+    std::unique_ptr<LoadingScreen> _loadingScreen;
 
     struct {
         properties::StringProperty versionString;

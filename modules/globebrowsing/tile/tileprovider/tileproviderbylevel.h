@@ -37,6 +37,9 @@ public:
     TileProviderByLevel(const std::string& imagePath);
     virtual ~TileProviderByLevel() = default;
 
+    bool initialize() override;
+    bool deinitialize() override;
+
     virtual Tile getTile(const TileIndex& tileIndex) override;
     virtual Tile::Status getTileStatus(const TileIndex& index) override;
     virtual TileDepthTransform depthTransform() override;

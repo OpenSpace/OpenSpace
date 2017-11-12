@@ -45,7 +45,9 @@
 
 namespace {
     const char* _loggerCat = "RenderableTimeVaryingVolume";
+}
 
+namespace {
     const char* KeyDimensions = "Dimensions";
     const char* KeyStepSize = "StepSize";
     const char* KeyTransferFunction = "TransferFunction";
@@ -146,7 +148,6 @@ namespace {
         "Upper value bound",
         "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace {
@@ -208,10 +209,11 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _gridType = (gridType == VolumeGridType::Spherical) ? 1 : 0;
     }
 }
-
+    
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
-void RenderableTimeVaryingVolume::initialize() {
+void RenderableTimeVaryingVolume::initializeGL() {
+
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
 
@@ -231,6 +233,7 @@ void RenderableTimeVaryingVolume::initialize() {
             loadTimestepMetadata(path);
         }
     }
+
 
     // TODO: defer loading of data to later. (separate thread or at least not when loading)
     for (auto& p : _volumeTimesteps) {
@@ -350,7 +353,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.time = Time::convertTime(timeString);
     t.inRam = false;
     t.onGpu = false;
-
+    
     _volumeTimesteps[t.time] = std::move(t);
 }
 
@@ -473,11 +476,14 @@ void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& 
     }
 }
 
+ 
+
 bool RenderableTimeVaryingVolume::isReady() const {
     return true;
 }
 
-void RenderableTimeVaryingVolume::deinitialize() {
+
+void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;

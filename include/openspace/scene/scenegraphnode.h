@@ -77,7 +77,9 @@ public:
         const ghoul::Dictionary& dictionary);
 
     void initialize();
+    void initializeGL();
     void deinitialize();
+    void deinitializeGL();
 
     void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
     void traversePostOrder(std::function<void(SceneGraphNode*)> fn);

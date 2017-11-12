@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/scene/sceneloader.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -138,9 +139,16 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
 
     std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
+    OsEng.loadingScreen().setItemNumber(allNodes.size() + 1); // +1 for Root node
+
     std::unique_ptr<SceneGraphNode> rootNode = std::make_unique<SceneGraphNode>();
     rootNode->setName(SceneGraphNode::RootNodeName);
     scene->setRoot(std::move(rootNode));
+    
+    OsEng.loadingScreen().updateItem(
+        SceneGraphNode::RootNodeName,
+        LoadingScreen::ItemStatus::Started
+    );
 
     addLoadedNodes(*scene, std::move(allNodes));
 
@@ -298,6 +306,12 @@ SceneLoader::LoadedNode SceneLoader::loadNode(const ghoul::Dictionary& dictionar
     std::vector<std::string> dependencies;
 
     std::string nodeName = dictionary.value<std::string>(KeyName);
+    OsEng.loadingScreen().updateItem(
+        nodeName,
+        LoadingScreen::ItemStatus::Started
+    );
+    OsEng.loadingScreen().tickItem();
+
     std::string parentName = dictionary.value<std::string>(KeyParentName);
     std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
         dictionary
