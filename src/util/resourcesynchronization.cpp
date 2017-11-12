@@ -66,7 +66,7 @@ documentation::Documentation ResourceSynchronization::Documentation() {
 }
 
 ResourceSynchronization::ResourceSynchronization()
-    : _job(std::make_shared<SynchronizationJob>(this))
+    : _started(false)
     , _resolved(false)
 {}
 
@@ -95,10 +95,6 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
     return result;
 }
 
-std::shared_ptr<SynchronizationJob> ResourceSynchronization::job() {
-    return _job;
-}
-
 void ResourceSynchronization::wait() {
 }
 
@@ -118,22 +114,6 @@ float ResourceSynchronization::progress() {
         return 1.f;
     }
     return static_cast<float>(nSynchronizedBytes()) / static_cast<float>(nTotalBytes());
-}
-
-// SynchronizationJob methods
-
-SynchronizationJob::SynchronizationJob(ResourceSynchronization* synchronization) {
-    _synchronization = synchronization;
-}
-
-void SynchronizationJob::execute() {
-    _synchronization->synchronize();
-}
-
-std::shared_ptr<SynchronizationProduct> SynchronizationJob::product() {
-    return std::make_shared<SynchronizationProduct>(
-        SynchronizationProduct{ _synchronization }
-    );
 }
 
 }

@@ -152,7 +152,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _networkEngine(new NetworkEngine)
     , _parallelConnection(new ParallelConnection)
     , _renderEngine(new RenderEngine)
-    , _resourceSynchronizer(new ResourceSynchronizer)
     , _settingsEngine(new SettingsEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
@@ -412,7 +411,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Set up asset loader
     _engine->_assetManager = std::make_unique<AssetManager>(
         std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}"),
-        std::make_unique<AssetSynchronizer>(OsEng._resourceSynchronizer.get())
+        std::make_unique<AssetSynchronizer>()
     );
     //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
@@ -1478,11 +1477,6 @@ WindowWrapper& OpenSpaceEngine::windowWrapper() {
 AssetManager& OpenSpaceEngine::assetManager() {
     ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
     return *_assetManager;
-}
-
-ResourceSynchronizer & OpenSpaceEngine::resourceSynchronizer() {
-    ghoul_assert(_resourceSynchronizer, "Resource Synchronizer must not be nullptr");
-    return *_resourceSynchronizer;
 }
 
 ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {

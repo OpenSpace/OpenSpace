@@ -25,42 +25,7 @@
 #ifndef __OPENSPACE_CORE___RESOURCESYNCHRONIZER___H__
 #define __OPENSPACE_CORE___RESOURCESYNCHRONIZER___H__
 
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/concurrentjobmanager.h>
-
-#include <unordered_map>
-
 namespace openspace {
-
-class ResourceSyncClient {};
-
-class ResourceSynchronizer {
-public:
-    ResourceSynchronizer();
-
-    void enqueueSynchronization(
-        std::shared_ptr<ResourceSynchronization> sync,
-        ResourceSyncClient* client);
-
-    void cancelSynchronization(
-        ResourceSynchronization* sync,
-        ResourceSyncClient* client);
-
-    std::vector<std::shared_ptr<ResourceSynchronization>>
-        finishedSynchronizations(ResourceSyncClient* client);
-
-private:
-    std::unordered_map<ResourceSynchronization*, ResourceSyncClient*> _clientMap;
-
-    std::unordered_map<ResourceSynchronization*, std::shared_ptr<ResourceSynchronization>>
-        _managedSynchronizations;
-
-    std::unordered_map<ResourceSyncClient*, std::vector<ResourceSynchronization*>>
-        _finishedSynchronizations;
-
-    ConcurrentJobManager<SynchronizationProduct> _jobManager;
-};
-
 
 } // namespace openspace
 

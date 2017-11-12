@@ -50,7 +50,6 @@ class ModuleEngine;
 class NetworkEngine;
 class ParallelConnection;
 class RenderEngine;
-class ResourceSynchronizer;
 class Scene;
 class SyncEngine;
 class SettingsEngine;
@@ -117,7 +116,6 @@ public:
     SettingsEngine& settingsEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
-    ResourceSynchronizer& resourceSynchronizer();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::NavigationHandler& navigationHandler();
     interaction::KeyBindingManager& keyBindingManager();
@@ -189,7 +187,6 @@ private:
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelConnection> _parallelConnection;
-    std::unique_ptr<ResourceSynchronizer> _resourceSynchronizer;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SettingsEngine> _settingsEngine;
     std::unique_ptr<SyncEngine> _syncEngine;

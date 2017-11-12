@@ -29,7 +29,6 @@
 #include <openspace/scene/asset.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/util/resourcesynchronizer.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/luastate.h>
@@ -43,7 +42,7 @@
 
 namespace openspace {
 
-class AssetSynchronizer : public ResourceSyncClient {
+class AssetSynchronizer {
 public:
     enum class SynchronizationState : int {
         Unknown,
@@ -52,7 +51,7 @@ public:
         Synchronized
     };
 
-    AssetSynchronizer(ResourceSynchronizer* resourceSynchronizer);
+    AssetSynchronizer();
     void addAsset(std::shared_ptr<Asset> asset);
     void removeAsset(Asset* asset);
     void syncAsset(Asset* asset);
@@ -65,14 +64,10 @@ public:
 private:
     bool assetIsSynchronized(Asset* asset);
 
-
-
     struct AssetSynchronization {
         std::shared_ptr<Asset> asset;
         SynchronizationState state;
     };
-
-    ResourceSynchronizer* _resourceSynchronizer;
 
     std::unordered_map<Asset*, AssetSynchronization> _managedAssets;
     std::unordered_map<ResourceSynchronization*, Asset*> _resourceToAssetMap;

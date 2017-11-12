@@ -38,19 +38,6 @@ class TorrentClient;
 
 class ResourceSynchronization;
 
-struct SynchronizationProduct {
-    ResourceSynchronization* synchronization;
-};
-
-class SynchronizationJob : public Job<SynchronizationProduct> {
-public:
-    SynchronizationJob(ResourceSynchronization* synchronization);
-    void execute() override;
-    std::shared_ptr<SynchronizationProduct> product() override;
-private:
-    ResourceSynchronization* _synchronization;
-};
-
 class ResourceSynchronization
     : public std::enable_shared_from_this<ResourceSynchronization>
 {
@@ -62,7 +49,10 @@ public:
     ResourceSynchronization();
     virtual ~ResourceSynchronization();
     virtual std::string directory() = 0;
-    virtual void synchronize() = 0;
+    virtual void start() = 0;
+    virtual void cancel() = 0;
+    virtual void clear() = 0;
+
     virtual float nSynchronizedBytes() = 0;
     virtual float nTotalBytes() = 0;
     virtual bool nTotalBytesIsKnown() = 0;
@@ -72,10 +62,8 @@ public:
     bool isResolved();
     void resolve();
     void updateProgress(float t);
-    std::shared_ptr<SynchronizationJob> job();
 
 private:
-    std::shared_ptr<SynchronizationJob> _job;
     std::atomic<bool> _started;
     std::atomic<bool> _resolved;
 };

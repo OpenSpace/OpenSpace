@@ -22,69 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/resourcesynchronizer.h>
-
-namespace {
-    size_t NumberOfThreads = 8;
-}
-
 namespace openspace {
 
-ResourceSynchronizer::ResourceSynchronizer()
-    : _jobManager(ThreadPool(NumberOfThreads))
-{}
-
-void ResourceSynchronizer::enqueueSynchronization(
-    std::shared_ptr<ResourceSynchronization> sync,
-    ResourceSyncClient* client)
-{
-    _managedSynchronizations.emplace(sync.get(), sync);
-    _clientMap[sync.get()] = client;
-
-    std::shared_ptr<SynchronizationJob> job = sync->job();
-    _jobManager.enqueueJob(job);
-}
-
-void ResourceSynchronizer::cancelSynchronization(
-    ResourceSynchronization* sync,
-    ResourceSyncClient* client)
-{
-    _managedSynchronizations.erase(sync);
-    _clientMap.erase(sync);
-}
-
-std::vector<std::shared_ptr<ResourceSynchronization>>
-    ResourceSynchronizer::finishedSynchronizations(ResourceSyncClient* client)
-{
-    // Fetch all finished jobs
-    while (_jobManager.numFinishedJobs() > 0) {
-        std::shared_ptr<Job<SynchronizationProduct>> j = _jobManager.popFinishedJob();
-        ResourceSynchronization* sync = j->product()->synchronization;
-        const auto it = _clientMap.find(sync);
-        if (it != _clientMap.end()) {
-            ResourceSyncClient* c = it->second;
-            _finishedSynchronizations[c].push_back(sync);
-        }
-    }
-
-    // Extract the ones that were queried by the client
-    const auto finishedIt = _finishedSynchronizations.find(client);
-    if (finishedIt == _finishedSynchronizations.end()) {
-        return std::vector<std::shared_ptr<ResourceSynchronization>>();
-    }
-
-    std::vector<ResourceSynchronization*>& rawSyncs = finishedIt->second;
-    
-    std::vector<std::shared_ptr<ResourceSynchronization>> syncs(rawSyncs.size());
-    std::transform(rawSyncs.begin(), rawSyncs.end(), syncs.begin(),
-        [this](ResourceSynchronization* raw) {
-            return _managedSynchronizations[raw];
-        }
-    );
-
-    _finishedSynchronizations.erase(finishedIt);
-
-    return syncs;
-}
 
 } // namespace openspace

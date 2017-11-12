@@ -33,9 +33,7 @@ namespace {
 }
 
 namespace openspace {
-AssetSynchronizer::AssetSynchronizer(ResourceSynchronizer* resourceSynchronizer) {
-    _resourceSynchronizer = resourceSynchronizer;
-}
+AssetSynchronizer::AssetSynchronizer() {}
 
 void AssetSynchronizer::addAsset(std::shared_ptr<Asset> asset) {
     _managedAssets.emplace(asset.get(), 
@@ -55,7 +53,7 @@ void AssetSynchronizer::removeAsset(Asset* asset) {
 
     for (const auto& s : resourceSyncs) {
         _resourceToAssetMap.erase(s.get());
-        _resourceSynchronizer->cancelSynchronization(s.get(), this);
+        s->cancel();
     }
 
     _managedAssets.erase(asset);
@@ -73,7 +71,7 @@ void AssetSynchronizer::syncAsset(Asset* asset) {
 
     for (const auto& s : resourceSyncs) {
         if (!s->isResolved()) {
-            _resourceSynchronizer->enqueueSynchronization(s, this);
+            s->start();
         }
     }
 }
@@ -122,11 +120,18 @@ float AssetSynchronizer::assetProgress(Asset* asset) {
 }
 
 std::vector<std::shared_ptr<Asset>> AssetSynchronizer::getSynchronizedAssets() {
-    std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
-        _resourceSynchronizer->finishedSynchronizations(this);
+    std::vector<std::shared_ptr<ResourceSynchronization>> finishedResourceSyncs;
+    for (auto a : _managedAssets) {
+        std::vector<std::shared_ptr<ResourceSynchronization>> syncs = a.first->synchronizations();
+        for (auto s : syncs) {
+            if (s->isResolved()) {
+                finishedResourceSyncs.push_back(s);
+            }
+        }
+    }
 
     std::vector<Asset*> affectedAssets;
-    for (const auto& sync : syncs) {       
+    for (const auto& sync : finishedResourceSyncs) {
         const auto& it = _resourceToAssetMap.find(sync.get());
         if (it != _resourceToAssetMap.end()) {
             affectedAssets.push_back(it->second);

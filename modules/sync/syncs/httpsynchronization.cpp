@@ -106,12 +106,13 @@ std::string HttpSynchronization::directory() {
     return FileSys.absPath(d);
 }
 
-void HttpSynchronization::synchronize() {
+void HttpSynchronization::start() {
     if (hasSyncFile()) {
         resolve();
         return;
     }
 
+    // TODO: Do this in a new thread!
     std::vector<std::string> listUrls = fileListUrls();
     for (const auto& url : listUrls) {
         if (trySyncFromUrl(url)) {
@@ -120,7 +121,13 @@ void HttpSynchronization::synchronize() {
         }
     }
 }
-    
+
+void HttpSynchronization::cancel() {
+}
+
+void HttpSynchronization::clear() {
+}
+
 std::vector<std::string> HttpSynchronization::fileListUrls() {
     std::string query = std::string("?") + QueryKeyIdentifier + "=" + _identifier +
         "&" + QueryKeyFileVersion + "=" + std::to_string(_version) +

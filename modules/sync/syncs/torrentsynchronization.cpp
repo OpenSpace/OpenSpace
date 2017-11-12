@@ -110,15 +110,18 @@ std::string TorrentSynchronization::directory() {
     return FileSys.absPath(d);
 }
 
-void TorrentSynchronization::synchronize() {
-    _torrentClient->addMagnetLink(_magnetLink, directory());
-
-    bool hasSyncFile();
-    void createSyncFile();
-
+void TorrentSynchronization::start() {
+    size_t torrentId = _torrentClient->addMagnetLink(_magnetLink, directory());
     resolve();
     return;
 }
+
+void TorrentSynchronization::cancel() {
+}
+
+void TorrentSynchronization::clear() {
+}
+
 
 float TorrentSynchronization::nSynchronizedBytes() {
     return 0;

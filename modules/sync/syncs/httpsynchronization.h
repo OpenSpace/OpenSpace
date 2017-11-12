@@ -42,7 +42,10 @@ public:
     static documentation::Documentation Documentation();
 
     std::string directory() override;
-    void synchronize() override;
+    void start() override;
+    void cancel() override;
+    void clear() override;
+
     float nSynchronizedBytes() override;
     float nTotalBytes() override;
     bool nTotalBytesIsKnown() override;
