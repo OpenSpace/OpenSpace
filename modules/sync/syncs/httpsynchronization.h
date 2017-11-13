@@ -56,6 +56,11 @@ private:
     bool hasSyncFile();
     void createSyncFile();
 
+    std::atomic_bool _nTotalBytesKnown;
+    std::atomic<float> _nTotalBytes;
+    std::atomic<float> _nSynchronizedBytes;
+
+    std::atomic_bool _shouldCancel;
     std::string _identifier;
     int _version;
     std::string _synchronizationRoot;

@@ -131,6 +131,42 @@ void HttpRequest::setReadyState(openspace::HttpRequest::ReadyState state) {
     _readyState = state;
 }
 
+HttpDownload::HttpDownload() 
+    : _onProgress([] (HttpRequest::Progress) { return true; })
+{}
+
+void HttpDownload::onProgress(ProgressCallback progressCallback) {
+    std::lock_guard<std::mutex> guard(_onProgressMutex);
+    _onProgress = progressCallback;
+}
+
+bool HttpDownload::hasStarted() {
+    return _started;
+}
+
+bool HttpDownload::hasFailed() {
+    return _failed;
+}
+bool HttpDownload::hasSucceeded() {
+    return _successful;
+}
+
+void HttpDownload::markAsStarted() {
+    _started = true;
+}
+
+void HttpDownload::markAsFailed() {
+    _failed = true;
+}
+void HttpDownload::markAsSuccessful() {
+    _successful = true;
+}
+
+bool HttpDownload::callOnProgress(HttpRequest::Progress p) {
+    std::lock_guard<std::mutex> guard(_onProgressMutex);
+    return _onProgress(p);
+}
+
 SyncHttpDownload::SyncHttpDownload(std::string url)
     : _httpRequest(std::move(url))
 {}
@@ -139,6 +175,11 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     initDownload();
     _httpRequest.onData([this] (HttpRequest::Data d) {
         return handleData(d);
+    });
+    _httpRequest.onProgress([this](HttpRequest::Progress p) {
+        // Return a non-zero value to cancel download
+        // if onProgress returns false.
+        return callOnProgress(p) ? 0 : 1;
     });
     _httpRequest.perform(opt);
     deinitDownload();
@@ -150,13 +191,13 @@ AsyncHttpDownload::AsyncHttpDownload(std::string url)
 
 void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
     std::lock_guard<std::mutex> guard(_mutex);
-    if (_started) {
+    if (hasStarted()) {
         return;
     }
     _downloadThread = std::thread([this, opt] {
         download(opt);
     });
-    _started = true;
+    markAsStarted();
 }
 
 void AsyncHttpDownload::cancel() {
@@ -167,7 +208,7 @@ void AsyncHttpDownload::cancel() {
 void AsyncHttpDownload::wait() {
     std::unique_lock<std::mutex> lock(_mutex);
     _downloadFinishCondition.wait(lock, [this] {
-        return _finished;
+        return hasFailed() || hasSucceeded();
     });
 }
 
@@ -182,21 +223,28 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     });
 
     _httpRequest.onProgress([this](HttpRequest::Progress p) {
+        // Return a non-zero value to cancel download
+        // if onProgress returns false.
         std::lock_guard<std::mutex> guard(_mutex);
+        bool shouldContinue = callOnProgress(p);
+        if (!shouldContinue) {
+            return 1;
+        }
         if (_shouldCancel) {
             return 1;
         }
         if (p.totalBytesKnown && p.downloadedBytes == p.totalBytes) {
-            _successful = true;
+            markAsSuccessful();
         }
         return 0;
     });
 
     lock.release();
     _httpRequest.perform(opt);
-    _finished = true;
+    if (!hasSucceeded()) {
+        markAsFailed();
+    }
     _downloadFinishCondition.notify_all();
-
     lock.lock();
     deinitDownload();
 }

@@ -153,9 +153,14 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     opt.requestTimeoutSeconds = 0;
 
     SyncHttpMemoryDownload fileListDownload(listUrl);
+    fileListDownload.onProgress([this](HttpRequest::Progress p) {
+        return !_shouldCancel;
+    });
     fileListDownload.download(opt);
 
-    // ...
+    if (!fileListDownload.hasSucceeded()) {
+        return false;
+    }
 
     const std::vector<char>& buffer = fileListDownload.downloadedData();
 
@@ -177,6 +182,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         });
         downloadThreads.push_back(std::move(t));
     }
+
     for (auto& t : downloadThreads) {
         t.join();
     }

@@ -74,7 +74,13 @@ public:
     };
 
     using ReadyStateChangeCallback = std::function<void(ReadyState)>;
+    
+    // ProgressCallback: Return non-zero value to cancel download.
     using ProgressCallback = std::function<int(Progress)>;
+
+    // DataCallback: Return number of bytes successfully stored.
+    // If this does not match the data buffer sice reported in Data,
+    // the request will fail.
     using DataCallback = std::function<size_t(Data)>;
 
     struct RequestOptions {
@@ -116,15 +122,33 @@ private:
         int64_t ulnow);
 };
 
-
-class HttpDownloadInterface {
+class HttpDownload {
 public:
+    HttpDownload();
+    using ProgressCallback = std::function<bool(HttpRequest::Progress)>;
+    void onProgress(ProgressCallback progressCallback);
+    bool hasStarted();
+    bool hasFailed();
+    bool hasSucceeded();
+
+protected:
+    virtual size_t handleData(HttpRequest::Data d) = 0;
     virtual bool initDownload() = 0;
     virtual bool deinitDownload() = 0;
-    virtual size_t handleData(HttpRequest::Data d) = 0;
+
+    bool callOnProgress(HttpRequest::Progress p);
+    void markAsStarted();
+    void markAsSuccessful();
+    void markAsFailed();
+private:
+    std::mutex _onProgressMutex;
+    ProgressCallback _onProgress;
+    bool _started = false;
+    bool _failed = false;
+    bool _successful = false;
 };
 
-class SyncHttpDownload : public virtual HttpDownloadInterface {
+class SyncHttpDownload : public virtual HttpDownload {
 public:
     SyncHttpDownload(std::string url);
     void download(HttpRequest::RequestOptions opt);
@@ -132,7 +156,7 @@ protected:
     HttpRequest _httpRequest;
 };
 
-class AsyncHttpDownload : public virtual HttpDownloadInterface {
+class AsyncHttpDownload : public virtual HttpDownload {
 public:
     AsyncHttpDownload(std::string url);
     virtual ~AsyncHttpDownload() = default;
@@ -143,17 +167,13 @@ protected:
     void download(HttpRequest::RequestOptions opt);
 private:
     HttpRequest _httpRequest;
-
     std::thread _downloadThread;
     std::mutex _mutex;
     std::condition_variable _downloadFinishCondition;
-    bool _started = false;
     bool _shouldCancel = false;
-    bool _finished = false;
-    bool _successful = false;
 };
 
-class HttpFileDownload : public virtual HttpDownloadInterface {
+class HttpFileDownload : public virtual HttpDownload {
 public:
     HttpFileDownload(std::string destination);
 protected:
@@ -165,7 +185,7 @@ private:
     std::ofstream _file;
 };
 
-class HttpMemoryDownload : public virtual HttpDownloadInterface {
+class HttpMemoryDownload : public virtual HttpDownload {
 public:
     const std::vector<char>& downloadedData();
 protected:
