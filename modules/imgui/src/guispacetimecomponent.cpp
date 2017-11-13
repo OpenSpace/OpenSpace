@@ -175,10 +175,10 @@ void GuiSpaceTimeComponent::render() {
 
         double newTime = [days, j2000, seconds](){
             if (days < 0) {
-                return static_cast<double>(j2000 - seconds);
+                return j2000 - seconds;
             }
             else {
-                return static_cast<double>(j2000 + seconds);
+                return j2000 + seconds;
             }
         }();
 

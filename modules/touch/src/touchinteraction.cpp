@@ -56,9 +56,8 @@
 
 #include <glm/ext.hpp>
 
-#pragma warning (pop)
 #ifdef WIN32
-
+#pragma warning (pop)
 #endif // WIN32
 
 
@@ -222,19 +221,19 @@ TouchInteraction::TouchInteraction()
     , _pickingRadiusMinimum(PickingRadiusInfo, 0.1f, 0.f, 1.f)
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
-    , _centroid(glm::dvec3(0.0))
     // calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
     , _projectionScaleFactor(1.000004)
     , _currentRadius(1.0)
     , _slerpdT(1000)
-    , _numOfTests(0)
     , _timeSlack(0.0)
+    , _numOfTests(0)
     , _directTouchMode(false)
     , _tap(false)
     , _doubleTap(false)
     , _lmSuccess(true)
     , _guiON(false)
+    , _centroid(glm::dvec3(0.0))
 {
     addProperty(_touchActive);
     addProperty(_unitTest);

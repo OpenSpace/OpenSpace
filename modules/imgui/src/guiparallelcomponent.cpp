@@ -56,7 +56,6 @@ void GuiParallelComponent::renderDisconnected() {
 }
 
 void GuiParallelComponent::renderClientWithHost() {
-
     ParallelConnection& parallel = OsEng.parallelConnection();
 
     std::string connectionInfo = "Session hosted by \"" + parallel.hostName() + "\"\n";

@@ -105,7 +105,7 @@ namespace {
             std::vector<std::string>(path.begin() + 1, path.end()),
             owner
         );
-    };
+    }
 
     void simplifyTree(TreeNode& node) {
         // Merging consecutive nodes if they only have a single child

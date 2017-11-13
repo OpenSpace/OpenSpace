@@ -112,10 +112,6 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _progressbar{ 0, 0, 0, 0 }
     , _randomEngine(_randomDevice())
 {
-    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
-    const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
-
     _program = ghoul::opengl::ProgramObject::Build(
         "Loading Screen",
         "${SHADERS}/loadingscreen.vert",

@@ -574,8 +574,8 @@ glm::vec3 FixedRotation::xAxis() const {
         case Axis::Type::Object:
             if (_xAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
-                    glm::dvec3(_xAxis.node->worldPosition()) -
-                    glm::dvec3(_attachedNode->worldPosition())
+                    _xAxis.node->worldPosition() -
+                    _attachedNode->worldPosition()
                 ));
                 return _xAxis.invertObject ? -dir : dir;
             }
@@ -629,8 +629,8 @@ glm::vec3 FixedRotation::yAxis() const {
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
-                    glm::dvec3(_yAxis.node->worldPosition()) -
-                    glm::dvec3(_attachedNode->worldPosition())
+                    _yAxis.node->worldPosition() -
+                    _attachedNode->worldPosition()
                 ));
                 return _yAxis.invertObject ? -dir : dir;
             }
@@ -684,8 +684,8 @@ glm::vec3 FixedRotation::zAxis() const {
         case Axis::Type::Object:
             if (_zAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
-                    glm::dvec3(_zAxis.node->worldPosition()) -
-                    glm::dvec3(_attachedNode->worldPosition())
+                    _zAxis.node->worldPosition() -
+                    _attachedNode->worldPosition()
                 ));
                 return _zAxis.invertObject ? -dir : dir;
             }

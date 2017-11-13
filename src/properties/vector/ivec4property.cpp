@@ -111,6 +111,6 @@ REGISTER_NUMERICALPROPERTY_SOURCE(IVec4Property, glm::ivec4, glm::ivec4(0),
                                   DEFAULT_TO_LUA_LAMBDA(glm::ivec4),
                                   DEFAULT_FROM_STRING_LAMBDA(glm::ivec4),
                                   DEFAULT_TO_STRING_LAMBDA(glm::ivec4),
-                                  LUA_TTABLE);
+                                  LUA_TTABLE)
 
 } // namespace openspace::properties

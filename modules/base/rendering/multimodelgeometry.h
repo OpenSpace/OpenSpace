@@ -39,7 +39,7 @@ public:
     MultiModelGeometry(const ghoul::Dictionary& dictionary);
 
 private:
-    bool loadModel(const std::string& filename);
+    virtual bool loadModel(const std::string& filename) override;
 };
 
 }  // namespace openspace::modelgeometry

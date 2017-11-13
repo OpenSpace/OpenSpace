@@ -107,7 +107,14 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(clippingSpacePoints[0]),
+        nullptr
+    );
 
     // Draw the vertices
     glDrawArrays(mode, 0, static_cast<GLsizei>(clippingSpacePoints.size()));

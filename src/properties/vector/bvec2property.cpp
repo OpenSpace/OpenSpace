@@ -110,6 +110,6 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BVec2Property, glm::bvec2, glm::bvec2(false),
                                  DEFAULT_TO_LUA_LAMBDA(glm::bvec2),
                                  DEFAULT_FROM_STRING_LAMBDA(glm::bvec2),
                                  DEFAULT_TO_STRING_LAMBDA(glm::bvec2),
-                                 LUA_TTABLE);
+                                 LUA_TTABLE)
 
 } // namespace openspace::properties
