@@ -30,6 +30,7 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/query/query.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
@@ -45,6 +46,7 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/onscopeexit.h>
+#include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -221,6 +223,76 @@ void Scene::sortTopologically() {
 
     _topologicallySortedNodes = nodes;
 }
+
+/*
+
+void Scene::initialize() {
+    bool useMultipleThreads = true;
+    if (OsEng.configurationManager().hasKey(
+        ConfigurationManager::KeyUseMultithreadedInitialization
+    ))
+    {
+        useMultipleThreads = OsEng.configurationManager().value<bool>(
+            ConfigurationManager::KeyUseMultithreadedInitialization
+        );
+    }
+
+    auto initFunction = [](SceneGraphNode* node){
+        try {
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Initializing
+            );
+            node->initialize();
+            OsEng.loadingScreen().tickItem();
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Finished
+            );
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERROR(node->name() << " not initialized.");
+            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Failed
+            );
+        }
+
+    };
+
+    if (useMultipleThreads) {
+        unsigned int nThreads = std::thread::hardware_concurrency();
+
+        ghoul::ThreadPool pool(nThreads == 0 ? 2 : nThreads - 1);
+
+        OsEng.loadingScreen().postMessage("Initializing scene");
+
+        for (SceneGraphNode* node : _topologicallySortedNodes) {
+            pool.queue(initFunction, node);
+        }
+
+        pool.stop();
+    }
+    else {
+        for (SceneGraphNode* node : _topologicallySortedNodes) {
+            initFunction(node);
+        }
+    }
+}
+
+void Scene::initializeGL() {
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        try {
+            node->initializeGL();
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERROR(node->name() << " not initialized.");
+            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+        }
+    }
+}
+*/
 
 void Scene::update(const UpdateData& data) {
     if (_dirtyNodeRegistry) {

@@ -79,6 +79,8 @@ public:
 
     void takeScreenshot(bool applyWarping = false) const override;
 
+    void swapBuffer() const override;
+
 private:
     properties::FloatProperty _eyeSeparation;
     properties::BoolProperty _showStatsGraph;

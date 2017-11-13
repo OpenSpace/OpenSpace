@@ -202,6 +202,8 @@ public:
      */
     TemporalTileProvider(const ghoul::Dictionary& dictionary);
 
+    bool initialize() override;
+
     // These methods implements the TileProvider interface
 
     virtual Tile getTile(const TileIndex& tileIndex) override;
@@ -330,6 +332,9 @@ private:
 
     TimeFormat* _timeFormat;
     TimeQuantizer _timeQuantizer;
+
+    std::vector<Time> _preCacheTimes;
+
     bool _successfulInitialization;
 };
 

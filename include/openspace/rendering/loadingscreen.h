@@ -22,85 +22,117 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLESTARS___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLESTARS___H__
+#ifndef __OPENSPACE_CORE___LOADINGSCREEN___H__
+#define __OPENSPACE_CORE___LOADINGSCREEN___H__
 
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
+#include <ghoul/glm.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::filesystem { class File; }
+#include <memory>
+#include <mutex>
+#include <random>
+
+// #define LOADINGSCREEN_DEBUGGING
+
+namespace ghoul::fontrendering {
+    class Font;
+} // namespace ghoul::fontrendering
+
 namespace ghoul::opengl {
     class ProgramObject;
-    class Texture;
+    class Texture; 
 } // namespace ghoul::opengl
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-class RenderableStars : public Renderable {
+class LoadingScreen {
 public:
-    explicit RenderableStars(const ghoul::Dictionary& dictionary);
-    ~RenderableStars();
+    using ShowMessage = ghoul::Boolean;
+    using ShowNodeNames = ghoul::Boolean;
+    using ShowProgressbar = ghoul::Boolean;
 
-    void initializeGL() override;
-    void deinitializeGL() override;
+    LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
+        ShowProgressbar showProgressbar);
+    ~LoadingScreen();
 
-    bool isReady() const override;
+    void render();
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    void postMessage(std::string message);
 
-    static documentation::Documentation Documentation();
+    void finalize();
 
-private:
-    enum ColorOption {
-        Color = 0,
-        Velocity = 1,
-        Speed = 2
+    void setItemNumber(int nItems);
+    void tickItem();
+
+    enum class Phase {
+        Construction,
+        Initialization
+    };
+    void setPhase(Phase phase);
+
+
+    enum class ItemStatus {
+        Started,
+        Initializing,
+        Finished,
+        Failed
     };
 
-    void createDataSlice(ColorOption option);
+    void updateItem(const std::string& itemName, ItemStatus newStatus);
 
-    bool loadData();
-    bool readSpeckFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
+private:
+    bool _showMessage;
+    bool _showNodeNames;
+    bool _showProgressbar;
 
-    properties::StringProperty _pointSpreadFunctionTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-    bool _pointSpreadFunctionTextureIsDirty;
-
-    properties::StringProperty _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
-    std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-    bool _colorTextureIsDirty;
-
-    properties::OptionProperty _colorOption;
-    bool _dataIsDirty;
-
-    properties::FloatProperty _alphaValue;
-    properties::FloatProperty _scaleFactor;
-    properties::FloatProperty _minBillboardSize;
+    Phase _phase;
+    int _iProgress;
+    int _nItems;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 
-    std::string _speckFile;
+    std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
+    std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
+    std::shared_ptr<ghoul::fontrendering::Font> _itemFont;
 
-    std::vector<float> _slicedData;
-    std::vector<float> _fullData;
-    int _nValuesPerStar;
+    struct {
+        GLuint vao;
+        GLuint vbo;
+    } _logo;
 
-    GLuint _vao;
-    GLuint _vbo;
+    struct {
+        GLuint vaoFill;
+        GLuint vboFill;
+
+        GLuint vaoBox;
+        GLuint vboBox;
+    } _progressbar;
+
+    std::string _message;
+    std::mutex _messageMutex;
+
+    struct Item {
+        std::string name;
+        ItemStatus status;
+
+        bool hasLocation;
+#ifdef LOADINGSCREEN_DEBUGGING
+        bool exhaustedSearch;
+#endif // LOADINGSCREEN_DEBUGGING
+        glm::vec2 ll;
+        glm::vec2 ur;
+
+        std::chrono::system_clock::time_point finishedTime;
+    };
+    std::vector<Item> _items;
+    std::mutex _itemsMutex;
+
+    std::random_device _randomDevice;
+    std::default_random_engine _randomEngine;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESTARS___H__
+#endif // __OPENSPACE_CORE___LOADINGSCREEN___H__

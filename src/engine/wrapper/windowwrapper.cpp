@@ -185,4 +185,6 @@ bool WindowWrapper::isSimpleRendering() const {
 
 void WindowWrapper::takeScreenshot(bool) const {}
 
+void WindowWrapper::swapBuffer() const {}
+
 } // namespace openspace

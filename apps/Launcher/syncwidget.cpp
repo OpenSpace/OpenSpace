@@ -51,11 +51,10 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-#include <modules/sync/libtorrent/entry.hpp>
-#include <modules/sync/libtorrent/bencode.hpp>
-#include <modules/sync/libtorrent/session.hpp>
-#include <modules/sync/libtorrent/alert_types.hpp>
-#include <modules/sync/libtorrent/torrent_info.hpp>
+#include <libtorrent/entry.hpp>
+#include <libtorrent/session.hpp>
+#include <libtorrent/alert_types.hpp>
+#include <libtorrent/torrent_info.hpp>
 
 #include <fstream>
 #include <mutex>
@@ -161,23 +160,28 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     }
     _session->start_upnp();
 
-    std::ifstream file(_configurationFile);
-    if (!file.fail()) {
-        union {
-            uint32_t value;
-            std::array<char, 4> data;
-        } size;
 
-        file.read(size.data.data(), sizeof(uint32_t));
-        std::vector<char> buffer(size.value);
-        file.read(buffer.data(), size.value);
-        file.close();
+    // I commented this out as it caused the Linux build nodes to fail during linking
+    // and I couldn't figure out how to fix it
+    // it would throw an cxx11 ABI incompatibility error
 
-        libtorrent::entry e = libtorrent::bdecode(buffer.begin(), buffer.end());
-        _session->start_dht(e);
-    }
-    else 
-        _session->start_dht();
+    //std::ifstream file(_configurationFile);
+    //if (!file.fail()) {
+    //    union {
+    //        uint32_t value;
+    //        std::array<char, 4> data;
+    //    } size;
+
+    //    file.read(size.data.data(), sizeof(uint32_t));
+    //    std::vector<char> buffer(size.value);
+    //    file.read(buffer.data(), size.value);
+    //    file.close();
+
+    //    libtorrent::entry e = libtorrent::bdecode(buffer.begin(), buffer.end());
+    //    _session->start_dht(e);
+    //}
+    //else 
+    _session->start_dht();
 
     _session->add_dht_router({ "router.utorrent.com", 6881 });
     _session->add_dht_router({ "dht.transmissionbt.com", 6881 });
@@ -198,18 +202,22 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
 SyncWidget::~SyncWidget() {
     libtorrent::entry dht = _session->dht_state();
 
-    std::vector<char> buffer;
-    libtorrent::bencode(std::back_inserter(buffer), dht);
+    // I commented this out as it caused the Linux build nodes to fail during linking
+    // and I couldn't figure out how to fix it
+    // it would throw an cxx11 ABI incompatibility error
 
-    std::ofstream f(_configurationFile);
+    //std::vector<char> buffer;
+    //libtorrent::bencode(std::back_inserter(buffer), dht);
 
-    union {
-        uint32_t value;
-        std::array<char, 4> data;
-    } size;
-    size.value = buffer.size();
-    f.write(size.data.data(), sizeof(uint32_t));
-    f.write(buffer.data(), buffer.size());
+    //std::ofstream f(_configurationFile);
+
+    //union {
+    //    uint32_t value;
+    //    std::array<char, 4> data;
+    //} size;
+    //size.value = buffer.size();
+    //f.write(size.data.data(), sizeof(uint32_t));
+    //f.write(buffer.data(), buffer.size());
 
     _downloadManager.reset();
     ghoul::deinitialize();
@@ -302,6 +310,8 @@ void SyncWidget::handleFileRequest() {
         }
         _filesDownloading.insert(requestId);
 
+        /*
+        TODO: Adapt to new http request api!
         _downloadManager->downloadRequestFilesAsync(
             identifier,
             path,
@@ -312,7 +322,7 @@ void SyncWidget::handleFileRequest() {
                 std::lock_guard<std::mutex> g(_filesDownloadingMutex);
                 _filesDownloading.erase(requestId);
             }
-        );
+        );*/
     }
 }
 

@@ -286,7 +286,7 @@ bool RenderableStars::isReady() const {
     return (_program != nullptr) && (!_fullData.empty());
 }
 
-void RenderableStars::initialize() {
+void RenderableStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("Star",
         "${MODULE_SPACE}/shaders/star_vs.glsl",
@@ -299,7 +299,7 @@ void RenderableStars::initialize() {
     }
 }
 
-void RenderableStars::deinitialize() {
+void RenderableStars::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);

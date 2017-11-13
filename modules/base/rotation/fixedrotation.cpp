@@ -36,6 +36,14 @@ namespace {
     const char* KeyYAxis = "YAxis";
     const char* KeyZAxis = "ZAxis";
 
+    static const openspace::properties::Property::PropertyInfo EnableInfo = {
+        "Enable",
+        "Enabled",
+        "If this value is 'true', all the machinery of this rotation is used, of it is "
+        "'false', it provides the ability to change its attributes without risking some "
+        "undefined behavior."
+    };
+
     static const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Specification Type",
@@ -51,6 +59,14 @@ namespace {
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
         "stay fixed to the current position of that object."
+    };
+
+    static const openspace::properties::Property::PropertyInfo InvertObjectInfo = {
+        "InvertObject",
+        "Invert Object Point Direction",
+        "If this value is set to 'true', and the type is set to 'Object', the inverse of "
+        "the pointing direction is used, causing the object to point away from the "
+        "referenced object."
     };
 
     static const openspace::properties::Property::PropertyInfo VectorInfo = {
@@ -155,13 +171,15 @@ documentation::Documentation FixedRotation::Documentation() {
 }
 
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
-    : _xAxis{
+    : _enabled(EnableInfo, true)
+    , _xAxis{
         properties::OptionProperty(
             {
                 "xAxis-" + TypeInfo.identifier,
                 "xAxis:" + TypeInfo.guiName,
                 TypeInfo.description
-            }
+            },
+            properties::OptionProperty::DisplayType::Dropdown
         ),
         properties::StringProperty(
             {
@@ -170,6 +188,14 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
                 ObjectInfo.description
             },
             ""
+        ),
+        properties::BoolProperty(
+            {
+                "xAxis-" + InvertObjectInfo.identifier,
+                "xAxis:" + InvertObjectInfo.guiName,
+                InvertObjectInfo.description
+            },
+            false
         ),
         properties::Vec3Property(
             {
@@ -197,7 +223,8 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
                 "yAxis-" + TypeInfo.identifier,
                 "yAxis:" + TypeInfo.guiName,
                 "yAxis:" + TypeInfo.description
-            }
+            },
+            properties::OptionProperty::DisplayType::Dropdown
         ),
         properties::StringProperty(
             {
@@ -206,6 +233,14 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
                 "yAxis:" + ObjectInfo.description
             },
             ""
+        ),
+        properties::BoolProperty(
+            {
+                "yAxis-" + InvertObjectInfo.identifier,
+                "yAxis:" + InvertObjectInfo.guiName,
+                InvertObjectInfo.description
+            },
+            false
         ),
         properties::Vec3Property(
             {
@@ -233,7 +268,8 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
                 "zAxis-" + TypeInfo.identifier,
                 "zAxis:" + TypeInfo.guiName,
                 "zAxis:" + TypeInfo.description
-            }
+            },
+            properties::OptionProperty::DisplayType::Dropdown
         ),
         properties::StringProperty(
             {
@@ -242,6 +278,14 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
                 "zAxis:" + ObjectInfo.description
             },
             ""
+        ),
+        properties::BoolProperty(
+                {
+                "zAxis-" + InvertObjectInfo.identifier,
+                "zAxis:" + InvertObjectInfo.guiName,
+                InvertObjectInfo.description
+            },
+            false
         ),
         properties::Vec3Property(
             {
@@ -274,11 +318,44 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
 
     _constructorDictionary = dictionary;
 
+    setPropertyGroupName("global", "Global");
+    setPropertyGroupName("xAxis", "X Axis");
+    setPropertyGroupName("yAxis", "Y Axis");
+    setPropertyGroupName("zAxis", "Z Axis");
+
+
+
+    _enabled.setGroupIdentifier("global");
+    addProperty(_enabled);
+
+    _attachedObject.setGroupIdentifier("global");
     addProperty(_attachedObject);
     _attachedObject.onChange([this](){
         _attachedNode = sceneGraphNode(_attachedObject);
     });
 
+    auto setPropertyVisibility = [this](Axis& axis) {
+        using Visibility = properties::Property::Visibility;
+        switch (axis.type) {
+            case Axis::Type::Object:
+                axis.object.setVisibility(Visibility::User);
+                axis.invertObject.setVisibility(Visibility::User);
+                axis.vector.setVisibility(Visibility::Hidden);
+                break;
+            case Axis::Type::Vector:
+            case Axis::Type::OrthogonalVector:
+                axis.object.setVisibility(Visibility::Hidden);
+                axis.invertObject.setVisibility(Visibility::Hidden);
+                axis.vector.setVisibility(Visibility::User);
+                break;
+            case Axis::Type::CoordinateSystemCompletion:
+                axis.object.setVisibility(Visibility::Hidden);
+                axis.invertObject.setVisibility(Visibility::Hidden);
+                axis.vector.setVisibility(Visibility::Hidden);
+                break;
+            }
+    };
+    
 
     _xAxis.type.addOptions({
         { Axis::Type::Object, "Object" },
@@ -286,11 +363,22 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::OrthogonalVector, "Orthogonal Vector" },
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
+    _xAxis.type.setGroupIdentifier("xAxis");
+    _xAxis.type.onChange([&]() {
+        setPropertyVisibility(_xAxis);
+    });
     addProperty(_xAxis.type);
+
+    _xAxis.object.setGroupIdentifier("xAxis");
     addProperty(_xAxis.object);
     _xAxis.object.onChange([this](){
         _xAxis.node = sceneGraphNode(_xAxis.object);
     });
+
+    _xAxis.invertObject.setGroupIdentifier("xAxis");
+    addProperty(_xAxis.invertObject);
+
+    _xAxis.vector.setGroupIdentifier("xAxis");
     addProperty(_xAxis.vector);
 
 
@@ -300,11 +388,22 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::OrthogonalVector, "Orthogonal Vector" },
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
+    _yAxis.type.setGroupIdentifier("yAxis");
+    _yAxis.type.onChange([&]() {
+        setPropertyVisibility(_yAxis);
+    });
     addProperty(_yAxis.type);
+
+    _yAxis.object.setGroupIdentifier("yAxis");
     addProperty(_yAxis.object);
     _yAxis.object.onChange([this](){
         _yAxis.node = sceneGraphNode(_yAxis.object);
     });
+
+    _yAxis.invertObject.setGroupIdentifier("yAxis");
+    addProperty(_yAxis.invertObject);
+
+    _yAxis.vector.setGroupIdentifier("yAxis");
     addProperty(_yAxis.vector);
 
 
@@ -314,12 +413,27 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::OrthogonalVector, "Orthogonal Vector" },
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
+    _zAxis.type.setGroupIdentifier("zAxis");
+    _zAxis.type.onChange([&]() {
+        setPropertyVisibility(_zAxis);
+    });
     addProperty(_zAxis.type);
+
+    _zAxis.object.setGroupIdentifier("zAxis");
     addProperty(_zAxis.object);
     _zAxis.object.onChange([this](){
         _zAxis.node = sceneGraphNode(_zAxis.object);
     });
+
+    _zAxis.invertObject.setGroupIdentifier("zAxis");
+    addProperty(_zAxis.invertObject);
+
+    _zAxis.vector.setGroupIdentifier("zAxis");
     addProperty(_zAxis.vector);
+
+    setPropertyVisibility(_xAxis);
+    setPropertyVisibility(_yAxis);
+    setPropertyVisibility(_zAxis);
 }
 
 bool FixedRotation::initialize() {
@@ -421,13 +535,14 @@ bool FixedRotation::initialize() {
 }
 
 void FixedRotation::update(const UpdateData&) {
+    if (!_enabled) {
+        _matrix = glm::dmat3();
+        return;
+    }
+
     glm::vec3 x = xAxis();
     glm::vec3 y = yAxis();
     glm::vec3 z = zAxis();
-
-    LINFOC("x", x);
-    LINFOC("y", y);
-    LINFOC("z", z);
 
     static const float Epsilon = 1e-3;
 
@@ -458,10 +573,11 @@ glm::vec3 FixedRotation::xAxis() const {
             return glm::vec3(1.f, 0.f, 0.f);
         case Axis::Type::Object:
             if (_xAxis.node && _attachedNode) {
-                return glm::vec3(glm::normalize(
+                glm::vec3 dir = glm::vec3(glm::normalize(
                     glm::dvec3(_xAxis.node->worldPosition()) -
                     glm::dvec3(_attachedNode->worldPosition())
                 ));
+                return _xAxis.invertObject ? -dir : dir;
             }
             else {
                 if (_xAxis.node) {
@@ -512,10 +628,11 @@ glm::vec3 FixedRotation::yAxis() const {
             return glm::vec3(0.f, 1.f, 0.f);
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
-                return glm::vec3(glm::normalize(
+                glm::vec3 dir = glm::vec3(glm::normalize(
                     glm::dvec3(_yAxis.node->worldPosition()) -
                     glm::dvec3(_attachedNode->worldPosition())
                 ));
+                return _yAxis.invertObject ? -dir : dir;
             }
             else {
                 if (_yAxis.node) {
@@ -566,10 +683,11 @@ glm::vec3 FixedRotation::zAxis() const {
             return glm::vec3(0.f, 0.f, 1.f);
         case Axis::Type::Object:
             if (_zAxis.node && _attachedNode) {
-                return glm::vec3(glm::normalize(
+                glm::vec3 dir = glm::vec3(glm::normalize(
                     glm::dvec3(_zAxis.node->worldPosition()) -
                     glm::dvec3(_attachedNode->worldPosition())
                 ));
+                return _zAxis.invertObject ? -dir : dir;
             }
             else {
                 if (_zAxis.node) {

@@ -41,6 +41,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
@@ -165,6 +166,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
+    , _loadingScreen(nullptr)
     , _versionInformation{
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
         properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
@@ -576,32 +578,67 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         }
     );
 
-    if (assetPath != "") {
-        if (_scene) {
-            _syncEngine->removeSyncables(_timeManager->getSyncables());
-            _syncEngine->removeSyncables(_renderEngine->getSyncables());
-            _renderEngine->setScene(nullptr);
-            _renderEngine->setCamera(nullptr);
-            _navigationHandler->setCamera(nullptr);
-            _scene->clear();
-        }
-
-        _scene = std::make_unique<Scene>();
-        _scene->setCamera(std::make_unique<Camera>());
-        Camera* camera = _scene->camera();
-        camera->setParent(_scene->root());
-
-        _renderEngine->setCamera(camera);
-        _navigationHandler->setCamera(camera);
-        _navigationHandler->setFocusNode(camera->parent());
-
-        _renderEngine->setScene(_scene.get());
-        _assetManager->clearAllTargetAssets();
-        _assetManager->setTargetAssetState(assetPath, AssetManager::AssetState::Initialized);
+    if (assetPath == "") {
+        return;
     }
+    if (_scene) {
+        _syncEngine->removeSyncables(_timeManager->getSyncables());
+        _syncEngine->removeSyncables(_renderEngine->getSyncables());
+        _renderEngine->setScene(nullptr);
+        _renderEngine->setCamera(nullptr);
+        _navigationHandler->setCamera(nullptr);
+        _scene->clear();
+    }
+
+    _scene = std::make_unique<Scene>();
+    _scene->setCamera(std::make_unique<Camera>());
+    Camera* camera = _scene->camera();
+    camera->setParent(_scene->root());
+
+    _renderEngine->setCamera(camera);
+    _navigationHandler->setCamera(camera);
+    _navigationHandler->setFocusNode(camera->parent());
+
+    _renderEngine->setScene(_scene.get());
+    _assetManager->clearAllTargetAssets();
+    _assetManager->setTargetAssetState(assetPath, AssetManager::AssetState::Initialized);
+
+    bool showMessage = true;
+    std::string kMessage =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowMessage;
+    if (configurationManager().hasKey(kMessage)) {
+        showMessage = configurationManager().value<bool>(kMessage);
+    }
+
+    bool showNodeNames = true;
+    std::string kNames = 
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowNodeNames;
+
+    if (configurationManager().hasKey(kNames)) {
+        showNodeNames = configurationManager().value<bool>(kNames);
+    }
+
+    bool showProgressbar = true;
+    std::string kProgress =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowProgressbar;
+
+    if (configurationManager().hasKey(kProgress)) {
+        showProgressbar = configurationManager().value<bool>(kProgress);
+    }
+ 
+
+    _loadingScreen = std::make_unique<LoadingScreen>(
+        LoadingScreen::ShowMessage(showMessage),
+        LoadingScreen::ShowNodeNames(showNodeNames),
+        LoadingScreen::ShowProgressbar(showProgressbar)
+    );
 
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
+
     _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
 
@@ -1467,6 +1504,11 @@ SettingsEngine& OpenSpaceEngine::settingsEngine() {
 TimeManager& OpenSpaceEngine::timeManager() {
     ghoul_assert(_timeManager, "Download Manager must not be nullptr");
     return *_timeManager;
+}
+
+LoadingScreen& OpenSpaceEngine::loadingScreen() {
+    ghoul_assert(_loadingScreen, "Loading Screen must not be nullptr");
+    return *_loadingScreen;
 }
 
 WindowWrapper& OpenSpaceEngine::windowWrapper() {

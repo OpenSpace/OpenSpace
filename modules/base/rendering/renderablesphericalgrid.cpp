@@ -177,18 +177,7 @@ bool RenderableSphericalGrid::isReady() const {
     return ready;
 }
 
-void RenderableSphericalGrid::deinitialize() {
-    glDeleteVertexArrays(1,&_vaoID);
-    _vaoID = 0;
-
-    glDeleteBuffers(1,&_vBufferID);
-    _vBufferID = 0;
-
-    glDeleteBuffers(1,&_iBufferID);
-    _iBufferID = 0;
-}
-
-void RenderableSphericalGrid::initialize() {
+void RenderableSphericalGrid::initializeGL() {
     _gridProgram = OsEng.renderEngine().buildRenderProgram(
             "GridProgram",
             "${MODULE_BASE}/shaders/grid_vs.glsl",
@@ -204,6 +193,17 @@ void RenderableSphericalGrid::initialize() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
+}
+
+void RenderableSphericalGrid::deinitializeGL() {
+    glDeleteVertexArrays(1, &_vaoID);
+    _vaoID = 0;
+
+    glDeleteBuffers(1, &_vBufferID);
+    _vBufferID = 0;
+
+    glDeleteBuffers(1, &_iBufferID);
+    _iBufferID = 0;
 }
 
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){

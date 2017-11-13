@@ -151,7 +151,11 @@ Renderable::~Renderable() {}
 
 void Renderable::initialize() {}
 
+void Renderable::initializeGL() {}
+
 void Renderable::deinitialize() {}
+
+void Renderable::deinitializeGL() {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;

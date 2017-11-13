@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,56 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__
+#version __CONTEXT__
 
-#include <openspace/properties/propertyowner.h>
+in vec2 in_position;
+in vec2 in_st;
 
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
-#include <modules/globebrowsing/rendering/layer/layer.h>
-#include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/tiletextureinitdata.h>
+out vec2 st;
 
-#include <functional>
-
-namespace openspace::globebrowsing {
-
-struct LayerGroup;
-
-/**
- * Manages multiple LayerGroups.
- */
-class LayerManager : public properties::PropertyOwner  {
-public:
-    LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
-
-    void initialize();
-    void deinitialize();
-
-    std::shared_ptr<Layer> addLayer(layergroupid::GroupID groupId, ghoul::Dictionary layerDict);
-    void deleteLayer(layergroupid::GroupID groupId, std::string layerName);
-
-    const LayerGroup& layerGroup(size_t groupId);
-    const LayerGroup& layerGroup(layergroupid::GroupID);
-
-    bool hasAnyBlendingLayersEnabled() const;
-
-    const std::vector<std::shared_ptr<LayerGroup>>& layerGroups() const;
-
-    void update();
-    void reset(bool includingDisabled = false);
-
-    static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
-                                                      bool padTiles,
-                                                      size_t preferredTileSize = 0);
-
-    static bool shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id);
-    void onChange(std::function<void(void)> callback);
-
-private:
-    std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
-};
-
-} // namespace openspace::globebrowsing
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__
+void main() {
+    gl_Position = vec4(in_position, 0.0, 1.0);
+    st = in_st;
+}

@@ -220,7 +220,7 @@ bool RenderableSphere::isReady() const {
     return _shader && _texture;
 }
 
-void RenderableSphere::initialize() {
+void RenderableSphere::initializeGL() {
     _sphere = std::make_unique<PowerScaledSphere>(
         PowerScaledScalar::CreatePSS(_size), _segments
     );
@@ -234,7 +234,7 @@ void RenderableSphere::initialize() {
     loadTexture();
 }
 
-void RenderableSphere::deinitialize() {
+void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
     if (_shader) {

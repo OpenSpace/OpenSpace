@@ -86,15 +86,10 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         if (hasStart && hasEnd) {
             const std::string start = dictionary.value<std::string>(KeyPreCacheStartTime);
             const std::string end = dictionary.value<std::string>(KeyPreCacheEndTime);
-            std::vector<Time> preCacheTimes = _timeQuantizer.quantized(
+            _preCacheTimes = _timeQuantizer.quantized(
                 Time(Time::convertTime(start)),
                 Time(Time::convertTime(end))
             );
-
-            LINFO("Preloading: " << _filePath.value());
-            for (const Time& t : preCacheTimes) {
-                getTileProvider(t);
-            }
         }
         _successfulInitialization = true;
     }
@@ -102,6 +97,21 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         LERROR("Unable to read file " + _filePath.value());
         _successfulInitialization = false;
     }
+}
+
+
+bool TemporalTileProvider::initialize() {
+    bool success = TileProvider::initialize();
+
+    if (!_preCacheTimes.empty()) {
+        LINFO("Preloading: " << _filePath.value());
+        for (const Time& t : _preCacheTimes) {
+            getTileProvider(t);
+        }
+        _preCacheTimes.clear();
+    }
+
+    return success;
 }
 
 bool TemporalTileProvider::readFilePath() {
@@ -298,6 +308,7 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(
     }
     else {
         std::shared_ptr<TileProvider> tileProvider = initTileProvider(timekey);
+        tileProvider->initialize();
 
         _tileProviderMap[timekey] = tileProvider;
         return tileProvider;

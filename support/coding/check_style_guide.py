@@ -288,7 +288,20 @@ def check_empty_only_line(lines):
         return ''
 
     index = [i + 1 for i, s in enumerate(lines) if s.translate({ord(c): None for c in '\n\r'}).isspace()]
-    if (len(index) > 0):
+    if len(index) > 0:
+        return index
+    else:
+        return ''
+
+
+
+def check_line_length(lines):
+    # Disable this check in non-strict mode
+    if not is_strict_mode:
+        return ''
+
+    index = [i + 1 for i, s in enumerate(lines) if len(s) > (90 + 1)]
+    if len(index) > 0:
         return index
     else:
         return ''
@@ -438,6 +451,10 @@ def check_inline_file(file, component):
         empty_only_lines = check_empty_only_line(lines)
         if empty_only_lines:
             print(file, '\t', 'Empty only line: ', empty_only_lines)
+
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
 
         if (not '_doc.inl' in file):
             # The _doc.inl files are allowed to use using namespace as they are inclued

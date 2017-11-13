@@ -60,7 +60,10 @@ public:
     virtual void render();
 
     virtual bool initialize();
+    virtual bool initializeGL();
     virtual bool deinitialize();
+    virtual bool deinitializeGL();
+
     virtual void update() = 0;
     virtual bool isReady() const;
     bool isEnabled() const;

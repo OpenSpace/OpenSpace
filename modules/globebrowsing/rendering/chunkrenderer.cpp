@@ -38,7 +38,7 @@ namespace openspace::globebrowsing {
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
                              std::shared_ptr<LayerManager> layerManager)
     : _grid(grid)
-    ,_layerManager(layerManager)
+    , _layerManager(layerManager)
 {
     _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
             "GlobalChunkedLodPatch",

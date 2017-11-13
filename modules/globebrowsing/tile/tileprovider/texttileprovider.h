@@ -53,6 +53,9 @@ public:
     TextTileProvider(const TileTextureInitData& initData, size_t fontSize = 48);
     virtual ~TextTileProvider() override;
 
+    bool initialize() override;
+    bool deinitialize() override;
+
     // The TileProvider interface below is implemented in this class
     virtual Tile getTile(const TileIndex& tileIndex) override;
     virtual Tile::Status getTileStatus(const TileIndex& index) override;

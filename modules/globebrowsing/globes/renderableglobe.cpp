@@ -259,17 +259,24 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_layerManager.get());
     //addPropertySubOwner(_pointGlobe.get());
 
+}
+
+void RenderableGlobe::initializeGL() {
+    _layerManager->initialize();
+
+    _layerManager->update();
+
+    _distanceSwitch.initializeGL();
+
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
     _chunkedLodGlobe->recompileShaders();
 }
 
-void RenderableGlobe::initialize() {
-    _distanceSwitch.initialize();
-}
+void RenderableGlobe::deinitializeGL() {
+    _distanceSwitch.deinitializeGL();
 
-void RenderableGlobe::deinitialize() {
-    _distanceSwitch.deinitialize();
+    _layerManager->deinitialize();
 }
 
 bool RenderableGlobe::isReady() const {

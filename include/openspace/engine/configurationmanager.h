@@ -155,6 +155,20 @@ public:
     /// The part of the key storing whether each OpenGL call should be logged
     static const std::string KeyLogEachOpenGLCall;
 
+    /// This key determines whether the scene graph nodes should initialized multithreaded
+    static const std::string KeyUseMultithreadedInitialization;
+
+    /// The key under which all of the loading settings are grouped
+    static const std::string KeyLoadingScreen;
+    /// The part of the key storing whether the loading screen should display the message
+    /// about current status
+    static const std::string PartShowMessage;
+    /// The part of the key storing whether the loading screen should display node names
+    static const std::string PartShowNodeNames;
+    /// The part of the key storing whether the loading screen should contain a progress
+    /// bar
+    static const std::string PartShowProgressbar;
+
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the

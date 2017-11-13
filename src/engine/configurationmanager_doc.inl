@@ -423,6 +423,45 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "'TRACE' loglevel. This will bring the rendering to a crawl but provides "
             "useful debugging features for the order in which OpenGL calls occur. This "
             "defaults to 'false'."
+        },
+        {
+            ConfigurationManager::KeyUseMultithreadedInitialization,
+            new BoolVerifier,
+            Optional::Yes,
+            "This value determines whether the initialization of the scene graph should "
+            "occur multithreaded, that is, whether multiple scene graph nodes should "
+            "initialize in parallel. The only use for this value is to disable it for "
+            "debugging support."
+        },
+        {
+            ConfigurationManager::KeyLoadingScreen,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartShowMessage,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "If this value is set to 'true', the loading screen will display a "
+                    "message information about the current phase the loading is in."
+                },
+                {
+                    ConfigurationManager::PartShowNodeNames,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "If this value is set to 'true', the loading screen will display a "
+                    "list of all of the nodes with their respective status (created, "
+                    "loaded, initialized)."
+                },
+                {
+                    ConfigurationManager::PartShowProgressbar,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "If this value is set to 'true', the loading screen will contain a "
+                    "progress bar that gives an estimate of the loading progression."
+                }
+            }),
+            Optional::Yes,
+            "Values in this table describe the behavior of the loading screen that is "
+            "displayed while the scene graph is created and initialized."
         }
         }
     };

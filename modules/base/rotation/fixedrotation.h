@@ -66,11 +66,14 @@ private:
 
         properties::OptionProperty type;
         properties::StringProperty object;
+        properties::BoolProperty invertObject;
         properties::Vec3Property vector;
         properties::BoolProperty isOrthogonal;
 
         SceneGraphNode* node;
     };
+
+    properties::BoolProperty _enabled;
 
     Axis _xAxis;
     Axis _yAxis;

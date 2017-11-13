@@ -115,6 +115,24 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     }
 }
 
+bool TileProviderByLevel::initialize() {
+    bool success = TileProvider::initialize();
+    for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
+        success &= tp->initialize();
+    }
+
+    return success;
+}
+
+bool TileProviderByLevel::deinitialize() {
+    bool success = true;
+    for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
+        success &= tp->deinitialize();
+    }
+    
+    return TileProvider::deinitialize() && success;
+}
+
 Tile TileProviderByLevel::getTile(const TileIndex& tileIndex) {
     TileProvider* provider = levelProvider(tileIndex.level);
     if (provider) {
