@@ -185,6 +185,10 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
     };
 }
 
+bool AssetManager::isDone() {
+    return _stateChangesInProgress.size() == 0;
+}
+
 std::shared_ptr<Asset> AssetManager::tryLoadAsset(const std::string& path) {
     try {
         return _assetLoader->loadAsset(path);

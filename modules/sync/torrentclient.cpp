@@ -90,13 +90,13 @@ void TorrentClient::pollAlerts() {
     _session->pop_alerts(&alerts);
 
     for (lt::alert const* a : alerts) {
-        LINFO(a->message());
+        //LINFO(a->message());
         // if we receive the finished alert or an error, we're done
         if (lt::alert_cast<lt::torrent_finished_alert>(a)) {
-            LINFO(a->message());
+            //LINFO(a->message());
         }
         if (lt::alert_cast<lt::torrent_error_alert>(a)) {
-            LINFO(a->message());
+            //LINFO(a->message());
         }
     }
 }

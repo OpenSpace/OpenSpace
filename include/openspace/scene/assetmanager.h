@@ -64,7 +64,7 @@ public:
     void clearAllTargetAssets();
     std::vector<std::shared_ptr<Asset>> allAssets();
     scripting::LuaLibrary luaLibrary();
-
+    bool isDone();
 private:
     std::shared_ptr<Asset> tryLoadAsset(const std::string& path);
     bool tryInitializeAsset(Asset& asset);

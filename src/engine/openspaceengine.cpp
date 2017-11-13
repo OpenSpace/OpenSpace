@@ -1136,6 +1136,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         writeDocumentations();
     }
 
+    if (_loadingScreen && _assetManager->isDone()) {
+        _loadingScreen = nullptr;
+    }
+
     _renderEngine->updateScene();
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
@@ -1177,6 +1181,13 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& projectionMatrix)
 {
     LTRACE("OpenSpaceEngine::render(begin)");
+    OnExit([] {
+        LTRACE("OpenSpaceEngine::render(end)");
+    });
+
+    if (_loadingScreen) {
+        return;
+    }
 
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
@@ -1190,11 +1201,19 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         func();
     }
 
-    LTRACE("OpenSpaceEngine::render(end)");
+
 }
 
 void OpenSpaceEngine::drawOverlays() {
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
+    OnExit([] {
+        LTRACE("OpenSpaceEngine::drawOverlays(end)");
+    });
+    if (_loadingScreen) {
+        _loadingScreen->render();
+        return;
+    }
+
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
 
@@ -1213,8 +1232,6 @@ void OpenSpaceEngine::drawOverlays() {
     for (const auto& func : _moduleCallbacks.draw2D) {
         func();
     }
-
-    LTRACE("OpenSpaceEngine::drawOverlays(end)");
 }
 
 void OpenSpaceEngine::postDraw() {

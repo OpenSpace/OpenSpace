@@ -28,10 +28,13 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/directory.h>
 
+#include <fstream>
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
+#include <mutex>
+#include <atomic>
 
 namespace openspace {
     
@@ -100,48 +103,106 @@ private:
     RequestOptions _options;
     
     friend size_t curlfunctions::writeCallback(
-                                char *ptr,
-                                size_t size,
-                                size_t nmemb,
-                                void *userdata);
+        char *ptr,
+        size_t size,
+        size_t nmemb,
+        void *userdata);
 
-    friend int curlfunctions::progressCallback(void *clientp,
-                                               int64_t dltotal,
-                                               int64_t dlnow,
-                                               int64_t ultotal,
-                                               int64_t ulnow);
+    friend int curlfunctions::progressCallback(
+        void *clientp,
+        int64_t dltotal,
+        int64_t dlnow,
+        int64_t ultotal,
+        int64_t ulnow);
 };
-    
-class HttpMemoryDownload {
-public:
-    HttpMemoryDownload(std::string url);
-    
-    void onReadyStateChange(HttpRequest::ReadyStateChangeCallback cb);
-    void onProgress(HttpRequest::ProgressCallback cb);
-    
-    void download(HttpRequest::RequestOptions opt);
-    
-    const std::vector<char>& downloadedData();
 
+
+class HttpDownloadInterface {
+public:
+    virtual bool initDownload() = 0;
+    virtual bool deinitDownload() = 0;
+    virtual size_t handleData(HttpRequest::Data d) = 0;
+};
+
+class SyncHttpDownload : public virtual HttpDownloadInterface {
+public:
+    SyncHttpDownload(std::string url);
+    void download(HttpRequest::RequestOptions opt);
+protected:
+    HttpRequest _httpRequest;
+};
+
+class AsyncHttpDownload : public virtual HttpDownloadInterface {
+public:
+    AsyncHttpDownload(std::string url);
+    virtual ~AsyncHttpDownload() = default;
+    void start(HttpRequest::RequestOptions opt);
+    void cancel();
+    void wait();
+protected:
+    void download(HttpRequest::RequestOptions opt);
 private:
     HttpRequest _httpRequest;
+
+    std::thread _downloadThread;
+    std::mutex _mutex;
+    std::condition_variable _downloadFinishCondition;
+    bool _started = false;
+    bool _shouldCancel = false;
+    bool _finished = false;
+    bool _successful = false;
+};
+
+class HttpFileDownload : public virtual HttpDownloadInterface {
+public:
+    HttpFileDownload(std::string destination);
+protected:
+    bool initDownload() override;
+    bool deinitDownload() override;
+    size_t handleData(HttpRequest::Data d) override;
+private:
+    std::string _destination;
+    std::ofstream _file;
+};
+
+class HttpMemoryDownload : public virtual HttpDownloadInterface {
+public:
+    const std::vector<char>& downloadedData();
+protected:
+    bool initDownload() override;
+    bool deinitDownload() override;
+    size_t handleData(HttpRequest::Data d) override;
+private:
     std::vector<char> _downloadedData;
 };
 
-class HttpFileDownload {
+// Synchronous download to memory
+class SyncHttpMemoryDownload : public SyncHttpDownload, public HttpMemoryDownload {
 public:
-    HttpFileDownload(std::string url, std::string destinationPath);
-    
-    void onReadyStateChange(HttpRequest::ReadyStateChangeCallback cb);
-    void onProgress(HttpRequest::ProgressCallback cb);
-    
-    void download(HttpRequest::RequestOptions opt);
-
-private:
-    HttpRequest _httpRequest;
-    std::string _destination;
+    SyncHttpMemoryDownload(std::string url);
+    virtual ~SyncHttpMemoryDownload() = default;
 };
-    
+
+// Synchronous download to file
+class SyncHttpFileDownload : public SyncHttpDownload, public HttpFileDownload {
+public:
+    SyncHttpFileDownload(std::string url, std::string destinationPath);
+    virtual ~SyncHttpFileDownload() = default;
+};
+
+// Asynchronous download to memory
+class AsyncHttpMemoryDownload : public AsyncHttpDownload, public HttpMemoryDownload {
+public:
+    AsyncHttpMemoryDownload(std::string url);
+    virtual ~AsyncHttpMemoryDownload() = default;
+};
+
+// Asynchronous download to file
+class AsyncHttpFileDownload : public AsyncHttpDownload, public HttpFileDownload {
+public:
+    AsyncHttpFileDownload(std::string url, std::string destinationPath);
+    virtual ~AsyncHttpFileDownload() = default;
+};
 
 } // namespace openspace
 

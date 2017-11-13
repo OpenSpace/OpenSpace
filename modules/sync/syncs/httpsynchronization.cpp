@@ -112,14 +112,16 @@ void HttpSynchronization::start() {
         return;
     }
 
-    // TODO: Do this in a new thread!
     std::vector<std::string> listUrls = fileListUrls();
-    for (const auto& url : listUrls) {
-        if (trySyncFromUrl(url)) {
-            resolve();
-            return;
+    _syncThread = std::thread([this, listUrls] {
+        for (const auto& url : listUrls) {
+            if (trySyncFromUrl(url)) {
+                resolve();
+                return;
+            }
         }
-    }
+        //fail();
+    });
 }
 
 void HttpSynchronization::cancel() {
@@ -150,8 +152,10 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     HttpRequest::RequestOptions opt;
     opt.requestTimeoutSeconds = 0;
 
-    HttpMemoryDownload fileListDownload(listUrl);
+    SyncHttpMemoryDownload fileListDownload(listUrl);
     fileListDownload.download(opt);
+
+    // ...
 
     const std::vector<char>& buffer = fileListDownload.downloadedData();
 
@@ -168,7 +172,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         filename;
 
         std::thread t([opt, line, fileDestination]() {
-            HttpFileDownload fileDownload(line, fileDestination);
+            SyncHttpFileDownload fileDownload(line, fileDestination);
             fileDownload.download(opt);
         });
         downloadThreads.push_back(std::move(t));
@@ -176,6 +180,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     for (auto& t : downloadThreads) {
         t.join();
     }
+
     createSyncFile();
     return true;
 }

@@ -60,6 +60,8 @@ private:
     int _version;
     std::string _synchronizationRoot;
     std::vector<std::string> _synchronizationRepositories;
+
+    std::thread _syncThread;
 };
 
 } // namespace openspace
