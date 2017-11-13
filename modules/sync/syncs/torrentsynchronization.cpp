@@ -123,11 +123,11 @@ void TorrentSynchronization::clear() {
 }
 
 
-float TorrentSynchronization::nSynchronizedBytes() {
+size_t TorrentSynchronization::nSynchronizedBytes() {
     return 0;
 }
 
-float TorrentSynchronization::nTotalBytes() {
+size_t TorrentSynchronization::nTotalBytes() {
     return 0;
 }
 

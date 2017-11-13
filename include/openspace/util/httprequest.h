@@ -35,6 +35,7 @@
 #include <vector>
 #include <mutex>
 #include <atomic>
+#include <thread>
 
 namespace openspace {
     
@@ -125,6 +126,7 @@ private:
 class HttpDownload {
 public:
     HttpDownload();
+    virtual ~HttpDownload() = default;
     using ProgressCallback = std::function<bool(HttpRequest::Progress)>;
     void onProgress(ProgressCallback progressCallback);
     bool hasStarted();
@@ -151,6 +153,7 @@ private:
 class SyncHttpDownload : public virtual HttpDownload {
 public:
     SyncHttpDownload(std::string url);
+    virtual ~SyncHttpDownload() = default;
     void download(HttpRequest::RequestOptions opt);
 protected:
     HttpRequest _httpRequest;
@@ -176,6 +179,7 @@ private:
 class HttpFileDownload : public virtual HttpDownload {
 public:
     HttpFileDownload(std::string destination);
+    virtual ~HttpFileDownload() = default;
 protected:
     bool initDownload() override;
     bool deinitDownload() override;
@@ -187,6 +191,7 @@ private:
 
 class HttpMemoryDownload : public virtual HttpDownload {
 public:
+    virtual ~HttpMemoryDownload() = default;
     const std::vector<char>& downloadedData();
 protected:
     bool initDownload() override;
@@ -200,6 +205,7 @@ private:
 class SyncHttpMemoryDownload : public SyncHttpDownload, public HttpMemoryDownload {
 public:
     SyncHttpMemoryDownload(std::string url);
+    SyncHttpMemoryDownload(SyncHttpMemoryDownload&&);
     virtual ~SyncHttpMemoryDownload() = default;
 };
 
@@ -207,6 +213,7 @@ public:
 class SyncHttpFileDownload : public SyncHttpDownload, public HttpFileDownload {
 public:
     SyncHttpFileDownload(std::string url, std::string destinationPath);
+    SyncHttpFileDownload(SyncHttpFileDownload&&);
     virtual ~SyncHttpFileDownload() = default;
 };
 
@@ -214,6 +221,7 @@ public:
 class AsyncHttpMemoryDownload : public AsyncHttpDownload, public HttpMemoryDownload {
 public:
     AsyncHttpMemoryDownload(std::string url);
+    AsyncHttpMemoryDownload(AsyncHttpMemoryDownload&&);
     virtual ~AsyncHttpMemoryDownload() = default;
 };
 
@@ -221,6 +229,7 @@ public:
 class AsyncHttpFileDownload : public AsyncHttpDownload, public HttpFileDownload {
 public:
     AsyncHttpFileDownload(std::string url, std::string destinationPath);
+    AsyncHttpFileDownload(AsyncHttpFileDownload&&);
     virtual ~AsyncHttpFileDownload() = default;
 };
 

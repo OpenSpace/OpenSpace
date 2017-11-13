@@ -49,8 +49,8 @@ public:
     void cancel() override;
     void clear() override;
 
-    float nSynchronizedBytes() override;
-    float nTotalBytes() override;
+    size_t nSynchronizedBytes() override;
+    size_t nTotalBytes() override;
     bool nTotalBytesIsKnown() override;
 
 private:

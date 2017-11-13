@@ -46,8 +46,8 @@ public:
     void cancel() override;
     void clear() override;
 
-    float nSynchronizedBytes() override;
-    float nTotalBytes() override;
+    size_t nSynchronizedBytes() override;
+    size_t nTotalBytes() override;
     bool nTotalBytesIsKnown() override;
 
 private:
@@ -57,8 +57,8 @@ private:
     void createSyncFile();
 
     std::atomic_bool _nTotalBytesKnown;
-    std::atomic<float> _nTotalBytes;
-    std::atomic<float> _nSynchronizedBytes;
+    std::atomic_size_t _nTotalBytes;
+    std::atomic_size_t _nSynchronizedBytes;
 
     std::atomic_bool _shouldCancel;
     std::string _identifier;

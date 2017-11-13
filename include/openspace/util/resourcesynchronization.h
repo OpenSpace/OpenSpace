@@ -53,19 +53,21 @@ public:
     virtual void cancel() = 0;
     virtual void clear() = 0;
 
-    virtual float nSynchronizedBytes() = 0;
-    virtual float nTotalBytes() = 0;
+    virtual size_t nSynchronizedBytes() = 0;
+    virtual size_t nTotalBytes() = 0;
     virtual bool nTotalBytesIsKnown() = 0;
     virtual float progress();
 
     void wait();
     bool isResolved();
     void resolve();
+    void reject();
     void updateProgress(float t);
 
 private:
     std::atomic<bool> _started;
     std::atomic<bool> _resolved;
+    std::atomic<bool> _rejected;
 };
 
 

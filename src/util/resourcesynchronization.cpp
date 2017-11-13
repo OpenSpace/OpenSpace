@@ -106,6 +106,10 @@ void ResourceSynchronization::resolve() {
     _resolved = true;
 }
 
+void ResourceSynchronization::reject() {
+    _rejected = true;
+}
+
 float ResourceSynchronization::progress() {
     if (!nTotalBytesIsKnown()) {
         return 0.f;

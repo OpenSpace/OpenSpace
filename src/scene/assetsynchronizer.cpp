@@ -105,10 +105,10 @@ float AssetSynchronizer::assetProgress(Asset* asset) {
 
     for (const auto& sync : syncs) {
         if (sync->nTotalBytesIsKnown()) {
-            return 0;
-        } else {
             nTotalBytes += sync->nTotalBytes();
             nSyncedBytes += sync->nSynchronizedBytes();
+        } else {
+            return 0;
         }
     }
 
