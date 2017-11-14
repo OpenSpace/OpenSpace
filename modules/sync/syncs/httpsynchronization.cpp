@@ -37,6 +37,7 @@
 #include <sstream>
 #include <fstream>
 #include <numeric>
+#include <memory>
 
 namespace {
     const char* _loggerCat = "HttpSynchronization";
@@ -69,6 +70,13 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict)
     const SyncModule* syncModule = OsEng.moduleEngine().module<SyncModule>();
     _synchronizationRoot = syncModule->synchronizationRoot();
     _synchronizationRepositories = syncModule->httpSynchronizationRepositories();
+}
+
+HttpSynchronization::~HttpSynchronization() {
+    if (_syncThread.joinable()) {
+        cancel();
+        _syncThread.join();
+    }
 }
 
 documentation::Documentation HttpSynchronization::Documentation() {
@@ -127,9 +135,11 @@ void HttpSynchronization::start() {
 }
 
 void HttpSynchronization::cancel() {
+    _shouldCancel = true;
 }
 
 void HttpSynchronization::clear() {
+    // TODO: Remove all files from directory.
 }
 
 std::vector<std::string> HttpSynchronization::fileListUrls() {
@@ -165,7 +175,6 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     }
 
     const std::vector<char>& buffer = fileListDownload.downloadedData();
-
     _nSynchronizedBytes = 0;
     _nTotalBytes = 0;
     _nTotalBytesKnown = false;
@@ -179,7 +188,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     std::atomic_bool startedAllDownloads = false;
     std::atomic_size_t nDownloads = 0;
     
-    std::vector<AsyncHttpFileDownload> downloads;
+    std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
     
     while (fileList >> line) {
         size_t lastSlash = line.find_last_of('/');
@@ -189,20 +198,18 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         ghoul::filesystem::FileSystem::PathSeparator +
         filename;
         
-        downloads.push_back(AsyncHttpFileDownload(line, fileDestination));
-        AsyncHttpFileDownload& fileDownload = downloads.back();
+        downloads.push_back(std::make_unique<AsyncHttpFileDownload>(line, fileDestination));
+        auto& fileDownload = downloads.back();
         
-        bool reportedFileSize = false;
         ++nDownloads;
         
-        fileDownload.onProgress(
-            [this, line, &reportedFileSize, &fileSizes, &fileSizeMutex,
+        fileDownload->onProgress(
+            [this, line, &fileSizes, &fileSizeMutex,
              &startedAllDownloads, &nDownloads](HttpRequest::Progress p)
         {
-            if (!reportedFileSize && p.totalBytesKnown) {
+            if (p.totalBytesKnown) {
                 std::lock_guard<std::mutex> guard(fileSizeMutex);
                 fileSizes[line] = p.totalBytes;
-                reportedFileSize = true;
                 
                 if (!_nTotalBytesKnown && startedAllDownloads && fileSizes.size() == nDownloads) {
                     _nTotalBytesKnown = true;
@@ -215,17 +222,24 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             return !_shouldCancel;
         });
 
-        fileDownload.start(opt);
+        fileDownload->start(opt);
     }
     startedAllDownloads = true;
     
+    bool failed = false;
     for (auto& d : downloads) {
-        d.wait();
-        if (!d.hasSucceeded()) {
-            return false;
+        d->wait();
+        if (!d->hasSucceeded()) {
+            failed = true;
         }
     }
-    return true;
+    if (!failed) {
+        return true;
+    }
+    for (auto& d : downloads) {
+        d->cancel();
+    }
+    return false;
 }
 
 void HttpSynchronization::createSyncFile() {
@@ -242,11 +256,11 @@ size_t HttpSynchronization::nSynchronizedBytes() {
 }
 
 size_t HttpSynchronization::nTotalBytes() {
-    return 0;
+    return _nTotalBytes;
 }
 
 bool HttpSynchronization::nTotalBytesIsKnown() {
-    return false;
+    return _nTotalBytesKnown;
 }
 
 } // namespace openspace

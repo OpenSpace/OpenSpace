@@ -35,7 +35,7 @@ namespace openspace {
 class HttpSynchronization : public ResourceSynchronization {
 public:
     HttpSynchronization(const ghoul::Dictionary& dict);
-    virtual ~HttpSynchronization() = default;
+    virtual ~HttpSynchronization();
 
     static documentation::Documentation Documentation();
 
@@ -58,7 +58,7 @@ private:
     std::atomic_size_t _nTotalBytes;
     std::atomic_size_t _nSynchronizedBytes;
 
-    std::atomic_bool _shouldCancel;
+    std::atomic_bool _shouldCancel = false;
     std::string _identifier;
     int _version;
     std::string _synchronizationRoot;

@@ -33,9 +33,8 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <mutex>
-#include <atomic>
 #include <thread>
+#include <condition_variable>
 
 namespace openspace {
     
@@ -125,10 +124,11 @@ private:
 
 class HttpDownload {
 public:
-    HttpDownload();
-    HttpDownload(HttpDownload&& d);
-    virtual ~HttpDownload() = default;
     using ProgressCallback = std::function<bool(HttpRequest::Progress)>;
+
+    HttpDownload();
+    HttpDownload(HttpDownload&& d) = default;
+    virtual ~HttpDownload() = default;
     void onProgress(ProgressCallback progressCallback);
     bool hasStarted();
     bool hasFailed();
@@ -144,7 +144,6 @@ protected:
     void markAsSuccessful();
     void markAsFailed();
 private:
-    std::mutex _onProgressMutex;
     ProgressCallback _onProgress;
     bool _started = false;
     bool _failed = false;
@@ -174,9 +173,10 @@ protected:
 private:
     HttpRequest _httpRequest;
     std::thread _downloadThread;
-    std::mutex _mutex;
+    std::mutex _conditionMutex;
     std::condition_variable _downloadFinishCondition;
     bool _shouldCancel = false;
+    std::mutex _stateChangeMutex;
 };
 
 class HttpFileDownload : public virtual HttpDownload {
@@ -212,7 +212,6 @@ private:
 class SyncHttpMemoryDownload : public SyncHttpDownload, public HttpMemoryDownload {
 public:
     SyncHttpMemoryDownload(std::string url);
-    SyncHttpMemoryDownload(SyncHttpMemoryDownload&&) = default;
     virtual ~SyncHttpMemoryDownload() = default;
 };
 
@@ -220,7 +219,6 @@ public:
 class SyncHttpFileDownload : public SyncHttpDownload, public HttpFileDownload {
 public:
     SyncHttpFileDownload(std::string url, std::string destinationPath);
-    SyncHttpFileDownload(SyncHttpFileDownload&&) = default;
     virtual ~SyncHttpFileDownload() = default;
 };
 
@@ -228,7 +226,6 @@ public:
 class AsyncHttpMemoryDownload : public AsyncHttpDownload, public HttpMemoryDownload {
 public:
     AsyncHttpMemoryDownload(std::string url);
-    AsyncHttpMemoryDownload(AsyncHttpMemoryDownload&&) = default;
     virtual ~AsyncHttpMemoryDownload() = default;
 };
 
@@ -236,7 +233,6 @@ public:
 class AsyncHttpFileDownload : public AsyncHttpDownload, public HttpFileDownload {
 public:
     AsyncHttpFileDownload(std::string url, std::string destinationPath);
-    AsyncHttpFileDownload(AsyncHttpFileDownload&&) = default;
     virtual ~AsyncHttpFileDownload() = default;
 };
 
