@@ -48,11 +48,17 @@ public:
         libtorrent::torrent_handle handle;
     };
 
+    struct Progress {
+
+    };
+
+    using TorrentProgressCallback = std::function<void(Progress)>;
+
     TorrentClient();
     ~TorrentClient();
     void initialize();
-    size_t addTorrentFile(std::string torrentFile, std::string destination);
-    size_t addMagnetLink(std::string magnetLink, std::string destination);
+    size_t addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb);
+    size_t addMagnetLink(std::string magnetLink, std::string destination, TorrentProgressCallback cb);
     void removeTorrent(size_t id);
     void pollAlerts();
 private:

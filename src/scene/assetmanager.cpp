@@ -43,75 +43,105 @@ AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader,
     , _assetSynchronizer(std::move(synchronizer))
 {}
 
+
 bool AssetManager::update() {
-    bool changedInititializations = false;
-
     std::unordered_map<std::string, std::shared_ptr<Asset>> loadedAssets;
-
     // Load and unload assets
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const AssetState targetState = c.second;
 
-        const bool shouldBeLoaded = targetState != AssetState::Unloaded;
-
-        const std::shared_ptr<Asset> asset = _assetLoader->loadedAsset(path);
-        const bool isLoaded = asset != nullptr;
-
-        if (isLoaded && !shouldBeLoaded) {
-            _currentStates.erase(asset.get());
-            _assetLoader->unloadAsset(asset.get());
-            
-        } else if (!isLoaded && shouldBeLoaded) {
-            std::shared_ptr<Asset> loadedAsset = tryLoadAsset(path);
-            if (loadedAsset) {
-                loadedAssets.emplace(path, loadedAsset);
-                _currentStates[loadedAsset.get()] = AssetState::Loaded;
-            } else {
-                _currentStates[loadedAsset.get()] = AssetState::LoadingFailed;
-            }
+        std::shared_ptr<Asset> asset = updateLoadState(path, targetState);
+        if (asset) {
+            loadedAssets.emplace(path, asset);
         }
     }
 
     // Collect all assets for synchronization
     for (const auto& loadedAsset : loadedAssets) {
-        const AssetState targetState = _pendingStateChangeCommands[loadedAsset.first];
+        const std::string& path = loadedAsset.first;
+        const AssetState targetState = _pendingStateChangeCommands[path];
 
-        const bool shouldSync =
-            targetState == AssetState::Synchronized ||
-            targetState == AssetState::Initialized;
+        updateSyncState(path, targetState);
+    }
 
-        if (!shouldSync) {
-            continue;
+    // Collect assets that were resolved and rejected.
+    // Initialize if requested.
+    // Update current state accordingly.
+    for (const auto& stateChange : _assetSynchronizer->getStateChanges()) {
+        handleSyncStateChange(stateChange);
+    }
+
+    _pendingStateChangeCommands.clear();
+    return false;
+}
+
+/**
+ * Load or unload asset depening on target state
+ * Return shared pointer to asset if this loads the asset
+ */
+std::shared_ptr<Asset> AssetManager::updateLoadState(std::string path, AssetState targetState) {
+    const bool shouldBeLoaded = targetState != AssetState::Unloaded;
+
+    const std::shared_ptr<Asset> asset = _assetLoader->loadedAsset(path);
+    const bool isLoaded = asset != nullptr;
+
+    if (isLoaded && !shouldBeLoaded) {
+        _currentStates.erase(asset.get());
+        _assetLoader->unloadAsset(asset.get());
+    }
+    else if (!isLoaded && shouldBeLoaded) {
+        std::shared_ptr<Asset> loadedAsset = tryLoadAsset(path);
+        if (loadedAsset) {
+            _currentStates[loadedAsset.get()] = AssetState::Loaded;
+            return loadedAsset;
         }
+        else {
+            _currentStates[loadedAsset.get()] = AssetState::LoadingFailed;
+        }
+    }
+    return nullptr;
+}
 
+/**
+ * Start or cancel synchronizations depending on target state
+ */
+void AssetManager::updateSyncState(Asset* asset, AssetState targetState) {
+    const bool shouldSync =
+        targetState == AssetState::Synchronized ||
+        targetState == AssetState::Initialized;
+
+    if (shouldSync) {
         std::vector<std::shared_ptr<Asset>> importedAssets =
             loadedAsset.second->allAssets();
 
         for (const auto& a : importedAssets) {
-            _assetSynchronizer->addAsset(a);
+            _assetSynchronizer->startSync(a);
             _syncAncestors[a].insert(loadedAsset.second);
+            //_syncDependencies[loadedAsset.second].insert(a);
         }
         _stateChangesInProgress.emplace(
             loadedAsset.second,
             _pendingStateChangeCommands[loadedAsset.first]
         );
+    } else {
+        _assetSynchronizer->cancelSync(a);
+        // Todo: Also cancel syncing of dependendencies
     }
+}
 
-    // Start asset synchronization. (Async operation)
-    _assetSynchronizer->syncUnsynced();
-    
-    // Collect finished synchronizations and initialize assets
-    std::vector<std::shared_ptr<Asset>> syncedAssets =
-        _assetSynchronizer->getSynchronizedAssets();
+void handleSyncStateChange(AssetSynchronizer::StateChange stateChange) {
 
-    for (const auto& syncedAsset : syncedAssets) {
-        // Retrieve ancestors that were waiting for this asset to sync
-        const auto it = _syncAncestors.find(syncedAsset);
-        if (it == _syncAncestors.end()) {
-            continue; // Should not happen. (No ancestor to this synchronization)
-        }
-        std::unordered_set<std::shared_ptr<Asset>>& ancestors = it->second;
+    // Retrieve ancestors that were waiting for this asset to sync
+    const auto it = _syncAncestors.find(stateChange.asset);
+    if (it == _syncAncestors.end()) {
+        continue; // Should not happen. (No ancestor to this synchronization)
+    }
+    std::unordered_set<std::shared_ptr<Asset>>& ancestors = it->second;
+
+    if (stateChange.state ==
+        AssetSynchronizer::SynchronizationState::Resolved)
+    {
 
         for (const auto& ancestor : ancestors) {
             const bool initReady = ancestor->isInitReady();
@@ -124,19 +154,27 @@ bool AssetManager::update() {
                     if (tryInitializeAsset(*ancestor)) {
                         changedInititializations = true;
                         _currentStates[ancestor.get()] = AssetState::Initialized;
-                    } else {
+                    }
+                    else {
                         _currentStates[ancestor.get()] = AssetState::InitializationFailed;
                     }
-                } else {
+                }
+                else {
                     _currentStates[ancestor.get()] = AssetState::Synchronized;
                 }
             }
         }
-        _syncAncestors.erase(syncedAsset);
+
+    }
+    else if (stateChange.state ==
+        AssetSynchronizer::SynchronizationState::Rejected)
+    {
+        for (const auto& ancestor : ancestors) {
+            _currentStates[ancestor.get()] = AssetState::SynchronizationFailed;
+        }
     }
 
-    _pendingStateChangeCommands.clear();
-    return changedInititializations;
+    _syncAncestors.erase(stateChange.asset);
 }
 
 void AssetManager::setTargetAssetState(const std::string& path, AssetState targetState) {

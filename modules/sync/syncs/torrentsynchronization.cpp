@@ -111,15 +111,29 @@ std::string TorrentSynchronization::directory() {
 }
 
 void TorrentSynchronization::start() {
-    size_t torrentId = _torrentClient->addMagnetLink(_magnetLink, directory());
-    resolve();
-    return;
+    if (_enabled) {
+        return;
+    }
+    _enabled = true;
+    _torrentId = _torrentClient->addMagnetLink(
+        _magnetLink,
+        directory(),
+        [this](TorrentClient::Progress p) {
+            updateTorrentProgress(p);
+        }
+    );
+
 }
 
 void TorrentSynchronization::cancel() {
+    if (_enabled) {
+        _torrentClient->removeTorrent(_torrentId);
+        _enabled = false;
+    }
 }
 
 void TorrentSynchronization::clear() {
+    // Todo: remove directory!
 }
 
 
@@ -133,6 +147,10 @@ size_t TorrentSynchronization::nTotalBytes() {
 
 bool TorrentSynchronization::nTotalBytesIsKnown() {
     return false;
+}
+
+void TorrentSynchronization::updateTorrentProgress(TorrentClient::Progress p) {
+    // TODO: implement this
 }
 
 } // namespace openspace

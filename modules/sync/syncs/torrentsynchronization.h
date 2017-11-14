@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 
+#include <modules/sync/torrentclient.h>
+
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/documentation/documentation.h>
 
@@ -54,6 +56,10 @@ public:
     bool nTotalBytesIsKnown() override;
 
 private:
+    void updateTorrentProgress(TorrentClient::Progress p);
+
+    std::atomic_bool _enabled = false;
+    size_t _torrentId;
     std::string uniformResourceName() const;
     std::string _identifier;
     std::string _magnetLink;

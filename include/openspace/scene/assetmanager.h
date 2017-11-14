@@ -53,12 +53,18 @@ public:
         Loaded,
         LoadingFailed,
         Synchronized,
-        SynchronizatoinFailed,
+        SynchronizationFailed,
         Initialized,
         InitializationFailed
     };
 
     bool update();
+
+
+    std::shared_ptr<Asset> updateLoadState(std::string path, AssetState targetState);
+    void updateSyncState(Asset* asset, AssetState targetState);
+    void handleSyncStateChange(AssetSynchronizer::StateChange stateChange);
+
     void setTargetAssetState(const std::string& path, AssetState targetState);
     AssetState currentAssetState(Asset* asset);
     void clearAllTargetAssets();

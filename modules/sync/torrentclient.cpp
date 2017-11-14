@@ -101,7 +101,7 @@ void TorrentClient::pollAlerts() {
     }
 }
 
-size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destination) {
+size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb) {
     if (!_session) {
         LERROR("Torrent session not initialized when adding torrent");
         return -1;
@@ -122,7 +122,8 @@ size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destin
     return id;
 }
 
-size_t TorrentClient::addMagnetLink(std::string magnetLink, std::string destination) {
+size_t TorrentClient::addMagnetLink(std::string magnetLink, std::string destination, TorrentProgressCallback cb) {
+    // TODO: register callback!
     if (!_session) {
         LERROR("Torrent session not initialized when adding torrent");
         return -1;
