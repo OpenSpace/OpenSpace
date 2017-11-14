@@ -135,6 +135,14 @@ HttpDownload::HttpDownload()
     : _onProgress([] (HttpRequest::Progress) { return true; })
 {}
 
+HttpDownload::HttpDownload(HttpDownload&& d)
+    : _onProgress(std::move(d._onProgress))
+    , _started(std::move(d._started))
+    , _failed(std::move(d._failed))
+    , _successful(std::move(d._successful))
+{}
+
+
 void HttpDownload::onProgress(ProgressCallback progressCallback) {
     std::lock_guard<std::mutex> guard(_onProgressMutex);
     _onProgress = progressCallback;
@@ -187,6 +195,12 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
 
 AsyncHttpDownload::AsyncHttpDownload(std::string url)
     : _httpRequest(std::move(url))
+{}
+
+AsyncHttpDownload::AsyncHttpDownload(AsyncHttpDownload&& d)
+    : _httpRequest(std::move(d._httpRequest))
+    , _downloadThread(std::move(d._downloadThread))
+    , _shouldCancel(std::move(d._shouldCancel))
 {}
 
 void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
@@ -300,6 +314,7 @@ size_t HttpFileDownload::handleData(HttpRequest::Data d) {
 
 SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)
     : SyncHttpDownload(std::move(url))
+    , HttpMemoryDownload()
 {}
 
 SyncHttpFileDownload::SyncHttpFileDownload(std::string url, std::string destinationPath)

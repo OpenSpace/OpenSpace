@@ -32,8 +32,6 @@
 
 namespace openspace {
 
-class HttpSynchronizationJob;
-
 class HttpSynchronization : public ResourceSynchronization {
 public:
     HttpSynchronization(const ghoul::Dictionary& dict);

@@ -70,11 +70,6 @@ private:
     std::atomic<bool> _rejected;
 };
 
-
-
-
-
-
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
