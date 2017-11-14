@@ -168,7 +168,10 @@ SyncHttpDownload::SyncHttpDownload(std::string url)
 {}
 
 void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
-    initDownload();
+    if (!initDownload()) {
+        markAsFailed();
+        return;
+    }
     _httpRequest.onData([this] (HttpRequest::Data d) {
         return handleData(d);
     });
@@ -298,6 +301,7 @@ bool HttpFileDownload::initDownload() {
         LERROR("Cannot open file " << destinationFile);
         return false;
     }
+    return true;
 }
 
 bool HttpFileDownload::deinitDownload() {

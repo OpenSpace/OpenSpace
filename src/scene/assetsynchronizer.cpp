@@ -79,7 +79,7 @@ void AssetSynchronizer::startSync(std::shared_ptr<Asset> asset) {
     }
 }
 
-void AssetSynchroinier::cancelSync(Asset* asset) {
+void AssetSynchronizer::cancelSync(Asset* asset) {
     // Todo: cancel sync
 }
 /*

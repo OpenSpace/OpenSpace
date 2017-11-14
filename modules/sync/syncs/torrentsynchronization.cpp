@@ -149,7 +149,7 @@ bool TorrentSynchronization::nTotalBytesIsKnown() {
     return false;
 }
 
-void TorrentSynchronization::updateTorrentProgress(TorrentClient::Progress p) {
+void TorrentSynchronization::updateTorrentProgress(TorrentClient::Progress) {
     // TODO: implement this
 }
 

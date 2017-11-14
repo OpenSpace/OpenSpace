@@ -58,9 +58,12 @@ public:
         InitializationFailed
     };
 
+    struct ManagedAsset {
+        std::shared_ptr<Asset> asset;
+        AssetState state;
+    };
+
     bool update();
-
-
     std::shared_ptr<Asset> updateLoadState(std::string path, AssetState targetState);
     void updateSyncState(Asset* asset, AssetState targetState);
     void handleSyncStateChange(AssetSynchronizer::StateChange stateChange);
@@ -68,18 +71,18 @@ public:
     void setTargetAssetState(const std::string& path, AssetState targetState);
     AssetState currentAssetState(Asset* asset);
     void clearAllTargetAssets();
-    std::vector<std::shared_ptr<Asset>> allAssets();
+    std::vector<std::shared_ptr<Asset>> loadedAssets();
     scripting::LuaLibrary luaLibrary();
     bool isDone();
 private:
     std::shared_ptr<Asset> tryLoadAsset(const std::string& path);
     bool tryInitializeAsset(Asset& asset);
-
+    
+    std::unordered_map<Asset*, ManagedAsset> _managedAssets;
     std::unordered_map<std::string, AssetState> _pendingStateChangeCommands;
-    std::unordered_map<std::shared_ptr<Asset>, AssetState> _stateChangesInProgress;
-    std::unordered_map<Asset*, AssetState> _currentStates;
+    std::unordered_map<Asset*, AssetState> _stateChangesInProgress;
 
-    std::unordered_map<std::shared_ptr<Asset>, std::unordered_set<std::shared_ptr<Asset>>> _syncAncestors;
+    std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncAncestors;
     std::unique_ptr<AssetLoader> _assetLoader;
     std::unique_ptr<AssetSynchronizer> _assetSynchronizer;
 };

@@ -629,13 +629,14 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         showProgressbar = configurationManager().value<bool>(kProgress);
     }
  
-
+/*
     _loadingScreen = std::make_unique<LoadingScreen>(
         LoadingScreen::ShowMessage(showMessage),
         LoadingScreen::ShowNodeNames(showNodeNames),
         LoadingScreen::ShowProgressbar(showProgressbar)
     );
-
+*/
+ 
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
