@@ -139,10 +139,13 @@ void ResourceSynchronization::begin() {
 void ResourceSynchronization::setState(State state) {
     _state = state;
     _callbackMutex.lock();
-    std::vector<StateChangeCallback> callbacks(
-        _stateChangeCallbacks.begin(),
-        _stateChangeCallbacks.end()
-    );
+    
+    
+    std::vector<StateChangeCallback> callbacks;
+    callbacks.reserve(_stateChangeCallbacks.size());
+    for (const auto& it : _stateChangeCallbacks) {
+        callbacks.push_back(it.second);
+    }
     _callbackMutex.unlock();
     for (auto& cb : callbacks) {
         cb(state);

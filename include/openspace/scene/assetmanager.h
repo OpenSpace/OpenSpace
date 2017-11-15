@@ -89,12 +89,16 @@ private:
     std::shared_ptr<Asset> tryLoadAsset(const std::string& path);
     void unloadAsset(Asset* asset);
     bool tryInitializeAsset(Asset& asset);
+    bool tryDeinitializeAsset(Asset& asset);
+    void startSynchronization(Asset& asset);
+    void cancelSynchronization(Asset& asset);
     
     std::vector<ManagedAsset> _managedAssets;
     
 
     std::unordered_map<std::string, AssetState> _pendingStateChangeCommands;
-    std::unordered_map<Asset*, AssetState> _stateChangesInProgress;
+    //std::unordered_map<Asset*, AssetState> _stateChangesInProgress;
+    std::unordered_set<Asset*> _pendingInitializations;
 
     std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncAncestors;
     std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncDependencies;

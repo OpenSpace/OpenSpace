@@ -160,9 +160,30 @@ std::vector<AssetSynchronizer::StateChange> AssetSynchronizer::getStateChanges()
 }
     
 AssetSynchronizer::SynchronizationState AssetSynchronizer::assetState(Asset*) {
-    return SynchronizationState::Unknown;
+    return SynchronizationState::Unsynced;
 }
     
+void AssetSynchronizer::startAssetResourceSync(
+    std::shared_ptr<Asset> a,
+    std::shared_ptr<ResourceSynchronization> rs)
+{
+    // Todo: implement this
+}
+
+void AssetSynchronizer::cancelAssetResourceSync(
+    std::shared_ptr<Asset> a,
+    std::shared_ptr<ResourceSynchronization> rs)
+{
+    // Todo: implement this
+}
+
+    
+void AssetSynchronizer::setState(
+    std::shared_ptr<Asset> a,
+    AssetSynchronizer::SynchronizationState state)
+{
+    // Todo: implement this
+}
 
 /*
 bool AssetSynchronizer::assetIsSynchronized(Asset * asset) {

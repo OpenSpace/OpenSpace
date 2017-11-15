@@ -57,7 +57,7 @@ bool AssetManager::update() {
         }
     }
 
-    // Start/cancel synchronizations
+    // Start/cancel synchronizations and/or deinitialize
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const AssetState targetState = c.second;
@@ -67,48 +67,64 @@ bool AssetManager::update() {
             continue;
         }
 
-        AssetSynchronizer::SynchronizationState state =
+        AssetSynchronizer::SynchronizationState currentSyncState =
             _assetSynchronizer->assetState(asset.get());
         
-        const bool alreadySyncedOrSyncing =
-            (state == AssetSynchronizer::SynchronizationState::Resolved ||
-             state == AssetSynchronizer::SynchronizationState::Synchronizing);
+        const bool syncedOrSyncing =
+            (currentSyncState == AssetSynchronizer::SynchronizationState::Resolved ||
+             currentSyncState == AssetSynchronizer::SynchronizationState::Synchronizing);
         
-        const bool shouldSync =
+        const bool shouldBeSynced =
             (targetState == AssetState::Synchronized ||
              targetState == AssetState::Initialized);
         
-        if (shouldSync && !alreadySyncedOrSyncing) {
-            startSynchronization(asset);
+
+        if (shouldBeSynced && !syncedOrSyncing) {
+            startSynchronization(*asset);
+        } else if (!shouldBeSynced && syncedOrSyncing) {
+            cancelSynchronization(*asset);
+        }
+        
+        const bool shouldBeInitialized = targetState == AssetState::Initialized;
+        const bool isInitialized = asset->readyState() == Asset::ReadyState::Initialized;
+        
+        if (shouldBeInitialized && !isInitialized) {
+            _pendingInitializations.insert(asset.get());
+        } else {
+            _pendingInitializations.erase(asset.get());
+            tryDeinitializeAsset(*asset);
         }
     }
     
+    std::vector<AssetSynchronizer::StateChange> stateChanges =
+        _assetSynchronizer->getStateChanges();
     
-            
-    
-    
-    // Start synchronizations
-    /*for (const auto& loadedAsset : loadedAssets) {
-        const std::string& path = loadedAsset.first;
-        Asset* asset = loadedAsset.second.get();
-        const AssetState targetState = _pendingStateChangeCommands[path];
-        updateSyncState(asset, targetState);
-    }*/
-
-    // Unload assets
-    
-    
-    // Collect assets that were resolved and rejected.
-    // Initialize if requested.
-    // Update current state accordingly.
-    /*for (const auto& stateChange : _assetSynchronizer->getStateChanges()) {
-        handleSyncStateChange(stateChange);
-    }*/
+    for (AssetSynchronizer::StateChange& stateChange : stateChanges) {
+        Asset* a = stateChange.asset.get();
+        auto it = _pendingInitializations.find(a);
+        if (it == _pendingInitializations.end()) {
+            continue;
+        }
+        Asset::ReadyState currentState = a->readyState();
+        if (currentState != Asset::ReadyState::Initialized)
+        {
+            _pendingInitializations.erase(it);
+            tryInitializeAsset(*a);
+        }
+    }
 
     _pendingStateChangeCommands.clear();
     return false;
 }
 
+void AssetManager::startSynchronization(Asset&) {
+    // todo: implement 
+}
+
+void AssetManager::cancelSynchronization(Asset&) {
+    // todo: implement this
+}
+    
 /**
  * Load or unload asset depening on target state
  * Return shared pointer to asset if this loads the asset
@@ -243,8 +259,8 @@ AssetManager::AssetState AssetManager::currentAssetState(const std::string& asse
 
 void AssetManager::clearAllTargetAssets() {
     _pendingStateChangeCommands.clear();
-    for (const auto& i : _assetLoader->loadedAssets()) {
-        _pendingStateChangeCommands[i->id()] = AssetState::Unloaded;
+    for (const auto& ma : _managedAssets) {
+        _pendingStateChangeCommands[ma.path] = AssetState::Unloaded;
     }
 }
 
@@ -296,7 +312,7 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
 }
 
 bool AssetManager::isDone() {
-    return _stateChangesInProgress.size() == 0;
+    return _pendingStateChangeCommands.size() == 0 && _pendingInitializations.size() == 0;
 }
 
 void AssetManager::unloadAsset(Asset* asset) {
@@ -340,12 +356,21 @@ std::shared_ptr<Asset> AssetManager::tryLoadAsset(const std::string& path) {
 bool AssetManager::tryInitializeAsset(Asset& asset) {
     try {
         asset.initialize();
-        return true;
     } catch (const ghoul::RuntimeError& e) {
-        LERROR(e.component << ": " << e.message);
+        LERROR("Error when initializing asset. " << e.component << ": " << e.message);
         return false;
     }
+    return true;
 }
-
+    
+bool AssetManager::tryDeinitializeAsset(Asset& asset) {
+    try {
+        asset.deinitialize();
+    } catch (const ghoul::RuntimeError& e) {
+        LERROR("Error when deinitializing asset. " << e.component << ": " << e.message);
+        return false;
+    }
+    return true;
+}
 
 }

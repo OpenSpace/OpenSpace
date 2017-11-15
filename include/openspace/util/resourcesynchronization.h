@@ -32,6 +32,8 @@
 
 #include <openspace/documentation/documentation.h>
 
+#include <unordered_map>
+
 namespace openspace {
 
 class ResourceSynchronization
