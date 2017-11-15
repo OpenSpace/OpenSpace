@@ -62,6 +62,6 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
         return true;
     },
     LUA_TBOOLEAN
-);
+)
 
 } // namespace openspace::properties

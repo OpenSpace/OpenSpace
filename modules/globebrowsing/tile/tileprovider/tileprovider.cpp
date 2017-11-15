@@ -55,17 +55,13 @@ TileProvider::TileProvider()
     : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
-{
-    initialize();
-}
+{}
 
 TileProvider::TileProvider(const ghoul::Dictionary&)
     : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
-{
-    initialize();
-}
+{}
 
 float TileProvider::noDataValueAsFloat() {
     ghoul_assert(_initialized, "TileProvider was not initialized.");
@@ -84,7 +80,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     }
     maxParents -= parents;
 
-    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
+    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside
     //         the range of defined data.
     int maximumLevel = maxLevel();
     while (tileIndex.level > maximumLevel){
@@ -95,8 +91,8 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
         return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
     }
 
-    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
-    //         has a loaded tile ready to use. 
+    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
+    //         has a loaded tile ready to use.
     while (tileIndex.level > 1) {
         Tile tile = getTile(tileIndex);
         if (tile.status() != Tile::Status::OK) {

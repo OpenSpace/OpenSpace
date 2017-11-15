@@ -29,7 +29,7 @@
 namespace openspace::globebrowsing {
 
 void GPULayerManager::setValue(ghoul::opengl::ProgramObject* programObject,
-                               const LayerManager& layerManager, 
+                               const LayerManager& layerManager,
                                const TileIndex& tileIndex)
 {
     auto layerGroups = layerManager.layerGroups();

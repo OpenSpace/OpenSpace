@@ -116,7 +116,7 @@ public:
     void unbind();
 
     /**
-     * \returns true of the buffer is mapped, otherwise false 
+     * \returns true of the buffer is mapped, otherwise false
      */
     bool isMapped() const;
 

@@ -54,7 +54,7 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     };
 }
 
-ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary) 
+ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _size(SizeInfo, glm::vec4(0), glm::vec4(0), glm::vec4(16384))
     , _framebuffer(nullptr)
@@ -75,15 +75,15 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
 
-bool ScreenSpaceFramebuffer::initialize() {
-    ScreenSpaceRenderable::initialize();
+bool ScreenSpaceFramebuffer::initializeGL() {
+    ScreenSpaceRenderable::initializeGL();
     createFragmentbuffer();
 
     return isReady();
 }
 
-bool ScreenSpaceFramebuffer::deinitialize() {
-    ScreenSpaceRenderable::deinitialize();
+bool ScreenSpaceFramebuffer::deinitializeGL() {
+    ScreenSpaceRenderable::deinitializeGL();
 
     _framebuffer->detachAll();
     removeAllRenderFunctions();

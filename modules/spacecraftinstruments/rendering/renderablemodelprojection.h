@@ -43,7 +43,7 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; } 
+namespace documentation { struct Documentation; }
 
 struct RenderData;
 struct UpdateData;
@@ -55,8 +55,8 @@ public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
     ~RenderableModelProjection();
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 

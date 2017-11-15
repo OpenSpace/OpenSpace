@@ -63,7 +63,7 @@ namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     : properties::PropertyOwner({ std::move(name) })
-    , _enabled(EnabledInfo, true) 
+    , _enabled(EnabledInfo, true)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
     , _registered(false)
@@ -100,31 +100,37 @@ std::shared_ptr<DataProcessor> IswaBaseGroup::dataProcessor(){
     return _dataProcessor;
 }
 
-std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaBaseGroup::groupEvent(){ 
-    return _groupEvent; 
+std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaBaseGroup::groupEvent() {
+    return _groupEvent;
 };
 
 
 void IswaBaseGroup::registerProperties(){
     _enabled.onChange([this]{
         LDEBUG("Group " + name() + " published enabledChanged");
-        _groupEvent->publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled.value()}}));
+        _groupEvent->publish(
+            "enabledChanged",
+            ghoul::Dictionary({{"enabled", _enabled.value()}})
+        );
     });
 
     _alpha.onChange([this]{
         LDEBUG("Group " + name() + " published alphaChanged");
-        _groupEvent->publish("alphaChanged", ghoul::Dictionary({{"alpha", _alpha.value()}}));
+        _groupEvent->publish(
+            "alphaChanged",
+            ghoul::Dictionary({{"alpha", _alpha.value()}})
+        );
     });
 
 
     _delete.onChange([this]{
         clearGroup();
-    }); 
+    });
 
-    _registered = true;  
+    _registered = true;
 }
 
-void IswaBaseGroup::unregisterProperties(){
+void IswaBaseGroup::unregisterProperties() {
     _registered = false;
 }
 

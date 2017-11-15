@@ -39,7 +39,9 @@ namespace {
 
 namespace openspace {
 
-std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(const ghoul::Dictionary& tasksDictionary) {
+std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
+                                                 const ghoul::Dictionary& tasksDictionary)
+{
     std::vector<std::unique_ptr<Task>> tasks;
     std::vector<std::string> keys = tasksDictionary.keys();
     for (const std::string& key : keys) {

@@ -132,7 +132,8 @@ namespace {
     };
 } // namespace
 
-namespace openspace::kameleonvolume {
+namespace openspace {
+namespace kameleonvolume {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -172,14 +173,16 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     std::string transferFunctionPath;
     if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
         _transferFunctionPath = transferFunctionPath;
-        _transferFunction = std::make_shared<TransferFunction>(absPath(transferFunctionPath));
+        _transferFunction = std::make_shared<TransferFunction>(
+            absPath(transferFunctionPath)
+        );
     }
 
     std::string sourcePath;
     if (dictionary.getValue(KeySource, sourcePath)) {
         _sourcePath = absPath(sourcePath);
     }
-
+    
     std::string variable;
     if (dictionary.getValue(KeyVariable, variable)) {
         _variable = variable;
@@ -234,8 +237,14 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         _cache = cache;
     }
 
-    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid");
-    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid");
+    _gridType.addOption(
+        static_cast<int>(volume::VolumeGridType::Cartesian),
+        "Cartesian grid"
+    );
+    _gridType.addOption(
+        static_cast<int>(volume::VolumeGridType::Spherical),
+        "Spherical grid"
+    );
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
     std::string gridType;
@@ -247,16 +256,20 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         }
     }
 }
-
+    
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
 
-void RenderableKameleonVolume::initialize() {
+void RenderableKameleonVolume::initializeGL() {
     load();
-
+    
     _volumeTexture->uploadTexture();
     _transferFunction->update();
 
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(_volumeTexture, _transferFunction, _clipPlanes);
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        _volumeTexture,
+        _transferFunction,
+        _clipPlanes
+    );
 
     _raycaster->setStepSize(_stepSize);
     _gridType.onChange([this] {
@@ -310,11 +323,11 @@ void RenderableKameleonVolume::initialize() {
 void RenderableKameleonVolume::updateRaycasterModelTransform() {
     glm::vec3 lowerBoundingBoxBound = _domainScale.value() * _lowerDomainBound.value();
     glm::vec3 upperBoundingBoxBound = _domainScale.value() * _upperDomainBound.value();
-
+    
     glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
     glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
 
-    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation); 
+    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation);
     modelTransform = glm::scale(modelTransform, scale);
     _raycaster->setModelTransform(modelTransform);
 }
@@ -326,7 +339,7 @@ bool RenderableKameleonVolume::cachingEnabled() {
 
 void RenderableKameleonVolume::load() {
     if (!FileSys.fileExists(_sourcePath)) {
-        LERROR("File " << _sourcePath << " does not exist."); 
+        LERROR("File " << _sourcePath << " does not exist.");
         return;
     }
     if (!cachingEnabled()) {
@@ -386,7 +399,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     }
 
     std::vector<std::string> variables = reader.gridVariableNames();
-
+   
     if (variables.size() == 3 && _autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
             reader.minValue(variables[0]),
@@ -405,11 +418,16 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
         }
         else {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
-        }       
+        }
     }
 
     ghoul::Dictionary dict = reader.readMetaData();
-    _rawVolume = reader.readFloatVolume(_dimensions, _variable, _lowerDomainBound, _upperDomainBound);
+    _rawVolume = reader.readFloatVolume(
+        _dimensions,
+        _variable,
+        _lowerDomainBound,
+        _upperDomainBound
+    );
     updateTextureFromVolume();
 }
 
@@ -441,18 +459,18 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
     volume::RawVolumeWriter<float> writer(path);
     writer.write(*_rawVolume);
 }
-
-void RenderableKameleonVolume::deinitialize() {
+    
+void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
-
+    
 bool RenderableKameleonVolume::isReady() const {
     return true;
 }
-
+    
 void RenderableKameleonVolume::update(const UpdateData&) {
     if (_raycaster) {
         _raycaster->setStepSize(_stepSize);
@@ -462,5 +480,6 @@ void RenderableKameleonVolume::update(const UpdateData&) {
 void RenderableKameleonVolume::render(const RenderData& data, RendererTasks& tasks) {
     tasks.raycasterTasks.push_back({ _raycaster.get(), data });
 }
-
-} // namespace openspace::kameleonvolume
+       
+}
+}

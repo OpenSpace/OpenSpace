@@ -43,7 +43,7 @@ namespace openspace::globebrowsing {
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
                              std::shared_ptr<LayerManager> layerManager)
     : _grid(grid)
-    ,_layerManager(layerManager)
+    , _layerManager(layerManager)
 {
     _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
             "GlobalChunkedLodPatch",
@@ -235,7 +235,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
     }
 
     if (chunk.owner().generalProperties().useAccurateNormals &&
-        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty()) 
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
         glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::SOUTH_WEST));
@@ -423,9 +423,10 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
 
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
-    // TODO (JCC): Enable the right normal for displaced points in the patch
-    programObject->setUniform("patchNormalModelSpace", glm::normalize(patchNormalModelSpace));
-    programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
+    programObject->setUniform(
+        "projectionTransform",
+        data.camera.sgctInternal.projectionMatrix()
+    );
 
     if (_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0) {
         // Apply an extra scaling to the height if the object is scaled

@@ -58,10 +58,14 @@ namespace {
 
 void initTextureReaders() {
     #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
+        ghoul::io::TextureReader::ref().addReader(
+            std::make_shared<ghoul::io::TextureReaderDevIL>()
+        );
     #endif // GHOUL_USE_DEVIL
     #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
+        ghoul::io::TextureReader::ref().addReader(
+            std::make_shared<ghoul::io::TextureReaderFreeImage>()
+        );
     #endif // GHOUL_USE_FREEIMAGE
 }
 
@@ -81,7 +85,10 @@ void performTasks(const std::string& path) {
 
     for (size_t i = 0; i < tasks.size(); i++) {
         Task& task = *tasks[i].get();
-        LINFO("Performing task " << (i + 1) << " out of " << tasks.size() << ": " << task.description());
+        LINFO(
+            "Performing task " << (i + 1) << " out of " <<
+            tasks.size() << ": " << task.description()
+        );
         ProgressBar progressBar(100);
         auto onProgress = [&progressBar](float progress) {
             progressBar.print(progress * 100);

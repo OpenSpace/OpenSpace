@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/scene/sceneloader.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -81,11 +82,17 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     }
     ghoul::lua::loadDictionaryFromFile(absScenePath, sceneDictionary, state);
 
-    documentation::testSpecificationAndThrow(Scene::Documentation(), sceneDictionary, "Scene");
+    documentation::testSpecificationAndThrow(
+        Scene::Documentation(),
+        sceneDictionary,
+        "Scene"
+    );
 
     std::string relativeSceneDirectory = ".";
     sceneDictionary.getValue<std::string>(KeyPathScene, relativeSceneDirectory);
-    std::string modulesPath = FileSys.absPath(sceneDirectory + FileSys.PathSeparator + relativeSceneDirectory);
+    std::string modulesPath = FileSys.absPath(
+        sceneDirectory + FileSys.PathSeparator + relativeSceneDirectory
+    );
 
     ghoul::Dictionary moduleDictionary;
     sceneDictionary.getValue(KeyModules, moduleDictionary);
@@ -132,9 +139,16 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
 
     std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
+    OsEng.loadingScreen().setItemNumber(allNodes.size() + 1); // +1 for Root node
+
     std::unique_ptr<SceneGraphNode> rootNode = std::make_unique<SceneGraphNode>();
     rootNode->setName(SceneGraphNode::RootNodeName);
     scene->setRoot(std::move(rootNode));
+    
+    OsEng.loadingScreen().updateItem(
+        SceneGraphNode::RootNodeName,
+        LoadingScreen::ItemStatus::Started
+    );
 
     addLoadedNodes(*scene, std::move(allNodes));
 
@@ -181,7 +195,9 @@ SceneLoader::importDirectory(Scene& scene, const std::string& path) {
     return { addLoadedNodes(scene, std::move(nodes.first)), nodes.second };
 }
 
-SceneGraphNode* SceneLoader::importNodeDictionary(Scene& scene, const ghoul::Dictionary& dict) {
+SceneGraphNode* SceneLoader::importNodeDictionary(Scene& scene,
+                                                  const ghoul::Dictionary& dict)
+{
     std::vector<SceneLoader::LoadedNode> loadedNodes;
     loadedNodes.push_back(loadNode(dict));
     std::vector<SceneGraphNode*> nodes = addLoadedNodes(scene, std::move(loadedNodes));
@@ -229,11 +245,13 @@ SceneLoader::loadDirectory(
         return {};
     }
     std::string moduleName = path.substr(pos + 1);
-    std::string moduleFile = FileSys.pathByAppendingComponent(path, moduleName) + ModuleExtension;
+    std::string moduleFile = FileSys.pathByAppendingComponent(path, moduleName) +
+                             ModuleExtension;
 
     if (FileSys.fileExists(moduleFile)) {
         // TODO: Get rid of changing the working directory (global state is bad) -- emiax
-        // This requires refactoring all renderables to not use relative paths in constructors.
+        // This requires refactoring all renderables to not use relative paths in
+        // constructors.
         // For now, no need to reset the directory here as it is done from the outside
         // function calling this method
         FileSys.setCurrentDirectory(ghoul::filesystem::Directory(path));
@@ -242,7 +260,8 @@ SceneLoader::loadDirectory(
         std::vector<SceneLoader::LoadedNode> nodes = loadModule(moduleFile, luaState);
 
         std::vector<SceneLicense> licenses;
-        std::string licenseFile = FileSys.pathByAppendingComponent(path, moduleName) + LicenseExtension;
+        std::string licenseFile = FileSys.pathByAppendingComponent(path, moduleName) +
+                                  LicenseExtension;
         if (FileSys.fileExists(licenseFile)) {
             licenses = loadLicense(licenseFile, moduleName);
         }
@@ -287,8 +306,16 @@ SceneLoader::LoadedNode SceneLoader::loadNode(const ghoul::Dictionary& dictionar
     std::vector<std::string> dependencies;
 
     std::string nodeName = dictionary.value<std::string>(KeyName);
+    OsEng.loadingScreen().updateItem(
+        nodeName,
+        LoadingScreen::ItemStatus::Started
+    );
+    OsEng.loadingScreen().tickItem();
+
     std::string parentName = dictionary.value<std::string>(KeyParentName);
-    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dictionary);
+    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
+        dictionary
+    );
 
     if (dictionary.hasKey(SceneGraphNode::KeyDependencies)) {
         if (!dictionary.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
@@ -307,7 +334,9 @@ SceneLoader::LoadedNode SceneLoader::loadNode(const ghoul::Dictionary& dictionar
 }
 
 
-std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& path, lua_State* luaState) {
+std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& path,
+                                                             lua_State* luaState)
+{
     ghoul::Dictionary moduleDictionary;
     try {
         ghoul::lua::loadDictionaryFromFile(path, moduleDictionary, luaState);
@@ -344,13 +373,18 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& 
             }
         }
         catch (ghoul::RuntimeError& e) {
-            LERROR("Failed loading node from " << path << ": " << e.message << ", " << e.component);
+            LERROR(
+                "Failed loading node from " << path << ": " <<
+                e.message << ", " << e.component
+            );
         }
     }
     return loadedNodes;
 }
 
-std::vector<SceneLicense> SceneLoader::loadLicense(const std::string& path, std::string module) {
+std::vector<SceneLicense> SceneLoader::loadLicense(const std::string& path,
+                                                   std::string module)
+{
     ghoul::Dictionary licenseDictionary;
     try {
         ghoul::lua::loadDictionaryFromFile(path, licenseDictionary);
@@ -363,7 +397,9 @@ std::vector<SceneLicense> SceneLoader::loadLicense(const std::string& path, std:
     return { license };
 }
 
-std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& loadedNodes) {
+std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene,
+                                       std::vector<SceneLoader::LoadedNode>&& loadedNodes)
+{
     std::map<std::string, SceneGraphNode*> existingNodes = scene.nodesByName();
     std::map<std::string, SceneGraphNode*> addedNodes;
 
@@ -406,7 +442,10 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
 
         SceneGraphNode* parent = findNode(parentName);
         if (!parent) {
-            LERROR("Could not find parent '" + parentName + "' for '" + loadedNode.name + "'");
+            LERROR(
+                "Could not find parent '" + parentName + "' for '" +
+                loadedNode.name + "'"
+            );
             badNodes.push_back(std::move(loadedNode.node));
             continue;
         }
@@ -416,7 +455,10 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
         for (const auto& depName : dependencyNames) {
             SceneGraphNode* dep = findNode(depName);
             if (!dep) {
-                LERROR("Could not find dependency '" + depName + "' for '" + loadedNode.name + "'");
+                LERROR(
+                    "Could not find dependency '" + depName + "' for '" +
+                    loadedNode.name + "'"
+                );
                 foundAllDeps = false;
                 continue;
             }
@@ -437,7 +479,8 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
         }
     }
 
-    // Remove all bad nodes (parent or deps missing) and all their children and dependent nodes.
+    // Remove all bad nodes (parent or deps missing) and all their children and dependent
+    // nodes.
     // Use unsorted set `visited` to avoid infinite loop in case of circular deps.
     std::unordered_set<SceneGraphNode*> visited;
     for (size_t i = 0; i < badNodes.size(); i++) {
@@ -451,7 +494,9 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
             if (visited.count(d) == 0) {
                 visited.insert(d);
                 if (parent) {
-                    badNodes.push_back(parent->detachChild(*d, SceneGraphNode::UpdateScene::No));
+                    badNodes.push_back(
+                        parent->detachChild(*d, SceneGraphNode::UpdateScene::No)
+                    );
                 }
             }
         }
@@ -459,7 +504,10 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
     // Warn for nodes that lack connection to the root.
     for (auto& node : addedNodes) {
         if (!node.second->scene()) {
-            LWARNING("Node '" << node.first << "' is not connected to the root and will not be added to the scene");
+            LWARNING(
+                "Node '" << node.first << "' is not connected to the root and will " <<
+                "not be added to the scene"
+            );
         }
     }
 
@@ -473,10 +521,16 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
 
     // Return a vector of all added nodes.
     std::vector<SceneGraphNode*> addedNodesVector;
-    std::transform(addedNodes.begin(), addedNodes.end(), std::back_inserter(addedNodesVector), [] (auto& pair) {
-        return pair.second;
-    });
+    std::transform(
+        addedNodes.begin(),
+        addedNodes.end(),
+        std::back_inserter(addedNodesVector),
+        [](auto& pair) {
+            return pair.second;
+        }
+    );
 
     return addedNodesVector;
 }
-}
+
+}  // namespace openspace

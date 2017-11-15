@@ -57,7 +57,9 @@ documentation::Documentation Rotation::Documentation() {
     };
 }
 
-std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Rotation> Rotation::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
 
     std::string rotationType = dictionary.value<std::string>(KeyType);
@@ -66,7 +68,7 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary
     return result;
 }
 
-Rotation::Rotation() 
+Rotation::Rotation()
     : properties::PropertyOwner({ "Rotation" })
 {}
 

@@ -70,7 +70,7 @@ namespace {
 
 namespace openspace::globebrowsing::tileprovider {
 
-DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary) 
+DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     : TileProvider(dictionary)
     , _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
@@ -97,7 +97,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     int tilePixelSize = 0;
     if (dictionary.getValue<double>(KeyTilePixelSize, pixelSize)) {
         LDEBUG("Default pixel size overridden: " << pixelSize);
-        tilePixelSize = static_cast<int>(pixelSize); 
+        tilePixelSize = static_cast<int>(pixelSize);
     }
 
     _padTiles = true;
@@ -126,8 +126,8 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_tilePixelSize);
 }
 
-DefaultTileProvider::DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader)
-    : _asyncTextureDataProvider(tileReader)
+DefaultTileProvider::DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tr)
+    : _asyncTextureDataProvider(tr)
     , _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
 {}
@@ -140,10 +140,11 @@ void DefaultTileProvider::update() {
         initTexturesFromLoadedData();
         if (_asyncTextureDataProvider->shouldBeDeleted()) {
             _asyncTextureDataProvider = nullptr;
-            TileTextureInitData initData(
-                LayerManager::getTileTextureInitData(_layerGroupID, _padTiles,
-                                                     _tilePixelSize)
-            );
+            TileTextureInitData initData(LayerManager::getTileTextureInitData(
+                _layerGroupID,
+                _padTiles,
+                _tilePixelSize
+            ));
             initAsyncTileDataReader(initData);
         }
     }
@@ -155,10 +156,11 @@ void DefaultTileProvider::reset() {
         _asyncTextureDataProvider->prepairToBeDeleted();
     }
     else {
-        TileTextureInitData initData(
-            LayerManager::getTileTextureInitData(_layerGroupID, _padTiles,
-                                                 _tilePixelSize)
-        );
+        TileTextureInitData initData(LayerManager::getTileTextureInitData(
+            _layerGroupID,
+            _padTiles,
+            _tilePixelSize
+        ));
         initAsyncTileDataReader(initData);
     }
 }
@@ -206,7 +208,8 @@ float DefaultTileProvider::noDataValueAsFloat() {
 
 void DefaultTileProvider::initTexturesFromLoadedData() {
     if (_asyncTextureDataProvider) {
-        std::shared_ptr<RawTile> rawTile = _asyncTextureDataProvider->popFinishedRawTile();
+        std::shared_ptr<RawTile> rawTile =
+            _asyncTextureDataProvider->popFinishedRawTile();
         if (rawTile) {
             cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
             ghoul_assert(!_tileCache->exist(key), "Tile must not be existing in cache");
@@ -224,14 +227,24 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
 
     // Initialize instance variables
 #ifdef GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<GdalRawTileDataReader>(_filePath, initData,
-                                                               _basePath, preprocess);
+    auto tileDataset = std::make_shared<GdalRawTileDataReader>(
+        _filePath,
+        initData,
+        _basePath,
+        preprocess
+    );
 #else // GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(_filePath, initData,
-                                                                 preprocess);
+    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(
+        _filePath,
+        initData,
+        preprocess
+    );
 #endif // GLOBEBROWSING_USE_GDAL
 
-    _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(_name, tileDataset);
+    _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
+        _name,
+        tileDataset
+    );
 
     // Tiles are only available for levels 2 and higher.
     if (_preCacheLevel >= 2) {

@@ -45,18 +45,18 @@ public:
 
     /**
      * Sets the value of <code>ChunkTilePile</code> to its corresponding
-     * GPU struct. OBS! Users must ensure bind has been 
+     * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
     void setValue(ghoul::opengl::ProgramObject* programObject,
         const ChunkTilePile& chunkTilePile);
 
-    /** 
-     * Binds this object with GLSL variables with identifiers starting 
+    /**
+     * Binds this object with GLSL variables with identifiers starting
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    void bind(ghoul::opengl::ProgramObject* programObject, const std::string& nameBase, 
+    void bind(ghoul::opengl::ProgramObject* programObject, const std::string& nameBase,
           int pileSize);
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.

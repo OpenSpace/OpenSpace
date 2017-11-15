@@ -45,7 +45,9 @@ public:
 private:
     TileProvider* indexProvider(const TileIndex& tileIndex) const;
 
-    std::unordered_map<TileIndex::TileHashKey, std::shared_ptr<TileProvider>> _tileProviderMap;
+    std::unordered_map<
+        TileIndex::TileHashKey, std::shared_ptr<TileProvider>
+    > _tileProviderMap;
     std::shared_ptr<TileProvider> _defaultTileProvider;
 };
 

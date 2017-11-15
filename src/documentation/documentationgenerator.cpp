@@ -136,7 +136,7 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
          << "\t"   << "</script>"                                                 << '\n'
          << "\t"   << "<style type=\"text/css\">"                                 << '\n'
          << "\t\t" << cssContent                                                  << '\n'
-         << "\t\t" << bootstrapContent                                            << '\n' 
+         << "\t\t" << bootstrapContent                                            << '\n'
          << "\t"   << "</style>"                                                  << '\n'
          << "\t\t" << "<title>" << _name << "</title>"                            << '\n'
          << "\t"   << "</head>"                                                   << '\n'

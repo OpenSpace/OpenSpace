@@ -54,14 +54,14 @@ public:
     void saveStateToJson(const std::string& pathToJsonFile);
 
     // ----------------------------------- GETTERS ----------------------------------- //
-    const std::vector<std::vector<float>>& extraQuantities()    const { return _extraQuantities; }
-    const std::vector<std::string>&        extraQuantityNames() const { return _extraQuantityNames; }
-    const std::vector<GLsizei>&            lineCount()          const { return _lineCount; }
-    const std::vector<GLint>&              lineStart()          const { return _lineStart; }
-    fls::Model                             model()              const { return _model; }
-    size_t                                 nExtraQuantities()   const { return _extraQuantities.size(); }
-    double                                 triggerTime()        const { return _triggerTime; }
-    const std::vector<glm::vec3>&          vertexPositions()    const { return _vertexPositions; }
+    const std::vector<std::vector<float>>& extraQuantities()    const;
+    const std::vector<std::string>&        extraQuantityNames() const;
+    const std::vector<GLsizei>&            lineCount()          const;
+    const std::vector<GLint>&              lineStart()          const;
+    fls::Model                             model()              const;
+    size_t                                 nExtraQuantities()   const;
+    double                                 triggerTime()        const;
+    const std::vector<glm::vec3>&          vertexPositions()    const;
 
     // Special getter. Returns extraQuantities[INDEX].
     const std::vector<float>& extraQuantity(const size_t INDEX, bool& isSuccesful) const;

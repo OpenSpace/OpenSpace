@@ -149,7 +149,7 @@ void PropertyOwner::addProperty(Property* prop) {
     std::vector<Property*>::const_iterator it = std::find_if(
         _properties.begin(),
         _properties.end(),
-        [id = prop->identifier()](Property* prop) { return prop->identifier() == id; }
+        [id = prop->identifier()](Property* p) { return p->identifier() == id; }
     );
 
     // If we found the property identifier, we need to bail out
@@ -184,7 +184,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [name = owner->name()](PropertyOwner* owner) { return owner->name() == name;  }
+        [name = owner->name()](PropertyOwner* o) { return o->name() == name;  }
     );
 
     // If we found the propertyowner's name, we need to bail out
@@ -218,7 +218,7 @@ void PropertyOwner::removeProperty(Property* prop) {
     std::vector<Property*>::const_iterator it = std::find_if(
         _properties.begin(),
         _properties.end(),
-        [id = prop->identifier()](Property* prop) { return prop->identifier() == id; }
+        [id = prop->identifier()](Property* p) { return p->identifier() == id; }
     );
 
     // If we found the property identifier, we can delete it
@@ -242,7 +242,7 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [name = owner->name()](PropertyOwner* owner) { return owner->name() == name;  }
+        [name = owner->name()](PropertyOwner* o) { return o->name() == name;  }
     );
 
     // If we found the propertyowner, we can delete it

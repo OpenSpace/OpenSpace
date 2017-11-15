@@ -611,6 +611,57 @@ namespace openspace {
     }
 
     void RenderableAtmosphere::initialize() {
+        //RenderEngine& renderEngine = OsEng.renderEngine();
+
+        //if (_atmosphereEnabled) {
+        //    _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
+        //    if (_deferredcaster) {
+        //        _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
+        //        _deferredcaster->setPlanetRadius(_atmospherePlanetRadius);
+        //        _deferredcaster->setPlanetAverageGroundReflectance(_planetAverageGroundReflectance);
+        //        _deferredcaster->setPlanetGroundRadianceEmittion(_planetGroundRadianceEmittion);
+        //        _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
+        //        _deferredcaster->enableOzone(_ozoneLayerEnabled);
+        //        _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
+        //        _deferredcaster->setMieHeightScale(_mieHeightScale);
+        //        _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
+        //        _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
+        //        _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
+        //        _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
+        //        _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
+        //        _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
+        //        // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
+        //        //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
+        //        _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
+
+        //        _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
+        //        if (_saveCalculationsToTexture)
+        //            _deferredcaster->enablePrecalculationTexturesSaving();
+
+        //        if (_shadowEnabled) {
+        //            _deferredcaster->setShadowConfigArray(_shadowConfArray);
+        //            _deferredcaster->setHardShadows(_hardShadows);
+        //        }
+
+        //        //_deferredcaster->initialize();
+        //    }
+
+        //    OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(*_deferredcaster.get());
+        //}
+
+        return;
+    }
+
+    void RenderableAtmosphere::deinitialize() {
+        if (_deferredcaster) {
+            OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
+            _deferredcaster = nullptr;
+        }
+
+        return;
+    }
+
+    void RenderableAtmosphere::initializeGL() {
         RenderEngine& renderEngine = OsEng.renderEngine();
 
         if (_atmosphereEnabled) {
@@ -652,13 +703,7 @@ namespace openspace {
         return;
     }
 
-    void RenderableAtmosphere::deinitialize() {
-        if (_deferredcaster) {
-            OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
-            _deferredcaster = nullptr;
-        }
-
-        return;
+    void RenderableAtmosphere::deinitializeGL() {
     }
 
     bool RenderableAtmosphere::isReady() const {

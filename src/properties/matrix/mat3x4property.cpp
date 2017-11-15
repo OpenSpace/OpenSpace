@@ -142,14 +142,14 @@ REGISTER_NUMERICALPROPERTY_SOURCE(Mat3x4Property, glm::mat3x4, glm::mat3x4(0),
                                     numeric_limits<float>::max()
                                   ),
                                   glm::mat3x4(
-                                    0.01f, 0.01f, 0.01f, 0.01f, 
-                                    0.01f, 0.01f, 0.01f, 0.01f, 
+                                    0.01f, 0.01f, 0.01f, 0.01f,
+                                    0.01f, 0.01f, 0.01f, 0.01f,
                                     0.01f, 0.01f, 0.01f, 0.01f
                                   ),
                                   DEFAULT_FROM_LUA_LAMBDA(glm::mat3x4),
                                   DEFAULT_TO_LUA_LAMBDA(glm::mat3x4),
                                   DEFAULT_FROM_STRING_LAMBDA(glm::mat3x4),
                                   DEFAULT_TO_STRING_LAMBDA(glm::mat3x4),
-                                  LUA_TTABLE);
+                                  LUA_TTABLE)
 
 }  // namespace openspace::properties

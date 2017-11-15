@@ -36,17 +36,20 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * @brief Creates a texture by rendering to a framebuffer, this is then used on a screen space plane.
- * @details This class lets you ass renderfunctions that should render to a framebuffer with an attached texture.
- * The texture is then used on a screen space plane that works both in fisheye and flat screens.
+ * @brief Creates a texture by rendering to a framebuffer, this is then used on a screen
+ *        space plane.
+ * @details This class lets you ass renderfunctions that should render to a framebuffer
+ *          with an attached texture.
+ * The texture is then used on a screen space plane that works both in fisheye and flat
+ * screens.
  */
 class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
     ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
     ~ScreenSpaceFramebuffer();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    bool initializeGL() override;
+    bool deinitializeGL() override;
     void render() override;
     void update() override;
     bool isReady() const override;

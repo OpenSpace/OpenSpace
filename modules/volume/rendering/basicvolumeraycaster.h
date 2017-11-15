@@ -56,16 +56,20 @@ class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
     BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
-        std::shared_ptr<TransferFunction> transferFunction, 
+        std::shared_ptr<TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
     virtual ~BasicVolumeRaycaster();
     void initialize();
     void deinitialize();
 
-    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
-    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
-    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+    void renderEntryPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
     bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
 
     std::string getBoundsVsPath() const override;
@@ -111,4 +115,4 @@ private:
 } // namespace openspace
 
 
-#endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__ 
+#endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__

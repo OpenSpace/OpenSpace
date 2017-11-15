@@ -37,7 +37,8 @@ namespace openspace::globebrowsing {
 
 namespace openspace::globebrowsing::tileselector {
 
-ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, const TileIndex& tileIndex);
+ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup,
+    const TileIndex& tileIndex);
 
 std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layerGroup,
     const TileIndex& tileIndex);

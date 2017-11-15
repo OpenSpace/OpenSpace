@@ -40,7 +40,7 @@ public:
     /**
      * Constructor
      */
-    Volume() {};    
+    Volume() {};
 
     /**
      * Destructor
@@ -50,16 +50,19 @@ public:
     /**
      * Render the volume's entry points (front face of the bounding geometry)
      */
-    //virtual void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) = 0;
+    //virtual void renderEntryPoints(const RenderData& data,
+    //    ghoul::opengl::ProgramObject* program) = 0;
 
     /**
      * Render the volume's exit points (back face of the bounding geometry)
      */
-    //virtual void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject* program) = 0;
+    //virtual void renderExitPoints(const RenderData& data,
+    //    ghoul::opengl::ProgramObject* program) = 0;
 
     /**
      * Prepare the volume for the ABuffer's resolve step.
-     * Make sure textures are up to date, bind them to texture units, set program uniforms etc.
+     * Make sure textures are up to date, bind them to texture units, set program uniforms
+     * etc.
      */
     //virtual void preRayCast(ghoul::opengl::ProgramObject* program) {};
 
@@ -76,22 +79,22 @@ public:
      *
      * The shader preprocessor will have acceess to
      *   A #{namespace} variable (unique per helper file)
-     * 
+     *
      * Should define the function:
      * vec4 getVertex()
      */
     //virtual std::string getBoundsVsPath() = 0;
 
     /*
-     * Return a path to a file with the functions, uniforms and fragment shader in variables
-     * required to generate the fragment color and depth. 
+     * Return a path to a file with the functions, uniforms and fragment shader in
+     * variables required to generate the fragment color and depth.
      *
      * Should define the function:
      * Fragment getFragment()
-     * 
+     *
      * The shader preprocessor will have acceess to
      *   A #{namespace} variable (unique per helper file)
-     */ 
+     */
     //virtual std::string getBoundsFsPath() = 0;
 
     /**
@@ -99,7 +102,8 @@ public:
      * required to perform ray casting through this volume.
      *
      * The header should define the following two functions:
-     *   vec4 sampler#{id}(vec3 samplePos, vec3 dir, float occludingAlpha, inout float maxStepSize)
+     *   vec4 sampler#{id}(vec3 samplePos, vec3 dir, float occludingAlpha,
+     *                     inout float maxStepSize)
      *      (return color of sample)
      *   float stepSize#{id}(vec3 samplePos, vec3 dir)
      *      (return the preferred step size at this sample position)
@@ -116,9 +120,9 @@ public:
      * This file will be included once per shader program generated,
      * regardless of how many volumes say they require the file.
      * Ideal to avoid redefinitions of helper functions.
-     * 
-     * The shader preprocessor will have access to the #{namespace} variable (unique per helper file)
-     * which should be a prefix to all symbols defined by the helper
+     *
+     * The shader preprocessor will have access to the #{namespace} variable (unique per
+     * helper file) which should be a prefix to all symbols defined by the helper
      */
     //virtual std::string getHelperPath() = 0;
 

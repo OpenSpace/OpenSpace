@@ -38,10 +38,10 @@ FieldlinesSequenceModule::FieldlinesSequenceModule()
     : OpenSpaceModule("FieldlinesSequence") {}
 
 void FieldlinesSequenceModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(factory, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
 }
 
 } // namespace openspace

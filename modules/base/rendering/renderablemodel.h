@@ -35,7 +35,7 @@
 #include <memory>
 
 namespace ghoul::opengl {
-    class ProgramObject; 
+    class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
 
@@ -51,8 +51,8 @@ class RenderableModel : public Renderable {
 public:
     RenderableModel(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 

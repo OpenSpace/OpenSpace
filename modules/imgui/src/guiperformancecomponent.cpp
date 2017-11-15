@@ -100,7 +100,8 @@ void GuiPerformanceComponent::render() {
     bool v = _isEnabled;
     ImGui::Begin("Performance", &v);
     _isEnabled = v;
-    PerformanceLayout* layout = OsEng.renderEngine().performanceManager()->performanceData();
+    RenderEngine& re = OsEng.renderEngine();
+    PerformanceLayout* layout = re.performanceManager()->performanceData();
 
     v = _sceneGraphIsEnabled;
     ImGui::Checkbox("SceneGraph", &v);
@@ -321,7 +322,8 @@ void GuiPerformanceComponent::render() {
                 indices.begin(),
                 indices.end(),
                 [layout](size_t a, size_t b) {
-                    return std::string(layout->sceneGraphEntries[a].name) < std::string(layout->sceneGraphEntries[b].name);
+                    return std::string(layout->sceneGraphEntries[a].name) <
+                           std::string(layout->sceneGraphEntries[b].name);
                 }
             );
         }

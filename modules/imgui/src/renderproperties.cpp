@@ -122,14 +122,33 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
             ImGui::RadioButton(o.description.c_str(), &value, o.value);
             renderTooltip(prop);
         }
+        ImGui::Separator();
         break;
     }
     case OptionProperty::DisplayType::Dropdown: {
+        // The order of the options does not have to correspond with the value of the
+        // option
         std::string nodeNames = "";
         for (const OptionProperty::Option& o : options) {
             nodeNames += o.description + '\0';
         }
-        ImGui::Combo(name.c_str(), &value, nodeNames.c_str());
+        nodeNames += '\0';
+
+        int idx = std::distance(
+            options.begin(),
+            std::find_if(
+                options.begin(),
+                options.end(),
+                [value](const OptionProperty::Option& o) { return o.value == value; }
+        ));
+
+        int oldIdx = idx;
+        ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
+
+        if (idx != oldIdx) {
+            value = options[idx].value;
+        }
+
         break;
     }
     }

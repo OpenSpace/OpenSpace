@@ -45,7 +45,7 @@ public:
      * \param useNormals determines whether or not to upload any vertex normal data
      * to the GPU.
     */
-    BasicGrid(unsigned int xSegments, unsigned int ySegments, 
+    BasicGrid(unsigned int xSegments, unsigned int ySegments,
         TriangleSoup::Positions usePositions,
         TriangleSoup::TextureCoordinates useTextureCoordinates,
         TriangleSoup::Normals useNormals);

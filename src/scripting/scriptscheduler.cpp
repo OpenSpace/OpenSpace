@@ -244,13 +244,13 @@ ScriptScheduler::progressTo(double newTime)
 }
 
 double ScriptScheduler::currentTime() const {
-    return _currentTime; 
+    return _currentTime;
 }
 
 std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
     std::vector<ScheduledScript> result;
     for (size_t i = 0; i < _timings.size(); ++i) {
-        ScheduledScript script;        
+        ScheduledScript script;
         script.time = _timings[i];
         script.forwardScript = _forwardScripts[i];
         script.backwardScript = _backwardScripts[i];

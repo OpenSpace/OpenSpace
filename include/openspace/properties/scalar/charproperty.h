@@ -28,9 +28,9 @@
  /**
  * \file charproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
 
  * \class CharProperty

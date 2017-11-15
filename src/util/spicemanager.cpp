@@ -175,7 +175,7 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString( const strin
     return Mapping.at(type);
 }
 
-SpiceManager::SpiceManager() 
+SpiceManager::SpiceManager()
     : _useExceptions(UseException::Yes)
 {
     // Set the SPICE library to not exit the program if an error occurs
@@ -447,7 +447,7 @@ void SpiceManager::getValue(const std::string& body, const std::string& value,
 }
 
 void SpiceManager::getValue(const std::string& body, const std::string& value,
-                            std::vector<double>& v) const 
+                            std::vector<double>& v) const
 {
     ghoul_assert(!v.empty(), "Array for values has to be preallocaed");
 
@@ -509,10 +509,11 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     if (!targetHasCoverage && !observerHasCoverage) {
         if (_useExceptions) {
             throw SpiceException(
-                format("Neither target '{}' nor observer '{}' has SPK coverage at time {}",
-                       target,
-                       observer,
-                       ephemerisTime
+                format(
+                    "Neither target '{}' nor observer '{}' has SPK coverage at time {}",
+                    target,
+                    observer,
+                    ephemerisTime
                 )
             );
         }
@@ -864,10 +865,10 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
     res.terminatorPoints.resize(numberOfTerminatorPoints);
 
     edterm_c(toString(terminatorType),
-             lightSource.c_str(), 
-             target.c_str(), 
-             ephemerisTime, 
-             frame.c_str(), 
+             lightSource.c_str(),
+             target.c_str(),
+             ephemerisTime,
+             frame.c_str(),
              aberrationCorrection,
              observer.c_str(),
              numberOfTerminatorPoints,
@@ -1128,7 +1129,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
         if (_useExceptions) {
             // no coverage
             throw SpiceException(format(
-                "No data available for the transform matrix from '{}' to '{}' at any time",
+                "No data available for transform matrix from '{}' to '{}' at any time",
                 fromFrame, toFrame
             ));
         }

@@ -63,7 +63,7 @@ private:
     /**
      * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
      * method with the correct values. If \p filename is a valid TLE file but contains
-     * disallowed values (see KeplerTranslation::setKeplerElements), a 
+     * disallowed values (see KeplerTranslation::setKeplerElements), a
      * KeplerTranslation::RangeError is thrown.
      * \param filename The path to the file that contains the TLE file.
      * \param lineNum The line number in the file where the set of 3 TLE lines starts

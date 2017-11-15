@@ -32,7 +32,7 @@ namespace openspace {
 /**
  * This class exist to abstract away the loading of images
  * from iSWA and updating of the textures for child geometries.
- * The class specifies the minimum interface that child classes 
+ * The class specifies the minimum interface that child classes
  * needs to implement.
  */
 class TextureCygnet : public IswaCygnet {
@@ -43,7 +43,8 @@ public:
 protected:
 
     bool updateTexture() override;
-    bool downloadTextureResource(double timestamp = OsEng.timeManager().time().j2000Seconds()) override;
+    bool downloadTextureResource(
+        double timestamp = OsEng.timeManager().time().j2000Seconds()) override;
     bool readyToRender() const override;
     bool updateTextureResource() override;
 

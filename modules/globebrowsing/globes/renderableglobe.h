@@ -51,7 +51,7 @@ class LayerManager;
  * algorithm for rendering.
 
  * The renderable uses a <code>DistanceSwitch</code> to determine if the renderable
- * should be rendered. 
+ * should be rendered.
  */
 class RenderableGlobe : public Renderable {
 public:
@@ -100,8 +100,8 @@ public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -126,7 +126,7 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);
 
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                             const glm::dvec3& targetModelSpace) override; 
+                                             const glm::dvec3& targetModelSpace) override;
 
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier

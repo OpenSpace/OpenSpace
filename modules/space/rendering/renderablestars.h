@@ -48,8 +48,8 @@ public:
     explicit RenderableStars(const ghoul::Dictionary& dictionary);
     ~RenderableStars();
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 

@@ -45,6 +45,7 @@ namespace openspace {
 class ConfigurationManager;
 class DownloadManager;
 class GUI;
+class LoadingScreen;
 class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
@@ -87,6 +88,7 @@ public:
     void postSynchronizationPreDraw();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
+    void drawOverlays();
     void postDraw();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier mod);
@@ -109,6 +111,7 @@ public:
     LuaConsole& console();
     DownloadManager& downloadManager();
     ModuleEngine& moduleEngine();
+    LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelConnection& parallelConnection();
     RenderEngine& renderEngine();
@@ -133,6 +136,7 @@ public:
         PreSync,         // Callback for the end of the pre-sync function
         PostSyncPreDraw, // Callback for the end of the post-sync-pre-draw function
         Render,          // Callback for the end of the render function
+        Draw2D,          // Callback for the two-dimensional rendering functions
         PostDraw         // Callback for the end of the post-draw function
     };
 
@@ -200,6 +204,8 @@ private:
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
 
+    std::unique_ptr<LoadingScreen> _loadingScreen;
+
     struct {
         properties::StringProperty versionString;
         properties::StringProperty sourceControlInformation;
@@ -218,6 +224,7 @@ private:
         std::vector<std::function<void()>> preSync;
         std::vector<std::function<void()>> postSyncPreDraw;
         std::vector<std::function<void()>> render;
+        std::vector<std::function<void()>> draw2D;
         std::vector<std::function<void()>> postDraw;
 
         std::vector<std::function<bool (Key, KeyModifier, KeyAction)>> keyboard;

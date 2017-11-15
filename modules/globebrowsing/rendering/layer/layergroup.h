@@ -46,10 +46,13 @@ struct LayerGroup : public properties::PropertyOwner {
     LayerGroup(layergroupid::GroupID id);
     LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict);
 
+    void initialize();
+    void deinitialize();
+
     /// Updates all layers tile providers within this group
     void update();
 
-    void addLayer(const ghoul::Dictionary& layerDict);
+    std::shared_ptr<Layer> addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
 
     /// @returns const vector of all layers

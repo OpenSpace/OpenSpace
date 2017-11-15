@@ -73,10 +73,13 @@ public:
     SceneGraphNode();
     ~SceneGraphNode();
 
-    static std::unique_ptr<SceneGraphNode> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<SceneGraphNode> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     void initialize();
+    void initializeGL();
     void deinitialize();
+    void deinitializeGL();
 
     void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
     void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
@@ -84,16 +87,21 @@ public:
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
 
-    void attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene = UpdateScene::Yes);
-    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child, UpdateScene updateScene = UpdateScene::Yes);
+    void attachChild(std::unique_ptr<SceneGraphNode> child,
+        UpdateScene updateScene = UpdateScene::Yes);
+    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child,
+        UpdateScene updateScene = UpdateScene::Yes);
     void setParent(SceneGraphNode& parent, UpdateScene updateScene = UpdateScene::Yes);
 
-    void addDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
-    void removeDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
+    void addDependency(SceneGraphNode& dependency,
+        UpdateScene updateScene = UpdateScene::Yes);
+    void removeDependency(SceneGraphNode& dependency,
+        UpdateScene updateScene = UpdateScene::Yes);
     void clearDependencies(UpdateScene updateScene = UpdateScene::Yes);
-    void setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene = UpdateScene::Yes);
+    void setDependencies(const std::vector<SceneGraphNode*>& dependencies,
+        UpdateScene updateScene = UpdateScene::Yes);
     SurfacePositionHandle calculateSurfacePositionHandle(
-                                                      const glm::dvec3& targetModelSpace);
+        const glm::dvec3& targetModelSpace);
 
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;

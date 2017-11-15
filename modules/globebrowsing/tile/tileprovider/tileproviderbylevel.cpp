@@ -64,7 +64,8 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         maxLevel = std::round(floatMaxLevel);
 
         ghoul::Dictionary providerDict;
-        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict)) {
+        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict))
+        {
             throw std::runtime_error(
                 "Must define key '" + std::string(KeyTileProvider) + "'"
             );
@@ -86,7 +87,10 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         }
 
         _levelTileProviders.push_back(
-            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(typeID, providerDict))
+            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(
+                typeID,
+                providerDict
+            ))
         );
 
         std::string providerName;
@@ -109,6 +113,24 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             _providerIndices[i] = _providerIndices[i+1];
         }
     }
+}
+
+bool TileProviderByLevel::initialize() {
+    bool success = TileProvider::initialize();
+    for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
+        success &= tp->initialize();
+    }
+
+    return success;
+}
+
+bool TileProviderByLevel::deinitialize() {
+    bool success = true;
+    for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
+        success &= tp->deinitialize();
+    }
+    
+    return TileProvider::deinitialize() && success;
 }
 
 Tile TileProviderByLevel::getTile(const TileIndex& tileIndex) {

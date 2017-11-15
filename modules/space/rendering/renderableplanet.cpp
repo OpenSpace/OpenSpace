@@ -285,9 +285,11 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                     sourceArray.emplace_back(sourceName, sourceRadius);
                 }
                 else {
-                    LWARNING("No Radius value expecified for Shadow Source Name "
+                    LWARNING(
+                        "No Radius value expecified for Shadow Source Name "
                         << sourceName << " from " << name
-                        << " planet.\nDisabling shadows for this planet.");
+                        << " planet.\nDisabling shadows for this planet."
+                    );
                     disableShadows = true;
                     break;
                 }
@@ -337,7 +339,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     }
 }
 
-void RenderablePlanet::initialize() {
+void RenderablePlanet::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     if (_programObject == nullptr && _shadowEnabled && _hasNightTexture) {
@@ -346,14 +348,14 @@ void RenderablePlanet::initialize() {
             "shadowNightProgram",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl");
-    } 
+    }
     else if (_programObject == nullptr && _shadowEnabled) {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowProgram",
             "${MODULE_SPACE}/shaders/shadow_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_fs.glsl");
-    } 
+    }
     else if (_programObject == nullptr && _hasNightTexture) {
         // Night texture program
         _programObject = renderEngine.buildRenderProgram(
@@ -381,7 +383,7 @@ void RenderablePlanet::initialize() {
     loadTexture();
 }
 
-void RenderablePlanet::deinitialize() {
+void RenderablePlanet::deinitializeGL() {
     if (_geometry) {
         _geometry->deinitialize();
         _geometry = nullptr;

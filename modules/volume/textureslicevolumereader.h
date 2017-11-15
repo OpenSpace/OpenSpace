@@ -41,7 +41,8 @@ class TextureSliceVolumeReader {
 public:
     using VoxelType = Type;
 
-    TextureSliceVolumeReader(std::vector<std::string> paths, size_t sliceCacheMaxItems, size_t sliceCacheSize);
+    TextureSliceVolumeReader(std::vector<std::string> paths, size_t sliceCacheMaxItems,
+        size_t sliceCacheSize);
     VoxelType get(const glm::ivec3& coordinates) const;
     virtual glm::ivec3 dimensions() const;
     void setPaths(const std::vector<std::string> paths);

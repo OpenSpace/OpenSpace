@@ -40,22 +40,24 @@ DataProcessorJson::DataProcessorJson()
 
 DataProcessorJson::~DataProcessorJson() {}
 
-std::vector<std::string> DataProcessorJson::readMetadata(std::string data, glm::size3_t& dimensions){
+std::vector<std::string> DataProcessorJson::readMetadata(std::string data,
+                                                         glm::size3_t& dimensions)
+{
     std::vector<std::string> options = std::vector<std::string>();
-    if(!data.empty()){
+    if (!data.empty()) {
         json j = json::parse(data);
         json variables = j["variables"];
 
-        for(json::iterator it = variables.begin(); it != variables.end(); ++it){
+        for (json::iterator it = variables.begin(); it != variables.end(); ++it) {
             std::string option = it.key();
-            if(option == "ep"){
+            if (option == "ep") {
                 json row = it.value();
                 json col = row.at(0);
 
                 dimensions = glm::size3_t(col.size(), row.size(), 1);
             }
 
-            if(_coordinateVariables.find(option) == _coordinateVariables.end()){
+            if (_coordinateVariables.find(option) == _coordinateVariables.end()) {
                 options.push_back(option);
             }
         }
@@ -63,11 +65,13 @@ std::vector<std::string> DataProcessorJson::readMetadata(std::string data, glm::
     return options;
 }
 
-void DataProcessorJson::addDataValues(std::string data, properties::SelectionProperty& dataOptions){
+void DataProcessorJson::addDataValues(std::string data,
+                                      properties::SelectionProperty& dataOptions)
+{
     int numOptions = dataOptions.options().size();
     initializeVectors(numOptions);
 
-    if(!data.empty()){
+    if (!data.empty()) {
         json j = json::parse(data);
         json variables = j["variables"];
 
@@ -77,7 +81,7 @@ void DataProcessorJson::addDataValues(std::string data, properties::SelectionPro
 
         float value;
 
-        for(int i=0; i<numOptions; i++){
+        for (int i=0; i<numOptions; i++) {
             json row = variables[options[i].description];
 //            int rowsize = row.size();
 
@@ -100,10 +104,13 @@ void DataProcessorJson::addDataValues(std::string data, properties::SelectionPro
     }
 }
 
-std::vector<float*> DataProcessorJson::processData(std::string data, properties::SelectionProperty& dataOptions,  glm::size3_t& dimensions){
-    if(!data.empty()){
+std::vector<float*> DataProcessorJson::processData(std::string data,
+                                               properties::SelectionProperty& dataOptions,
+                                               glm::size3_t& dimensions)
+{
+    if (!data.empty()) {
         json j = json::parse(data);
-        json variables = j["variables"]; 
+        json variables = j["variables"];
 
         std::vector<int> selectedOptions = dataOptions.value();
 //        int numSelected = selectedOptions.size();
@@ -116,7 +123,7 @@ std::vector<float*> DataProcessorJson::processData(std::string data, properties:
 
         std::vector<float*> dataOptions(numOptions, nullptr);
         for(int option : selectedOptions){
-            dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
+            dataOptions[option] = new float[dimensions.x*dimensions.y]{0.f};
 
             json row = variables[options[option].description];
             rowsize = row.size();

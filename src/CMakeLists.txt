@@ -121,6 +121,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
@@ -171,6 +172,13 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/gpudata.cpp
 )
+
+if (APPLE)
+    set(OPENSPACE_SOURCE
+        ${OPENSPACE_SOURCE}
+        ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    )
+endif ()
 
 set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
@@ -278,6 +286,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
@@ -335,6 +344,13 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )
+
+if (APPLE)
+    set(OPENSPACE_HEADER
+        ${OPENSPACE_HEADER}
+        ${OPENSPACE_BASE_DIR}/include/openspace/interaction/touchbar.h
+    )
+endif ()
 
 # Place files into source groups
 foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})

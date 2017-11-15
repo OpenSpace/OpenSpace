@@ -38,8 +38,8 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-TileIndex::TileIndex(int x, int y, int level)
-    : x(x), y(y), level(level)
+TileIndex::TileIndex(int x_, int y_, int level_)
+    : x(x_), y(y_), level(level_)
 {}
 
 TileIndex::TileIndex(const TileIndex& other)
@@ -112,7 +112,7 @@ int TileIndex::manhattan(const TileIndex& other) const {
 }
 
 // Creates a hash which can be used as key in hash maps.
-// 
+//
 // +-------+------------+-------+------------+
 // | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
 // +-------+------------+-------+------------+

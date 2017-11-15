@@ -60,7 +60,10 @@ TileTextureInitData::TileTextureInitData(const TileTextureInitData& original)
         original.glType(),
         original.ghoulTextureFormat(),
         original._padTiles,
-        original.shouldAllocateDataOnCPU() ? ShouldAllocateDataOnCPU::Yes : ShouldAllocateDataOnCPU::No)
+        original.shouldAllocateDataOnCPU() ?
+            ShouldAllocateDataOnCPU::Yes :
+            ShouldAllocateDataOnCPU::No
+    )
 {}
 
 glm::ivec3 TileTextureInitData::dimensions() const {
@@ -152,7 +155,7 @@ unsigned int TileTextureInitData::getUniqueIdFromTextureFormat(
         case Format::DepthComponent:
             return 6;
         default:
-            ghoul_assert(false, "Unknown texture format");
+            throw ghoul::MissingCaseException();
     }
 }
 

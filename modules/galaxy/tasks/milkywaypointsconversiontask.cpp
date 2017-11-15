@@ -51,7 +51,8 @@ std::string MilkywayPointsConversionTask::description()
     return std::string();
 }
 
-void MilkywayPointsConversionTask::perform(const Task::ProgressCallback & progressCallback) {
+void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progressCallback)
+{
     std::ifstream in(_inFilename, std::ios::in);
     std::ofstream out(_outFilename, std::ios::out | std::ios::binary);
 

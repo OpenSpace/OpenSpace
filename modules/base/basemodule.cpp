@@ -46,6 +46,7 @@
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/statictranslation.h>
 
+#include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/luarotation.h>
 #include <modules/base/rotation/staticrotation.h>
 
@@ -94,6 +95,7 @@ void BaseModule::internalInitialize() {
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
+    fRotation->registerClass<FixedRotation>("FixedRotation");
     fRotation->registerClass<LuaRotation>("LuaRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
 
@@ -118,6 +120,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceFramebuffer::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
+        FixedRotation::Documentation(),
         LuaRotation::Documentation(),
         StaticRotation::Documentation(),
         LuaScale::Documentation(),

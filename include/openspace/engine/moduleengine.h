@@ -68,7 +68,7 @@ public:
      * Registers the passed \p module with this ModuleEngine. The OpenSpaceModule::create
      * method will be called on the \p module in the process.
      * \param module The OpenSpaceModule that is to be registered
-     * \throw ghoul::RuntimeError If the name of the \p module was already registered 
+     * \throw ghoul::RuntimeError If the name of the \p module was already registered
      * previously
      * \pre \p module must not be nullptr
      */

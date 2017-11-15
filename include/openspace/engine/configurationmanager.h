@@ -131,9 +131,9 @@ public:
     static const std::string PartHttpProxyPort;
     /// The key that stores the authentication method of the http proxy
     static const std::string PartHttpProxyAuthentication;
-    /// The key that stores the username to use for authentication to access the http proxy
+    /// Key that stores the username to use for authentication to access the http proxy
     static const std::string PartHttpProxyUser;
-    /// The key that stores the password to use for authentication to access the http proxy
+    /// Key that stores the password to use for authentication to access the http proxy
     static const std::string PartHttpProxyPassword;
     /// The key that stores the dictionary containing information about debug contexts
     static const std::string KeyOpenGLDebugContext;
@@ -155,6 +155,20 @@ public:
     static const std::string KeyCheckOpenGLState;
     /// The part of the key storing whether each OpenGL call should be logged
     static const std::string KeyLogEachOpenGLCall;
+
+    /// This key determines whether the scene graph nodes should initialized multithreaded
+    static const std::string KeyUseMultithreadedInitialization;
+
+    /// The key under which all of the loading settings are grouped
+    static const std::string KeyLoadingScreen;
+    /// The part of the key storing whether the loading screen should display the message
+    /// about current status
+    static const std::string PartShowMessage;
+    /// The part of the key storing whether the loading screen should display node names
+    static const std::string PartShowNodeNames;
+    /// The part of the key storing whether the loading screen should contain a progress
+    /// bar
+    static const std::string PartShowProgressbar;
 
 
     /**

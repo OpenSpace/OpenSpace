@@ -112,6 +112,6 @@ REGISTER_NUMERICALPROPERTY_SOURCE(Vec2Property, glm::vec2, glm::vec2(0),
                                   DEFAULT_TO_LUA_LAMBDA(glm::vec2),
                                   DEFAULT_FROM_STRING_LAMBDA(glm::vec2),
                                   DEFAULT_TO_STRING_LAMBDA(glm::vec2),
-                                  LUA_TTABLE);
+                                  LUA_TTABLE)
 
 } // namespace openspace::properties

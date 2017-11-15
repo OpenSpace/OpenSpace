@@ -35,8 +35,8 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::filesystem { 
-    class File; 
+namespace ghoul::filesystem {
+    class File;
 }
 
 namespace ghoul::opengl {
@@ -54,7 +54,8 @@ namespace openspace {
         ~RenderablePoints() = default;
 
         void initialize() override;
-        void deinitialize() override;
+        void initializeGL() override;
+        void deinitializeGL() override;
 
         bool isReady() const override;
 

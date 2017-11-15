@@ -83,7 +83,7 @@ public:
      * lower than the current level of the <code>Chunks</code>s
      * <code>TileIndex</code>. If the desired level is higher than that of the
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
-     * its siblings. 
+     * its siblings.
      */
     int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
 

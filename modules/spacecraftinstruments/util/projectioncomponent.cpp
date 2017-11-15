@@ -465,7 +465,7 @@ void ProjectionComponent::imageProjectBegin() {
         // Generate the new textures
         generateProjectionLayerTexture(_textureSize);
 
-        if (_shadowing.isEnabled) { 
+        if (_shadowing.isEnabled) {
             generateDepthTexture(_textureSize);
         }
 

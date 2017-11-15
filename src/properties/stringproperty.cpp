@@ -28,8 +28,11 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
-[](lua_State* state, bool& success) -> std::string {
+REGISTER_TEMPLATEPROPERTY_SOURCE(
+    StringProperty,
+    std::string,
+    "",
+    [](lua_State* state, bool& success) -> std::string {
         success = lua_isstring(state, -1) == 1;
         if (success) {
             return lua_tostring(state, -1);
@@ -38,27 +41,27 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
             return "";
         }
     },
-[](lua_State* state, std::string value) -> bool {
+    [](lua_State* state, std::string value) -> bool {
         lua_pushstring(state, value.c_str());
         return true;
     },
-[](std::string value, bool& success) -> std::string {
-    // An incoming string is of the form
-    // "value"
-    // so we want to remove the leading and trailing " characters
-    if (value.size() > 2 && (value[0] == '"' && value[value.size() - 1] == '"')) {
-        // Removing the first and last "
-        success = true;
-        return value.substr(1, value.size() - 2);
-    }
-    success = false;
-    return value;
-},
-[](std::string& outValue, std::string inValue) -> bool {
-    outValue = "\"" + inValue + "\"";
-    return true;
-},
-LUA_TSTRING
-);
+    [](std::string value, bool& success) -> std::string {
+        // An incoming string is of the form
+        // "value"
+        // so we want to remove the leading and trailing " characters
+        if (value.size() > 2 && (value[0] == '"' && value[value.size() - 1] == '"')) {
+            // Removing the first and last "
+            success = true;
+            return value.substr(1, value.size() - 2);
+        }
+        success = false;
+        return value;
+    },
+    [](std::string& outValue, std::string inValue) -> bool {
+        outValue = "\"" + inValue + "\"";
+        return true;
+    },
+    LUA_TSTRING
+)
 
 } // namespace openspace::properties

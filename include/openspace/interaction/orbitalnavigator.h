@@ -55,7 +55,7 @@ public:
     void setFocusNode(SceneGraphNode* focusNode);
     void startInterpolateCameraDirection(const Camera& camera);
 
-    bool followingNodeRotation() const;    
+    bool followingNodeRotation() const;
     SceneGraphNode* focusNode() const;
 
     bool hasRotationalFriction() const;
@@ -99,7 +99,7 @@ private:
      * camera points towards the focus node in the direction opposite to the direction
      * out from the surface of the object. The local rotation defines the differential
      * from the global to the current total rotation so that
-     * <code>cameraRotation = globalRotation * localRotation</code>. 
+     * <code>cameraRotation = globalRotation * localRotation</code>.
      */
     CameraRotationDecomposition decomposeCameraRotation(const glm::dvec3& cameraPosition,
         const glm::dquat& cameraRotation, const glm::dvec3& cameraLookUp,
@@ -139,7 +139,7 @@ private:
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the focus
-     * node defined by the differential focusNodeRotationDiff. 
+     * node defined by the differential focusNodeRotationDiff.
      * \returns a position updated with the rotation defined by focusNodeRotationDiff
      */
     glm::dvec3 followFocusNodeRotation(const glm::dvec3& cameraPosition,

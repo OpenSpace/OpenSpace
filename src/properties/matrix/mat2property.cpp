@@ -133,6 +133,6 @@ REGISTER_NUMERICALPROPERTY_SOURCE(Mat2Property, glm::mat2x2, glm::mat2x2(0),
                                   DEFAULT_TO_LUA_LAMBDA(glm::mat2x2),
                                   DEFAULT_FROM_STRING_LAMBDA(glm::mat2x2),
                                   DEFAULT_TO_STRING_LAMBDA(glm::mat2x2),
-                                  LUA_TTABLE);
+                                  LUA_TTABLE)
 
 }  // namespace openspace::properties

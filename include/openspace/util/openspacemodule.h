@@ -45,7 +45,7 @@ namespace documentation {  struct Documentation; }
 class OpenSpaceModule : public properties::PropertyOwner {
 public:
     /**
-     * Constructs the OpenSpaceModule with a specific \p name. The uniqueness of the 
+     * Constructs the OpenSpaceModule with a specific \p name. The uniqueness of the
      * \p name will be checked at a later stage.
      * \param name The name of this OpenSpace module
      * \pre \p name must not be empty

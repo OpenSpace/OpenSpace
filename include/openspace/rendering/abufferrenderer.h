@@ -119,9 +119,11 @@ private:
      * The _volumes map keeps track of which volumes that can
      * be rendered using the current resolve program, along with their raycast data
      * (id, namespace, etc)
-     */ 
+     */
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _boundsPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _boundsPrograms;
     std::vector<std::string> _helperPaths;
 
     ghoul::Dictionary _resolveDictionary;

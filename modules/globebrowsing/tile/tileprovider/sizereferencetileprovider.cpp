@@ -106,7 +106,8 @@ int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileInde
     return l;
 }
 
-TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const {
+TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const
+{
     int l = roundedLongitudalLength(tileIndex);
     TileIndex::TileHashKey key = static_cast<TileIndex::TileHashKey>(l);
     return key;
