@@ -163,6 +163,11 @@ std::vector<AssetSynchronizer::StateChange> AssetSynchronizer::getStateChanges()
     _stateChanges.clear();
     return stateChangesVector;
 }
+    
+AssetSynchronizer::SynchronizationState AssetSynchronizer::assetState(Asset*) {
+    return SynchronizationState::Unknown;
+}
+    
 
 /*
 bool AssetSynchronizer::assetIsSynchronized(Asset * asset) {

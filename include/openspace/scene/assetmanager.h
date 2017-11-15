@@ -59,6 +59,7 @@ public:
     };
 
     struct ManagedAsset {
+        std::string path;
         std::shared_ptr<Asset> asset;
         AssetState state;
     };
@@ -76,13 +77,18 @@ public:
     bool isDone();
 private:
     std::shared_ptr<Asset> tryLoadAsset(const std::string& path);
+    void unloadAsset(Asset* asset);
     bool tryInitializeAsset(Asset& asset);
     
-    std::unordered_map<Asset*, ManagedAsset> _managedAssets;
+    std::vector<ManagedAsset> _managedAssets;
+    
+
     std::unordered_map<std::string, AssetState> _pendingStateChangeCommands;
     std::unordered_map<Asset*, AssetState> _stateChangesInProgress;
 
     std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncAncestors;
+    std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncDependencies;
+    
     std::unique_ptr<AssetLoader> _assetLoader;
     std::unique_ptr<AssetSynchronizer> _assetSynchronizer;
 };
