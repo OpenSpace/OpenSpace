@@ -65,7 +65,7 @@ struct WarningCompare {
 // so we have to include one ourselves
 namespace std {
 std::string to_string(std::string value) {
-    return value; 
+    return value;
 }
 
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason) {

@@ -156,7 +156,7 @@ bool RenderableModel::isReady() const {
     return _programObject && _texture;
 }
 
-void RenderableModel::initialize() {
+void RenderableModel::initializeGL() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "ModelProgram",
         "${MODULE_BASE}/shaders/model_vs.glsl",
@@ -165,10 +165,10 @@ void RenderableModel::initialize() {
 
     loadTexture();
 
-    _geometry->initialize(this); 
+    _geometry->initialize(this);
 }
 
-void RenderableModel::deinitialize() {
+void RenderableModel::deinitializeGL() {
     if (_geometry) {
         _geometry->deinitialize();
         _geometry = nullptr;

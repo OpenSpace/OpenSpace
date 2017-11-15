@@ -135,7 +135,7 @@ bool RenderableCrawlingLine::isReady() const {
     return (_program != nullptr);
 }
 
-void RenderableCrawlingLine::initialize() {
+void RenderableCrawlingLine::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram(
         "RenderableCrawlingLine",
@@ -166,7 +166,7 @@ void RenderableCrawlingLine::initialize() {
     glBindVertexArray(0);
 }
 
-void RenderableCrawlingLine::deinitialize(){
+void RenderableCrawlingLine::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
     glDeleteBuffers(1, &_vbo);
@@ -196,7 +196,7 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() *
         glm::mat4(data.camera.combinedViewMatrix() *
             modelTransform
-        )    
+        )
     ;
     //glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -283,7 +283,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferSubData(
-        GL_ARRAY_BUFFER, 
+        GL_ARRAY_BUFFER,
         0,
         2 * sizeof(VBOData),
         vboData

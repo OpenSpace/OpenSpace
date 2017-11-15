@@ -347,7 +347,10 @@ DownloadManager::downloadRequestFiles(
             ++nFiles;
 #ifdef __APPLE__
             // @TODO: Fix this so that the ifdef is not necessary anymore ---abock
-          std::string file = ghoul::filesystem::File(line, ghoul::filesystem::File::RawPath::Yes).filename();
+            std::string file = ghoul::filesystem::File(
+                line,
+                ghoul::filesystem::File::RawPath::Yes
+            ).filename();
 #else
             std::string file = ghoul::filesystem::File(line).filename();
 #endif
@@ -426,7 +429,7 @@ void DownloadManager::getFileExtension(const std::string& url,
             if (CURLE_OK == res) {
                 char* ct;
                 // ask for the content-type
-                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);    
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
                 if ((res == CURLE_OK) && ct && finishedCallback) {
                     finishedCallback(std::string(ct));
                 }

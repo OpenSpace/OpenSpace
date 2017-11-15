@@ -45,7 +45,9 @@ SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments,
         _geometry->setVertexPositions(createPositions(_xSegments, _ySegments));
     }
     if (useTextureCoordinates) {
-        _geometry->setVertexTextureCoordinates(createTextureCoordinates(_xSegments, _ySegments));
+        _geometry->setVertexTextureCoordinates(
+            createTextureCoordinates(_xSegments, _ySegments)
+        );
     }
     if (useNormals) {
         _geometry->setVertexNormals(createNormals(_xSegments, _ySegments));

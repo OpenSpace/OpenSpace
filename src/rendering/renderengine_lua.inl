@@ -114,7 +114,9 @@ int registerScreenSpaceRenderable(lua_State* L) {
         return 0;
     }
 
-    std::shared_ptr<ScreenSpaceRenderable> s( ScreenSpaceRenderable::createFromDictionary(d) );
+    std::shared_ptr<ScreenSpaceRenderable> s(
+        ScreenSpaceRenderable::createFromDictionary(d)
+    );
     OsEng.renderEngine().registerScreenSpaceRenderable(s);
 
     return 1;
@@ -130,9 +132,14 @@ int unregisterScreenSpaceRenderable(lua_State* L) {
 
     std::string name = luaL_checkstring(L, -1);
 
-    std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(name);
+    std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(
+        name
+    );
     if (!s) {
-        LERRORC("unregisterScreenSpaceRenderable", errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
+        LERRORC(
+            "unregisterScreenSpaceRenderable",
+            errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'"
+        );
         return 0;
     }
 

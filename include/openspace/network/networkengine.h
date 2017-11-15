@@ -48,7 +48,8 @@ public:
     void sendMessages();
 
     // Initial Connection Messages
-    void setInitialConnectionMessage(MessageIdentifier identifier, std::vector<char> message);
+    void setInitialConnectionMessage(MessageIdentifier identifier,
+        std::vector<char> message);
     void sendInitialInformation();
 
     // Background

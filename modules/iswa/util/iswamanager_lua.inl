@@ -71,7 +71,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
     float id;
     d.getValue("CygnetId", id);
 
-    auto cygnetInformation = IswaManager::ref().cygnetInformation(); 
+    auto cygnetInformation = IswaManager::ref().cygnetInformation();
     if (cygnetInformation.find((int)id) == cygnetInformation.end()) {
         LWARNING("Could not find Cygnet with id = " + std::to_string(id));
         return 0;
@@ -90,7 +90,9 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         d.setValue("Type", "ScreenSpaceCygnet");
         d.setValue("UpdateInterval", (float) updateInterval);
 
-        std::shared_ptr<ScreenSpaceRenderable> s( ScreenSpaceRenderable::createFromDictionary(d) );
+        std::shared_ptr<ScreenSpaceRenderable> s(
+            ScreenSpaceRenderable::createFromDictionary(d)
+        );
         OsEng.renderEngine().registerScreenSpaceRenderable(s);
     }
     return 0;
@@ -131,7 +133,7 @@ int iswa_removeScrenSpaceCygnet(lua_State* L) {
 
     int id = static_cast<int>(lua_tonumber(L, 1));
 
-    auto cygnetInformation = IswaManager::ref().cygnetInformation(); 
+    auto cygnetInformation = IswaManager::ref().cygnetInformation();
     if (cygnetInformation.find(id) == cygnetInformation.end()) {
         LWARNING("Could not find Cygnet with id = " + std::to_string(id));
         return 0;
@@ -140,7 +142,10 @@ int iswa_removeScrenSpaceCygnet(lua_State* L) {
     auto info = cygnetInformation[id];
     info->selected = false;
 
-    std::string script = "openspace.unregisterScreenSpaceRenderable('" + cygnetInformation[id]->name + "');";
+    std::string script =
+        "openspace.unregisterScreenSpaceRenderable('" +
+        cygnetInformation[id]->name + "');";
+
     OsEng.scriptEngine().queueScript(
         script,
         scripting::ScriptEngine::RemoteScripting::Yes
@@ -152,7 +157,7 @@ int iswa_removeGroup(lua_State* L) {
     std::string name = luaL_checkstring(L, -1);
     // IswaManager::ref().unregisterGroup(id);
 
-    auto groups = IswaManager::ref().groups(); 
+    auto groups = IswaManager::ref().groups();
     if (groups.find(name) != groups.end()) {
         groups[name]->clearGroup();
     }
@@ -171,7 +176,7 @@ int iswa_addKameleonPlanes(lua_State* L) {
     std::string group = luaL_checkstring(L, 1);
     int pos = static_cast<int>(lua_tonumber(L, 2));
     IswaManager::ref().addKameleonCdf(group, pos);
-    // auto cdfInfo = 
+    // auto cdfInfo =
     return 0;
 }
 

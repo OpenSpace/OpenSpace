@@ -128,7 +128,10 @@ static void RenderDrawLists(ImDrawData* drawData) {
             GL_STREAM_DRAW
         );
 
-        for (const ImDrawCmd* pcmd = cmdList->CmdBuffer.begin(); pcmd != cmdList->CmdBuffer.end(); pcmd++) {
+        for (const ImDrawCmd* pcmd = cmdList->CmdBuffer.begin();
+             pcmd != cmdList->CmdBuffer.end();
+             pcmd++)
+        {
             if (pcmd->UserCallback) {
                 pcmd->UserCallback(cmdList, pcmd);
             }
@@ -221,19 +224,28 @@ void addScreenSpaceRenderableLocal(std::string texturePath) {
     }
 
     const std::string luaTable =
-        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" + texturePath + "') }";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" +
+        texturePath + "') }";
+    const std::string script = "openspace.registerScreenSpaceRenderable(" +
+        luaTable + ");";
+    OsEng.scriptEngine().queueScript(
+        script,
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void addScreenSpaceRenderableOnline(std::string texturePath) {
     const std::string luaTable =
         "{Type = 'ScreenSpaceImageOnline', TexturePath = '" + texturePath + "' }";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+    const std::string script = "openspace.registerScreenSpaceRenderable(" +
+        luaTable + ");";
+    OsEng.scriptEngine().queueScript(
+        script,
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
-} // namespace 
+} // namespace
 
 namespace openspace::gui {
 
@@ -243,7 +255,7 @@ void CaptionText(const char* text) {
     ImGui::PopFont();
 }
 
-GUI::GUI() 
+GUI::GUI()
     : GuiComponent("Main")
     , _globalProperty("Global")
     , _property(
@@ -388,7 +400,7 @@ void GUI::initialize() {
     _featuredProperties.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _filePath.initialize();
-#ifdef GLOBEBROWSING_USE_GDAL    
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initialize();
 #endif // GLOBEBROWSING_USE_GDAL
     _performance.initialize();
@@ -396,7 +408,7 @@ void GUI::initialize() {
     _parallel.initialize();
     _mission.initialize();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _iswa.initialize(); 
+    _iswa.initialize();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
 }
 
@@ -493,7 +505,7 @@ void GUI::initializeGL() {
     _globalProperty.initializeGL();
     _featuredProperties.initializeGL();
     _performance.initializeGL();
-    _help.initializeGL();    
+    _help.initializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initializeGL();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -644,7 +656,7 @@ bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
     const bool consumeEvent = io.WantCaptureKeyboard;
     if (consumeEvent) {
         if (action == KeyAction::Press) {
-            io.KeysDown[keyIndex] = true; 
+            io.KeysDown[keyIndex] = true;
         }
         io.KeyShift = hasShift;
         io.KeyCtrl = hasCtrl;

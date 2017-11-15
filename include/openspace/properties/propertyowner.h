@@ -39,7 +39,7 @@ class Property;
  * sub-owners must be unique to this PropertyOwner. A Property cannot have the same name
  * as a PropertyOwner owned by this PropertyOwner.
  * Propertys can be added using the Property::addProperty methods and be removed by the
- * Property::removeProperty method. The same holds true for sub-owners 
+ * Property::removeProperty method. The same holds true for sub-owners
  * (Property::addPropertySubOwner, Property::removePropertySubOwner). These methods will
  * inform the passed object about the new ownership automatically.
  * Stored properties can be accessed using the Property::properties method or the
@@ -231,7 +231,7 @@ public:
     void addTag(std::string tag);
 
     /**
-     * Removes a tag from this PropertyOwner. No error is reported if the tag does not 
+     * Removes a tag from this PropertyOwner. No error is reported if the tag does not
      * exist
      * @param tag The tag is that is to be removed from this PropertyOwner
      */

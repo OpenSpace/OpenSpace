@@ -44,7 +44,7 @@ namespace documentation { struct Documentation; }
 
 /**
  * The base class for screen space images and screen space framebuffers.
- * This base class handles general functionality specific to planes that are rendered in 
+ * This base class handles general functionality specific to planes that are rendered in
  * front of the camera. It implements protected methods and properties for converting
  * the planes from Spherical to Euclidean coordinates and back. It also specifies the
  * interface that its children need to implement.
@@ -60,7 +60,10 @@ public:
     virtual void render();
 
     virtual bool initialize();
+    virtual bool initializeGL();
     virtual bool deinitialize();
+    virtual bool deinitializeGL();
+
     virtual void update() = 0;
     virtual bool isReady() const;
     bool isEnabled() const;
@@ -79,7 +82,7 @@ protected:
      * Converts Spherical coordinates to Euclidean.
      * \param spherical The coordinates theta and phi
      * \param radius The radius position value of the plane
-     * \return The x and y position value of the plane 
+     * \return The x and y position value of the plane
      */
     glm::vec2 toEuclidean(const glm::vec2& spherical, float radius);
 

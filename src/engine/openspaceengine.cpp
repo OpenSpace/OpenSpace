@@ -41,6 +41,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
@@ -82,6 +83,11 @@
 #ifdef WIN32
 #include <Windows.h>
 #endif
+
+#ifdef __APPLE__
+#include <openspace/interaction/touchbar.h>
+#endif // __APPLE__
+
 
 #include <numeric>
 
@@ -159,6 +165,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
+    , _loadingScreen(nullptr)
     , _versionInformation{
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
         properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
@@ -316,15 +323,15 @@ void OpenSpaceEngine::create(int argc, char** argv,
     }
 
     const bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
-    const bool hasCacheConfiguration = _engine->configurationManager().hasKeyAndValue<bool>(
+    const bool hasCacheConfig = _engine->configurationManager().hasKeyAndValue<bool>(
         ConfigurationManager::KeyPerSceneCache
     );
     std::string cacheFolder = absPath("${CACHE}");
-    if (hasCacheCommandline || hasCacheConfiguration) {
+    if (hasCacheCommandline || hasCacheConfig) {
         if (hasCacheCommandline) {
             cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
         }
-        if (hasCacheConfiguration) {
+        if (hasCacheConfig) {
             std::string scene = _engine->configurationManager().value<std::string>(
                 ConfigurationManager::KeyConfigScene
             );
@@ -395,7 +402,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-    if (_engine->parallelConnection().status() != ParallelConnection::Status::Disconnected) {
+    if (_engine->parallelConnection().status() !=
+        ParallelConnection::Status::Disconnected)
+    {
         _engine->parallelConnection().signalDisconnect();
     }
 
@@ -574,45 +583,121 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     }
 
     Scene* scene;
-    try {
-        scene = _sceneManager->loadScene(scenePath);
-    } catch (const ghoul::FileNotFoundError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    } catch (const Scene::InvalidSceneError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    } catch (const ghoul::RuntimeError& e) {
-        LERRORC(e.component, e.message);
-        return;
+
+    bool showMessage = true;
+    std::string kMessage =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowMessage;
+    if (configurationManager().hasKey(kMessage)) {
+        showMessage = configurationManager().value<bool>(kMessage);
     }
-    catch (const std::exception& e) {
-        LERROR(e.what());
-        return;
+
+    bool showNodeNames = true;
+    std::string kNames = 
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowNodeNames;
+
+    if (configurationManager().hasKey(kNames)) {
+        showNodeNames = configurationManager().value<bool>(kNames);
     }
-    catch (...) {
-        LERROR("Unknown error loading the scene");
+
+    bool showProgressbar = true;
+    std::string kProgress =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowProgressbar;
+
+    if (configurationManager().hasKey(kProgress)) {
+        showProgressbar = configurationManager().value<bool>(kProgress);
+    }
+ 
+
+    _loadingScreen = std::make_unique<LoadingScreen>(
+        LoadingScreen::ShowMessage(showMessage),
+        LoadingScreen::ShowNodeNames(showNodeNames),
+        LoadingScreen::ShowProgressbar(showProgressbar)
+    );
+
+    // We can initialize all SceneGraphNodes in a separate thread since none of them use
+    // an OpenGL context
+    std::atomic_bool initializeFinished(false);
+    bool errorWhileLoading = false;
+    std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading, this]() {
+        _loadingScreen->postMessage("Creating scene...");
+        _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
+        try {
+            scene = _sceneManager->loadScene(scenePath);
+        }
+        catch (const ghoul::FileNotFoundError& e) {
+            LERRORC(e.component, e.message);
+            errorWhileLoading = true;
+            return;
+        }
+        catch (const Scene::InvalidSceneError& e) {
+            LERRORC(e.component, e.message);
+            errorWhileLoading = true;
+            return;
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+            errorWhileLoading = true;
+            return;
+        }
+        catch (const std::exception& e) {
+            LERROR(e.what());
+            errorWhileLoading = true;
+            return;
+        }
+        catch (...) {
+            LERROR("Unknown error loading the scene");
+            errorWhileLoading = true;
+            return;
+        }
+
+        Scene* previousScene = _renderEngine->scene();
+        if (previousScene) {
+            _syncEngine->removeSyncables(_timeManager->getSyncables());
+            _syncEngine->removeSyncables(_renderEngine->getSyncables());
+            _syncEngine->removeSyncable(_scriptEngine.get());
+
+            _renderEngine->setScene(nullptr);
+            _renderEngine->setCamera(nullptr);
+            _sceneManager->unloadScene(*previousScene);
+        }
+
+        // Initialize the RenderEngine
+        _renderEngine->setScene(scene);
+        _renderEngine->setCamera(scene->camera());
+        _renderEngine->setGlobalBlackOutFactor(0.0);
+        _renderEngine->startFading(1, 3.0);
+
+        _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
+
+        scene->initialize();
+        _loadingScreen->postMessage("Finished initializing");
+        initializeFinished = true;
+    });
+
+    
+
+    // While the SceneGraphNodes initialize themselves, we can hand over control to the
+    // Loading screen rendering
+
+   while (!initializeFinished) {
+        _loadingScreen->render();
+    }
+   _loadingScreen->postMessage("Initializing OpenGL");
+   _loadingScreen->finalize();
+
+    t.join();
+    // It's okay to delete it since the last rendered image will remain on screen
+    _loadingScreen = nullptr;
+        
+    if (errorWhileLoading) {
         return;
     }
 
-    Scene* previousScene = _renderEngine->scene();
-    if (previousScene) {
-        _syncEngine->removeSyncables(_timeManager->getSyncables());
-        _syncEngine->removeSyncables(_renderEngine->getSyncables());
-        _syncEngine->removeSyncable(_scriptEngine.get());
+    scene->initializeGL();
 
-        _renderEngine->setScene(nullptr);
-        _renderEngine->setCamera(nullptr);
-        _sceneManager->unloadScene(*previousScene);
-    }
-
-    // Initialize the RenderEngine
-    _renderEngine->setScene(scene);
-    _renderEngine->setCamera(scene->camera());
-    _renderEngine->setGlobalBlackOutFactor(0.0);
-    _renderEngine->startFading(1, 3.0);
-
-    scene->initialize();
     // Update the scene so that position of objects are set in case they are used in
     // post sync scripts
     _renderEngine->updateScene();
@@ -656,6 +741,10 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
+
+#ifdef __APPLE__
+    showTouchbar();
+#endif // APPLE
 
     LTRACE("OpenSpaceEngine::loadScene(end)");
 }
@@ -832,7 +921,7 @@ void OpenSpaceEngine::configureLogging() {
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogLevel;
     const std::string KeyLogImmediateFlush =
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartImmediateFlush;
-    const std::string KeyLogs = 
+    const std::string KeyLogs =
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogs;
 
     if (configurationManager().hasKeyAndValue<std::string>(KeyLogLevel)) {
@@ -1009,7 +1098,7 @@ void OpenSpaceEngine::initializeGL() {
 
     // The ordering of the KeyCheckOpenGLState and KeyLogEachOpenGLCall are important as
     // the callback mask in glbinding is stateful for each context, and since
-    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the 
+    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the
     // state from KeyCheckOpenGLState
     if (_configurationManager->hasKey(ConfigurationManager::KeyCheckOpenGLState)) {
         const bool val = _configurationManager->value<bool>(
@@ -1214,18 +1303,11 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         func();
     }
 
-    if (isGuiWindow && _shutdown.inShutdown) {
-        _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
-    }
-
     LTRACE("OpenSpaceEngine::render(end)");
 }
 
-void OpenSpaceEngine::postDraw() {
-    LTRACE("OpenSpaceEngine::postDraw(begin)");
-
-    _renderEngine->postDraw();
-
+void OpenSpaceEngine::drawOverlays() {
+    LTRACE("OpenSpaceEngine::drawOverlays(begin)");
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
 
@@ -1241,6 +1323,18 @@ void OpenSpaceEngine::postDraw() {
         _console->render();
     }
 
+    for (const auto& func : _moduleCallbacks.draw2D) {
+        func();
+    }
+
+    LTRACE("OpenSpaceEngine::drawOverlays(end)");
+}
+
+void OpenSpaceEngine::postDraw() {
+    LTRACE("OpenSpaceEngine::postDraw(begin)");
+
+    _renderEngine->postDraw();
+
     for (const auto& func : _moduleCallbacks.postDraw) {
         func();
     }
@@ -1249,6 +1343,7 @@ void OpenSpaceEngine::postDraw() {
         _windowWrapper->setSynchronization(true);
         _isFirstRenderingFirstFrame = false;
     }
+
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
 }
@@ -1354,8 +1449,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "toggleShutdown",
                 &luascriptfunctions::toggleShutdown,
                 "",
-                "Toggles the shutdown mode that will close the application after the count"
-                "down timer is reached"
+                "Toggles the shutdown mode that will close the application after the "
+                "count down timer is reached"
             },
             {
                 "writeDocumentation",
@@ -1429,6 +1524,9 @@ void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption opt
             break;
         case CallbackOption::Render:
             _moduleCallbacks.render.push_back(std::move(function));
+            break;
+        case CallbackOption::Draw2D:
+            _moduleCallbacks.draw2D.push_back(std::move(function));
             break;
         case CallbackOption::PostDraw:
             _moduleCallbacks.postDraw.push_back(std::move(function));
@@ -1511,6 +1609,11 @@ SettingsEngine& OpenSpaceEngine::settingsEngine() {
 TimeManager& OpenSpaceEngine::timeManager() {
     ghoul_assert(_timeManager, "Download Manager must not be nullptr");
     return *_timeManager;
+}
+
+LoadingScreen& OpenSpaceEngine::loadingScreen() {
+    ghoul_assert(_loadingScreen, "Loading Screen must not be nullptr");
+    return *_loadingScreen;
 }
 
 WindowWrapper& OpenSpaceEngine::windowWrapper() {

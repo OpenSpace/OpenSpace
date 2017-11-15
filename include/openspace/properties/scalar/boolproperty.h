@@ -28,9 +28,9 @@
  /**
  * \file boolproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
 
  * \class BoolProperty

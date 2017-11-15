@@ -41,7 +41,7 @@ class UniformLocation {
 public:
 
     /**
-    * Updates the uniform location of the uniform variable named <name> 
+    * Updates the uniform location of the uniform variable named <name>
     * in the provided shader program.
     */
     void bind(ghoul::opengl::ProgramObject* program, const std::string& name);
@@ -53,7 +53,7 @@ protected:
 
 /**
  * Manages a GPU representation of the templated data type T.
- * This class provides a simple interface setting the value of 
+ * This class provides a simple interface setting the value of
  * the binded GLSL variable.
  */
 template<typename T>
@@ -71,13 +71,13 @@ public:
 
 /**
  * Manages a Texture on the GPU.
- * This class provides a simple interface binding texture to the 
+ * This class provides a simple interface binding texture to the
  * named uniform.
  */
 class GPUTexture : public UniformLocation{
 public:
     /**
-     * Sets and assignes a texture unit within the provided shader 
+     * Sets and assignes a texture unit within the provided shader
      * program.
      * OBS! Users must ensure bind has been called before using this method.
      */

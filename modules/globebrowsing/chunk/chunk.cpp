@@ -40,7 +40,7 @@ Chunk::Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex, bool init
     : _owner(owner)
     , _tileIndex(tileIndex)
     , _isVisible(initVisible)
-    , _surfacePatch(tileIndex) 
+    , _surfacePatch(tileIndex)
 {}
 
 const GeodeticPatch& Chunk::surfacePatch() const {
@@ -62,7 +62,14 @@ bool Chunk::isVisible() const {
 Chunk::Status Chunk::update(const RenderData& data) {
     const auto& savedCamera = _owner.savedCamera();
     const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
-    RenderData myRenderData = { camRef, data.position, data.time, data.doPerformanceMeasurement, data.renderBinMask, data.modelTransform };
+    RenderData myRenderData = {
+        camRef,
+        data.position,
+        data.time,
+        data.doPerformanceMeasurement,
+        data.renderBinMask,
+        data.modelTransform
+    };
 
     _isVisible = true;
     if (_owner.chunkedLodGlobe()->testIfCullable(*this, myRenderData)) {
@@ -100,7 +107,9 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
-    const LayerGroup& heightmaps = layerManager->layerGroup(layergroupid::GroupID::HeightLayers);
+    const LayerGroup& heightmaps = layerManager->layerGroup(
+        layergroupid::GroupID::HeightLayers
+    );
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
         tileselector::getTilesAndSettingsUnsorted(
             heightmaps, _tileIndex);
@@ -171,8 +180,8 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
     double maxCenterRadius = patchCenterRadius + boundingHeight.max;
     Geodetic2 halfSize = patch.halfSize();
 
-    // As the patch is curved, the maximum height offsets at the corners must be long 
-    // enough to cover large enough to cover a boundingHeight.max at the center of the 
+    // As the patch is curved, the maximum height offsets at the corners must be long
+    // enough to cover large enough to cover a boundingHeight.max at the center of the
     // patch.
     // Approximating scaleToCoverCenter by assuming the latitude and longitude angles
     // of "halfSize" are equal to the angles they create from the center of the
@@ -189,7 +198,7 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
 
     bool chunkIsNorthOfEquator = patch.isNorthern();
 
-    // The minimum height offset, however, we can simply 
+    // The minimum height offset, however, we can simply
     double minCornerHeight = boundingHeight.min;
     std::vector<glm::dvec4> corners(8);
 

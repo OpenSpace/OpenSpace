@@ -134,13 +134,13 @@ REGISTER_NUMERICALPROPERTY_SOURCE(DMat2x4Property, glm::dmat2x4, glm::dmat2x4(0)
                                     numeric_limits<double>::max()
                                   ),
                                   glm::dmat2x4(
-                                    0.01, 0.01, 0.01, 0.01, 
+                                    0.01, 0.01, 0.01, 0.01,
                                     0.01, 0.01, 0.01, 0.01
                                   ),
                                   DEFAULT_FROM_LUA_LAMBDA(glm::dmat2x4),
                                   DEFAULT_TO_LUA_LAMBDA(glm::dmat2x4),
                                   DEFAULT_FROM_STRING_LAMBDA(glm::dmat2x4),
                                   DEFAULT_TO_STRING_LAMBDA(glm::dmat2x4),
-                                  LUA_TTABLE);
+                                  LUA_TTABLE)
 
 }  // namespace openspace::properties

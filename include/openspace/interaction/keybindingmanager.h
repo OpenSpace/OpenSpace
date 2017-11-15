@@ -61,7 +61,7 @@ public:
 
     static scripting::LuaLibrary luaLibrary();
 
-    // Callback functions 
+    // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
 private:

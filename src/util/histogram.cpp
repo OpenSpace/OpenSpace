@@ -114,8 +114,11 @@ bool Histogram::add(float value, float repeat) {
         return false;
     }
 
-    float normalizedValue = (value - _minValue) / (_maxValue - _minValue);      // [0.0, 1.0]
-    int binIndex = std::min( static_cast<float>(floor(normalizedValue * _numBins)), _numBins - 1.0f ); // [0, _numBins - 1]
+    float normalizedValue = (value - _minValue) / (_maxValue - _minValue);   // [0.0, 1.0]
+    int binIndex = std::min(
+        static_cast<float>(floor(normalizedValue * _numBins)),
+        _numBins - 1.f
+    ); // [0, _numBins - 1]
 
     _data[binIndex] += repeat;
     _numValues += repeat;
@@ -133,8 +136,12 @@ void Histogram::changeRange(float minValue, float maxValue){\
     float* newData = new float[_numBins]{0.0};
     for(int i=0; i<_numBins; i++){
         float unNormalizedValue = i*(oldMax-oldMin)+oldMin;
-        float normalizedValue = (unNormalizedValue - _minValue) / (_maxValue - _minValue);      // [0.0, 1.0]
-        int binIndex = std::min( static_cast<float>(floor(normalizedValue * _numBins)), _numBins - 1.0f ); // [0, _numBins - 1]
+        float normalizedValue = (unNormalizedValue - _minValue) /
+                                (_maxValue - _minValue);      // [0.0, 1.0]
+        int binIndex = std::min(
+            static_cast<float>(floor(normalizedValue * _numBins)),
+            _numBins - 1.f
+        ); // [0, _numBins - 1]
 
         newData[binIndex] = oldData[i];
     }
@@ -148,13 +155,13 @@ void Histogram::changeRange(float minValue, float maxValue){\
 }
 
 bool Histogram::add(const Histogram& histogram) {
-    if (_minValue == histogram.minValue() && _maxValue == histogram.maxValue() && _numBins == histogram.numBins()) {
-
+    if (_minValue == histogram.minValue() &&
+        _maxValue == histogram.maxValue() &&
+        _numBins == histogram.numBins())
+    {
         const float* data = histogram.data();
         for (int i = 0; i < _numBins; i++) {
-
             _data[i] += data[i];
-
         }
         _numValues += histogram._numValues;
         return true;
@@ -278,7 +285,11 @@ Histogram Histogram::equalize(){
  */
 float Histogram::equalize(float value){
     // if (value < _minValue || value > _maxValue) {
-    //     LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minValue) + " max: " + std::to_string(_maxValue) + " val: " + std::to_string(value));
+    //     LWARNING(
+    //         "Equalized value is is not within domain of histogram. min: " +
+    //         std::to_string(_minValue) + " max: " + std::to_string(_maxValue) +
+    //         " val: " + std::to_string(value)
+    //     );
     // }
     float normalizedValue = (value-_minValue)/(_maxValue-_minValue);
     int bin = floor(normalizedValue * _numBins);
@@ -293,15 +304,14 @@ float Histogram::entropy(){
     float entropy = 0.f;
     for (int i = 0; i < _numBins; ++i) {
         if (_data[i] != 0) {
-            entropy -= (static_cast<float>(_data[i])/_numValues) * log2(static_cast<float>(_data[i])/_numValues);
+            entropy -= (static_cast<float>(_data[i])/_numValues) *
+                        log2(static_cast<float>(_data[i])/_numValues);
         }
     }
     return entropy;
 }
 
 void Histogram::print() const {
-    // std::cout << "number of bins: " << _numBins << std::endl
-    //           << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
     for (int i = 0; i < _numBins; i++) {
         float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
         float high = low + (_maxValue - _minValue) / float(_numBins);
@@ -342,7 +352,8 @@ float Histogram::highestBinValue(bool equalized, int overBins){
 
 
     if (!equalized) {
-        float low = _minValue + static_cast<float>(highestBin) / _numBins * (_maxValue - _minValue);
+        float low = _minValue + static_cast<float>(highestBin) /
+                    _numBins * (_maxValue - _minValue);
         float high = low + (_maxValue - _minValue) / static_cast<float>(_numBins);
         return (high+low)/2.0;
     } else {
@@ -355,4 +366,4 @@ float Histogram::binWidth() {
     return (_maxValue-_minValue) / _numBins;
 }
 
-}
+} // namespace openspace

@@ -34,18 +34,46 @@
 namespace {
     const std::string _loggerCat = "TouchMarker";
     const int MAX_FINGERS = 20;
+
+    static const openspace::properties::Property::PropertyInfo VisibilityInfo = {
+        "Visibility",
+        "Toggle visibility of markers",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+        "Size",
+        "Marker radius",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+        "Transparency",
+        "Marker transparency",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ThicknessInfo = {
+        "Thickness",
+        "Marker thickness",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+        "MarkerColor", "Marker color", "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
 TouchMarker::TouchMarker()
     : properties::PropertyOwner({ "TouchMarker" })
-    , _visible({ "TouchMarkers visible", "Toggle visibility of markers", "" }, true) // @TODO Missing documentation
-    , _radiusSize({ "Marker size", "Marker radius", "" }, 30.f, 0.f, 100.f) // @TODO Missing documentation
-    , _transparency({ "Transparency of marker", "Marker transparency", "" }, 0.8f, 0.f, 1.f) // @TODO Missing documentation
-    , _thickness({ "Thickness of marker", "Marker thickness", "" }, 2.f, 0.f, 4.f) // @TODO Missing documentation
+    , _visible(VisibilityInfo, true)
+    , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
+    , _transparency(TransparencyInfo, 0.8f, 0.f, 1.f)
+    , _thickness(ThicknessInfo, 2.f, 0.f, 4.f )
     , _color(
-        { "MarkerColor", "Marker color", "" }, // @TODO Missing documentation
+        ColorInfo,
         glm::vec3(204.f / 255.f, 51.f / 255.f, 51.f / 255.f),
         glm::vec3(0.f),
         glm::vec3(1.f)

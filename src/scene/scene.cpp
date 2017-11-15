@@ -30,6 +30,7 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/query/query.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneloader.h>
@@ -46,6 +47,7 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/onscopeexit.h>
+#include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -63,18 +65,6 @@
 
 namespace {
     const char* _loggerCat = "Scene";
-    //const char* _moduleExtension = ".mod";
-    //const char* _commonModuleToken = "${COMMON_MODULE}";
-
-    //const char* KeyCamera = "Camera";
-    //const char* KeyFocusObject = "Focus";
-    //const char* KeyPositionObject = "Position";
-    //const char* KeyViewOffset = "Offset";
-
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
-    const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
-    const char* PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
 } // namespace
 
 namespace openspace {
@@ -84,11 +74,20 @@ Scene::Scene()
         "Documented",
         "propertyOwners",
         {
-            { "mainTemplate", MainTemplateFilename },
-            { "propertyOwnerTemplate", PropertyOwnerTemplateFilename },
-            { "propertyTemplate", PropertyTemplateFilename }
+            {
+                "mainTemplate",
+                "${OPENSPACE_DATA}/web/properties/main.hbs"
+            },
+            {
+                "propertyOwnerTemplate",
+                "${OPENSPACE_DATA}/web/properties/propertyowner.hbs"
+            },
+            {
+                "propertyTemplate",
+                "${OPENSPACE_DATA}/web/properties/property.hbs"
+            }
         },
-        JsFilename
+        "${OPENSPACE_DATA}/web/properties/script.js"
     )
 {}
 
@@ -128,7 +127,11 @@ void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
     // Remove the node and all its children.
     node->traversePostOrder([this](SceneGraphNode* n) {
         _topologicallySortedNodes.erase(
-            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), n),
+            std::remove(
+                _topologicallySortedNodes.begin(),
+                _topologicallySortedNodes.end(),
+                n
+            ),
             _topologicallySortedNodes.end()
         );
         _nodesByName.erase(n->name());
@@ -155,7 +158,10 @@ void Scene::sortTopologically() {
     );
     _circularNodes.clear();
 
-    ghoul_assert(_topologicallySortedNodes.size() == _nodesByName.size(), "Number of scene graph nodes is inconsistent");
+    ghoul_assert(
+        _topologicallySortedNodes.size() == _nodesByName.size(),
+        "Number of scene graph nodes is inconsistent"
+    );
 
     if (_topologicallySortedNodes.empty()) {
         return;
@@ -204,7 +210,10 @@ void Scene::sortTopologically() {
         }
     }
     if (inDegrees.size() > 0) {
-        LERROR("The scene contains circular dependencies. " << inDegrees.size() << " nodes will be disabled.");
+        LERROR(
+            "The scene contains circular dependencies. " <<
+            inDegrees.size() << " nodes will be disabled."
+        );
     }
 
     for (auto it : inDegrees) {
@@ -215,9 +224,64 @@ void Scene::sortTopologically() {
 }
 
 void Scene::initialize() {
+    bool useMultipleThreads = true;
+    if (OsEng.configurationManager().hasKey(
+        ConfigurationManager::KeyUseMultithreadedInitialization
+    ))
+    {
+        useMultipleThreads = OsEng.configurationManager().value<bool>(
+            ConfigurationManager::KeyUseMultithreadedInitialization
+        );
+    }
+
+    auto initFunction = [](SceneGraphNode* node){
+        try {
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Initializing
+            );
+            node->initialize();
+            OsEng.loadingScreen().tickItem();
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Finished
+            );
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERROR(node->name() << " not initialized.");
+            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Failed
+            );
+        }
+
+    };
+
+    if (useMultipleThreads) {
+        unsigned int nThreads = std::thread::hardware_concurrency();
+
+        ghoul::ThreadPool pool(nThreads == 0 ? 2 : nThreads - 1);
+
+        OsEng.loadingScreen().postMessage("Initializing scene");
+
+        for (SceneGraphNode* node : _topologicallySortedNodes) {
+            pool.queue(initFunction, node);
+        }
+
+        pool.stop();
+    }
+    else {
+        for (SceneGraphNode* node : _topologicallySortedNodes) {
+            initFunction(node);
+        }
+    }
+}
+
+void Scene::initializeGL() {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            node->initialize();
+            node->initializeGL();
         }
         catch (const ghoul::RuntimeError& e) {
             LERROR(node->name() << " not initialized.");
@@ -429,7 +493,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
     };
 }
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& error, const std::string& comp)
+Scene::InvalidSceneError::InvalidSceneError(const std::string& error,
+                                            const std::string& comp)
     : ghoul::RuntimeError(error, comp)
 {}
 

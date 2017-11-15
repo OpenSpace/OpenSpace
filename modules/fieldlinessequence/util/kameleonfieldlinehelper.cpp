@@ -42,7 +42,8 @@ namespace {
 
     const std::string TAsPOverRho = "T = p/rho";
     const std::string JParallelB  = "Current: mag(J||B)";
-    const float ToKelvin = 72429735.6984f; // <-- [nPa]/[amu/cm^3] * ToKelvin => Temperature in Kelvin
+    // [nPa]/[amu/cm^3] * ToKelvin => Temperature in Kelvin
+    const float ToKelvin = 72429735.6984f;
 }
 
 namespace openspace {
@@ -63,14 +64,20 @@ namespace fls {
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 // ----------------------------------------------------------------------------------- //
 
-/** Traces field lines from the provided cdf file using kameleon and stores the data in the provided FieldlinesState.
- * Returns `false` if it fails to create a valid state. Requires the kameleon module to be activated!
+/** Traces field lines from the provided cdf file using kameleon and stores the data in
+ * the provided FieldlinesState.
+ * Returns `false` if it fails to create a valid state. Requires the kameleon module to be
+ * activated!
  * @param state, FieldlineState which should hold the extracted data
  * @param cdfPath, std::string of the absolute path to a .cdf file
  * @param seedPoints, vector of seed points from which to trace field lines
- * @param tracingVar, which quantity to trace lines from. Typically "b" for magnetic field lines and "u" for velocity flow lines
- * @param extraVars, extra scalar quantities to be stored in the FieldlinesState; e.g. "T" for temperature, "rho" for density or "P" for pressure
- * @param extraMagVars, variables which should be used for extracting magnitudes, must be a multiple of 3; e.g. "ux", "uy" & "uz" to get the magnitude of the velocity vector at each line vertex
+ * @param tracingVar, which quantity to trace lines from. Typically "b" for magnetic field
+ *        lines and "u" for velocity flow lines
+ * @param extraVars, extra scalar quantities to be stored in the FieldlinesState; e.g. "T"
+ *        for temperature, "rho" for density or "P" for pressure
+ * @param extraMagVars, variables which should be used for extracting magnitudes, must be
+ *        a multiple of 3; e.g. "ux", "uy" & "uz" to get the magnitude of the velocity
+ *        vector at each line vertex
  */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string cdfPath,
                                  const std::vector<glm::vec3>& seedPoints,
@@ -118,7 +125,8 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string cdfPa
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 /**
  * Traces and adds line vertices to state.
- * Vertices are not scaled to meters nor converted from spherical into cartesian coordinates.
+ * Vertices are not scaled to meters nor converted from spherical into cartesian
+ * coordinates.
  * Note that extraQuantities will NOT be set!
  */
 bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& seedPoints,
@@ -184,8 +192,9 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
  * coordinate system)!
  *
  * @param kameleon raw pointer to an already opened Kameleon object
- * @param extraScalarVars vector of strings. Strings should be names of a scalar quantities
- * to load into _extraQuantites; such as: "T" for temperature or "rho" for density.
+ * @param extraScalarVars vector of strings. Strings should be names of a scalar
+ * quantities to load into _extraQuantites; such as: "T" for temperature or "rho" for
+ * density.
  * @param extraMagVars vector of strings. Size must be multiple of 3. Strings should be
  * names of the components needed to calculate magnitude. E.g. {"ux", "uy", "uz"} will
  * calculate: sqrt(ux*ux + uy*uy + uz*uz). Magnitude will be stored in _extraQuantities
@@ -256,8 +265,10 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
  *  _extraQuantityNames vector.
  *
  *  @param kameleon, raw pointer to an already opened kameleon object
- *  @param extraScalarVars, names of scalar quantities to add to state; e.g "rho" for density
- *  @param extraMagVars, names of the variables used for calculating magnitudes. Must be multiple of 3.
+ *  @param extraScalarVars, names of scalar quantities to add to state; e.g "rho" for
+ *         density
+ *  @param extraMagVars, names of the variables used for calculating magnitudes. Must be
+ *         multiple of 3.
  */
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
@@ -271,7 +282,8 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
     // Remove non-existing variables from vector
     for (int i = 0; i < extraScalarVars.size(); i++) {
         std::string& str = extraScalarVars[i];
-        bool isSuccesful = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
+        bool isSuccesful = kameleon->doesVariableExist(str) &&
+                           kameleon->loadVariable(str);
         if (!isSuccesful &&
                 (model == fls::Model::Batsrus && (str == TAsPOverRho || str == "T" ))) {
             LDEBUG("BATSRUS doesn't contain variable T for temperature. Trying to "
@@ -321,7 +333,10 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                 LWARNING("FAILED TO LOAD AT LEAST ONE OF THE MAGNITUDE VARIABLES: "
                         << s1 << ", " << s2 <<  " & " << s3
                         << ". Removing ability to store corresponding magnitude!");
-                extraMagVars.erase(extraMagVars.begin() + i, extraMagVars.begin() + i + 3);
+                extraMagVars.erase(
+                    extraMagVars.begin() + i,
+                    extraMagVars.begin() + i + 3
+                );
                 i -= 3;
             } else {
                 extraQuantityNames.push_back(name);

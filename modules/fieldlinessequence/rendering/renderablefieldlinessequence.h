@@ -58,7 +58,8 @@ public:
     void update(const UpdateData& data) override;
 private:
     // ------------------------------------- ENUMS -------------------------------------//
-    enum ColorMethod : int {    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
+    // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
+    enum ColorMethod : int {
         Uniform = 0,
         ByQuantity
     };
@@ -67,73 +68,139 @@ private:
     std::string       _name;                               // Name of the Node!
 
     // ------------------------------------- FLAGS -------------------------------------//
-    std::atomic<bool> _isLoadingStateFromDisk    { false}; // Used for 'runtime-states'. True when loading a new state from disk on another thread.
-    bool              _isReady                   = false;  // If initialization proved successful
-    bool              _loadingStatesDynamically  = false;  // False => states are stored in RAM (using 'in-RAM-states'), True => states are loaded from disk during runtime (using 'runtime-states')
-    bool              _mustLoadNewStateFromDisk  = false;  // Used for 'runtime-states': True if new 'runtime-state' must be loaded from disk. False => the previous frame's state should still be shown
-    bool              _needsUpdate               = false;  // Used for 'in-RAM-states' : True if new 'in-RAM-state'  must be loaded.           False => the previous frame's state should still be shown
-    std::atomic<bool> _newStateIsReady           { false}; // Used for 'runtime-states'. True when finished loading a new state from disk on another thread.
-    bool              _shouldUpdateColorBuffer   = false;  // True when new state is loaded or user change which quantity to color the lines by
-    bool              _shouldUpdateMaskingBuffer = false;  // True when new state is loaded or user change which quantity used for masking out line segments
+    // Used for 'runtime-states'. True when loading a new state from disk on another
+    // thread.
+    std::atomic<bool> _isLoadingStateFromDisk    { false};
+    // If initialization proved successful
+    bool              _isReady                   = false;
+    // False => states are stored in RAM (using 'in-RAM-states'), True => states are
+    // loaded from disk during runtime (using 'runtime-states')
+    bool              _loadingStatesDynamically  = false;
+    // Used for 'runtime-states': True if new 'runtime-state' must be loaded from disk.
+    // False => the previous frame's state should still be shown
+    bool              _mustLoadNewStateFromDisk  = false;
+    // Used for 'in-RAM-states' : True if new 'in-RAM-state'  must be loaded.
+    // False => the previous frame's state should still be shown
+    bool              _needsUpdate               = false;
+    // Used for 'runtime-states'. True when finished loading a new state from disk on
+    // another thread.
+    std::atomic<bool> _newStateIsReady           = false;
+    // True when new state is loaded or user change which quantity to color the lines by
+    bool              _shouldUpdateColorBuffer   = false;
+    // True when new state is loaded or user change which quantity used for masking out
+    // line segments
+    bool              _shouldUpdateMaskingBuffer = false;
 
     // --------------------------------- NUMERICALS ----------------------------------- //
-    int               _activeStateIndex          = -1;     // Active index of _states. If(==-1)=>no state available for current time. Always the same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else always = 0
-    int               _activeTriggerTimeIndex    = -1;     // Active index of _startTimes
-    size_t            _nStates                   = 0;      // Number of states in the sequence
-    float             _scalingFactor             = 1.f;    // In setup it is used to scale JSON coordinates. During runtime it is used to scale domain limits.
-    double            _sequenceEndTime;                    // Estimated end of sequence.
-    GLuint            _vertexArrayObject         = 0;      // OpenGL Vertex Array Object
-    GLuint            _vertexColorBuffer         = 0;      // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring the lines
-    GLuint            _vertexMaskingBuffer       = 0;      // OpenGL Vertex Buffer Object containing the extraQuantity values used for masking out segments of the lines
-    GLuint            _vertexPositionBuffer      = 0;      // OpenGL Vertex Buffer Object containing the vertex positions
+    // Active index of _states. If(==-1)=>no state available for current time. Always the
+    // same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else
+    // always = 0
+    int               _activeStateIndex          = -1;
+    // Active index of _startTimes
+    int               _activeTriggerTimeIndex    = -1;
+    // Number of states in the sequence
+    size_t            _nStates                   = 0;
+    // In setup it is used to scale JSON coordinates. During runtime it is used to scale
+    // domain limits.
+    float             _scalingFactor             = 1.f;
+    // Estimated end of sequence.
+    double            _sequenceEndTime;
+    // OpenGL Vertex Array Object
+    GLuint            _vertexArrayObject         = 0;
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
+    // the lines
+    GLuint            _vertexColorBuffer         = 0;
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for masking
+    // out segments of the lines
+    GLuint            _vertexMaskingBuffer       = 0;
+    // OpenGL Vertex Buffer Object containing the vertex positions
+    GLuint            _vertexPositionBuffer      = 0;
 
     // ----------------------------------- POINTERS ------------------------------------//
-    std::unique_ptr<ghoul::Dictionary>            _dictionary;       // The Lua-Modfile-Dictionary used during initialization
-    std::unique_ptr<FieldlinesState>              _newState;         // Used for 'runtime-states' when switching out current state to a new state
+    // The Lua-Modfile-Dictionary used during initialization
+    std::unique_ptr<ghoul::Dictionary>            _dictionary;
+    // Used for 'runtime-states' when switching out current state to a new state
+    std::unique_ptr<FieldlinesState>              _newState;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
-    std::shared_ptr<TransferFunction>             _transferFunction; // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
+    // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
+    std::shared_ptr<TransferFunction>             _transferFunction;
 
     // ------------------------------------ VECTORS ----------------------------------- //
-    std::vector<std::string>     _colorTablePaths;      // Paths to color tables. One for each 'extraQuantity'
-    std::vector<glm::vec2>       _colorTableRanges;     // Values represents min & max values represented in the color table
-    std::vector<glm::vec2>       _maskingRanges;        // Values represents min & max limits for valid masking range
-    std::vector<std::string>     _sourceFiles;          // Stores the provided source file paths if using 'runtime-states', else emptied after initialization
-    std::vector<double>          _startTimes;           // Contains the _triggerTimes for all FieldlineStates in the sequence
-    std::vector<FieldlinesState> _states;               // Stores the FieldlineStates
+    // Paths to color tables. One for each 'extraQuantity'
+    std::vector<std::string>     _colorTablePaths;
+    // Values represents min & max values represented in the color table
+    std::vector<glm::vec2>       _colorTableRanges;
+    // Values represents min & max limits for valid masking range
+    std::vector<glm::vec2>       _maskingRanges;
+    // Stores the provided source file paths if using 'runtime-states', else emptied after
+    // initialization
+    std::vector<std::string>     _sourceFiles;
+    // Contains the _triggerTimes for all FieldlineStates in the sequence
+    std::vector<double>          _startTimes;
+    // Stores the FieldlineStates
+    std::vector<FieldlinesState> _states;
 
     // ---------------------------------- Properties ---------------------------------- //
-    properties::PropertyOwner    _pColorGroup;          // Group to hold the color properties
-    properties::OptionProperty   _pColorMethod;         // Uniform/transfer function/topology?
-    properties::OptionProperty   _pColorQuantity;       // Index of the extra quantity to color lines by
-    properties::StringProperty   _pColorQuantityMin;    // Color table/transfer function min
-    properties::StringProperty   _pColorQuantityMax;    // Color table/transfer function max
-    properties::StringProperty   _pColorTablePath;      // Color table/transfer function for "By Quantity" coloring
-    properties::Vec4Property     _pColorUniform;        // Uniform Field Line Color
-    properties::BoolProperty     _pColorABlendEnabled;  // Whether or not to use additive blending
+    // Group to hold the color properties
+    properties::PropertyOwner    _pColorGroup;
+    // Uniform/transfer function/topology?
+    properties::OptionProperty   _pColorMethod;
+    // Index of the extra quantity to color lines by
+    properties::OptionProperty   _pColorQuantity;
+    // Color table/transfer function min
+    properties::StringProperty   _pColorQuantityMin;
+    // Color table/transfer function max
+    properties::StringProperty   _pColorQuantityMax;
+    // Color table/transfer function for "By Quantity" coloring
+    properties::StringProperty   _pColorTablePath;
+    // Uniform Field Line Color
+    properties::Vec4Property     _pColorUniform;
+    // Whether or not to use additive blending
+    properties::BoolProperty     _pColorABlendEnabled;
 
-    properties::BoolProperty     _pDomainEnabled;       // Whether or not to use Domain
-    properties::PropertyOwner    _pDomainGroup;         // Group to hold the Domain properties
-    properties::Vec2Property     _pDomainX;             // Domain Limits along x-axis
-    properties::Vec2Property     _pDomainY;             // Domain Limits along y-axis
-    properties::Vec2Property     _pDomainZ;             // Domain Limits along z-axis
-    properties::Vec2Property     _pDomainR;             // Domain Limits radially
+// Whether or not to use Domain
+    properties::BoolProperty     _pDomainEnabled;
+    // Group to hold the Domain properties
+    properties::PropertyOwner    _pDomainGroup;
+    // Domain Limits along x-axis
+    properties::Vec2Property     _pDomainX;
+    // Domain Limits along y-axis
+    properties::Vec2Property     _pDomainY;
+    // Domain Limits along z-axis
+    properties::Vec2Property     _pDomainZ;
+    // Domain Limits radially
+    properties::Vec2Property     _pDomainR;
 
-    properties::Vec4Property     _pFlowColor;           // Simulated particles' color
-    properties::BoolProperty     _pFlowEnabled;         // Toggle flow [ON/OFF]
-    properties::PropertyOwner    _pFlowGroup;           // Group to hold the flow/particle properties
-    properties::IntProperty      _pFlowParticleSize;    // Size of simulated flow particles
-    properties::IntProperty      _pFlowParticleSpacing; // Size of simulated flow particles
-    properties::BoolProperty     _pFlowReversed;        // Toggle flow direction [FORWARDS/BACKWARDS]
-    properties::IntProperty      _pFlowSpeed;           // Speed of simulated flow
+// Simulated particles' color
+    properties::Vec4Property     _pFlowColor;
+    // Toggle flow [ON/OFF]
+    properties::BoolProperty     _pFlowEnabled;
+    // Group to hold the flow/particle properties
+    properties::PropertyOwner    _pFlowGroup;
+    // Size of simulated flow particles
+    properties::IntProperty      _pFlowParticleSize;
+    // Size of simulated flow particles
+    properties::IntProperty      _pFlowParticleSpacing;
+    // Toggle flow direction [FORWARDS/BACKWARDS]
+    properties::BoolProperty     _pFlowReversed;
+    // Speed of simulated flow
+    properties::IntProperty      _pFlowSpeed;
 
-    properties::BoolProperty     _pMaskingEnabled;      // Whether or not to use masking
-    properties::PropertyOwner    _pMaskingGroup;        // Group to hold the masking properties
-    properties::StringProperty   _pMaskingMin;          // Lower limit for allowed values
-    properties::StringProperty   _pMaskingMax;          // Upper limit for allowed values
-    properties::OptionProperty   _pMaskingQuantity;     // Index of the extra quantity to use for masking
+// Whether or not to use masking
+    properties::BoolProperty     _pMaskingEnabled;
+    // Group to hold the masking properties
+    properties::PropertyOwner    _pMaskingGroup;
+    // Lower limit for allowed values
+    properties::StringProperty   _pMaskingMin;
+    // Upper limit for allowed values
+    properties::StringProperty   _pMaskingMax;
+    // Index of the extra quantity to use for masking
+    properties::OptionProperty   _pMaskingQuantity;
 
-    properties::TriggerProperty  _pFocusOnOriginBtn;    // Button which sets camera focus to parent node of the renderable
-    properties::TriggerProperty  _pJumpToStartBtn;      // Button which executes a time jump to start of sequence
+// Button which sets camera focus to parent node of the renderable
+    properties::TriggerProperty  _pFocusOnOriginBtn;
+    // Button which executes a time jump to start of sequence
+    properties::TriggerProperty  _pJumpToStartBtn;
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
     void addStateToSequence(FieldlinesState& STATE);
@@ -147,7 +214,8 @@ private:
     bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
     void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
     void extractOsflsInfoFromDictionary();
-    bool extractSeedPointsFromFile(const std::string& path, std::vector<glm::vec3>& outVec);
+    bool extractSeedPointsFromFile(const std::string& path,
+        std::vector<glm::vec3>& outVec);
     void extractTriggerTimesFromFileNames();
     bool loadJsonStatesIntoRAM(const std::string& outputFolder);
     void loadOsflsStatesIntoRAM(const std::string& outputFolder);

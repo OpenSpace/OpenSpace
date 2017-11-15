@@ -260,7 +260,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     _aberration = static_cast<int>(aberration.type);
 }
 
-void RenderableShadowCylinder::initialize() {
+void RenderableShadowCylinder::initializeGL() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
 
@@ -272,7 +272,7 @@ void RenderableShadowCylinder::initialize() {
     );
 }
 
-void RenderableShadowCylinder::deinitialize() {
+void RenderableShadowCylinder::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);

@@ -97,7 +97,7 @@ double Time::deltaTime() const {
 }
 
 void Time::setPause(bool pause) {
-    _timePaused = pause;    
+    _timePaused = pause;
 }
 
 bool Time::togglePause() {

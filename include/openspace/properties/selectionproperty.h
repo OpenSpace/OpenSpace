@@ -63,22 +63,26 @@ std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className();
 
 template <>
 template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(lua_State* state, bool& success);
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(
+    lua_State* state, bool& success);
 
 template <>
 template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State* state, std::vector<int> value);
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(
+    lua_State* state, std::vector<int> value);
 
 template <>
 int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua();
 
 template <>
 template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(std::string value, bool& success);
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(
+    std::string value, bool& success);
 
 template <>
 template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string& outValue, std::vector<int> inValue);
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
+    std::string& outValue, std::vector<int> inValue);
 
 } // namespace openspace::properties
 

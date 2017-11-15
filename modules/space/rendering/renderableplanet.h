@@ -68,8 +68,8 @@ public:
 public:
     RenderablePlanet(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -88,7 +88,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;    
+    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
     properties::FloatProperty _heightExaggeration;

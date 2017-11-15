@@ -152,8 +152,6 @@ void GuiIswaComponent::render() {
                 if (cdfOptionValue != cdfOption) {
                    if (cdfOptionValue >= 0) {
                         groupName = cdfs[cdfOptionValue].group;
-                        // std::cout << groupName << std::endl;
-                        // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
                     }
 
                     std::string path  = cdfs[cdfOption].path;

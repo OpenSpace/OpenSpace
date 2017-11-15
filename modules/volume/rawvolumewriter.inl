@@ -55,8 +55,9 @@ glm::uvec3 RawVolumeWriter<VoxelType>::dimensions() const {
 }
 
 template <typename VoxelType>
-void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::uvec3&)>& fn,
-                                       const std::function<void(float t)>& onProgress)
+void RawVolumeWriter<VoxelType>::write(
+                                    const std::function<VoxelType(const glm::uvec3&)>& fn,
+                                    const std::function<void(float t)>& onProgress)
 {
     glm::uvec3 dims = dimensions();
 
@@ -79,13 +80,16 @@ void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::
         for (bufferPos = 0; bufferPos < bufferSize; bufferPos++, i++) {
             buffer[bufferPos] = fn(indexToCoords(i));
         }
-        file.write(reinterpret_cast<char*>(buffer.data()), bufferSize * sizeof(VoxelType));
+        file.write(
+            reinterpret_cast<char*>(buffer.data()),
+            bufferSize * sizeof(VoxelType)
+        );
         onProgress(static_cast<float>(c + 1) / nChunks);
     }
     file.close();
 }
 
-template <typename VoxelType>    
+template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     setDimensions(volume.dimensions());
 

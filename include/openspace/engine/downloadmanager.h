@@ -102,13 +102,13 @@ public:
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    std::future<MemoryFile> fetchFile(
-    const std::string& url,
-    SuccessCallback successCallback = SuccessCallback(), ErrorCallback errorCallback = ErrorCallback());
+    std::future<MemoryFile> fetchFile(const std::string& url,
+        SuccessCallback successCallback = SuccessCallback(),
+        ErrorCallback errorCallback = ErrorCallback());
 
-    std::vector<std::shared_ptr<FileFuture>> downloadRequestFiles(const std::string& identifier,
-        const ghoul::filesystem::Directory& destination, int version,
-        bool overrideFiles = true,
+    std::vector<std::shared_ptr<FileFuture>> downloadRequestFiles(
+        const std::string& identifier, const ghoul::filesystem::Directory& destination,
+        int version, bool overrideFiles = true,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );

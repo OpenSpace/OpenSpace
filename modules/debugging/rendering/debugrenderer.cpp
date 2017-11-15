@@ -44,15 +44,15 @@ DebugRenderer* DebugRenderer::_reference = nullptr;
 
 DebugRenderer::DebugRenderer()  {
     _programObject = OsEng.renderEngine().buildRenderProgram(
-        "BasicDebugShader", 
+        "BasicDebugShader",
         "${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl",
         "${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl"
         );
 }
 
 DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject)
-    : _programObject(std::move(programObject)) 
-{ 
+    : _programObject(std::move(programObject))
+{
     // nothing to do
 }
 
@@ -107,7 +107,14 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(clippingSpacePoints[0]),
+        nullptr
+    );
 
     // Draw the vertices
     glDrawArrays(mode, 0, static_cast<GLsizei>(clippingSpacePoints.size()));

@@ -74,10 +74,10 @@ void ABufferRenderer::initialize() {
     const GLfloat vertex_data[] = {
         //      x      y     s     t
         -size, -size, 0.0f, 1.0f,
-        size,    size, 0.0f, 1.0f, 
-        -size,  size, 0.0f, 1.0f, 
-        -size, -size, 0.0f, 1.0f, 
-        size, -size, 0.0f, 1.0f, 
+        size,    size, 0.0f, 1.0f,
+        -size,  size, 0.0f, 1.0f,
+        -size, -size, 0.0f, 1.0f,
+        size, -size, 0.0f, 1.0f,
         size,    size, 0.0f, 1.0f,
     };
 
@@ -237,7 +237,7 @@ void ABufferRenderer::update() {
 void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
     PerfMeasure("ABufferRenderer::render");
 
-    if (!_scene || !_camera) { 
+    if (!_scene || !_camera) {
         return;
     }
 
@@ -364,9 +364,15 @@ void ABufferRenderer::preRaycast(const RaycasterTask& raycasterTask) {
     glm::vec3 localCameraPosition;
     bool cameraIsInside = raycaster.cameraIsInside(renderData, localCameraPosition);
     int uniformIndex = raycastData.id + 1; // uniforms are indexed from 1 (not from 0)
-    _resolveProgram->setUniform("insideRaycaster" + std::to_string(uniformIndex), cameraIsInside);
+    _resolveProgram->setUniform(
+        "insideRaycaster" + std::to_string(uniformIndex),
+        cameraIsInside
+    );
     if (cameraIsInside) {
-        _resolveProgram->setUniform("cameraPosInRaycaster" + std::to_string(uniformIndex), localCameraPosition);
+        _resolveProgram->setUniform(
+            "cameraPosInRaycaster" + std::to_string(uniformIndex),
+            localCameraPosition
+        );
     }
 }
 
@@ -550,7 +556,9 @@ void ABufferRenderer::updateRaycastData() {
         OsEng.renderEngine().raycasterManager().raycasters();
 
     std::map<std::string, int> namespaceIndices;
-    int nextId = 0; // raycaster ids are positive integers starting at 0. (for raycasters, fragment type is id+1)
+    // raycaster ids are positive integers starting at 0. (for raycasters,
+    // fragment type is id+1)
+    int nextId = 0;
     int nextNamespaceIndex = 0;
 
     for (auto &raycaster : raycasters) {

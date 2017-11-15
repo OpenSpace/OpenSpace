@@ -114,7 +114,7 @@ bool InstrumentTimesParser::create() {
                 continue;
             }
 
-            // Read file into string 
+            // Read file into string
             std::ifstream inFile(filepath);
             std::string line;
             std::smatch matches;

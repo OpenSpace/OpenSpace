@@ -78,7 +78,7 @@ documentation::Documentation Scene::Documentation() {
         {
             "Modules",
             new TableVerifier({
-                { 
+                {
                     "*",
                     new StringVerifier,
                     Optional::No,

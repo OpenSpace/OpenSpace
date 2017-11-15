@@ -88,7 +88,7 @@ public:
         Visibility visibility = Visibility::All;
     };
 
-    /// An OnChangeHandle is returned by the onChange method to uniquely identify an 
+    /// An OnChangeHandle is returned by the onChange method to uniquely identify an
     /// onChange callback
     using OnChangeHandle = uint32_t;
 
@@ -102,7 +102,7 @@ public:
      * to be accessed by the GUI elements using the <code>guiName</code> key. The default
      * visibility settings is Visibility::All, whereas the default read-only state is
      * <code>false</code>.
-     * \param info The PropertyInfo structure that contains all the required static 
+     * \param info The PropertyInfo structure that contains all the required static
      * information for initializing this Property.
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
@@ -399,7 +399,7 @@ protected:
      * <code>generateAdditionalDescription()}</code>, which #generateMetaDataDescription
      * and this method being the override points to customize the behavior.
      * \return The information specific to each subclass of Property
-     */ 
+     */
     virtual std::string generateAdditionalDescription() const;
 
     /**
@@ -409,7 +409,7 @@ protected:
     void notifyListener();
 
     /// The PropetyOwner this Property belongs to, or <code>nullptr</code>
-    PropertyOwner* _owner; 
+    PropertyOwner* _owner;
 
     /// The identifier for this Property
     std::string _identifier;

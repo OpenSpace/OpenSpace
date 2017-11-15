@@ -37,13 +37,15 @@
 
 namespace openspace::globebrowsing {
 
-bool LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
-    const LayerGroupPreprocessingData& other) const {
+bool
+LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
+    const LayerGroupPreprocessingData& other) const
+{
     return layerType == other.layerType &&
-        blendMode == other.blendMode &&
-        layerAdjustmentType == other.layerAdjustmentType &&
-        lastLayerIdx == other.lastLayerIdx &&
-        layerBlendingEnabled == other.layerBlendingEnabled;
+           blendMode == other.blendMode &&
+           layerAdjustmentType == other.layerAdjustmentType &&
+           lastLayerIdx == other.lastLayerIdx &&
+           layerBlendingEnabled == other.layerBlendingEnabled;
 }
 
 bool LayerShaderManager::LayerShaderPreprocessingData::operator==(
@@ -92,7 +94,9 @@ LayerShaderManager::LayerShaderPreprocessingData
         for (const std::shared_ptr<Layer>& layer : layers) {
             layeredTextureInfo.layerType.push_back(layer->type());
             layeredTextureInfo.blendMode.push_back(layer->blendMode());
-            layeredTextureInfo.layerAdjustmentType.push_back(layer->layerAdjustment().type());
+            layeredTextureInfo.layerAdjustmentType.push_back(
+                layer->layerAdjustment().type()
+            );
         }
 
         preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
@@ -173,7 +177,10 @@ void LayerShaderManager::recompileShaderProgram(
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
             std::string key = groupName + std::to_string(j) + "LayerType";
-            shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].layerType[j]));
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].layerType[j])
+            );
         }
 
         // This is to avoid errors from shader preprocessor
@@ -182,7 +189,10 @@ void LayerShaderManager::recompileShaderProgram(
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
             std::string key = groupName + std::to_string(j) + "BlendMode";
-            shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].blendMode[j]));
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].blendMode[j])
+            );
         }
 
         // This is to avoid errors from shader preprocessor
@@ -191,7 +201,10 @@ void LayerShaderManager::recompileShaderProgram(
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
             std::string key = groupName + std::to_string(j) + "LayerAdjustmentType";
-            shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].layerAdjustmentType[j]));
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].layerAdjustmentType[j])
+            );
         }
     }
 

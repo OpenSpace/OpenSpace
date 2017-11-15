@@ -585,7 +585,8 @@ void ParallelConnection::initializationMessageReceived(){
     std::cout << "initialization message recieved queue" << std::endl;
     queueMessage(InitializationCompleted, buffer);
 
-    //we also need to force a time jump just to ensure that the server and client are synced
+    // we also need to force a time jump just to ensure that the server and client are
+    // synced
     _initializationTimejumpRequired.store(true);
 
 }
@@ -614,11 +615,13 @@ double ParallelConnection::latencyStandardDeviation() const {
         accumulatedLatencyDiff += diff;
         accumulatedLatencyDiffSquared += diff*diff;
     }
-    double expectedLatencyDiffSquared = accumulatedLatencyDiffSquared / _latencyDiffs.size();
+    double expectedLatencyDiffSquared = accumulatedLatencyDiffSquared /
+                                        _latencyDiffs.size();
     double expectedLatencyDiff = accumulatedLatencyDiff / _latencyDiffs.size();
 
     // V(X) = E(x^2) - E(x)^2
-    double latencyVariance = expectedLatencyDiffSquared - expectedLatencyDiff*expectedLatencyDiff;
+    double latencyVariance = expectedLatencyDiffSquared -
+                             expectedLatencyDiff*expectedLatencyDiff;
     return std::sqrt(latencyVariance);
 }
 
@@ -628,7 +631,7 @@ double ParallelConnection::timeTolerance() const {
 
 void ParallelConnection::dataMessageReceived(const std::vector<char>& messageContent) {
     // The type of data message received
-    uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));   
+    uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));
     std::vector<char> buffer(
         messageContent.begin() + sizeof(uint32_t),
         messageContent.end()
@@ -834,7 +837,9 @@ void ParallelConnection::nConnectionsMessageReceived(const std::vector<char>& me
 
 
 
-//void ParallelConnection::initializationRequestMessageReceived(const std::vector<char>& message){
+//void ParallelConnection::initializationRequestMessageReceived(
+                                                       // const std::vector<char>& message
+// {
 /*
     //get current state as scripts
     std::vector<std::string> scripts;
@@ -846,7 +851,9 @@ void ParallelConnection::nConnectionsMessageReceived(const std::vector<char>& me
         for(state_it = _currentState.begin();
             state_it != _currentState.end();
             ++state_it){
-            scripts.push_back(scriptFromPropertyAndValue(state_it->first, state_it->second));
+            scripts.push_back(
+                scriptFromPropertyAndValue(state_it->first, state_it->second)
+            );
         }
     }
 
@@ -888,14 +895,26 @@ void ParallelConnection::nConnectionsMessageReceived(const std::vector<char>& me
     writeHeader(buffer, MessageTypes::Initialization);
 
     //write client ID to receive init message
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&requesterID), reinterpret_cast<char*>(&requesterID) + sizeof(uint32_t));
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&requesterID),
+        reinterpret_cast<char*>(&requesterID) + sizeof(uint32_t)
+    );
 
     //write total size of data chunk
     uint32_t totlen = static_cast<uint32_t>(scriptbuffer.size());
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&totlen), reinterpret_cast<char*>(&totlen) + sizeof(uint32_t));
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&totlen),
+        reinterpret_cast<char*>(&totlen) + sizeof(uint32_t)
+    );
 
     //write number of scripts
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&numscripts), reinterpret_cast<char*>(&numscripts) + sizeof(uint16_t));
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&numscripts),
+        reinterpret_cast<char*>(&numscripts) + sizeof(uint16_t)
+    );
 
     //write all scripts
     buffer.insert(buffer.end(), scriptbuffer.begin(), scriptbuffer.end());
@@ -1152,7 +1171,8 @@ void ParallelConnection::sendCameraKeyframe() {
     datamessagestructures::CameraKeyframe kf;
     kf._position = OsEng.navigationHandler().focusNodeToCameraVector();
 
-    kf._followNodeRotation = OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
+    kf._followNodeRotation =
+                     OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
         kf._rotation = OsEng.navigationHandler().focusNodeToCameraRotation();
@@ -1215,8 +1235,7 @@ uint32_t ParallelConnection::hash(const std::string& val) {
     hashVal += (hashVal << 15);
 
     return hashVal;
-};
-
+}
 
 std::shared_ptr<ghoul::Event<>> ParallelConnection::connectionEvent() {
     return _connectionEvent;

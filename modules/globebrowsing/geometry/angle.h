@@ -96,8 +96,8 @@ public:
     Angle<T>& normalizeAround(const Angle<T>& center);
 
     /**
-    * Clamps the angle to the interval [min, max]. 
-    * Default arguments are [0, 2pi]. 
+    * Clamps the angle to the interval [min, max].
+    * Default arguments are [0, 2pi].
     */
     Angle<T>& clamp(const Angle<T>& min = ZERO, const Angle<T>& max = FULL);
 

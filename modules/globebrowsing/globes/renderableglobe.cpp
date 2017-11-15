@@ -157,11 +157,11 @@ namespace openspace::globebrowsing {
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _debugProperties({
-        BoolProperty(SaveOrThrowInfo, false), 
+        BoolProperty(SaveOrThrowInfo, false),
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(ShowChunkBoundsInfo, false),
         BoolProperty(ShowChunkAABBInfo, false),
-        BoolProperty(HeightResolutionInfo, false), 
+        BoolProperty(HeightResolutionInfo, false),
         BoolProperty(HeightIntensityInfo, false),
         BoolProperty(FrustumCullingInfo, true),
         BoolProperty(HorizonCullingInfo, true),
@@ -259,17 +259,24 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_layerManager.get());
     //addPropertySubOwner(_pointGlobe.get());
 
+}
+
+void RenderableGlobe::initializeGL() {
+    _layerManager->initialize();
+
+    _layerManager->update();
+
+    _distanceSwitch.initializeGL();
+
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
     _chunkedLodGlobe->recompileShaders();
 }
 
-void RenderableGlobe::initialize() {
-    _distanceSwitch.initialize();
-}
+void RenderableGlobe::deinitializeGL() {
+    _distanceSwitch.deinitializeGL();
 
-void RenderableGlobe::deinitialize() {
-    _distanceSwitch.deinitialize();
+    _layerManager->deinitialize();
 }
 
 bool RenderableGlobe::isReady() const {
@@ -368,7 +375,7 @@ const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
 }
 
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace) 
+                                                       const glm::dvec3& targetModelSpace)
 {
     glm::dvec3 centerToEllipsoidSurface =
         _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
@@ -396,7 +403,7 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     };
 }
 
-void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 
+void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) {
     _savedCamera = camera;
 }
 

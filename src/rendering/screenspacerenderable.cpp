@@ -294,7 +294,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     }
 
     _delete.onChange([this](){
-        std::string script = 
+        std::string script =
             "openspace.unregisterScreenSpaceRenderable('" + name() + "');";
         OsEng.scriptEngine().queueScript(
             script,
@@ -304,6 +304,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 }
 
 bool ScreenSpaceRenderable::initialize() {
+    return true;
+}
+
+bool ScreenSpaceRenderable::initializeGL() {
     _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
 
     createPlane();
@@ -313,6 +317,10 @@ bool ScreenSpaceRenderable::initialize() {
 }
 
 bool ScreenSpaceRenderable::deinitialize() {
+    return true;
+}
+
+bool ScreenSpaceRenderable::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -454,7 +462,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
             _scale * scalingRatioY * textureRatio,
             1.f
         )
-    ); 
+    );
 }
 
 glm::mat4 ScreenSpaceRenderable::rotationMatrix() {

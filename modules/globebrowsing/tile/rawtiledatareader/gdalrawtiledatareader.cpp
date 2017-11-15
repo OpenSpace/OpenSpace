@@ -130,8 +130,10 @@ void GdalRawTileDataReader::initialize() {
     _gdalDatasetMetaDataCached.offset = _dataset->GetRasterBand(1)->GetOffset();
     _gdalDatasetMetaDataCached.rasterXSize = _dataset->GetRasterXSize();
     _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
-    _gdalDatasetMetaDataCached.noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
-    _gdalDatasetMetaDataCached.dataType = tiledatatype::getGdalDataType(_initData.glType());
+    _gdalDatasetMetaDataCached.noDataValue =
+        _dataset->GetRasterBand(1)->GetNoDataValue();
+    _gdalDatasetMetaDataCached.dataType =
+        tiledatatype::getGdalDataType(_initData.glType());
 
     CPLErr err = _dataset->GetGeoTransform(&_gdalDatasetMetaDataCached.padfTransform[0]);
     if (err == CE_Failure) {
@@ -167,8 +169,8 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     char* dataDest = dataDestination;
 
     // GDAL reads pixels top to bottom, but we want our pixels bottom to top.
-    // Therefore, we increment the destination pointer to the last line on in the 
-    // buffer, and the we specify in the rasterIO call that we want negative line 
+    // Therefore, we increment the destination pointer to the last line on in the
+    // buffer, and the we specify in the rasterIO call that we want negative line
     // spacing. Doing this compensates the flipped Y axis
     dataDest += (io.write.totalNumBytes - io.write.bytesPerLine);
 

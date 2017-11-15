@@ -77,6 +77,6 @@ REGISTER_NUMERICALPROPERTY_SOURCE(UShortProperty, unsigned short, 0,
                                   DEFAULT_TO_LUA_LAMBDA(unsigned short),
                                   DEFAULT_FROM_STRING_LAMBDA(unsigned short, 0),
                                   DEFAULT_TO_STRING_LAMBDA(unsigned short),
-                                  LUA_TNUMBER);
+                                  LUA_TNUMBER)
 
 } // namespace openspace::properties

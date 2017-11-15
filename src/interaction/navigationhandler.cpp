@@ -75,7 +75,9 @@ NavigationHandler::NavigationHandler()
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
-            LWARNING("Could not find a node in scenegraph called '" << _origin.value() << "'");
+            LWARNING(
+                "Could not find a node in scenegraph called '" << _origin.value() << "'"
+            );
             return;
         }
         setFocusNode(node);
@@ -149,7 +151,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
             }
             else {
                 _orbitalNavigator->updateMouseStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);    
+                _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);
             }
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
@@ -165,7 +167,9 @@ glm::dvec3 NavigationHandler::focusNodeToCameraVector() const {
 }
 
 glm::quat NavigationHandler::focusNodeToCameraRotation() const {
-    glm::dmat4 invWorldRotation = glm::dmat4(glm::inverse(focusNode()->worldRotationMatrix()));
+    glm::dmat4 invWorldRotation = glm::dmat4(
+        glm::inverse(focusNode()->worldRotationMatrix())
+    );
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 
@@ -189,11 +193,13 @@ void NavigationHandler::mouseScrollWheelCallback(double pos) {
     _inputState->mouseScrollWheelCallback(pos);
 }
 
-void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
+{
     _inputState->keyboardCallback(key, modifier, action);
 }
 
-void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict) {
+void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict)
+{
     bool readSuccessful = true;
 
     std::string focus;
@@ -255,7 +261,8 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
         glm::dquat q = _camera->rotationQuaternion();
 
         ofs << "return {" << std::endl;
-        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->name() << "\"" << "," << std::endl;
+        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->name() << "\""
+            << "," << std::endl;
         ofs << "    " << KeyPosition << " = {"
             << std::to_string(p.x) << ", "
             << std::to_string(p.y) << ", "

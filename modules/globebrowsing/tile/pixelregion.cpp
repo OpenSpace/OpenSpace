@@ -31,7 +31,7 @@ namespace openspace::globebrowsing {
 PixelRegion::PixelRegion(const PixelCoordinate& pixelStart,
                          const PixelRange& numberOfPixels)
     : start(pixelStart)
-    , numPixels(numberOfPixels) 
+    , numPixels(numberOfPixels)
 {}
 
 PixelRegion::PixelRegion(const PixelRegion& o)
@@ -91,20 +91,20 @@ void PixelRegion::align(Side side, int pos) {
     }
 }
 
-void PixelRegion::alignLeft(int x) { 
-    start.x = x; 
+void PixelRegion::alignLeft(int x) {
+    start.x = x;
 }
 
-void PixelRegion::alignTop(int y) { 
-    start.y = y; 
+void PixelRegion::alignTop(int y) {
+    start.y = y;
 }
 
-void PixelRegion::alignRight(int x) { 
-    start.x = x - numPixels.x; 
+void PixelRegion::alignRight(int x) {
+    start.x = x - numPixels.x;
 }
 
-void PixelRegion::alignBottom(int y) { 
-    start.y = y - numPixels.y; 
+void PixelRegion::alignBottom(int y) {
+    start.y = y - numPixels.y;
 }
 
 void PixelRegion::scale(const glm::dvec2& s) {

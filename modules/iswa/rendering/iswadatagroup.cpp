@@ -85,7 +85,7 @@ namespace {
 
 namespace openspace{
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
-    : IswaBaseGroup(name, type)    
+    : IswaBaseGroup(name, type)
     , _useLog(UseLogInfo, false)
     , _useHistogram(UseHistogramInfo, false)
     , _autoFilter(AutoFilterInfo, true)
@@ -122,44 +122,62 @@ void IswaDataGroup::registerProperties(){
 
     _useLog.onChange([this]{
         LDEBUG("Group " + name() + " published useLogChanged");
-        _groupEvent->publish("useLogChanged", ghoul::Dictionary({{"useLog", _useLog.value()}}));
+        _groupEvent->publish(
+            "useLogChanged",
+            ghoul::Dictionary({{"useLog", _useLog.value()}})
+        );
     });
 
     _useHistogram.onChange([this]{
         LDEBUG("Group " + name() + " published useHistogramChanged");
-        _groupEvent->publish("useHistogramChanged", ghoul::Dictionary({{"useHistogram", _useHistogram.value()}}));
+        _groupEvent->publish(
+            "useHistogramChanged",
+            ghoul::Dictionary({{"useHistogram", _useHistogram.value()}})
+        );
     });
 
     //If autofiler is on, background values property should be hidden
     _autoFilter.onChange([this](){
         LDEBUG("Group " + name() + " published autoFilterChanged");
-        // If autofiler is selected, use _dataProcessor to set backgroundValues 
+        // If autofiler is selected, use _dataProcessor to set backgroundValues
         // and unregister backgroundvalues property.
         if(_autoFilter.value()){
             _backgroundValues.setValue(_dataProcessor->filterValues());
             _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
             //_backgroundValues.setVisible(false);
-        // else if autofilter is turned off, register backgroundValues 
+        // else if autofilter is turned off, register backgroundValues
         } else {
             _backgroundValues.setVisibility(properties::Property::Visibility::All);
             //_backgroundValues.setVisible(true);
         }
-        _groupEvent->publish("autoFilterChanged", ghoul::Dictionary({{"autoFilter", _autoFilter.value()}}));
+        _groupEvent->publish(
+            "autoFilterChanged",
+            ghoul::Dictionary({{"autoFilter", _autoFilter.value()}})
+        );
     });
 
     _normValues.onChange([this]{
         LDEBUG("Group " + name() + " published normValuesChanged");
-        _groupEvent->publish("normValuesChanged", ghoul::Dictionary({{"normValues", _normValues.value()}}));
+        _groupEvent->publish(
+            "normValuesChanged",
+            ghoul::Dictionary({{"normValues", _normValues.value()}})
+        );
     });
 
     _backgroundValues.onChange([this]{
         LDEBUG("Group " + name() + " published backgroundValuesChanged");
-        _groupEvent->publish("backgroundValuesChanged", ghoul::Dictionary({{"backgroundValues", _backgroundValues.value()}}));
+        _groupEvent->publish(
+            "backgroundValuesChanged",
+            ghoul::Dictionary({{"backgroundValues", _backgroundValues.value()}})
+        );
     });
 
     _transferFunctionsFile.onChange([this]{
         LDEBUG("Group " + name() + " published transferFunctionsChanged");
-        _groupEvent->publish("transferFunctionsChanged", ghoul::Dictionary({{"transferFunctions", _transferFunctionsFile.value()}}));
+        _groupEvent->publish(
+            "transferFunctionsChanged",
+            ghoul::Dictionary({{"transferFunctions", _transferFunctionsFile.value()}})
+        );
     });
 
     _dataOptions.onChange([this]{
@@ -170,29 +188,32 @@ void IswaDataGroup::registerProperties(){
     });
 }
 
-void IswaDataGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
-    if(!_registered)
+void IswaDataGroup::registerOptions(
+                        const std::vector<properties::SelectionProperty::Option>& options)
+{
+    if (!_registered) {
         registerProperties();
+    }
 
-    if(_dataOptions.options().empty()){
-        for(auto option : options){
+    if (_dataOptions.options().empty()) {
+        for (auto option : options) {
             _dataOptions.addOption({option.value, option.description});
         }
         _dataOptions.setValue(std::vector<int>(1,0));
     }
 }
 
-void IswaDataGroup::createDataProcessor(){
-    if(_type == typeid(DataPlane).name()){
+void IswaDataGroup::createDataProcessor() {
+    if (_type == typeid(DataPlane).name()) {
         _dataProcessor = std::make_shared<DataProcessorText>();
-    }else if(_type == typeid(DataSphere).name()){
+    }else if (_type == typeid(DataSphere).name()) {
         _dataProcessor = std::make_shared<DataProcessorJson>();
-    }else if(_type == typeid(KameleonPlane).name()){
+    }else if (_type == typeid(KameleonPlane).name()) {
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
     }
 }
 
-std::vector<int> IswaDataGroup::dataOptionsValue(){
+std::vector<int> IswaDataGroup::dataOptionsValue() {
     return _dataOptions.value();
 }
 

@@ -49,7 +49,7 @@ namespace {
 
 namespace openspace {
 
-NetworkEngine::NetworkEngine() 
+NetworkEngine::NetworkEngine()
     // -1 is okay as we assign one identifier in this ctor
     : _lastAssignedIdentifier(MessageIdentifier(-1))
     , _shouldPublishStatusMessage(true)
@@ -217,7 +217,7 @@ void NetworkEngine::sendInitialInformation() {
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
         OsEng.windowWrapper().sendMessageToExternalControl(payload);
-        LINFO("Sent initial message: (s=" << m.body.size() << ")" << 
+        LINFO("Sent initial message: (s=" << m.body.size() << ")" <<
               "[i=" << identifier.value << "]"
         );
 

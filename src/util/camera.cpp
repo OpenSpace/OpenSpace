@@ -35,7 +35,7 @@
 namespace openspace {
 
     //////////////////////////////////////////////////////////////////////////////////////
-    //                                        CAMERA                                        //
+    //                                        CAMERA                                    //
     //////////////////////////////////////////////////////////////////////////////////////
 
     namespace {
@@ -176,7 +176,9 @@ namespace openspace {
 
     const Camera::Mat4& Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
-            _cachedViewRotationMatrix.datum = glm::mat4_cast(glm::inverse(static_cast<glm::dquat>(_rotation)));
+            _cachedViewRotationMatrix.datum = glm::mat4_cast(
+                glm::inverse(static_cast<glm::dquat>(_rotation))
+            );
         }
         return _cachedViewRotationMatrix.datum;
     }
@@ -223,7 +225,7 @@ namespace openspace {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
-    //                                    SGCT INTERNAL                                    //
+    //                                    SGCT INTERNAL                                 //
     //////////////////////////////////////////////////////////////////////////////////////
     Camera::SgctInternal::SgctInternal()
         : _viewMatrix()

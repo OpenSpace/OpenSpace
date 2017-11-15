@@ -82,7 +82,9 @@ private:
         auto iter = _tracker.insert(_tracker.end(), key);
         _cache[key] = std::make_pair(value, iter);
     };
-    ContainerType<KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>> _cache;
+    ContainerType<
+        KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>
+    > _cache;
     std::list<KeyType> _tracker;
     size_t _capacity;
 };

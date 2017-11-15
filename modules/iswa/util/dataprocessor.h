@@ -39,9 +39,12 @@ public:
     DataProcessor();
     virtual ~DataProcessor();
 
-    virtual std::vector<std::string> readMetadata(std::string data, glm::size3_t& dimensions) = 0;
-    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) = 0;
-    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
+    virtual std::vector<std::string> readMetadata(std::string data,
+        glm::size3_t& dimensions) = 0;
+    virtual void addDataValues(std::string data,
+        properties::SelectionProperty& dataOptions) = 0;
+    virtual std::vector<float*> processData(std::string data,
+        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
 
     void useLog(bool useLog);
     void useHistogram(bool useHistogram);
@@ -53,8 +56,10 @@ public:
 
 protected:
     float processDataPoint(float value, int option);
-    float normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
-    float unnormalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
+    float normalizeWithStandardScore(float value, float mean, float sd,
+        glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
+    float unnormalizeWithStandardScore(float value, float mean, float sd,
+        glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
 
     void initializeVectors(int numOptions);
     void calculateFilterValues(std::vector<int> selectedOptions);
@@ -66,7 +71,7 @@ protected:
     glm::vec2 _normValues;
     glm::vec2 _filterValues;
 
-    std::vector<float> _min; 
+    std::vector<float> _min;
     std::vector<float> _max;
     std::vector<float> _sum;
     std::vector<float> _standardDeviation;
