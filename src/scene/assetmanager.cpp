@@ -43,9 +43,11 @@ AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader,
     , _assetSynchronizer(std::move(synchronizer))
 {}
 
-
 bool AssetManager::update() {
-    
+    // 1. Load assets.
+    // 2. Start/cancel synchronizations
+    // 3. Unload assets.
+
     // Load assets
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
@@ -55,7 +57,7 @@ bool AssetManager::update() {
         }
     }
 
-    // Start synchronizations
+    // Start/cancel synchronizations
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const AssetState targetState = c.second;
@@ -77,7 +79,7 @@ bool AssetManager::update() {
              targetState == AssetState::Initialized);
         
         if (shouldSync && !alreadySyncedOrSyncing) {
-            //startSynchronization(asset);
+            startSynchronization(asset);
         }
     }
     
@@ -224,6 +226,21 @@ AssetManager::AssetState AssetManager::currentAssetState(Asset* asset) {
     return it->state;
 }
 
+AssetManager::AssetState AssetManager::currentAssetState(const std::string& assetIdentifier) {
+    const auto it = std::find_if(
+        _managedAssets.begin(),
+        _managedAssets.end(),
+        [&assetIdentifier](const ManagedAsset& ma) {
+        return ma.path == assetIdentifier;
+    }
+    );
+    if (it == _managedAssets.end()) {
+        return AssetManager::AssetState::Unloaded;
+    }
+    return it->state;
+}
+
+
 void AssetManager::clearAllTargetAssets() {
     _pendingStateChangeCommands.clear();
     for (const auto& i : _assetLoader->loadedAssets()) {
@@ -254,9 +271,23 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
                 ""
             },
             {
+                "synchronizeAsset",
+                &luascriptfunctions::synchronizeAsset,
+                {this},
+                "string",
+                ""
+            },
+            {
+                "initializeAsset",
+                &luascriptfunctions::initializeAsset,
+                { this },
+                "string",
+                ""
+            },
+            {
                 "unloadAsset",
                 &luascriptfunctions::unloadAsset,
-                {this},
+                { this },
                 "string",
                 ""
             }

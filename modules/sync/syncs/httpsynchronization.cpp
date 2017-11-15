@@ -116,6 +116,11 @@ std::string HttpSynchronization::directory() {
 }
 
 void HttpSynchronization::start() {
+    if (isSyncing()) {
+        return;
+    }
+    begin();
+
     if (hasSyncFile()) {
         resolve();
         return;
@@ -130,15 +135,19 @@ void HttpSynchronization::start() {
                 return;
             }
         }
-        reject();
+        if (!_shouldCancel) {
+            reject();
+        }
     });
 }
 
 void HttpSynchronization::cancel() {
     _shouldCancel = true;
+    reset();
 }
 
 void HttpSynchronization::clear() {
+    cancel();
     // TODO: Remove all files from directory.
 }
 

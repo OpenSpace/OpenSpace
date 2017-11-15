@@ -73,17 +73,7 @@ std::vector<std::shared_ptr<ResourceSynchronization>> Asset::synchronizations()
 std::vector<std::shared_ptr<Asset>> Asset::allAssets() {
     std::set<std::shared_ptr<Asset>> assets({ shared_from_this() });
     for (auto& dep : _dependencies) {
-        std::vector<std::shared_ptr<Asset>> depAssets = dep->allActiveAssets();
-        std::copy(depAssets.begin(), depAssets.end(), std::inserter(assets, assets.end()));
-    }
-    std::vector<std::shared_ptr<Asset>> assetVector(assets.begin(), assets.end());
-    return assetVector;
-}
-
-std::vector<std::shared_ptr<Asset >> Asset::allActiveAssets() {
-    std::set<std::shared_ptr<Asset>> assets({ shared_from_this() });
-    for (auto& dep : _dependencies) {
-        std::vector<std::shared_ptr<Asset>> depAssets = dep->allActiveAssets();
+        std::vector<std::shared_ptr<Asset>> depAssets = dep->allAssets();
         std::copy(depAssets.begin(), depAssets.end(), std::inserter(assets, assets.end()));
     }
     std::vector<std::shared_ptr<Asset>> assetVector(assets.begin(), assets.end());

@@ -65,13 +65,9 @@ documentation::Documentation ResourceSynchronization::Documentation() {
     };
 }
 
-ResourceSynchronization::ResourceSynchronization()
-    : _started(false)
-    , _resolved(false)
-{}
+ResourceSynchronization::ResourceSynchronization() {}
 
-ResourceSynchronization::~ResourceSynchronization()
-{}
+ResourceSynchronization::~ResourceSynchronization() {}
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
     const ghoul::Dictionary & dictionary)
@@ -99,15 +95,58 @@ void ResourceSynchronization::wait() {
 }
 
 bool ResourceSynchronization::isResolved() {
-    return _resolved;
+    return _state == State::Resolved;
+}
+
+bool ResourceSynchronization::isRejected() {
+    return _state == State::Rejected;
+}
+
+bool ResourceSynchronization::isSyncing() {
+    return _state == State::Syncing;
+}
+
+ResourceSynchronization::CallbackHandle
+    ResourceSynchronization::addStateChangeCallback(StateChangeCallback cb)
+{
+    std::lock_guard<std::mutex> guard(_callbackMutex);
+    CallbackHandle callbackId = _nextCallbackId++;
+    _stateChangeCallbacks[callbackId] = cb;
+    return callbackId;
+}
+
+void ResourceSynchronization::removeStateChangeCallback(CallbackHandle id) {
+    std::lock_guard<std::mutex> guard(_callbackMutex);
+    _stateChangeCallbacks.erase(id);
 }
 
 void ResourceSynchronization::resolve() {
-    _resolved = true;
+    setState(State::Resolved);
 }
 
 void ResourceSynchronization::reject() {
-    _rejected = true;
+    setState(State::Rejected);
+}
+
+void ResourceSynchronization::reset() {
+    setState(State::Unsynced);
+}
+
+void ResourceSynchronization::begin() {
+    setState(State::Syncing);
+}
+
+void ResourceSynchronization::setState(State state) {
+    _state = state;
+    _callbackMutex.lock();
+    std::vector<StateChangeCallback> callbacks(
+        _stateChangeCallbacks.begin(),
+        _stateChangeCallbacks.end()
+    );
+    _callbackMutex.unlock();
+    for (auto& cb : callbacks) {
+        cb(state);
+    }
 }
 
 float ResourceSynchronization::progress() {

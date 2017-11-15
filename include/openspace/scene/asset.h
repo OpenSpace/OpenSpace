@@ -70,7 +70,6 @@ public:
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     std::vector<std::shared_ptr<ResourceSynchronization>> synchronizations();
 
-    std::vector<std::shared_ptr<Asset>> allActiveAssets();
     std::vector<std::shared_ptr<Asset>> allAssets();
 
     bool isInitReady() const;

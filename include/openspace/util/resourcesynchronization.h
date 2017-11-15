@@ -34,14 +34,20 @@
 
 namespace openspace {
 
-class TorrentClient;
-
-class ResourceSynchronization;
-
 class ResourceSynchronization
     : public std::enable_shared_from_this<ResourceSynchronization>
 {
 public:
+    enum class State : int {
+        Unsynced,
+        Syncing,
+        Resolved,
+        Rejected
+    };
+
+    using CallbackHandle = size_t;
+    using StateChangeCallback = std::function<void(State)>;
+
     static documentation::Documentation Documentation();
     static std::unique_ptr<ResourceSynchronization> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -60,14 +66,25 @@ public:
 
     void wait();
     bool isResolved();
+    bool isRejected();
+    bool isSyncing();
+    CallbackHandle addStateChangeCallback(StateChangeCallback cb);
+    void removeStateChangeCallback(CallbackHandle id);
+
+protected:
     void resolve();
     void reject();
+    void reset();
+    void begin();
     void updateProgress(float t);
 
 private:
-    std::atomic<bool> _started;
-    std::atomic<bool> _resolved;
-    std::atomic<bool> _rejected;
+    void setState(State state);
+
+    std::atomic<State> _state = State::Unsynced;
+    std::mutex _callbackMutex;
+    CallbackHandle _nextCallbackId = 0;
+    std::unordered_map<CallbackHandle, StateChangeCallback> _stateChangeCallbacks;
 };
 
 } // namespace openspace

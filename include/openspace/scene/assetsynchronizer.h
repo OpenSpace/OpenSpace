@@ -45,7 +45,7 @@ namespace openspace {
 class AssetSynchronizer {
 public:
     enum class SynchronizationState : int {
-        Unknown,
+        Unsynced,
         Synchronizing,
         Resolved,
         Rejected
@@ -56,9 +56,15 @@ public:
         SynchronizationState state;
     };
 
+    struct AssetResourceSync {
+        std::shared_ptr<Asset> asset;
+        std::shared_ptr<ResourceSynchronization> sync;
+    };
+
     AssetSynchronizer();
     void startSync(std::shared_ptr<Asset> asset);
-    void cancelSync(Asset* asset);
+    void cancelSync(std::shared_ptr<Asset> asset);
+    void restartSync(std::shared_ptr<Asset> asset);
 
     SynchronizationState assetState(Asset* asset);
     float assetProgress(Asset* asset);
@@ -66,9 +72,13 @@ public:
     std::vector<StateChange> getStateChanges();
 
 private:
-    std::unordered_map<Asset*, std::shared_ptr<Asset>> _synchronizingAssets;
+    void startAssetResourceSync(std::shared_ptr<Asset> a, std::shared_ptr<ResourceSynchronization> rs);
+    void cancelAssetResourceSync(std::shared_ptr<Asset> a, std::shared_ptr<ResourceSynchronization> rs);
+    void setState(std::shared_ptr<Asset> a, SynchronizationState state);
+
+    std::vector<std::shared_ptr<Asset>> _synchronizingAssets;
     std::unordered_map<Asset*, StateChange> _stateChanges;
-    std::unordered_map<ResourceSynchronization*, Asset*> _resourceToAssetMap;
+    std::unordered_map<ResourceSynchronization*, std::vector<Asset*>> _resourceToAssetMap;
 };
 
 } // namespace openspace
