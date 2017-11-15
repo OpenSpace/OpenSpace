@@ -89,10 +89,10 @@ private:
     void loadPolygonGeometryForRendering();
     void renderPolygonGeometry(GLuint vao);
     void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-        const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+        const glm::dmat4& worldToModelTransform, const glm::dvec3& orthoRight, const glm::dvec3& orthoUp,
         const float fadeInVariable);
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix, 
-        const glm::vec3& orthoRight, const glm::vec3& orthoUp, const float fadeInVariable);
+        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, const float fadeInVariable);
 
     bool loadData();
     bool readSpeckFile();

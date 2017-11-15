@@ -94,7 +94,7 @@ namespace openspace {
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix, const float fadeInVariable);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::vec3& orthoRight, const glm::vec3& orthoUp, const float fadeInVarible);
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, const float fadeInVarible);
 
         bool loadData();
         bool loadTextures();

@@ -576,6 +576,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
     else {
         _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
+        _camera->sgctInternal.setSceneMatrix(sceneMatrix);
     }
     _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
 

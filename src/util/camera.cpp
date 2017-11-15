@@ -226,9 +226,17 @@ namespace openspace {
     //                                    SGCT INTERNAL                                    //
     //////////////////////////////////////////////////////////////////////////////////////
     Camera::SgctInternal::SgctInternal()
-        : _viewMatrix()
+        : _sceneMatrix()
+        , _viewMatrix()
         , _projectionMatrix()
     { }
+
+    void Camera::SgctInternal::setSceneMatrix(glm::mat4 sceneMatrix) {
+        std::lock_guard<std::mutex> _lock(_mutex);
+
+        _sceneMatrix = std::move(sceneMatrix);
+        //_cachedViewProjectionMatrix.isDirty = true;
+    }
 
     void Camera::SgctInternal::setViewMatrix(glm::mat4 viewMatrix) {
         std::lock_guard<std::mutex> _lock(_mutex);
@@ -242,6 +250,10 @@ namespace openspace {
 
         _projectionMatrix = std::move(projectionMatrix);
         _cachedViewProjectionMatrix.isDirty = true;
+    }
+
+    const glm::mat4& Camera::SgctInternal::sceneMatrix() const {
+        return _sceneMatrix;
     }
 
     const glm::mat4& Camera::SgctInternal::viewMatrix() const {

@@ -323,7 +323,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.addOption(2, "Screen center Position Normal");
     addProperty(_renderOption);
-    _renderOption.set(1);
+    //_renderOption.set(1);
 
     if (dictionary.hasKey(keyUnit)) {
         std::string unit = dictionary.value<std::string>(keyUnit);
@@ -586,7 +586,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
 }
 
 void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-    const glm::vec3& orthoRight, const glm::vec3& orthoUp, const float fadeInVariable) {
+    const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, const float fadeInVariable) {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
@@ -688,15 +688,20 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
-    glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+    /*glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
     glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
     glm::vec3 right = glm::cross(viewDirection, lookup);
     glm::vec3 up = glm::cross(right, viewDirection);
 
     glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
     glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
-    glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
+    glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));*/
 
+    //glm::dmat4 invMVP = glm::inverse(modelViewProjectionMatrix);
+    glm::dmat4 invMVPParts = glm::inverse(modelMatrix) * glm::inverse(data.camera.combinedViewMatrix()) *
+        glm::inverse(glm::dmat4(projectionMatrix));
+    glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
+    glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
 
     if (_hasSpeckFile) {
         renderPlanes(data, modelViewMatrix, projectionMatrix, fadeInVariable);            

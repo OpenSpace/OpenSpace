@@ -32,8 +32,8 @@ layout(triangle_strip, max_vertices = 6) out;
 //uniform dmat4 transformMatrix;
 uniform dmat4 modelViewProjectionTransform;
 uniform float scaleFactor;
-uniform vec3 up;
-uniform vec3 right;
+uniform dvec3 up;
+uniform dvec3 right;
 uniform dvec3 cameraPosition;
 uniform dvec3 cameraLookUp;
 uniform dvec4 centerScreenInWorldPosition;
@@ -139,12 +139,13 @@ void main() {
     // EndPrimitive(); // Second Triangle
 
     // Testing size:
-    vec4 topLeft = thirdPosition/thirdPosition.w;
-    topLeft =  ((topLeft + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
+    vec4 topRight = secondPosition/secondPosition.w;
+    topRight =  ((topRight + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
     vec4 bottomLeft = initialPosition/initialPosition.w;
     bottomLeft = ((bottomLeft + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
 
-    if ((topLeft.y - bottomLeft.y) > maxBillboardSize) {
+    if (((topRight.y - bottomLeft.y) > maxBillboardSize) ||
+        ((topRight.x - bottomLeft.x) > maxBillboardSize)) {
         return;
     } else {
         // Build primitive

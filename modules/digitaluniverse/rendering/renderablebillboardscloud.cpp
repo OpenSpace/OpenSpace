@@ -384,7 +384,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.addOption(2, "Screen center Position Normal");
     addProperty(_renderOption);
-    _renderOption.set(1);
+    //_renderOption.set(1);
 
     if (dictionary.hasKey(keyUnit)) {
         std::string unit = dictionary.value<std::string>(keyUnit);
@@ -606,7 +606,7 @@ void RenderableBillboardsCloud::deinitialize() {
 }
 
 void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-    const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp,
+    const glm::dmat4& worldToModelTransform, const glm::dvec3& orthoRight, const glm::dvec3& orthoUp,
     const float fadeInVariable) {
     glDepthMask(false);
 
@@ -635,17 +635,11 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
+    glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
     _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
-    _program->setUniform("projection", projectionMatrix);
+    _program->setUniform("projection", projMatrix);
     _program->setUniform("modelViewTransform", modelViewMatrix);
-    _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
-
-    glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-    glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-
+    _program->setUniform("modelViewProjectionTransform", projMatrix * modelViewMatrix);   
     _program->setUniform("cameraPosition", glm::dvec3(worldToModelTransform * 
         glm::dvec4(data.camera.positionVec3(), 1.0)));
     _program->setUniform("cameraLookUp", glm::dvec3(worldToModelTransform * 
@@ -719,7 +713,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
 }
 
 void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-    const glm::vec3& orthoRight, const glm::vec3& orthoUp, const float fadeInVariable) {
+    const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, const float fadeInVariable) {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
@@ -837,20 +831,22 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
           modelViewMatrix;
 
     glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-    
-    /*glm::vec3 viewDirection = glm::vec3(glm::dmat4(OsEng.renderEngine().getSGCTModelMatrix()) * 
-        glm::dvec4(data.camera.viewDirectionWorldSpace(), 1.0));*/
-
-    glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-    glm::vec3 right = glm::cross(viewDirection, lookup);
-    glm::vec3 up = glm::cross(right, viewDirection);
-
+        
     glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-    glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
-    glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
+    glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+    //glm::vec3 right = glm::cross(viewDirection, lookup);
+    //glm::vec3 up = glm::cross(right, viewDirection);
+    //glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
+    //glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
+
+    //glm::dmat4 invMVP = glm::inverse(modelViewProjectionMatrix);
+    glm::dmat4 invMVPParts = glm::inverse(modelMatrix) * glm::inverse(data.camera.combinedViewMatrix()) *
+        glm::inverse(glm::dmat4(projectionMatrix));
+    glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
+    glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
       
     if (_hasSpeckFile) {
-        renderBillboards(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp, fadeInVariable);
+        renderBillboards(data, modelViewMatrix, worldToModelTransform, orthoRight, orthoUp, fadeInVariable);
     }
         
     if (_drawLabels && _hasLabel) {
