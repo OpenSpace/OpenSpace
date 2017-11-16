@@ -42,11 +42,24 @@ AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader)
 {}
 
 void AssetManager::initialize() {
-    _assetLoader->rootAsset()->initialize();
+    _addAssetCallbackHandle = _assetLoader->addAssetLoadCallback(
+        [this] (std::shared_ptr<Asset> a) {
+            a->addStateChangeCallback([&a, this] (Asset::State state) {
+                assetStateChanged(*a, state);
+            });
+        }
+     );
+    std::shared_ptr<Asset> rootAsset = _assetLoader->rootAsset();
+    rootAsset->addStateChangeCallback([&rootAsset, this] (Asset::State state) {
+        assetStateChanged(*rootAsset, state);
+    });
+    rootAsset->initialize();
 }
 
 void AssetManager::deinitialize() {
     _assetLoader->rootAsset()->deinitialize();
+    
+    _assetLoader->removeAssetLoadCallback(_addAssetCallbackHandle);
 }
 
 bool AssetManager::update() {
@@ -138,6 +151,13 @@ void AssetManager::startSynchronization(Asset&) {
 
 void AssetManager::cancelSynchronization(Asset&) {
     // todo: implement this
+}
+
+void AssetManager::assetStateChanged(Asset& asset, Asset::State state) {
+    // Todo: store this and handle the state change data in the update loop.
+    // to make sure this happens on the main thread.
+    // Check if assets should start syncing or if they should init.
+    // flags: autoSync, autoInit ?
 }
     
 /**
@@ -322,13 +342,22 @@ void AssetManager::unloadAsset(Asset* asset) {
 }
     
 std::shared_ptr<Asset> AssetManager::tryAddAsset(const std::string& path) {
-    _assetLoader->add(path);
+    try {
+        _assetLoader->add(path);
+    } catch (const ghoul::RuntimeError& e) {
+        LERROR("Error adding asset: " << e.component << ": " << e.message);
+    }
     return nullptr;
 }
 
 bool AssetManager::tryRemoveAsset(const std::string& path) {
-    _assetLoader->remove(path);
-    return false;
+    try {
+        _assetLoader->remove(path);
+    } catch (const ghoul::RuntimeError& e) {
+        LERROR("Error removing asset: " << e.component << ": " << e.message);
+        return false;
+    }
+    return true;
 }
 
 bool AssetManager::tryInitializeAsset(Asset& asset) {

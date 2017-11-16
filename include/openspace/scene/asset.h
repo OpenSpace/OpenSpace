@@ -33,7 +33,7 @@
 #include <vector>
 
 #include <memory>
-#include <unordered_set>
+#include <unordered_map>
 #include <iterator>
 
 namespace openspace {
@@ -42,8 +42,6 @@ class AssetLoader;
 
 class Asset : public std::enable_shared_from_this<Asset> {
 public:
-    using Optional = std::pair<std::shared_ptr<Asset>, bool>;
-
     enum class State : unsigned int {
         Unloaded,
         LoadingFailed,
@@ -54,6 +52,9 @@ public:
         Initialized,
         InitializationFailed
     };
+    
+    using StateChangeCallback = std::function<void(State)>;
+    using CallbackHandle = size_t;
 
     /**
      * Root asset constructor
@@ -61,9 +62,11 @@ public:
     Asset(AssetLoader* loader);
 
     /**
-    * Dependency or Optional constructor
+    * Regular asset constructor
     */
     Asset(AssetLoader* loader, ghoul::filesystem::File assetPath);
+    
+    ~Asset();
 
     std::string id() const;
     std::string assetFilePath() const;
@@ -73,12 +76,15 @@ public:
     AssetLoader* loader() const;
     State state() const;
 
+    CallbackHandle addStateChangeCallback(StateChangeCallback cb);
+    void removeStateChangeCallback(CallbackHandle handle);
+    
     void setState(State state);
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
-    std::vector<std::shared_ptr<ResourceSynchronization>> synchronizations();
-
+    std::vector<std::shared_ptr<ResourceSynchronization>> synchronizations() const;
 
     // Sync
+    bool isSynchronized();
     bool startSynchronizations();
     bool cancelSynchronizations();
     bool restartSynchronizations();
@@ -108,14 +114,12 @@ public:
 
     std::string resolveLocalResource(std::string resourceName);
 private:
-
     void handleRequests();
-    void startSync(ResourceSynchronization& rs);
-    void cancelSync(ResourceSynchronization& rs);
 
-    State _state;
+    std::atomic<State> _state;
     AssetLoader* _loader;
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
+    mutable std::mutex _synchronizationsMutex;
 
     bool _hasAssetPath;
     // The name of the asset
@@ -135,6 +139,15 @@ private:
 
     // Assets that refers to this asset as a requested asset
     std::vector<std::weak_ptr<Asset>> _requestingAssets;
+    
+    // Synchronization callback handles
+    std::unordered_map<ResourceSynchronization*, ResourceSynchronization::CallbackHandle>
+        _syncCallbackHandles;
+    
+    CallbackHandle _nextCallbackHandle;
+    std::unordered_map<CallbackHandle, StateChangeCallback> _stateChangeCallbacks;
+    std::mutex _stateChangeCallbackMutex;
+    
 };
 
 } // namespace openspace

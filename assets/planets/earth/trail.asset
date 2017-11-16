@@ -1,5 +1,5 @@
-local assetHelper = asset.import('assethelper')
-local sunTransforms = asset.import('sun/transforms')
+local assetHelper = asset.require('assethelper')
+local sunTransforms = asset.require('sun/transforms')
 
 local EarthTrail = {
     Name = "EarthTrail",

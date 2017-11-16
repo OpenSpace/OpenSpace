@@ -1,5 +1,5 @@
-local assetHelper = asset.import('assethelper')
-local transforms = asset.import('./transforms')
+local assetHelper = asset.require('assethelper')
+local transforms = asset.require('./transforms')
 
 local sunParentName = transforms.SunIau.Name;
 

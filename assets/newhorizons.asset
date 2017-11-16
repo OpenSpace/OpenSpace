@@ -1,3 +1,3 @@
-asset.import('keybindings')
-asset.import('solarsystem')
-asset.import('missions/newhorizons/spice/spice')
+asset.request('keybindings')
+asset.request('solarsystem')
+asset.request('missions/newhorizons/spice/spice')

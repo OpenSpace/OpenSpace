@@ -83,6 +83,7 @@ private:
     void startSynchronization(Asset& asset);
     void cancelSynchronization(Asset& asset);
     
+    void assetStateChanged(Asset& asset, Asset::State state);
 
     std::unordered_map<std::string, bool> _pendingStateChangeCommands;
     //std::unordered_map<Asset*, AssetState> _stateChangesInProgress;
@@ -92,6 +93,8 @@ private:
     std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncDependencies;
     
     std::unique_ptr<AssetLoader> _assetLoader;
+    AssetLoader::CallbackHandle _addAssetCallbackHandle;
+    
 };
 
 } // namespace openspace

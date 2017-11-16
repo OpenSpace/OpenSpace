@@ -1,5 +1,5 @@
-local assetHelper = asset.import("assethelper")
-asset.import("spice/base")
+local assetHelper = asset.require("assethelper")
+asset.require("spice/base")
 
 -- Barycenter of the solar system, expressed in the Galactic frame
 local SolarSystemBarycenter = {

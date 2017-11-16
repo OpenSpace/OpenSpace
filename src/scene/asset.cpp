@@ -28,6 +28,8 @@
 #include <ghoul/logging/logmanager.h>
 
 #include <algorithm>
+#include <unordered_set>
+#include <mutex>
 
 namespace {
     const char* _loggerCat = "Asset";
@@ -50,6 +52,12 @@ Asset::Asset(AssetLoader* loader, ghoul::filesystem::File assetPath)
     , _assetPath(assetPath)
 {}
 
+Asset::~Asset() {
+    for (const auto& it : _syncCallbackHandles) {
+        it.first->removeStateChangeCallback(it.second);
+    }
+}
+
 std::string Asset::resolveLocalResource(std::string resourceName) {
     std::string currentAssetDirectory = assetDirectory();
     return currentAssetDirectory +
@@ -65,28 +73,71 @@ void Asset::handleRequests() {
     }
 }
 
-void Asset::startSync(ResourceSynchronization& rs) {
-    rs.start();
-}
-
-void Asset::cancelSync(ResourceSynchronization& rs) {
-    rs.cancel();
-}
-
 Asset::State Asset::state() const {
     return _state;
 }
 
+Asset::CallbackHandle Asset::addStateChangeCallback(StateChangeCallback cb) {
+    std::lock_guard<std::mutex> guard(_stateChangeCallbackMutex);
+    CallbackHandle h = _nextCallbackHandle++;
+    _stateChangeCallbacks.emplace(h, cb);
+    return h;
+}
+    
+void Asset::removeStateChangeCallback(Asset::CallbackHandle handle) {
+    std::lock_guard<std::mutex> guard(_stateChangeCallbackMutex);
+    _stateChangeCallbacks.erase(handle);
+}
+
 void Asset::setState(Asset::State state) {
     _state = state;
+    _stateChangeCallbackMutex.lock();
+    std::vector<StateChangeCallback> callbacks;
+    callbacks.reserve(_stateChangeCallbacks.size());
+    for (const auto& it : _stateChangeCallbacks) {
+        callbacks.push_back(it.second);
+    }
+    _stateChangeCallbackMutex.unlock();
+    for (auto& cb : callbacks) {
+        cb(state);
+    }
 }
 
 void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization) {
-    _synchronizations.push_back(synchronization);
+    {
+        std::lock_guard<std::mutex> guard(_synchronizationsMutex);
+        _synchronizations.push_back(synchronization);
+    }
+    
+    // Set up callback for synchronization state change.
+    // This will be called from another thread, so we need to mutex protect
+    // things that are touched by the callback.
+    ResourceSynchronization::CallbackHandle cbh = synchronization->addStateChangeCallback(
+        [this](ResourceSynchronization::State s) {
+            std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
+                this->synchronizations();
+
+            if (s == ResourceSynchronization::State::Resolved) {
+                auto it = std::find_if(
+                    syncs.begin(),
+                    syncs.end(),
+                    [](std::shared_ptr<ResourceSynchronization>& s) {
+                        return !s->isResolved();
+                    }
+                );
+                if (it == syncs.end()) {
+                    setState(State::SyncResolved);
+                }
+            } else if (s == ResourceSynchronization::State::Rejected) {
+                setState(State::SyncRejected);
+            }
+        }
+    );
+    _syncCallbackHandles[synchronization.get()] = cbh;
 }
 
-std::vector<std::shared_ptr<ResourceSynchronization>> Asset::synchronizations()
-{
+std::vector<std::shared_ptr<ResourceSynchronization>> Asset::synchronizations() const {
+    std::lock_guard<std::mutex> guard(_synchronizationsMutex);
     return _synchronizations;
 }
 
@@ -110,24 +161,34 @@ std::vector<std::shared_ptr<Asset>> Asset::requiredSubTreeAssets() {
     return assetVector;
 }
 
+bool Asset::isSynchronized() {
+    State s = state();
+    return s == State::SyncResolved ||
+           s == State::Initialized ||
+           s == State::InitializationFailed;
+}
+    
 bool Asset::startSynchronizations() {
-    bool startedAnySync = false;
+    bool foundUnresolved = false;
+    // Start synchronization of all children first.
     for (auto& child : childAssets()) {
-        bool started = child->startSynchronizations();
-        if (started) {
-            startedAnySync = true;
+        if (child->startSynchronizations()) {
+            foundUnresolved = true;
         }
     }
-    for (const auto& s : _synchronizations) {
+    // Now synchronize its own synchronizations.
+    for (const auto& s : synchronizations()) {
         if (!s->isResolved()) {
-            startedAnySync = true;
-            startSync(*s);
+            foundUnresolved = true;
+            s->start();
+            setState(State::Synchronizing);
         }
     }
-    if (!startedAnySync) {
+    // If all syncs are resolved (or no syncs exist), mark as resolved.
+    if (!foundUnresolved) {
         setState(State::SyncResolved);
     }
-    return startedAnySync;
+    return foundUnresolved;
 }
 
 bool Asset::cancelSynchronizations() {
@@ -138,10 +199,11 @@ bool Asset::cancelSynchronizations() {
             cancelledAnySync = true;
         }
     }
-    for (const auto& s : _synchronizations) {
+    for (const auto& s : synchronizations()) {
         if (s->isSyncing()) {
             cancelledAnySync = true;
-            cancelSync(*s);
+            s->cancel();
+            setState(State::Loaded);
         }
     }
     if (cancelledAnySync) {
@@ -183,7 +245,7 @@ float Asset::synchronizationProgress() {
 bool Asset::isInitReady() const {
     // An asset is ready for initialization if all synchronizations are resolved
     // and all its dependencies are ready for initialization.
-    for (const std::shared_ptr<ResourceSynchronization>& sync : _synchronizations) {
+    for (const std::shared_ptr<ResourceSynchronization> sync : synchronizations()) {
         if (!sync->isResolved()) {
             return false;
         }
@@ -382,8 +444,8 @@ std::vector<std::shared_ptr<Asset>> Asset::requestedAssets() {
 std::vector<std::shared_ptr<Asset>> Asset::childAssets() {
     std::vector<std::shared_ptr<Asset>> children;
     children.reserve(_requiredAssets.size() + _requestedAssets.size());
-    children.insert(_requiredAssets.begin(), _requiredAssets.end(), children.end());
-    children.insert(_requestedAssets.begin(), _requestedAssets.end(), children.end());
+    children.insert(children.end(), _requiredAssets.begin(), _requiredAssets.end());
+    children.insert(children.end(), _requestedAssets.begin(), _requestedAssets.end());
     return children;
 }
 

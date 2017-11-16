@@ -45,13 +45,25 @@ void GuiAssetComponent::render() {
 
     AssetManager& assetManager = OsEng.assetManager();
 
-
     std::vector<std::shared_ptr<Asset>> allAssets =
         assetManager.rootAsset()->subTreeAssets();
 
     for (const auto& a : allAssets) {
         ImGui::Text("%s", a->assetFilePath().c_str());
         ImGui::NextColumn();
+        
+        std::string stateText;
+        switch(a->state()) {
+            case Asset::State::Loaded: stateText = "Loaded"; break;
+            case Asset::State::LoadingFailed: stateText = "LoadingFailed"; break;
+            case Asset::State::Synchronizing: stateText = "Synchronizing"; break;
+            case Asset::State::SyncRejected: stateText = "SyncRejected"; break;
+            case Asset::State::SyncResolved: stateText = "SyncResolved"; break;
+            case Asset::State::Initialized: stateText = "Initialized"; break;
+            case Asset::State::InitializationFailed: stateText = "InitializationFailed"; break;
+            default: stateText = "Unknown"; break;
+        }
+        ImGui::Text("%s", stateText.c_str());
         
         ImGui::NextColumn();
         ImGui::Separator();

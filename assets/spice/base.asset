@@ -1,4 +1,4 @@
-local AssetHelper = asset.import("assethelper")
+local AssetHelper = asset.require("assethelper")
 
 local syncedDirectory = asset.syncedResource({
     Type = "HttpSynchronization",

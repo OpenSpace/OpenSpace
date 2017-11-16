@@ -38,6 +38,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 namespace openspace {
 
@@ -48,7 +49,8 @@ int onInitialize(lua_State* state);
 int onDeinitialize(lua_State* state);
 int onInitializeDependency(lua_State* state);
 int onDeinitializeDependency(lua_State* state);
-int importDependency(lua_State* state);
+int require(lua_State* state);
+int request(lua_State* state);
 int localResource(lua_State* state);
 int syncedResource(lua_State* state);
 int noOperation(lua_State* state);
@@ -57,6 +59,9 @@ int exportAsset(lua_State* state);
 
 class AssetLoader {
 public:
+    using CallbackHandle = size_t;
+    using AssetLoadCallback = std::function<void(std::shared_ptr<Asset>)>;
+    
     /**
      * Constructor
      */
@@ -92,7 +97,7 @@ public:
     * Returns the asset identified by the identifier,
     * if the asset is loaded. Otherwise return nullptr.
     */
-    std::shared_ptr<Asset> has(const std::string& identifier);
+    std::shared_ptr<Asset> has(const std::string& identifier) const;
 
     /**
      * Return all assets loaded using the loadAsset method.
@@ -113,7 +118,7 @@ public:
     /**
     * Return the asset root directory
     */
-    const std::string& assetRootDirectory();
+    const std::string& assetRootDirectory() const;
 
     void callOnInitialize(Asset* asset);
 
@@ -123,7 +128,11 @@ public:
 
     void callOnDependencyDeinitialize(Asset* asset, Asset* dependant);
 
-    std::string generateAssetPath(const std::string& baseDirectory, const std::string& path) const;
+    std::string generateAssetPath(const std::string& baseDirectory,
+                                  const std::string& path) const;
+    
+    CallbackHandle addAssetLoadCallback(AssetLoadCallback);
+    void removeAssetLoadCallback(CallbackHandle cbh);
 
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
@@ -144,7 +153,8 @@ private:
     int onDeinitializeLua(Asset* asset);
     int onInitializeDependencyLua(Asset* dependant, Asset* dependency);
     int onDeinitializeDependencyLua(Asset* dependant, Asset* dependency);
-    int importDependencyLua(Asset* asset);
+    int requireLua(Asset* asset);
+    int requestLua(Asset* asset);
     int localResourceLua(Asset* asset);
     int syncedResourceLua(Asset* asset);
     int exportAssetLua(Asset* asset);
@@ -154,25 +164,31 @@ private:
     friend int assetloader::onDeinitialize(lua_State* state);
     friend int assetloader::onInitializeDependency(lua_State* state);
     friend int assetloader::onDeinitializeDependency(lua_State* state);
-    friend int assetloader::importDependency(lua_State* state);
+    friend int assetloader::require(lua_State* state);
+    friend int assetloader::request(lua_State* state);
     friend int assetloader::localResource(lua_State* state);
     friend int assetloader::syncedResource(lua_State* state);
     friend int assetloader::exportAsset(lua_State* state);
 
     std::shared_ptr<Asset> _rootAsset;
-    std::map<std::string, std::shared_ptr<Asset>> _loadedAssets;
+    std::unordered_map<std::string, std::shared_ptr<Asset>> _loadedAssets;
     std::vector<std::shared_ptr<Asset>> _assetStack;
 
     std::string _assetRootDirectory;
     ghoul::lua::LuaState* _luaState;
 
     // References to lua values
-    std::map<Asset*, std::vector<int>> _onInitializationFunctionRefs;
-    std::map<Asset*, std::vector<int>> _onDeinitializationFunctionRefs;
-    std::map<Asset*, std::map<Asset*, std::vector<int>>> _onDependencyInitializationFunctionRefs;
-    std::map<Asset*, std::map<Asset*, std::vector<int>>> _onDependencyDeinitializationFunctionRefs;
+    std::unordered_map<Asset*, std::vector<int>> _onInitializationFunctionRefs;
+    std::unordered_map<Asset*, std::vector<int>> _onDeinitializationFunctionRefs;
+    std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
+        _onDependencyInitializationFunctionRefs;
+    std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
+        _onDependencyDeinitializationFunctionRefs;
 
     int _assetsTableRef;
+    
+    std::unordered_map<CallbackHandle, AssetLoadCallback> _assetLoadCallbacks;
+    CallbackHandle _nextCallbackId;
 
 };
 

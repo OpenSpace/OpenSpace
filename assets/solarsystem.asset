@@ -1,10 +1,10 @@
-asset.import("sun/sun")
---asset.import("planets/planets")
--- asset.import("planets/moons")
-asset.import("planets/trails")
--- asset.import("dwarfplanets/pluto")
+asset.request("sun/sun")
+--asset.request("planets/planets")
+-- asset.request("planets/moons")
+asset.request("planets/trails")
+-- asset.request("dwarfplanets/pluto")
 
-local sceneHelper = asset.import("scenehelper")
+local sceneHelper = asset.require("scenehelper")
 
 asset.onInitialize(function ()
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
