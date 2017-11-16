@@ -51,8 +51,8 @@ namespace openspace::properties {
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
-    [](std::string val, bool& success) -> TYPE {                                         \
-        std::stringstream s(val);                                                        \
+    [](std::string value, bool& success) -> TYPE {                                       \
+        std::stringstream s(value);                                                      \
         TYPE v;                                                                          \
         s >> v;                                                                          \
         success = !s.fail();                                                             \
@@ -60,7 +60,7 @@ namespace openspace::properties {
             return v;                                                                    \
         }                                                                                \
         else {                                                                           \
-            throw ghoul::RuntimeError("Conversion error for string: " + val);            \
+            throw ghoul::RuntimeError("Conversion error for string: " + value);          \
         }                                                                                \
     }
 
@@ -70,7 +70,7 @@ namespace openspace::properties {
         return true;                                                                     \
     }
 
-REGISTER_NUMERICALPROPERTY_SOURCE(IntProperty, int, int(0), numeric_limits<int>::lowest(),
+REGISTER_NUMERICALPROPERTY_SOURCE(IntProperty, int, 0, numeric_limits<int>::lowest(),
                                   numeric_limits<int>::max(), int(1),
                                   DEFAULT_FROM_LUA_LAMBDA(int, int(0)),
                                   DEFAULT_TO_LUA_LAMBDA(int),

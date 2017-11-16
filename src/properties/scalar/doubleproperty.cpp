@@ -37,7 +37,7 @@ namespace openspace::properties {
     [](lua_State* state, bool& success) -> TYPE {                                        \
         success = (lua_isnumber(state, -1) == 1);                                        \
         if (success) {                                                                   \
-            return static_cast<TYPE>(lua_tonumber(state, -1));                           \
+            return lua_tonumber(state, -1);                                              \
         }                                                                                \
         else {                                                                           \
             return DEFAULT_VALUE;                                                        \
@@ -46,13 +46,13 @@ namespace openspace::properties {
 
 #define DEFAULT_TO_LUA_LAMBDA(TYPE)                                                      \
     [](lua_State* state, TYPE value) -> bool {                                           \
-        lua_pushnumber(state, static_cast<lua_Number>(value));                           \
+        lua_pushnumber(state, value);                                                    \
         return true;                                                                     \
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
-    [](std::string val, bool& success) -> TYPE {                                         \
-        std::stringstream s(val);                                                        \
+    [](std::string value, bool& success) -> TYPE {                                       \
+        std::stringstream s(value);                                                      \
         TYPE v;                                                                          \
         s >> v;                                                                          \
         success = !s.fail();                                                             \
@@ -60,7 +60,7 @@ namespace openspace::properties {
             return v;                                                                    \
         }                                                                                \
         else {                                                                           \
-            throw ghoul::RuntimeError("Conversion error for string: " + val);            \
+            throw ghoul::RuntimeError("Conversion error for string: " + value);          \
         }                                                                                \
     }
 

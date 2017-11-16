@@ -186,19 +186,19 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string val,           \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
                                                               bool& successful)          \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(val, successful);                           \
+        return FROM_STRING_LAMBDA_EXPRESSION(value, successful);                         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromString(std::string val,          \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromString(std::string value,        \
                                                                bool& success)            \
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::fromString<TYPE>(               \
-          val,                                                                           \
+          value,                                                                         \
           success                                                                        \
         );                                                                               \
     }                                                                                    \

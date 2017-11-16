@@ -150,7 +150,7 @@ void GdalRawTileDataReader::initialize() {
         calculateTileLevelDifference(_initData.dimensions().x);
 
     int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-    _cached._maxLevel = -_cached._tileLevelDifference;
+    _cached._maxLevel = static_cast<int>(-_cached._tileLevelDifference);
     if (numOverviews > 0) {
         _cached._maxLevel += numOverviews - 1;
     }

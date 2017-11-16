@@ -106,9 +106,9 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* l,      \
-                                                                      bool& s)           \
+                                                                      bool& successful)  \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(l, s);                                         \
+        return FROM_LUA_LAMBDA_EXPRESSION(l, successful);                                \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -126,9 +126,9 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string v,             \
-                                                              bool& s)                   \
+                                                              bool& successful)          \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(v, s);                                      \
+        return FROM_STRING_LAMBDA_EXPRESSION(v, successful);                             \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
