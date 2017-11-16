@@ -61,7 +61,7 @@ namespace openspace::properties {
         lua_newtable(state);                                                             \
         int number = 1;                                                                  \
         for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            lua_pushnumber(state, static_cast<lua_Number>(value[i]));                    \
+            lua_pushnumber(state, value[i]);                                             \
             lua_setfield(state, -2, std::to_string(number).c_str());                     \
             ++number;                                                                    \
         }                                                                                \

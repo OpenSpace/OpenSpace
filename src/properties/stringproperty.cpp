@@ -41,21 +41,21 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(
             return "";
         }
     },
-    [](lua_State* state, std::string value) -> bool {
-        lua_pushstring(state, value.c_str());
+    [](lua_State* state, std::string val) -> bool {
+        lua_pushstring(state, val.c_str());
         return true;
     },
-    [](std::string value, bool& success) -> std::string {
+    [](std::string val, bool& success) -> std::string {
         // An incoming string is of the form
         // "value"
         // so we want to remove the leading and trailing " characters
-        if (value.size() > 2 && (value[0] == '"' && value[value.size() - 1] == '"')) {
+        if (val.size() > 2 && (val[0] == '"' && val[val.size() - 1] == '"')) {
             // Removing the first and last "
             success = true;
-            return value.substr(1, value.size() - 2);
+            return val.substr(1, val.size() - 2);
         }
         success = false;
-        return value;
+        return val;
     },
     [](std::string& outValue, std::string inValue) -> bool {
         outValue = "\"" + inValue + "\"";

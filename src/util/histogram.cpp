@@ -306,8 +306,8 @@ float Histogram::entropy() {
     float entropy = 0.f;
     for (int i = 0; i < _numBins; ++i) {
         if (_data[i] != 0) {
-            entropy -= (static_cast<float>(_data[i])/_numValues) *
-                        log2(static_cast<float>(_data[i])/_numValues);
+            entropy -= (_data[i] / static_cast<float>(_numValues)) *
+                        (log2(_data[i]) / static_cast<float>(_numValues));
         }
     }
     return entropy;

@@ -57,11 +57,11 @@ namespace openspace::properties {
     }
 
 #define DEFAULT_TO_LUA_LAMBDA(__TYPE__)                                                  \
-    [](lua_State* state, __TYPE__ value) -> bool {                                       \
+    [](lua_State* state, __TYPE__ val) -> bool {                                         \
         lua_newtable(state);                                                             \
         int number = 1;                                                                  \
         for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            lua_pushnumber(state, static_cast<lua_Number>(value[i]));                    \
+            lua_pushnumber(state, static_cast<lua_Number>(val[i]));                      \
             lua_setfield(state, -2, std::to_string(number).c_str());                     \
             ++number;                                                                    \
         }                                                                                \
