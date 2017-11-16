@@ -113,9 +113,10 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l, TYPE v)\
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l,        \
+                                                                    TYPE value)          \
     {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(l, v);                                           \
+        return TO_LUA_LAMBDA_EXPRESSION(l, value);                                       \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -125,10 +126,10 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string v,             \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
                                                               bool& successful)          \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(v, successful);                             \
+        return FROM_STRING_LAMBDA_EXPRESSION(value, successful);                         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \

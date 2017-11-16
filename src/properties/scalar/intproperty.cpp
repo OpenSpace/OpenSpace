@@ -71,10 +71,10 @@ namespace openspace::properties {
     }
 
 REGISTER_NUMERICALPROPERTY_SOURCE(IntProperty, int, 0, numeric_limits<int>::lowest(),
-                                  numeric_limits<int>::max(), int(1),
-                                  DEFAULT_FROM_LUA_LAMBDA(int, int(0)),
+                                  numeric_limits<int>::max(), 1,
+                                  DEFAULT_FROM_LUA_LAMBDA(int, 0),
                                   DEFAULT_TO_LUA_LAMBDA(int),
-                                  DEFAULT_FROM_STRING_LAMBDA(int, int(0)),
+                                  DEFAULT_FROM_STRING_LAMBDA(int, 0),
                                   DEFAULT_TO_STRING_LAMBDA(int),
                                   LUA_TNUMBER)
 
