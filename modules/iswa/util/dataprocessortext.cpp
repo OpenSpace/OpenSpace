@@ -91,7 +91,7 @@ std::vector<std::string> DataProcessorText::readMetadata(std::string data,
 void DataProcessorText::addDataValues(std::string data,
                                       properties::SelectionProperty& dataOptions)
 {
-    int numOptions = dataOptions.options().size();
+    int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
 
     if (!data.empty()) {
@@ -147,16 +147,16 @@ void DataProcessorText::addDataValues(std::string data,
 }
 
 std::vector<float*> DataProcessorText::processData(std::string data,
-                                               properties::SelectionProperty& dataOptions,
+                                               properties::SelectionProperty& options,
                                                glm::size3_t& dimensions)
 {
     if (!data.empty()) {
         std::string line;
         std::stringstream memorystream(data);
 
-        std::vector<int> selectedOptions = dataOptions.value();
+        std::vector<int> selectedOptions = options.value();
 //        int numSelected = selectedOptions.size();
-        int numOptions  = dataOptions.options().size();
+        int numOptions = static_cast<int>(options.options().size());
 
         std::vector<float> values;
         float value;
@@ -164,8 +164,8 @@ std::vector<float*> DataProcessorText::processData(std::string data,
         int first, last, option, lineSize;
 
         std::vector<float*> dataOptions(numOptions, nullptr);
-        for (int option : selectedOptions) {
-            dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
+        for (int o : selectedOptions) {
+            dataOptions[o] = new float[dimensions.x * dimensions.y] { 0.f };
         }
 
         int numValues = 0;
@@ -203,12 +203,11 @@ std::vector<float*> DataProcessorText::processData(std::string data,
 //            first = 0;
             last = 0;
             option = -3;
-            lineSize = line.size();
+            lineSize = static_cast<int>(line.size());
 
             while (last < lineSize) {
-
-                first = line.find_first_not_of(" \t", last);
-                last =  line.find_first_of(" \t", first);
+                first = static_cast<int>(line.find_first_not_of(" \t", last));
+                last = static_cast<int>(line.find_first_of(" \t", first));
                 last = (last > 0)? last : lineSize;
 
                 auto it = std::find(

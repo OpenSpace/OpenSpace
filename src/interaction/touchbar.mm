@@ -72,9 +72,11 @@ NSArray* focusIdentifiers;
         return touchBar;
     }
 
-    - (NSTouchBarItem *)touchBar:(NSTouchBar *)
+    - (NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar
                         makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
     {
+        (void)touchBar;
+
         if ([identifier isEqualToString:pauseResultId]) {
             NSButton* button = [NSButton 
                 buttonWithTitle:NSLocalizedString(
@@ -161,7 +163,8 @@ NSArray* focusIdentifiers;
         );
     }
 
-    - (void)guiButtonAction:(id) {
+    - (void)guiButtonAction:(id)sender {
+        (void)sender;
         OsEng.scriptEngine().queueScript(
             "openspace.setPropertyValue('Global Properties.ImGUI.Main.Enabled', \
             not openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled'));",

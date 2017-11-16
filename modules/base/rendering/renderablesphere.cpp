@@ -259,7 +259,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     setPscUniforms(*_shader.get(), data.camera, data.position);
 
     if (_fadeOutThreshold > -1.0) {
-        float distCamera = glm::distance(
+        double distCamera = glm::distance(
             data.camera.positionVec3(),
             data.position.dvec3()
         );

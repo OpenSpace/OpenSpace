@@ -119,10 +119,10 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
         for (const std::string& key : keys) {
             std::string fullName = moduleDictionary.value<std::string>(key);
             std::replace(fullName.begin(), fullName.end(), '/', FileSys.PathSeparator);
-            std::string path = FileSys.pathByAppendingComponent(modulesPath, fullName);
+            std::string p = FileSys.pathByAppendingComponent(modulesPath, fullName);
 
             std::pair<std::vector<SceneLoader::LoadedNode>, std::vector<SceneLicense>>
-            nodes = loadDirectory(path, state);
+            nodes = loadDirectory(p, state);
 
             std::move(
                 nodes.first.begin(),

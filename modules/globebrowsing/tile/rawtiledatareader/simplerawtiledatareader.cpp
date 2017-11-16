@@ -115,14 +115,16 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                 y * _initData.bytesPerLine() +
                 x * _initData.bytesPerPixel();
 
-            int xInSource =
+            int xInSource = static_cast<int>(
                 io.read.region.start.x +
                 static_cast<float>(x) / io.write.region.numPixels.x *
-                io.read.region.numPixels.x;
-            int yInSource =
+                io.read.region.numPixels.x
+            );
+            int yInSource = static_cast<int>(
                 io.read.region.start.y +
                 static_cast<float>(y) / io.write.region.numPixels.y *
-                io.read.region.numPixels.y;
+                io.read.region.numPixels.y
+            );
 
             glm::vec4 sourceTexel = _dataTexture->texelAsFloat(xInSource, yInSource);
 

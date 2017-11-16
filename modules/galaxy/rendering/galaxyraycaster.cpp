@@ -115,9 +115,7 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data,
     program.setUniform(galaxyTextureUniformName, *_textureUnit);
 }
 
-void GalaxyRaycaster::postRaycast(const RaycastData& data,
-                                  ghoul::opengl::ProgramObject& program)
-{
+void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
     _textureUnit = nullptr; // release texture unit.
 }
 

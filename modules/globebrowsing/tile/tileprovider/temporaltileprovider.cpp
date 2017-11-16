@@ -500,7 +500,7 @@ std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) c
     const double delta = endSeconds - startSeconds;
 
     ghoul_assert(int(delta) % int(_resolution) == 0, "Quantization error");
-    const int nSteps = delta / _resolution;
+    const int nSteps = static_cast<int>(delta / _resolution);
 
     std::vector<Time> result(nSteps + 1);
     for (int i = 0; i <= nSteps; ++i) {

@@ -43,6 +43,8 @@ public:
 
     TextureSliceVolumeReader(std::vector<std::string> paths, size_t sliceCacheMaxItems,
         size_t sliceCacheSize);
+    virtual ~TextureSliceVolumeReader() = default;
+
     VoxelType get(const glm::ivec3& coordinates) const;
     virtual glm::ivec3 dimensions() const;
     void setPaths(const std::vector<std::string> paths);

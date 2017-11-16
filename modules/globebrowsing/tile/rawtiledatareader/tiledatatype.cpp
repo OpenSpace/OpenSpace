@@ -141,6 +141,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 2:
@@ -169,6 +170,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                     break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 3:
@@ -198,6 +200,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 4:
@@ -227,11 +230,12 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         default:
             LERROR("Unknown number of channels for OpenGL texture: " << rasterCount);
-            break;
+            throw ghoul::MissingCaseException();
     }
     return format;
 }
@@ -267,6 +271,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 2:
@@ -295,6 +300,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                     break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 3:
@@ -324,6 +330,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 4:
@@ -353,6 +360,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         default:
@@ -380,7 +388,7 @@ GLenum getOpenGLDataType(GDALDataType gdalType) {
             return GL_DOUBLE;
         default:
             LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-            return GL_UNSIGNED_BYTE;
+            throw ghoul::MissingCaseException();
     }
 }
 
@@ -402,7 +410,7 @@ GDALDataType getGdalDataType(GLenum glType) {
             return GDT_Float64;
         default:
             LERROR("OpenGL data type unknown to GDAL: " << glType);
-            return GDT_Unknown;
+            throw ghoul::MissingCaseException();
     }
 }
 

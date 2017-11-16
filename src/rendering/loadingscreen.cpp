@@ -489,11 +489,11 @@ void LoadingScreen::render() {
                 for ( /* i */; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
-                        res.x - b.boundingBox.x - 15
+                        static_cast<int>(res.x - b.boundingBox.x - 15)
                     );
                     std::uniform_int_distribution<int> distY(
                         15,
-                        res.y - b.boundingBox.y - 15
+                        static_cast<int>(res.y - b.boundingBox.y - 15)
                     );
 
                     ll = { distX(_randomEngine), distY(_randomEngine) };
