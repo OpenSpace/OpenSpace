@@ -28,10 +28,6 @@
 #include <memory>
 #include <numeric>
 
-namespace {
-    const char* _loggerCat = "AssetSynchronizer";
-}
-
 namespace openspace {
 AssetSynchronizer::AssetSynchronizer() {}
 
@@ -107,50 +103,6 @@ float AssetSynchronizer::assetProgress(Asset* asset) {
 
 
 std::vector<AssetSynchronizer::StateChange> AssetSynchronizer::getStateChanges() {
-    /*
-    std::vector<std::shared_ptr<ResourceSynchronization>> finishedResourceSyncs;
-    
-    for (auto a : _managedAssets) {
-        std::vector<std::shared_ptr<ResourceSynchronization>> syncs = a.first->synchronizations();
-        for (auto s : syncs) {
-            if (s->isResolved() || s->isRejected()) {
-                finishedResourceSyncs.push_back(s);
-            }
-        }
-    }
-
-    std::vector<Asset*> affectedAssets;
-    for (const auto& sync : finishedResourceSyncs) {
-        const auto& it = _resourceToAssetMap.find(sync.get());
-        if (it != _resourceToAssetMap.end()) {
-            affectedAssets.push_back(it->second);
-        }
-    }
-
-    std::vector<std::shared_ptr<Asset>> synchronizedAssets;
-    for (auto a : affectedAssets) {
-        std::vector<std::shared_ptr<ResourceSynchronization>> syncs = a->synchronizations();
-        if (assetIsSynchronized(a)) {
-            _managedAssets[a].state = SynchronizationState::Synchronized;
-        }
-        const auto it = _managedAssets.find(a);
-        if (it != _managedAssets.end()) {
-            synchronizedAssets.push_back(it->second.asset);
-        }
-    }
-
-    for (auto& finished : _trivialSynchronizations) {
-        auto it = _managedAssets.find(finished);
-        if (it != _managedAssets.end()) {
-            std::shared_ptr<Asset> asset = it->second.asset;
-            _managedAssets[asset.get()].state = SynchronizationState::Synchronized;
-            synchronizedAssets.push_back(asset);
-        }
-    }
-    _trivialSynchronizations.clear();
-
-    return synchronizedAssets;
-    */
     std::vector<StateChange> stateChangesVector;
     for (auto& s : _stateChanges) {
         stateChangesVector.push_back(std::move(s.second));
@@ -164,25 +116,44 @@ AssetSynchronizer::SynchronizationState AssetSynchronizer::assetState(Asset*) {
 }
     
 void AssetSynchronizer::startAssetResourceSync(
-    std::shared_ptr<Asset> a,
-    std::shared_ptr<ResourceSynchronization> rs)
+    std::shared_ptr<Asset> asset,
+    std::shared_ptr<ResourceSynchronization> sync)
 {
-    // Todo: implement this
+    _stateChanges[asset.get()] = StateChange{asset, SynchronizationState::Synchronizing};
+    _resourceToAssetMap[sync.get()].insert(asset.get());
+    
+    ResourceSynchronization::CallbackHandle h =
+        sync->addStateChangeCallback([this, asset, sync](ResourceSynchronization::State state) {
+            handleSyncStateChange(asset, sync, state);
+        });
 }
 
 void AssetSynchronizer::cancelAssetResourceSync(
-    std::shared_ptr<Asset> a,
-    std::shared_ptr<ResourceSynchronization> rs)
+    std::shared_ptr<Asset> asset,
+    std::shared_ptr<ResourceSynchronization> sync)
 {
     // Todo: implement this
 }
 
     
 void AssetSynchronizer::setState(
-    std::shared_ptr<Asset> a,
+    std::shared_ptr<Asset> asset,
     AssetSynchronizer::SynchronizationState state)
 {
-    // Todo: implement this
+    _stateChanges[asset.get()] = StateChange{asset, state};
+}
+    
+void AssetSynchronizer::handleSyncStateChange(
+    std::shared_ptr<Asset> asset,
+    std::shared_ptr<ResourceSynchronization> sync,
+    ResourceSynchronization::State state)
+{
+    if (state == ResourceSynchronization::State::Resolved) {
+        _resourceToAssetMap[sync.get()].erase(asset.get());
+        if (_resourceToAssetMap[sync.get()].empty()) {
+//            _stateChanges[asset.get()] =
+        }
+    }
 }
 
 /*

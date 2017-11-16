@@ -39,6 +39,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace openspace {
 
@@ -74,11 +75,14 @@ public:
 private:
     void startAssetResourceSync(std::shared_ptr<Asset> a, std::shared_ptr<ResourceSynchronization> rs);
     void cancelAssetResourceSync(std::shared_ptr<Asset> a, std::shared_ptr<ResourceSynchronization> rs);
+    
+    void handleSyncStateChange(std::shared_ptr<Asset>, std::shared_ptr<ResourceSynchronization>, ResourceSynchronization::State state);
+    
     void setState(std::shared_ptr<Asset> a, SynchronizationState state);
 
     std::vector<std::shared_ptr<Asset>> _synchronizingAssets;
     std::unordered_map<Asset*, StateChange> _stateChanges;
-    std::unordered_map<ResourceSynchronization*, std::vector<Asset*>> _resourceToAssetMap;
+    std::unordered_map<ResourceSynchronization*, std::unordered_set<Asset*>> _resourceToAssetMap;
 };
 
 } // namespace openspace
