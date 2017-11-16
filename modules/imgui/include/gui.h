@@ -85,6 +85,8 @@ public:
 
     bool _showInternals;
 
+    properties::BoolProperty _showHelpText;
+
 private:
     void renderAndUpdatePropertyVisibility();
 

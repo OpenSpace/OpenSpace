@@ -166,6 +166,10 @@ void GuiPropertyComponent::setHasRegularProperties(bool hasOnlyRegularProperties
     _hasOnlyRegularProperties = hasOnlyRegularProperties;
 }
 
+void GuiPropertyComponent::setShowHelpTooltip(bool showHelpTooltip) {
+    _showHelpTooltip = showHelpTooltip;
+}
+
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
     if (owner->propertiesRecursive().empty()) {
         return;
@@ -373,7 +377,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
                                           properties::PropertyOwner* owner)
 {
     using Func = std::function<
-        void(properties::Property*, const std::string&, IsRegularProperty)
+        void(properties::Property*, const std::string&, IsRegularProperty, ShowToolTip)
     >;
     static const std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
@@ -406,14 +410,16 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
                 it->second(
                     prop,
                     owner->name(),
-                    IsRegularProperty(_hasOnlyRegularProperties)
+                    IsRegularProperty(_hasOnlyRegularProperties),
+                    ShowToolTip(_showHelpTooltip)
                 );
             }
             else {
                 it->second(
                     prop,
                     "",
-                    IsRegularProperty(_hasOnlyRegularProperties)
+                    IsRegularProperty(_hasOnlyRegularProperties),
+                    ShowToolTip(_showHelpTooltip)
                 );
             }
         }

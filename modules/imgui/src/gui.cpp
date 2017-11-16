@@ -245,6 +245,13 @@ void addScreenSpaceRenderableOnline(std::string texturePath) {
     );
 }
 
+static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
+    "ShowHelpText",
+    "Show tooltip help",
+    "If this value is enabled these kinds of tooltips are shown for most properties "
+    "explaining what impact they have on the visuals."
+};
+
 } // namespace
 
 namespace openspace::gui {
@@ -268,6 +275,7 @@ GUI::GUI()
         GuiPropertyComponent::UseTreeLayout::No,
         GuiPropertyComponent::IsTopLevelWindow::Yes)
     , _showInternals(false)
+    , _showHelpText(ShowHelpInfo, true)
     , _currentVisibility(properties::Property::Visibility::Developer)
 {
     addPropertySubOwner(_help);
@@ -285,6 +293,14 @@ GUI::GUI()
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     addPropertySubOwner(_iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+
+    addProperty(_showHelpText);
+    _showHelpText.onChange([this](){
+        _globalProperty.setShowHelpTooltip(_showHelpText);
+        _property.setShowHelpTooltip(_showHelpText);
+        _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
+        _virtualProperty.setShowHelpTooltip(_showHelpText);
+    });
 }
 
 void GUI::initialize() {

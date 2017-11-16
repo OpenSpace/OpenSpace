@@ -36,60 +36,78 @@ namespace openspace::properties {
 namespace openspace {
 
 using IsRegularProperty = ghoul::Boolean;
+using ShowToolTip = ghoul::Boolean;
 
 void executeScript(const std::string& id, const std::string& value,
     IsRegularProperty isRegular = IsRegularProperty::Yes);
 
 void renderBoolProperty(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderOptionProperty(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderSelectionProperty(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderStringProperty(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderIntProperty(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderIVec2Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderIVec3Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderIVec4Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderFloatProperty(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderVec2Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderVec3Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderVec4Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderDVec2Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderDVec3Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderDVec4Property(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 void renderTriggerProperty(properties::Property* prop, const std::string& ownerName,
-    IsRegularProperty isRegular = IsRegularProperty::Yes);
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
 
 } // namespace openspace
 
