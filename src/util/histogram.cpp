@@ -223,7 +223,7 @@ float Histogram::interpolate(float bin) const {
 }
 
 float Histogram::sample(int binIndex) const {
-    assert(binIndex >= 0 && binIndex < _numBins);
+    ghoul_assert(binIndex >= 0 && binIndex < _numBins, "@MISSING");
     return _data[binIndex];
 }
 
