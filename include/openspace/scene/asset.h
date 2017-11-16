@@ -44,9 +44,15 @@ class Asset : public std::enable_shared_from_this<Asset> {
 public:
     using Optional = std::pair<std::shared_ptr<Asset>, bool>;
 
-    enum class ReadyState : unsigned int {
+    enum class State : unsigned int {
+        Unloaded,
+        LoadingFailed,
         Loaded,
-        Initialized
+        Synchronizing,
+        SyncResolved,
+        SyncRejected,
+        Initialized,
+        InitializationFailed
     };
 
     /**
@@ -65,11 +71,17 @@ public:
     std::string assetDirectory() const;
     std::string assetName() const;
     AssetLoader* loader() const;
-    ReadyState readyState() const;
+    State state() const;
 
+    void setState(State state);
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     std::vector<std::shared_ptr<ResourceSynchronization>> synchronizations();
     std::vector<std::shared_ptr<Asset>> allAssets();
+
+    bool startSynchronizations();
+    bool cancelSynchronizations();
+    bool restartSynchronizations();
+    float synchronizationProgress();
 
     bool isInitReady() const;
     void initialize();
@@ -86,7 +98,10 @@ public:
 
     std::string resolveLocalResource(std::string resourceName);
 private:
-    ReadyState _readyState;
+    void startSync(ResourceSynchronization& rs);
+    void cancelSync(ResourceSynchronization& rs);
+
+    State _state;
     AssetLoader* _loader;
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
 

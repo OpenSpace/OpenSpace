@@ -28,7 +28,6 @@
 #include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scene/assetsynchronizer.h>
 #include <openspace/util/resourcesynchronization.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -170,7 +169,6 @@ private:
     std::map<std::string, std::shared_ptr<Asset>> _importedAssets;
     std::vector<std::shared_ptr<Asset>> _assetStack;
 
-    AssetSynchronizer* _assetSynchronizer;
     std::string _assetRootDirectory;
     ghoul::lua::LuaState* _luaState;
 

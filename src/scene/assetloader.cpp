@@ -101,6 +101,7 @@ std::shared_ptr<Asset> AssetLoader::importAsset(std::string path) {
 
     ghoul::lua::runScriptFile(*_luaState, path);
     _importedAssets.emplace(asset->id(), asset);
+    asset->setState(Asset::State::Loaded);
 
     return asset;
 }

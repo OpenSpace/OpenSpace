@@ -412,8 +412,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Set up asset loader
     _engine->_assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}"),
-        std::make_unique<AssetSynchronizer>()
+        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}")
     );
     //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
@@ -601,7 +600,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     _renderEngine->setScene(_scene.get());
     _assetManager->clearAllTargetAssets();
-    _assetManager->setTargetAssetState(assetPath, AssetManager::AssetState::Initialized);
+    _assetManager->setTargetAssetState(assetPath, Asset::State::Initialized);
 
     bool showMessage = true;
     std::string kMessage =

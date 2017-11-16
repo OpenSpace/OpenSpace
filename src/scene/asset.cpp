@@ -36,7 +36,7 @@ namespace {
 namespace openspace {
 
 Asset::Asset(AssetLoader* loader)
-    : _readyState(Asset::ReadyState::Loaded)
+    : _state(State::Unloaded)
     , _loader(loader)
     , _hasAssetPath(false)
     , _assetName("Root Asset")
@@ -44,7 +44,7 @@ Asset::Asset(AssetLoader* loader)
 {}
 
 Asset::Asset(AssetLoader* loader, ghoul::filesystem::File assetPath)
-    : _readyState(Asset::ReadyState::Loaded)
+    : _state(State::Unloaded)
     , _loader(loader)
     , _hasAssetPath(true)
     , _assetPath(assetPath)
@@ -57,8 +57,18 @@ std::string Asset::resolveLocalResource(std::string resourceName) {
         resourceName;
 }
 
-Asset::ReadyState Asset::readyState() const {
-    return _readyState;
+void Asset::startSync(ResourceSynchronization & rs) {
+}
+
+void Asset::cancelSync(ResourceSynchronization & rs) {
+}
+
+Asset::State Asset::state() const {
+    return _state;
+}
+
+void Asset::setState(Asset::State state) {
+    _state = state;
 }
 
 void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization) {
@@ -80,6 +90,76 @@ std::vector<std::shared_ptr<Asset>> Asset::allAssets() {
     return assetVector;
 }
 
+bool Asset::startSynchronizations() {
+    bool startedAnySync = false;
+    for (auto& dep : _dependencies) {
+        bool started = dep->startSynchronizations();
+        if (started) {
+            startedAnySync = true;
+        }
+    }
+    for (const auto& s : _synchronizations) {
+        if (!s->isResolved()) {
+            startedAnySync = true;
+            startSync(*s);
+        }
+    }
+    if (!startedAnySync) {
+        setState(State::SyncResolved);
+    }
+    return startedAnySync;
+}
+
+bool Asset::cancelSynchronizations() {
+    bool cancelledAnySync = false;
+    for (auto& dep : _dependencies) {
+        bool cancelled = dep->cancelSynchronizations();
+        if (cancelled) {
+            cancelledAnySync = true;
+        }
+    }
+    for (const auto& s : _synchronizations) {
+        if (s->isSyncing()) {
+            cancelledAnySync = true;
+            cancelSync(*s);
+        }
+    }
+    if (cancelledAnySync) {
+        setState(State::Loaded);
+    }
+    return cancelledAnySync;
+}
+
+bool Asset::restartSynchronizations() {
+    cancelSynchronizations();
+    return startSynchronizations();
+}
+
+float Asset::synchronizationProgress() {
+    std::vector<std::shared_ptr<Asset>> assets = allAssets();
+
+    size_t nTotalBytes = 0;
+    size_t nSyncedBytes = 0;
+
+    for (const auto& a : assets) {
+        const std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
+            a->synchronizations();
+
+        for (const auto& sync : syncs) {
+            if (sync->nTotalBytesIsKnown()) {
+                nTotalBytes += sync->nTotalBytes();
+                nSyncedBytes += sync->nSynchronizedBytes();
+            } else {
+                return 0;
+            }
+        }
+    }
+    if (nTotalBytes == 0) {
+        return 1.f;
+    }
+    return static_cast<float>(nSyncedBytes) / static_cast<float>(nTotalBytes);
+}
+
 bool Asset::isInitReady() const {
     // An asset is ready for initialization if all synchronizations are resolved
     // and all its dependencies are ready for initialization.
@@ -98,7 +178,7 @@ bool Asset::isInitReady() const {
 
 void Asset::initialize() {
     LDEBUG("Initializing asset " << id());
-    if (_readyState == Asset::ReadyState::Initialized) {
+    if (state() == Asset::State::Initialized) {
         return;
     }
 
@@ -112,7 +192,7 @@ void Asset::initialize() {
         dependency->initialize();
     }
 
-    _readyState = Asset::ReadyState::Initialized;
+    setState(Asset::State::Initialized);
 
     // Call onInitialize in Lua
     loader()->callOnInitialize(this);
@@ -124,7 +204,7 @@ void Asset::initialize() {
 }
 
 void Asset::deinitialize() {
-    if (_readyState != Asset::ReadyState::Initialized) {
+    if (state() != Asset::State::Initialized) {
         return;
     }
 
@@ -136,7 +216,7 @@ void Asset::deinitialize() {
     // Call onDeinitialize in Lua
     loader()->callOnDeinitialize(this);
 
-    _readyState = Asset::ReadyState::Loaded;
+    setState(Asset::State::Loaded);
 
     // Make sure no dependencies are left dangling
     for (auto& dependency : _dependencies) {
@@ -183,8 +263,8 @@ bool Asset::hasDependency(const Asset* asset) const {
 }
 
 void Asset::addDependency(std::shared_ptr<Asset> dependency) {
-    if (_readyState == Asset::ReadyState::Initialized) {
-        // TODO: Throw: cannot add dep while asset is initialized.
+    if (state() == Asset::State::Unloaded) {
+        // TODO: Throw: Can only add dependency when in Loaded state
         return;
     }
 
@@ -258,7 +338,7 @@ bool Asset::hasDependants() const {
 bool Asset::hasInitializedDependants() const {
     for (const auto& dependant : _dependants) {
         std::shared_ptr<Asset> d = dependant.lock();
-        if (d && d->readyState() == Asset::ReadyState::Initialized &&
+        if (d && d->state() == Asset::State::Initialized &&
             d->hasDependency(this))
         {
             return true;

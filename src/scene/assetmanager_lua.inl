@@ -33,7 +33,7 @@ int loadAsset(lua_State* state) {
 
     std::string assetName = luaL_checkstring(state, -1);
 
-    assetManager->setTargetAssetState(assetName, AssetManager::AssetState::Loaded);
+    assetManager->setTargetAssetState(assetName, Asset::State::Loaded);
     return 0;
 }
 
@@ -46,7 +46,7 @@ int synchronizeAsset(lua_State* state) {
 
     std::string assetName = luaL_checkstring(state, -1);
 
-    assetManager->setTargetAssetState(assetName, AssetManager::AssetState::Synchronized);
+    assetManager->setTargetAssetState(assetName, Asset::State::SyncResolved);
     return 0;
 }
 
@@ -60,7 +60,7 @@ int initializeAsset(lua_State* state) {
 
     std::string assetName = luaL_checkstring(state, -1);
 
-    assetManager->setTargetAssetState(assetName, AssetManager::AssetState::Initialized);
+    assetManager->setTargetAssetState(assetName, Asset::State::Initialized);
     return 0;
 }
 
@@ -73,7 +73,7 @@ int unloadAsset(lua_State* state) {
 
     std::string assetName = luaL_checkstring(state, -1);
 
-    assetManager->setTargetAssetState(assetName, AssetManager::AssetState::Unloaded);
+    assetManager->setTargetAssetState(assetName, Asset::State::Unloaded);
     return 0;
 }
 

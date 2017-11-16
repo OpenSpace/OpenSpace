@@ -54,32 +54,20 @@ class Asset;
 class AssetManager {
 public:
     AssetManager(
-        std::unique_ptr<AssetLoader> loader,
-        std::unique_ptr<AssetSynchronizer> synchronizer
+        std::unique_ptr<AssetLoader> loader
     );
-
-    enum class AssetState : int {
-        Unloaded,
-        Loaded,
-        LoadingFailed,
-        Synchronized,
-        SynchronizationFailed,
-        Initialized,
-        InitializationFailed
-    };
 
     struct ManagedAsset {
         std::string path;
         std::shared_ptr<Asset> asset;
-        AssetState state;
     };
 
     bool update();
 
-    void setTargetAssetState(const std::string& path, AssetState targetState);
-    void setTargetAssetState(Asset* asset, AssetState targetState);
-    AssetState currentAssetState(Asset* asset);
-    AssetState currentAssetState(const std::string& path);
+    void setTargetAssetState(const std::string& path, Asset::State targetState);
+    void setTargetAssetState(Asset* asset, Asset::State targetState);
+    Asset::State currentAssetState(Asset* asset);
+    Asset::State currentAssetState(const std::string& path);
 
     void clearAllTargetAssets();
     std::vector<std::shared_ptr<Asset>> loadedAssets();
@@ -96,7 +84,7 @@ private:
     std::vector<ManagedAsset> _managedAssets;
     
 
-    std::unordered_map<std::string, AssetState> _pendingStateChangeCommands;
+    std::unordered_map<std::string, Asset::State> _pendingStateChangeCommands;
     //std::unordered_map<Asset*, AssetState> _stateChangesInProgress;
     std::unordered_set<Asset*> _pendingInitializations;
 
@@ -104,7 +92,6 @@ private:
     std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncDependencies;
     
     std::unique_ptr<AssetLoader> _assetLoader;
-    std::unique_ptr<AssetSynchronizer> _assetSynchronizer;
 };
 
 } // namespace openspace
