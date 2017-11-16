@@ -41,26 +41,34 @@ AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader)
     : _assetLoader(std::move(loader))
 {}
 
+void AssetManager::initialize() {
+    _assetLoader->rootAsset()->initialize();
+}
+
+void AssetManager::deinitialize() {
+    _assetLoader->rootAsset()->deinitialize();
+}
+
 bool AssetManager::update() {
     // 1. Load assets.
     // 2. Start/cancel synchronizations
     // 3. Unload assets.
 
-    // Load assets
+    // Add assets
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
-        const Asset::State targetState = c.second;
-        if (targetState != Asset::State::Unloaded && !_assetLoader->loadedAsset(path)) {
-            std::shared_ptr<Asset> asset = tryLoadAsset(path);
+        const bool add = c.second;
+        if (add && !_assetLoader->has(path)) {
+            std::shared_ptr<Asset> asset = tryAddAsset(path);
         }
     }
 
     // Start/cancel synchronizations and/or deinitialize
-    for (const auto& c : _pendingStateChangeCommands) {
+    /*for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const Asset::State targetState = c.second;
         
-        std::shared_ptr<Asset> asset = _assetLoader->loadedAsset(path);
+        std::shared_ptr<Asset> asset = _assetLoader->has(path);
         if (!asset) {
             continue;
         }
@@ -90,7 +98,17 @@ bool AssetManager::update() {
             _pendingInitializations.erase(asset.get());
             tryDeinitializeAsset(*asset);
         }
+    }*/
+
+    // Remove assets
+    for (const auto& c : _pendingStateChangeCommands) {
+        const std::string& path = c.first;
+        const bool remove = c.second;
+        if (remove && _assetLoader->has(path)) {
+            tryRemoveAsset(path);
+        }
     }
+
     
     // TODO: Handle state changes
     /*std::vector<AssetSynchronizer::StateChange> stateChanges =
@@ -221,89 +239,76 @@ void AssetManager::handleSyncStateChange(AssetSynchronizer::StateChange stateCha
     _syncAncestors.erase(stateChange.asset.get());
 }*/
 
-void AssetManager::setTargetAssetState(const std::string& path, Asset::State targetState) {
-    _pendingStateChangeCommands[path] = targetState;
+void AssetManager::add(const std::string& path) {
+    _pendingStateChangeCommands[path] = true;
 }
 
-Asset::State AssetManager::currentAssetState(Asset* asset) {
-    const auto it = std::find_if(
-        _managedAssets.begin(),
-        _managedAssets.end(),
-        [&asset](const ManagedAsset& ma){
-            return ma.asset.get() == asset;
-        }
-    );
-    if (it == _managedAssets.end()) {
-        return Asset::State::Unloaded;
-    }
-    return it->asset->state();
+void AssetManager::remove(const std::string& path) {
+    _pendingStateChangeCommands[path] = false;
 }
 
-Asset::State AssetManager::currentAssetState(const std::string& assetIdentifier) {
-    const auto it = std::find_if(
-        _managedAssets.begin(),
-        _managedAssets.end(),
-        [&assetIdentifier](const ManagedAsset& ma) {
-        return ma.path == assetIdentifier;
-    }
-    );
-    if (it == _managedAssets.end()) {
-        return Asset::State::Unloaded;
-    }
-    return it->asset->state();
-}
-
-
-void AssetManager::clearAllTargetAssets() {
+void AssetManager::removeAll() {
     _pendingStateChangeCommands.clear();
-    for (const auto& ma : _managedAssets) {
-        _pendingStateChangeCommands[ma.path] = Asset::State::Unloaded;
+    std::vector<std::shared_ptr<Asset>> allAssets =
+        _assetLoader->rootAsset()->requestedAssets();
+
+    for (const auto& a : allAssets) {
+        _pendingStateChangeCommands[a->assetFilePath()] = false;
     }
 }
 
-std::vector<std::shared_ptr<Asset>> AssetManager::loadedAssets() {
-    std::vector<std::shared_ptr<Asset>> assets;
-    assets.reserve(_managedAssets.size());
-    for (auto ma : _managedAssets) {
-        if (ma.asset != nullptr) {
-            assets.push_back(ma.asset);
-        }
-    }
-    return assets;
+std::shared_ptr<Asset> AssetManager::rootAsset() {
+    return _assetLoader->rootAsset();
 }
 
 scripting::LuaLibrary AssetManager::luaLibrary() {
     return {
-        "",
+        "asset",
         {
+            // Functions for adding/removing assets
             {
-                "loadAsset",
-                &luascriptfunctions::loadAsset,
+                "add",
+                &luascriptfunctions::asset::add,
                 {this},
                 "string",
                 ""
             },
             {
-                "synchronizeAsset",
-                &luascriptfunctions::synchronizeAsset,
+                "remove",
+                &luascriptfunctions::asset::remove,
+                {this},
+                "string",
+                ""
+            },
+            // Functions for managing assets
+            {
+                "reload",
+                &luascriptfunctions::asset::reload,
                 {this},
                 "string",
                 ""
             },
             {
-                "initializeAsset",
-                &luascriptfunctions::initializeAsset,
-                { this },
+                "synchronize",
+                &luascriptfunctions::asset::synchronize,
+                {this},
                 "string",
                 ""
             },
             {
-                "unloadAsset",
-                &luascriptfunctions::unloadAsset,
-                { this },
+                "resynchronize",
+                &luascriptfunctions::asset::resynchronize,
+                {this},
                 "string",
                 ""
-            }
+            },
+            {
+                "cancelSynchronization",
+                &luascriptfunctions::asset::cancelSynchronization,
+                {this},
+                "string",
+                ""
+            },
         }
     };
 }
@@ -316,40 +321,14 @@ void AssetManager::unloadAsset(Asset* asset) {
 
 }
     
-std::shared_ptr<Asset> AssetManager::tryLoadAsset(const std::string& path) {
-    /*
-    std::shared_ptr<Asset> asset;
-    try {
-        asset = _assetLoader->loadAsset(path);
-    } catch (const ghoul::RuntimeError& e) {
-        LERROR(e.component << ": " << e.message);
-    }
-    if (asset == nullptr) {
-        LERROR("Could not load asset from " << path);
-        _managedAssets.push_back(ManagedAsset{
-            path,
-            nullptr,
-            Asset::State::LoadingFailed
-        });
-        return nullptr;
-    }
-    const auto it = std::find_if(
-        _managedAssets.begin(),
-        _managedAssets.end(),
-        [&asset](const ManagedAsset& ma){
-            return ma.asset == asset;
-        }
-    );
-    if (it == _managedAssets.end()) {
-        _managedAssets.push_back(ManagedAsset{
-            path,
-            asset,
-            AssetState::Loaded
-        });
-        return asset;
-    } */
+std::shared_ptr<Asset> AssetManager::tryAddAsset(const std::string& path) {
+    _assetLoader->add(path);
     return nullptr;
-   
+}
+
+bool AssetManager::tryRemoveAsset(const std::string& path) {
+    _assetLoader->remove(path);
+    return false;
 }
 
 bool AssetManager::tryInitializeAsset(Asset& asset) {

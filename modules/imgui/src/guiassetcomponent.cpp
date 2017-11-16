@@ -45,20 +45,14 @@ void GuiAssetComponent::render() {
 
     AssetManager& assetManager = OsEng.assetManager();
 
-    std::unordered_set<std::shared_ptr<Asset>> allAssets;
-    std::vector<std::shared_ptr<Asset>> loadedAssets = assetManager.loadedAssets();
-    
-    for (const std::shared_ptr<Asset>& ancestor : loadedAssets) {
-        const std::vector<std::shared_ptr<Asset>> all = ancestor->allAssets();
-        std::copy(all.begin(), all.end(), std::inserter(allAssets, allAssets.end()));
-    }
-    
+
+    std::vector<std::shared_ptr<Asset>> allAssets =
+        assetManager.rootAsset()->subTreeAssets();
+
     for (const auto& a : allAssets) {
         ImGui::Text("%s", a->assetFilePath().c_str());
         ImGui::NextColumn();
         
-        assetManager.currentAssetState(a.get());
-
         ImGui::NextColumn();
         ImGui::Separator();
 /*

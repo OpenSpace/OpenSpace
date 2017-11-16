@@ -87,7 +87,7 @@ AssetLoader::AssetLoader(
 AssetLoader::~AssetLoader() {
 }
 
-std::shared_ptr<Asset> AssetLoader::importAsset(std::string path) {
+std::shared_ptr<Asset> AssetLoader::loadAsset(std::string path) {
     std::shared_ptr<Asset> asset = std::make_shared<Asset>(this, path);
 
     pushAsset(asset);
@@ -100,7 +100,7 @@ std::shared_ptr<Asset> AssetLoader::importAsset(std::string path) {
     }
 
     ghoul::lua::runScriptFile(*_luaState, path);
-    _importedAssets.emplace(asset->id(), asset);
+    _loadedAssets.emplace(asset->id(), asset);
     asset->setState(Asset::State::Loaded);
 
     return asset;
@@ -125,10 +125,10 @@ std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
     std::string path = generateAssetPath(directory, name);
 
     // Check if asset is already loaded.
-    const auto it = _importedAssets.find(path);
+    const auto it = _loadedAssets.find(path);
 
-    return it == _importedAssets.end() ?
-        importAsset(path) :
+    return it == _loadedAssets.end() ?
+        loadAsset(path) :
         it->second;
 }
 
@@ -164,11 +164,23 @@ int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency
     return 0;
 }
 
-std::shared_ptr<Asset> AssetLoader::importDependency(const std::string& name) {
+std::shared_ptr<Asset> AssetLoader::require(const std::string& name) {
     std::shared_ptr<Asset> asset = getAsset(name);
     std::shared_ptr<Asset> dependant = _assetStack.back();
-    dependant->addDependency(asset);
+    dependant->require(asset);
     return asset;
+}
+
+std::shared_ptr<Asset> AssetLoader::request(const std::string& name) {
+    try {
+        std::shared_ptr<Asset> asset = getAsset(name);
+        std::shared_ptr<Asset> parent = _assetStack.back();
+        parent->request(asset);
+        return asset;
+    } catch (const ghoul::RuntimeError& e) {
+        LERROR("Failed to load " << name << e.component << " :" << e.message);
+    }
+    return nullptr;
 }
 
 ghoul::filesystem::Directory AssetLoader::currentDirectory() {
@@ -179,42 +191,30 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() {
     }
 }
 
-std::shared_ptr<Asset> AssetLoader::loadAsset(const std::string & identifier) {
+std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
     ghoul_assert(_assetStack.size() == 1, "Can only load an asset from the root asset");
-    return importDependency(identifier);
+    return request(identifier);
 }
 
 
-void AssetLoader::unloadAsset(const std::string & identifier) {
+void AssetLoader::remove(const std::string & identifier) {
     ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");   
     // TODO: Implement this
     //_rootAsset->removeDependency(id);
 }
 
-void AssetLoader::unloadAsset(const Asset* asset) {
+void AssetLoader::remove(const Asset* asset) {
     ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");
     // TODO: Implement this
     //_rootAsset->removeDependency(id);
 }
 
-bool AssetLoader::hasLoadedAsset(const std::string & identifier) {
-    const auto it = _importedAssets.find(identifier);
-    if (it == _importedAssets.end()) {
+std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) {
+    const auto it = _loadedAssets.find(identifier);
+    if (it == _loadedAssets.end()) {
         return false;
     }
-    return _rootAsset->hasDependency(it->second.get());
-}
-
-std::shared_ptr<Asset> AssetLoader::loadedAsset(const std::string & identifier) {
-    const auto it = _importedAssets.find(identifier);
-    if (it == _importedAssets.end()) {
-        return nullptr;
-    }
     return it->second;
-}
-
-std::vector<std::shared_ptr<Asset>> AssetLoader::loadedAssets() {
-    return _rootAsset->dependencies();
 }
 
 ghoul::lua::LuaState* AssetLoader::luaState() {
@@ -253,7 +253,7 @@ void AssetLoader::callOnDeinitialize(Asset * asset) {
     }
 }
 
-void AssetLoader::callOnDependantInitialize(Asset* asset, Asset* dependant) {
+void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
     for (int init : _onDependencyInitializationFunctionRefs[dependant][asset]) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
@@ -265,7 +265,7 @@ void AssetLoader::callOnDependantInitialize(Asset* asset, Asset* dependant) {
     }
 }
 
-void AssetLoader::callOnDependantDeinitialize(Asset* asset, Asset* dependant) {
+void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
     std::vector<int>& funs = _onDependencyDeinitializationFunctionRefs[dependant][asset];
     for (auto it = funs.rbegin(); it != funs.rend(); it++) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
@@ -432,7 +432,7 @@ int AssetLoader::importDependencyLua(Asset* dependant) {
 
     std::string assetName = luaL_checkstring(*_luaState, 1);
 
-    std::shared_ptr<Asset> dependency = importDependency(assetName);
+    std::shared_ptr<Asset> dependency = require(assetName);
 
     if (!dependency) {
         return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());

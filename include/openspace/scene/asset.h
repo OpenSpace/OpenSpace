@@ -33,7 +33,7 @@
 #include <vector>
 
 #include <memory>
-#include <set>
+#include <unordered_set>
 #include <iterator>
 
 namespace openspace {
@@ -76,28 +76,40 @@ public:
     void setState(State state);
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     std::vector<std::shared_ptr<ResourceSynchronization>> synchronizations();
-    std::vector<std::shared_ptr<Asset>> allAssets();
 
+
+    // Sync
     bool startSynchronizations();
     bool cancelSynchronizations();
     bool restartSynchronizations();
     float synchronizationProgress();
 
+    // Init
     bool isInitReady() const;
     void initialize();
     void deinitialize();
 
-    bool hasDependency(const Asset* asset) const;
-    void addDependency(std::shared_ptr<Asset> asset);
-    void removeDependency(Asset* asset);
-    void removeDependency(const std::string& assetId);
-    std::vector<std::shared_ptr<Asset>> dependencies();
+    // Dependency graph
+    bool requires(const Asset* asset) const;
+    void require(std::shared_ptr<Asset> asset);
 
-    bool hasDependants() const;
-    bool hasInitializedDependants() const;
+    bool requests(const Asset* child) const;
+    void request(std::shared_ptr<Asset> child);
+    void unrequest(std::shared_ptr<Asset> child);
+
+    std::vector<std::shared_ptr<Asset>> requiredSubTreeAssets();
+    std::vector<std::shared_ptr<Asset>> subTreeAssets();
+    std::vector<std::shared_ptr<Asset>> requestedAssets();
+    std::vector<std::shared_ptr<Asset>> requiredAssets();
+    std::vector<std::shared_ptr<Asset>> childAssets();
+
+    bool isRequired() const;
+    bool isRequested() const;
 
     std::string resolveLocalResource(std::string resourceName);
 private:
+
+    void handleRequests();
     void startSync(ResourceSynchronization& rs);
     void cancelSync(ResourceSynchronization& rs);
 
@@ -112,11 +124,17 @@ private:
     // Absolute path to asset file
     std::string _assetPath;
 
-    // Dependencies
-    std::vector<std::shared_ptr<Asset>> _dependencies;
+    // Required assets
+    std::vector<std::shared_ptr<Asset>> _requiredAssets;
 
-    // Assets that refers to this asset as an dependency
-    std::vector<std::weak_ptr<Asset>> _dependants;
+    // Assets that refers to this asset as a required asset
+    std::vector<std::weak_ptr<Asset>> _requiringAssets;
+
+    // Requested assets
+    std::vector<std::shared_ptr<Asset>> _requestedAssets;
+
+    // Assets that refers to this asset as a requested asset
+    std::vector<std::weak_ptr<Asset>> _requestingAssets;
 };
 
 } // namespace openspace

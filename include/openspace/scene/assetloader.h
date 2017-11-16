@@ -71,43 +71,34 @@ public:
     ~AssetLoader();
 
     /**
-     * Load an asset:
-     * Add the asset as a dependency on the root asset
+     * Add the asset as a request for the root asset
      * The asset is loaded synchronously
      */
-    std::shared_ptr<Asset> loadAsset(const std::string& identifier);
+    std::shared_ptr<Asset> add(const std::string& identifier);
 
     /**
-     * Unload an asset:
      * Remove the asset as a dependency on the root asset
      * The asset is unloaded synchronously
      */
-    void unloadAsset(const std::string& identifier);
+    void remove(const std::string& identifier);
 
     /**
-    * Unload an asset:
     * Remove the asset as a dependency on the root asset
     * The asset is unloaded synchronously
     */
-    void unloadAsset(const Asset* asset);
+    void remove(const Asset* asset);
     
     /**
-     * Return true if the specified asset is loaded
-     */
-    bool hasLoadedAsset(const std::string& identifier);
-
-
-    /**
-     * Returns the asset identified by the identifier, 
-     * if the asset is loaded. Otherwise return nullptr.
-     */
-    std::shared_ptr<Asset> loadedAsset(const std::string& identifier);
+    * Returns the asset identified by the identifier,
+    * if the asset is loaded. Otherwise return nullptr.
+    */
+    std::shared_ptr<Asset> has(const std::string& identifier);
 
     /**
      * Return all assets loaded using the loadAsset method.
      * Non-recursive (does not include imports of the loaded assets)
      */
-    std::vector<std::shared_ptr<Asset>> loadedAssets();
+    //std::vector<std::shared_ptr<Asset>> loadedAssets();
 
     /**
      * Return the lua state
@@ -128,15 +119,18 @@ public:
 
     void callOnDeinitialize(Asset* asset);
 
-    void callOnDependantInitialize(Asset* asset, Asset* dependant);
+    void callOnDependencyInitialize(Asset* asset, Asset* dependant);
 
-    void callOnDependantDeinitialize(Asset* asset, Asset* dependant);
+    void callOnDependencyDeinitialize(Asset* asset, Asset* dependant);
 
     std::string generateAssetPath(const std::string& baseDirectory, const std::string& path) const;
 
 private:
-    std::shared_ptr<Asset> importDependency(const std::string& identifier);
-    std::shared_ptr<Asset> importAsset(std::string path);
+    std::shared_ptr<Asset> require(const std::string& identifier);
+    std::shared_ptr<Asset> request(const std::string& path);
+    void unrequest(const std::string& path);
+
+    std::shared_ptr<Asset> loadAsset(std::string path);
     std::shared_ptr<Asset> getAsset(std::string path);
     ghoul::filesystem::Directory currentDirectory();
 
@@ -166,7 +160,7 @@ private:
     friend int assetloader::exportAsset(lua_State* state);
 
     std::shared_ptr<Asset> _rootAsset;
-    std::map<std::string, std::shared_ptr<Asset>> _importedAssets;
+    std::map<std::string, std::shared_ptr<Asset>> _loadedAssets;
     std::vector<std::shared_ptr<Asset>> _assetStack;
 
     std::string _assetRootDirectory;

@@ -555,6 +555,7 @@ void OpenSpaceEngine::initialize() {
 
     std::string assetPath = "";
     configurationManager().getValue(ConfigurationManager::KeyConfigAsset, assetPath);
+    _engine->_assetManager->initialize();
     scheduleLoadSingleAsset(assetPath);
 
     LTRACE("OpenSpaceEngine::initialize(end)");
@@ -599,8 +600,9 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _navigationHandler->setFocusNode(camera->parent());
 
     _renderEngine->setScene(_scene.get());
-    _assetManager->clearAllTargetAssets();
-    _assetManager->setTargetAssetState(assetPath, Asset::State::Initialized);
+
+    _assetManager->removeAll();
+    _assetManager->add(assetPath);
 
     bool showMessage = true;
     std::string kMessage =

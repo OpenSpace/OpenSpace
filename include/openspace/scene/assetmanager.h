@@ -57,34 +57,34 @@ public:
         std::unique_ptr<AssetLoader> loader
     );
 
-    struct ManagedAsset {
-        std::string path;
-        std::shared_ptr<Asset> asset;
-    };
+    void initialize();
+    void deinitialize();
+    void add(const std::string& path);
+    void remove(const std::string& path);
+    void removeAll();
+    std::shared_ptr<Asset> rootAsset();
 
     bool update();
 
-    void setTargetAssetState(const std::string& path, Asset::State targetState);
-    void setTargetAssetState(Asset* asset, Asset::State targetState);
-    Asset::State currentAssetState(Asset* asset);
-    Asset::State currentAssetState(const std::string& path);
-
-    void clearAllTargetAssets();
-    std::vector<std::shared_ptr<Asset>> loadedAssets();
+    //void setTargetAssetState(const std::string& path, Asset::State targetState);
+    //void setTargetAssetState(Asset* asset, Asset::State targetState);
+    //Asset::State currentAssetState(Asset* asset);
+    //Asset::State currentAssetState(const std::string& path);
+    //void clearAllTargetAssets();
+    //std::vector<std::shared_ptr<Asset>> loadedAssets();
     scripting::LuaLibrary luaLibrary();
     bool isDone();
 private:
-    std::shared_ptr<Asset> tryLoadAsset(const std::string& path);
+    std::shared_ptr<Asset> tryAddAsset(const std::string& path);
+    bool tryRemoveAsset(const std::string& path);
     void unloadAsset(Asset* asset);
     bool tryInitializeAsset(Asset& asset);
     bool tryDeinitializeAsset(Asset& asset);
     void startSynchronization(Asset& asset);
     void cancelSynchronization(Asset& asset);
     
-    std::vector<ManagedAsset> _managedAssets;
-    
 
-    std::unordered_map<std::string, Asset::State> _pendingStateChangeCommands;
+    std::unordered_map<std::string, bool> _pendingStateChangeCommands;
     //std::unordered_map<Asset*, AssetState> _stateChangesInProgress;
     std::unordered_set<Asset*> _pendingInitializations;
 

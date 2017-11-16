@@ -22,58 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::luascriptfunctions {
+namespace openspace::luascriptfunctions::asset {
 
-int loadAsset(lua_State* state) {
+int add(lua_State* state) {
     AssetManager *assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
     int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("loadAsset", state, 1, nArguments);
-
+    SCRIPT_CHECK_ARGUMENTS("add", state, 1, nArguments);
     std::string assetName = luaL_checkstring(state, -1);
-
-    assetManager->setTargetAssetState(assetName, Asset::State::Loaded);
+    assetManager->add(assetName);
     return 0;
 }
 
-int synchronizeAsset(lua_State* state) {
+int remove(lua_State* state) {
     AssetManager *assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
     int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("synchronizeAsset", state, 1, nArguments);
-
+    SCRIPT_CHECK_ARGUMENTS("remove", state, 1, nArguments);
     std::string assetName = luaL_checkstring(state, -1);
-
-    assetManager->setTargetAssetState(assetName, Asset::State::SyncResolved);
+    assetManager->remove(assetName);
     return 0;
 }
 
-
-int initializeAsset(lua_State* state) {
+int removeAll(lua_State* state) {
     AssetManager *assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
     int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("initializeAsset", state, 1, nArguments);
-
-    std::string assetName = luaL_checkstring(state, -1);
-
-    assetManager->setTargetAssetState(assetName, Asset::State::Initialized);
+    SCRIPT_CHECK_ARGUMENTS("removeAll", state, 0, nArguments);
+    assetManager->removeAll();
     return 0;
 }
 
-int unloadAsset(lua_State* state) {
-    AssetManager *assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
+int reload(lua_State* state) {
+    return 0;
+}
 
-    int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("unloadAsset", state, 1, nArguments);
+int synchronize(lua_State* state) {
+    return 0;
+}
 
-    std::string assetName = luaL_checkstring(state, -1);
+int resynchronize(lua_State* state) {
+    return 0;
+}
 
-    assetManager->setTargetAssetState(assetName, Asset::State::Unloaded);
+int initialize(lua_State* state) {
+    return 0;
+}
+
+int cancelSynchronization(lua_State* state) {
     return 0;
 }
 
