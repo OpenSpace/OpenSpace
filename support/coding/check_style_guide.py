@@ -42,6 +42,8 @@ guards for correctness. At the moment this includes:
  * Checking that no file includes glm header directly
  * Checking whether any files starts with the UTF-8 Byte-order mark
  * Checking whether a file as empty-only lines
+ * Checking whether the default assert macros are used anywhere instead of the
+   ghoul_assert macro
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
 be passed, otherwise the first and only argument has to point to the base directory.
@@ -308,6 +310,16 @@ def check_line_length(lines):
 
 
 
+def check_assert_usage(lines):
+    # _assert checks for both ghoul_assert and static_assert, which are both reasonable
+    index = [i + 1 for i,s in enumerate(lines) if ('assert(' in s and not '_assert(' in s) and s.strip()[0:2] != '//']
+    if len(index) > 0:
+        return index
+    else:
+        return '';
+
+
+
 def check_line_length(lines):
     # Disable this check in non-strict mode
     if not is_strict_mode:
@@ -422,6 +434,11 @@ def check_header_file(file, component):
         if empty_character_at_end:
             print(file, '\t', 'Empty character at end: ', empty_character_at_end)
 
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
+
+
 
 def check_inline_file(file, component):
     with open(file, 'r+', encoding="utf8") as f:
@@ -471,6 +488,10 @@ def check_inline_file(file, component):
         if empty_character_at_end:
             print(file, '\t', 'Empty character at end: ', empty_character_at_end)
 
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
+
 
 
 def check_source_file(file, component):
@@ -509,6 +530,10 @@ def check_source_file(file, component):
         empty_character_at_end = check_empty_character_at_end(lines)
         if empty_character_at_end:
             print(file, '\t', 'Empty character at end: ', empty_character_at_end)
+
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
 
 
 

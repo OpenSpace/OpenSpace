@@ -187,8 +187,6 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
 {
     std::string name;
-    //bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-    //assert(success);
 
     _filename = "";
     bool success = dictionary.getValue(KeyDataSource, _filename);
