@@ -141,7 +141,7 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                     char value = static_cast<char>(
                         sourceTexel[rasterBand - 1] * 255
                     );
-                    *reinterpret_cast<char*>(pixelWriteDestination) = value;
+                    *pixelWriteDestination = value;
                     break;
                 }
                 case GL_UNSIGNED_SHORT: {

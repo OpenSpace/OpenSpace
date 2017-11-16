@@ -159,17 +159,17 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* lua,      \
-                                                                    TYPE value)          \
+                                                                    TYPE val)            \
     {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(lua, value);                                     \
+        return TO_LUA_LAMBDA_EXPRESSION(lua, val);                                       \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
     bool PropertyDelegate<NumericalProperty<TYPE>>::toLuaValue<TYPE>(lua_State* state,   \
-                                                                     TYPE value)         \
+                                                                     TYPE val)           \
     {                                                                                    \
-        return PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(state, value); \
+        return PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(state, val);   \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -186,19 +186,19 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string val,           \
                                                               bool& successful)          \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(value, successful);                         \
+        return FROM_STRING_LAMBDA_EXPRESSION(val, successful);                           \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromString(std::string value,        \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromString(std::string val,          \
                                                                bool& success)            \
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::fromString<TYPE>(               \
-          value,                                                                         \
+          val,                                                                           \
           success                                                                        \
         );                                                                               \
     }                                                                                    \

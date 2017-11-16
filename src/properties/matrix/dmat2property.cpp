@@ -45,8 +45,7 @@ namespace openspace::properties {
                     success = false;                                                     \
                     return __TYPE__(0);                                                  \
                 } else {                                                                 \
-                    result[i][j]                                                         \
-                          = static_cast<__TYPE__::value_type>(lua_tonumber(state, -1));  \
+                    result[i][j] = lua_tonumber(state, -1);                             \
                     lua_pop(state, 1);                                                   \
                     ++number;                                                            \
                 }                                                                        \
@@ -62,7 +61,7 @@ namespace openspace::properties {
         int number = 1;                                                                  \
         for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
             for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
-                lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));             \
+                lua_pushnumber(state, value[i][j]);                                      \
                 lua_setfield(state, -2, std::to_string(number).c_str());                 \
                 ++number;                                                                \
             }                                                                            \
@@ -71,9 +70,9 @@ namespace openspace::properties {
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(__TYPE__)                                             \
-    [](std::string v, bool& success) -> __TYPE__ {                                       \
+    [](std::string value, bool& success) -> __TYPE__ {                                   \
         __TYPE__ result;                                                                 \
-        std::vector<std::string> tokens = ghoul::tokenizeString(v, ',');                 \
+        std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');             \
         if (tokens.size() !=                                                             \
             (ghoul::glm_rows<__TYPE__>::value * ghoul::glm_cols<__TYPE__>::value))       \
         {                                                                                \

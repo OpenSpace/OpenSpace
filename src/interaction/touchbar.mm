@@ -72,7 +72,7 @@ NSArray* focusIdentifiers;
         return touchBar;
     }
 
-    - (NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar
+    - (NSTouchBarItem *)touchBar:(NSTouchBar *)
                         makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
     {
         if ([identifier isEqualToString:pauseResultId]) {
@@ -144,13 +144,13 @@ NSArray* focusIdentifiers;
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
 
-        NSButton* button = (NSButton*)sender;
+        NSButton* button = static_cast<NSButton*>(sender);
         // This check is inverted since the togglePause script has not run yet
         [button setTitle: OsEng.timeManager().time().paused() ? @"Pause" : @"Resume"];
     }
 
     - (void)focusObjectAction:(id)sender {
-        NSButton* button = (NSButton*)sender;
+        NSButton* button = static_cast<NSButton*>(sender);
 
         NSString* title = [button title];
 
@@ -161,7 +161,7 @@ NSArray* focusIdentifiers;
         );
     }
 
-    - (void)guiButtonAction:(id)sender {
+    - (void)guiButtonAction:(id) {
         OsEng.scriptEngine().queueScript(
             "openspace.setPropertyValue('Global Properties.ImGUI.Main.Enabled', \
             not openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled'));",
