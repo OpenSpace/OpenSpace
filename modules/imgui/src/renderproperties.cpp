@@ -138,13 +138,13 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
         }
         nodeNames += '\0';
 
-        int idx = std::distance(
+        int idx = static_cast<int>(std::distance(
             options.begin(),
             std::find_if(
                 options.begin(),
                 options.end(),
                 [value](const OptionProperty::Option& o) { return o.value == value; }
-        ));
+        )));
 
         int oldIdx = idx;
         ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());

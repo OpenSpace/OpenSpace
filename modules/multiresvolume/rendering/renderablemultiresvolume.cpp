@@ -511,7 +511,8 @@ bool RenderableMultiresVolume::initializeSelector() {
                 } else {
                     // Build histograms from tsp file.
                     LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _errorHistogramManager->buildHistograms(nHistograms)) {
+                    success &= _errorHistogramManager->buildHistograms(nHistograms);
+                    if (success) {
                         LINFO("Writing cache to " << cacheFilename);
                         _errorHistogramManager->saveToFile(cacheFilename);
                     }
@@ -537,7 +538,11 @@ bool RenderableMultiresVolume::initializeSelector() {
                 } else {
                     // Build histograms from tsp file.
                     LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _histogramManager->buildHistograms(_tsp.get(), nHistograms)) {
+                    success &= _histogramManager->buildHistograms(
+                        _tsp.get(),
+                        nHistograms
+                    );
+                    if (success) {
                         LINFO("Writing cache to " << cacheFilename);
                         _histogramManager->saveToFile(cacheFilename);
                     }
@@ -563,7 +568,8 @@ bool RenderableMultiresVolume::initializeSelector() {
                 } else {
                     // Build histograms from tsp file.
                     LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _localErrorHistogramManager->buildHistograms(nHistograms)) {
+                    success &= _localErrorHistogramManager->buildHistograms(nHistograms);
+                    if (success) {
                         LINFO("Writing cache to " << cacheFilename);
                         _localErrorHistogramManager->saveToFile(cacheFilename);
                     }
@@ -676,7 +682,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
     }
     else if (_useGlobalTime) {
         double t = (_time - _startTime) / (_endTime - _startTime);
-        currentTimestep = t * numTimesteps;
+        currentTimestep = static_cast<int>(t * numTimesteps);
         visible = currentTimestep >= 0 && currentTimestep < numTimesteps;
     }
     else {

@@ -340,22 +340,22 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
     
 
-    float lowerRampStart = maxDim * 0.02;
-    float lowerRampEnd = maxDim * 0.5;
+    float lowerRampStart = maxDim * 0.02f;
+    float lowerRampEnd = maxDim * 0.5f;
 
-    float upperRampStart = maxDim * 2.0;
-    float upperRampEnd = maxDim * 10;
+    float upperRampStart = maxDim * 2.f;
+    float upperRampEnd = maxDim * 10.f;
 
-    float opacityCoefficient = 1.0;
+    float opacityCoefficient = 1.f;
 
     if (length < lowerRampStart) {
-        opacityCoefficient = 0; // camera really close
+        opacityCoefficient = 0.f; // camera really close
     } else if (length < lowerRampEnd) {
         opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
     } else if (length < upperRampStart) {
-        opacityCoefficient = 1.0; // sweet spot (max)
+        opacityCoefficient = 1.f; // sweet spot (max)
     } else if (length < upperRampEnd) {
-        opacityCoefficient = 1.0 - (length - upperRampStart) /
+        opacityCoefficient = 1.f - (length - upperRampStart) /
                              (upperRampEnd - upperRampStart); //fade out
     } else {
         opacityCoefficient = 0;
@@ -363,7 +363,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 
     _opacityCoefficient = opacityCoefficient;
     ghoul_assert(
-        _opacityCoefficient >= 0.0 && _opacityCoefficient <= 1.0,
+        _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
         "Opacity coefficient was not between 0 and 1"
     );
     if (opacityCoefficient > 0) {

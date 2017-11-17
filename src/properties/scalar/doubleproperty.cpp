@@ -37,7 +37,7 @@ namespace openspace::properties {
     [](lua_State* state, bool& success) -> TYPE {                                        \
         success = (lua_isnumber(state, -1) == 1);                                        \
         if (success) {                                                                   \
-            return static_cast<TYPE>(lua_tonumber(state, -1));                           \
+            return lua_tonumber(state, -1);                                              \
         }                                                                                \
         else {                                                                           \
             return DEFAULT_VALUE;                                                        \
@@ -46,7 +46,7 @@ namespace openspace::properties {
 
 #define DEFAULT_TO_LUA_LAMBDA(TYPE)                                                      \
     [](lua_State* state, TYPE value) -> bool {                                           \
-        lua_pushnumber(state, static_cast<lua_Number>(value));                           \
+        lua_pushnumber(state, value);                                                    \
         return true;                                                                     \
     }
 

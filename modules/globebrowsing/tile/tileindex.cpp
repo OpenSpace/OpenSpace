@@ -46,8 +46,8 @@ TileIndex::TileIndex(const TileIndex& other)
     : x(other.x), y(other.y), level(other.level)
 {}
 
-TileIndex::TileIndex(const Geodetic2& point, int level)
-    : level(level)
+TileIndex::TileIndex(const Geodetic2& point, int level_)
+    : level(level_)
 {
     int numIndicesAtLevel = 1 << level;
     double u = 0.5 + point.lon / (2 * glm::pi<double>());
@@ -55,8 +55,8 @@ TileIndex::TileIndex(const Geodetic2& point, int level)
     double xIndexSpace = u * numIndicesAtLevel;
     double yIndexSpace = v * numIndicesAtLevel;
 
-    x = floor(xIndexSpace);
-    y = floor(yIndexSpace);
+    x = static_cast<int>(floor(xIndexSpace));
+    y = static_cast<int>(floor(yIndexSpace));
 }
 
 TileIndex::TileIndex(const ghoul::Dictionary& dict) {

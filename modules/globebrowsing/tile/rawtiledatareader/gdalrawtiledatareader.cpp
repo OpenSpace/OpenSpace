@@ -126,12 +126,17 @@ void GdalRawTileDataReader::initialize() {
 
     // Assume all raster bands have the same data type
     _gdalDatasetMetaDataCached.rasterCount = _dataset->GetRasterCount();
-    _gdalDatasetMetaDataCached.scale = _dataset->GetRasterBand(1)->GetScale();
-    _gdalDatasetMetaDataCached.offset = _dataset->GetRasterBand(1)->GetOffset();
+    _gdalDatasetMetaDataCached.scale = static_cast<float>(
+        _dataset->GetRasterBand(1)->GetScale()
+    );
+    _gdalDatasetMetaDataCached.offset = static_cast<float>(
+        _dataset->GetRasterBand(1)->GetOffset()
+    );
     _gdalDatasetMetaDataCached.rasterXSize = _dataset->GetRasterXSize();
     _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
-    _gdalDatasetMetaDataCached.noDataValue =
-        _dataset->GetRasterBand(1)->GetNoDataValue();
+    _gdalDatasetMetaDataCached.noDataValue = static_cast<float>(
+        _dataset->GetRasterBand(1)->GetNoDataValue()
+    );
     _gdalDatasetMetaDataCached.dataType =
         tiledatatype::getGdalDataType(_initData.glType());
 
@@ -145,7 +150,7 @@ void GdalRawTileDataReader::initialize() {
         calculateTileLevelDifference(_initData.dimensions().x);
 
     int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-    _cached._maxLevel = -_cached._tileLevelDifference;
+    _cached._maxLevel = static_cast<int>(-_cached._tileLevelDifference);
     if (numOverviews > 0) {
         _cached._maxLevel += numOverviews - 1;
     }
@@ -191,7 +196,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
         io.write.region.numPixels.y,    // width to write y in destination
         _gdalDatasetMetaDataCached.dataType,         // Type
         static_cast<int>(_initData.bytesPerPixel()), // Pixel spacing
-        static_cast<int>(-io.write.bytesPerLine)     // Line spacing
+        -static_cast<int>(io.write.bytesPerLine)     // Line spacing
     );
 
     // Convert error to RawTile::ReadError
@@ -236,7 +241,7 @@ int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) co
     }
     int sizeLevel0 = maxOverview->GetXSize();
     double diff = log2(minimumPixelSize) - log2(sizeLevel0);
-    return diff;
+    return static_cast<int>(diff);
 }
 
 } // namespace openspace::globebrowsing

@@ -45,8 +45,8 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
         lua_pushboolean(state, value);
         return true;
     },
-    [](std::string value, bool& success) -> bool {
-        std::stringstream s(value);
+    [](std::string val, bool& success) -> bool {
+        std::stringstream s(val);
         bool v;
         s >> v;
         success = !s.fail();
@@ -54,7 +54,7 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
             return v;
         }
         else {
-            throw ghoul::RuntimeError("Conversion error for string: " + value);
+            throw ghoul::RuntimeError("Conversion error for string: " + val);
         }
     },
     [](std::string& outValue, bool inValue) -> bool {

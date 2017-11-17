@@ -35,7 +35,7 @@ using std::numeric_limits;
 namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(__TYPE__, __CONVFUNC__, __TESTFUNC__)                    \
-    [](lua_State * state, bool& success) -> __TYPE__ {                                   \
+    [](lua_State* state, bool& success) -> __TYPE__ {                                    \
         __TYPE__ result;                                                                 \
         lua_pushnil(state);                                                              \
         for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
@@ -48,7 +48,7 @@ namespace openspace::properties {
                 success = false;                                                         \
                 return __TYPE__(0);                                                      \
             } else {                                                                     \
-                result[i] = static_cast<__TYPE__::value_type>(__CONVFUNC__(state, -1));  \
+                result[i] = __CONVFUNC__(state, -1);                                     \
                 lua_pop(state, 1);                                                       \
             }                                                                            \
         }                                                                                \
@@ -61,7 +61,7 @@ namespace openspace::properties {
         lua_newtable(state);                                                             \
         int number = 1;                                                                  \
         for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            lua_pushnumber(state, static_cast<lua_Number>(value[i]));                    \
+            lua_pushnumber(state, value[i]);                                             \
             lua_setfield(state, -2, std::to_string(number).c_str());                     \
             ++number;                                                                    \
         }                                                                                \

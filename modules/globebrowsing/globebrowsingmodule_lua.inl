@@ -162,8 +162,8 @@ int goToGeo(lua_State* L) {
         return luaL_error(L, "Expected 2 or 3 arguments.");
     }
 
-    double latitude = static_cast<double>(lua_tonumber(L, 1));
-    double longitude = static_cast<double>(lua_tonumber(L, 2));
+    double latitude = lua_tonumber(L, 1);
+    double longitude = lua_tonumber(L, 2);
 
     if (nArguments == 2) {
         OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);

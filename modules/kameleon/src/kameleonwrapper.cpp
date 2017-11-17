@@ -412,8 +412,8 @@ float* KameleonWrapper::getUniformSliceValues(const std::string& var,
     LDEBUG(var << "Min: " << varMin);
     LDEBUG(var << "Max: " << varMax);
 
-    double maxValue = 0.0;
-    double minValue = std::numeric_limits<double>::max();
+    //double maxValue = 0.0;
+    //double minValue = std::numeric_limits<double>::max();
 
     float missingValue = _model->getMissingValue();
 
