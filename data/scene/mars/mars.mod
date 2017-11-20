@@ -51,6 +51,10 @@ return {
                         FilePath = "map_service_configs/Utah/Mola_PseudoColor.xml"
                     },
                     {
+                        Name = "MOLA HRSC",
+                        FilePath = "map_service_configs/Utah/Mola_HRSC.xml"
+                    },
+                    {
                         Name = "Viking MDIM [Utah]",
                         FilePath = "map_service_configs/Utah/Mdim.xml"
                     },
