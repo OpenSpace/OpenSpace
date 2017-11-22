@@ -149,7 +149,7 @@ namespace openspace {
         
         glm::dmat4 _transformationMatrix;
 
-        std::unordered_map<int, RenderingPlane> _renderingPlanesMap;       
+        std::vector<RenderingPlane> _renderingPlanesArray;       
     };
 
 

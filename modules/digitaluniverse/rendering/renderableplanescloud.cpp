@@ -486,9 +486,9 @@ void RenderablePlanesCloud::initializeGL() {
 
 
 void RenderablePlanesCloud::deleteDataGPU() {
-    for (auto pair : _renderingPlanesMap) {
-        glDeleteVertexArrays(1, &pair.second.vao);
-        glDeleteBuffers(1, &pair.second.vbo);
+    for (auto renderingPlane : _renderingPlanesArray) {
+        glDeleteVertexArrays(1, &renderingPlane.vao);
+        glDeleteBuffers(1, &renderingPlane.vbo);
     }
 }
 
@@ -555,13 +555,16 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     //    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     //}
     
-    for (auto pair : _renderingPlanesMap) {
-        ghoul::opengl::TextureUnit unit;
-        unit.activate();
-        _textureMap[pair.second.planeIndex]->bind();
-        _program->setUniform("galaxyTexture", unit);
-
-        glBindVertexArray(pair.second.vao);
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _program->setUniform("galaxyTexture", unit);
+    int currentTextureIndex = -1;
+    for (auto renderingPlane : _renderingPlanesArray) {
+        if (currentTextureIndex != renderingPlane.planeIndex) {
+            _textureMap[renderingPlane.planeIndex]->bind();
+            currentTextureIndex = renderingPlane.planeIndex;
+        }                
+        glBindVertexArray(renderingPlane.vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);                  
     }               
     
@@ -1240,7 +1243,7 @@ void RenderablePlanesCloud::createPlanes() {
                 reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
             );                                
 
-            _renderingPlanesMap.insert({planeNumber++, plane});
+            _renderingPlanesArray.push_back(plane);
         }
 
         glBindVertexArray(0);
@@ -1251,6 +1254,15 @@ void RenderablePlanesCloud::createPlanes() {
     if (_hasLabel && _labelDataIsDirty) {
 
         _labelDataIsDirty = false;
+    }
+
+    // Sort planes by texture index
+    if (!_renderingPlanesArray.empty()) {
+        std::sort(_renderingPlanesArray.begin(), _renderingPlanesArray.end(), 
+            [](const RenderingPlane& planeA, const RenderingPlane& planeB) {
+            return planeA.planeIndex < planeB.planeIndex;
+        });
+
     }
 }
 

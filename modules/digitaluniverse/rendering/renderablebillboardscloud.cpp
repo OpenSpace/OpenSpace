@@ -832,26 +832,45 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         
     glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
     
-    //glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-    //glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-    //glm::vec3 right = glm::cross(viewDirection, lookup);
-    //glm::vec3 up = glm::cross(right, viewDirection);
-    //glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
-    //glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
+    /*glm::dmat4 internalCameraMatrix = data.camera.viewRotationMatrix() *
+        glm::inverse(glm::translate(glm::dmat4(1.0), data.camera.positionVec3()));
+    glm::dmat4 invInternalCameraMatrix = glm::inverse(internalCameraMatrix);
+    glm::vec3 lookup = worldToModelTransform * invInternalCameraMatrix * glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
+    glm::vec3 viewDirection = worldToModelTransform * invInternalCameraMatrix * glm::dvec4(data.camera.viewDirectionWorldSpace(), 0.0);
+    glm::vec3 right = glm::cross(viewDirection, lookup);
+    glm::vec3 up = glm::cross(right, viewDirection);
+    
+    glm::vec3 orthoRight = glm::normalize(right);
+    glm::vec3 orthoUp = glm::normalize(up);*/
 
-    //glm::dmat4 invMVP = glm::inverse(modelViewProjectionMatrix);
+    /*
+    glm::dmat4 internalCameraMatrix = data.camera.viewRotationMatrix() *
+        glm::inverse(glm::translate(glm::dmat4(1.0), data.camera.positionVec3()));
+    glm::dmat4 invInternalCameraMatrix = glm::inverse(internalCameraMatrix);
+    glm::dvec4 lookup = worldToModelTransform * glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
+    glm::dvec4 viewDirection = worldToModelTransform * glm::dvec4(data.camera.viewDirectionWorldSpace(), 0.0);
+    glm::vec3 right = glm::cross(glm::vec3(viewDirection), glm::vec3(lookup));
+    glm::vec3 up = glm::cross(right, glm::vec3(viewDirection));
+
+    glm::vec3 orthoRight = glm::normalize(right);
+    glm::vec3 orthoUp = glm::normalize(up);
+    */
+
+    
+    // Almost Working
     glm::dmat4 invMVPParts = glm::inverse(modelMatrix) * glm::inverse(data.camera.combinedViewMatrix()) *
         glm::inverse(glm::dmat4(projectionMatrix));
     glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
-    glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
-      
+    glm::dvec3 orthoUp    = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
+    
+    
     if (_hasSpeckFile) {
         renderBillboards(data, modelViewMatrix, worldToModelTransform, orthoRight, orthoUp, fadeInVariable);
     }
         
     if (_drawLabels && _hasLabel) {
         renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
-    }                
+    } 
 }
 
 void RenderableBillboardsCloud::update(const UpdateData&) {  
