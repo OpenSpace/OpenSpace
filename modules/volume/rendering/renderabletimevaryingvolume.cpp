@@ -157,7 +157,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _clipPlanes(nullptr)
-    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
+    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
     , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -166,7 +166,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
-    , _opacity(OpacityInfo, 10.f, 0.f, 50.f)
+    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
@@ -191,6 +191,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" },
     });
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
+
+    if (dictionary.hasValue<float>(KeyStepSize)) {
+        _stepSize = dictionary.value<float>(KeyStepSize);
+    }
 
     if (dictionary.hasValue<float>(KeySecondsBefore)) {
         _secondsBefore = dictionary.value<float>(KeySecondsBefore);
@@ -326,6 +330,12 @@ void RenderableTimeVaryingVolume::initializeGL() {
             VolumeGridType::Cartesian
         );
     });
+
+    _transferFunctionPath.onChange([this] {
+        _transferFunction =
+            std::make_shared<TransferFunction>(_transferFunctionPath);
+        _raycaster->setTransferFunction(_transferFunction);
+    });
 }
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
@@ -426,6 +436,7 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData&) {
+    _transferFunction->update();
     if (_raycaster) {
         Timestep* t = currentTimestep();
         _currentTimestep = timestepIndex(t);
