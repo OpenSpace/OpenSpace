@@ -439,11 +439,12 @@ void GUI::initialize() {
 }
 
 void GUI::deinitialize() {
+    ImGui::Shutdown();
+
     int nWindows = OsEng.windowWrapper().nWindows();
     for (int i = 0; i < nWindows; ++i) {
         ImGui::DestroyContext(_contexts[i]);
     }
-    ImGui::Shutdown();
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitialize();
