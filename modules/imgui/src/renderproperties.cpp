@@ -213,7 +213,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
-    std::string value = FileSys.convertPathSeparator(p->value(), '/');
+    const std::string value = p->value();
 
     static const int bufferSize = 256;
     static char buffer[bufferSize];
@@ -235,7 +235,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     if (hasNewValue) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "'" + std::string(buffer) + "'",
+            "[[" + std::string(buffer) + "]]",
             isRegular
         );
     }
