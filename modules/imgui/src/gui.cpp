@@ -615,7 +615,10 @@ void GUI::endFrame() {
         _program->rebuildFromFile();
     }
 
-    if (OsEng.renderEngine().doesPerformanceMeasurements()) {
+    bool perf = OsEng.renderEngine().doesPerformanceMeasurements();
+    _performance.setEnabled(perf);
+
+    if (_performance.isEnabled()) {
         _performance.render();
     }
 
