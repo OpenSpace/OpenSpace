@@ -56,6 +56,7 @@ return {
                 },
             -- Fade in value in the same unit as "Unit"
             FadeInThreshould = 0.1,
+            PlaneMinSize = 5.0,
             Unit = "Mpc",
         },        
         GuiPath = "/Universe/Galaxies"

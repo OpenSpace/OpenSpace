@@ -122,6 +122,7 @@ namespace openspace {
         properties::OptionProperty _blendMode;
         properties::FloatProperty _fadeInDistance;
         properties::BoolProperty _disableFadeInDistance;
+        properties::FloatProperty _planeMinSize;
 
         // DEBUG:
         properties::OptionProperty _renderOption;

@@ -163,6 +163,13 @@ namespace {
         "Enables/Disables the Fade-in effect."
     };
 
+    static const openspace::properties::Property::PropertyInfo PlaneMinSizeInfo = {
+        "PlaneMinSize",
+        "Plane Min Size in Pixels",
+        "The min size (in pixels) for the plane representing the astronomical "
+        "object."
+    };
+
 }  // namespace
 
 namespace openspace {
@@ -263,6 +270,12 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 Optional::Yes,
                 DisableFadeInInfo.description
             },
+            {
+                PlaneMinSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                PlaneMinSizeInfo.description
+            },
         }
     };
 }
@@ -291,6 +304,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.1, 1000.0)
     , _disableFadeInDistance(DisableFadeInInfo, true)
+    , _planeMinSize(PlaneMinSizeInfo, 0.5, 0.0, 500.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
     , _fontRenderer(nullptr)
@@ -448,6 +462,11 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         addProperty(_fadeInDistance);
         addProperty(_disableFadeInDistance);
     }
+
+    if (dictionary.hasKey(PlaneMinSizeInfo.identifier)) {
+        _planeMinSize = static_cast<float>(dictionary.value<double>(PlaneMinSizeInfo.identifier));
+        addProperty(_planeMinSize);
+    }
 }
 
 bool RenderablePlanesCloud::isReady() const {
@@ -533,7 +552,8 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
+    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    _program->setUniform("modelViewProjectionTransform", modelViewProjectionMatrix);
     _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("fadeInValue", fadeInVariable);
@@ -554,12 +574,35 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     //    //glDepthMask(false);
     //    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     //}
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
     
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _program->setUniform("galaxyTexture", unit);
     int currentTextureIndex = -1;
     for (auto renderingPlane : _renderingPlanesArray) {
+
+        glm::dvec4 vertex0(renderingPlane.vertexData[0], renderingPlane.vertexData[1], 
+            renderingPlane.vertexData[2], renderingPlane.vertexData[3]);
+        glm::dvec4 vertex1(renderingPlane.vertexData[6], renderingPlane.vertexData[7],
+            renderingPlane.vertexData[8], renderingPlane.vertexData[9]);
+        
+        vertex0 = modelViewProjectionMatrix * vertex0;
+        vertex1 = modelViewProjectionMatrix * vertex1;
+        
+        // Testing size:
+        glm::vec4 topRight = vertex1 / vertex1.w;
+        topRight = ((topRight + glm::vec4(1.0)) / glm::vec4(2.0)) * glm::vec4(viewport[2], viewport[3], 1.0, 1.0);
+        glm::vec4 bottomLeft = vertex0 / vertex0.w;
+        bottomLeft = ((bottomLeft + glm::vec4(1.0)) / glm::vec4(2.0)) * glm::vec4(viewport[2], viewport[3], 1.0, 1.0);
+
+        if ((std::fabs(topRight.y - bottomLeft.y) < _planeMinSize) ||
+            (std::fabs(topRight.x - bottomLeft.x) < _planeMinSize)) {
+            continue;
+        }
+
         if (currentTextureIndex != renderingPlane.planeIndex) {
             _textureMap[renderingPlane.planeIndex]->bind();
             currentTextureIndex = renderingPlane.planeIndex;
