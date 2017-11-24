@@ -342,6 +342,7 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& 
     try {
         ghoul::lua::loadDictionaryFromFile(path, moduleDictionary, luaState);
     } catch (const ghoul::lua::LuaRuntimeException& e) {
+        LERROR("Error parsing module: " << path);
         LERRORC(e.component, e.message);
         return std::vector<SceneLoader::LoadedNode>();
     }
