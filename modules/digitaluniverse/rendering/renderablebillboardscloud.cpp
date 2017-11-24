@@ -185,6 +185,13 @@ namespace {
         "The max size (in pixels) for the billboard representing the astronomical "
         "object."
     };
+
+    static const openspace::properties::Property::PropertyInfo BillboardMinSizeInfo = {
+        "BillboardMinSize",
+        "Billboard Min Size in Pixels",
+        "The min size (in pixels) for the billboard representing the astronomical "
+        "object."
+    };
 }  // namespace
 
 namespace openspace {
@@ -309,6 +316,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 Optional::Yes,
                 BillboardMaxSizeInfo.description
             },
+            {
+                BillboardMinSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                BillboardMinSizeInfo.description
+            },
         }
     };
 }
@@ -345,6 +358,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.1, 100.0)
     , _disableFadeInDistance(DisableFadeInInfo, true)
     , _billboardMaxSize(BillboardMaxSizeInfo, 400.0, 0.0, 1000.0)
+    , _billboardMinSize(BillboardMinSizeInfo, 0.0, 0.0, 100.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _polygonTexture(nullptr)
     , _spriteTexture(nullptr)
@@ -540,6 +554,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _billboardMaxSize = static_cast<float>(dictionary.value<double>(BillboardMaxSizeInfo.identifier));
         addProperty(_billboardMaxSize);
     }
+
+    if (dictionary.hasKey(BillboardMinSizeInfo.identifier)) {
+        _billboardMinSize = static_cast<float>(dictionary.value<double>(BillboardMinSizeInfo.identifier));
+        addProperty(_billboardMinSize);
+    }
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -653,7 +672,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
         glm::dvec4(0.0, 0.0, 0.0, 1.0);
     _program->setUniform("centerScreenInWorldPosition", centerScreenWorld);
         
-    _program->setUniform("minBillboardSize", 1.f); // in pixels
+    _program->setUniform("minBillboardSize", _billboardMinSize); // in pixels
     _program->setUniform("maxBillboardSize", _billboardMaxSize); // in pixels
     _program->setUniform("color", _pointColor);
     _program->setUniform("sides", 4);

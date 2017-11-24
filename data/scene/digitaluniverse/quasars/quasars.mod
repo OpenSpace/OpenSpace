@@ -14,6 +14,8 @@ return {
             ScaleFactor = 537.31,
             -- Fade in value in the same unit as "Unit"
             FadeInThreshould = 1000.0,
+            BillboardMaxSize = 200.0,
+            BillboardMinSize = 1.5,
         },
         GuiPath = "/Universe/Quasars"
     }

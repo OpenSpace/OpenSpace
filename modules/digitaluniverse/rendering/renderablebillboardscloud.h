@@ -129,6 +129,7 @@ private:
     properties::FloatProperty _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _billboardMaxSize;
+    properties::FloatProperty _billboardMinSize;
 
     // DEBUG:
     properties::OptionProperty _renderOption;

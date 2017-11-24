@@ -30,6 +30,7 @@ return {
             Unit = "Mpc",
             -- Max size in pixels
             BillboardMaxSize = 200.0,
+            BillboardMinSize = 1.5,
         },
         GuiPath = "/Universe/Galaxies"
     },

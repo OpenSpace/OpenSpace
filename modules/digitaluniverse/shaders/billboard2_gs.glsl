@@ -40,7 +40,7 @@ uniform dvec4 centerScreenInWorldPosition;
 uniform int renderOption;
 uniform vec2 screenSize;
 uniform float maxBillboardSize;
-
+uniform float minBillboardSize;
 
 in vec4 colorMap[];
 
@@ -144,10 +144,17 @@ void main() {
     vec4 bottomLeft = initialPosition/initialPosition.w;
     bottomLeft = ((bottomLeft + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
 
-    if (((topRight.y - bottomLeft.y) > maxBillboardSize) ||
-        ((topRight.x - bottomLeft.x) > maxBillboardSize)) {
+    float height = abs(topRight.y - bottomLeft.y);
+    float width  = abs(topRight.x - bottomLeft.x);
+    
+    if ((height > maxBillboardSize) ||
+        (width > maxBillboardSize)) {
         return;
-    } else {
+    } 
+    else if (width < minBillboardSize) {
+        return;
+    } 
+    else {
         // Build primitive
         texCoord    = corners[0];
         gl_Position = initialPosition;
