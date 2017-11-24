@@ -41,6 +41,8 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
+struct ImGuiContext;
+
 namespace openspace::gui {
 
 class GUI : public GuiComponent {
@@ -92,6 +94,8 @@ private:
 
     properties::Property::Visibility _currentVisibility;
 
+    
+    std::vector<ImGuiContext*> _contexts;
 };
 
 void CaptionText(const char* text);

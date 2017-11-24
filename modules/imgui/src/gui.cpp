@@ -27,6 +27,7 @@
 #include <modules/imgui/imguimodule.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/keys.h>
@@ -316,96 +317,105 @@ void GUI::initialize() {
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.IniFilename = iniFileBuffer;
-    io.DeltaTime = 1.f / 60.f;
-    io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
-    io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
-    io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
-    io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
-    io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
-    io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
-    io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
-    io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
-    io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
-    io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
-    io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
-    io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
-    io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
-    io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
-    io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
-    io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
-    io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
+    int nWindows = OsEng.windowWrapper().nWindows();
+    _contexts.resize(nWindows);
 
-    io.RenderDrawListsFn = RenderDrawLists;
-    io.Fonts->AddFontFromFileTTF(
-        absPath(GuiFont).c_str(),
-        FontSize
-    );
+    for (int i = 0; i < nWindows; ++i) {
+        _contexts[i] = ImGui::CreateContext();
+        ImGui::SetCurrentContext(_contexts[i]);
+        //}
 
-    captionFont = io.Fonts->AddFontFromFileTTF(
-        absPath(GuiFont).c_str(),
-        FontSize * 1.5f
-    );
 
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowPadding = { 4.f, 4.f };
-    style.WindowRounding = 0.f;
-    style.FramePadding = { 3.f, 3.f };
-    style.FrameRounding = 0.f;
-    style.ItemSpacing = { 3.f, 2.f };
-    style.ItemInnerSpacing = { 3.f, 2.f };
-    style.TouchExtraPadding = { 1.f, 1.f };
-    style.IndentSpacing = 15.f;
-    style.ScrollbarSize = 10.f;
-    style.ScrollbarRounding = 0.f;
-    style.GrabMinSize = 10.f;
-    style.GrabRounding = 16.f;
+        ImGuiIO& io = ImGui::GetIO();
+        io.IniFilename = iniFileBuffer;
+        io.DeltaTime = 1.f / 60.f;
+        io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
+        io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
+        io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
+        io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
+        io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
+        io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
+        io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
+        io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
+        io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
+        io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
+        io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
+        io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
+        io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
+        io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
+        io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
+        io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
+        io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
-    style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
-    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
-    style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
-    style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
-    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.30f);
-    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.91f, 0.94f, 0.99f, 0.40f);
-    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.90f, 0.90f, 0.45f);
-    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
-    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
-    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.26f, 0.27f, 0.33f, 0.80f);
-    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
-    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
-    style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
-    style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
-    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
-    style.Colors[ImGuiCol_Button] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.36f, 0.54f, 0.68f, 1.00f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.36f, 0.61f, 0.81f, 1.00f);
-    style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
-    style.Colors[ImGuiCol_Column] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
-    style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
-    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
-    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-    style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
-    style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
-    style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
-    style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
-    style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+        io.RenderDrawListsFn = RenderDrawLists;
+        io.Fonts->AddFontFromFileTTF(
+            absPath(GuiFont).c_str(),
+            FontSize
+        );
 
+        captionFont = io.Fonts->AddFontFromFileTTF(
+            absPath(GuiFont).c_str(),
+            FontSize * 1.5f
+        );
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.WindowPadding = { 4.f, 4.f };
+        style.WindowRounding = 0.f;
+        style.FramePadding = { 3.f, 3.f };
+        style.FrameRounding = 0.f;
+        style.ItemSpacing = { 3.f, 2.f };
+        style.ItemInnerSpacing = { 3.f, 2.f };
+        style.TouchExtraPadding = { 1.f, 1.f };
+        style.IndentSpacing = 15.f;
+        style.ScrollbarSize = 10.f;
+        style.ScrollbarRounding = 0.f;
+        style.GrabMinSize = 10.f;
+        style.GrabRounding = 16.f;
+
+        style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
+        style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
+        style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
+        style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_FrameBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.30f);
+        style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.91f, 0.94f, 0.99f, 0.40f);
+        style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.90f, 0.90f, 0.45f);
+        style.Colors[ImGuiCol_TitleBg] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+        style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+        style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
+        style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.26f, 0.27f, 0.33f, 0.80f);
+        style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
+        style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+        style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+        style.Colors[ImGuiCol_ComboBg] = ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
+        style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+        style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
+        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
+        style.Colors[ImGuiCol_Button] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.36f, 0.54f, 0.68f, 1.00f);
+        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.36f, 0.61f, 0.81f, 1.00f);
+        style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
+        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
+        style.Colors[ImGuiCol_Column] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+        style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
+        style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+        style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+        style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
+        style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
+        style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+        style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
+        style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+    }
     _property.initialize();
     _property.setHasRegularProperties(true);
     _screenSpaceProperty.initialize();
@@ -430,6 +440,11 @@ void GUI::initialize() {
 
 void GUI::deinitialize() {
     ImGui::Shutdown();
+
+    int nWindows = OsEng.windowWrapper().nWindows();
+    for (int i = 0; i < nWindows; ++i) {
+        ImGui::DestroyContext(_contexts[i]);
+    }
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitialize();
@@ -463,8 +478,13 @@ void GUI::initializeGL() {
 
     unsigned char* pngData;
     glm::ivec2 textureSize;
-    ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pngData, &textureSize.x, &textureSize.y);
+    int nWindows = OsEng.windowWrapper().nWindows();
+    for (int i = 0; i < nWindows; ++i) {
+        //_contexts[i] = ImGui::CreateContext();
+        ImGui::SetCurrentContext(_contexts[i]);
 
+        ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pngData, &textureSize.x, &textureSize.y);
+    }
     _fontTexture = std::make_unique<ghoul::opengl::Texture>(
         pngData,
         glm::uvec3(textureSize.x, textureSize.y, 1)
@@ -474,7 +494,12 @@ void GUI::initializeGL() {
     _fontTexture->uploadTexture();
     GLuint id = *_fontTexture;
     uint64_t tmp = id;
-    ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(tmp);
+    for (int i = 0; i < nWindows; ++i) {
+        //_contexts[i] = ImGui::CreateContext();
+        ImGui::SetCurrentContext(_contexts[i]);
+
+        ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(tmp);
+    }
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -569,6 +594,9 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
+    int iWindow = OsEng.windowWrapper().currentWindowId();
+    ImGui::SetCurrentContext(_contexts[iWindow]);
+
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
     io.DisplayFramebufferScale = ImVec2(dpiScaling.x, dpiScaling.y);

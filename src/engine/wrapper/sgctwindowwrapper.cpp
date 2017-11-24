@@ -115,9 +115,9 @@ uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
     uint32_t result = 0;
     for (int i = 0; i < maxNumber; ++i) {
         bool button = (sgct::Engine::instance()->getMouseButton(id, i) != 0);
-        if (button)
+        if (button) {
             result |= (1 << i);
-
+        }
     }
     return result;
 }
@@ -267,6 +267,14 @@ void SGCTWindowWrapper::swapBuffer() const {
     glfwSwapBuffers(w);
 
     glfwPollEvents();
+}
+
+int SGCTWindowWrapper::nWindows() const {
+    return static_cast<int>(sgct::Engine::instance()->getNumberOfWindows());
+}
+
+int SGCTWindowWrapper::currentWindowId() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
 }
 
 } // namespace openspace
