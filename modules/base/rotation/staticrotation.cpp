@@ -64,7 +64,7 @@ documentation::Documentation StaticRotation::Documentation() {
 }
 
 StaticRotation::StaticRotation()
-    : _rotationMatrix(RotationInfo, glm::dmat3(1.0))
+    : _rotationMatrix(RotationInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
 {
     addProperty(_rotationMatrix);
     _rotationMatrix.onChange([this]() { _matrix = _rotationMatrix; });

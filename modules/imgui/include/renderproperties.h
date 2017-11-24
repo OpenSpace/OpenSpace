@@ -105,6 +105,18 @@ void renderDVec4Property(properties::Property* prop, const std::string& ownerNam
     IsRegularProperty isRegular = IsRegularProperty::Yes,
     ShowToolTip showTooltip = ShowToolTip::Yes);
 
+void renderDMat2Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
+
+void renderDMat3Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
+
+void renderDMat4Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes);
+
 void renderTriggerProperty(properties::Property* prop, const std::string& ownerName,
     IsRegularProperty isRegular = IsRegularProperty::Yes,
     ShowToolTip showTooltip = ShowToolTip::Yes);
