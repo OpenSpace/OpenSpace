@@ -38,7 +38,6 @@ glm::dmat3x3 fromLuaConversion(lua_State* state, bool& success) {
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
             lua_getfield(state, -1, std::to_string(number).c_str());
-            int type = lua_type(state, -1);
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
                 return glm::dmat3x3(0);

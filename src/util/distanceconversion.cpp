@@ -22,17 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DISTANCECONSTANTS___H__
-#define __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+#include <openspace/util/distanceconversion.h>
 
-namespace openspace::distanceconstants {
-    constexpr double EarthRadius = 6371;
-    constexpr double LightYear = 9.4607304725808E15;
-    constexpr double LightMonth = LightYear / 12;
-    constexpr double LightDay = LightYear / 365;
-    constexpr double LightHour = LightDay / 24;
-    constexpr double AstronomicalUnit = 1.495978707E11;
-    constexpr double Parsec = 3.0856776E16;
-} // openspace::distanceconstants
+#include <openspace/util/distanceconstants.h>
 
-#endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+namespace openspace {
+
+std::pair<double, std::string> simplifyDistance(double meters) {
+    if (meters > 1e-3 && meters < 1e3) {
+        return { meters, "meter" };
+    }
+
+    if (meters < 1e-9) {
+        return { meters / 1e-9, "nanometer" };
+    }
+    else if (meters < 1e-6) {
+        return { meters / 1e-6, "micrometer" };
+    }
+    else if (meters < 1e-3) {
+        return { meters / 1e-3, "millimeter" };
+    }
+
+    if (meters > (1e9 * distanceconstants::Parsec)) {
+        return { meters / (1e9 * distanceconstants::Parsec) , "Gigaparsec" };
+    }
+    else if (meters > (1e6 * distanceconstants::Parsec)) {
+        return { meters / (1e6 * distanceconstants::Parsec), "Megaparsec" };
+    }
+    else if (meters > (1e3 * distanceconstants::Parsec)) {
+        return { meters / (1e3 * distanceconstants::Parsec), "Kiloparsec" };
+    }
+    else if (meters > distanceconstants::Parsec) {
+        return { meters / distanceconstants::Parsec, "Parsec" };
+    }
+    else if (meters > distanceconstants::LightYear) {
+        return { meters / distanceconstants::LightYear, "Lightyears" };
+    }
+    else if (meters > distanceconstants::LightMonth) {
+        return { meters / distanceconstants::LightMonth, "Lightmonth" };
+    }
+    else if (meters > distanceconstants::LightDay) {
+        return { meters / distanceconstants::LightDay, "Lightday" };
+    }
+    else if (meters > distanceconstants::LightHour) {
+        return { meters / distanceconstants::LightDay, "Lighthour" };
+    }
+    else if (meters > distanceconstants::AstronomicalUnit) {
+        return { meters / distanceconstants::AstronomicalUnit, "AU" };
+    }
+    else {
+        return { meters / 1000.0, "km" };
+    }
+}
+
+} // namespace openspace

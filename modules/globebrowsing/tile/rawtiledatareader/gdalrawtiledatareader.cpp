@@ -167,7 +167,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     );
 
     PixelRegion::PixelCoordinate end = io.write.region.end();
-    size_t largestIndex =
+    [[maybe_unused]] size_t largestIndex =
         (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _initData.bytesPerPixel();
     ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
 

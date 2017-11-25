@@ -22,17 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DISTANCECONSTANTS___H__
-#define __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+#include <openspace/util/timeconversion.h>
 
-namespace openspace::distanceconstants {
-    constexpr double EarthRadius = 6371;
-    constexpr double LightYear = 9.4607304725808E15;
-    constexpr double LightMonth = LightYear / 12;
-    constexpr double LightDay = LightYear / 365;
-    constexpr double LightHour = LightDay / 24;
-    constexpr double AstronomicalUnit = 1.495978707E11;
-    constexpr double Parsec = 3.0856776E16;
-} // openspace::distanceconstants
+#include <chrono>
 
-#endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+namespace {
+    constexpr double SecondsPerYear = 31556952; // seconds in average Gregorian year
+    constexpr double SecondsPerMonth = SecondsPerYear / 12;
+    constexpr double SecondsPerDay = static_cast<double>(
+        std::chrono::seconds(std::chrono::hours(24)).count()
+    );
+    constexpr double SecondsPerHour = static_cast<double>(
+        std::chrono::seconds(std::chrono::hours(1)).count()
+    );
+    constexpr double SecondsPerMinute = static_cast<double>(
+        std::chrono::seconds(std::chrono::minutes(1)).count()
+        );
+} // namespace
+
+namespace openspace {
+
+std::pair<double, std::string> simplifyTime(double seconds) {
+    double secondsVal = abs(seconds);
+
+    if (secondsVal > 1e-3 && secondsVal < SecondsPerMinute) {
+        return { seconds, seconds == 1.0 ? "second" : "seconds" };
+    }
+
+    if (secondsVal <= 1e-9) {
+        double val = seconds / 1e-9;
+        return { val, val == 1.0 ? "nanosecond" : "nanoseconds" };
+    }
+    else if (secondsVal <= 1e-6) {
+        double val = seconds / 1e-6;
+        return { val, val == 1.0 ? "microsecond" : "microseconds" };
+    }
+    else if (secondsVal <= 1e-3) {
+        double val = seconds / 1e-3;
+        return { val, val == 1.0 ? "millisecond" : "milliseconds" };
+    }
+
+    if (secondsVal >= SecondsPerYear) {
+        double val = seconds / SecondsPerYear;
+        return { val, val == 1.0 ? "year" : "years" };
+    }
+    else if (secondsVal >= SecondsPerMonth) {
+        double val = seconds / SecondsPerMonth;
+        return { val, val == 1.0 ? "month" : "months" };
+    }
+    else if (secondsVal >= SecondsPerDay) {
+        double val = seconds / SecondsPerDay;
+        return { val, val == 1.0 ? "day" : "days" };
+    }
+    else if (secondsVal >= SecondsPerHour) {
+        double val = seconds / SecondsPerHour;
+        return { val, val == 1.0 ? "hour" : "hours" };
+    }
+    else {
+        double val = seconds / SecondsPerMinute;
+        return { val, val == 1.0 ? "minute" : "minutes" };
+    }
+}
+
+} // namespace openspace

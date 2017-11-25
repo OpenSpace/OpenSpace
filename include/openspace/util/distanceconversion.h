@@ -22,17 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DISTANCECONSTANTS___H__
-#define __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+#ifndef __OPENSPACE_CORE___DISTANCECONVERSION___H__
+#define __OPENSPACE_CORE___DISTANCECONVERSION___H__
 
-namespace openspace::distanceconstants {
-    constexpr double EarthRadius = 6371;
-    constexpr double LightYear = 9.4607304725808E15;
-    constexpr double LightMonth = LightYear / 12;
-    constexpr double LightDay = LightYear / 365;
-    constexpr double LightHour = LightDay / 24;
-    constexpr double AstronomicalUnit = 1.495978707E11;
-    constexpr double Parsec = 3.0856776E16;
-} // openspace::distanceconstants
+#include <string>
+#include <utility>
 
-#endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+namespace openspace {
+
+std::pair<double, std::string> simplifyDistance(double meters);
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___DISTANCECONVERSION___H__

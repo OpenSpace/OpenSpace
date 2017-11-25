@@ -267,6 +267,7 @@ void GuiPropertyComponent::render() {
                     dynamic_cast<SceneGraphNode*>(owner),
                     "When using the tree layout, all owners must be SceneGraphNodes"
                 );
+                (void)owner; // using [[maybe_unused]] in the for loop gives an error
             }
 
             // Sort:
