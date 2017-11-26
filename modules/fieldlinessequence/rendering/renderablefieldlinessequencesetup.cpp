@@ -303,8 +303,12 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         LERROR(_name << ": The field " << std::string(KeyInputFileType) << " is missing!");
         return false;
     } else {
-        std::transform(inputFileTypeString.begin(), inputFileTypeString.end(),
-                       inputFileTypeString.begin(), ::tolower);
+        std::transform(
+            inputFileTypeString.begin(),
+            inputFileTypeString.end(),
+            inputFileTypeString.begin(),
+            [](char c) { return static_cast<char>(tolower(c)); }
+        );
         // Verify that the input type is correct
         if (inputFileTypeString == ValueInputFileTypeCdf) {
             sourceFileType = SourceFileType::Cdf;

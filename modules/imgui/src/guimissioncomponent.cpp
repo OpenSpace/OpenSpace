@@ -35,7 +35,7 @@
 #include <openspace/util/timemanager.h>
 
 namespace {
-    const ImVec2 size = ImVec2(350, 500);
+    static const ImVec2 Size = ImVec2(350, 500);
 
     void renderMission(const openspace::Mission& mission) {
         // The hashname is necessary since ImGui computes a hash based off the name of the
@@ -99,7 +99,7 @@ GuiMissionComponent::GuiMissionComponent() : GuiComponent("Mission Information")
 
 void GuiMissionComponent::render() {
     bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, size, 0.75f);
+    ImGui::Begin(name().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
 
     ghoul_assert(

@@ -119,10 +119,10 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
         for (const std::string& key : keys) {
             std::string fullName = moduleDictionary.value<std::string>(key);
             std::replace(fullName.begin(), fullName.end(), '/', FileSys.PathSeparator);
-            std::string path = FileSys.pathByAppendingComponent(modulesPath, fullName);
+            std::string p = FileSys.pathByAppendingComponent(modulesPath, fullName);
 
             std::pair<std::vector<SceneLoader::LoadedNode>, std::vector<SceneLicense>>
-            nodes = loadDirectory(path, state);
+            nodes = loadDirectory(p, state);
 
             std::move(
                 nodes.first.begin(),
@@ -139,7 +139,8 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
 
     std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
-    OsEng.loadingScreen().setItemNumber(allNodes.size() + 1); // +1 for Root node
+    // +1 for Root node
+    OsEng.loadingScreen().setItemNumber(static_cast<int>(allNodes.size() + 1));
 
     std::unique_ptr<SceneGraphNode> rootNode = std::make_unique<SceneGraphNode>();
     rootNode->setName(SceneGraphNode::RootNodeName);
@@ -341,6 +342,7 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& 
     try {
         ghoul::lua::loadDictionaryFromFile(path, moduleDictionary, luaState);
     } catch (const ghoul::lua::LuaRuntimeException& e) {
+        LERROR("Error parsing module: " << path);
         LERRORC(e.component, e.message);
         return std::vector<SceneLoader::LoadedNode>();
     }

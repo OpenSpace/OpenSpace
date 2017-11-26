@@ -26,41 +26,53 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
+namespace {
+
+std::string fromLuaConversion(lua_State* state, bool& success) {
+    success = lua_isstring(state, -1) == 1;
+    if (success) {
+        return lua_tostring(state, -1);
+    }
+    else {
+        return "";
+    }
+}
+
+bool toLuaConversion(lua_State* state, std::string val) {
+    lua_pushstring(state, val.c_str());
+    return true;
+}
+
+std::string fromStringConversion(std::string val, bool& success) {
+    // An incoming string is of the form
+    // "value"
+    // so we want to remove the leading and trailing " characters
+    if (val.size() > 2 && (val[0] == '"' && val[val.size() - 1] == '"')) {
+        // Removing the first and last "
+        success = true;
+        return val.substr(1, val.size() - 2);
+    }
+    success = false;
+    return val;
+}
+
+bool toStringConversion(std::string& outValue, std::string inValue) {
+    outValue = "\"" + inValue + "\"";
+    return true;
+}
+
+} // namespace
+
 namespace openspace::properties {
 
 REGISTER_TEMPLATEPROPERTY_SOURCE(
     StringProperty,
     std::string,
     "",
-    [](lua_State* state, bool& success) -> std::string {
-        success = lua_isstring(state, -1) == 1;
-        if (success) {
-            return lua_tostring(state, -1);
-        }
-        else {
-            return "";
-        }
-    },
-    [](lua_State* state, std::string value) -> bool {
-        lua_pushstring(state, value.c_str());
-        return true;
-    },
-    [](std::string value, bool& success) -> std::string {
-        // An incoming string is of the form
-        // "value"
-        // so we want to remove the leading and trailing " characters
-        if (value.size() > 2 && (value[0] == '"' && value[value.size() - 1] == '"')) {
-            // Removing the first and last "
-            success = true;
-            return value.substr(1, value.size() - 2);
-        }
-        success = false;
-        return value;
-    },
-    [](std::string& outValue, std::string inValue) -> bool {
-        outValue = "\"" + inValue + "\"";
-        return true;
-    },
+    fromLuaConversion,
+    toLuaConversion,
+    fromStringConversion,
+    toStringConversion,
     LUA_TSTRING
 )
 

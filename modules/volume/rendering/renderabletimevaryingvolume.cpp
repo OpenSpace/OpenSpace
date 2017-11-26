@@ -157,20 +157,20 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _clipPlanes(nullptr)
-    , _stepSize(StepSizeInfo, 0.02, 0.01, 1)
+    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _secondsBefore(SecondsBeforeInfo, 0.0, 0.01, SecondsInOneDay)
-    , _secondsAfter(SecondsAfterInfo, 0.0, 0.01, SecondsInOneDay)
+    , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
+    , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
     , _sourceDirectory(SourceDirectoryInfo)
     , _transferFunctionPath(TransferFunctionInfo)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
-    , _opacity(OpacityInfo, 10.0f, 0.0f, 50.0f)
-    , _rNormalization(rNormalizationInfo, 0.0f, 0.0f, 2.0f)
-    , _rUpperBound(rUpperBoundInfo, 1.0f, 0.0f, 2.0f)
-    , _lowerValueBound(lowerValueBoundInfo, 0.0f, 0.0f, 1000000.0f)
-    , _upperValueBound(upperValueBoundInfo, 0.0f, 0.0f, 1000000.0f)
+    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
+    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
+    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
+    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
+    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
 {
@@ -191,6 +191,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" },
     });
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
+
+    if (dictionary.hasValue<float>(KeyStepSize)) {
+        _stepSize = dictionary.value<float>(KeyStepSize);
+    }
 
     if (dictionary.hasValue<float>(KeySecondsBefore)) {
         _secondsBefore = dictionary.value<float>(KeySecondsBefore);
@@ -296,7 +300,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     });
 
     const int lastTimestep = (_volumeTimesteps.size() > 0) ?
-                             (_volumeTimesteps.size() - 1) :
+                             static_cast<int>(_volumeTimesteps.size() - 1) :
                              0;
     _currentTimestep.setMaxValue(lastTimestep);
     _jumpToTimestep.setMaxValue(lastTimestep);
@@ -325,6 +329,12 @@ void RenderableTimeVaryingVolume::initializeGL() {
             VolumeGridType::Spherical :
             VolumeGridType::Cartesian
         );
+    });
+
+    _transferFunctionPath.onChange([this] {
+        _transferFunction =
+            std::make_shared<TransferFunction>(_transferFunctionPath);
+        _raycaster->setTransferFunction(_transferFunction);
     });
 }
 
@@ -425,7 +435,8 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
     OsEng.timeManager().setTimeNextFrame(t->time);
 }
 
-void RenderableTimeVaryingVolume::update(const UpdateData& data) {
+void RenderableTimeVaryingVolume::update(const UpdateData&) {
+    _transferFunction->update();
     if (_raycaster) {
         Timestep* t = currentTimestep();
         _currentTimestep = timestepIndex(t);

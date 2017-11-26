@@ -38,7 +38,7 @@ PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
 {
     glGenBuffers(1, &_id);
     bind();
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, 0, static_cast<GLenum>(_usage));
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, nullptr, static_cast<GLenum>(_usage));
     unbind();
 }
 

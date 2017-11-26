@@ -170,7 +170,7 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex, float* ma
             unsigned int atlasCoords = _freeAtlasCoords.back();
             _freeAtlasCoords.pop_back();
             int level = _nOtLevels - floor(log((7.0 * (float(brickIndex % _nOtNodes)) + 1.0))/log(8)) - 1;
-            assert(atlasCoords <= 0x0FFFFFFF);
+            ghoul_assert(atlasCoords <= 0x0FFFFFFF, "@MISSING");
             unsigned int atlasData = (level << 28) + atlasCoords;
             _brickMap.insert(std::pair<unsigned int, unsigned int>(brickIndex, atlasData));
             _nStreamedBricks++;

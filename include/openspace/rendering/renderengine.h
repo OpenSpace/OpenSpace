@@ -77,6 +77,7 @@ public:
     void initialize();
     void initializeGL();
     void deinitialize();
+    void deinitializeGL();
 
     void setScene(Scene* scene);
     Scene* scene();

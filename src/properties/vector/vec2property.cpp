@@ -30,88 +30,90 @@
 
 #include <limits>
 
-using std::numeric_limits;
+namespace {
+
+glm::vec2 fromLuaConversion(lua_State* state, bool& success) {
+    glm::vec2 result;
+    lua_pushnil(state);
+    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec2>::value; ++i) {
+        int hasNext = lua_next(state, -2);
+        if (hasNext != 1) {
+            success = false;
+            return glm::vec2(0);
+        }
+        if (lua_isnumber(state, -1) != 1) {
+            success = false;
+            return glm::vec2(0);
+        }
+        else {
+            result[i] = static_cast<glm::vec2::value_type>(lua_tonumber(state, -1));
+            lua_pop(state, 1);
+        }
+    }
+    success = true;
+    return result;
+}
+
+bool toLuaConversion(lua_State* state, glm::vec2 value) {
+    lua_newtable(state);
+    int number = 1;
+    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec2>::value; ++i) {
+        lua_pushnumber(state, static_cast<lua_Number>(value[i]));
+        lua_setfield(state, -2, std::to_string(number).c_str());
+        ++number;
+    }
+    return true;
+}
+
+glm::vec2 fromStringConversion(std::string val, bool& success) {
+    glm::vec2 result;
+    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
+    if (tokens.size() != static_cast<size_t>(result.length())) {
+        success = false;
+        return result;
+    }
+    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec2>::value; ++i) {
+        std::stringstream s(tokens[i]);
+        glm::vec2::value_type v;
+        s >> v;
+        if (s.fail()) {
+            success = false;
+            return result;
+        }
+        else {
+            result[i] = v;
+        }
+    }
+    success = true;
+    return result;
+}
+
+bool toStringConversion(std::string& outValue, glm::vec2 inValue) {
+    outValue = "{";
+    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec2>::value; ++i) {
+        outValue += std::to_string(inValue[i]) + ",";
+    }
+    outValue.pop_back();
+    outValue += "}";
+    return true;
+}
+
+} // namespace
 
 namespace openspace::properties {
 
-#define DEFAULT_FROM_LUA_LAMBDA(__TYPE__, __CONVFUNC__, __TESTFUNC__)                    \
-    [](lua_State * state, bool& success) -> __TYPE__ {                                   \
-        __TYPE__ result;                                                                 \
-        lua_pushnil(state);                                                              \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            int hasNext = lua_next(state, -2);                                           \
-            if (hasNext != 1) {                                                          \
-                success = false;                                                         \
-                return __TYPE__(0);                                                      \
-            }                                                                            \
-            if (__TESTFUNC__(state, -1) != 1) {                                          \
-                success = false;                                                         \
-                return __TYPE__(0);                                                      \
-            } else {                                                                     \
-                result[i] = static_cast<__TYPE__::value_type>(__CONVFUNC__(state, -1));  \
-                lua_pop(state, 1);                                                       \
-            }                                                                            \
-        }                                                                                \
-        success = true;                                                                  \
-        return result;                                                                   \
-    }
-
-#define DEFAULT_TO_LUA_LAMBDA(__TYPE__)                                                  \
-    [](lua_State * state, __TYPE__ value) -> bool {                                      \
-        lua_newtable(state);                                                             \
-        int number = 1;                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            lua_pushnumber(state, static_cast<lua_Number>(value[i]));                    \
-            lua_setfield(state, -2, std::to_string(number).c_str());                     \
-            ++number;                                                                    \
-        }                                                                                \
-        return true;                                                                     \
-    }
-
-#define DEFAULT_FROM_STRING_LAMBDA(__TYPE__)                                             \
-    [](std::string val, bool& success) -> __TYPE__ {                                     \
-        __TYPE__ result;                                                                 \
-        std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');               \
-        if (tokens.size() != static_cast<size_t>(result.length())) {                     \
-            success = false;                                                             \
-            return result;                                                               \
-        }                                                                                \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-                std::stringstream s(tokens[i]);                                          \
-                __TYPE__::value_type v;                                                  \
-                s >> v;                                                                  \
-                if (s.fail()) {                                                          \
-                    success = false;                                                     \
-                    return result;                                                       \
-                }                                                                        \
-                else {                                                                   \
-                    result[i] = v;                                                       \
-                }                                                                        \
-        }                                                                                \
-        success = true;                                                                  \
-        return result;                                                                   \
-    }
-
-#define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
-    [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
-        outValue = "{";                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            outValue += std::to_string(inValue[i]) + ",";                                \
-        }                                                                                \
-        outValue.pop_back();                                                             \
-        outValue += "}";                                                                 \
-        return true;                                                                     \
-    }
-
-REGISTER_NUMERICALPROPERTY_SOURCE(Vec2Property, glm::vec2, glm::vec2(0),
-                                  glm::vec2(numeric_limits<float>::lowest()),
-                                  glm::vec2(numeric_limits<float>::max()),
-                                  glm::vec2(0.01f),
-                                  DEFAULT_FROM_LUA_LAMBDA(glm::vec2, lua_tonumber,
-                                                          lua_isnumber),
-                                  DEFAULT_TO_LUA_LAMBDA(glm::vec2),
-                                  DEFAULT_FROM_STRING_LAMBDA(glm::vec2),
-                                  DEFAULT_TO_STRING_LAMBDA(glm::vec2),
-                                  LUA_TTABLE)
+REGISTER_NUMERICALPROPERTY_SOURCE(
+    Vec2Property,
+    glm::vec2,
+    glm::vec2(0),
+    glm::vec2(std::numeric_limits<float>::lowest()),
+    glm::vec2(std::numeric_limits<float>::max()),
+    glm::vec2(0.01f),
+    fromLuaConversion,
+    toLuaConversion,
+    fromStringConversion,
+    toStringConversion,
+    LUA_TTABLE
+)
 
 } // namespace openspace::properties

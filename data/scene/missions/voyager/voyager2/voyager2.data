@@ -1,0 +1,6 @@
+return {
+    FileRequest = {
+        { Identifier = "voyager2_model", Destination = ".", Version = 1 },
+        { Identifier = "voyager2_spice", Destination = "${SPICE}/voyager", Version = 1 }
+    }
+}

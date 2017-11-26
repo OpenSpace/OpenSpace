@@ -346,6 +346,8 @@ bool ScreenSpaceRenderable::isReady() const {
     return _shader && _texture;
 }
 
+void ScreenSpaceRenderable::update() {}
+
 bool ScreenSpaceRenderable::isEnabled() const {
     return _enabled;
 }

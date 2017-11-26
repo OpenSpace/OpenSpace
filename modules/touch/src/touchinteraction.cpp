@@ -360,7 +360,6 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         dvec3 centerPos = ptr->node->worldPosition();
 
         dvec3 directionToCenter = normalize(centerPos - camPos);
-        dvec3 centerToCamera = camPos - centerPos;
         dvec3 lookUp = ptr->camera->lookUpVectorWorldSpace();
         dvec3 camDirection = ptr->camera->viewDirectionWorldSpace();
 
@@ -386,6 +385,8 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         { // Orbit (global rotation)
             dvec3 eulerAngles(q[1], q[0], 0);
             dquat rotationDiffCamSpace = dquat(eulerAngles);
+            
+            dvec3 centerToCamera = camPos - centerPos;
 
             dquat rotationDiffWorldSpace =
                 globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
@@ -393,11 +394,11 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
                 centerToCamera * rotationDiffWorldSpace - centerToCamera;
             camPos += rotationDiffVec3;
 
-            dvec3 centerToCamera = camPos - centerPos;
+            centerToCamera = camPos - centerPos;
             directionToCenter = normalize(-centerToCamera);
             dvec3 lookUpWhenFacingCenter =
                 globalCamRot * dvec3(ptr->camera->lookUpVectorCameraSpace());
-            dmat4 lookAtMat = lookAt(
+            lookAtMat = lookAt(
                 dvec3(0, 0, 0),
                 directionToCenter,
                 lookUpWhenFacingCenter);
@@ -757,12 +758,12 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
     double minDiff = 1000;
     int id = 0;
     for (const TuioCursor& c : list) {
-        TuioPoint point = std::find_if(
+        TuioPoint itPoint = std::find_if(
             lastProcessed.begin(),
             lastProcessed.end(),
             [&c](const Point& p) { return p.first == c.getSessionID(); }
         )->second;
-        double diff = c.getX() - point.getX() + c.getY() - point.getY();
+        double diff = c.getX() - itPoint.getX() + c.getY() - itPoint.getY();
         if (!c.isMoving()) {
             diff = minDiff = 0.0;
             id = c.getSessionID();
@@ -784,8 +785,14 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
                 [&c](const Point& p) { return p.first == c.getSessionID(); }
             )->second;
             double res = 0.0;
-            float lastAngle = point.getAngle(_centroid.x, _centroid.y);
-            float currentAngle = c.getAngle(_centroid.x, _centroid.y);
+            float lastAngle = point.getAngle(
+                static_cast<float>(_centroid.x),
+                static_cast<float>(_centroid.y)
+            );
+            float currentAngle = c.getAngle(
+                static_cast<float>(_centroid.x),
+                static_cast<float>(_centroid.y)
+            );
             if (lastAngle > currentAngle + 1.5 * M_PI) {
                 res = currentAngle + (2 * M_PI - lastAngle);
             }
@@ -811,7 +818,9 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         return ROT;
     }
     else {
-        float avgDistance = std::abs(dist - lastDist) / list.at(0).getMotionSpeed();
+        float avgDistance = static_cast<float>(
+            std::abs(dist - lastDist) / list.at(0).getMotionSpeed()
+        );
         // if average distance between 3 fingers are constant we have panning
         if (avgDistance < _interpretPan && list.size() == 3) {
             return PAN;
@@ -854,7 +863,10 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 list.end(),
                 0.0,
                 [&](double d, const TuioCursor& c) {
-                    return d + c.getDistance(_centroid.x, _centroid.y);
+                    return d + c.getDistance(
+                        static_cast<float>(_centroid.x),
+                        static_cast<float>(_centroid.y)
+                    );
                 }
             ) / list.size();
             double lastDistance = std::accumulate(
@@ -862,7 +874,10 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 lastProcessed.end(),
                 0.0f,
                 [&](float d, const Point& p) {
-                    return d + p.second.getDistance(_centroid.x, _centroid.y);
+                    return d + p.second.getDistance(
+                        static_cast<float>(_centroid.x),
+                        static_cast<float>(_centroid.y)
+                    );
                 }
             ) / lastProcessed.size();
 
@@ -886,8 +901,14 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                         [&c](const Point& p) { return p.first == c.getSessionID(); }
                     )->second;
                     double res = diff;
-                    double lastAngle = point.getAngle(_centroid.x, _centroid.y);
-                    double currentAngle = c.getAngle(_centroid.x, _centroid.y);
+                    double lastAngle = point.getAngle(
+                        static_cast<float>(_centroid.x),
+                        static_cast<float>(_centroid.y)
+                    );
+                    double currentAngle = c.getAngle(
+                        static_cast<float>(_centroid.x),
+                        static_cast<float>(_centroid.y)
+                    );
                     // if's used to set angles 359 + 1 = 0 and 0 - 1 = 359
                     if (lastAngle > currentAngle + 1.5 * M_PI) {
                         res += currentAngle + (2 * M_PI - lastAngle);
@@ -1009,8 +1030,8 @@ void TouchInteraction::step(double dt) {
                                      centerToCamera;
             camPos += rotationDiffVec3;
 
-            dvec3 centerToCamera = camPos - centerPos;
-            directionToCenter = normalize(-centerToCamera);
+            dvec3 centerToCam = camPos - centerPos;
+            directionToCenter = normalize(-centerToCam);
             dvec3 lookUpWhenFacingCenter = globalCamRot *
                                            dvec3(_camera->lookUpVectorCameraSpace());
             dmat4 lookAtMat = lookAt(
@@ -1021,11 +1042,11 @@ void TouchInteraction::step(double dt) {
         }
         { // Zooming
             centerToBoundingSphere = -directionToCenter * boundingSphere;
-            dvec3 centerToCamera = camPos - centerPos;
-            double distToSurface = length(centerToCamera - centerToBoundingSphere);
+            dvec3 centerToCam = camPos - centerPos;
+            double distToSurface = length(centerToCam - centerToBoundingSphere);
 
             if (length(_vel.zoom * dt) < distToSurface &&
-                length(centerToCamera + directionToCenter*_vel.zoom * dt) >
+                length(centerToCam + directionToCenter*_vel.zoom * dt) >
                     length(centerToBoundingSphere))
             {
                 camPos += directionToCenter * _vel.zoom * dt;
@@ -1054,12 +1075,12 @@ void TouchInteraction::unitTest() {
 
         // set _selected pos and new pos (on screen)
         std::vector<TuioCursor> lastFrame = {
-            { TuioCursor(0, 10, 0.45, 0.4) }, // session id, cursor id, x, y
-            { TuioCursor(1, 11, 0.55, 0.6) }
+            { TuioCursor(0, 10, 0.45f, 0.4f) }, // session id, cursor id, x, y
+            { TuioCursor(1, 11, 0.55f, 0.6f) }
         };
         std::vector<TuioCursor> currFrame = {
-            { TuioCursor(0, 10, 0.2, 0.6) }, // (-0.6,-0.2)
-            { TuioCursor(1, 11, 0.8, 0.4) } // (0.6, 0.2)
+            { TuioCursor(0, 10, 0.2f, 0.6f) }, // (-0.6,-0.2)
+            { TuioCursor(1, 11, 0.8f, 0.4f) } // (0.6, 0.2)
         };
 
         // call update
@@ -1098,7 +1119,7 @@ void TouchInteraction::decelerate(double dt) {
     double frequency = 1.0 / _deceleratesPerSecond;
     // Number of times velocities should decelerate, depending on chosen frequency and
     // time slack over from last frame
-    int times = (dt + _timeSlack) / frequency;
+    int times = static_cast<int>((dt + _timeSlack) / frequency);
     // Save the new time slack for the next frame
     _timeSlack = fmod((dt + _timeSlack), frequency);
 

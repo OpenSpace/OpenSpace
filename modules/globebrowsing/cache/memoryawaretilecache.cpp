@@ -301,7 +301,8 @@ void MemoryAwareTileCache::update() {
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
     return std::accumulate(
         _textureContainerMap.cbegin(),
-        _textureContainerMap.cend(), 0,
+        _textureContainerMap.cend(),
+        size_t(0),
         [](size_t s, const std::pair<const TileTextureInitData::HashKey,
         TextureContainerTileCache>& p)
         {
@@ -316,7 +317,8 @@ size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
 size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
     size_t dataSize = std::accumulate(
         _textureContainerMap.cbegin(),
-        _textureContainerMap.cend(), 0,
+        _textureContainerMap.cend(),
+        size_t(0),
         [](size_t s, const std::pair<const TileTextureInitData::HashKey,
         TextureContainerTileCache>& p)
         {

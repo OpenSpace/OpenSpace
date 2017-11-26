@@ -394,8 +394,8 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     KameleonVolumeReader reader(path);
 
     if (_autoValueBounds) {
-        _lowerValueBound = reader.minValue(_variable);
-        _upperValueBound = reader.maxValue(_variable);
+        _lowerValueBound = static_cast<float>(reader.minValue(_variable));
+        _upperValueBound = static_cast<float>(reader.maxValue(_variable));
     }
 
     std::vector<std::string> variables = reader.gridVariableNames();

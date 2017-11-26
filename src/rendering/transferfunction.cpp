@@ -72,6 +72,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     if (!FileSys.fileExists(f)) {
         LERROR("Could not find transfer function file.");
         _file = nullptr;
+        return;
     }
     _filepath = f;
     _file = std::make_unique<ghoul::filesystem::File>(
@@ -191,9 +192,13 @@ void TransferFunction::setTextureFromTxt() {
         for (size_t channel=0; channel<4; ++channel) {
             size_t position = 4*i + channel;
             // Interpolate linearly between prev and next mapping key
-
             float value = ((*prevKey).color[channel] * (1.f - weight) +
                           (*currentKey).color[channel] * weight) / 255.f;
+            if (channel < 3) {
+                // Premultiply with alpha
+                value *= ((*prevKey).color[3] * (1.f - weight) +
+                         (*currentKey).color[3] * weight) / 255.f;
+            }
             transferFunction[position] = value;
         }
     }

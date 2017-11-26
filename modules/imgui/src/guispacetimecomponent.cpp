@@ -37,7 +37,7 @@
 #include <openspace/scene/scene.h>
 
 namespace {
-    const ImVec2 size = ImVec2(350, 500);
+    static const ImVec2 Size = ImVec2(350, 500);
 } // namespace
 
 namespace openspace::gui {
@@ -45,7 +45,7 @@ namespace openspace::gui {
 GuiSpaceTimeComponent::GuiSpaceTimeComponent() : GuiComponent("Space/Time") {}
 
 void GuiSpaceTimeComponent::render() {
-    ImGui::Begin(name().c_str(), nullptr, size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin(name().c_str(), nullptr, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
 
     std::vector<SceneGraphNode*> nodes =
         OsEng.renderEngine().scene()->allSceneGraphNodes();

@@ -544,7 +544,7 @@ void FixedRotation::update(const UpdateData&) {
     glm::vec3 y = yAxis();
     glm::vec3 z = zAxis();
 
-    static const float Epsilon = 1e-3;
+    static const float Epsilon = 1e-3f;
 
     if (glm::dot(x, y) > 1.f - Epsilon ||
         glm::dot(y, z) > 1.f - Epsilon ||
