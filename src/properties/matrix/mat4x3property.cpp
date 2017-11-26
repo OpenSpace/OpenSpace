@@ -31,7 +31,7 @@
 #include <vector>
 
 namespace {
-    
+
 glm::mat4x3 fromLuaConversion(lua_State* state, bool& success) {
     glm::mat4x3 result;
     int number = 1;
@@ -106,7 +106,7 @@ bool toStringConversion(std::string& outValue, glm::mat4x3 inValue) {
     return true;
 }
 
-} // namespace 
+} // namespace
 
 namespace openspace::properties {
 

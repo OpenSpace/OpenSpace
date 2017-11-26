@@ -355,7 +355,6 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
                 break;
             }
     };
-    
 
     _xAxis.type.addOptions({
         { Axis::Type::Object, "Object" },

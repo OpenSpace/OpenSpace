@@ -483,7 +483,11 @@ void GUI::initializeGL() {
         //_contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
-        ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pngData, &textureSize.x, &textureSize.y);
+        ImGui::GetIO().Fonts->GetTexDataAsRGBA32(
+            &pngData,
+            &textureSize.x,
+            &textureSize.y
+        );
     }
     _fontTexture = std::make_unique<ghoul::opengl::Texture>(
         pngData,

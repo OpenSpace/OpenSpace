@@ -40,7 +40,7 @@ class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
 public:
     ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceDashboard();
-    
+
     bool initializeGL() override;
     bool deinitializeGL() override;
 
@@ -51,7 +51,7 @@ public:
 
 private:
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-    
+
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
 };

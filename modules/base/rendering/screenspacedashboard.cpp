@@ -164,7 +164,10 @@ bool ScreenSpaceDashboard::deinitializeGL() {
 }
 
 bool ScreenSpaceDashboard::isReady() const {
-    return (_fontRenderer != nullptr) && (_fontDate != nullptr) && (_fontInfo != nullptr) && ScreenSpaceFramebuffer::isReady();
+    return (_fontRenderer != nullptr) &&
+           (_fontDate != nullptr) &&
+           (_fontInfo != nullptr) &&
+           ScreenSpaceFramebuffer::isReady();
 }
 
 void ScreenSpaceDashboard::update() {

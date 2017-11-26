@@ -145,7 +145,7 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     std::unique_ptr<SceneGraphNode> rootNode = std::make_unique<SceneGraphNode>();
     rootNode->setName(SceneGraphNode::RootNodeName);
     scene->setRoot(std::move(rootNode));
-    
+
     OsEng.loadingScreen().updateItem(
         SceneGraphNode::RootNodeName,
         LoadingScreen::ItemStatus::Started

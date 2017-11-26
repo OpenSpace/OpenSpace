@@ -385,7 +385,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         { // Orbit (global rotation)
             dvec3 eulerAngles(q[1], q[0], 0);
             dquat rotationDiffCamSpace = dquat(eulerAngles);
-            
+
             dvec3 centerToCamera = camPos - centerPos;
 
             dquat rotationDiffWorldSpace =

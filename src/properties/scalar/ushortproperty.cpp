@@ -30,7 +30,7 @@
 #include <sstream>
 
 namespace {
-    
+
 unsigned short fromLuaConversion(lua_State* state, bool& success) {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
