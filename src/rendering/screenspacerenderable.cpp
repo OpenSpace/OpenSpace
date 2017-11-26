@@ -295,7 +295,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     _delete.onChange([this](){
         std::string script =
-            "openspace.unregisterScreenSpaceRenderable('" + name() + "');";
+            "openspace.removeScreenSpaceRenderable('" + name() + "');";
         OsEng.scriptEngine().queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes

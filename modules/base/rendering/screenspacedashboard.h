@@ -22,58 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
 
-#include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/textureunit.h>
+namespace ghoul::fontrendering {
+    class Font;
+    class FontRenderer;
+}
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-/**
- * @brief Creates a texture by rendering to a framebuffer, this is then used on a screen
- *        space plane.
- * @details This class lets you ass renderfunctions that should render to a framebuffer
- *          with an attached texture.
- * The texture is then used on a screen space plane that works both in fisheye and flat
- * screens.
- */
-class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
+class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
 public:
-    ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
-    ~ScreenSpaceFramebuffer();
-
+    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
+    ~ScreenSpaceDashboard();
+    
     bool initializeGL() override;
     bool deinitializeGL() override;
-    void render() override;
-    bool isReady() const override;
 
-    void setSize(glm::vec4);
-    void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
-    void addRenderFunction(std::function<void()> renderFunction);
-    void removeAllRenderFunctions();
+    bool isReady() const override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    void createFramebuffer();
-    properties::Vec4Property _size;
-
 private:
-    static int id();
-
-    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-    std::vector<std::shared_ptr<std::function<void()>>> _renderFunctionsShared;
-    std::vector<std::function<void()>> _renderFunctions;
-
-    int _id;
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+    
+    std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
 };
 
-} //namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
