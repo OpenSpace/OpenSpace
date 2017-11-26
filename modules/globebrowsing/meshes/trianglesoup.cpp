@@ -87,7 +87,7 @@ void TriangleSoup::setElements(std::vector<unsigned int> elements) {
     _elementData.resize(elements.size());
     _gpuDataNeedUpdate = true;
     for (size_t i = 0; i < elements.size(); i++) {
-        _elementData[i] = static_cast<GLuint>(elements[i]);
+        _elementData[i] = elements[i];
     }
 }
 
@@ -128,8 +128,8 @@ bool TriangleSoup::updateDataOnGPU() {
     // Positions at location 0
     if (_useVertexPositions) {
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-            reinterpret_cast<const GLvoid*>(offsetof(Vertex, position)));
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+            //reinterpret_cast<const GLvoid*>(offsetof(Vertex, position)));
     }
     // Textures at location 1
     if (_useTextureCoordinates) {

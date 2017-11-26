@@ -293,7 +293,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
         Geodetic2 corner = chunk.surfacePatch().getCorner(q);
         glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
         glm::dvec3 cornerCameraSpace =
-            glm::dvec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
+            glm::dvec3(modelViewTransform * glm::dvec4(cornerModelSpace, 1));
         cornersCameraSpace[i] = cornerCameraSpace;
         programObject->setUniform(cornerNames[i], vec3(cornerCameraSpace));
     }

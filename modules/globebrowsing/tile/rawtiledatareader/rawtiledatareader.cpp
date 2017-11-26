@@ -577,7 +577,7 @@ TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
 
     TileDepthTransform transform;
     transform.depthOffset = depthOffset();
-    transform.depthScale = depthScale() * maximumValue;
+    transform.depthScale = static_cast<float>(depthScale() * maximumValue);
     return transform;
 }
 

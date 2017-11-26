@@ -68,7 +68,7 @@ void RawVolumeWriter<VoxelType>::write(
     std::vector<VoxelType> buffer(_bufferSize);
     std::ofstream file(_path, std::ios::binary);
 
-    int nChunks = size / _bufferSize;
+    int nChunks = static_cast<int>(size / _bufferSize);
     if (size % _bufferSize > 0) {
         nChunks++;
     }

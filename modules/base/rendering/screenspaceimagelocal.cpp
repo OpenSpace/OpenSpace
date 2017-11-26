@@ -89,7 +89,12 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     }
     else {
         static int id = 0;
-        setName("ScreenSpaceImageLocal " + std::to_string(id));
+        if (id == 0) {
+            setName("ScreenSpaceImageLocal");
+        }
+        else {
+            setName("ScreenSpaceImageLocal " + std::to_string(id));
+        }
         ++id;
     }
 

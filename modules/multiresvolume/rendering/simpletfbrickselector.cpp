@@ -311,7 +311,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
             float x = static_cast<float>(i) / static_cast<float>(tfWidth);
             float sample = histogram->interpolate(x);
 
-            assert(sample >= 0);
+            ghoul_assert(sample >= 0, "@MISSING");
             dotProduct += sample * tf->sample(i).w;
         }
         _brickImportances[brickIndex] = dotProduct;

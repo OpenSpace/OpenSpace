@@ -64,7 +64,7 @@ public:
     virtual bool deinitialize();
     virtual bool deinitializeGL();
 
-    virtual void update() = 0;
+    virtual void update();
     virtual bool isReady() const;
     bool isEnabled() const;
 

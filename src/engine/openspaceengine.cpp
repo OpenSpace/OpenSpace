@@ -421,6 +421,8 @@ void OpenSpaceEngine::destroy() {
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
     _engine->_syncEngine->removeSyncable(_engine->_scriptEngine.get());
 
+    _engine->_renderEngine->deinitializeGL();
+
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 

@@ -56,20 +56,20 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(
         for (int y = minCoords.y; y <= maxCoords.y; y++) {
             for (int x = minCoords.x; x <= maxCoords.x; x++) {
                 glm::ivec3 sampleCoords = glm::ivec3(x, y, z);
-                float filterCoefficient = 1.0;
+                float filterCoefficient = 1.f;
 
                 if (x == minCoords.x) {
-                    filterCoefficient *= (1.0 - t.x);
+                    filterCoefficient *= (1.f - t.x);
                 } else if (x == maxCoords.x) {
                     filterCoefficient *= t.x;
                 }
                 if (y == minCoords.y) {
-                    filterCoefficient *= (1.0 - t.y);
+                    filterCoefficient *= (1.f - t.y);
                 } else if (y == maxCoords.y) {
                     filterCoefficient *= t.y;
                 }
                 if (z == minCoords.z) {
-                    filterCoefficient *= (1.0 - t.z);
+                    filterCoefficient *= (1.f - t.z);
                 } else if (z == maxCoords.z) {
                     filterCoefficient *= t.z;
                 }
