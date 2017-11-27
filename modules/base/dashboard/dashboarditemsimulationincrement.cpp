@@ -22,43 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/timeconversion.h>
+#include <openspace/util/timemanager.h>
 
-#include <openspace/rendering/dashboard.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-}
+namespace {
+    const char* KeyFontMono = "Mono";
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(ghoul::Dictionary dictionary)
+    : DashboardItem("Simulation Increment")
+    , _font(OsEng.fontManager().font(KeyFontMono, 10))
+{
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
-public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+}
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
+    std::pair<double, std::string> deltaTime = simplifyTime(
+        OsEng.timeManager().time().deltaTime()
+    );
+    RenderFontCr(
+        *_font,
+        penPosition,
+        "Simulation increment: %.1f %s / second",
+        deltaTime.first,
+        deltaTime.second.c_str()
+    );
+}
 
-    bool isReady() const override;
-    void update() override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    Dashboard _dashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-};
+glm::vec2 DashboardItemSimulationIncrement::size() const {
+    std::pair<double, std::string> deltaTime = simplifyTime(
+        OsEng.timeManager().time().deltaTime()
+    );
+    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        *_font,
+        "Simulation increment: %.1f %s / second",
+        deltaTime.first,
+        deltaTime.second.c_str()
+    ).boundingBox;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__

@@ -22,43 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-
-#include <modules/base/rendering/screenspaceframebuffer.h>
-
 #include <openspace/rendering/dashboard.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-}
+#include <openspace/rendering/dashboarditem.h>
+#include <openspace/scripting/scriptengine.h>
+
+#include "dashboard_lua.inl"
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+Dashboard::Dashboard()
+    : properties::PropertyOwner({ "Dashboard" })
+{}
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
-public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
+    addPropertySubOwner(item.get());
+    _items.push_back(std::move(item));
+}
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+void Dashboard::removeDashboardItem(int index) {
+    ghoul_assert(index < _items.size(), "Invalid index");
+    removePropertySubOwner(_items[index].get());
+    _items.erase(_items.begin() + index);
+}
 
-    bool isReady() const override;
-    void update() override;
+bool Dashboard::hasItem(int index) const {
+    return (index >= 0) && (index < _items.size());
+}
 
-    static documentation::Documentation Documentation();
+const DashboardItem& Dashboard::item(int index) const {
+    ghoul_assert(index < _items.size(), "Invalid index");
+    return *_items[index];
+}
 
-private:
-    Dashboard _dashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+void Dashboard::removeDashboardItems() {
+    for (const std::unique_ptr<DashboardItem>& item : _items) {
+        removePropertySubOwner(item.get());
+    }
+    _items.clear();
+}
 
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-};
+void Dashboard::render(glm::vec2& penPosition) {
+    for (const std::unique_ptr<DashboardItem>& item : _items) {
+        if (item->isEnabled()) {
+            item->render(penPosition);
+        }
+    }
+}
+
+scripting::LuaLibrary Dashboard::luaLibrary() {
+    return {
+        "dashboard",
+        {
+            {
+                "addDashboardItem",
+                &luascriptfunctions::addDashboardItem,
+                "table",
+                "Adds a new dashboard item to the main dashboard."
+            },
+            {
+                "removeDashboardItems",
+                &luascriptfunctions::removeDashboardItems,
+                "",
+                "Removes all dashboard items from the main dashboard."
+            }
+        }
+    };
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__

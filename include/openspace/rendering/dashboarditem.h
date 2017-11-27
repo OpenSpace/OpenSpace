@@ -22,43 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#ifndef __OPENSPACE_CORE___DASHBOARDITEM___H__
+#define __OPENSPACE_CORE___DASHBOARDITEM___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/properties/propertyowner.h>
 
-#include <openspace/rendering/dashboard.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-}
+#include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
+
+#include <string>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
+class DashboardItem : public properties::PropertyOwner {
 public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+    static std::unique_ptr<DashboardItem> createFromDictionary(
+        ghoul::Dictionary dictionary
+    );
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    DashboardItem(std::string name);
 
-    bool isReady() const override;
-    void update() override;
+    bool isEnabled() const;
+    virtual void render(glm::vec2& penPosition) = 0;
 
-    static documentation::Documentation Documentation();
+    virtual glm::vec2 size() const = 0;
 
-private:
-    Dashboard _dashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+protected:
+    properties::BoolProperty _isEnabled;
 };
 
-} // namespace openspace
+} // openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#endif // __OPENSPACE_CORE___DASHBOARDITEM___H__

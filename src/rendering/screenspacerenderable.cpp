@@ -238,7 +238,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_depth);
     addProperty(_scale);
     addProperty(_alpha);
-    addProperty(_delete);
 
     if (dictionary.hasKey(EnabledInfo.identifier)) {
         _enabled = dictionary.value<bool>(EnabledInfo.identifier);
@@ -298,9 +297,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             "openspace.removeScreenSpaceRenderable('" + name() + "');";
         OsEng.scriptEngine().queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     });
+    addProperty(_delete);
 }
 
 bool ScreenSpaceRenderable::initialize() {

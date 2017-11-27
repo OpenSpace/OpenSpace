@@ -22,43 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#include <openspace/rendering/dashboarditem.h>
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/util/factorymanager.h>
 
-#include <openspace/rendering/dashboard.h>
+#include <ghoul/misc/templatefactory.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-}
+namespace {
+    const char* KeyType = "Type";
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "If this value is set to 'true' this dashboard item is shown in the dashboard"
+    };
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
+                                                             ghoul::Dictionary dictionary)
+{
+    auto factory = FactoryManager::ref().factory<DashboardItem>();
+    ghoul_assert(factory, "DashboardItem factory did not exist");
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
-public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+    std::string dashboardType = dictionary.value<std::string>(KeyType);
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    return factory->create(dashboardType, dictionary);
+}
 
-    bool isReady() const override;
-    void update() override;
+DashboardItem::DashboardItem(std::string name)
+    : properties::PropertyOwner({ std::move(name) })
+    , _isEnabled(EnabledInfo, true)
+{
+    addProperty(_isEnabled);
+}
 
-    static documentation::Documentation Documentation();
-
-private:
-    Dashboard _dashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-};
+bool DashboardItem::isEnabled() const {
+    return _isEnabled;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__

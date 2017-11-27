@@ -22,43 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#include <modules/base/dashboard/dashboarditemdate.h>
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/timemanager.h>
 
-#include <openspace/rendering/dashboard.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-}
+namespace {
+    const char* KeyFontMono = "Mono";
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+DashboardItemDate::DashboardItemDate(ghoul::Dictionary dictionary)
+    : DashboardItem("Date")
+    , _font(OsEng.fontManager().font(KeyFontMono, 15))
+{}
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
-public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+void DashboardItemDate::render(glm::vec2& penPosition) {
+    RenderFontCr(
+        *_font,
+        penPosition,
+        "Date: %s",
+        OsEng.timeManager().time().UTC().c_str()
+    );
+}
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
-
-    bool isReady() const override;
-    void update() override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    Dashboard _dashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-};
+glm::vec2 DashboardItemDate::size() const {
+    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        *_font,
+        "Date: %s",
+        OsEng.timeManager().time().UTC().c_str()
+    ).boundingBox;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__

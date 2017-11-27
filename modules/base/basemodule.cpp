@@ -31,6 +31,13 @@
 
 #include <ghoul/misc/assert.h>
 
+#include <modules/base/dashboard/dashboarditemdate.h>
+#include <modules/base/dashboard/dashboarditemdistance.h>
+#include <modules/base/dashboard/dashboarditemframerate.h>
+#include <modules/base/dashboard/dashboarditemmission.h>
+#include <modules/base/dashboard/dashboarditemparallelconnection.h>
+#include <modules/base/dashboard/dashboarditemsimulationincrement.h>
+
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
@@ -77,6 +84,20 @@ void BaseModule::internalInitialize() {
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
     fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
+
+    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul_assert(fDashboard, "Dashboard factory was not created");
+
+    fDashboard->registerClass<DashboardItemDate>("DashboardItemDate");
+    fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
+    fDashboard->registerClass<DashboardItemFramerate>("DashboardItemFramerate");
+    fDashboard->registerClass<DashboardItemMission>("DashboardItemMission");
+    fDashboard->registerClass<DashboardItemParallelConnection>(
+        "DashboardItemParallelConnection"
+    );
+    fDashboard->registerClass<DashboardItemSimulationIncrement>(
+        "DashboardItemSimulationIncrement"
+    );
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");

@@ -22,43 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#include <openspace/engine/openspaceengine.h>
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+namespace openspace::luascriptfunctions {
 
-#include <openspace/rendering/dashboard.h>
+/**
+* \ingroup LuaScripts
+* addDashboardItem(table):
+*/
+int addDashboardItem(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
+    const int type = lua_type(L, -1);
+    if (type != LUA_TTABLE) {
+        return luaL_error(L, "Expected argument of type 'table'");
+    }
+
+    ghoul::Dictionary d;
+    try {
+        ghoul::lua::luaDictionaryFromState(L, d);
+    }
+    catch (const ghoul::lua::LuaFormatException& e) {
+        LERRORC("addDashboardItem", e.what());
+        return 0;
+    }
+    
+    OsEng.dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+
+    return 0;
 }
 
-namespace openspace {
+/**
+* \ingroup LuaScripts
+* removeDashboardItems(table):
+*/
+int removeDashboardItems(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
-namespace documentation { struct Documentation; }
+    OsEng.dashboard().removeDashboardItems();
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
-public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+    return 0;
+}
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
-
-    bool isReady() const override;
-    void update() override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    Dashboard _dashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+}// namespace openspace::luascriptfunctions

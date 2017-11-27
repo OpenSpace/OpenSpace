@@ -33,6 +33,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
@@ -68,7 +69,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                         &(OsEng.navigationHandler()),
                         &(OsEng.renderEngine()),
                         &(OsEng.parallelConnection()),
-                        &(OsEng.console())
+                        &(OsEng.console()),
+                        &(OsEng.dashboard())
                     };
                     return res;
                 }

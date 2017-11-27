@@ -25,6 +25,12 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdistance.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemframerate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemmission.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemparallelconnection.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
@@ -49,6 +55,12 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdate.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdistance.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemframerate.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemmission.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemparallelconnection.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp

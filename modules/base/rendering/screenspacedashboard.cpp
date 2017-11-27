@@ -36,6 +36,8 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 
+#include <openspace/rendering/dashboard.h>
+
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -65,9 +67,6 @@ documentation::Documentation ScreenSpaceDashboard::Documentation() {
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     : ScreenSpaceFramebuffer(dictionary)
-    , _fontRenderer(nullptr)
-    , _fontDate(nullptr)
-    , _fontInfo(nullptr)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -92,9 +91,9 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     _scale = 1.f;
     _scale.setMaxValue(15.f);
 
-    _size.onChange([this]() {
-        _fontRenderer->setFramebufferSize({ _size.value().z, _size.value().w });
-    });
+    //_size.onChange([this]() {
+    //    _fontRenderer->setFramebufferSize({ _size.value().z, _size.value().w });
+    //});
 }
 
 ScreenSpaceDashboard::~ScreenSpaceDashboard() {}
@@ -102,71 +101,77 @@ ScreenSpaceDashboard::~ScreenSpaceDashboard() {}
 bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
-    _fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
-    _fontRenderer->setFramebufferSize({ _size.value().z, _size.value().w });
+    //_fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
+    //_fontRenderer->setFramebufferSize({ _size.value().z, _size.value().w });
 
 
-    _fontDate = OsEng.fontManager().font(
-        KeyFontMono,
-        48
-    );
-    _fontInfo = OsEng.fontManager().font(
-        KeyFontMono,
-        32
-    );
+    //_fontDate = OsEng.fontManager().font(
+    //    KeyFontMono,
+    //    48
+    //);
+    //_fontInfo = OsEng.fontManager().font(
+    //    KeyFontMono,
+    //    32
+    //);
 
     addRenderFunction([this]() {
-
         glm::vec2 penPosition = glm::vec2(
             10.f,
             _size.value().w
         );
 
-        penPosition.y -= _fontDate->height();
-        RenderFontCr(
-            *_fontDate,
-            penPosition,
-            "Date: %s",
-            OsEng.timeManager().time().UTC().c_str()
-        );
+        //_dashboard.render(penPosition);
+        OsEng.dashboard().render(penPosition);
+        //glm::vec2 penPosition = glm::vec2(
+        //    10.f,
+        //    _size.value().w
+        //);
 
-        std::pair<double, std::string> deltaTime = simplifyTime(
-            OsEng.timeManager().time().deltaTime()
-        );
-        RenderFontCr(
-            *_fontInfo,
-            penPosition,
-            "Simulation increment: %.1f %s / second",
-            deltaTime.first,
-            deltaTime.second.c_str()
-        );
+        //penPosition.y -= _fontDate->height();
+        //RenderFontCr(
+        //    *_fontDate,
+        //    penPosition,
+        //    "Date: %s",
+        //    OsEng.timeManager().time().UTC().c_str()
+        //);
 
-        double distance = glm::length(
-            OsEng.renderEngine().camera()->positionVec3() -
-            OsEng.navigationHandler().focusNode()->worldPosition()
-        );
-        std::pair<double, std::string> dist = simplifyDistance(distance);
-        RenderFontCr(
-            *_fontInfo,
-            penPosition,
-            "Distance from focus: %f %s",
-            dist.first,
-            dist.second.c_str()
-        );
+        //std::pair<double, std::string> deltaTime = simplifyTime(
+        //    OsEng.timeManager().time().deltaTime()
+        //);
+        //RenderFontCr(
+        //    *_fontInfo,
+        //    penPosition,
+        //    "Simulation increment: %.1f %s / second",
+        //    deltaTime.first,
+        //    deltaTime.second.c_str()
+        //);
+
+        //double distance = glm::length(
+        //    OsEng.renderEngine().camera()->positionVec3() -
+        //    OsEng.navigationHandler().focusNode()->worldPosition()
+        //);
+        //std::pair<double, std::string> dist = simplifyDistance(distance);
+        //RenderFontCr(
+        //    *_fontInfo,
+        //    penPosition,
+        //    "Distance from focus: %f %s",
+        //    dist.first,
+        //    dist.second.c_str()
+        //);
     });
 
     return true;
 }
 
 bool ScreenSpaceDashboard::deinitializeGL() {
-    _fontRenderer = nullptr;
+    //_fontRenderer = nullptr;
     return ScreenSpaceFramebuffer::deinitializeGL();
 }
 
 bool ScreenSpaceDashboard::isReady() const {
-    return (_fontRenderer != nullptr) &&
+    return /*(_fontRenderer != nullptr) &&
            (_fontDate != nullptr) &&
-           (_fontInfo != nullptr) &&
+           (_fontInfo != nullptr) &&*/
            ScreenSpaceFramebuffer::isReady();
 }
 
