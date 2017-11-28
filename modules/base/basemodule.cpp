@@ -37,6 +37,7 @@
 #include <modules/base/dashboard/dashboarditemmission.h>
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
+#include <modules/base/dashboard/dashboarditemspacing.h>
 
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
@@ -98,6 +99,7 @@ void BaseModule::internalInitialize() {
     fDashboard->registerClass<DashboardItemSimulationIncrement>(
         "DashboardItemSimulationIncrement"
     );
+    fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");

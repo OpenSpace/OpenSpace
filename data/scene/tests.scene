@@ -68,6 +68,11 @@ function preInitialization()
         DestinationNodeName = "Sun"
     })
 
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSpacing",
+        Spacing = 100
+    })
+
     -- DashboardItemFramerate
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemFramerate"
@@ -95,6 +100,10 @@ function preInitialization()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemFramerate",
         FrametimeType = "None"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSpacing"
     })
 
     -- DashboardItemSimulationIncrement
