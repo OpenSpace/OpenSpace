@@ -36,6 +36,27 @@ Dashboard::Dashboard()
 {}
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
+    std::string originalName = item->name();
+    int suffix = 1;
+    while (true) {
+        auto it = std::find_if(
+            _items.begin(),
+            _items.end(),
+            [&item](const std::unique_ptr<DashboardItem>& i) {
+                return (i->name() == item->name());
+            }
+        );
+
+        if (it == _items.end()) {
+            // We found a unique name
+            break;
+        }
+        else {
+            item->setName(originalName + " " + std::to_string(suffix));
+            ++suffix;
+        }
+    }
+
     addPropertySubOwner(item.get());
     _items.push_back(std::move(item));
 }

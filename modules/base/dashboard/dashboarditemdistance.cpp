@@ -290,7 +290,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
                         comp.nodeName
                     );
 
-                    if (comp.node) {
+                    if (!comp.node) {
                         LERRORC(
                             "DashboardItemDistance",
                             "Could not find node '" + comp.nodeName.value() + "'"

@@ -65,6 +65,38 @@ function preInitialization()
         DestinationNodeName = "Sun"
     })
 
+    -- DashboardItemFramerate
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemFramerate"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemFramerate",
+        FontName = "Light",
+        FontSize = 36,
+        FrametimeType = "Average Deltatime"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemFramerate",
+        FontName = "Console",
+        FrametimeType = "Frames per second"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemFramerate",
+        FontSize = 28,
+        FrametimeType = "Average frames per second"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemFramerate",
+        FrametimeType = "None"
+    })
+
+
+
+
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
