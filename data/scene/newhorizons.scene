@@ -28,12 +28,44 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
-    dofile(openspace.absPath('${SCRIPTS}/default_setup.lua'))
+    set_default_dashboard()
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSpacing",
+        Spacing = 50
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Node",
+        SourceNodeName = "NewHorizons",
+        DestinationType = "Node",
+        DestinationNodeName = "Pluto"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Node",
+        SourceNodeName = "NewHorizons",
+        DestinationType = "Node Surface",
+        DestinationNodeName = "Pluto"
+    })
+
+        openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Camera",
+        DestinationType = "Node Surface",
+        DestinationNodeName = "Pluto"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemInstruments"
+    })
 
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2015-07-14T08:00:00.00")
+    openspace.time.setTime("2015-07-14T11:49:00.00")
 
     -- Load the common helper functions
     dofile(openspace.absPath('${SCRIPTS}/common.lua'))

@@ -31,6 +31,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
+#include <utility>
+
 namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
@@ -53,18 +55,24 @@ public:
 private:
     enum Type {
         Node = 0,
+        NodeSurface,
         Focus,
         Camera
     };
-
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
-
+    
     struct Component {
         properties::OptionProperty type;
         properties::StringProperty nodeName;
         SceneGraphNode* node;
     };
+
+    std::pair<glm::dvec3, std::string> positionAndLabel(Component& mainComp,
+        Component& otherComp) const;
+
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+
 
     Component _source;
     Component _destination;

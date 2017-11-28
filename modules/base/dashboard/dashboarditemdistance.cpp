@@ -112,7 +112,7 @@ documentation::Documentation DashboardItemDistance::Documentation() {
             {
                 SourceTypeInfo.identifier,
                 new StringInListVerifier({
-                    "Node", "Focus", "Camera"
+                    "Node", "Node Surface" "Focus", "Camera"
                 }),
                 Optional::Yes,
                     SourceTypeInfo.description
@@ -126,7 +126,7 @@ documentation::Documentation DashboardItemDistance::Documentation() {
             {
                 DestinationTypeInfo.identifier,
                 new StringInListVerifier({
-                    "Node", "Focus", "Camera"
+                    "Node", "Node Surface", "Focus", "Camera"
                 }),
                 Optional::Yes,
                 DestinationTypeInfo.description
@@ -189,24 +189,30 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
 
     _source.type.addOptions({
         { Type::Node, "Node" },
+        { Type::NodeSurface, "Node Surface" },
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
     _source.type.onChange([this]() {
         _source.nodeName.setVisibility(
-            properties::Property::Visibility(_source.type.value() == Type::Node)
+            properties::Property::Visibility(
+                _source.type == Type::Node || _source.type == Type::NodeSurface
+            )
         );
     });
     if (dictionary.hasKey(SourceTypeInfo.identifier)) {
         std::string value = dictionary.value<std::string>(SourceTypeInfo.identifier);
         if (value == "Node") {
-            _source.type.setValue(Type::Node);
+            _source.type = Type::Node;
+        }
+        else if (value == "Node Surface") {
+            _source.type = Type::NodeSurface;
         }
         else if (value == "Focus") {
-            _source.type.setValue(Type::Focus);
+            _source.type = Type::Focus;
         }
         else {
-            _source.type.setValue(Type::Camera);
+            _source.type = Type::Camera;
         }
     }
     else {
@@ -217,7 +223,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     _source.nodeName.onChange([this]() {
         _source.node = nullptr;
     });
-    if (_source.type.value() == Type::Node) {
+    if (_source.type == Type::Node || _source.type == Type::NodeSurface) {
         if (dictionary.hasKey(SourceNodeNameInfo.identifier)) {
             _source.nodeName = dictionary.value<std::string>(
                 SourceNodeNameInfo.identifier
@@ -234,26 +240,30 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
 
     _destination.type.addOptions({
         { Type::Node, "Node" },
+        { Type::NodeSurface, "Node Surface" },
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
     _destination.type.onChange([this]() {
         _destination.nodeName.setVisibility(
             properties::Property::Visibility(
-                _destination.type.value() == static_cast<int>(Type::Node)
+                _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );
     });
     if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
         std::string value = dictionary.value<std::string>(DestinationTypeInfo.identifier);
         if (value == "Node") {
-            _destination.type.setValue(Type::Node);
+            _destination.type = Type::Node;
+        }
+        else if (value == "Node Surface") {
+            _destination.type = Type::NodeSurface;
         }
         else if (value == "Focus") {
-            _destination.type.setValue(Type::Focus);
+            _destination.type = Type::Focus;
         }
         else {
-            _destination.type.setValue(Type::Camera);
+            _destination.type = Type::Camera;
         }
     }
     else {
@@ -263,7 +273,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     _destination.nodeName.onChange([this]() {
         _destination.node = nullptr;
     });
-    if (_destination.type.value() == Type::Node) {
+    if (_destination.type == Type::Node || _destination.type == Type::NodeSurface) {
         if (dictionary.hasKey(DestinationNodeNameInfo.identifier)) {
             _destination.nodeName = dictionary.value<std::string>(
                 DestinationNodeNameInfo.identifier
@@ -281,39 +291,81 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 
-void DashboardItemDistance::render(glm::vec2& penPosition) {
-    auto positionAndLabel = [](Component& comp) -> std::pair<glm::dvec3, std::string> {
-        switch (comp.type) {
-            case Type::Node:
-                if (!comp.node) {
-                    comp.node = OsEng.renderEngine().scene()->sceneGraphNode(
-                        comp.nodeName
-                    );
+std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
+                                                    Component& mainComp,
+                                                    Component& otherComp) const
+{
+    if (mainComp.type == Type::Node || mainComp.type == Type::NodeSurface) {
+        if (!mainComp.node) {
+            mainComp.node = OsEng.renderEngine().scene()->sceneGraphNode(
+                mainComp.nodeName
+            );
 
-                    if (!comp.node) {
-                        LERRORC(
-                            "DashboardItemDistance",
-                            "Could not find node '" + comp.nodeName.value() + "'"
-                        );
-                        return { glm::dvec3(0.0), "Node" };
-                    }
-                }
-
-                return { comp.node->worldPosition(), comp.node->name() };
-            case Type::Focus:
-                return {
-                    OsEng.navigationHandler().focusNode()->worldPosition(),
-                    "focus"
-                };
-            case Type::Camera:
-                return { OsEng.renderEngine().camera()->positionVec3(), "camera" };
-            default:
-                return { glm::dvec3(0.0), "Unknown" };
+            if (!mainComp.node) {
+                LERRORC(
+                    "DashboardItemDistance",
+                    "Could not find node '" + mainComp.nodeName.value() + "'"
+                );
+                return { glm::dvec3(0.0), "Node" };
+            }
         }
-    };
+    }
 
-    std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
-    std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(_destination);
+    switch (mainComp.type) {
+        case Type::Node:
+            return { mainComp.node->worldPosition(), mainComp.node->name() };
+        case Type::NodeSurface:
+        {
+            glm::dvec3 otherPos = positionAndLabel(otherComp, mainComp).first;
+            glm::dvec3 thisPos = mainComp.node->worldPosition();
+
+            glm::dvec3 dir = glm::normalize(otherPos - thisPos);
+            glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
+
+            return { thisPos + dirLength, "surface of " + mainComp.node->name() };
+
+
+            //glm::dvec3 pos = positionAndLabel(otherComp, mainComp).first;
+
+            //glm::dvec3 modelPos = glm::dvec3(
+            //    mainComp.node->inverseModelTransform() * glm::dvec4(pos, 1.0)
+            //);
+            //SurfacePositionHandle h = mainComp.node->calculateSurfacePositionHandle(
+            //    modelPos
+            //);
+            //glm::dvec3 centerToActualSurface = 
+            //    h.centerToReferenceSurface +
+            //    h.referenceSurfaceOutDirection * h.heightToSurface;
+
+            //glm::dvec3 surfaceWorld =
+            //    mainComp.node->worldPosition() + centerToActualSurface;
+
+            //return {
+            //    surfaceWorld,
+            //    "surface of " + mainComp.node->name()
+            //};
+        }
+        case Type::Focus:
+            return {
+                OsEng.navigationHandler().focusNode()->worldPosition(),
+                "focus"
+            };
+        case Type::Camera:
+            return { OsEng.renderEngine().camera()->positionVec3(), "camera" };
+        default:
+            return { glm::dvec3(0.0), "Unknown" };
+    }
+};
+
+void DashboardItemDistance::render(glm::vec2& penPosition) {
+    std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(
+        _source,
+        _destination
+    );
+    std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(
+        _destination,
+        _source
+    );
 
     double distance = glm::length(sourceInfo.first - destinationInfo.first);
     std::pair<double, std::string> dist = simplifyDistance(distance);

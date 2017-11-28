@@ -30,30 +30,34 @@ namespace openspace {
 
 std::pair<double, std::string> simplifyDistance(double meters) {
     if (meters > 1e-3 && meters < 1e3) {
-        return { meters, "meter" };
+        return { meters, meters == 1.0 ? "meter" : "meters" };
     }
 
     if (meters < 1e-9) {
-        return { meters / 1e-9, "nanometer" };
+        return { meters / 1e-9, (meters / 1e-9) == 1.0 ? "nanometer" : "nanometers" };
     }
     else if (meters < 1e-6) {
-        return { meters / 1e-6, "micrometer" };
+        return { meters / 1e-6, (meters / 1e-6) == 1.0 ? "micrometer" : "micrometers" };
     }
     else if (meters < 1e-3) {
-        return { meters / 1e-3, "millimeter" };
+        return { meters / 1e-3, (meters / 1e-3) == 1.0 ? "millimeter" : "millimeters" };
     }
 
     if (meters > (1e9 * distanceconstants::Parsec)) {
-        return { meters / (1e9 * distanceconstants::Parsec) , "Gigaparsec" };
+        double val = meters / (1e9 * distanceconstants::Parsec);
+        return { val, val == 1.0 ? "Gigaparsec" : "Gigaparsecs" };
     }
     else if (meters > (1e6 * distanceconstants::Parsec)) {
-        return { meters / (1e6 * distanceconstants::Parsec), "Megaparsec" };
+        double val = meters / (1e6 * distanceconstants::Parsec);
+        return { val, val == 1.0 ? "Megaparsec" : "Megaparsecs" };
     }
     else if (meters > (1e3 * distanceconstants::Parsec)) {
-        return { meters / (1e3 * distanceconstants::Parsec), "Kiloparsec" };
+        double val = meters / (1e3 * distanceconstants::Parsec);
+        return { val, val == 1.0 ? "Kiloparsec" : "Kiloparsecs" };
     }
     else if (meters > distanceconstants::Parsec) {
-        return { meters / distanceconstants::Parsec, "Parsec" };
+        double val = meters / distanceconstants::Parsec;
+        return { val, val == 1.0 ? "Parsec", "Parsecs" };
     }
     else if (meters > distanceconstants::LightYear) {
         double val = meters / distanceconstants::LightYear;
