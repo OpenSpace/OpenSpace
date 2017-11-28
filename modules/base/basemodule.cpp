@@ -137,22 +137,35 @@ void BaseModule::internalInitialize() {
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
+        DashboardItemDate::Documentation(),
+        DashboardItemDistance::Documentation(),
+        DashboardItemFramerate::Documentation(),
+        DashboardItemMission::Documentation(),
+        DashboardItemParallelConnection::Documentation(),
+        DashboardItemSimulationIncrement::Documentation(),
+        DashboardItemSpacing::Documentation(),
+
         RenderableModel::Documentation(),
         RenderablePlane::Documentation(),
         RenderableSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
+
         ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
+
         FixedRotation::Documentation(),
         LuaRotation::Documentation(),
         StaticRotation::Documentation(),
+
         LuaScale::Documentation(),
         StaticScale::Documentation(),
+
         LuaTranslation::Documentation(),
         StaticTranslation::Documentation(),
+
         modelgeometry::ModelGeometry::Documentation(),
     };
 }

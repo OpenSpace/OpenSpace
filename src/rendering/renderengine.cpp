@@ -34,6 +34,7 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
+#include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -531,6 +532,13 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     // Print some useful information on the master viewport
     if (wrapper.isMaster() && wrapper.isSimpleRendering()) {
+        std::unique_ptr<performance::PerformanceMeasurement> perf;
+        if (_performanceManager) {
+            perf = std::make_unique<performance::PerformanceMeasurement>(
+                "Main Dashboard::render",
+                OsEng.renderEngine().performanceManager()
+            );
+    }
         glm::vec2 penPosition = glm::vec2(
             10.f,
             fontResolution().y
