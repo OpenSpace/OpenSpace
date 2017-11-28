@@ -317,7 +317,8 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 
     double distance = glm::length(sourceInfo.first - destinationInfo.first);
     std::pair<double, std::string> dist = simplifyDistance(distance);
-    RenderFontCr(
+    penPosition.y -= _font->height();
+    RenderFont(
         *_font,
         penPosition,
         "Distance from %s to %s: %f %s",

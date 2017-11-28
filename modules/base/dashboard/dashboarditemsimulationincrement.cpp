@@ -116,7 +116,8 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
     std::pair<double, std::string> deltaTime = simplifyTime(
         OsEng.timeManager().time().deltaTime()
     );
-    RenderFontCr(
+    penPosition.y -= _font->height();
+    RenderFont(
         *_font,
         penPosition,
         "Simulation increment: %.1f %s / second",

@@ -152,8 +152,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 str.c_str()
             );
         }
-        std::pair<double, std::string> nextTarget =
-            ImageSequencer::ref().getNextTarget();
+        std::pair<double, std::string> nextTarget = ImageSequencer::ref().getNextTarget();
         std::pair<double, std::string> currentTarget =
             ImageSequencer::ref().getCurrentTarget();
 

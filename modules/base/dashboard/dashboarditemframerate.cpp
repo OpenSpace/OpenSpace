@@ -158,7 +158,8 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
     switch (frametimeType) {
         case FrametimeType::DtTimeAvg:
-            RenderFontCr(
+            penPosition.y -= _font->height();
+            RenderFont(
                 *_font,
                 penPosition,
                 "Avg. Frametime: %.5f",
@@ -166,7 +167,8 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
             );
             break;
         case FrametimeType::FPS:
-            RenderFontCr(
+            penPosition.y -= _font->height();
+            RenderFont(
                 *_font,
                 penPosition,
                 "FPS: %3.2f",
@@ -174,7 +176,8 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
             );
             break;
         case FrametimeType::FPSAvg:
-            RenderFontCr(
+            penPosition.y -= _font->height();
+            RenderFont(
                 *_font,
                 penPosition,
                 "Avg. FPS: %3.2f",
@@ -208,6 +211,8 @@ glm::vec2 DashboardItemFramerate::size() const {
                 1.0 / OsEng.windowWrapper().averageDeltaTime()
             ).boundingBox;
         case FrametimeType::None:
+            return { 0.f, 0.f };
+        default:
             return { 0.f, 0.f };
     }
 }

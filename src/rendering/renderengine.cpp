@@ -45,9 +45,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/distanceconversion.h>>
 #include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 
@@ -540,15 +538,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         
         penPosition.y -= OsEng.console().currentHeight();
 
-        if (OsEng.dashboard().hasItem(0)) {
-            // We need to offset the penposition by the height of the first item as the
-            // position is specified in the lower left corner. Without this, the first
-            // element would be rendered above the screen instead
-            penPosition.y -= OsEng.dashboard().item(0).size().y;
-        }
-
         OsEng.dashboard().render(penPosition);
-        //renderInformation();
     }
 
     if (_showFrameNumber) {

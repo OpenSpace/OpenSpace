@@ -112,7 +112,8 @@ DashboardItemDate::DashboardItemDate(ghoul::Dictionary dictionary)
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
-    RenderFontCr(
+    penPosition.y -= _font->height();
+    RenderFont(
         *_font,
         penPosition,
         "Date: %s",

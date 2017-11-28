@@ -9,6 +9,9 @@ function preInitialization()
     ]]--
     -- dofile(openspace.absPath('${SCRIPTS}/default_setup.lua'))
 
+    local TestFontSize1 = 28
+    local TestFontSize2 = 20
+
     -- DashboardItemDate tests
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemDate"
@@ -20,11 +23,11 @@ function preInitialization()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemDate",
         FontName = "Light",
-        FontSize = 36
+        FontSize = TestFontSize1
     })
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemDate",
-        FontSize = 28
+        FontSize = TestFontSize2
     })
 
     -- DashboardItemDistance tests
@@ -40,13 +43,13 @@ function preInitialization()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemDistance",
         FontName = "Light",
-        FontSize = 36,
+        FontSize = TestFontSize1,
         SourceType = "Focus",
         DestinationType = "Camera"
     })
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemDistance",
-        FontSize = 28,
+        FontSize = TestFontSize2,
         SourceType = "Focus",
         DestinationType = "Node",
         DestinationNodeName = "Sun"
@@ -73,7 +76,7 @@ function preInitialization()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemFramerate",
         FontName = "Light",
-        FontSize = 36,
+        FontSize = TestFontSize1,
         FrametimeType = "Average Deltatime"
     })
 
@@ -85,7 +88,7 @@ function preInitialization()
 
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemFramerate",
-        FontSize = 28,
+        FontSize = TestFontSize2,
         FrametimeType = "Average frames per second"
     })
 
@@ -94,7 +97,25 @@ function preInitialization()
         FrametimeType = "None"
     })
 
+    -- DashboardItemSimulationIncrement
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSimulationIncrement"
+    })
 
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSimulationIncrement",
+        FontName = "Light",
+        FontSize = TestFontSize1,
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSimulationIncrement",
+        FontName = "Console"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSimulationIncrement",
+        FontSize = TestFontSize2
+    })
 
 
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
