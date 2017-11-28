@@ -56,16 +56,20 @@ std::pair<double, std::string> simplifyDistance(double meters) {
         return { meters / distanceconstants::Parsec, "Parsec" };
     }
     else if (meters > distanceconstants::LightYear) {
-        return { meters / distanceconstants::LightYear, "Lightyears" };
+        double val = meters / distanceconstants::LightYear;
+        return { val, val == 1.0 ? "Lightyear" : "Lightyears" };
     }
     else if (meters > distanceconstants::LightMonth) {
-        return { meters / distanceconstants::LightMonth, "Lightmonth" };
+        double val = meters / distanceconstants::LightMonth;
+        return { val, val == 1.0 ? "Lightmonth" : "Lightmonths" };
     }
     else if (meters > distanceconstants::LightDay) {
-        return { meters / distanceconstants::LightDay, "Lightday" };
+        double val = meters / distanceconstants::LightDay;
+        return { val, val == 1.0 ? "Lightday" : "Lightdays" };
     }
     else if (meters > distanceconstants::LightHour) {
-        return { meters / distanceconstants::LightDay, "Lighthour" };
+        double val = meters / distanceconstants::LightDay;
+        return { val, val == 1.0 ? "Lighthour" : "Lighthours" };
     }
     else if (meters > distanceconstants::AstronomicalUnit) {
         return { meters / distanceconstants::AstronomicalUnit, "AU" };

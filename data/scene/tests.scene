@@ -1,0 +1,123 @@
+dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
+
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+    -- dofile(openspace.absPath('${SCRIPTS}/default_setup.lua'))
+
+    -- DashboardItemDate tests
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDate"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDate",
+        FontName = "Console"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDate",
+        FontName = "Light",
+        FontSize = 36
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDate",
+        FontSize = 28
+    })
+
+    -- DashboardItemDistance tests
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        FontName = "Console",
+        SourceType = "Node",
+        SourceNodeName = "Moon"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        FontName = "Light",
+        FontSize = 36,
+        SourceType = "Focus",
+        DestinationType = "Camera"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        FontSize = 28,
+        SourceType = "Focus",
+        DestinationType = "Node",
+        DestinationNodeName = "Sun"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Camera",
+        DestinationType = "Focus"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Camera",
+        SourceType = "Node",
+        SourceNodeName = "Saturn",
+        DestinationType = "Node",
+        DestinationNodeName = "Sun"
+    })
+
+    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    openspace.time.setTime("2000 JAN 01")
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+end
+
+function postInitialization()
+    openspace.printInfo("Setting default values")
+
+    openspace.setPropertyValueSingle("Global Properties.GlobeBrowsing.GdalWrapper.LogGdalErrors", false)
+    openspace.setPropertyValueSingle("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
+
+    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+
+    openspace.printInfo("Done setting default values")
+
+    -- Defined in scene_helper.lua
+    -- Used to create focus buttons for a subset of scenegraph nodes
+    mark_interesting_nodes({
+        "Earth"
+    })
+end
+
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "Earth",
+        Position = {0, 0, 0},
+        Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
+    },
+    Modules = {
+        -- # Solar system objects
+        "sun",
+        "mercury",
+        "venus",
+        "earth",
+        "moon",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        -- "satellites",
+
+        -- "grids",
+        -- "digitaluniverse",
+        "stars/digitaluniverse",
+        "milkyway/digitaluniverse",
+
+        -- "missions/voyager"
+    }
+}
+

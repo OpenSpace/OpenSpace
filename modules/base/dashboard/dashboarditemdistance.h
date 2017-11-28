@@ -27,14 +27,15 @@
 
 #include <openspace/rendering/dashboarditem.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-} // namespace ghoul::fontrendering
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
+
+class SceneGraphNode;
 
 namespace documentation { struct Documentation; }
 
@@ -50,8 +51,23 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    enum Type {
+        Node = 0,
+        Focus,
+        Camera
+    };
+
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
+
+    struct Component {
+        properties::OptionProperty type;
+        properties::StringProperty nodeName;
+        SceneGraphNode* node;
+    };
+
+    Component _source;
+    Component _destination;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
