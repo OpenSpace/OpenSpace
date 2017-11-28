@@ -57,7 +57,7 @@ std::pair<double, std::string> simplifyDistance(double meters) {
     }
     else if (meters > distanceconstants::Parsec) {
         double val = meters / distanceconstants::Parsec;
-        return { val, val == 1.0 ? "Parsec", "Parsecs" };
+        return { val, val == 1.0 ? "Parsec" : "Parsecs" };
     }
     else if (meters > distanceconstants::LightYear) {
         double val = meters / distanceconstants::LightYear;
