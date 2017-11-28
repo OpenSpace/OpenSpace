@@ -32,7 +32,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/distanceconversion.h>>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 
@@ -43,8 +43,6 @@
 
 namespace {
     const char* KeyName = "Name";
-    const char* KeyFontMono = "Mono";
-
 } // namespace
 
 namespace openspace {

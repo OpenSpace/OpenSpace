@@ -24,6 +24,8 @@
 
 #include <modules/base/dashboard/dashboarditemdistance.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -36,15 +38,83 @@
 
 namespace {
     const char* KeyFontMono = "Mono";
+
+    const float DefaultFontSize = 10.f;
+
+    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+        "FontName",
+        "Font Name",
+        "This value is the name of the font that is used. It can either refer to an "
+        "internal name registered previously, or it can refer to a path that is used."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+        "FontSize",
+        "Font Size",
+        "This value determines the size of the font that is used to render the date."
+    };
 } // namespace
 
 namespace openspace {
 
+documentation::Documentation DashboardItemDistance::Documentation() {
+    using namespace documentation;
+    return {
+        "DashboardItem Distance",
+        "base_dashboarditem_distance",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("DashboardItemDistance"),
+                Optional::No
+            },
+            {
+                FontNameInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                FontNameInfo.description
+            },
+            {
+                FontSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                FontSizeInfo.description
+            }
+        }
+    };
+}
+
 DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     : DashboardItem("Distance")
-    , _font(OsEng.fontManager().font(KeyFontMono, 10))
+    , _fontName(FontNameInfo, KeyFontMono)
+    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "DashboardItemDistance"
+    );
 
+    if (dictionary.hasKey(FontNameInfo.identifier)) {
+        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
+    }
+    if (dictionary.hasKey(FontSizeInfo.identifier)) {
+        _fontSize = static_cast<float>(
+            dictionary.value<double>(FontSizeInfo.identifier)
+        );
+    }
+
+    _fontName.onChange([this](){
+        _font = OsEng.fontManager().font(_fontName, _fontSize);
+    });
+    addProperty(_fontName);
+
+    _fontSize.onChange([this](){
+        _font = OsEng.fontManager().font(_fontName, _fontSize);
+    });
+    addProperty(_fontSize);
+    
+    _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 
 void DashboardItemDistance::render(glm::vec2& penPosition) {

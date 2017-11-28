@@ -24,6 +24,8 @@
 
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -36,15 +38,81 @@
 
 namespace {
     const char* KeyFontMono = "Mono";
+    const float DefaultFontSize = 10.f;
+
+    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+        "FontName",
+        "Font Name",
+        "This value is the name of the font that is used. It can either refer to an "
+        "internal name registered previously, or it can refer to a path that is used."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+        "FontSize",
+        "Font Size",
+        "This value determines the size of the font that is used to render the date."
+    };
 } // namespace
 
 namespace openspace {
 
+documentation::Documentation DashboardItemParallelConnection::Documentation() {
+    using namespace documentation;
+    return {
+        "DashboardItem Parallel Connection",
+        "base_dashboarditem_parallelconnection",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("DashboardItemParallelConnection"),
+                Optional::No
+            },
+            {
+                FontNameInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                FontNameInfo.description
+            },
+            {
+                FontSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                FontSizeInfo.description
+            }
+        }
+    };
+}
+
 DashboardItemParallelConnection::DashboardItemParallelConnection(ghoul::Dictionary dictionary)
     : DashboardItem("Parallel Connection")
-    , _font(OsEng.fontManager().font(KeyFontMono, 10))
+    , _fontName(FontNameInfo, KeyFontMono)
+    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "DashboardItemDate"
+    );
 
+    if (dictionary.hasKey(FontNameInfo.identifier)) {
+        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
+    }
+    _fontName.onChange([this](){
+        _font = OsEng.fontManager().font(_fontName, _fontSize);
+    });
+    addProperty(_fontName);
+
+    if (dictionary.hasKey(FontSizeInfo.identifier)) {
+        _fontSize = static_cast<float>(
+            dictionary.value<double>(FontSizeInfo.identifier)
+        );
+    }
+    _fontSize.onChange([this](){
+        _font = OsEng.fontManager().font(_fontName, _fontSize);
+    });
+    addProperty(_fontSize);
+    
+    _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 
 void DashboardItemParallelConnection::render(glm::vec2& penPosition) {

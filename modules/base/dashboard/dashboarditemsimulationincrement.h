@@ -27,11 +27,16 @@
 
 #include <openspace/rendering/dashboarditem.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+
 namespace ghoul::fontrendering {
     class Font;
 } // namespace ghoul::fontrendering
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class DashboardItemSimulationIncrement : public DashboardItem {
 public:
@@ -41,7 +46,12 @@ public:
     void render(glm::vec2& penPosition) override;
     glm::vec2 size() const override;
 
+    static documentation::Documentation Documentation();
+
 private:
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
