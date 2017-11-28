@@ -30,29 +30,22 @@ namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
     [](lua_State* state, bool& success) -> TYPE {                                        \
-        success = (lua_istable(state, -1) == 1);                                         \
-        if(success) {                                                                    \
-            lua_pushnil(state);                                                          \
-            int index = lua_gettop(state);                                               \
-            std::vector<std::string> results;                                            \
-            while (lua_next(state, -1)) {                                                \
-                auto something  = lua_tostring(state, -1);                               \
-                results.push_back(something);                                            \
-                lua_pop(state, 1);                                                       \
-            }                                                                            \
-        }                                                                                \
-            return DEFAULT_VALUE;                                                        \
-        }
+        TYPE TF;                                                                         \
+        success = true;                                                                  \
+        TF.setEnvelopesFromLua(state);                                                   \
+        return TF;                                                                       \
+    }
 
 #define DEFAULT_TO_LUA_LAMBDA(TYPE)                                                      \
     [](lua_State* state, TYPE value) -> bool {                                           \
-        return true;                                                                     \
+        bool success = value.getEnvelopesToLua(state);                                   \
+        return success;                                                                  \
     }
 
 #define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
     [](std::string val, bool& success) -> TYPE {                                         \
-        TYPE TF(val);                                                                    \
-        success = true;                                                                  \
+        TYPE TF;                                                                         \
+        success = TF.setEnvelopesFromString(val);                                        \
         return TF;                                                                       \
     }
 

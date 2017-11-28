@@ -39,21 +39,22 @@ namespace openspace {
 
             TransferFunction(TransferFunction&& tf);
 
+            bool getEnvelopesToLua(lua_State* state);
+            
+            bool setEnvelopesFromString(std::string s);
+            bool setEnvelopesFromLua(lua_State* lua);
+
+            TransferFunction& operator=(const TransferFunction& tf);
             TransferFunction& operator=(TransferFunction&& tf);
             bool operator!=(const TransferFunction& tf);
 
-            void update();
-            void createTexture(std::unique_ptr<ghoul::opengl::Texture> *ptr);
-            bool isTextureSet() const;
+            bool createTexture(std::shared_ptr<ghoul::opengl::Texture> ptr);
             std::string getSerializedToString() const;
 
-            
-
         private:
-            int width = 512;
+            int _width = 1024;
             double lower = 0.0;
             double upper = 1.0;
-            bool _textureSet = false;
             std::vector<Envelope> _envelopes;
         };
 

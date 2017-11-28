@@ -46,14 +46,17 @@ public:
     glm::vec4 sample(size_t t);
     size_t width();
     void setCallback(TfChangedCallback callback);
+    void setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture> ptr);
 private:
-    void setTextureFromTxt();
+    void setTextureFromTxt() {
+        setTextureFromTxt(_texture);
+    }
     void setTextureFromImage();
     void uploadTexture();
 
     std::string _filepath;
     std::unique_ptr<ghoul::filesystem::File> _file = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::shared_ptr<ghoul::opengl::Texture> _texture = nullptr;
     bool _needsUpdate = false;
     TfChangedCallback _tfChangedCallback;
 };

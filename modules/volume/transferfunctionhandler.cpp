@@ -35,50 +35,78 @@ static const openspace::properties::Property::PropertyInfo TransferFunctionInfo 
     "All the envelopes"
 };
 
+static const openspace::properties::Property::PropertyInfo HistogramInfo = {
+    "Histogram",
+    "Histogram",
+    "All the data"
+};
+
 namespace openspace {
     namespace volume {
+
+        ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+        ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
+
         
         TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
             : properties::PropertyOwner({ "TransferFunctionHandler" }),
             _transferFunctionPath(prop),
-            _transferFunctionProperty(TransferFunctionInfo)
+            _transferFunctionProperty(TransferFunctionInfo),
+            _histogramProperty(HistogramInfo)
         {
+            _transferFunction = std::make_shared<openspace::TransferFunction>(_transferFunctionPath);
         }
 
         void TransferFunctionHandler::initialize() {
+
+
             addProperty(_transferFunctionPath);
             addProperty(_transferFunctionProperty);
+            addProperty(_histogramProperty);
+
+            _texture = std::make_shared<ghoul::opengl::Texture>(
+                glm::size3_t(1024, 1, 1), ghoul::opengl::Texture::Format::RGBA,
+                GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
+
+            _transferFunction->setTextureFromTxt(_texture);
+            uploadTexture();
+
+            _transferFunctionProperty.onChange([this]() {
+                setTexture();
+            });
         }
 
-        void TransferFunctionHandler::update() {
-            if (_needsUpdate) {
-                if (!_transferFunctionProperty.value().isTextureSet()) {
-                    setTexture();
-                    uploadTexture();
-                }
+        void TransferFunctionHandler::buildHistogram(float *data, int num) {
+            _histogram = std::make_shared<Histogram>(0.0, 1.0, 100);
+            for (int i = 0; i < num; ++i) {
+                _histogram->add(data[i]);
             }
-        }
-
-        void TransferFunctionHandler::buildHistogram(float *data) {
-//            _histogram = std::make_shared<Histogram>(0, 0.1, 1000, data);
+            _histogramProperty.setValue(openspace::properties::VectorProperty{ _histogram->getDataAsVector() });
         }
 
         void TransferFunctionHandler::setTexture() {
-           _transferFunctionProperty.value().createTexture(&_texture);
-           _needsUpdate = false;
+            if (_transferFunctionProperty.value().createTexture(_texture)) {
+                uploadTexture();
+                useTxtTexture = false;
+            }
         }
 
         ghoul::opengl::Texture& TransferFunctionHandler::getTexture() {
-            ghoul_assert(_texture != nullptr, "Transfer function is null");
             return *_texture.get();
         }
 
         void TransferFunctionHandler::uploadTexture() {
-            //_texture->uploadTexture();
+            _texture->uploadTexture();
         }
 
         bool TransferFunctionHandler::hasTexture() {
-            return !_texture;
+            if (_texture == nullptr)
+                return false;
+            return true;
+        }
+
+        std::shared_ptr<openspace::TransferFunction> TransferFunctionHandler::getTransferFunction() {
+            return _transferFunction;
         }
 
     } //namespace volume

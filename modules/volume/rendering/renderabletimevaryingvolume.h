@@ -91,8 +91,6 @@ private:
     properties::FloatProperty _secondsAfter;
     properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
-    properties::FloatProperty _lowerValueBound;
-    properties::FloatProperty _upperValueBound;
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;

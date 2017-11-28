@@ -54,8 +54,6 @@ namespace {
     const char* KeySourceDirectory = "SourceDirectory";
     const char* KeyLowerDomainBound = "LowerDomainBound";
     const char* KeyUpperDomainBound = "UpperDomainBound";
-    const char* KeyLowerValueBound = "LowerValueBound";
-    const char* KeyUpperValueBound = "UpperValueBound";
     const char* KeyClipPlanes = "ClipPlanes";
     const char* KeySecondsBefore = "SecondsBefore";
     const char* KeySecondsAfter = "SecondsAfter";
@@ -84,8 +82,6 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     , _opacity({"opacity", "Opacity", "" }, 10.0f, 0.0f, 50.0f)
     , _rNormalization({"rNormalization", "Radius normalization", "" }, 0.0f, 0.0f, 2.0f)
     , _rUpperBound({"rUpperBound", "Radius upper bound", "" }, 1.0f, 0.0f, 2.0f)
-    , _lowerValueBound({"lowerValueBound", "Lower value bound", "" }, 0.0f, 0.0f, 1000000.0f)
-    , _upperValueBound({"upperValueBound", "Upper value bound", "" }, 0.0f, 0.0f, 1000000.0f)
     , _raycaster(nullptr)
     , _transferFunctionHandler(nullptr)
 
@@ -98,8 +94,6 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
 
     _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
     _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
-    _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
-    _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _transferFunctionHandler = std::make_shared<TransferFunctionHandler>(_transferFunctionPath);
 
 
@@ -158,13 +152,14 @@ void RenderableTimeVaryingVolume::initialize() {
 
         float min = t.minValue;
         float diff = t.maxValue - t.minValue;
-
+        std::vector<float> test;
         float *data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
+            test.push_back(glm::clamp((data[i] - min) / diff, 0.0f, 1.0f));
             data[i] = glm::clamp((data[i] - min) / diff, 0.0f, 1.0f);
         }
 
-        //_transferFunctionHandler->buildHistogram(data);
+        _transferFunctionHandler->buildHistogram(data, t.rawVolume->nCells());
 
         // TODO: handle normalization properly for different timesteps + transfer function
 
@@ -220,8 +215,6 @@ void RenderableTimeVaryingVolume::initialize() {
     addProperty(_opacity);
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
-    addProperty(_lowerValueBound);
-    addProperty(_upperValueBound);
 
     _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
     _gridType.onChange([this] {
@@ -316,7 +309,6 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData& data) {
-    _transferFunctionHandler->update();
     if (_raycaster) {
         Timestep* t = currentTimestep();
         _currentTimestep = timestepIndex(t);
@@ -339,13 +331,6 @@ void RenderableTimeVaryingVolume::update(const UpdateData& data) {
             }
             _raycaster->setVolumeTexture(t->texture);
 
-            // Remap volume value to that TF value 0 is sampled for lowerValueBound, and 1 is sampled for upperLowerBound.
-            // This means that volume values = 0 need to be remapped to how localMin relates to the global range.
-            float zeroMap = (t->minValue - _lowerValueBound) / (_upperValueBound - _lowerValueBound);
-
-            // Volume values = 1 are mapped to how localMax relates to the global range.
-            float oneMap = (t->maxValue - _lowerValueBound) / (_upperValueBound - _lowerValueBound);
-            _raycaster->setValueRemapping(zeroMap, oneMap);
         } else {
             _raycaster->setVolumeTexture(nullptr);
         }
@@ -393,20 +378,6 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
                 new StringVerifier,
                 Optional::No,
                 "Specifies the transfer function file path",
-            },
-            {
-                KeyLowerValueBound,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the lower value bound."
-                "This number will be mapped to 0 before uploadin to the GPU.",
-            },
-            {
-                KeyUpperValueBound,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the lower value bound."
-                "This number will be mapped to 0 before uploadin to the GPU."
             },
             {
                 KeyGridType,

@@ -299,6 +299,13 @@ float Histogram::entropy(){
     return entropy;
 }
 
+std::vector<float> Histogram::getDataAsVector() const {
+    std::vector<float> dataVector;
+    for (int i = 0; i < _numBins; i++)
+        dataVector.emplace_back(_data[i]);
+    return dataVector;
+}
+
 void Histogram::print() const {
     // std::cout << "number of bins: " << _numBins << std::endl
     //           << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;

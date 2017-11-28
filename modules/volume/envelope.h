@@ -28,35 +28,47 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/glm.h>
 #include <ext/json/json.hpp>
+#include <ghoul/lua/ghoul_lua.h>
 
 using json = nlohmann::json;
 
 namespace openspace {
     namespace volume {
-
-        class Envelope {
+        class EnvelopePoint {
         public:
-            Envelope();
-            Envelope(glm::vec3 col, std::vector<std::pair<float, float>> vec);
-
-            void setColor(std::string hex);
-            void setPoints(std::vector<std::pair<float, float>> vec);
+            EnvelopePoint(glm::vec3 c, float x, float y) : color(c), colorHex(getHexadecimalFromVec3(c)), position(std::make_pair(x, y)) {}
+            EnvelopePoint(std::string c, float x, float y) : color(hexadecimalToRGBConversion(c)), colorHex(c), position(std::make_pair(x, y)) {}
 
             int HexadecimalToDecimal(std::string hex) const;
             std::string DecimalToHexadecimal(int dec) const;
             glm::vec3 hexadecimalToRGBConversion(std::string hex) const;
-            std::string getHexadecimal() const;
+            std::string getHexadecimalFromVec3(glm::vec3 vec) const;
+
+            glm::vec3 color;
+            std::string colorHex;
+            std::pair<float, float> position;
+        };
+        class Envelope {
+        public:
+            Envelope();
+            Envelope(std::vector<EnvelopePoint> vec);
+
+            void setPoints(std::vector<EnvelopePoint> vec);
 
             glm::vec4 getValueAtPosition(float pos) const;
+            glm::vec3 normalizeColor(glm::vec3 vec) const;
+            json getJSONPoints() const;
+            json getJSONEnvelope() const;
+            void setEnvelopeLuaTable(lua_State* state) const;
+
             bool isValueInEnvelope(float pos) const;
-            json getSerializedPoints() const;
-            json getSerializedEnvelope() const;
+            bool isEnvelopeValid() const;
 
             bool operator!=(const Envelope& env) const;
 
         private:
-            glm::vec3 color{ 0.f, 0.f, 0.f };
-            std::vector<std::pair<float, float>> _points;
+           
+            std::vector<EnvelopePoint> _points;
         };
 
     }//namespace volume

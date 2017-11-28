@@ -85,7 +85,6 @@ public:
     void setRNormalization(float rNormalization);
     float rUpperBound() const;
     void setRUpperBound(float rNormalization);
-    void setValueRemapping(float mapZeroTo, float mapOneTo);
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
@@ -102,7 +101,6 @@ private:
     float _opacity;
     float _rNormalization;
     float _rUpperBound;
-    glm::vec2 _valueRemapping;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;

@@ -25,13 +25,14 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTIONHANDLER___H__
 #define __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTIONHANDLER___H__
 #include <functional>
-//#include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/glm.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/binaryproperty.h>
 #include <openspace/util/histogram.h>
 #include <modules/volume/transferfunctionproperty.h>
+#include <openspace/rendering/transferfunction.h>
 
 #include <vector>
 #include <memory>
@@ -47,23 +48,25 @@ namespace openspace {
             TransferFunctionHandler(const properties::StringProperty& prop);
             
             void initialize();
-            void update();
             
-            void buildHistogram(float *data);
+            void buildHistogram(float *data, int num);
 
             void setTexture();
 
             ghoul::opengl::Texture& getTexture();
             void uploadTexture();
-            void bindTexture();
             bool hasTexture();
 
+            std::shared_ptr<openspace::TransferFunction> getTransferFunction();
+
         private:
-            bool _needsUpdate = true;
+            bool useTxtTexture = true;
             properties::StringProperty _transferFunctionPath;
             properties::TransferFunctionProperty _transferFunctionProperty;
+            properties::BinaryProperty _histogramProperty;
             std::shared_ptr<Histogram> _histogram;
-            std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+            std::shared_ptr<openspace::TransferFunction> _transferFunction;
+            std::shared_ptr<ghoul::opengl::Texture> _texture = nullptr;
         };
     }//namespace volume
 }//namespace openspace

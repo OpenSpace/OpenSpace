@@ -104,7 +104,7 @@ void TransferFunction::setCallback(TfChangedCallback callback) {
     _tfChangedCallback = std::move(callback);
 }
 
-void TransferFunction::setTextureFromTxt() {
+void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture> ptr) {
     std::ifstream in;
     in.open(_filepath.c_str());
 
@@ -194,7 +194,7 @@ void TransferFunction::setTextureFromTxt() {
     }
 
     // no need to deallocate transferFunction. Ownership is transferred to the Texture.
-    _texture = std::make_unique<ghoul::opengl::Texture>(transferFunction,
+    ptr = std::make_shared<ghoul::opengl::Texture>(transferFunction,
                                             glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA,
                                             GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
 }
