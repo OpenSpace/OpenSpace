@@ -1,47 +1,34 @@
 import React from 'react';
-import Graph from '../../common/Graph/Graph';
+import GraphBody from '../../common/Graph/GraphBody';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import styles from './Histogram.scss'
 
 const Histogram = ({
-  histograms,
+  data,
+  height,
+  width,
 }) => (
-      <div className={styles.Histogram}>
-      {histograms.map(histogram =>
-        <Graph
-          key={histogram.id}
-          {...histogram}
+      <svg width={width} height={width}>
+        <GraphBody
+          UseLinearGradient={false}
+          color={'blue'}
+          points={data}
+          x={0}
+          y={600}
+          fill={"blue"}
+          fillOpacity={".5"}
+          strokeWidth={1}
         />
-      )}
-    </div>
+        </svg>
 );
 Histogram.PropTypes = {
-  histograms: PropTypes.arrayOf(
+  data: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      points: PropTypes.arrayOf(
-        PropTypes.shape({
-            id: PropTypes.number.isRequired,
-            position: PropTypes.shape({
-              x: PropTypes.number.isRequired,
-              y:PropTypes.number.isRequired,
-            }).isRequired,
-          }).isRequired,
-      ).isRequired,
-      color: PropTypes.string.isRequired,
-    }).isRequired
-  ).isRequired,
+      x: PropTypes.number.isRequired,
+      y:PropTypes.number.isRequired,
+    })
+  ).isRequired
 }
-const mapStateToProps = (state) => {
-  return {
-    histograms:
-      state.histograms,
-    };
-};
 
-const CreatedHistograms = connect(
-  mapStateToProps,
-)(Histogram);
-
-export default CreatedHistograms;
+export default Histogram;

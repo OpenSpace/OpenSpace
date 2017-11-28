@@ -2,67 +2,124 @@ import React, {Component} from 'react';
 import Draggable from 'react-draggable';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import CreatedHistograms from './Histogram';
+import Histogram from './Histogram';
 import CreatedEnvelopes from './EnvelopeCanvas'
-import { addEnvelope, addHistogram, deleteEnvelope } from './actions';
+import { addEnvelope, deleteEnvelope, clearEnvelopes } from './actions';
 import styles from './EditorCanvas.scss';
 import DataManager from '../../../api/DataManager';
-import { TransferFunctionKey } from '../../../api/keys';
+import { TransferFunctionKey, HistogramKey } from '../../../api/keys';
 
 class EditorCanvas extends Component {
   constructor(props) {
     super(props);
-    this.handleChange = this.handleChange.bind(this);
+    this.state = {
+      height: 600,
+      width: 800,
+      hasHistogramData: false,
+      color: this.props.color,
+    }
+
+    this.sendEnvelopes = this.sendEnvelopes.bind(this);
     this.convertPointsBeforeSending = this.convertPointsBeforeSending.bind(this);
+    this.handleRecievedHistogram = this.handleRecievedHistogram.bind(this);
+    this.handleRecievedEnvelopes = this.handleRecievedEnvelopes.bind(this);
   }
 
   componentDidMount() {
-    var histPositions = [{x: 0, y: 0}, {x: 300, y: 500},{x: 400, y: 600}, {x: 800, y: 0}];
-    this.props.AddHistogram(histPositions);
+    DataManager.getValue(TransferFunctionKey, this.handleRecievedEnvelopes);
+    DataManager.getValue(HistogramKey, this.handleRecievedHistogram);
+    DataManager.subscribe(HistogramKey, this.handleRecievedHistogram);
+  }
+
+  handleRecievedHistogram(data) {
+    var convertedData = (eval('('+data.Value+')'));
+    return this.normalizeHistogramDataToCanvas(convertedData);
+  }
+
+  handleRecievedEnvelopes(data) {
+    var envelopes = (eval('('+data.Value+')'));
+    console.log(envelopes);
+    if (Object.keys(envelopes).length != 0 || envelopes.constructor != Object) {
+      this.props.ClearEnvelopes();
+      envelopes = envelopes.map(envelope =>
+        envelope['points'].map(point =>
+            Object.assign({},
+                { color : point.color,
+                  position : {
+                    x : point.position.x * this.state.width,
+                    y : this.state.height - point.position.y * this.state.height,
+                  },
+                })
+          )
+      )
+      envelopes.map(envelope =>
+        this.props.AddEnvelope(envelope)
+      )
+    }
   }
 
   convertPointsBeforeSending(position) {
-      let x = (position.x - 10) / 800;
-      let y = (600 - position.y) / 590;
+      let x = (position.x);
+      let y = (this.state.height - position.y);
       return {x: x, y: y};
   }
 
-  handleChange(envelopes) {
-      let data = envelopes.map(envelope =>
+  sendEnvelopes() {
+    let data = this.props.envelopes.map(envelope =>
+        Object.assign({},
+            {points: envelope.points.map(point =>
+                Object.assign({},
+                { color : point.color,
+                  position : this.convertPointsBeforeSending(point.position),
+                })
+              )
+            },
+            {height: this.state.height},
+            {width: this.state.width},
+          )
+      )
+    DataManager.setValue(TransferFunctionKey, JSON.stringify(data));
+  }
+
+  normalizeHistogramDataToCanvas(data) {
+    if(data.length < this.state.width) {
+      let maxValue =  Math.max.apply(Math,data.map(function(o){return o;}));
+      this.state.NormalizedHistogramData = data.map((value, index) =>
           Object.assign({},
-              {color: envelope.color},
-              {points: envelope.points.map(point =>
-                  Object.assign({},
-                  {position : this.convertPointsBeforeSending(point.position)}
-                  )
-                )
+              {x: (index / data.length) * this.state.width,
+               y: (value / maxValue) * this.state.height,
               },
-            )
         )
-      console.log(data);
-      DataManager.setValue(TransferFunctionKey, JSON.stringify(data));
+      )
+      //Making sure the graphs body gets filled properly by adding 0 in the beginning and end of the histogram
+      this.state.NormalizedHistogramData.unshift({ x: 0, y: 0 });
+      this.state.NormalizedHistogramData.push({ x: this.state.width, y: 0 });
+      this.setState({ histogramLoaded : true})
+    }
   }
 
   render() {
-    var positions = [{x: 10, y: 600}, {x: 30, y: 50},{x: 40, y: 60}, {x: 50, y: 600}];
+    const {histogramLoaded, NormalizedHistogramData, height, width, color } = this.state;
+    let defaultEnvelopePoints = [{color: color, position : { x: 0, y: height}}, {color: color, position : { x: 30, y: 0}},
+                    {color: color, position : { x: 70, y: 0}}, {color: color, position : { x: 100, y: height}}];
       return (
       <div className={styles.EditorContainer} >
-        <button onClick={() => this.props.AddEnvelope(positions)}>Add Envelope</button>
-        <button onClick={() => this.handleChange(this.props.envelopes)}>Send Envelopes</button>
+        <button onClick={() => this.props.AddEnvelope(defaultEnvelopePoints)}>Add Envelope</button>
         <button onClick={() => this.props.DeleteEnvelope()}>Delete Envelope</button>
         <div className={styles.EnvelopeContainer}>
-          <CreatedEnvelopes />
+            <CreatedEnvelopes onPointMoved={() => this.sendEnvelopes()} height={height} width={width}/>
         </div>
+        {histogramLoaded && (
         <div className={styles.HistogramContainer}>
-          <CreatedHistograms />
+          <Histogram data={NormalizedHistogramData} height={height} width={width}/>
         </div>
+      )}
       </div>
     );
     }
 };
 EditorCanvas.propTypes = {
   AddEnvelope: PropTypes.func.isRequired,
-  AddHistogram: PropTypes.func.isRequired,
   DeleteEnvelope: PropTypes.func.isRequired,
 }
 const mapStateToProps = (state) => {
@@ -74,14 +131,14 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    AddEnvelope: (data) => {
-      dispatch(addEnvelope(data, 'red'));
-    },
-    AddHistogram: (data) => {
-      dispatch(addHistogram(data, 'blue'));
+    AddEnvelope: (envelope) => {
+      dispatch(addEnvelope(envelope));
     },
     DeleteEnvelope: () => {
       dispatch(deleteEnvelope());
+    },
+    ClearEnvelopes: () => {
+      dispatch(clearEnvelopes());
     },
   }
 }

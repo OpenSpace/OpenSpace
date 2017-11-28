@@ -4,6 +4,8 @@
 export const OriginKey = 'NavigationHandler.Origin';
 // key for setting/getting the envelopes (focus) node
 export const TransferFunctionKey = 'Enlil Sequence.renderable.TransferFunctionHandler.TransferFunction';
+// key for setting/getting the histogram (focus) node
+export const HistogramKey = 'Enlil Sequence.renderable.TransferFunctionHandler.Histogram';
 // key to get all scene graph nodes
 export const SceneGraphKey = '__allNodes';
 // key to get all properties in openspace engine

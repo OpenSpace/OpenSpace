@@ -4,43 +4,55 @@ import Draggable from 'react-draggable'
 import Point from './Point'
 import styles from './Envelope.scss'
 import GraphBody from '../../common/Graph/GraphBody'
-const Envelope = ({
-  id,
-  points,
-  color,
-  anchor,
-  active,
-  handleOnDrag,
-  handleOnClick,
-}) => (
-    <div>
-      <svg className={styles.Line}>
-        <GraphBody
-         points={points}
-         color={color}
-         x={0}
-         y={600}
-         fillOpacity={"0"}
-         strokeWidth={2}
-       />
-      </svg>
+class Envelope extends Component {
+  constructor(props) {
+    super(props);
+
+    this.handleOnDrag = this.props.handleOnDrag.bind(this);
+  }
+
+  pointsForEnvelopeGraph(data) {
+    return data = this.props.points.map(point =>
+        Object.assign({},
+        {x: point.position.x + 10,
+         y: 600 - point.position.y - 10,
+         color: point.color}
+        )
+      )
+  }
+
+  render() {
+    const {id, points, color, anchor, active, height, width, envelope} = this.props;
+    return (
       <div className={styles.Envelope}>
+        <svg className={styles.Line} height={height} width={width + 10}>
+          <GraphBody
+           UseLinearGradient={true}
+           points={this.pointsForEnvelopeGraph(points)}
+           x={0}
+           y={600}
+           width={800}
+           fillOpacity={"0"}
+           strokeWidth={2}
+          />
+        </svg>
        {points.map((point) =>
+        <div key={point.id}>
         <Point
-          key={point.id}
           {...point}
-          color={color}
-          active={active}
-          handleOnDrag={(position, id) => handleOnDrag(position, id)}
-          handleOnClick={() => handleOnClick()}
+          height={height}
+          width={width}
+          envelope={envelope}
+          handleOnDrag={(position, id, envelopeId) => this.handleOnDrag(position, id, envelopeId)}
          />
+        </div>
         )}
       </div>
-    </div>
-  );
+    );
+  }
+}
 Envelope.propTypes = {
   handleOnDrag: PropTypes.func.isRequired,
-  handleOnClick: PropTypes.func.isRequired,
   points: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
@@ -49,9 +61,8 @@ Envelope.propTypes = {
               y:PropTypes.number.isRequired,
             }).isRequired,
       anchor: PropTypes.bool.isRequired,
+      color: PropTypes.string.isRequired,
     }).isRequired,
   ).isRequired,
-  color: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 }
 export default Envelope;

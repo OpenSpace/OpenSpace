@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { SketchPicker } from 'react-color';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { changeColor } from './actions';
 
 let createHandlers = function(dispatch) {
@@ -12,12 +13,12 @@ let createHandlers = function(dispatch) {
   };
 }
 
-class ColorPic extends Component {
+class ColorPicker extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      background: '#fff',
+      color: '#fff',
     };
 
     this.handlers = createHandlers(this.props.dispatch);
@@ -25,16 +26,21 @@ class ColorPic extends Component {
 
   handleChangeComplete(color) {
     this.handlers.ChangeColor(color.hex);
+    this.setState({color : color.hex});
+    this.props.onColorChange(color.hex);
   };
 
   render() {
     return (
       <SketchPicker
         {...this.props }
-        color={ this.state.background }
+        color={ this.state.color }
         onChangeComplete={(color) => this.handleChangeComplete(color) }
       />
     );
   }
 }
-export default connect()(ColorPic);
+ColorPicker.propTypes = {
+  onColorChange: PropTypes.func.isRequired,
+}
+export default connect()(ColorPicker);
