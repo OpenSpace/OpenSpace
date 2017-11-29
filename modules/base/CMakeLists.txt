@@ -25,6 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemangle.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdistance.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemframerate.h
@@ -56,6 +57,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemangle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdate.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdistance.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemframerate.cpp

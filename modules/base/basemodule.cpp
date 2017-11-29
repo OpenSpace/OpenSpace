@@ -31,6 +31,7 @@
 
 #include <ghoul/misc/assert.h>
 
+#include <modules/base/dashboard/dashboarditemangle.h>
 #include <modules/base/dashboard/dashboarditemdate.h>
 #include <modules/base/dashboard/dashboarditemdistance.h>
 #include <modules/base/dashboard/dashboarditemframerate.h>
@@ -89,6 +90,7 @@ void BaseModule::internalInitialize() {
     auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
+    fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
     fDashboard->registerClass<DashboardItemDate>("DashboardItemDate");
     fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
     fDashboard->registerClass<DashboardItemFramerate>("DashboardItemFramerate");

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemdistance.h>
+#include <modules/base/dashboard/dashboarditemangle.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -32,7 +32,6 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/distanceconversion.h>
 
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -58,43 +57,61 @@ namespace {
     static const openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
-        "The type of position that is used as the source to calculate the distance. The "
-        "default value is 'Camera'."
+        "The type of position that is used as the triangle apex used to calculate the "
+        "angle. The default value is 'Camera'."
     };
 
     static const openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
         "SourceNodeName",
         "Source Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the source for computing the distance."
+        "node that is to be used as the apex of the triangle used to calculate the "
+        "angle. The computed angle is the incident angle to Source in the triangle ("
+        "Source, Reference, Destination)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
+        "ReferenceType",
+        "Reference Type",
+        "The type of position that is used as the destination of the reference line used "
+        "to calculate the angle. The computed angle is the incident angle to Source in "
+        "the triangle (Source, Reference, Destination)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ReferenceNodeNameInfo = {
+        "ReferenceNodeName",
+        "Reference Node Name",
+        "If a scene graph node is selected as type, this value specifies the name of the "
+        "node that is to be used as the reference direction to compute the angle."
     };
 
     static const openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination Type",
-        "The type of position that is used as the destination to calculate the distance. "
-        "The default value for this is 'Focus'."
+        "The type of position that is used as the destination to calculate the angle. "
+        "The computed angle is the incident angle to Source in the triangle ("
+        "Source, Reference, Destination). The default value for this is 'Focus'."
     };
 
     static const openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
-        "node that is to be used as the destination for computing the distance."
+        "node that is to be used as the destination for computing the angle."
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation DashboardItemDistance::Documentation() {
+documentation::Documentation DashboardItemAngle::Documentation() {
     using namespace documentation;
     return {
-        "DashboardItem Distance",
-        "base_dashboarditem_distance",
+        "DashboardItem Angle",
+        "base_dashboarditem_angle",
         {
             {
                 "Type",
-                new StringEqualVerifier("DashboardItemDistance"),
+                new StringEqualVerifier("DashboardItemAngle"),
                 Optional::No
             },
             {
@@ -112,10 +129,10 @@ documentation::Documentation DashboardItemDistance::Documentation() {
             {
                 SourceTypeInfo.identifier,
                 new StringInListVerifier({
-                    "Node", "Node Surface", "Focus", "Camera"
+                    "Node", "Focus", "Camera"
                 }),
                 Optional::Yes,
-                    SourceTypeInfo.description
+                SourceTypeInfo.description
             },
             {
                 SourceNodeNameInfo.identifier,
@@ -124,9 +141,23 @@ documentation::Documentation DashboardItemDistance::Documentation() {
                 SourceNodeNameInfo.description
             },
             {
+                ReferenceTypeInfo.identifier,
+                new StringInListVerifier({
+                    "Node", "Focus", "Camera"
+                }),
+                Optional::No,
+                ReferenceTypeInfo.description
+            },
+            {
+                ReferenceNodeNameInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                ReferenceNodeNameInfo.description
+            },
+            {
                 DestinationTypeInfo.identifier,
                 new StringInListVerifier({
-                    "Node", "Node Surface", "Focus", "Camera"
+                    "Node", "Focus", "Camera"
                 }),
                 Optional::Yes,
                 DestinationTypeInfo.description
@@ -141,7 +172,7 @@ documentation::Documentation DashboardItemDistance::Documentation() {
     };
 }
 
-DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
+DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
     : DashboardItem("Distance")
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -151,6 +182,14 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
             properties::OptionProperty::DisplayType::Dropdown
         ),
         properties::StringProperty(SourceNodeNameInfo),
+        nullptr
+    }
+    , _reference{
+        properties::OptionProperty(
+            ReferenceTypeInfo,
+            properties::OptionProperty::DisplayType::Dropdown
+        ),
+        properties::StringProperty(ReferenceNodeNameInfo),
         nullptr
     }
     , _destination{
@@ -165,7 +204,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "DashboardItemDistance"
+        "DashboardItemAngle"
     );
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {
@@ -189,24 +228,18 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
 
     _source.type.addOptions({
         { Type::Node, "Node" },
-        { Type::NodeSurface, "Node Surface" },
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
     _source.type.onChange([this]() {
         _source.nodeName.setVisibility(
-            properties::Property::Visibility(
-                _source.type == Type::Node || _source.type == Type::NodeSurface
-            )
+            properties::Property::Visibility(_source.type == Type::Node)
         );
     });
     if (dictionary.hasKey(SourceTypeInfo.identifier)) {
         std::string value = dictionary.value<std::string>(SourceTypeInfo.identifier);
         if (value == "Node") {
             _source.type = Type::Node;
-        }
-        else if (value == "Node Surface") {
-            _source.type = Type::NodeSurface;
         }
         else if (value == "Focus") {
             _source.type = Type::Focus;
@@ -223,7 +256,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     _source.nodeName.onChange([this]() {
         _source.node = nullptr;
     });
-    if (_source.type == Type::Node || _source.type == Type::NodeSurface) {
+    if (_source.type == Type::Node) {
         if (dictionary.hasKey(SourceNodeNameInfo.identifier)) {
             _source.nodeName = dictionary.value<std::string>(
                 SourceNodeNameInfo.identifier
@@ -231,8 +264,49 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
         }
         else {
             LERRORC(
-                "DashboardItemDistance",
+                "DashboardItemAngle",
                 "Node type was selected for source but no node specified"
+            );
+        }
+    }
+    addProperty(_source.nodeName);
+
+
+    _reference.type.addOptions({
+        { Type::Node, "Node" },
+        { Type::Focus, "Focus" },
+        { Type::Camera, "Camera" }
+    });
+    _reference.type.onChange([this]() {
+        _reference.nodeName.setVisibility(
+            properties::Property::Visibility(_reference.type == Type::Node)
+        );
+    });
+    std::string value = dictionary.value<std::string>(ReferenceTypeInfo.identifier);
+    if (value == "Node") {
+        _reference.type = Type::Node;
+    }
+    else if (value == "Focus") {
+        _reference.type = Type::Focus;
+    }
+    else {
+        _reference.type = Type::Camera;
+    }
+    addProperty(_reference.type);
+
+    _reference.nodeName.onChange([this]() {
+        _reference.node = nullptr;
+    });
+    if (_reference.type == Type::Node) {
+        if (dictionary.hasKey(ReferenceNodeNameInfo.identifier)) {
+            _reference.nodeName = dictionary.value<std::string>(
+                ReferenceNodeNameInfo.identifier
+            );
+        }
+        else {
+            LERRORC(
+                "DashboardItemAngle",
+                "Node type was selected for reference but no node specified"
             );
         }
     }
@@ -240,24 +314,18 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
 
     _destination.type.addOptions({
         { Type::Node, "Node" },
-        { Type::NodeSurface, "Node Surface" },
         { Type::Focus, "Focus" },
         { Type::Camera, "Camera" }
     });
     _destination.type.onChange([this]() {
         _destination.nodeName.setVisibility(
-            properties::Property::Visibility(
-                _source.type == Type::Node || _source.type == Type::NodeSurface
-            )
+            properties::Property::Visibility(_source.type == Type::Node)
         );
     });
     if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
         std::string value = dictionary.value<std::string>(DestinationTypeInfo.identifier);
         if (value == "Node") {
             _destination.type = Type::Node;
-        }
-        else if (value == "Node Surface") {
-            _destination.type = Type::NodeSurface;
         }
         else if (value == "Focus") {
             _destination.type = Type::Focus;
@@ -273,7 +341,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     _destination.nodeName.onChange([this]() {
         _destination.node = nullptr;
     });
-    if (_destination.type == Type::Node || _destination.type == Type::NodeSurface) {
+    if (_destination.type == Type::Node) {
         if (dictionary.hasKey(DestinationNodeNameInfo.identifier)) {
             _destination.nodeName = dictionary.value<std::string>(
                 DestinationNodeNameInfo.identifier
@@ -281,7 +349,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
         }
         else {
             LERRORC(
-                "DashboardItemDistance",
+                "DashboardItemAngle",
                 "Node type was selected for destination but no node specified"
             );
         }
@@ -291,47 +359,28 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 
-std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
-                                                    Component& mainComp,
-                                                    Component& otherComp) const
+std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
+                                                                    Component& comp) const
 {
-    if (mainComp.type == Type::Node || mainComp.type == Type::NodeSurface) {
-        if (!mainComp.node) {
-            mainComp.node = OsEng.renderEngine().scene()->sceneGraphNode(
-                mainComp.nodeName
+    if (comp.type == Type::Node) {
+        if (!comp.node) {
+            comp.node = OsEng.renderEngine().scene()->sceneGraphNode(
+                comp.nodeName
             );
 
-            if (!mainComp.node) {
+            if (!comp.node) {
                 LERRORC(
-                    "DashboardItemDistance",
-                    "Could not find node '" + mainComp.nodeName.value() + "'"
+                    "DashboardItemAngle",
+                    "Could not find node '" + comp.nodeName.value() + "'"
                 );
                 return { glm::dvec3(0.0), "Node" };
             }
         }
     }
 
-    switch (mainComp.type) {
+    switch (comp.type) {
         case Type::Node:
-            return { mainComp.node->worldPosition(), mainComp.node->name() };
-        case Type::NodeSurface:
-        {
-            glm::dvec3 otherPos;
-            if (otherComp.type == Type::NodeSurface) {
-                // We are only interested in the direction, and we want to prevent
-                // infinite recursion
-                otherPos = otherComp.node->worldPosition();
-            }
-            else {
-                otherPos = positionAndLabel(otherComp, mainComp).first;
-            }
-            glm::dvec3 thisPos = mainComp.node->worldPosition();
-
-            glm::dvec3 dir = glm::normalize(otherPos - thisPos);
-            glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
-
-            return { thisPos + dirLength, "surface of " + mainComp.node->name() };
-        }
+            return { comp.node->worldPosition(), comp.node->name() };
         case Type::Focus:
             return {
                 OsEng.navigationHandler().focusNode()->worldPosition(),
@@ -344,39 +393,50 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
     }
 };
 
-void DashboardItemDistance::render(glm::vec2& penPosition) {
-    std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(
-        _source,
-        _destination
-    );
-    std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(
-        _destination,
-        _source
-    );
+void DashboardItemAngle::render(glm::vec2& penPosition) {
+    std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
+    std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
+    std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(_destination);
 
-    double distance = glm::length(sourceInfo.first - destinationInfo.first);
-    std::pair<double, std::string> dist = simplifyDistance(distance);
-    penPosition.y -= _font->height();
-    RenderFont(
-        *_font,
-        penPosition,
-        "Distance from %s to %s: %f %s",
-        sourceInfo.second.c_str(),
-        destinationInfo.second.c_str(),
-        dist.first,
-        dist.second.c_str()
-    );
+    glm::dvec3 a = referenceInfo.first - sourceInfo.first;
+    glm::dvec3 b = destinationInfo.first - sourceInfo.first;
+
+    if (glm::length(a) == 0.0 || glm::length(b) == 0) {
+        penPosition.y -= _font->height();
+        RenderFont(
+            *_font,
+            penPosition,
+            "Could not compute angle at %s between %s and %s",
+            sourceInfo.second.c_str(),
+            destinationInfo.second.c_str(),
+            referenceInfo.second.c_str()
+        );
+    }
+    else {
+        double angle = glm::degrees(
+            glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
+        );
+
+        penPosition.y -= _font->height();
+        RenderFont(
+            *_font,
+            penPosition,
+            "Angle at %s between %s and %s: %f degrees",
+            sourceInfo.second.c_str(),
+            destinationInfo.second.c_str(),
+            referenceInfo.second.c_str(),
+            angle
+        );
+    }
 }
 
-glm::vec2 DashboardItemDistance::size() const {
-    double distance = 1e20;
-    std::pair<double, std::string> dist = simplifyDistance(distance);
+glm::vec2 DashboardItemAngle::size() const {
+    double angle = 120;
 
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        "Distance from focus: %f %s",
-        dist.first,
-        dist.second.c_str()
+        "Angle: %f %s",
+        angle
     ).boundingBox;
 }
 

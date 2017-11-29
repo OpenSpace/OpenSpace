@@ -9,8 +9,8 @@ function preInitialization()
     ]]--
     -- dofile(openspace.absPath('${SCRIPTS}/default_setup.lua'))
 
-    local TestFontSize1 = 28
-    local TestFontSize2 = 20
+    local TestFontSize1 = 20
+    local TestFontSize2 = 14
 
     -- DashboardItemDate tests
     openspace.dashboard.addDashboardItem({
@@ -124,6 +124,60 @@ function preInitialization()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemSimulationIncrement",
         FontSize = TestFontSize2
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSpacing"
+    })
+
+    -- DashboardItemAngle
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemAngle",
+        ReferenceType = "Node",
+        ReferenceNodeName = "Moon",
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemAngle",
+        FontName = "Console",
+        SourceType = "Node",
+        SourceNodeName = "Moon",
+        ReferenceType = "Node",
+        ReferenceNodeName = "Moon",
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemAngle",
+        FontName = "Light",
+        FontSize = TestFontSize1,
+        SourceType = "Focus",
+        ReferenceType = "Node",
+        ReferenceNodeName = "Moon",
+        DestinationType = "Camera"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemAngle",
+        FontSize = TestFontSize2,
+        SourceType = "Focus",
+        ReferenceType = "Node",
+        ReferenceNodeName = "Moon",
+        DestinationType = "Node",
+        DestinationNodeName = "Sun"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemAngle",
+        SourceType = "Camera",
+        ReferenceType = "Node",
+        ReferenceNodeName = "Moon",
+        DestinationType = "Focus"
+    })
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemAngle",
+        SourceType = "Camera",
+        SourceType = "Node",
+        SourceNodeName = "Saturn",
+        ReferenceType = "Node",
+        ReferenceNodeName = "Moon",
+        DestinationType = "Node",
+        DestinationNodeName = "Sun"
     })
 
 
