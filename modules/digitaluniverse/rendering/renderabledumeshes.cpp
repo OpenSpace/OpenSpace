@@ -416,6 +416,9 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                                       const glm::dmat4& projectionMatrix)
 {
     // Saving current OpenGL state
+    GLfloat lineWidth = 1.0f;
+    glGetFloatv(GL_LINE_WIDTH, &lineWidth);
+
     GLboolean blendEnabled = glIsEnabled(GL_BLEND);
     GLenum blendEquationRGB;
     GLenum blendEquationAlpha;
@@ -455,7 +458,9 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
             case Solid:
                 break;
             case Wire:
+                glLineWidth(2.0);
                 glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
+                glLineWidth(lineWidth);
                 break;
             case Point:
                 glDrawArrays(GL_POINTS, 0, pair.second.numV);
@@ -542,8 +547,8 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
 
     glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
     glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
