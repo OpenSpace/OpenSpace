@@ -47,6 +47,7 @@ in vec4 colorMap[];
 out vec4 gs_colorMap;
 out vec2 texCoord;
 out float vs_screenSpaceDepth;
+out float ta;
 
 const double PARSEC = 0.308567756e17LF;
 
@@ -59,6 +60,7 @@ const vec2 corners[4] = vec2[4](
 
 
 void main() {
+    ta  = 1.0f;
     vec4 pos    = gl_in[0].gl_Position;
     gs_colorMap = colorMap[0];
     
@@ -147,14 +149,32 @@ void main() {
     float height = abs(topRight.y - bottomLeft.y);
     float width  = abs(topRight.x - bottomLeft.x);
     
+    // if ((height < (2.0 * maxBillboardSize)) ||
+    //     (width < (2.0 * maxBillboardSize))) {
+    //     ta = 1.0 - (height - maxBillboardSize)/(maxBillboardSize);
+    //     //ta = 0.5;
+    // } 
+
+    float var = (height+width);    
+    
     if ((height > maxBillboardSize) ||
         (width > maxBillboardSize)) {
-        return;
+        //return;    
+        float maxVar = 3.0f * maxBillboardSize;
+        float minVar = maxBillboardSize;
+        ta = 1.0f - ( (var - minVar)/(maxVar - minVar) );
+        if (ta == 0.0f)
+            return;
     } 
-    else if (width < minBillboardSize) {
-        return;
+    else if (width < 2.0f * minBillboardSize) {
+        //return;
+        float maxVar = 2.0f * minBillboardSize;
+        float minVar = minBillboardSize;
+        ta = ( (var - minVar)/(maxVar - minVar) );
+        if (ta == 0.0f)
+            return;
     } 
-    else {
+    {
         // Build primitive
         texCoord    = corners[0];
         gl_Position = initialPosition;

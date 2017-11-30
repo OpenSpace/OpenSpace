@@ -27,6 +27,7 @@
 in vec4 gs_colorMap;
 in float vs_screenSpaceDepth;
 in vec2 texCoord;
+in float ta;
 
 uniform float alphaValue;
 uniform vec3 color;
@@ -51,7 +52,7 @@ Fragment getFragment() {
         fullColor = vec4(color.rgb * textureColor.rgb, textureColor.a * alphaValue);
     }
 
-    fullColor.a *= fadeInValue;
+    fullColor.a *= fadeInValue * ta;
 
     if (fullColor.a == 0.f) {
         discard;
@@ -60,7 +61,7 @@ Fragment getFragment() {
     Fragment frag;
     frag.color      = fullColor;
     frag.depth      = vs_screenSpaceDepth;
-    frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
+    frag.gPosition  = vec4(1e32, 1e32, 1e32, 1.0);
     frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
 
