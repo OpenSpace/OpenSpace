@@ -497,7 +497,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
         groundRadiance = groundReflectance.rgb * RLStar;
     }
 
-    groundRadiance = groundReflectance.rgb * RLStar;
+    //groundRadiance = groundReflectance.rgb * RLStar;
 
     // Specular reflection from sun on oceans and rivers  
     if ((waterReflectance > 0.1) && (dotNS > -0.2f)/*(muSun > 0.0)*/) {
