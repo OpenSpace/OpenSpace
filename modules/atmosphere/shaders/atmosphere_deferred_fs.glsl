@@ -486,11 +486,21 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     vec3  irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
 
     // R[L0] + R[L*]
-    vec3 groundRadiance = (dotNS < -0.2f ? groundReflectance.rgb * 15 : groundReflectance.rgb) *
-      (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
+    // vec3 groundRadiance = (dotNS < -0.2f ? groundReflectance.rgb * 15 : groundReflectance.rgb) *
+    //   (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
+
+    vec3 groundRadiance;
+    vec3 RLStar = (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
+    if (dotNS < 0.05f) {
+        groundRadiance = groundReflectance.rgb * mix(30.0f, 1.0f, smoothstep(-1.0f, 0.05f, dotNS)) * RLStar;
+    } else {
+        groundRadiance = groundReflectance.rgb * RLStar;
+    }
+
+    groundRadiance = groundReflectance.rgb * RLStar;
 
     // Specular reflection from sun on oceans and rivers  
-    if ((waterReflectance > 0.1) && (muSun > 0.0)) {
+    if ((waterReflectance > 0.1) && (dotNS > -0.2f)/*(muSun > 0.0)*/) {
         vec3  h         = normalize(s - v);
         // Fresnell Schlick's approximation
         float fresnel   = 0.02f + 0.98f * pow(1.0f - dot(-v, h), 5.0f);

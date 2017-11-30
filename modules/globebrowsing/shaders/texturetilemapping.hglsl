@@ -323,7 +323,7 @@ vec4 calculateNight(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
 
     vec3 n = normalize(ellipsoidNormalCameraSpace);
     vec3 l = lightDirectionCameraSpace;
-    float cosineFactor = clamp(dot(l, normalize(n + 0.15 * l)) * 3 , 0, 1);
+    float cosineFactor = clamp(dot(l, normalize(n + 0.20 * l)) * 3 , 0, 1);
     
     #for i in 0..#{lastLayerIndexNightLayers}
     {

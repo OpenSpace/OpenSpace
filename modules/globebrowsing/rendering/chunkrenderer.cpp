@@ -33,7 +33,7 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
-
+ 
 namespace {
     const double KM_TO_M = 1000.0;
 }
