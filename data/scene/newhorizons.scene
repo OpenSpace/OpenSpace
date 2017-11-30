@@ -39,21 +39,6 @@ function preInitialization()
         Type = "DashboardItemDistance",
         SourceType = "Node",
         SourceNodeName = "NewHorizons",
-        DestinationType = "Node",
-        DestinationNodeName = "Pluto"
-    })
-
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemDistance",
-        SourceType = "Node",
-        SourceNodeName = "NewHorizons",
-        DestinationType = "Node Surface",
-        DestinationNodeName = "Pluto"
-    })
-
-        openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemDistance",
-        SourceType = "Camera",
         DestinationType = "Node Surface",
         DestinationNodeName = "Pluto"
     })

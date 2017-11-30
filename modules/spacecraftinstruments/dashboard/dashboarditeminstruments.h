@@ -27,11 +27,15 @@
 
 #include <openspace/rendering/dashboarditem.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-} // namespace ghoul::fontrendering
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class DashboardItemInstruments : public DashboardItem {
 public:
@@ -42,7 +46,16 @@ public:
 
     glm::vec2 size() const override;
 
+    static documentation::Documentation Documentation();
+
 private:
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+    properties::Vec3Property _activeColor;
+    properties::Vec3Property _activeFlash;
+
+
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 

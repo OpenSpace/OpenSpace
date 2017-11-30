@@ -26,6 +26,8 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -35,8 +37,39 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
+#include <chrono>
+
 namespace {
     const char* KeyFontMono = "Mono";
+    const float DefaultFontSize = 10.f;
+
+    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+        "FontName",
+        "Font Name",
+        "This value is the name of the font that is used. It can either refer to an "
+        "internal name registered previously, or it can refer to a path that is used."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+        "FontSize",
+        "Font Size",
+        "This value determines the size of the font that is used to render the date."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ActiveColorInfo = {
+        "ActiveColor",
+        "Active Color",
+        "This value determines the color that the active instrument is rendered in. "
+        "Shortly after activation, the used color is mixture of this and the flash color. "
+        "The default value is (0.6, 1.0, 0.0)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FlashColorInfo = {
+        "FlashColor",
+        "Flash Color",
+        "This value determines the color that is used shortly after an instrument "
+        "activation. The default value is (0.9, 1.0, 0.75)"
+    };
 
     std::string progressToStr(int size, double t) {
         std::string progress = "|";
@@ -63,54 +96,136 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation DashboardItemInstruments::Documentation() {
+    using namespace documentation;
+    return {
+        "DashboardItem Instruments",
+        "spacecraftinstruments_dashboarditem_instuments",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("DashboardItemInstruments"),
+                Optional::No
+            },
+            {
+                FontNameInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                FontNameInfo.description
+            },
+            {
+                FontSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                FontSizeInfo.description
+            },
+            {
+                ActiveColorInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                ActiveColorInfo.description
+            },
+            {
+                FlashColorInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                FlashColorInfo.description
+            }
+        }
+    };
+}
+
 DashboardItemInstruments::DashboardItemInstruments(ghoul::Dictionary dictionary)
     : DashboardItem("Instruments")
+    , _fontName(FontNameInfo, KeyFontMono)
+    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    , _activeColor(
+        ActiveColorInfo,
+        glm::vec3(0.6f, 1.f, 0.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
+    )
+    , _activeFlash(FlashColorInfo,
+        glm::vec3(0.9f, 1.f, 0.75f),
+        glm::vec3(0.f),
+        glm::vec3(1.f)
+    )
     , _font(OsEng.fontManager().font(KeyFontMono, 10))
-{}
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "DashboardItemInstruments"
+    );
+
+    if (dictionary.hasKey(FontNameInfo.identifier)) {
+        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
+    }
+    if (dictionary.hasKey(FontSizeInfo.identifier)) {
+        _fontSize = static_cast<float>(
+            dictionary.value<double>(FontSizeInfo.identifier)
+            );
+    }
+
+    _fontName.onChange([this]() {
+        _font = OsEng.fontManager().font(_fontName, _fontSize);
+    });
+    addProperty(_fontName);
+
+    _fontSize.onChange([this]() {
+        _font = OsEng.fontManager().font(_fontName, _fontSize);
+    });
+    addProperty(_fontSize);
+
+    _activeColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_activeColor);
+    _activeFlash.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_activeFlash);
+
+    _font = OsEng.fontManager().font(_fontName, _fontSize);
+}
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
-    bool hasNewHorizons = OsEng.renderEngine().scene()->sceneGraphNode("NewHorizons");
     double currentTime = OsEng.timeManager().time().j2000Seconds();
 
     if (ImageSequencer::ref().isReady()) {
         penPosition.y -= 25.f;
 
-        glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
+        glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
-        double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() -
-            currentTime;
+        double remaining = ImageSequencer::ref().getNextCaptureTime() - currentTime;
         float t = static_cast<float>(
-            1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength()
-            );
-
-        std::string str = SpiceManager::ref().dateFromEphemerisTime(
-            ImageSequencer::ref().getNextCaptureTime(),
-            "YYYY MON DD HR:MN:SC"
+            1.0 - remaining / ImageSequencer::ref().getIntervalLength()
         );
 
-        glm::vec4 active(0.6, 1, 0.00, 1);
-        glm::vec4 brigther_active(0.9, 1, 0.75, 1);
-
         if (remaining > 0) {
-            std::string progress = progressToStr(25, t);
-            brigther_active *= (1 - t);
-
             RenderFontCr(*_font,
                 penPosition,
-                active * t + brigther_active,
+                glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
+                //active * t + brigther_active,
                 "Next instrument activity:"
             );
 
+            const int Size = 25;
+            int p = std::max(static_cast<int>((t * (Size - 1)) + 1), 0);
             RenderFontCr(*_font,
                 penPosition,
-                active * t + brigther_active,
-                "%.0f s %s %.1f %%",
-                remaining, progress.c_str(), t * 100
+                glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
+                "%4.0f s |%s>%s| %.1f %%",
+                remaining,
+                std::string(p, '-').c_str(),
+                std::string(Size - p, ' ').c_str(),
+                t * 100
+            );
+
+            std::string str = SpiceManager::ref().dateFromEphemerisTime(
+                ImageSequencer::ref().getNextCaptureTime(),
+                "YYYY MON DD HR:MN:SC"
             );
 
             RenderFontCr(*_font,
                 penPosition,
-                active,
+                glm::vec4(_activeColor.value(), 1.f),
                 "Data acquisition time: %s",
                 str.c_str()
             );
@@ -120,31 +235,19 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             ImageSequencer::ref().getCurrentTarget();
 
         if (currentTarget.first > 0.0) {
-            int timeleft = static_cast<int>(nextTarget.first - currentTime);
+            using namespace std::chrono;
+            seconds tls = seconds(static_cast<int>(nextTarget.first - currentTime));
 
-            int hour = timeleft / 3600;
-            int second = timeleft % 3600;
-            int minute = second / 60;
-            second = second % 60;
-
-            std::string hh, mm, ss;
-
-            if (hour   < 10)
-                hh.append("0");
-            if (minute < 10)
-                mm.append("0");
-            if (second < 10)
-                ss.append("0");
-
-            hh.append(std::to_string(hour));
-            mm.append(std::to_string(minute));
-            ss.append(std::to_string(second));
+            hours tlh = duration_cast<hours>(tls);
+            tls -= tlh;
+            minutes tlm = duration_cast<minutes>(tls);
+            tls -= tlm;
 
             RenderFontCr(*_font,
                 penPosition,
                 targetColor,
-                "Data acquisition adjacency: [%s:%s:%s]",
-                hh.c_str(), mm.c_str(), ss.c_str()
+                "Next image: [%02i:%02i:%02i]",
+                tlh.count(), tlm.count(), tls.count()
             );
 
             penPosition.y -= _font->height();
@@ -156,7 +259,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
             RenderFontCr(*_font,
                 penPosition,
-                active,
+                glm::vec4(_activeColor.value(), 1.f),
                 "Active Instruments:"
             );
 
@@ -195,7 +298,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                     );
                     RenderFontCr(*_font,
                         penPosition,
-                        active,
+                        glm::vec4(_activeColor.value(), 1.f),
                         "    %5s",
                         m.first.c_str()
                     );
