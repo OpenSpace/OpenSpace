@@ -33,6 +33,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <modules/server/include/getpropertytopic.h>
+#include <modules/volume/transferfunctionhandler.h>
 
 using nlohmann::json;
 
@@ -82,7 +83,7 @@ json GetPropertyTopic::getAllProperties() {
             OsEng.windowWrapper(),
             OsEng.navigationHandler(),
             OsEng.globalPropertyOwner(),
-            OsEng.virtualPropertyManager()
+            OsEng.virtualPropertyManager(),
         }}
     };
     return wrappedPayload(payload);

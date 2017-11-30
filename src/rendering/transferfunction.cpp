@@ -86,7 +86,7 @@ ghoul::opengl::Texture& TransferFunction::getTexture() {
 }
 
 void TransferFunction::update() {
-    if (_needsUpdate) {
+  /*  if (_needsUpdate) {
         if (hasExtension(_filepath, "txt")) {
             setTextureFromTxt();
         } else {
@@ -97,7 +97,7 @@ void TransferFunction::update() {
         if (_tfChangedCallback) {
             _tfChangedCallback(*this);
         }
-    }
+    }*/
 }
 
 void TransferFunction::setCallback(TfChangedCallback callback) {
@@ -197,6 +197,7 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
     ptr = std::make_shared<ghoul::opengl::Texture>(transferFunction,
                                             glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA,
                                             GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
+
 }
 
 void TransferFunction::setTextureFromImage() {

@@ -555,7 +555,8 @@ int main_main(int argc, char** argv) {
         { { 4, 2 }, sgct::Engine::RunMode::OpenGL_4_2_Core_Profile },
         { { 4, 3 }, sgct::Engine::RunMode::OpenGL_4_3_Core_Profile },
         { { 4, 4 }, sgct::Engine::RunMode::OpenGL_4_4_Core_Profile },
-        { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile }
+        { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile },
+        { { 4, 6 }, sgct::Engine::RunMode::OpenGL_4_6_Core_Profile }
     };
     ghoul_assert(
         versionMapping.find(glVersion) != versionMapping.end(),

@@ -5,7 +5,7 @@ local mars_folders = {
     -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
     -- CTX will stomp over the HiRISE
     --
-    -- tl;dr:  Specify CTX folders first, then HiRISE 
+    -- tl;dr:  Specify CTX folders first, then HiRISE
 }
 
 function preInitialization()
@@ -77,9 +77,9 @@ function postInitialization()
 
     openspace.setPropertyValue("SunGlare.renderable.Enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.Enabled", false)
-    
+
     openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
-    
+
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
 
@@ -108,22 +108,23 @@ return {
     },
     Modules = {
         "sun",
-        "mercury",
-        "venus",
+        --"mercury",
+        --"venus",
         "earth",
-        "moon",
-        "mars",
-        "jupiter",
-        "saturn",
-        "uranus",
-        "neptune",
-        "stars/digitaluniverse",
+        "enlil",
+        --"moon",
+        --"mars",
+        --"jupiter",
+        --"saturn",
+        --"uranus",
+        --"neptune",
+        --"stars/digitaluniverse",
         -- "stars/denver",
-        "milkyway/digitaluniverse",
+        --"milkyway/digitaluniverse",
         --"milkyway/eso",
         -- "satellites"
-        "constellationbounds",
-        "grids"
+        --"constellationbounds",
+        --"grids"
     }
 }
 

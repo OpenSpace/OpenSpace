@@ -1,9 +1,9 @@
 import React, {Component} from 'react'
-import Draggable from 'react-draggable'
 import { connect } from 'react-redux';
-import { toggleActiveEnvelope, toggleActivePoint} from './actions';
+import { toggleActiveEnvelope, toggleActivePoint} from '../actions';
+import WTF from '../presentational/Point.jsx'
 import PropTypes from 'prop-types';
-import styles from './Point.scss';
+import styles from '../style/Point.scss';
 
 class Point extends Component{
   constructor(props) {
@@ -66,14 +66,17 @@ class Point extends Component{
   }
 
   render() {
-    const { height, width, color, active, anchor, envelope} = this.props;
-    const {x, y} = this.state.alteredPosition;
-    return (
-      <Draggable defaultPosition={this.state.alteredPosition} onDrag={this.handleDrag} axis={anchor ? "x" : "both"} bounds={{top: 0, left: 0, right: width, bottom: (height - 10)}}>
-        <svg className={(active || envelope.active ) ? styles.Active : styles.Point} width={20} height={20} onClick={this.handleClick}>
-          <circle cx={10} cy={10} r={(active || envelope.active ) ? 8 : 10} fill={color} />
-        </svg>
-      </Draggable>
+    return(
+    <WTF
+      handleClick={() => this.handleClick()}
+      handleDrag={(e, ui) => this.handleDrag(e, ui)}
+      height={this.props.height}
+      width={this.props.width}
+      color={this.props.color}
+      active={(this.props.active || this.props.envelope.active) ? true : false}
+      anchor={this.props.anchor}
+      position={this.state.alteredPosition}
+    />
     );
   }
 }

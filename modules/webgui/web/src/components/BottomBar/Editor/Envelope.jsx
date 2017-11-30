@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types';
 import Draggable from 'react-draggable'
-import Point from './Point'
+import Point from './containers/Point'
 import styles from './Envelope.scss'
 import GraphBody from '../../common/Graph/GraphBody'
 class Envelope extends Component {
