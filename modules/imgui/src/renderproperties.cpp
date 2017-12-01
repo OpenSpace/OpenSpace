@@ -37,6 +37,8 @@
 
 #include <ghoul/filesystem/filesystem.h>
 
+#include <glm/ext.hpp>
+
 namespace openspace {
 
 using namespace properties;
