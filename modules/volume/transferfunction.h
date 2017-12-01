@@ -28,6 +28,8 @@
 #include <ghoul/glm.h>
 #include <modules/volume/envelope.h>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
     namespace volume {
         class TransferFunction {
@@ -36,7 +38,6 @@ namespace openspace {
             TransferFunction(int s);
             TransferFunction(std::string);
             TransferFunction(const TransferFunction& tf);
-
             TransferFunction(TransferFunction&& tf);
 
             bool getEnvelopesToLua(lua_State* state);
@@ -44,9 +45,13 @@ namespace openspace {
             bool setEnvelopesFromString(std::string s);
             bool setEnvelopesFromLua(lua_State* lua);
 
+            void loadEnvelopesFromFile(const std::string& path);
+            void saveEnvelopesToFile(const std::string& path);
+
             TransferFunction& operator=(const TransferFunction& tf);
             TransferFunction& operator=(TransferFunction&& tf);
             bool operator!=(const TransferFunction& tf);
+            bool hasEnvelopes() const;
 
             bool createTexture(std::shared_ptr<ghoul::opengl::Texture> ptr);
             std::string getSerializedToString() const;
@@ -55,6 +60,7 @@ namespace openspace {
             int _width = 1024;
             double lower = 0.0;
             double upper = 1.0;
+            std::string _loadableFilePath;
             std::vector<Envelope> _envelopes;
         };
 

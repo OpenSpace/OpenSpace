@@ -40,6 +40,8 @@ const envelopes = (state=[], action) => {  // state refers to array of envelopes
       return [...state, envelope(undefined, action)];
     case 'CLEAR_ENVELOPES':
       return [];
+    case 'DELETE_ENVELOPE':
+      return state.filter(envelope => envelope.active !== true)
     case 'MOVE_POINT':
       return  state.map(envelope => ({
               ...envelope,
@@ -50,8 +52,6 @@ const envelopes = (state=[], action) => {  // state refers to array of envelopes
                 : point.position })),
                 })
               );
-    case 'DELETE_ENVELOPE':
-        return state.filter(envelope => envelope.active !== true)
     case 'CHANGE_COLOR':
       return state.map(envelope => ({
               ...envelope,

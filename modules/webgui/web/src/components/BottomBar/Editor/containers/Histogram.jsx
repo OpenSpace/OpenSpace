@@ -35,7 +35,7 @@ class Histogram extends Component {
       )
       //Making sure the graphs body gets filled properly by adding 0 in the beginning and end of the histogram
       this.state.NormalizedHistogramData.unshift({ x: 0, y: 0 });
-      this.state.NormalizedHistogramData.push({ x: this.state.width, y: 0 });
+      this.state.NormalizedHistogramData.push({ x: this.props.width, y: 0 });
       this.setState({ histogramLoaded : true})
     }
   }

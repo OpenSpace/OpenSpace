@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Window from '../../common/Window/Window';
 import Picker from '../Picker';
-import EditorCanvas from './containers/EditorCanvas'
+import Editor from './containers/Editor'
 import styles from './TfEditor.scss'
 import ColorPicker from './ColorPicker';
 import DataManager from '../../../api/DataManager';
@@ -41,7 +41,7 @@ class TfEditor extends Component {
           <div>
           <Window size={{ width: 900, height: 700 }} closeCallback={this.toggleTfEditor} title="Transfer Function Editor" className={styles.Window}>
               <div className={styles.Canvas}>
-                  <EditorCanvas color={this.state.currentColor}/>
+                  <Editor color={this.state.currentColor}/>
               </div>
           </Window>
           { showColorPicker && (

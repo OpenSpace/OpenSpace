@@ -54,6 +54,7 @@ namespace openspace {
             Envelope(std::vector<EnvelopePoint> vec);
 
             void setPoints(std::vector<EnvelopePoint> vec);
+            std::vector<EnvelopePoint> getPoints();
 
             glm::vec4 getValueAtPosition(float pos) const;
             glm::vec3 normalizeColor(glm::vec3 vec) const;

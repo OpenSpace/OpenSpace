@@ -8,7 +8,7 @@ import styles from '../style/EditorCanvas.scss';
 import DataManager from '../../../../api/DataManager';
 import { TransferFunctionKey } from '../../../../api/keys';
 
-class EditorCanvas extends Component {
+class Editor extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,23 +32,26 @@ class EditorCanvas extends Component {
   }
 
   handleRecievedEnvelopes(data) {
-    var envelopes = (eval('('+data.Value+')'));
-    if (Object.keys(envelopes).length != 0 || envelopes.constructor != Object) {
-      this.props.ClearEnvelopes();
-      envelopes = envelopes.map(envelope =>
-        envelope['points'].map(point =>
-            Object.assign({},
-                { color : point.color,
-                  position : {
-                    x : point.position.x * this.state.width,
-                    y : this.state.height - point.position.y * this.state.height,
-                  },
-                })
-          )
-      )
-      envelopes.map(envelope =>
-        this.props.AddEnvelope(envelope)
-      )
+    console.log(data);
+    if(data !== undefined && data.Value !== "") {
+      var envelopes = (eval('('+data.Value+')'));
+      if (Object.keys(envelopes).length != 0 || envelopes.constructor != Object) {
+        this.props.ClearEnvelopes();
+        envelopes = envelopes.map(envelope =>
+          envelope['points'].map(point =>
+              Object.assign({},
+                  { color : point.color,
+                    position : {
+                      x : point.position.x * this.state.width,
+                      y : this.state.height - point.position.y * this.state.height,
+                    },
+                  })
+            )
+        )
+        envelopes.map(envelope =>
+          this.props.AddEnvelope(envelope)
+        )
+      }
     }
   }
 
@@ -92,9 +95,10 @@ class EditorCanvas extends Component {
     );
     }
 };
-EditorCanvas.propTypes = {
+Editor.propTypes = {
   AddEnvelope: PropTypes.func.isRequired,
   DeleteEnvelope: PropTypes.func.isRequired,
+  ClearEnvelopes: PropTypes.func.isRequired,
 }
 const mapStateToProps = (state) => {
   return {
@@ -117,9 +121,9 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-EditorCanvas = connect(
+Editor = connect(
   mapStateToProps,
   mapDispatchToProps,
-  )(EditorCanvas)
+  )(Editor)
 
-export default EditorCanvas;
+export default Editor;

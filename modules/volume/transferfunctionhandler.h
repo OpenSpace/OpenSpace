@@ -32,12 +32,11 @@
 #include <openspace/properties/binaryproperty.h>
 #include <openspace/util/histogram.h>
 #include <modules/volume/transferfunctionproperty.h>
+#include <modules/volume/transferfunction.h>
 #include <openspace/rendering/transferfunction.h>
 
 #include <vector>
 #include <memory>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
     namespace volume {
@@ -52,6 +51,9 @@ namespace openspace {
             void buildHistogram(float *data, int num);
 
             void setTexture();
+            void loadStoredEnvelopes();
+            void saveEnvelopes();
+            void setFilepath(const std::string& path);
 
             ghoul::opengl::Texture& getTexture();
             void uploadTexture();
@@ -62,6 +64,7 @@ namespace openspace {
         private:
             bool useTxtTexture = true;
             properties::StringProperty _transferFunctionPath;
+            std::string _filePath;
             properties::TransferFunctionProperty _transferFunctionProperty;
             properties::BinaryProperty _histogramProperty;
             std::shared_ptr<Histogram> _histogram;

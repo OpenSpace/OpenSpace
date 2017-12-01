@@ -140,6 +140,9 @@ void RenderableTimeVaryingVolume::initialize() {
         if (extension == "dictionary") {
             loadTimestepMetadata(path);
         }
+        if (extension == "tf") {
+            _transferFunctionHandler->setFilepath(path);
+        }
     }
 
 

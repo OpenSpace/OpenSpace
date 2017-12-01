@@ -25,6 +25,8 @@
 #include <modules/volume/transferfunctionhandler.h>
 #include <ghoul/misc/dictionary.h>
 #include <openspace/properties/scalarproperty.h>
+#include <iostream>
+#include <fstream>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -58,8 +60,6 @@ namespace openspace {
         }
 
         void TransferFunctionHandler::initialize() {
-
-
             addProperty(_transferFunctionPath);
             addProperty(_transferFunctionProperty);
             addProperty(_histogramProperty);
@@ -68,11 +68,13 @@ namespace openspace {
                 glm::size3_t(1024, 1, 1), ghoul::opengl::Texture::Format::RGBA,
                 GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
 
-            _transferFunction->setTextureFromTxt(_texture);
-            uploadTexture();
+            if (_filePath != "") {
+                loadStoredEnvelopes();
+            }
 
             _transferFunctionProperty.onChange([this]() {
                 setTexture();
+                saveEnvelopes();
             });
         }
 
@@ -89,6 +91,23 @@ namespace openspace {
                 uploadTexture();
                 useTxtTexture = false;
             }
+        }
+
+        void TransferFunctionHandler::loadStoredEnvelopes() {
+            TransferFunction tf;
+            tf.loadEnvelopesFromFile(_filePath);
+            if (tf.hasEnvelopes()) {
+                _transferFunctionProperty.setValue(tf);
+                setTexture();
+            }
+        }
+
+        void TransferFunctionHandler::saveEnvelopes() {
+            _transferFunctionProperty.value().saveEnvelopesToFile(_filePath);
+        }
+
+        void TransferFunctionHandler::setFilepath(const std::string& path) {
+            _filePath = path;
         }
 
         ghoul::opengl::Texture& TransferFunctionHandler::getTexture() {

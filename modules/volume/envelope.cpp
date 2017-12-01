@@ -30,6 +30,10 @@ namespace openspace {
             this->_points = vec;
         }
 
+        std::vector<EnvelopePoint> Envelope::getPoints() {
+            return _points;
+        }
+
         bool Envelope::isValueInEnvelope(float pos) const {
             if (!_points.empty()) {
                 if (_points.front().position.first <= pos && _points.back().position.first >= pos)
@@ -154,19 +158,18 @@ namespace openspace {
         }
 
         void Envelope::setEnvelopeLuaTable(lua_State* state) const {
-            lua_newtable(state);
-            lua_newtable(state);
             for (auto iter = _points.begin(); iter != _points.end(); ++iter) {
+                lua_newtable(state);
+                lua_pushstring(state, iter->colorHex.c_str());
+                lua_setfield(state, -2, "color");
                 lua_newtable(state);
                 lua_pushnumber(state, static_cast<lua_Number>(iter->position.first));
                 lua_setfield(state, -2, "x");
                 lua_pushnumber(state, static_cast<lua_Number>(iter->position.second));
                 lua_setfield(state, -2, "y");
-                lua_pushstring(state, iter->colorHex.c_str());
-                lua_setfield(state, -2, "color");
                 lua_setfield(state, -2, "position");
+                lua_setfield(state, -2, ("[\"" + std::to_string(iter - _points.begin() + 1) + "\"]").c_str());
             }
-            lua_setfield(state, -2, "points");
         }
 
     }//namespace volume

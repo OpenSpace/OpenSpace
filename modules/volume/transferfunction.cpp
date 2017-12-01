@@ -23,8 +23,13 @@
 ****************************************************************************************/
 
 #include <modules/volume/transferfunction.h>
+#include <ghoul/misc/dictionary.h>
 #include <ext/json/json.hpp>
 #include <memory>
+#include <iostream>
+#include <fstream>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/filesystem/filesystem.h>
 
 using json = nlohmann::json;
 
@@ -41,17 +46,19 @@ namespace openspace {
             setEnvelopesFromString(s);
         }
 
-        TransferFunction::TransferFunction(const TransferFunction& tf) : _envelopes(tf._envelopes) { }
+        TransferFunction::TransferFunction(const TransferFunction& tf) : _envelopes(tf._envelopes), _loadableFilePath(tf._loadableFilePath) { }
 
-        TransferFunction::TransferFunction(TransferFunction&& tf) : _envelopes(std::move(tf._envelopes)) { }
+        TransferFunction::TransferFunction(TransferFunction&& tf) : _envelopes(std::move(tf._envelopes)), _loadableFilePath(std::move(tf._loadableFilePath)) { }
 
         TransferFunction& TransferFunction::operator=(const TransferFunction& tf) {
             _envelopes = tf._envelopes;
+            _loadableFilePath = tf._loadableFilePath;
             return *this;
         }
 
         TransferFunction& TransferFunction::operator=(TransferFunction&& tf) {
             _envelopes = std::move(tf._envelopes);
+            _loadableFilePath = std::move(tf._loadableFilePath);
             return *this;
         }
 
@@ -73,25 +80,34 @@ namespace openspace {
             }
             return true;
         }
-
+        //TODO, implement this
         bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
             bool success = (lua_istable(state, -1) == 1);
             if (success) {
                 lua_pushnil(state);
                 while (lua_next(state, -2)) {
                     Envelope env;
-                    std::vector < EnvelopePoint> tmpVec;
-                    lua_pushnil(state);
+                    std::vector<EnvelopePoint> tmpVec;
+                    
+                    /*lua_pushnil(state);
                     while (lua_next(state, -2)) {
-                        float x_value = static_cast<float>(lua_tonumber(state, -1));
-                        lua_pop(state, 1);
-                        float y_value = static_cast<float>(lua_tonumber(state, -1));
-                        lua_pop(state, 1);
-                        std::string color = static_cast<std::string>(lua_tostring(state, -1));
-                        lua_pop(state, 1);
-                        tmpVec.emplace_back(color, x_value, y_value);
-                        lua_pop(state, 1);
-                    }
+                        lua_pushnil(state);
+                        while (lua_next(state, -2)) {
+                            PrintTable(state);
+                            std::string color = static_cast<std::string>(lua_tostring(state, -1));
+                            lua_pop(state, 1);
+                            lua_pushnil(state);
+                            lua_next(state, -2);
+                            float x_value = static_cast<float>(lua_tonumber(state, -1));
+                            
+                            lua_pop(state, 1);
+                            lua_next(state, -2);
+                            float y_value = static_cast<float>(lua_tonumber(state, -1));
+                            lua_pop(state, 1);
+                            tmpVec.emplace_back(color, x_value, y_value);
+                            lua_pop(state, 1);
+                        }
+                    }*/
                     lua_pop(state, 2);
                 }
                 lua_pop(state, 1);
@@ -102,14 +118,64 @@ namespace openspace {
         bool TransferFunction::getEnvelopesToLua(lua_State* state) {
             lua_newtable(state);
             for (auto iter = _envelopes.begin(); iter != _envelopes.end(); ++iter) {
+                lua_newtable(state);
                 iter->setEnvelopeLuaTable(state);
+                lua_setfield(state, -2, ("[\"" + std::to_string(iter - _envelopes.begin() + 1) + "\"]").c_str());
             }
             return true;
+        }
+
+        void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
+            lua_State* L = luaL_newstate();
+            std::string absFilename = absPath(path);
+            ghoul::Dictionary dictionary;
+            ghoul::lua::loadDictionaryFromFile(path, dictionary, L);
+
+            std::vector<std::string> transferfunctionKeys = dictionary.keys();
+            for (auto transferfunctionKey : transferfunctionKeys) {
+                ghoul::Dictionary transferfunctionDictionary = dictionary.value<ghoul::Dictionary>(transferfunctionKey);
+                std::vector<std::string> envelopeKeys = transferfunctionDictionary.keys();
+                for (auto envelopeKey : envelopeKeys) {
+                    ghoul::Dictionary envelopeDictionary = transferfunctionDictionary.value<ghoul::Dictionary>(envelopeKey);
+                    std::vector<std::string> pointKeys = envelopeDictionary.keys();
+                    Envelope env;
+                    std::vector < EnvelopePoint> tmpVec;
+                    for (auto pointKey : pointKeys) {
+                        ghoul::Dictionary pointDictionary = envelopeDictionary.value<ghoul::Dictionary>(pointKey);
+                        std::string color = pointDictionary.value<std::string>("color");
+                        ghoul::Dictionary positionDictionary = pointDictionary.value<ghoul::Dictionary>("position");
+                        float posX = positionDictionary.value<float>("x");
+                        float posY = positionDictionary.value<float>("y");
+                        tmpVec.emplace_back(color, posX, posY);
+                    }
+                    env.setPoints(tmpVec);
+                    _envelopes.emplace_back(env);
+                }
+            }
+        }
+
+        void TransferFunction::saveEnvelopesToFile(const std::string& path) {
+
+            ghoul::Dictionary dictionary;
+            lua_State* state = luaL_newstate();
+            getEnvelopesToLua(state);
+            
+            ghoul::lua::luaDictionaryFromState(state, dictionary);
+            ghoul::DictionaryLuaFormatter formatter;
+            std::ofstream tfFile;
+            tfFile.open(path);
+            tfFile << "return {";
+            tfFile << formatter.format(dictionary);
+            tfFile << "}";
+            tfFile.close();
         }
 
         bool TransferFunction::operator!=(const TransferFunction& tf) { 
             
             if (_envelopes.size() != tf._envelopes.size())
+                return true;
+
+            if (_loadableFilePath != tf._loadableFilePath)
                 return true;
 
             auto iter = _envelopes.begin();
@@ -119,6 +185,10 @@ namespace openspace {
                     return true;
             }
             return false; 
+        }
+
+        bool TransferFunction::hasEnvelopes() const {
+            return !_envelopes.empty();
         }
 
         std::string TransferFunction::getSerializedToString() const {
