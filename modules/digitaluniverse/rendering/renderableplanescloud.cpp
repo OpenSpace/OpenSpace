@@ -918,7 +918,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
             // +3 because of the x, y and z at the begining of each line.
             _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject + 3});                
 
-            if (dummy == "orientation") { // 3d vectors u and v
+            if ((dummy == "orientation") || (dummy == "ori")) { // 3d vectors u and v
                 _nValuesPerAstronomicalObject += 6; // We want the number, but the index is 0 based
             }
             else {
@@ -949,10 +949,18 @@ bool RenderablePlanesCloud::readSpeckFile() {
         if (line.substr(0, 8) == "texture ") {
             std::stringstream str(line);
             
+            std::size_t found = line.find("-");
+            
             int textureIndex = 0;
             
             std::string dummy;
             str >> dummy; // command
+            
+            if (found != std::string::npos) {
+                std::string option; // Not being used right now.
+                str >> option;
+            }
+            
             str >> textureIndex;
             str >> dummy; // texture file name
 
@@ -1169,7 +1177,7 @@ bool RenderablePlanesCloud::saveCachedFile(const std::string& file) const {
 void RenderablePlanesCloud::createPlanes() {
     if (_dataIsDirty && _hasSpeckFile) {
         LDEBUG("Creating planes");
-
+        float maxSize = 0.0f;
         int planeNumber = 0;
         for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
             glm::vec4 transformedPos = glm::vec4(_transformationMatrix * 
@@ -1244,11 +1252,18 @@ void RenderablePlanesCloud::createPlanes() {
                 break;
             }
 
+            for (int i = 0; i < 3; ++i) {
+                maxSize = maxSize > vertex0[i] ? maxSize : vertex0[i];
+                maxSize = maxSize > vertex1[i] ? maxSize : vertex1[i];
+                maxSize = maxSize > vertex2[i] ? maxSize : vertex2[i];
+                maxSize = maxSize > vertex4[i] ? maxSize : vertex4[i];
+            }
+
             vertex0 *= static_cast<float>(scale);
             vertex1 *= static_cast<float>(scale);
             vertex2 *= static_cast<float>(scale);
-            vertex4 *= static_cast<float>(scale);
-
+            vertex4 *= static_cast<float>(scale);            
+            
             GLfloat vertexData[] = {
                 //      x      y     z     w           s    t
                 vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
@@ -1292,6 +1307,8 @@ void RenderablePlanesCloud::createPlanes() {
         glBindVertexArray(0);
 
         _dataIsDirty = false;
+
+        _fadeInDistance.setMaxValue(10.0f * maxSize);
     }
 
     if (_hasLabel && _labelDataIsDirty) {
@@ -1306,7 +1323,7 @@ void RenderablePlanesCloud::createPlanes() {
             return planeA.planeIndex < planeB.planeIndex;
         });
 
-    }
+    }    
 }
 
 } // namespace openspace
