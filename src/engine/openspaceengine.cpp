@@ -1319,6 +1319,10 @@ void OpenSpaceEngine::drawOverlays() {
             // and we won't need this if we are shutting down
             _renderEngine->renderCameraInformation();
         }
+        else {
+            // If we are in shutdown mode, we can display the remaining time
+            _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
+        }
         _console->render();
     }
 

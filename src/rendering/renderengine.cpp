@@ -598,6 +598,15 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         timer,
         fullTime
     );
+
+    RenderFontCr(
+        *_fontDate,
+        penPosition,
+        "%s",
+        // Important: length of this string is the same as the shutdown time text
+        // to make them align
+        "Press ESC again to abort"
+    );
 }
 
 void RenderEngine::postDraw() {
