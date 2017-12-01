@@ -41,64 +41,52 @@ const envelopes = (state=[], action) => {  // state refers to array of envelopes
     case 'CLEAR_ENVELOPES':
       return [];
     case 'MOVE_POINT':
-       return [...state, envelope[action.envelopeId].points[action.id].position = action.position];
+      return  state.map(envelope => ({
+              ...envelope,
+              points: envelope.points.map(point => ({
+                ...point,
+                position: (point.id === action.id) ?
+                  action.position
+                : point.position })),
+                })
+              );
     case 'DELETE_ENVELOPE':
         return state.filter(envelope => envelope.active !== true)
     case 'CHANGE_COLOR':
-      return state.map(envelope =>
-          Object.assign({}, envelope, {
-            points: envelope.points.map(point =>
-            (point.active || envelope.active)
-            ? Object.assign({}, point, {
-                color: action.color,
+      return state.map(envelope => ({
+              ...envelope,
+              points: envelope.points.map(point => ({
+                ...point,
+                color: (point.active || envelope.active) ?
+                  action.color
+                : point.color })),
                 })
-            : point),
-          })
-        )
+              );
     case 'TOGGLE_ACTIVE_ENVELOPE':
-      return state.map(envelope =>
-          (envelope.id === action.id)
-          ? Object.assign({}, envelope, {
-            points: envelope.points.map(point =>
-              Object.assign({}, point, {
-                active: false,
+      return state.map(envelope => ({
+              ...envelope,
+              active: (envelope.id === action.id) ?
+                !envelope.active
+                : false,
+              points: envelope.points.map(point => ({
+                ...point,
+                active: false
+                })),
               })
-            ),
-            active: !envelope.active,
-          })
-          : Object.assign({}, envelope, {
-            points: envelope.points.map(point =>
-              Object.assign({}, point, {
-                active: false,
-              })
-            ),
-            active: false,
-          })
-        )
+            );
     case 'TOGGLE_ACTIVE_POINT':
-      return state.map(envelope =>
-          (envelope.id === action.envelopeId)
-          ? Object.assign({}, envelope, {
-            points: envelope.points.map(point =>
-              (point.id === action.pointId)
-              ? Object.assign({}, point, {
-                active: !point.active,
-                })
-              : Object.assign({}, point, {
-                active: false,
-                })
-              ),
+      return state.map(envelope => ({
+              ...envelope,
               active: false,
-          })
-          : Object.assign({}, envelope, {
-            points: envelope.points.map(point =>
-              Object.assign({}, point, {
-                active: false,
-                })
-              ),
-            active: false,
-          })
-        )
+              points: envelope.points.map(point => ({
+                ...point,
+                active: (point.id === action.pointId &&
+                  envelope.id === action.envelopeId) ?
+                  !point.active
+                  : false,
+                })),
+              })
+            );
     default:
       return state;
   }

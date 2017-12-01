@@ -1,10 +1,8 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types';
 import Draggable from 'react-draggable'
-import Point from '../presentational/Point.jsx'
 import { connect } from 'react-redux';
-import styles from '../style/Envelope.scss'
-import GraphBody from '../../../common/Graph/GraphBody'
+import EnvelopeCanvas from '../presentational/EnvelopeCanvas'
 import { toggleActiveEnvelope, toggleActivePoint, movePoint} from '../actions';
 
 class Envelope extends Component {
@@ -15,16 +13,6 @@ class Envelope extends Component {
     }
     this.handleDrag = this.handleDrag.bind(this);
     this.handleClick = this.handleClick.bind(this);
-  }
-
-  pointsForEnvelopeGraph(data) {
-    return data = this.props.points.map(point =>
-        Object.assign({},
-        {x: point.position.x + 10,
-         y: 600 - point.position.y - 10,
-         color: point.color}
-        )
-      )
   }
 
   handleDrag(e, ui, id) {
@@ -69,31 +57,14 @@ class Envelope extends Component {
   render() {
     const { points, height, width, active } = this.props;
     return (
-      <div className={styles.Envelope}>
-        <svg className={styles.Line} height={height} width={width + 10}>
-          <GraphBody
-           UseLinearGradient={true}
-           points={this.pointsForEnvelopeGraph(points)}
-           x={0}
-           y={600}
-           width={800}
-           fillOpacity={"0"}
-           strokeWidth={2}
-          />
-        </svg>
-       {points.map((point) =>
-        <Point
-        key={point.id}
-          handleClick={() => this.handleClick(point.id)}
-          handleDrag={(e, ui) => this.handleDrag(e, ui, point.id)}
-          height={this.props.height}
-          width={this.props.width}
-          {...point}
-          active={(point.active || active) ? true : false}
-
-        />
-        )}
-      </div>
+      <EnvelopeCanvas
+        handleClick={(pointId) => this.handleClick(pointId)}
+        handleDrag={(e, ui, pointId) => this.handleDrag(e, ui, pointId)}
+        points={points}
+        height={height}
+        width={width}
+        active={active}
+      />
     );
   }
 }
