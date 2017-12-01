@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Draggable from 'react-draggable'
 import Point from '../presentational/Point.jsx'
 import { connect } from 'react-redux';
+import styles from '../style/Envelope.scss'
 import GraphBody from '../../../common/Graph/GraphBody'
 import { toggleActiveEnvelope, toggleActivePoint, movePoint} from '../actions';
 
@@ -85,8 +86,8 @@ class Envelope extends Component {
         key={point.id}
           handleClick={() => this.handleClick(point.id)}
           handleDrag={(e, ui) => this.handleDrag(e, ui, point.id)}
-          height={height}
-          width={width}
+          height={this.props.height}
+          width={this.props.width}
           {...point}
           active={(point.active || active) ? true : false}
 

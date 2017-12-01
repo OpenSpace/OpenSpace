@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Window from '../../common/Window/Window';
 import Picker from '../Picker';
-import EditorCanvas from './EditorCanvas'
+import EditorCanvas from './containers/EditorCanvas'
 import styles from './TfEditor.scss'
 import ColorPicker from './ColorPicker';
 import DataManager from '../../../api/DataManager';
@@ -31,7 +31,7 @@ class TfEditor extends Component {
   }
 
   render() {
-    const {showTfEditor, showColorPicker, hasHistogramData, hasEnvelopeData} = this.state;
+    const {showTfEditor, showColorPicker} = this.state;
     return(
       <div className={styles.Wrapper}>
         <Picker onClick={this.toggleTfEditor} className={(showTfEditor ? styles.Active : '')}>

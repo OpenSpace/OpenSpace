@@ -2,12 +2,11 @@ import React, {Component} from 'react';
 import Draggable from 'react-draggable';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import Histogram from './containers/Histogram';
-import Envelope from './containers/Envelope'
-import { addEnvelope, deleteEnvelope, clearEnvelopes, movePoint } from './actions';
-import styles from './EditorCanvas.scss';
-import DataManager from '../../../api/DataManager';
-import { TransferFunctionKey, HistogramKey } from '../../../api/keys';
+import { addEnvelope, deleteEnvelope, clearEnvelopes } from '../actions';
+import EditorContainer from '../presentational/EditorContainer'
+import styles from '../style/EditorCanvas.scss';
+import DataManager from '../../../../api/DataManager';
+import { TransferFunctionKey } from '../../../../api/keys';
 
 class EditorCanvas extends Component {
   constructor(props) {
@@ -84,21 +83,11 @@ class EditorCanvas extends Component {
       <div className={styles.EditorContainer} >
         <button onClick={() => this.props.AddEnvelope(defaultEnvelopePoints)}>Add Envelope</button>
         <button onClick={() => this.props.DeleteEnvelope()}>Delete Envelope</button>
-        <div className={styles.EnvelopeContainer}>
-            {this.props.envelopes.map(envelope =>
-              <Envelope className={styles.Envelope}
-                key={envelope.id}
-                height={height}
-                width={width}
-                points={envelope.points}
-                id={envelope.id}
-                active={envelope.active}
-              />
-            )}
-        </div>
-        <div >
-          <Histogram height={height} width={width}/>
-        </div>
+        <EditorContainer
+          envelopes={this.props.envelopes}
+          height={height}
+          width={width}
+        />
       </div>
     );
     }
