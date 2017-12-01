@@ -38,6 +38,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <glm/ext.hpp>
 
+#include <glm/ext.hpp>
+
 namespace openspace {
 
 using namespace properties;
@@ -668,7 +670,7 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
             isRegular
         );
     }
-    
+
     ImGui::PopID();
 }
 

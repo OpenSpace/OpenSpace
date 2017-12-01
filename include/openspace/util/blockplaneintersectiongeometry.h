@@ -35,7 +35,8 @@ namespace openspace {
 class BlockPlaneIntersectionGeometry {
 public:
     // initializers
-    BlockPlaneIntersectionGeometry(glm::vec3 blockSize, glm::vec3 planeNormal, float planeDistance);
+    BlockPlaneIntersectionGeometry(glm::vec3 blockSize, glm::vec3 planeNormal,
+        float planeDistance);
     ~BlockPlaneIntersectionGeometry();
 
     bool initialize();

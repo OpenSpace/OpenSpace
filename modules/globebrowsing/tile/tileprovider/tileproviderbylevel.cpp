@@ -129,7 +129,7 @@ bool TileProviderByLevel::deinitialize() {
     for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
         success &= tp->deinitialize();
     }
-    
+
     return TileProvider::deinitialize() && success;
 }
 

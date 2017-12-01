@@ -73,7 +73,7 @@ public:
      * Initalizes the SceneGraph
      */
     void initialize();
-    
+
     /**
      * Initializes the OpenGL part of the SceneGraph
      */

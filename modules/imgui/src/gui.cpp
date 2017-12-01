@@ -227,7 +227,7 @@ void addScreenSpaceRenderableLocal(std::string texturePath) {
     const std::string luaTable =
         "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" +
         texturePath + "') }";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" +
+    const std::string script = "openspace.addScreenSpaceRenderable(" +
         luaTable + ");";
     OsEng.scriptEngine().queueScript(
         script,
@@ -238,7 +238,7 @@ void addScreenSpaceRenderableLocal(std::string texturePath) {
 void addScreenSpaceRenderableOnline(std::string texturePath) {
     const std::string luaTable =
         "{Type = 'ScreenSpaceImageOnline', TexturePath = '" + texturePath + "' }";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" +
+    const std::string script = "openspace.addScreenSpaceRenderable(" +
         luaTable + ");";
     OsEng.scriptEngine().queueScript(
         script,
@@ -483,7 +483,11 @@ void GUI::initializeGL() {
         //_contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
-        ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pngData, &textureSize.x, &textureSize.y);
+        ImGui::GetIO().Fonts->GetTexDataAsRGBA32(
+            &pngData,
+            &textureSize.x,
+            &textureSize.y
+        );
     }
     _fontTexture = std::make_unique<ghoul::opengl::Texture>(
         pngData,
@@ -810,6 +814,14 @@ void GUI::render() {
     );
     if (addImageOnline) {
         addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
+    }
+
+    bool addDashboard = ImGui::Button("Add Dashboard");
+    if (addDashboard) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 
     ImGui::Checkbox("ImGUI Internals", &_showInternals);

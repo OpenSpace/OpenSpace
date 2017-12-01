@@ -48,7 +48,7 @@ namespace documentation { struct Documentation; }
 class RenderableFov : public Renderable {
 public:
     RenderableFov(const ghoul::Dictionary& dictionary);
-    
+
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -56,7 +56,7 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-    
+
     static documentation::Documentation Documentation();
 
 private:
@@ -153,7 +153,7 @@ private:
         properties::Vec4Property square; // Color for the orthogonal square
     } _colors;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___RENDERABLEFOV___H__

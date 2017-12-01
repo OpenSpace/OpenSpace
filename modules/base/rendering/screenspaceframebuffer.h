@@ -51,23 +51,25 @@ public:
     bool initializeGL() override;
     bool deinitializeGL() override;
     void render() override;
-    void update() override;
     bool isReady() const override;
 
     void setSize(glm::vec4);
     void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
+    void addRenderFunction(std::function<void()> renderFunction);
     void removeAllRenderFunctions();
 
     static documentation::Documentation Documentation();
 
-private:
-    void createFragmentbuffer();
-    static int id();
-
+protected:
+    void createFramebuffer();
     properties::Vec4Property _size;
 
+private:
+    static int id();
+
     std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-    std::vector<std::shared_ptr<std::function<void()>>> _renderFunctions;
+    std::vector<std::shared_ptr<std::function<void()>>> _renderFunctionsShared;
+    std::vector<std::function<void()>> _renderFunctions;
 
     int _id;
 };
