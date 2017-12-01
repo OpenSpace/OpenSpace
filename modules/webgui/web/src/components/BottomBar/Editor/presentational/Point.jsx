@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import Draggable from 'react-draggable'
 import styles from '../style/Point.scss';
 
-const WTF = ({
+const Point = ({
   handleClick,
   handleDrag,
   height,
@@ -21,8 +21,9 @@ const WTF = ({
   </Draggable>
   </div>
 )
-WTF.propTypes = {
+Point.propTypes = {
   handleDrag: PropTypes.func.isRequired,
+  handleClick: PropTypes.func.isRequired,
   position: PropTypes.shape({
               x: PropTypes.number.isRequired,
               y:PropTypes.number.isRequired,
@@ -30,6 +31,8 @@ WTF.propTypes = {
   anchor: PropTypes.bool.isRequired,
   color: PropTypes.string.isRequired,
   active: PropTypes.bool.isRequired,
+  height: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired,
 }
 
-export default WTF
+export default Point

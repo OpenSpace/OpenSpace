@@ -2,9 +2,9 @@ import React, {Component} from 'react';
 import Draggable from 'react-draggable';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import Histogram from './Histogram';
-import CreatedEnvelopes from './EnvelopeCanvas'
-import { addEnvelope, deleteEnvelope, clearEnvelopes } from './actions';
+import Histogram from './containers/Histogram';
+import Envelope from './containers/Envelope'
+import { addEnvelope, deleteEnvelope, clearEnvelopes, movePoint } from './actions';
 import styles from './EditorCanvas.scss';
 import DataManager from '../../../api/DataManager';
 import { TransferFunctionKey, HistogramKey } from '../../../api/keys';
@@ -15,30 +15,25 @@ class EditorCanvas extends Component {
     this.state = {
       height: 600,
       width: 800,
-      hasHistogramData: false,
-      color: this.props.color,
+      color: this.props.color
     }
-
-    this.sendEnvelopes = this.sendEnvelopes.bind(this);
     this.convertPointsBeforeSending = this.convertPointsBeforeSending.bind(this);
-    this.handleRecievedHistogram = this.handleRecievedHistogram.bind(this);
     this.handleRecievedEnvelopes = this.handleRecievedEnvelopes.bind(this);
   }
 
   componentDidMount() {
     DataManager.getValue(TransferFunctionKey, this.handleRecievedEnvelopes);
-    DataManager.getValue(HistogramKey, this.handleRecievedHistogram);
-    DataManager.subscribe(HistogramKey, this.handleRecievedHistogram);
   }
 
-  handleRecievedHistogram(data) {
-    var convertedData = (eval('('+data.Value+')'));
-    return this.normalizeHistogramDataToCanvas(convertedData);
+  //listen to changes in store
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.envelopes !== prevProps.envelopes) {
+      this.sendEnvelopes();
+    }
   }
 
   handleRecievedEnvelopes(data) {
     var envelopes = (eval('('+data.Value+')'));
-    console.log(envelopes);
     if (Object.keys(envelopes).length != 0 || envelopes.constructor != Object) {
       this.props.ClearEnvelopes();
       envelopes = envelopes.map(envelope =>
@@ -81,25 +76,8 @@ class EditorCanvas extends Component {
     DataManager.setValue(TransferFunctionKey, JSON.stringify(data));
   }
 
-  normalizeHistogramDataToCanvas(data) {
-    if(data.length < this.state.width) {
-      let maxValue =  Math.max.apply(Math,data.map(function(o){return o;}));
-      this.state.NormalizedHistogramData = data.map((value, index) =>
-          Object.assign({},
-              {x: (index / data.length) * this.state.width,
-               y: (value / maxValue) * this.state.height,
-              },
-        )
-      )
-      //Making sure the graphs body gets filled properly by adding 0 in the beginning and end of the histogram
-      this.state.NormalizedHistogramData.unshift({ x: 0, y: 0 });
-      this.state.NormalizedHistogramData.push({ x: this.state.width, y: 0 });
-      this.setState({ histogramLoaded : true})
-    }
-  }
-
   render() {
-    const {histogramLoaded, NormalizedHistogramData, height, width, color } = this.state;
+    const {height, width, color } = this.state;
     let defaultEnvelopePoints = [{color: color, position : { x: 0, y: height}}, {color: color, position : { x: 30, y: 0}},
                     {color: color, position : { x: 70, y: 0}}, {color: color, position : { x: 100, y: height}}];
       return (
@@ -107,13 +85,20 @@ class EditorCanvas extends Component {
         <button onClick={() => this.props.AddEnvelope(defaultEnvelopePoints)}>Add Envelope</button>
         <button onClick={() => this.props.DeleteEnvelope()}>Delete Envelope</button>
         <div className={styles.EnvelopeContainer}>
-            <CreatedEnvelopes onPointMoved={() => this.sendEnvelopes()} height={height} width={width}/>
+            {this.props.envelopes.map(envelope =>
+              <Envelope className={styles.Envelope}
+                key={envelope.id}
+                height={height}
+                width={width}
+                points={envelope.points}
+                id={envelope.id}
+                active={envelope.active}
+              />
+            )}
         </div>
-        {histogramLoaded && (
-        <div className={styles.HistogramContainer}>
-          <Histogram data={NormalizedHistogramData} height={height} width={width}/>
+        <div >
+          <Histogram height={height} width={width}/>
         </div>
-      )}
       </div>
     );
     }
@@ -129,7 +114,7 @@ const mapStateToProps = (state) => {
     };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch) => {
   return {
     AddEnvelope: (envelope) => {
       dispatch(addEnvelope(envelope));

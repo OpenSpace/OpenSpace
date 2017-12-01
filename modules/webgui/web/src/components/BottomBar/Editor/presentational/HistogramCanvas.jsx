@@ -1,10 +1,9 @@
 import React from 'react';
-import GraphBody from '../../common/Graph/GraphBody';
+import GraphBody from '../../../common/Graph/GraphBody';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import styles from './Histogram.scss'
 
-const Histogram = ({
+const HistogramCanvas = ({
   data,
   height,
   width,
@@ -22,7 +21,7 @@ const Histogram = ({
         />
         </svg>
 );
-Histogram.PropTypes = {
+HistogramCanvas.PropTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
       x: PropTypes.number.isRequired,
@@ -30,5 +29,4 @@ Histogram.PropTypes = {
     })
   ).isRequired
 }
-
-export default Histogram;
+export default HistogramCanvas;
