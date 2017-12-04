@@ -48,7 +48,8 @@ public:
     void initialize();
     void deinitialize();
 
-    std::shared_ptr<Layer> addLayer(layergroupid::GroupID groupId, ghoul::Dictionary layerDict);
+    std::shared_ptr<Layer> addLayer(layergroupid::GroupID groupId,
+        ghoul::Dictionary layerDict);
     void deleteLayer(layergroupid::GroupID groupId, std::string layerName);
 
     const LayerGroup& layerGroup(size_t groupId);

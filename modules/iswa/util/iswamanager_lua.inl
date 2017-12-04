@@ -93,7 +93,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         std::shared_ptr<ScreenSpaceRenderable> s(
             ScreenSpaceRenderable::createFromDictionary(d)
         );
-        OsEng.renderEngine().registerScreenSpaceRenderable(s);
+        OsEng.renderEngine().addScreenSpaceRenderable(s);
     }
     return 0;
 }

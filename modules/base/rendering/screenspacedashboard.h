@@ -22,50 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
-#define __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
+
+namespace ghoul::fontrendering {
+    class Font;
+    class FontRenderer;
+}
 
 namespace openspace {
 
-class PowerScaledSphere {
+namespace documentation { struct Documentation; }
+
+class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
 public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius,
-        int segments = 8);
+    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
+    ~ScreenSpaceDashboard();
 
-    PowerScaledSphere(glm::vec3 radius, int segments);
+    bool initializeGL() override;
+    bool deinitializeGL() override;
 
-    ~PowerScaledSphere();
-    PowerScaledSphere(const PowerScaledSphere& cpy);
+    bool isReady() const override;
+    void update() override;
 
-    bool initialize();
+    static documentation::Documentation Documentation();
 
-    void render();
+private:
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
 
-
-//private:
-    typedef struct {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
-
-    GLuint _vaoID;
-    GLuint _vBufferID;
-    GLuint _iBufferID;
-
-    unsigned int _isize;
-    unsigned int _vsize;
-    Vertex* _varray;
-    int* _iarray;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__

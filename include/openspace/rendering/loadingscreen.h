@@ -41,7 +41,7 @@ namespace ghoul::fontrendering {
 
 namespace ghoul::opengl {
     class ProgramObject;
-    class Texture; 
+    class Texture;
 } // namespace ghoul::opengl
 
 namespace openspace {

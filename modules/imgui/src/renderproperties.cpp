@@ -668,7 +668,7 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
             isRegular
         );
     }
-    
+
     ImGui::PopID();
 }
 
