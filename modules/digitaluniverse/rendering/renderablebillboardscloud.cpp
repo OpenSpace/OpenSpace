@@ -355,7 +355,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.1, 100.0)
+    , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.0, 100.0)
     , _disableFadeInDistance(DisableFadeInInfo, true)
     , _billboardMaxSize(BillboardMaxSizeInfo, 400.0, 0.0, 1000.0)
     , _billboardMinSize(BillboardMinSizeInfo, 0.0, 0.0, 100.0)
@@ -1413,6 +1413,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         }
     }        
 
+    float biggestCoord = -1.0f;
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) { 
         glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2], 1.0);
         glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
@@ -1420,6 +1421,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         if (_hasColorMapFile) {
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(position[j]);
+                biggestCoord = biggestCoord < position[j] ? position[j] : biggestCoord;
             }
             // Finds from which bin to get the color.
             // Note: the first color in the colormap file
@@ -1445,6 +1447,8 @@ void RenderableBillboardsCloud::createDataSlice() {
             }
         }            
     }
+
+    _fadeInDistance.setMaxValue(10.0f * biggestCoord);
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {

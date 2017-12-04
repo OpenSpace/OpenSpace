@@ -583,6 +583,10 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform("galaxyTexture", unit);
     int currentTextureIndex = -1;
     for (auto renderingPlane : _renderingPlanesArray) {
+        // For planes with undefined textures references
+        if (renderingPlane.planeIndex == -1) {
+            continue;
+        }
 
         glm::dvec4 vertex0(renderingPlane.vertexData[0], renderingPlane.vertexData[1], 
             renderingPlane.vertexData[2], renderingPlane.vertexData[3]);
@@ -1216,7 +1220,7 @@ void RenderablePlanesCloud::createPlanes() {
             // JCC: Ask Abbott about these points refeering to a non-existing texture.
             if (plane.planeIndex == 30) {
                 //std::cout << "--- Creating planes - index: " << plane.planeIndex << std::endl;
-                plane.planeIndex = 0;
+                plane.planeIndex = -1;
             }
                 
             glGenVertexArrays(1, &plane.vao);
