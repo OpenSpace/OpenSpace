@@ -26,7 +26,9 @@
 
 namespace openspace {
 
-Worker::Worker(ThreadPool& pool) : pool(pool) {}
+Worker::Worker(ThreadPool& pool_)
+    : pool(pool_)
+{}
 
 void Worker::operator()() {
     std::function<void()> task;

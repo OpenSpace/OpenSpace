@@ -148,9 +148,7 @@ void DataProcessor::initializeVectors(int numOptions){
 }
 
 void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions) {
-    int numSelected = selectedOptions.size();
-    std::shared_ptr<Histogram> histogram;
-    float mean, standardDeviation, filterMid, filterWidth;
+    int numSelected = static_cast<int>(selectedOptions.size());
 
     _filterValues = glm::vec2(0.0);
     if (numSelected <= 0) {
@@ -159,10 +157,12 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions) {
 
     if (!_histograms.empty()) {
         for (int option : selectedOptions) {
+            float filterMid;
+            float filterWidth;
             if (!_useHistogram) {
-                mean = (1.0/_numValues[option])*_sum[option];
-                standardDeviation = _standardDeviation[option];
-                histogram = _histograms[option];
+                float mean = (1.f / _numValues[option]) * _sum[option];
+                float standardDeviation = _standardDeviation[option];
+                std::shared_ptr<Histogram> histogram = _histograms[option];
 
                 filterMid = histogram->highestBinValue(_useHistogram);
                 filterWidth = mean+histogram->binWidth();
@@ -196,13 +196,13 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions) {
 void DataProcessor::add(std::vector<std::vector<float>>& optionValues,
                         std::vector<float>& sum)
 {
-    int numOptions = optionValues.size();
+    int numOptions = static_cast<int>(optionValues.size());
     int numValues;
     float mean, value, variance, standardDeviation;
 
     for (int i=0; i<numOptions; i++) {
         std::vector<float> values = optionValues[i];
-        numValues = values.size();
+        numValues = static_cast<int>(values.size());
 
         variance = 0;
         mean = (1.0f/numValues)*sum[i];

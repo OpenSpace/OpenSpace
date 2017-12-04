@@ -61,7 +61,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 "Must define key '" + std::string(KeyMaxLevel) + "'"
             );
         }
-        maxLevel = std::round(floatMaxLevel);
+        maxLevel = static_cast<int>(std::round(floatMaxLevel));
 
         ghoul::Dictionary providerDict;
         if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict))
@@ -129,7 +129,7 @@ bool TileProviderByLevel::deinitialize() {
     for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
         success &= tp->deinitialize();
     }
-    
+
     return TileProvider::deinitialize() && success;
 }
 

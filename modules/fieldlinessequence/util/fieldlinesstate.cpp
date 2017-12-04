@@ -373,7 +373,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
 
 // Returns one of the extra quantity vectors, _extraQuantities[index].
 // If index is out of scope an empty vector is returned and the referenced bool is false.
-const std::vector<float>&  FieldlinesState::extraQuantity(const size_t index,
+std::vector<float> FieldlinesState::extraQuantity(const size_t index,
                                                           bool& isSuccessful) const {
     if (index < _extraQuantities.size()) {
         isSuccessful = true;

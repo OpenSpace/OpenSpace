@@ -184,12 +184,12 @@ bool KameleonWrapper::open(const std::string& filename) {
 }
 
 void KameleonWrapper::close() {
-    if (_kameleon)
+    if (_kameleon) {
         _kameleon->close();
-    if (_interpolator)
-        delete _interpolator;
-    if (_kameleon)
-        delete _kameleon;
+    }
+
+    delete _interpolator;
+    delete _kameleon;
 
     _kameleon = nullptr;
     _interpolator = nullptr;
@@ -202,8 +202,7 @@ float* KameleonWrapper::getUniformSampledValues(
     const std::string& var,
     const glm::size3_t& outDimensions)
 {
-    assert(_model && _interpolator);
-    assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
+    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
     LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
 
     unsigned int size = static_cast<unsigned int>(
@@ -384,8 +383,7 @@ float* KameleonWrapper::getUniformSliceValues(const std::string& var,
                                               const glm::size3_t& outDimensions,
                                               const float& slice)
 {
-    assert(_model && _interpolator);
-    assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
+    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
     LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
 
     unsigned int size = static_cast<unsigned int>(
@@ -414,8 +412,8 @@ float* KameleonWrapper::getUniformSliceValues(const std::string& var,
     LDEBUG(var << "Min: " << varMin);
     LDEBUG(var << "Max: " << varMax);
 
-    double maxValue = 0.0;
-    double minValue = std::numeric_limits<double>::max();
+    //double maxValue = 0.0;
+    //double minValue = std::numeric_limits<double>::max();
 
     float missingValue = _model->getMissingValue();
 
@@ -517,8 +515,7 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar,
                                                       const std::string& zVar,
                                                       const glm::size3_t& outDimensions)
 {
-    assert(_model && _interpolator);
-    assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
+    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
     LINFO(
         "Loading variables " << xVar << " " << yVar << " " << zVar <<
         " from CDF data with a uniform sampling"
@@ -597,7 +594,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getClassifiedFieldLines(
     const std::vector<glm::vec3>& seedPoints,
     float stepSize )
 {
-    assert(_model && _interpolator);
+    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
     LINFO(
         "Creating " << seedPoints.size() << " fieldlines from variables " <<
         xVar << " " << yVar << " " << zVar
@@ -654,7 +651,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getFieldLines(const std::string& xV
     const std::string& yVar, const std::string& zVar,
     const std::vector<glm::vec3>& seedPoints, float stepSize, const glm::vec4& color)
 {
-    assert(_model && _interpolator);
+    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
     LINFO(
         "Creating " << seedPoints.size() << " fieldlines from variables " <<
         xVar << " " << yVar << " " << zVar
@@ -744,7 +741,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getLorentzTrajectories(
 glm::vec3 KameleonWrapper::getModelBarycenterOffset() {
     // ENLIL is centered, no need for offset
     if (_type == Model::ENLIL) {
-        return glm::vec3(0,0,0);
+        return glm::vec3(0.f);
     }
 
     glm::vec3 offset;
@@ -770,8 +767,9 @@ glm::vec4 KameleonWrapper::getModelBarycenterOffsetScaled() {
 }
 
 glm::vec3 KameleonWrapper::getModelScale() {
-    if (_type == Model::ENLIL)
-        return glm::vec3(1.0f, 1.0f, 1.0f);
+    if (_type == Model::ENLIL) {
+        return glm::vec3(1.f);
+    }
 
     glm::vec3 scale;
     scale.x = _xMax - _xMin;

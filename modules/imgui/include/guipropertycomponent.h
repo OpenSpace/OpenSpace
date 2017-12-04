@@ -59,6 +59,7 @@ public:
 
     void setVisibility(properties::Property::Visibility visibility);
     void setHasRegularProperties(bool hasOnlyRegularProperties);
+    void setShowHelpTooltip(bool showHelpTooltip);
 
     void render() override;
 
@@ -76,6 +77,7 @@ protected:
     UseTreeLayout _useTreeLayout;
     bool _currentUseTreeLayout;
     IsTopLevelWindow _isTopLevel;
+    bool _showHelpTooltip;
 };
 
 } // namespace openspace::gui

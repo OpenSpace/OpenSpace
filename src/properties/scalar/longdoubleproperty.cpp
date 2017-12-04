@@ -29,54 +29,57 @@
 #include <limits>
 #include <sstream>
 
-using std::numeric_limits;
+namespace {
+
+long double fromLuaConversion(lua_State* state, bool& success) {
+    success = (lua_isnumber(state, -1) == 1);
+    if (success) {
+        return static_cast<long double>(lua_tonumber(state, -1));
+    }
+    else {
+        return 0l;
+    }
+}
+
+bool toLuaConversion(lua_State* state, long double value) {
+    lua_pushnumber(state, static_cast<lua_Number>(value));
+    return true;
+}
+
+long double fromStringConversion(std::string val, bool& success) {
+    std::stringstream s(val);
+    long double v;
+    s >> v;
+    success = !s.fail();
+    if (success) {
+        return v;
+    }
+    else {
+        throw ghoul::RuntimeError("Conversion error for string: " + val);
+    }
+}
+
+bool toStringConversion(std::string& outValue, long double inValue) {
+    outValue = std::to_string(inValue);
+    return true;
+}
+
+} // namespace
 
 namespace openspace::properties {
 
-#define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
-    [](lua_State* state, bool& success) -> TYPE {                                        \
-        success = (lua_isnumber(state, -1) == 1);                                        \
-        if (success) {                                                                   \
-            return static_cast<TYPE>(lua_tonumber(state, -1));                           \
-        }                                                                                \
-        else {                                                                           \
-            return DEFAULT_VALUE;                                                        \
-        }                                                                                \
-    }
-
-#define DEFAULT_TO_LUA_LAMBDA(TYPE)                                                      \
-    [](lua_State* state, TYPE value) -> bool {                                           \
-        lua_pushnumber(state, static_cast<lua_Number>(value));                           \
-        return true;                                                                     \
-    }
-
-#define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
-    [](std::string val, bool& success) -> TYPE {                                         \
-        std::stringstream s(val);                                                        \
-        TYPE v;                                                                          \
-        s >> v;                                                                          \
-        success = !s.fail();                                                             \
-        if (success) {                                                                   \
-            return v;                                                                    \
-        }                                                                                \
-        else {                                                                           \
-            throw ghoul::RuntimeError("Conversion error for string: " + val);            \
-        }                                                                                \
-    }
-
-#define DEFAULT_TO_STRING_LAMBDA(TYPE)                                                   \
-    [](std::string& outValue, TYPE inValue) -> bool {                                    \
-        outValue = std::to_string(inValue);                                              \
-        return true;                                                                     \
-    }
-
-REGISTER_NUMERICALPROPERTY_SOURCE(LongDoubleProperty, long double, 0l,
-                                  numeric_limits<long double>::lowest(),
-                                  numeric_limits<long double>::max(), 0.01l,
-                                  DEFAULT_FROM_LUA_LAMBDA(long double, 0l),
-                                  DEFAULT_TO_LUA_LAMBDA(long double),
-                                  DEFAULT_FROM_STRING_LAMBDA(long double, 0l),
-                                  DEFAULT_TO_STRING_LAMBDA(long double),
-                                  LUA_TNUMBER);
+REGISTER_NUMERICALPROPERTY_SOURCE(
+    LongDoubleProperty,
+    long double,
+    0l,
+    std::numeric_limits<long double>::lowest(),
+    std::numeric_limits<long double>::max(),
+    0.01l,
+    fromLuaConversion,
+    toLuaConversion,
+    fromStringConversion,
+    toStringConversion,
+    LUA_TNUMBER
+)
 
 } // namespace openspace::properties

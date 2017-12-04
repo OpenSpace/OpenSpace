@@ -429,6 +429,8 @@ void OpenSpaceEngine::destroy() {
     _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
 
+    _engine->_renderEngine->deinitializeGL();
+
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 
@@ -637,9 +639,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         LoadingScreen::ShowProgressbar(showProgressbar)
     );
 */
- 
+
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
+
 
     _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());

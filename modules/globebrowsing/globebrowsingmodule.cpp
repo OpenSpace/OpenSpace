@@ -502,16 +502,11 @@ std::string GlobeBrowsingModule::layerTypeNamesList() {
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
 {
-    auto downloadFunction = [](const std::string& url) {
+    auto downloadFunction = [](const std::string& downloadUrl) {
         GDALDatasetH dataset = GDALOpen(
-            url.c_str(),
+            downloadUrl.c_str(),
             GA_ReadOnly
         );
-        //    GDAL_OF_READONLY | GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR,
-        //    nullptr,
-        //    nullptr,
-        //    nullptr
-        //);
 
         char** subDatasets = GDALGetMetadata(dataset, "SUBDATASETS");
         int nSubdatasets = CSLCount(subDatasets);

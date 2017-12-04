@@ -81,6 +81,9 @@ public:
 
     void swapBuffer() const override;
 
+    int nWindows() const override;
+    int currentWindowId() const override;
+
 private:
     properties::FloatProperty _eyeSeparation;
     properties::BoolProperty _showStatsGraph;

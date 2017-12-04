@@ -86,9 +86,9 @@ KeyWithModifier stringToKey(std::string str) {
 
     // default is unknown
     Key k = Key::Unknown;
-    auto it = KeyMapping.find(tokens.back());
-    if (it != KeyMapping.end()) {
-        k = it->second;
+    auto itKey = KeyMapping.find(tokens.back());
+    if (itKey != KeyMapping.end()) {
+        k = itKey->second;
     }
 
 
@@ -97,9 +97,9 @@ KeyWithModifier stringToKey(std::string str) {
         tokens.begin(),
         tokens.end() - 1,
         [&m](const std::string& s) {
-            auto it = KeyModifierMapping.find(s);
-            if (it != KeyModifierMapping.end()) {
-                m |= it->second;
+            auto itMod = KeyModifierMapping.find(s);
+            if (itMod != KeyModifierMapping.end()) {
+                m |= itMod->second;
             }
             else {
                 LERROR("Unknown modifier key '" << s << "'");

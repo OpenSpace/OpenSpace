@@ -88,6 +88,9 @@ data/scene/missions/rosetta/67P/rosettaimages
 data/scene/missions/rosetta/67P/textures
 data/scene/missions/rosetta/rosetta/rosetta
 data/scene/missions/rosetta/rosetta/textures
+data/scene/missions/voyager/**/*.png
+data/scene/missions/voyager/**/*.jpg
+data/scene/missions/voyager/**/*.obj
 data/scene/moon/textures
 data/scene/neptune/textures
 data/scene/pluto/textures
@@ -118,6 +121,7 @@ data/spice/nh_kernels
 data/spice/OsirisRexKernels
 data/spice/plu055.bsp
 data/spice/Rosetta
+data/spice/voyager
 data/spice/sat375.bsp
 data/spice/new_horizons/
 data/scene/mars/map_datasets/mars_COL_v006_mars2000_rgb.tif

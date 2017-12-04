@@ -105,7 +105,7 @@ namespace {
             std::vector<std::string>(path.begin() + 1, path.end()),
             owner
         );
-    };
+    }
 
     void simplifyTree(TreeNode& node) {
         // Merging consecutive nodes if they only have a single child
@@ -164,6 +164,10 @@ void GuiPropertyComponent::setVisibility(properties::Property::Visibility visibi
 
 void GuiPropertyComponent::setHasRegularProperties(bool hasOnlyRegularProperties) {
     _hasOnlyRegularProperties = hasOnlyRegularProperties;
+}
+
+void GuiPropertyComponent::setShowHelpTooltip(bool showHelpTooltip) {
+    _showHelpTooltip = showHelpTooltip;
 }
 
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
@@ -263,6 +267,7 @@ void GuiPropertyComponent::render() {
                     dynamic_cast<SceneGraphNode*>(owner),
                     "When using the tree layout, all owners must be SceneGraphNodes"
                 );
+                (void)owner; // using [[maybe_unused]] in the for loop gives an error
             }
 
             // Sort:
@@ -373,7 +378,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
                                           properties::PropertyOwner* owner)
 {
     using Func = std::function<
-        void(properties::Property*, const std::string&, IsRegularProperty)
+        void(properties::Property*, const std::string&, IsRegularProperty, ShowToolTip)
     >;
     static const std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
@@ -389,6 +394,9 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
         { "DVec2Property", &renderDVec2Property },
         { "DVec3Property", &renderDVec3Property },
         { "DVec4Property", &renderDVec4Property },
+        { "DMat2Property", &renderDMat2Property },
+        { "DMat3Property", &renderDMat3Property },
+        { "DMat4Property", &renderDMat4Property },
         { "StringProperty", &renderStringProperty },
         { "OptionProperty", &renderOptionProperty },
         { "TriggerProperty", &renderTriggerProperty },
@@ -406,14 +414,16 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
                 it->second(
                     prop,
                     owner->name(),
-                    IsRegularProperty(_hasOnlyRegularProperties)
+                    IsRegularProperty(_hasOnlyRegularProperties),
+                    ShowToolTip(_showHelpTooltip)
                 );
             }
             else {
                 it->second(
                     prop,
                     "",
-                    IsRegularProperty(_hasOnlyRegularProperties)
+                    IsRegularProperty(_hasOnlyRegularProperties),
+                    ShowToolTip(_showHelpTooltip)
                 );
             }
         }

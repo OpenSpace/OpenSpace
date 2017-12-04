@@ -89,7 +89,12 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     }
     else {
         static int id = 0;
-        setName("ScreenSpaceImageOnline " + std::to_string(id));
+        if (id == 0) {
+            setName("ScreenSpaceImageOnline");
+        }
+        else {
+            setName("ScreenSpaceImageOnline " + std::to_string(id));
+        }
         ++id;
     }
 

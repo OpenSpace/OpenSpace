@@ -69,8 +69,8 @@ LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
                 try {
                     addLayer(fallbackLayerDict);
                 }
-                catch (const ghoul::RuntimeError& e) {
-                    LERRORC(e.component, e.message);
+                catch (const ghoul::RuntimeError& except) {
+                    LERRORC(except.component, except.message);
                     continue;
                 }
             }

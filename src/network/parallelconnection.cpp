@@ -1235,8 +1235,7 @@ uint32_t ParallelConnection::hash(const std::string& val) {
     hashVal += (hashVal << 15);
 
     return hashVal;
-};
-
+}
 
 std::shared_ptr<ghoul::Event<>> ParallelConnection::connectionEvent() {
     return _connectionEvent;

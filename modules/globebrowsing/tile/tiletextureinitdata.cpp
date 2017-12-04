@@ -155,7 +155,7 @@ unsigned int TileTextureInitData::getUniqueIdFromTextureFormat(
         case Format::DepthComponent:
             return 6;
         default:
-            ghoul_assert(false, "Unknown texture format");
+            throw ghoul::MissingCaseException();
     }
 }
 

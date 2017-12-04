@@ -151,6 +151,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
     ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
@@ -170,6 +171,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
     ${OPENSPACE_BASE_DIR}/src/util/threadpool.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/timeconversion.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timeline.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
@@ -321,6 +323,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/distanceconstants.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/distanceconversion.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
@@ -340,6 +344,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/timeconversion.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h

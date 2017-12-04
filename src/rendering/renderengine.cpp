@@ -43,9 +43,12 @@
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/distanceconversion.h>>
 #include <openspace/util/time.h>
+#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
@@ -403,6 +406,10 @@ void RenderEngine::initializeGL() {
     _log = log.get();
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
+    for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+        ssr->initializeGL();
+    }
+
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
 }
@@ -413,6 +420,12 @@ void RenderEngine::deinitialize() {
     }
 
     MissionManager::deinitialize();
+}
+
+void RenderEngine::deinitializeGL() {
+    for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+        ssr->deinitializeGL();
+    }
 }
 
 void RenderEngine::updateScene() {
@@ -827,17 +840,17 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 ""
             },
             {
-                "registerScreenSpaceRenderable",
-                &luascriptfunctions::registerScreenSpaceRenderable,
+                "addScreenSpaceRenderable",
+                &luascriptfunctions::addScreenSpaceRenderable,
                 {},
                 "table",
-                "Will create a ScreenSpaceRenderable from a lua Table and register it in "
-                "the RenderEngine"
+                "Will create a ScreenSpaceRenderable from a lua Table and add it in the "
+                "RenderEngine"
             },
             {
-                "unregisterScreenSpaceRenderable",
-                &luascriptfunctions::unregisterScreenSpaceRenderable,
-                {},
+                "removeScreenSpaceRenderable",
+                &luascriptfunctions::removeScreenSpaceRenderable,
+                {},                
                 "string",
                 "Given a ScreenSpaceRenderable name this script will remove it from the "
                 "renderengine"
@@ -854,15 +867,13 @@ performance::PerformanceManager* RenderEngine::performanceManager() {
     return _performanceManager.get();
 }
 
-void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s)
-{
+void RenderEngine::addScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s) {
     s->initialize();
+    s->initializeGL();
     _screenSpaceRenderables.push_back(std::move(s));
 }
 
-void RenderEngine::unregisterScreenSpaceRenderable(
-                                                 std::shared_ptr<ScreenSpaceRenderable> s)
-{
+void RenderEngine::removeScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s) {
     auto it = std::find(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
@@ -875,10 +886,10 @@ void RenderEngine::unregisterScreenSpaceRenderable(
     }
 }
 
-void RenderEngine::unregisterScreenSpaceRenderable(const std::string& name){
+void RenderEngine::removeScreenSpaceRenderable(const std::string& name) {
     std::shared_ptr<ScreenSpaceRenderable> s = screenSpaceRenderable(name);
     if (s) {
-        unregisterScreenSpaceRenderable(s);
+        removeScreenSpaceRenderable(s);
     }
 }
 
@@ -968,11 +979,28 @@ void RenderEngine::renderInformation() {
     }
 
     if (_showInfo && _fontInfo) {
+        std::pair<double, std::string> deltaTime = simplifyTime(
+            OsEng.timeManager().time().deltaTime()
+        );
         RenderFontCr(
             *_fontInfo,
             penPosition,
-            "Simulation increment (s): %.3f",
-            OsEng.timeManager().time().deltaTime()
+            "Simulation increment: %.1f %s / second",
+            deltaTime.first,
+            deltaTime.second.c_str()
+        );
+
+        double distance = glm::length(
+            _camera->positionVec3() -
+            OsEng.navigationHandler().focusNode()->worldPosition()
+        );
+        std::pair<double, std::string> dist = simplifyDistance(distance);
+        RenderFontCr(
+            *_fontInfo,
+            penPosition,
+            "Distance from focus: %f %s",
+            dist.first,
+            dist.second.c_str()
         );
 
         FrametimeType frametimeType = FrametimeType(_frametimeType.value());

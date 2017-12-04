@@ -187,4 +187,13 @@ void WindowWrapper::takeScreenshot(bool) const {}
 
 void WindowWrapper::swapBuffer() const {}
 
+int WindowWrapper::nWindows() const {
+    return 0;
+}
+
+int WindowWrapper::currentWindowId() const {
+    return 0;
+}
+
+
 } // namespace openspace

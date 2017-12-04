@@ -54,6 +54,6 @@ void ProgressBar::print(int current) {
             << std::flush;
     }
     _previous = iprogress;
-};
+}
 
 } // namespace openspace

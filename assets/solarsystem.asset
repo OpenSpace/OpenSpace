@@ -1,13 +1,16 @@
+asset.require("keybindings")
+
 asset.request("sun/sun")
 --asset.request("planets/planets")
 -- asset.request("planets/moons")
 asset.request("planets/trails")
 -- asset.request("dwarfplanets/pluto")
 
+
+
 local sceneHelper = asset.require("scenehelper")
 
 asset.onInitialize(function ()
-    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
     openspace.time.setTime(openspace.time.currentWallTime())
 
 

@@ -75,7 +75,7 @@ namespace {
     {
         lhsLl -= glm::vec2(ItemStandoffDistance / 2.f);
         lhsUr += glm::vec2(ItemStandoffDistance / 2.f);
-        
+
         rhsLl -= glm::vec2(ItemStandoffDistance / 2.f);
         rhsUr += glm::vec2(ItemStandoffDistance / 2.f);
 
@@ -110,10 +110,6 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _progressbar{ 0, 0, 0, 0 }
     , _randomEngine(_randomDevice())
 {
-    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
-    const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
-
     _program = ghoul::opengl::ProgramObject::Build(
         "Loading Screen",
         "${SHADERS}/loadingscreen.vert",
@@ -151,7 +147,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
             absPath("${OPENSPACE_DATA}/openspace-logo.png")
         );
         _logoTexture->uploadTexture();
-        
+
         glGenVertexArrays(1, &_logo.vao);
         glBindVertexArray(_logo.vao);
         glGenBuffers(1, &_logo.vbo);
@@ -218,7 +214,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
 
 LoadingScreen::~LoadingScreen() {
     _logoTexture = nullptr;
-   
+
     _loadingFont = nullptr;
     _messageFont = nullptr;
     _itemFont = nullptr;
@@ -236,7 +232,7 @@ LoadingScreen::~LoadingScreen() {
 void LoadingScreen::render() {
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
-    
+
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     const glm::ivec2 res =
         glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
@@ -306,16 +302,14 @@ void LoadingScreen::render() {
         ProgressbarSize.x,
         ProgressbarSize.y * screenAspectRatio
     };
-    
+
     glm::vec2 progressbarLl = {
         ProgressbarCenter.x - progressbarSize.x,
         ProgressbarCenter.y - progressbarSize.y
-        
     };
     glm::vec2 progressbarUr = {
         ProgressbarCenter.x + progressbarSize.x ,
         ProgressbarCenter.y + progressbarSize.y
-        
     };
 
     if (_showProgressbar) {
@@ -323,14 +317,14 @@ void LoadingScreen::render() {
 
         // Depending on the progress, we only want to draw the progress bar to a mixture
         // of the lowerleft and upper right extent
-        
+
         float progress = _nItems != 0 ? 
             static_cast<float>(_iProgress) / static_cast<float>(_nItems) :
             0.f;
 
         glm::vec2 ur = progressbarUr;
         ur.x = glm::mix(progressbarLl.x, progressbarUr.x, progress);
-        
+
         GLfloat dataFill[] = {
             progressbarLl.x, progressbarLl.y,
                        ur.x,            ur.y,
@@ -473,7 +467,7 @@ void LoadingScreen::render() {
         for (Item& item : _items) {
             if (!item.hasLocation) {
                 // Compute a new location
-                
+
                 FR::BoundingBoxInformation b = renderer.boundingBox(
                     *_itemFont,
                     "%s",
@@ -491,18 +485,17 @@ void LoadingScreen::render() {
                 for ( /* i */; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
-                        res.x - b.boundingBox.x - 15
+                        static_cast<int>(res.x - b.boundingBox.x - 15)
                     );
                     std::uniform_int_distribution<int> distY(
                         15,
-                        res.y - b.boundingBox.y - 15
+                        static_cast<int>(res.y - b.boundingBox.y - 15)
                     );
 
                     ll = { distX(_randomEngine), distY(_randomEngine) };
                     ur = ll + b.boundingBox;
 
                     // Test against logo and text
-                    
                     bool logoOverlap = rectOverlaps(
                         ndcToScreen(logoLl, res), ndcToScreen(logoUr, res),
                         ll, ur
@@ -530,7 +523,6 @@ void LoadingScreen::render() {
                         continue;
                     }
 
-                    
                     // Test against all other boxes
                     bool overlap = false;
                     for (const Item& j : _items) {
@@ -571,11 +563,14 @@ void LoadingScreen::render() {
                         return glm::vec4(1.f);
                 }
             }();
-            
-            if (item.status == ItemStatus::Finished) {
-                auto t = std::chrono::duration_cast<std::chrono::milliseconds>(now - item.finishedTime);
 
-                color.a = 1.f - static_cast<float>(t.count()) / static_cast<float>(TTL.count());
+            if (item.status == ItemStatus::Finished) {
+                auto t = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    now - item.finishedTime
+                );
+
+                color.a = 1.f - static_cast<float>(t.count()) /
+                                static_cast<float>(TTL.count());
             }
 
 #ifdef LOADINGSCREEN_DEBUGGING

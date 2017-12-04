@@ -36,7 +36,6 @@ namespace {
 
 namespace openspace {
 
-
 BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(
         glm::vec3 blockSize,
         glm::vec3 planeNormal,
@@ -51,7 +50,6 @@ BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
     glDeleteBuffers(1, &_vBufferId);
     glDeleteVertexArrays(1, &_vaoId);
 }
-
 
 void BlockPlaneIntersectionGeometry::setBlockSize(glm::vec3 size) {
     _size = size;

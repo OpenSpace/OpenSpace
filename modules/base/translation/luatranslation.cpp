@@ -118,7 +118,9 @@ void LuaTranslation::update(const UpdateData& data) {
     auto now = high_resolution_clock::now();
     lua_pushnumber(
         _state,
-        duration_cast<milliseconds>(now.time_since_epoch()).count()
+        static_cast<lua_Number>(
+            duration_cast<milliseconds>(now.time_since_epoch()).count()
+        )
     );
 
     // Execute the scaling function

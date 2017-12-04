@@ -271,7 +271,20 @@ public:
      */
     virtual void takeScreenshot(bool applyWarping = false) const;
 
+    /**
+     * Encourages the windowing system to swap the back- and front buffers
+     */
     virtual void swapBuffer() const;
+
+    /**
+     * Returns the number of windows that are currently instantiated
+     */
+    virtual int nWindows() const;
+
+    /**
+     * Returns the id of the current window (in the range [0, nWindows -1])
+     */
+    virtual int currentWindowId() const;
 
     struct WindowWrapperException : public ghoul::RuntimeError {
         explicit WindowWrapperException(const std::string& msg);

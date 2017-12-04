@@ -68,7 +68,7 @@ std::vector<std::string> DataProcessorJson::readMetadata(std::string data,
 void DataProcessorJson::addDataValues(std::string data,
                                       properties::SelectionProperty& dataOptions)
 {
-    int numOptions = dataOptions.options().size();
+    int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
 
     if (!data.empty()) {
@@ -87,7 +87,7 @@ void DataProcessorJson::addDataValues(std::string data,
 
             for(int y=0; y<row.size(); y++){
                 json col = row.at(y);
-                int colsize = col.size();
+                int colsize = static_cast<int>(col.size());
 
                 for(int x=0; x<colsize; x++){
                     value = col.at(x);
@@ -105,32 +105,33 @@ void DataProcessorJson::addDataValues(std::string data,
 }
 
 std::vector<float*> DataProcessorJson::processData(std::string data,
-                                               properties::SelectionProperty& dataOptions,
+                                               properties::SelectionProperty& optionProp,
                                                glm::size3_t& dimensions)
 {
     if (!data.empty()) {
         json j = json::parse(data);
         json variables = j["variables"];
 
-        std::vector<int> selectedOptions = dataOptions.value();
+        std::vector<int> selectedOptions = optionProp.value();
 //        int numSelected = selectedOptions.size();
 
-        auto options = dataOptions.options();
-        int numOptions = options.size();
+        const std::vector<properties::SelectionProperty::Option>& options =
+                                                                     optionProp.options();
+        int numOptions = static_cast<int>(options.size());
 
         float value;
         int rowsize, colsize, i;
 
         std::vector<float*> dataOptions(numOptions, nullptr);
         for(int option : selectedOptions){
-            dataOptions[option] = new float[dimensions.x*dimensions.y]{0.f};
+            dataOptions[option] = new float[dimensions.x*dimensions.y]{ 0.f };
 
             json row = variables[options[option].description];
-            rowsize = row.size();
+            rowsize = static_cast<int>(row.size());
 
             for(int y=0; y<rowsize; y++){
                 json col = row.at(y);
-                colsize = col.size();
+                colsize = static_cast<int>(col.size());
 
                 for(int x=0; x<colsize; x++){
                     value = col.at(x);

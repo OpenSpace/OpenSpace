@@ -64,7 +64,7 @@ public:
     const std::vector<glm::vec3>&          vertexPositions()    const;
 
     // Special getter. Returns extraQuantities[INDEX].
-    const std::vector<float>& extraQuantity(const size_t INDEX, bool& isSuccesful) const;
+    std::vector<float> extraQuantity(const size_t INDEX, bool& isSuccesful) const;
 
     void setModel(const fls::Model m)   { _model = m; }
     void setTriggerTime(const double t) { _triggerTime = t; }

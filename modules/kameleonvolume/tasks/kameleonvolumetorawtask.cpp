@@ -130,8 +130,14 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     outputMetadata.setValue<glm::vec3>(KeyDimensions, _dimensions);
     outputMetadata.setValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound);
     outputMetadata.setValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound);
-    outputMetadata.setValue<float>(KeyMinValue, reader.minValue(_variable));
-    outputMetadata.setValue<float>(KeyMaxValue, reader.maxValue(_variable));
+    outputMetadata.setValue<float>(
+        KeyMinValue,
+        static_cast<float>(reader.minValue(_variable))
+    );
+    outputMetadata.setValue<float>(
+        KeyMaxValue,
+        static_cast<float>(reader.maxValue(_variable))
+    );
 
     ghoul::DictionaryLuaFormatter formatter;
     std::string metadataString = formatter.format(outputMetadata);

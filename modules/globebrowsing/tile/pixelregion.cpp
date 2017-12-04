@@ -118,12 +118,12 @@ void PixelRegion::scale(double s) {
 
 void PixelRegion::downscalePow2(int exponent, PixelCoordinate wrt) {
     start += wrt;
-    start.x = ceil(start.x / static_cast<float>(pow(2, exponent)));// >>= exponent;
-    start.y = ceil(start.y / static_cast<float>(pow(2, exponent)));// >>= exponent;
+    start.x = static_cast<int>(ceil(start.x / static_cast<float>(pow(2, exponent))));
+    start.y = static_cast<int>(ceil(start.y / static_cast<float>(pow(2, exponent))));
     numPixels.x =
-        ceil(numPixels.x / static_cast<float>(pow(2, exponent)));// >>= exponent;
+        static_cast<int>(ceil(numPixels.x / static_cast<float>(pow(2, exponent))));
     numPixels.y =
-        ceil(numPixels.y / static_cast<float>(pow(2, exponent)));// >>= exponent;
+        static_cast<int>(ceil(numPixels.y / static_cast<float>(pow(2, exponent))));
     start -= wrt;
 }
 
