@@ -611,7 +611,6 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     if (configurationManager().hasKey(kProgress)) {
         showProgressbar = configurationManager().value<bool>(kProgress);
     }
- 
 
     _loadingScreen = std::make_unique<LoadingScreen>(
         LoadingScreen::ShowMessage(showMessage),
@@ -679,8 +678,6 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         initializeFinished = true;
     });
 
-    
-
     // While the SceneGraphNodes initialize themselves, we can hand over control to the
     // Loading screen rendering
 
@@ -693,7 +690,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     t.join();
     // It's okay to delete it since the last rendered image will remain on screen
     _loadingScreen = nullptr;
-        
+
     if (errorWhileLoading) {
         return;
     }

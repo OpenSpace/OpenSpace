@@ -107,9 +107,9 @@ public:
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
 
-    void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
-    void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
-    void unregisterScreenSpaceRenderable(const std::string& name);
+    void addScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void removeScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void removeScreenSpaceRenderable(const std::string& name);
     std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(const std::string& name);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 

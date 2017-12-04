@@ -338,7 +338,7 @@ def check_empty_character_at_end(lines):
     if not is_strict_mode:
         return ''
 
-    index = [i + 1 for i, s in enumerate(lines) if len(s) > 1 and s[-2] == ' ']
+    index = [i + 1 for i, s in enumerate(lines) if len(s) > 1 and s[-2] == ' ' and not s.strip() == '']
     if len(index) > 0:
         return index
     else:
