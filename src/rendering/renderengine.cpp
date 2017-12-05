@@ -916,6 +916,7 @@ void RenderEngine::addScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderabl
     s->initializeGL();
     _screenSpaceRenderables.push_back(std::move(s));
 }
+
 void RenderEngine::removeScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s) {
     auto it = std::find(
         _screenSpaceRenderables.begin(),
