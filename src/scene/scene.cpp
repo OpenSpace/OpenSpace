@@ -124,6 +124,10 @@ Camera* Scene::camera() const {
 }
 
 void Scene::registerNode(SceneGraphNode* node) {
+    if (_nodesByName.count(node->name())){
+        throw Scene::InvalidSceneError("Node with name " + node->name() + " already exits.");
+    }
+
     _topologicallySortedNodes.push_back(node);
     _nodesByName[node->name()] = node;
     _dirtyNodeRegistry = true;
@@ -328,7 +332,7 @@ void Scene::clear() {
     _rootDummy.clearChildren();
 }
 
-const std::map<std::string, SceneGraphNode*>& Scene::nodesByName() const {
+const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByName() const {
     return _nodesByName;
 }
 

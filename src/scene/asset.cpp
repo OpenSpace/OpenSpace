@@ -90,6 +90,9 @@ void Asset::removeStateChangeCallback(Asset::CallbackHandle handle) {
 }
 
 void Asset::setState(Asset::State state) {
+    if (_state == state) {
+        return;
+    }
     _state = state;
     _stateChangeCallbackMutex.lock();
     std::vector<StateChangeCallback> callbacks;
@@ -169,6 +172,11 @@ bool Asset::isSynchronized() {
 }
     
 bool Asset::startSynchronizations() {
+    // Do not attempt to resync if this is already initialized
+    if (state() == State::Initialized) {
+        return false;
+    }
+
     bool foundUnresolved = false;
     // Start synchronization of all children first.
     for (auto& child : childAssets()) {
@@ -176,12 +184,13 @@ bool Asset::startSynchronizations() {
             foundUnresolved = true;
         }
     }
+
     // Now synchronize its own synchronizations.
     for (const auto& s : synchronizations()) {
         if (!s->isResolved()) {
             foundUnresolved = true;
-            s->start();
             setState(State::Synchronizing);
+            s->start();
         }
     }
     // If all syncs are resolved (or no syncs exist), mark as resolved.

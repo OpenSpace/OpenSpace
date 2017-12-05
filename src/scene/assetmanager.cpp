@@ -44,7 +44,7 @@ AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader)
 void AssetManager::initialize() {
     _addAssetCallbackHandle = _assetLoader->addAssetLoadCallback(
         [this] (std::shared_ptr<Asset> a) {
-            a->addStateChangeCallback([&a, this] (Asset::State state) {
+            a->addStateChangeCallback([a, this] (Asset::State state) {
                 assetStateChanged(*a, state);
             });
         }
@@ -154,9 +154,18 @@ void AssetManager::cancelSynchronization(Asset&) {
 }
 
 void AssetManager::assetStateChanged(Asset& asset, Asset::State state) {
-    // Todo: store this and handle the state change data in the update loop.
-    // to make sure this happens on the main thread.
-    // Check if assets should start syncing or if they should init.
+    if (rootAsset()->state() == Asset::State::Initialized) {
+        if (state == Asset::State::Loaded) {
+            asset.startSynchronizations();
+        }
+        if (state == Asset::State::SyncResolved) {
+            asset.initialize();
+        }
+    } else {
+        asset.deinitialize();
+    }
+
+    // Todo: Check if assets should start syncing or if they should init.
     // flags: autoSync, autoInit ?
 }
     

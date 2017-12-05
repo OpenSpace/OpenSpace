@@ -153,7 +153,7 @@ public:
     /**
      * Return a a map from name to scene graph node.
      */
-    const std::map<std::string, SceneGraphNode*>& nodesByName() const;
+    const std::unordered_map<std::string, SceneGraphNode*>& nodesByName() const;
 
     /**
      * Load a scene graph node from a dictionary and return it.
@@ -185,7 +185,7 @@ private:
     std::unique_ptr<Camera> _camera;
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
     std::vector<SceneGraphNode*> _circularNodes;
-    std::map<std::string, SceneGraphNode*> _nodesByName;
+    std::unordered_map<std::string, SceneGraphNode*> _nodesByName;
     bool _dirtyNodeRegistry;
     SceneGraphNode _rootDummy;
 
