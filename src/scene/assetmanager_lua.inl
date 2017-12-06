@@ -56,24 +56,4 @@ int removeAll(lua_State* state) {
     return 0;
 }
 
-int reload(lua_State* state) {
-    return 0;
-}
-
-int synchronize(lua_State* state) {
-    return 0;
-}
-
-int resynchronize(lua_State* state) {
-    return 0;
-}
-
-int initialize(lua_State* state) {
-    return 0;
-}
-
-int cancelSynchronization(lua_State* state) {
-    return 0;
-}
-
 } // namespace openspace::luascriptfunctions

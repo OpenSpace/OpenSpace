@@ -1141,10 +1141,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         writeDocumentations();
     }
 
-    if (_loadingScreen && _assetManager->isDone()) {
-        _loadingScreen = nullptr;
-    }
-
     _renderEngine->updateScene();
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();

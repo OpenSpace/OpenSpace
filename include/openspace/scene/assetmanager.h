@@ -65,36 +65,15 @@ public:
     std::shared_ptr<Asset> rootAsset();
 
     bool update();
-
-    //void setTargetAssetState(const std::string& path, Asset::State targetState);
-    //void setTargetAssetState(Asset* asset, Asset::State targetState);
-    //Asset::State currentAssetState(Asset* asset);
-    //Asset::State currentAssetState(const std::string& path);
-    //void clearAllTargetAssets();
-    //std::vector<std::shared_ptr<Asset>> loadedAssets();
     scripting::LuaLibrary luaLibrary();
-    bool isDone();
 private:
     std::shared_ptr<Asset> tryAddAsset(const std::string& path);
     bool tryRemoveAsset(const std::string& path);
-    void unloadAsset(Asset* asset);
-    bool tryInitializeAsset(Asset& asset);
-    bool tryDeinitializeAsset(Asset& asset);
-    void startSynchronization(Asset& asset);
-    void cancelSynchronization(Asset& asset);
-    
     void assetStateChanged(Asset& asset, Asset::State state);
 
     std::unordered_map<std::string, bool> _pendingStateChangeCommands;
-    //std::unordered_map<Asset*, AssetState> _stateChangesInProgress;
-    std::unordered_set<Asset*> _pendingInitializations;
-
-    std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncAncestors;
-    std::unordered_map<Asset*, std::unordered_set<Asset*>> _syncDependencies;
-    
     std::unique_ptr<AssetLoader> _assetLoader;
     AssetLoader::CallbackHandle _addAssetCallbackHandle;
-    
 };
 
 } // namespace openspace
