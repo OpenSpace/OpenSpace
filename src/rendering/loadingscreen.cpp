@@ -108,6 +108,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _loadingFont(nullptr)
     , _messageFont(nullptr)
     , _itemFont(nullptr)
+    , _hasCatastrophicErrorOccurred(false)
     , _logo{ 0, 0 }
     , _progressbar{ 0, 0, 0, 0 }
     , _randomEngine(_randomDevice())
