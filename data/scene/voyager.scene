@@ -19,6 +19,8 @@ end
 function postInitialization()
     openspace.printInfo("Setting default values")
 
+    set_default_gui_sorting()
+
     openspace.setPropertyValueSingle("Global Properties.GlobeBrowsing.GdalWrapper.LogGdalErrors", false)
     openspace.setPropertyValueSingle("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
 

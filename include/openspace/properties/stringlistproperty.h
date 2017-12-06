@@ -22,68 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_IMGUI___GUIPROPERTYCOMPONENT___H__
-#define __OPENSPACE_MODULE_IMGUI___GUIPROPERTYCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
+#define __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
 
-#include <modules/imgui/include/guicomponent.h>
+#include <openspace/properties/templateproperty.h>
 
-#include <openspace/properties/property.h>
-#include <openspace/properties/stringlistproperty.h>
-
-#include <ghoul/misc/boolean.h>
-
-#include <functional>
 #include <string>
 #include <vector>
 
 namespace openspace::properties {
-    class Property;
-    class PropertyOwner;
+
+REGISTER_TEMPLATEPROPERTY_HEADER(StringListProperty, std::vector<std::string>)
+
 } // namespace openspace::properties
 
-namespace openspace::gui {
-
-class GuiPropertyComponent : public GuiComponent {
-public:
-    using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
-
-    using UseTreeLayout = ghoul::Boolean;
-    using IsTopLevelWindow = ghoul::Boolean;
-
-
-    GuiPropertyComponent(std::string name, UseTreeLayout useTree = UseTreeLayout::No,
-        IsTopLevelWindow isTopLevel = IsTopLevelWindow::No);
-
-    // This is the function that evaluates to the list of Propertyowners that this
-    // component should render
-    void setSource(SourceFunction func);
-
-    void setVisibility(properties::Property::Visibility visibility);
-    void setHasRegularProperties(bool hasOnlyRegularProperties);
-    void setShowHelpTooltip(bool showHelpTooltip);
-
-    void render() override;
-
-protected:
-    void renderPropertyOwner(properties::PropertyOwner* owner);
-    void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
-
-    properties::Property::Visibility _visibility;
-
-    SourceFunction _function;
-    /// This is set to \c true if all properties contained in this GUIPropertyComponent
-    /// are regular, i.e., not containing wildcards, regex, or groups
-    /// This variable only has an impact on which \c setPropertyValue function is called
-    bool _hasOnlyRegularProperties = false;
-    UseTreeLayout _useTreeLayout;
-    bool _currentUseTreeLayout;
-
-    properties::StringListProperty _treeOrdering;
-
-    IsTopLevelWindow _isTopLevel;
-    bool _showHelpTooltip;
-};
-
-} // namespace openspace::gui
-
-#endif // __OPENSPACE_MODULE_IMGUI___GUIPROPERTYCOMPONENT___H__
+#endif // __OPENSPACE_CORE___STRINGLISTPROPERTY___H__

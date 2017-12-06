@@ -32,10 +32,12 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/misc.h>
 
 namespace openspace {
 
@@ -237,6 +239,56 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
         executeScript(
             p->fullyQualifiedIdentifier(),
             "[[" + std::string(buffer) + "]]",
+            isRegular
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderStringListProperty(Property* prop, const std::string& ownerName,
+                              IsRegularProperty isRegular, ShowToolTip showTooltip)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    StringListProperty* p = static_cast<StringListProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    std::string value;
+    p->getStringValue(value);
+    // const std::string value = p->value();
+
+    static const int bufferSize = 512;
+    static char buffer[bufferSize];
+#ifdef _MSC_VER
+    strcpy_s(buffer, value.length() + 1, value.c_str());
+#else
+    strcpy(buffer, value.c_str());
+#endif
+    bool hasNewValue = ImGui::InputText(
+        name.c_str(),
+        buffer,
+        bufferSize,
+        ImGuiInputTextFlags_EnterReturnsTrue
+    );
+    if (showTooltip) {
+        renderTooltip(prop);
+    }
+
+    if (hasNewValue) {
+        std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
+        std::string script = "{";
+        for (std::string& token : tokens) {
+            if (!token.empty()) {
+                ghoul::trimWhitespace(token);
+                script += "[[" + token + "]],";
+            }
+        }
+        script += "}";
+        
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            std::move(script),
             isRegular
         );
     }

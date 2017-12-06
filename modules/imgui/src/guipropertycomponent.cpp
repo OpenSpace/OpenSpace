@@ -37,6 +37,14 @@
 namespace {
     const ImVec2 size = ImVec2(350, 500);
 
+    static const openspace::properties::Property::PropertyInfo OrderingInfo = {
+        "Ordering",
+        "Tree Ordering",
+        "This list determines the order of the first tree layer if it is used. Elements "
+        "present in this list will be shown first, with an alphabetical ordering for "
+        "elements not listed."
+    };
+
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props,
         openspace::properties::Property::Visibility visibility)
     {
@@ -151,8 +159,11 @@ GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTr
     : GuiComponent(std::move(name))
     , _useTreeLayout(useTree)
     , _currentUseTreeLayout(useTree)
+    , _treeOrdering(OrderingInfo)
     , _isTopLevel(topLevel)
-{}
+{
+    addProperty(_treeOrdering);
+}
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
     _function = std::move(function);
@@ -236,6 +247,8 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
 }
 
 void GuiPropertyComponent::render() {
+    using namespace properties;
+
     if (_isTopLevel) {
         ImGui::Begin(name().c_str(), nullptr, size, 0.75f);
     }
@@ -271,12 +284,14 @@ void GuiPropertyComponent::render() {
             }
 
             // Sort:
-            // if guigrouping, sort by name and shortest first
+            // if guigrouping, sort by name and shortest first, but respect the user
+            // specified ordering
             // then all w/o guigroup
+            const std::vector<std::string>& ordering = _treeOrdering;
             std::stable_sort(
                 owners.begin(),
                 owners.end(),
-                [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+                [&ordering](PropertyOwner* lhs, PropertyOwner* rhs) {
                     std::string lhsGroup = static_cast<SceneGraphNode*>(lhs)->guiPath();
                     std::string rhsGroup = static_cast<SceneGraphNode*>(rhs)->guiPath();
 
@@ -286,7 +301,40 @@ void GuiPropertyComponent::render() {
                     if (rhsGroup.empty()) {
                         return true;
                     }
-                    return lhsGroup < rhsGroup;
+
+                    if (ordering.empty()) {
+                        return lhsGroup < rhsGroup;
+                    }
+
+                    std::vector<std::string> lhsToken = ghoul::tokenizeString(
+                        lhsGroup,
+                        '/'
+                    );
+                    // The first token is always empty
+                    auto lhsIt = std::find(ordering.begin(), ordering.end(), lhsToken[1]);
+
+                    std::vector<std::string> rhsToken = ghoul::tokenizeString(
+                        rhsGroup,
+                        '/'
+                    );
+                    // The first token is always empty
+                    auto rhsIt = std::find(ordering.begin(), ordering.end(), rhsToken[1]);
+
+                    if (lhsIt != ordering.end() && rhsIt != ordering.end()) {
+                        // If both top-level groups are in the ordering list, the order
+                        // of the iterators gives us the order of the groups
+                        return lhsIt < rhsIt;
+                    }
+                    else if (lhsIt != ordering.end() && rhsIt == ordering.end()) {
+                        // If only one of them is in the list, we have a sorting
+                        return true;
+                    }
+                    else if (lhsIt == ordering.end() && rhsIt != ordering.end()) {
+                        return false;
+                    }
+                    else {
+                        return lhsGroup < rhsGroup;
+                    }
                 }
             );
         }
@@ -398,6 +446,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
         { "DMat3Property", &renderDMat3Property },
         { "DMat4Property", &renderDMat4Property },
         { "StringProperty", &renderStringProperty },
+        { "StringListProperty", &renderStringListProperty },
         { "OptionProperty", &renderOptionProperty },
         { "TriggerProperty", &renderTriggerProperty },
         { "SelectionProperty", &renderSelectionProperty }
