@@ -46,7 +46,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/distanceconversion.h>>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
