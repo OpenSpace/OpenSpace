@@ -37,6 +37,14 @@
 namespace {
     const ImVec2 size = ImVec2(350, 500);
 
+    static const openspace::properties::Property::PropertyInfo UseTreeInfo = {
+        "TreeLayout",
+        "Use Tree Layout",
+        "If this value is checked, this component will display the properties using a "
+        "tree layout, rather than using a flat map. This value should only be set on "
+        "property windows that display SceneGraphNodes, or the application might crash."
+    };
+
     static const openspace::properties::Property::PropertyInfo OrderingInfo = {
         "Ordering",
         "Tree Ordering",
@@ -157,11 +165,11 @@ namespace openspace::gui {
 GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree,
                                            IsTopLevelWindow topLevel)
     : GuiComponent(std::move(name))
-    , _useTreeLayout(useTree)
-    , _currentUseTreeLayout(useTree)
+    , _useTreeLayout(UseTreeInfo, useTree)
     , _treeOrdering(OrderingInfo)
     , _isTopLevel(topLevel)
 {
+    addProperty(_useTreeLayout);
     addProperty(_treeOrdering);
 }
 
@@ -259,11 +267,6 @@ void GuiPropertyComponent::render() {
     }
 
     if (_function) {
-        if (_useTreeLayout) {
-            ImGui::Checkbox("Use Tree layout", &_currentUseTreeLayout);
-        }
-
-
         std::vector<properties::PropertyOwner*> owners = _function();
 
         std::sort(
@@ -274,7 +277,7 @@ void GuiPropertyComponent::render() {
             }
         );
 
-        if (_currentUseTreeLayout) {
+        if (_useTreeLayout) {
             for (properties::PropertyOwner* owner : owners) {
                 ghoul_assert(
                     dynamic_cast<SceneGraphNode*>(owner),
@@ -377,7 +380,7 @@ void GuiPropertyComponent::render() {
             }
         };
 
-        if (!_currentUseTreeLayout || noGuiGroups) {
+        if (!_useTreeLayout || noGuiGroups) {
             std::for_each(owners.begin(), owners.end(), renderProp);
         }
         else { // _useTreeLayout && gui groups exist

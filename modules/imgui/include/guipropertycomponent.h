@@ -29,6 +29,7 @@
 
 #include <openspace/properties/property.h>
 #include <openspace/properties/stringlistproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 #include <ghoul/misc/boolean.h>
 
@@ -75,9 +76,8 @@ protected:
     /// are regular, i.e., not containing wildcards, regex, or groups
     /// This variable only has an impact on which \c setPropertyValue function is called
     bool _hasOnlyRegularProperties = false;
-    UseTreeLayout _useTreeLayout;
-    bool _currentUseTreeLayout;
 
+    properties::BoolProperty _useTreeLayout;
     properties::StringListProperty _treeOrdering;
 
     IsTopLevelWindow _isTopLevel;
