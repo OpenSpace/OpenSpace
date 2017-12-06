@@ -76,6 +76,22 @@ int restoreCameraStateFromFile(lua_State* L) {
     return 0;
 }
 
+int setCameraState(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    try {
+        ghoul::Dictionary dictionary;
+        ghoul::lua::luaDictionaryFromState(L, dictionary);
+        OsEng.navigationHandler().setCameraStateFromDictionary(dictionary);
+    } catch (const ghoul::RuntimeError& e) {
+        return luaL_error(L, "Could not set camera state: %s", e.what());
+    }
+    return 0;
+}
+
 int saveCameraStateToFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 

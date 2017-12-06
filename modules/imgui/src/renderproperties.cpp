@@ -37,6 +37,8 @@
 
 #include <ghoul/filesystem/filesystem.h>
 
+#include <glm/gtx/component_wise.hpp>
+
 namespace openspace {
 
 using namespace properties;

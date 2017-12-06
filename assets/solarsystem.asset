@@ -13,6 +13,11 @@ local sceneHelper = asset.require("scenehelper")
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
 
+    openspace.navigation.setCameraState({
+        Focus = "Sun",
+        Position = {505370268487, 1089706179273, -890259148524 },
+        Rotation = {0.250635, -0.028751, 0.879269, 0.404030}
+    });
 
     -- Toggle night texture, shading, atmosphere and water
     openspace.bindKey("s",

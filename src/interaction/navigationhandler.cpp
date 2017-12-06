@@ -34,6 +34,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
@@ -299,6 +300,13 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return {
         "navigation",
         {
+            {
+                "setCameraState",
+                &luascriptfunctions::setCameraState,
+                {},
+                "object",
+                "Set the camera state"
+            },
             {
                 "saveCameraStateToFile",
                 &luascriptfunctions::saveCameraStateToFile,
