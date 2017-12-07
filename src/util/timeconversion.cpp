@@ -24,6 +24,8 @@
 
 #include <openspace/util/timeconversion.h>
 
+#include <ghoul/glm.h>
+
 #include <chrono>
 #include <cmath>
 

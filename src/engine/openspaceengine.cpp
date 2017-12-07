@@ -643,7 +643,6 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
-
     _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
 
@@ -1227,6 +1226,10 @@ void OpenSpaceEngine::drawOverlays() {
             // and we won't need this if we are shutting down
             _renderEngine->renderCameraInformation();
         }
+        else {
+            // If we are in shutdown mode, we can display the remaining time
+            _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
+        }
         _console->render();
     }
 
@@ -1335,12 +1338,10 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int siz
 void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
-        LINFO("Disabled shutdown mode");
         _shutdown.inShutdown = false;
     }
     else {
         // Else, we have to enable it
-        LINFO("Shutting down OpenSpace");
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
     }

@@ -229,6 +229,9 @@ const std::string NumericalProperty<T>::MaximumValueKey = "MaximumValue";
 template <typename T>
 const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
 
+template <typename T>
+const std::string NumericalProperty<T>::ExponentValueKey = "Exponent";
+
 // Delegating constructors are necessary; automatic template deduction cannot
 // deduce template argument for 'U' if 'default' methods are used as default values in
 // a single constructor
@@ -240,7 +243,8 @@ NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info)
         PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
+        1.f
     )
 {}
 
@@ -251,7 +255,8 @@ NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value)
         std::move(value),
         PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
+        1.f
     )
 {}
 
@@ -260,18 +265,36 @@ NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
                                         T minimumValue, T maximumValue)
     : NumericalProperty<T>(
         std::move(info),
-        std::move(value), std::move(minimumValue), std::move(maximumValue),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+        std::move(value),
+        std::move(minimumValue),
+        std::move(maximumValue),
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
+        1.f
     )
 {}
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
                                         T minimumValue, T maximumValue, T steppingValue)
+    : NumericalProperty<T>(
+        std::move(info),
+        std::move(value),
+        std::move(minimumValue),
+        std::move(maximumValue),
+        std::move(steppingValue),
+        1.f
+    )
+{}
+
+template <typename T>
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
+                                        T minimumValue, T maximumValue, T steppingValue,
+                                        float exponent)
     : TemplateProperty<T>(std::move(info), std::move(value))
     , _minimumValue(std::move(minimumValue))
     , _maximumValue(std::move(maximumValue))
     , _stepping(std::move(steppingValue))
+    , _exponent(exponent)
 {}
 
 template <typename T>
@@ -343,11 +366,32 @@ void NumericalProperty<T>::setMaxValue(T value) {
 }
 
 template <typename T>
+T NumericalProperty<T>::steppingValue() const {
+    return _steppingValue;
+}
+
+template <typename T>
+void NumericalProperty<T>::setSteppingValue(T value) {
+    _steppingValue = std::move(value);
+}
+
+template <typename T>
+float NumericalProperty<T>::exponent() const {
+    return _exponent;
+}
+
+template <typename T>
+void NumericalProperty<T>::setExponent(float exponent) {
+    _exponent = exponent;
+}
+
+template <typename T>
 std::string NumericalProperty<T>::generateAdditionalDescription() const {
     std::string result;
     result += MinimumValueKey  + " = " + std::to_string(_minimumValue) + ",";
     result += MaximumValueKey  + " = " + std::to_string(_maximumValue) + ",";
-    result += SteppingValueKey + " = " + std::to_string(_stepping);
+    result += SteppingValueKey + " = " + std::to_string(_stepping) + ",";
+    result += ExponentValueKey + " = " + std::to_string(_exponent);
     return result;
 }
 

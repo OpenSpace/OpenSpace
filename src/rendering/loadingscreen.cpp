@@ -106,6 +106,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _loadingFont(nullptr)
     , _messageFont(nullptr)
     , _itemFont(nullptr)
+    , _hasCatastrophicErrorOccurred(false)
     , _logo{ 0, 0 }
     , _progressbar{ 0, 0, 0, 0 }
     , _randomEngine(_randomDevice())
@@ -410,12 +411,17 @@ void LoadingScreen::render() {
     using FR = ghoul::fontrendering::FontRenderer;
     FR& renderer = FR::defaultRenderer();
 
+
+    std::string headline =
+        _hasCatastrophicErrorOccurred ?
+        "Failure":
+        "Loading...";
     // We use "Loading" to center the text, but render "Loading..." to make it look more
     // pleasing
     FR::BoundingBoxInformation bbox = renderer.boundingBox(
         *_loadingFont,
         "%s",
-        "Loading."
+        headline.substr(0, headline.size() - 2).c_str()
     );
 
     glm::vec2 loadingLl = glm::vec2(
@@ -429,7 +435,7 @@ void LoadingScreen::render() {
         loadingLl,
         glm::vec4(1.f, 1.f, 1.f, 1.f),
         "%s",
-        "Loading..."
+        headline.c_str()
     );
 
     glm::vec2 messageLl;
@@ -613,6 +619,10 @@ void LoadingScreen::render() {
 void LoadingScreen::postMessage(std::string message) {
     std::lock_guard<std::mutex> guard(_messageMutex);
     _message = std::move(message);
+}
+
+void LoadingScreen::setCatastrophicError(CatastrophicError catastrophicError) {
+    _hasCatastrophicErrorOccurred = catastrophicError;
 }
 
 void LoadingScreen::finalize() {

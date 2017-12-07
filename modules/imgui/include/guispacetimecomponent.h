@@ -27,12 +27,18 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
+#include <openspace/properties/scalar/floatproperty.h>
+
 namespace openspace::gui {
 
 class GuiSpaceTimeComponent : public GuiComponent {
 public:
     GuiSpaceTimeComponent();
     void render() override;
+
+private:
+    properties::FloatProperty _minMaxDeltaTime;
+    float _localMinMaxDeltatime; // We don't want the default display inside the component
 };
 
 } // namespace openspace::gui

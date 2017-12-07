@@ -46,7 +46,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/distanceconversion.h>>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
@@ -600,6 +600,15 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         "Shutdown in: %.2fs/%.2fs",
         timer,
         fullTime
+    );
+
+    RenderFontCr(
+        *_fontDate,
+        penPosition,
+        "%s",
+        // Important: length of this string is the same as the shutdown time text
+        // to make them align
+        "Press ESC again to abort"
     );
 }
 

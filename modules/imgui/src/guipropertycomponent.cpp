@@ -37,6 +37,22 @@
 namespace {
     const ImVec2 size = ImVec2(350, 500);
 
+    static const openspace::properties::Property::PropertyInfo UseTreeInfo = {
+        "TreeLayout",
+        "Use Tree Layout",
+        "If this value is checked, this component will display the properties using a "
+        "tree layout, rather than using a flat map. This value should only be set on "
+        "property windows that display SceneGraphNodes, or the application might crash."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OrderingInfo = {
+        "Ordering",
+        "Tree Ordering",
+        "This list determines the order of the first tree layer if it is used. Elements "
+        "present in this list will be shown first, with an alphabetical ordering for "
+        "elements not listed."
+    };
+
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props,
         openspace::properties::Property::Visibility visibility)
     {
@@ -146,13 +162,14 @@ namespace {
 
 namespace openspace::gui {
 
-GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree,
-                                           IsTopLevelWindow topLevel)
+GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree)
     : GuiComponent(std::move(name))
-    , _useTreeLayout(useTree)
-    , _currentUseTreeLayout(useTree)
-    , _isTopLevel(topLevel)
-{}
+    , _useTreeLayout(UseTreeInfo, useTree)
+    , _treeOrdering(OrderingInfo)
+{
+    addProperty(_useTreeLayout);
+    addProperty(_treeOrdering);
+}
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
     _function = std::move(function);
@@ -236,21 +253,16 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
 }
 
 void GuiPropertyComponent::render() {
-    if (_isTopLevel) {
-        ImGui::Begin(name().c_str(), nullptr, size, 0.75f);
-    }
-    else {
-        bool v = _isEnabled;
-        ImGui::Begin(name().c_str(), &v, size, 0.75f);
-        _isEnabled = v;
-    }
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+
+    bool v = _isEnabled;
+    ImGui::Begin(name().c_str(), &v, size, 0.75f);
+    _isEnabled = v;
+
+    _isCollapsed = ImGui::IsWindowCollapsed();
+    using namespace properties;
 
     if (_function) {
-        if (_useTreeLayout) {
-            ImGui::Checkbox("Use Tree layout", &_currentUseTreeLayout);
-        }
-
-
         std::vector<properties::PropertyOwner*> owners = _function();
 
         std::sort(
@@ -261,7 +273,7 @@ void GuiPropertyComponent::render() {
             }
         );
 
-        if (_currentUseTreeLayout) {
+        if (_useTreeLayout) {
             for (properties::PropertyOwner* owner : owners) {
                 ghoul_assert(
                     dynamic_cast<SceneGraphNode*>(owner),
@@ -271,12 +283,14 @@ void GuiPropertyComponent::render() {
             }
 
             // Sort:
-            // if guigrouping, sort by name and shortest first
+            // if guigrouping, sort by name and shortest first, but respect the user
+            // specified ordering
             // then all w/o guigroup
+            const std::vector<std::string>& ordering = _treeOrdering;
             std::stable_sort(
                 owners.begin(),
                 owners.end(),
-                [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+                [&ordering](PropertyOwner* lhs, PropertyOwner* rhs) {
                     std::string lhsGroup = static_cast<SceneGraphNode*>(lhs)->guiPath();
                     std::string rhsGroup = static_cast<SceneGraphNode*>(rhs)->guiPath();
 
@@ -286,7 +300,40 @@ void GuiPropertyComponent::render() {
                     if (rhsGroup.empty()) {
                         return true;
                     }
-                    return lhsGroup < rhsGroup;
+
+                    if (ordering.empty()) {
+                        return lhsGroup < rhsGroup;
+                    }
+
+                    std::vector<std::string> lhsToken = ghoul::tokenizeString(
+                        lhsGroup,
+                        '/'
+                    );
+                    // The first token is always empty
+                    auto lhsIt = std::find(ordering.begin(), ordering.end(), lhsToken[1]);
+
+                    std::vector<std::string> rhsToken = ghoul::tokenizeString(
+                        rhsGroup,
+                        '/'
+                    );
+                    // The first token is always empty
+                    auto rhsIt = std::find(ordering.begin(), ordering.end(), rhsToken[1]);
+
+                    if (lhsIt != ordering.end() && rhsIt != ordering.end()) {
+                        // If both top-level groups are in the ordering list, the order
+                        // of the iterators gives us the order of the groups
+                        return lhsIt < rhsIt;
+                    }
+                    else if (lhsIt != ordering.end() && rhsIt == ordering.end()) {
+                        // If only one of them is in the list, we have a sorting
+                        return true;
+                    }
+                    else if (lhsIt == ordering.end() && rhsIt != ordering.end()) {
+                        return false;
+                    }
+                    else {
+                        return lhsGroup < rhsGroup;
+                    }
                 }
             );
         }
@@ -329,7 +376,7 @@ void GuiPropertyComponent::render() {
             }
         };
 
-        if (!_currentUseTreeLayout || noGuiGroups) {
+        if (!_useTreeLayout || noGuiGroups) {
             std::for_each(owners.begin(), owners.end(), renderProp);
         }
         else { // _useTreeLayout && gui groups exist
@@ -398,6 +445,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
         { "DMat3Property", &renderDMat3Property },
         { "DMat4Property", &renderDMat4Property },
         { "StringProperty", &renderStringProperty },
+        { "StringListProperty", &renderStringListProperty },
         { "OptionProperty", &renderOptionProperty },
         { "TriggerProperty", &renderTriggerProperty },
         { "SelectionProperty", &renderSelectionProperty }

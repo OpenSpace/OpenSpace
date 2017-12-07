@@ -98,9 +98,12 @@ namespace openspace::gui {
 GuiMissionComponent::GuiMissionComponent() : GuiComponent("Mission Information") {}
 
 void GuiMissionComponent::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
     ImGui::Begin(name().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
+    
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     ghoul_assert(
         MissionManager::ref().hasCurrentMission(),
