@@ -72,6 +72,9 @@ public:
 protected:
     /// <code>true</code> if this component is enabled and visible on the screen
     properties::BoolProperty _isEnabled;
+    /// if <code>true</code> this window is currently collapsed. This setting mirrors the
+    /// ImGui internal state of the window
+    properties::BoolProperty _isCollapsed;
 };
 
 } // namespace openspace::gui

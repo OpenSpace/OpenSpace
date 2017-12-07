@@ -51,6 +51,7 @@ public:
     using ShowMessage = ghoul::Boolean;
     using ShowNodeNames = ghoul::Boolean;
     using ShowProgressbar = ghoul::Boolean;
+    using CatastrophicError = ghoul::Boolean;
 
     LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
         ShowProgressbar showProgressbar);
@@ -59,6 +60,7 @@ public:
     void render();
 
     void postMessage(std::string message);
+    void setCatastrophicError(CatastrophicError catastrophicError);
 
     void finalize();
 
@@ -110,6 +112,7 @@ private:
         GLuint vboBox;
     } _progressbar;
 
+    bool _hasCatastrophicErrorOccurred;
     std::string _message;
     std::mutex _messageMutex;
 
@@ -118,9 +121,6 @@ private:
         ItemStatus status;
 
         bool hasLocation;
-#ifdef LOADINGSCREEN_DEBUGGING
-        bool exhaustedSearch;
-#endif // LOADINGSCREEN_DEBUGGING
         glm::vec2 ll;
         glm::vec2 ur;
 

@@ -54,11 +54,12 @@ void GuiIswaComponent::render() {
     bool oldGmImageValue = _gmImage;
     bool oldIonDataValue = _ionData;
 
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+    
     bool e = _isEnabled;
-
     ImGui::Begin("ISWA", &e, WindowSize, 0.5f);
-
     _isEnabled = e;
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     ImGui::Text("Global Magnetosphere");
     ImGui::Checkbox("Gm From Data", &_gmData); ImGui::SameLine();

@@ -32,10 +32,12 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/misc.h>
 
 #include <glm/ext.hpp>
 
@@ -246,6 +248,56 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     ImGui::PopID();
 }
 
+void renderStringListProperty(Property* prop, const std::string& ownerName,
+                              IsRegularProperty isRegular, ShowToolTip showTooltip)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    StringListProperty* p = static_cast<StringListProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    std::string value;
+    p->getStringValue(value);
+    // const std::string value = p->value();
+
+    static const int bufferSize = 512;
+    static char buffer[bufferSize];
+#ifdef _MSC_VER
+    strcpy_s(buffer, value.length() + 1, value.c_str());
+#else
+    strcpy(buffer, value.c_str());
+#endif
+    bool hasNewValue = ImGui::InputText(
+        name.c_str(),
+        buffer,
+        bufferSize,
+        ImGuiInputTextFlags_EnterReturnsTrue
+    );
+    if (showTooltip) {
+        renderTooltip(prop);
+    }
+
+    if (hasNewValue) {
+        std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
+        std::string script = "{";
+        for (std::string& token : tokens) {
+            if (!token.empty()) {
+                ghoul::trimWhitespace(token);
+                script += "[[" + token + "]],";
+            }
+        }
+        script += "}";
+        
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            std::move(script),
+            isRegular
+        );
+    }
+
+    ImGui::PopID();
+}
+
 void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
                           IsRegularProperty isRegular, ShowToolTip showTooltip)
 {
@@ -258,7 +310,7 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     float min = static_cast<float>(p->minValue());
     float max = static_cast<float>(p->maxValue());
 
-    ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f");
+    ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f", p->exponent());
     if (showTooltip) {
         renderTooltip(prop);
     }
@@ -401,7 +453,7 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
     FloatProperty::ValueType value = *p;
     float min = p->minValue();
     float max = p->maxValue();
-    ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f");
+    ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f", p->exponent());
     if (showTooltip) {
         renderTooltip(prop);
     }
@@ -430,7 +482,8 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
         &value.x,
         min,
         max,
-        "%.5f"
+        "%.5f",
+        p->exponent()
     );
     if (showTooltip) {
         renderTooltip(prop);
@@ -471,7 +524,8 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
             glm::value_ptr(value),
             min,
             max,
-            "%.5f"
+            "%.5f",
+            p->exponent()
         );
     }
     if (showTooltip) {
@@ -513,7 +567,8 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
             glm::value_ptr(value),
             min,
             max,
-            "%.5f"
+            "%.5f",
+            p->exponent()
         );
     }
     if (showTooltip) {
@@ -547,7 +602,8 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
         &value.x,
         min,
         max,
-        "%.5f"
+        "%.5f",
+        p->exponent()
     );
     if (showTooltip) {
         renderTooltip(prop);
@@ -581,7 +637,8 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
         glm::value_ptr(value),
         min,
         max,
-        "%.5f"
+        "%.5f",
+        p->exponent()
     );
     if (showTooltip) {
         renderTooltip(prop);
@@ -615,7 +672,8 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
         &value.x,
         min,
         max,
-        "%.5f"
+        "%.5f",
+        p->exponent()
     );
     if (showTooltip) {
         renderTooltip(prop);
@@ -655,8 +713,8 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
     };
     float max = static_cast<float>(glm::compMax(maxValues));
 
-    ImGui::SliderFloat2("[0]", glm::value_ptr(value[0]), min, max);
-    ImGui::SliderFloat2("[1]", glm::value_ptr(value[1]), min, max);
+    ImGui::SliderFloat2("[0]", glm::value_ptr(value[0]), min, max, "%.5f", p->exponent());
+    ImGui::SliderFloat2("[1]", glm::value_ptr(value[1]), min, max, "%.5f", p->exponent());
 
     if (showTooltip) {
         renderTooltip(prop);
@@ -699,9 +757,9 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
     float max = static_cast<float>(glm::compMax(maxValues));
 
 
-    ImGui::SliderFloat3("[0]", glm::value_ptr(value[0]), min, max);
-    ImGui::SliderFloat3("[1]", glm::value_ptr(value[1]), min, max);
-    ImGui::SliderFloat3("[2]", glm::value_ptr(value[2]), min, max);
+    ImGui::SliderFloat3("[0]", glm::value_ptr(value[0]), min, max, "%.5f", p->exponent());
+    ImGui::SliderFloat3("[1]", glm::value_ptr(value[1]), min, max, "%.5f", p->exponent());
+    ImGui::SliderFloat3("[2]", glm::value_ptr(value[2]), min, max, "%.5f", p->exponent());
 
     if (showTooltip) {
         renderTooltip(prop);
@@ -746,10 +804,10 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
     float max = static_cast<float>(glm::compMax(maxValues));
 
 
-    ImGui::SliderFloat4("[0]", glm::value_ptr(value[0]), min, max);
-    ImGui::SliderFloat4("[1]", glm::value_ptr(value[1]), min, max);
-    ImGui::SliderFloat4("[2]", glm::value_ptr(value[2]), min, max);
-    ImGui::SliderFloat4("[3]", glm::value_ptr(value[3]), min, max);
+    ImGui::SliderFloat4("[0]", glm::value_ptr(value[0]), min, max, "%.5f", p->exponent());
+    ImGui::SliderFloat4("[1]", glm::value_ptr(value[1]), min, max, "%.5f", p->exponent());
+    ImGui::SliderFloat4("[2]", glm::value_ptr(value[2]), min, max, "%.5f", p->exponent());
+    ImGui::SliderFloat4("[3]", glm::value_ptr(value[3]), min, max, "%.5f", p->exponent());
 
     if (showTooltip) {
         renderTooltip(prop);

@@ -22,64 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___NUMERICALPROPERTY___H__
-#define __OPENSPACE_CORE___NUMERICALPROPERTY___H__
+#ifndef __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
+#define __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
 
+#include <string>
+#include <vector>
+
 namespace openspace::properties {
 
-template <typename T>
-class NumericalProperty : public TemplateProperty<T> {
-public:
-    NumericalProperty(Property::PropertyInfo info);
-    NumericalProperty(Property::PropertyInfo info, T value);
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue);
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue, T steppingValue);
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue, T steppingValue, float exponent);
-
-    bool getLuaValue(lua_State* state) const override;
-    bool setLuaValue(lua_State* state) override;
-    int typeLua() const override;
-
-    bool getStringValue(std::string& value) const override;
-    bool setStringValue(std::string value) override;
-
-    T minValue() const;
-    void setMinValue(T value);
-
-    T maxValue() const;
-    void setMaxValue(T value);
-
-    T steppingValue() const;
-    void setSteppingValue(T value);
-
-    float exponent() const;
-    void setExponent(float exponent);
-
-    virtual std::string className() const override;
-
-    using TemplateProperty<T>::operator=;
-
-protected:
-    static const std::string MinimumValueKey;
-    static const std::string MaximumValueKey;
-    static const std::string SteppingValueKey;
-    static const std::string ExponentValueKey;
-
-    std::string generateAdditionalDescription() const override;
-
-    T _minimumValue;
-    T _maximumValue;
-    T _stepping;
-    float _exponent;
-};
+REGISTER_TEMPLATEPROPERTY_HEADER(StringListProperty, std::vector<std::string>)
 
 } // namespace openspace::properties
 
-#include "openspace/properties/numericalproperty.inl"
-
-#endif // __OPENSPACE_CORE___NUMERICALPROPERTY___H__
+#endif // __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
