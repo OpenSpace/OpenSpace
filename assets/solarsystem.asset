@@ -1,6 +1,10 @@
-asset.require("keybindings")
+-- Request basic deps
+asset.require("keybindings/base")
 asset.require("spice/base")
-asset.require("sun/sun")
+local sceneHelper = asset.require("scenehelper")
+
+-- Required for camera focus
+local sun = asset.require("sun/sun")
 
 --asset.request("planets/planets")
 -- asset.request("planets/moons")
@@ -9,13 +13,11 @@ asset.request("planets/trails")
 
 
 
-local sceneHelper = asset.require("scenehelper")
-
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
 
     openspace.navigation.setCameraState({
-        Focus = "Sun",
+        Focus = sun.Sun.Name,
         Position = {505370268487, 1089706179273, -890259148524 },
         Rotation = {0.250635, -0.028751, 0.879269, 0.404030}
     });
@@ -85,6 +87,6 @@ asset.onInitialize(function ()
     -- Defined in scene_helper.lua
     -- Used to create focus buttons for a subset of scenegraph nodes
     sceneHelper.markInterestingNodes({
-        "Earth", "Mars", "Moon"
+        sun.Sun.Name, "Earth", "Mars", "Moon"
     })
 end)

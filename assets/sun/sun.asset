@@ -28,10 +28,7 @@ local Sun = {
             Radius = 6.957E8,
             Segments = 100
         },
-        Textures = {
-            Type = "simple",
-            Color = texturesPath .. "/sun.jpg",
-        },
+        ColorTexture = texturesPath .. "/sun.jpg",
         PerformShading = false,
     }
 }
@@ -75,3 +72,7 @@ assetHelper.registerSceneGraphNodes(asset, {
     SunGlare,
     SunMarker
 })
+
+asset.export("Sun", Sun)
+asset.export("SunGlare", SunGlare)
+asset.export("SunMarker", SunMarker)
