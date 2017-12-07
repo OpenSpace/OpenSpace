@@ -367,12 +367,12 @@ void NumericalProperty<T>::setMaxValue(T value) {
 
 template <typename T>
 T NumericalProperty<T>::steppingValue() const {
-    return _steppingValue;
+    return _stepping;
 }
 
 template <typename T>
 void NumericalProperty<T>::setSteppingValue(T value) {
-    _steppingValue = std::move(value);
+    _stepping = std::move(value);
 }
 
 template <typename T>

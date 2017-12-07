@@ -27,7 +27,6 @@
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
 
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
@@ -82,8 +81,6 @@ void GuiSpaceTimeComponent::render() {
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    ImGui::Text("%s", "Focus on:");
-    ImGui::SameLine();
     // Buttons for important SceneGraphNodes
     for (SceneGraphNode* n : nodes) {
         const std::vector<std::string>& tags = n->tags();
@@ -119,7 +116,7 @@ void GuiSpaceTimeComponent::render() {
     }
     int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
 
-    bool hasChanged = ImGui::Combo("Focus Node", &currentPosition, nodeNames.c_str());
+    bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.setPropertyValue('NavigationHandler.Origin', '" +
