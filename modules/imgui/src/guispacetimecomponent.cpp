@@ -38,14 +38,34 @@
 
 namespace {
     static const ImVec2 Size = ImVec2(350, 500);
+
+    static const openspace::properties::Property::PropertyInfo MinMaxInfo = {
+        "MinMax",
+        "Minimum/Maximum value for delta time",
+        "This value determines the minimum and maximum value for the delta time slider."
+    };
+
 } // namespace
 
 namespace openspace::gui {
 
-GuiSpaceTimeComponent::GuiSpaceTimeComponent() : GuiComponent("Space/Time") {}
+GuiSpaceTimeComponent::GuiSpaceTimeComponent()
+    : GuiComponent("Space/Time")
+    , _minMaxDeltaTime(MinMaxInfo, 100000.f, 0.f, 1e8f, 1.f, 5.f)
+    , _localMinMaxDeltatime(100000.f)
+{
+    _minMaxDeltaTime.onChange([this]() {
+        _localMinMaxDeltatime = _minMaxDeltaTime;
+    });
+    addProperty(_minMaxDeltaTime);
+}
 
 void GuiSpaceTimeComponent::render() {
-    ImGui::Begin(name().c_str(), nullptr, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+    bool v = _isEnabled;
+    ImGui::Begin(name().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     std::vector<SceneGraphNode*> nodes =
         OsEng.renderEngine().scene()->allSceneGraphNodes();
@@ -57,15 +77,6 @@ void GuiSpaceTimeComponent::render() {
             return lhs->name() < rhs->name();
         }
     );
-
-    ImGui::BeginGroup();
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(
-            "%s",
-            "These buttons and the dropdown menu determine the focus object in the scene "
-            "that is the center of all camera movement"
-        );
-    }
 
     CaptionText("Focus Selection");
 
@@ -117,8 +128,6 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
-    ImGui::EndGroup();
-
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
     ImGui::Separator();
@@ -126,15 +135,6 @@ void GuiSpaceTimeComponent::render() {
     ImGui::Separator();
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-
-
-    ImGui::BeginGroup();
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(
-            "%s",
-            "These elements determine the simulation time inside OpenSpace."
-        );
-    }
 
     CaptionText("Time Controls");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
@@ -253,17 +253,24 @@ void GuiSpaceTimeComponent::render() {
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
+    bool minMaxChanged = ImGui::InputFloat(
+        "Time slider range",
+        &_localMinMaxDeltatime
+    );
+    if (minMaxChanged) {
+        _minMaxDeltaTime = _localMinMaxDeltatime;
+    }
 
     float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-    bool changed = ImGui::SliderFloat(
+    bool deltaChanged = ImGui::SliderFloat(
         "Delta Time",
         &deltaTime,
-        -100000.f,
-        100000.f,
-        "%.3f",
+        -_minMaxDeltaTime,
+        _minMaxDeltaTime,
+        "%.6f",
         5.f
     );
-    if (changed) {
+    if (deltaChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
@@ -372,9 +379,6 @@ void GuiSpaceTimeComponent::render() {
         );
     }
     ImGui::SameLine();
-
-
-    ImGui::EndGroup();
 
     ImGui::End();
 

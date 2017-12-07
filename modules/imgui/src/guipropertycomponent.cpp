@@ -146,12 +146,10 @@ namespace {
 
 namespace openspace::gui {
 
-GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree,
-                                           IsTopLevelWindow topLevel)
+GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree)
     : GuiComponent(std::move(name))
     , _useTreeLayout(useTree)
     , _currentUseTreeLayout(useTree)
-    , _isTopLevel(topLevel)
 {}
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
@@ -236,14 +234,13 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
 }
 
 void GuiPropertyComponent::render() {
-    if (_isTopLevel) {
-        ImGui::Begin(name().c_str(), nullptr, size, 0.75f);
-    }
-    else {
-        bool v = _isEnabled;
-        ImGui::Begin(name().c_str(), &v, size, 0.75f);
-        _isEnabled = v;
-    }
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+
+    bool v = _isEnabled;
+    ImGui::Begin(name().c_str(), &v, size, 0.75f);
+    _isEnabled = v;
+
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     if (_function) {
         if (_useTreeLayout) {

@@ -47,11 +47,9 @@ public:
     using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
 
     using UseTreeLayout = ghoul::Boolean;
-    using IsTopLevelWindow = ghoul::Boolean;
 
 
-    GuiPropertyComponent(std::string name, UseTreeLayout useTree = UseTreeLayout::No,
-        IsTopLevelWindow isTopLevel = IsTopLevelWindow::No);
+    GuiPropertyComponent(std::string name, UseTreeLayout useTree = UseTreeLayout::No);
 
     // This is the function that evaluates to the list of Propertyowners that this
     // component should render
@@ -76,7 +74,6 @@ protected:
     bool _hasOnlyRegularProperties = false;
     UseTreeLayout _useTreeLayout;
     bool _currentUseTreeLayout;
-    IsTopLevelWindow _isTopLevel;
     bool _showHelpTooltip;
 };
 

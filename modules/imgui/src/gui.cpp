@@ -253,6 +253,13 @@ static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
     "explaining what impact they have on the visuals."
 };
 
+static const openspace::properties::Property::PropertyInfo HiddenInfo = {
+    "IsHidden",
+    "Is Hidden",
+    "If this value is true, all GUI items will not be rendered, regardless of their "
+    "status"
+};
+
 } // namespace
 
 namespace openspace::gui {
@@ -272,23 +279,25 @@ GUI::GUI()
     )
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
-    , _featuredProperties("Featured Properties",
-        GuiPropertyComponent::UseTreeLayout::No,
-        GuiPropertyComponent::IsTopLevelWindow::Yes)
+    , _featuredProperties("Featured Properties", GuiPropertyComponent::UseTreeLayout::No)
     , _showInternals(false)
     , _showHelpText(ShowHelpInfo, true)
     , _currentVisibility(properties::Property::Visibility::Developer)
+    , _allHidden(HiddenInfo, true)
 {
     addPropertySubOwner(_help);
     addPropertySubOwner(_performance);
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
+    _featuredProperties.setEnabled(true);
+    addPropertySubOwner(_featuredProperties);
     addPropertySubOwner(_virtualProperty);
 #ifdef GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_globeBrowsing);
 #endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
+    _spaceTime.setEnabled(true);
     addPropertySubOwner(_spaceTime);
     addPropertySubOwner(_mission);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -302,6 +311,8 @@ GUI::GUI()
         _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
         _virtualProperty.setShowHelpTooltip(_showHelpText);
     });
+
+    addProperty(_allHidden);
 }
 
 void GUI::initialize() {
@@ -615,6 +626,11 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 }
 
 void GUI::endFrame() {
+    LINFOC("Enabled", _isEnabled);
+    LINFOC("Collapsed", _isCollapsed);
+    LINFOC("Hidden", _allHidden);
+
+
     if (_program->isDirty()) {
         _program->rebuildFromFile();
     }
@@ -626,8 +642,11 @@ void GUI::endFrame() {
         _performance.render();
     }
 
-    if (_isEnabled) {
-        render();
+    if (!_allHidden) {
+
+        if (_isEnabled) {
+            render();
+        }
 
         if (_globalProperty.isEnabled()) {
             _globalProperty.render();
@@ -666,11 +685,13 @@ void GUI::endFrame() {
             _mission.render();
         }
 
-        // We always want to render the Space/Time component
-        _spaceTime.render();
+        if (_spaceTime.isEnabled()) {
+            _spaceTime.render();
+        }
 
-        // We always want to render the featured properties component
-        _featuredProperties.render();
+        if (_featuredProperties.isEnabled()) {
+            _featuredProperties.render();
+        }
     }
 
     ImGui::Render();
@@ -744,7 +765,11 @@ bool GUI::charCallback(unsigned int character, KeyModifier) {
 }
 
 void GUI::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+
     ImGui::Begin("OpenSpace GUI", nullptr);
+    
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     bool property = _property.isEnabled();
     ImGui::Checkbox("Scene Graph Properties", &property);
@@ -754,9 +779,17 @@ void GUI::render() {
     ImGui::Checkbox("ScreenSpace Properties", &screenSpaceProperty);
     _screenSpaceProperty.setEnabled(screenSpaceProperty);
 
+    bool featuredProperties = _featuredProperties.isEnabled();
+    ImGui::Checkbox("Featured Properties", &featuredProperties);
+    _featuredProperties.setEnabled(featuredProperties);
+
     bool globalProperty = _globalProperty.isEnabled();
     ImGui::Checkbox("Global Properties", &globalProperty);
     _globalProperty.setEnabled(globalProperty);
+
+    bool spacetime = _spaceTime.isEnabled();
+    ImGui::Checkbox("Space/Time", &spacetime);
+    _spaceTime.setEnabled(spacetime);
 
     bool parallel = _parallel.isEnabled();
     ImGui::Checkbox("Parallel Connection", &parallel);

@@ -159,9 +159,11 @@ void GuiParallelComponent::renderHost() {
 
 
 void GuiParallelComponent::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
     ImGui::Begin("Parallel Connection", &v);
     _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     ParallelConnection::Status status = OsEng.parallelConnection().status();
 

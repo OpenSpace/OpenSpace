@@ -38,6 +38,8 @@ public:
         T maximumValue);
     NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
         T maximumValue, T steppingValue);
+    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
+        T maximumValue, T steppingValue, float exponent);
 
     bool getLuaValue(lua_State* state) const override;
     bool setLuaValue(lua_State* state) override;
@@ -52,6 +54,12 @@ public:
     T maxValue() const;
     void setMaxValue(T value);
 
+    T steppingValue() const;
+    void setSteppingValue(T value);
+
+    float exponent() const;
+    void setExponent(float exponent);
+
     virtual std::string className() const override;
 
     using TemplateProperty<T>::operator=;
@@ -60,12 +68,14 @@ protected:
     static const std::string MinimumValueKey;
     static const std::string MaximumValueKey;
     static const std::string SteppingValueKey;
+    static const std::string ExponentValueKey;
 
     std::string generateAdditionalDescription() const override;
 
     T _minimumValue;
     T _maximumValue;
     T _stepping;
+    float _exponent;
 };
 
 } // namespace openspace::properties
