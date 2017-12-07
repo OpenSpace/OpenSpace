@@ -421,7 +421,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
             cornersModelSpace[Quad::NORTH_EAST] -
             cornersModelSpace[Quad::SOUTH_WEST]));
 
-
+    programObject->setUniform("patchNormalModelSpace", patchNormalModelSpace);
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
     programObject->setUniform(
         "projectionTransform",
