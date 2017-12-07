@@ -81,7 +81,11 @@ public:
     
     void setState(State state);
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
-    std::vector<std::shared_ptr<ResourceSynchronization>> synchronizations() const;
+    std::vector<std::shared_ptr<ResourceSynchronization>> ownSynchronizations() const;
+    std::vector<std::shared_ptr<ResourceSynchronization>> requiredSynchronizations() const;
+
+    void syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
+                          ResourceSynchronization::State s);
 
     // Sync
     bool isSynchronized();
@@ -103,10 +107,13 @@ public:
     void request(std::shared_ptr<Asset> child);
     void unrequest(std::shared_ptr<Asset> child);
 
+    std::vector<std::shared_ptr<Asset>> requestedAssets();
+    std::vector<std::shared_ptr<Asset>> requestingAssets();
+    std::vector<std::shared_ptr<Asset>> requiredAssets();
+    std::vector<std::shared_ptr<Asset>> requiringAssets();
+
     std::vector<std::shared_ptr<Asset>> requiredSubTreeAssets();
     std::vector<std::shared_ptr<Asset>> subTreeAssets();
-    std::vector<std::shared_ptr<Asset>> requestedAssets();
-    std::vector<std::shared_ptr<Asset>> requiredAssets();
     std::vector<std::shared_ptr<Asset>> childAssets();
 
     bool isRequired() const;

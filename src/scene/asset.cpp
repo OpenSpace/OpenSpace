@@ -116,30 +116,57 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
     // This will be called from another thread, so we need to mutex protect
     // things that are touched by the callback.
     ResourceSynchronization::CallbackHandle cbh = synchronization->addStateChangeCallback(
-        [this](ResourceSynchronization::State s) {
-            std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
-                this->synchronizations();
-
-            if (s == ResourceSynchronization::State::Resolved) {
-                auto it = std::find_if(
-                    syncs.begin(),
-                    syncs.end(),
-                    [](std::shared_ptr<ResourceSynchronization>& s) {
-                        return !s->isResolved();
-                    }
-                );
-                if (it == syncs.end()) {
-                    setState(State::SyncResolved);
-                }
-            } else if (s == ResourceSynchronization::State::Rejected) {
-                setState(State::SyncRejected);
-            }
+        [this, synchronization](ResourceSynchronization::State state) {
+            syncStateChanged(synchronization, state);
         }
     );
     _syncCallbackHandles[synchronization.get()] = cbh;
 }
+    
+void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> synchronization,
+                             ResourceSynchronization::State state)
+{
+    if (state == ResourceSynchronization::State::Resolved) {
+        std::vector<std::shared_ptr<Asset>> requiredAssets = this->requiredAssets();
+        auto pendingRequiredAsset = std::find_if(
+            requiredAssets.begin(),
+            requiredAssets.end(),
+            [](std::shared_ptr<Asset>& a) {
+                return a->state() == Asset::State::Loaded ||
+                       a->state() == Asset::State::Synchronizing;
+            }
+        );
 
-std::vector<std::shared_ptr<ResourceSynchronization>> Asset::synchronizations() const {
+        if (pendingRequiredAsset != requiredAssets.end()) {
+            // Do not change state if required assets are still synchronizing
+            return;
+        }
+
+        std::vector<std::shared_ptr<ResourceSynchronization>> syncs = this->ownSynchronizations();
+        auto unresolvedOwnSynchronization = std::find_if(
+            syncs.begin(),
+            syncs.end(),
+            [](std::shared_ptr<ResourceSynchronization>& s) {
+                return !s->isResolved();
+            }
+        );
+        if (unresolvedOwnSynchronization == syncs.end()) {
+            setState(State::SyncResolved);
+        }
+    } else if (state == ResourceSynchronization::State::Rejected) {
+        setState(State::SyncRejected);
+    }
+
+    // Notify parents
+    std::vector<std::shared_ptr<Asset>> requiringAssets = this->requiringAssets();
+    for (auto& a : requiringAssets) {
+        if (a->state() == Asset::State::Synchronizing) {
+            a->syncStateChanged(synchronization, state);
+        }
+    }
+}
+
+std::vector<std::shared_ptr<ResourceSynchronization>> Asset::ownSynchronizations() const {
     std::lock_guard<std::mutex> guard(_synchronizationsMutex);
     return _synchronizations;
 }
@@ -177,19 +204,24 @@ bool Asset::startSynchronizations() {
         return false;
     }
 
+    setState(State::Synchronizing);
+
     bool foundUnresolved = false;
+
     // Start synchronization of all children first.
-    for (auto& child : childAssets()) {
+    for (auto& child : requiredAssets()) {
         if (child->startSynchronizations()) {
             foundUnresolved = true;
         }
     }
+    for (auto& child : requestedAssets()) {
+        child->startSynchronizations();
+    }
 
     // Now synchronize its own synchronizations.
-    for (const auto& s : synchronizations()) {
+    for (const auto& s : ownSynchronizations()) {
         if (!s->isResolved()) {
             foundUnresolved = true;
-            setState(State::Synchronizing);
             s->start();
         }
     }
@@ -208,7 +240,7 @@ bool Asset::cancelSynchronizations() {
             cancelledAnySync = true;
         }
     }
-    for (const auto& s : synchronizations()) {
+    for (const auto& s : ownSynchronizations()) {
         if (s->isSyncing()) {
             cancelledAnySync = true;
             s->cancel();
@@ -234,7 +266,7 @@ float Asset::synchronizationProgress() {
 
     for (const auto& a : assets) {
         const std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
-            a->synchronizations();
+            a->ownSynchronizations();
 
         for (const auto& sync : syncs) {
             if (sync->nTotalBytesIsKnown()) {
@@ -254,7 +286,7 @@ float Asset::synchronizationProgress() {
 bool Asset::isInitReady() const {
     // An asset is ready for initialization if all synchronizations are resolved
     // and all its dependencies are ready for initialization.
-    for (const std::shared_ptr<ResourceSynchronization> sync : synchronizations()) {
+    for (const std::shared_ptr<ResourceSynchronization>& sync : ownSynchronizations()) {
         if (!sync->isResolved()) {
             return false;
         }
@@ -384,9 +416,8 @@ bool Asset::requires(const Asset* asset) const {
 }
 
 void Asset::require(std::shared_ptr<Asset> child) {
-    if (state() == Asset::State::Unloaded) {
-        // TODO: Throw: Can only require asset when in unloaded state
-        return;
+    if (state() != Asset::State::Unloaded) {
+        throw ghoul::RuntimeError("Cannot require child asset when already loaded");
     }
 
     auto it = std::find(_requiredAssets.begin(),
@@ -446,8 +477,32 @@ std::vector<std::shared_ptr<Asset>> Asset::requiredAssets() {
     return _requiredAssets;
 }
 
+std::vector<std::shared_ptr<Asset>> Asset::requiringAssets() {
+    std::vector<std::shared_ptr<Asset>> assets;
+    assets.reserve(_requiringAssets.size());
+    for (auto& a : _requiringAssets) {
+        std::shared_ptr<Asset> shared = a.lock();
+        if (shared) {
+            assets.push_back(shared);
+        }
+    }
+    return assets;
+}
+
 std::vector<std::shared_ptr<Asset>> Asset::requestedAssets() {
     return _requestedAssets;
+}
+
+std::vector<std::shared_ptr<Asset>> Asset::requestingAssets() {
+    std::vector<std::shared_ptr<Asset>> assets;
+    assets.reserve(_requestingAssets.size());
+    for (auto& a : _requestingAssets) {
+        std::shared_ptr<Asset> shared = a.lock();
+        if (shared) {
+            assets.push_back(shared);
+        }
+    }
+    return assets;
 }
 
 std::vector<std::shared_ptr<Asset>> Asset::childAssets() {

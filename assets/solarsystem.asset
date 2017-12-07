@@ -1,6 +1,7 @@
 asset.require("keybindings")
+asset.require("spice/base")
+asset.require("sun/sun")
 
-asset.request("sun/sun")
 --asset.request("planets/planets")
 -- asset.request("planets/moons")
 asset.request("planets/trails")

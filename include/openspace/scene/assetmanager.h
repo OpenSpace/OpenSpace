@@ -69,9 +69,12 @@ public:
 private:
     std::shared_ptr<Asset> tryAddAsset(const std::string& path);
     bool tryRemoveAsset(const std::string& path);
-    void assetStateChanged(Asset& asset, Asset::State state);
+    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state);
 
     std::unordered_map<std::string, bool> _pendingStateChangeCommands;
+    std::mutex _pendingInitializationsMutex;
+    std::vector<std::shared_ptr<Asset>> _pendingInitializations;
+
     std::unique_ptr<AssetLoader> _assetLoader;
     AssetLoader::CallbackHandle _addAssetCallbackHandle;
 };

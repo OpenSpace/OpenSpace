@@ -45,13 +45,13 @@ void AssetManager::initialize() {
     _addAssetCallbackHandle = _assetLoader->addAssetLoadCallback(
         [this] (std::shared_ptr<Asset> a) {
             a->addStateChangeCallback([a, this] (Asset::State state) {
-                assetStateChanged(*a, state);
+                assetStateChanged(a, state);
             });
         }
      );
     std::shared_ptr<Asset> rootAsset = _assetLoader->rootAsset();
     rootAsset->addStateChangeCallback([&rootAsset, this] (Asset::State state) {
-        assetStateChanged(*rootAsset, state);
+        assetStateChanged(rootAsset, state);
     });
     rootAsset->initialize();
 }
@@ -62,6 +62,15 @@ void AssetManager::deinitialize() {
 }
 
 bool AssetManager::update() {
+    // Initialize assets
+    {
+        std::lock_guard<std::mutex> guard(_pendingInitializationsMutex);
+        for (const auto& a : _pendingInitializations) {
+            a->initialize();
+        }
+        _pendingInitializations.clear();
+    }
+
     // Add assets
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
@@ -84,16 +93,17 @@ bool AssetManager::update() {
     return false;
 }
 
-void AssetManager::assetStateChanged(Asset& asset, Asset::State state) {
+void AssetManager::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
     if (rootAsset()->state() == Asset::State::Initialized) {
         if (state == Asset::State::Loaded) {
-            asset.startSynchronizations();
+            asset->startSynchronizations();
         }
         if (state == Asset::State::SyncResolved) {
-            asset.initialize();
+            std::lock_guard<std::mutex> guard(_pendingInitializationsMutex);
+            _pendingInitializations.push_back(asset);
         }
     } else {
-        asset.deinitialize();
+        asset->deinitialize();
     }
     // Todo: Check if assets should start syncing or if they should init.
     // flags: autoSync, autoInit ?
