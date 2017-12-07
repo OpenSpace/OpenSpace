@@ -30,52 +30,78 @@
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/asset.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
+
+namespace {
+    std::string assetStateToString(openspace::Asset::State state) {
+        switch (state) {
+        case openspace::Asset::State::Loaded: return "Loaded"; break;
+        case openspace::Asset::State::LoadingFailed: return "LoadingFailed"; break;
+        case openspace::Asset::State::Synchronizing: return "Synchronizing"; break;
+        case openspace::Asset::State::SyncRejected: return "SyncRejected"; break;
+        case openspace::Asset::State::SyncResolved: return "SyncResolved"; break;
+        case openspace::Asset::State::Initialized: return "Initialized"; break;
+        case openspace::Asset::State::InitializationFailed: return "InitializationFailed"; break;
+        default: return "Unknown"; break;
+        }
+    }
+}
+
 namespace openspace::gui {
 
 GuiAssetComponent::GuiAssetComponent()
     : GuiComponent("Assets")
 {}
 
+
 void GuiAssetComponent::render() {
     bool e = _isEnabled;
     ImGui::Begin("Assets", &e);
     _isEnabled = e;
 
-    ImGui::Columns(2);
-    ImGui::Separator();
-
     AssetManager& assetManager = OsEng.assetManager();
 
-    std::vector<std::shared_ptr<Asset>> allAssets =
-        assetManager.rootAsset()->subTreeAssets();
+    std::string rootPath = "";
 
-    for (const auto& a : allAssets) {
-        ImGui::Text("%s", a->assetFilePath().c_str());
-        ImGui::NextColumn();
-        
-        std::string stateText;
-        switch(a->state()) {
-            case Asset::State::Loaded: stateText = "Loaded"; break;
-            case Asset::State::LoadingFailed: stateText = "LoadingFailed"; break;
-            case Asset::State::Synchronizing: stateText = "Synchronizing"; break;
-            case Asset::State::SyncRejected: stateText = "SyncRejected"; break;
-            case Asset::State::SyncResolved: stateText = "SyncResolved"; break;
-            case Asset::State::Initialized: stateText = "Initialized"; break;
-            case Asset::State::InitializationFailed: stateText = "InitializationFailed"; break;
-            default: stateText = "Unknown"; break;
-        }
-        ImGui::Text("%s", stateText.c_str());
-        
-        ImGui::NextColumn();
-        ImGui::Separator();
-/*
-        ImGui::Text("%s", t.c_str());
-        ImGui::NextColumn();
-        ImGui::Text("%s", absPath(t).c_str());
-        ImGui::NextColumn();
-        ImGui::Separator();*/
+    for (const std::shared_ptr<Asset>& a : assetManager.rootAsset()->childAssets()) {
+        renderTree(a, rootPath);
     }
+
     ImGui::End();
 }
+
+void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset,
+                                   const std::string& relativeToPath)
+{
+    std::string assetPath = asset->assetFilePath();
+    const std::string assetDirectory = ghoul::filesystem::File(assetPath).directoryName();
+
+    if (relativeToPath != "") {
+        assetPath = FileSys.relativePath(assetPath, relativeToPath);
+    }
+
+    std::string assetText = assetPath + " " + assetStateToString(asset->state());
+
+    std::vector<std::shared_ptr<Asset>> requested = asset->requestedAssets();
+    std::vector<std::shared_ptr<Asset>> required = asset->requiredAssets();
+
+    if (requested.empty() && required.empty()) {
+        ImGui::Text(assetText.c_str());
+    } else if (ImGui::TreeNode(assetText.c_str())) {
+        ImGui::Text("Required assets:");
+        for (const auto& child : required) {
+            renderTree(child, assetDirectory);
+        }
+
+        ImGui::Text("Requested assets:");
+        for (const auto& child : requested) {
+            renderTree(child, assetDirectory);
+        }
+
+        ImGui::TreePop();
+    }
+}
+
 
 } // namespace openspace::gui

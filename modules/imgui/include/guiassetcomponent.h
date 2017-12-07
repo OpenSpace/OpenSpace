@@ -27,13 +27,18 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
+namespace openspace {
+    class Asset;
+}
+
 namespace openspace::gui {
 
 class GuiAssetComponent : public GuiComponent {
 public:
     GuiAssetComponent();
-
     void render() override;
+private:
+    void renderTree(const std::shared_ptr<openspace::Asset> a, const std::string& rootPath);
 };
 
 } // namespace openspace::gui

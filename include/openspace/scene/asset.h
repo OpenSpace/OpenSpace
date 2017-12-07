@@ -82,7 +82,6 @@ public:
     void setState(State state);
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     std::vector<std::shared_ptr<ResourceSynchronization>> ownSynchronizations() const;
-    std::vector<std::shared_ptr<ResourceSynchronization>> requiredSynchronizations() const;
 
     void syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
                           ResourceSynchronization::State s);
