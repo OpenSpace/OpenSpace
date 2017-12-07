@@ -37,8 +37,9 @@ GuiAssetComponent::GuiAssetComponent()
 {}
 
 void GuiAssetComponent::render() {
-    bool v = _isEnabled;
-    ImGui::Begin("Assets", &v);
+    bool e = _isEnabled;
+    ImGui::Begin("Assets", &e);
+    _isEnabled = e;
 
     ImGui::Columns(2);
     ImGui::Separator();
