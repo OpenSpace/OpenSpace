@@ -19,6 +19,8 @@ function postInitialization()
     created and initialized, but before the first render call. This is the place to set
     graphical settings for the renderables.
     ]]--
+    set_default_gui_sorting()
+
     openspace.printInfo("Setting default values")
     openspace.setPropertyValue("Sun.renderable.Enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.Enabled", false)

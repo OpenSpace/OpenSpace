@@ -626,11 +626,6 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 }
 
 void GUI::endFrame() {
-    LINFOC("Enabled", _isEnabled);
-    LINFOC("Collapsed", _isCollapsed);
-    LINFOC("Hidden", _allHidden);
-
-
     if (_program->isDirty()) {
         _program->rebuildFromFile();
     }
