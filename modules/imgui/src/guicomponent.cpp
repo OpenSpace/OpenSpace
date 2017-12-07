@@ -30,6 +30,12 @@ namespace {
         "Is Enabled",
         "This setting determines whether this object will be visible or not."
     };
+
+    static const openspace::properties::Property::PropertyInfo CollapsedInfo = {
+        "Collapsed",
+        "Is Collapsed",
+        "This setting determines whether this window is collapsed or not."
+    };
 } // namespace
 
 namespace openspace::gui {
@@ -37,8 +43,10 @@ namespace openspace::gui {
 GuiComponent::GuiComponent(std::string name)
     : properties::PropertyOwner({ std::move(name) })
     , _isEnabled(EnabledInfo, false)
+    , _isCollapsed(CollapsedInfo, false)
 {
     addProperty(_isEnabled);
+    addProperty(_isCollapsed);
 }
 
 bool GuiComponent::isEnabled() const {

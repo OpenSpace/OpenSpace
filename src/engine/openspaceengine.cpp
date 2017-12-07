@@ -576,12 +576,14 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         }
     );
 
+    bool errorWithPreInit = false;
     // Run start up scripts
     try {
         runPreInitializationScripts(scenePath);
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
+        errorWithPreInit = true;
     }
 
     Scene* scene;
@@ -622,60 +624,68 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     // an OpenGL context
     std::atomic_bool initializeFinished(false);
     bool errorWhileLoading = false;
-    std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading, this]() {
-        _loadingScreen->postMessage("Creating scene...");
-        _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
-        try {
-            scene = _sceneManager->loadScene(scenePath);
+    std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading,
+                   &errorWithPreInit, this]()
+    {
+        if (errorWithPreInit) {
+            _loadingScreen->postMessage("Failed loading scene '" + scenePath + "'");
+            _loadingScreen->setCatastrophicError(LoadingScreen::CatastrophicError::Yes);
         }
-        catch (const ghoul::FileNotFoundError& e) {
-            LERRORC(e.component, e.message);
-            errorWhileLoading = true;
-            return;
-        }
-        catch (const Scene::InvalidSceneError& e) {
-            LERRORC(e.component, e.message);
-            errorWhileLoading = true;
-            return;
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-            errorWhileLoading = true;
-            return;
-        }
-        catch (const std::exception& e) {
-            LERROR(e.what());
-            errorWhileLoading = true;
-            return;
-        }
-        catch (...) {
-            LERROR("Unknown error loading the scene");
-            errorWhileLoading = true;
-            return;
-        }
+        else {
+            _loadingScreen->postMessage("Creating scene...");
+            _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
+            try {
+                scene = _sceneManager->loadScene(scenePath);
+            }
+            catch (const ghoul::FileNotFoundError& e) {
+                LERRORC(e.component, e.message);
+                errorWhileLoading = true;
+                return;
+            }
+            catch (const Scene::InvalidSceneError& e) {
+                LERRORC(e.component, e.message);
+                errorWhileLoading = true;
+                return;
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+                errorWhileLoading = true;
+                return;
+            }
+            catch (const std::exception& e) {
+                LERROR(e.what());
+                errorWhileLoading = true;
+                return;
+            }
+            catch (...) {
+                LERROR("Unknown error loading the scene");
+                errorWhileLoading = true;
+                return;
+            }
 
-        Scene* previousScene = _renderEngine->scene();
-        if (previousScene) {
-            _syncEngine->removeSyncables(_timeManager->getSyncables());
-            _syncEngine->removeSyncables(_renderEngine->getSyncables());
-            _syncEngine->removeSyncable(_scriptEngine.get());
+            Scene* previousScene = _renderEngine->scene();
+            if (previousScene) {
+                _syncEngine->removeSyncables(_timeManager->getSyncables());
+                _syncEngine->removeSyncables(_renderEngine->getSyncables());
+                _syncEngine->removeSyncable(_scriptEngine.get());
 
-            _renderEngine->setScene(nullptr);
-            _renderEngine->setCamera(nullptr);
-            _sceneManager->unloadScene(*previousScene);
+                _renderEngine->setScene(nullptr);
+                _renderEngine->setCamera(nullptr);
+                _sceneManager->unloadScene(*previousScene);
+            }
+
+            // Initialize the RenderEngine
+            _renderEngine->setScene(scene);
+            _renderEngine->setCamera(scene->camera());
+            _renderEngine->setGlobalBlackOutFactor(0.0);
+            _renderEngine->startFading(1, 3.0);
+
+            _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
+
+            scene->initialize();
+            _loadingScreen->postMessage("Finished initializing");
+            initializeFinished = true;
         }
-
-        // Initialize the RenderEngine
-        _renderEngine->setScene(scene);
-        _renderEngine->setCamera(scene->camera());
-        _renderEngine->setGlobalBlackOutFactor(0.0);
-        _renderEngine->startFading(1, 3.0);
-
-        _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
-
-        scene->initialize();
-        _loadingScreen->postMessage("Finished initializing");
-        initializeFinished = true;
     });
 
     // While the SceneGraphNodes initialize themselves, we can hand over control to the
@@ -1319,6 +1329,10 @@ void OpenSpaceEngine::drawOverlays() {
             // and we won't need this if we are shutting down
             _renderEngine->renderCameraInformation();
         }
+        else {
+            // If we are in shutdown mode, we can display the remaining time
+            _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
+        }
         _console->render();
     }
 
@@ -1429,12 +1443,10 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int siz
 void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
-        LINFO("Disabled shutdown mode");
         _shutdown.inShutdown = false;
     }
     else {
         // Else, we have to enable it
-        LINFO("Shutting down OpenSpace");
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
     }

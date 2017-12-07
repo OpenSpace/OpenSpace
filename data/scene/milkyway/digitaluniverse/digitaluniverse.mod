@@ -7,7 +7,7 @@ return {
             Size = 9.2E20,
             Segments = 40,
             Alpha = 0.4,
-            Texture = "textures/DarkUniverse_mellinger_8k.jpg",
+            Texture = "textures/DarkUniverse_mellinger_4k.jpg",
             Orientation = "Inside/Outside",
             FadeOutThreshould = 0.25
         },

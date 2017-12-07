@@ -63,10 +63,13 @@ void GuiGlobeBrowsingComponent::render() {
     using Capabilities = GlobeBrowsingModule::Capabilities;
     using Layer = GlobeBrowsingModule::Layer;
 
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+
     bool e = _isEnabled;
 
     ImGui::Begin("Globe Browsing", &e, WindowSize, 0.5f);
     _isEnabled = e;
+    _isCollapsed = ImGui::IsWindowCollapsed();
     OnExit([]() {ImGui::End(); }); // We escape early from this function in a few places
 
 

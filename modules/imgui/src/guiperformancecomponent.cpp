@@ -97,9 +97,12 @@ void GuiPerformanceComponent::render() {
     using ghoul::SharedMemory;
     using namespace performance;
 
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
     ImGui::Begin("Performance", &v);
     _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
+
     RenderEngine& re = OsEng.renderEngine();
     PerformanceLayout* layout = re.performanceManager()->performanceData();
 

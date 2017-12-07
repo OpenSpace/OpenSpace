@@ -74,6 +74,8 @@ function preInitialization()
 end
 
 function postInitialization()
+    set_default_gui_sorting()
+
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",

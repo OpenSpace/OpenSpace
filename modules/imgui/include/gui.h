@@ -94,6 +94,8 @@ private:
 
     properties::Property::Visibility _currentVisibility;
 
+    properties::BoolProperty _allHidden;
+
     std::vector<ImGuiContext*> _contexts;
 };
 

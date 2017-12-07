@@ -67,6 +67,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/stringlistproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
@@ -230,6 +231,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalarproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
