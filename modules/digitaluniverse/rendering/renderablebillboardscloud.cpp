@@ -877,7 +877,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
     
     // Almost Working
-    glm::dmat4 invMVPParts = glm::inverse(modelMatrix) * glm::inverse(data.camera.combinedViewMatrix()) *
+    glm::dmat4 invMVPParts = worldToModelTransform * glm::inverse(data.camera.combinedViewMatrix()) *
         glm::inverse(glm::dmat4(projectionMatrix));
     glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
     glm::dvec3 orthoUp    = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));

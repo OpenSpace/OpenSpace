@@ -159,12 +159,29 @@ void main() {
     
     if ((height > maxBillboardSize) ||
         (width > maxBillboardSize)) {
-        //return;    
+        
+        // Set maximum size as Carter's instructions
+        float correctionScale = height > maxBillboardSize ? maxBillboardSize / (topRight.y - bottomLeft.y) :
+                                                            maxBillboardSize / (topRight.x - bottomLeft.x);
+        
+        scaledRight = correctionScale * scaleMultiply * right/2.0f;
+        scaledUp    = correctionScale * scaleMultiply * up/2.0f;
+        initialPosition = z_normalization(vec4(modelViewProjectionTransform *
+                                dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+        vs_screenSpaceDepth  = initialPosition.w;
+        secondPosition = z_normalization(vec4(modelViewProjectionTransform * 
+                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+        crossCorner = z_normalization(vec4(modelViewProjectionTransform * 
+                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+        thirdPosition = z_normalization(vec4(modelViewProjectionTransform *
+                        dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+
+        // Fade-out
         float maxVar = 3.0f * maxBillboardSize;
         float minVar = maxBillboardSize;
         ta = 1.0f - ( (var - minVar)/(maxVar - minVar) );
         if (ta == 0.0f)
-            return;
+           return;
     } 
     else if (width < 2.0f * minBillboardSize) {
         //return;
