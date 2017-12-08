@@ -23,10 +23,6 @@ return {
             Layers = {
                 ColorLayers = {
                     -- MoonTrek based servers
-                    {
-                        Name = "Apollo 16 Metric Cam Image Mosaic",
-                        FilePath = "map_service_configs/MoonTrek/Apollo16_Metric_Cam_Image_Mosaic.wms"
-                    },
                     -- Utah based servers
                     {
                         Name = "ClemUvvis",
