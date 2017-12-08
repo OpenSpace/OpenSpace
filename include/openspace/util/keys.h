@@ -217,6 +217,7 @@ struct KeyWithModifier {
 
 KeyWithModifier stringToKey(std::string str);
 bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs);
+bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs);
 
 static const std::map<std::string, KeyModifier> KeyModifierMapping = {
     { "SHIFT", KeyModifier::Shift },

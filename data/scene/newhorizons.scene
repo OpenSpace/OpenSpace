@@ -19,8 +19,6 @@ charon_image = "textures/NH_Charon_mosaic.png"
 charon_height = "textures/NH_Charon_DTM.png"
 -- charon_height = "textures/NH_Charon_DTM_8192.png"
 
-dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
-
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -28,7 +26,7 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
-    set_default_gui_sorting()
+    openspace.set_default_gui_sorting()
 
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
@@ -193,7 +191,7 @@ function postInitialization()
 
     -- Defined in scene_helper.lua
     -- Used to create focus buttons for a subset of scenegraph nodes
-    mark_interesting_nodes({
+    openspace.mark_interesting_nodes({
         "Pluto", "NewHorizons", "Charon"
     })
 end
