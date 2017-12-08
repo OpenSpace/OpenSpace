@@ -142,7 +142,9 @@ void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> synchroniz
             return;
         }
 
-        std::vector<std::shared_ptr<ResourceSynchronization>> syncs = this->ownSynchronizations();
+        std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
+            this->ownSynchronizations();
+
         auto unresolvedOwnSynchronization = std::find_if(
             syncs.begin(),
             syncs.end(),
@@ -316,7 +318,14 @@ void Asset::initialize() {
     }
 
     // 2. Call onInitialize in Lua
-    loader()->callOnInitialize(this);
+    try {
+        loader()->callOnInitialize(this);
+    } catch (const ghoul::lua::LuaRuntimeException& e) {
+        LERROR("Failed to initialize asset " << id() << ". " <<
+            e.component << ": " << e.message);
+        // TODO: rollback;
+        return;
+    }
 
     // 3. Update the internal state
     setState(Asset::State::Initialized);
@@ -324,14 +333,28 @@ void Asset::initialize() {
     // 4. Call dependency initialization functions
     // Now that both this and all children are initialized.
     for (auto& child : _requiredAssets) {
-        loader()->callOnDependencyInitialize(child.get(), this);
+        try {
+            loader()->callOnDependencyInitialize(child.get(), this);
+        } catch (const ghoul::lua::LuaRuntimeException& e) {
+            LERROR("Failed to initialize required asset " <<
+                child->id() << " of " << id() << ". " <<
+                e.component << ": " << e.message);
+            // TODO: rollback;
+        }
     }
 
     // 5. Call dependency initialization function of the child and this
     // if the requested child was initialized before this.
     for (auto& child : _requestedAssets) {
         if (child->state() == State::Initialized) {
-            loader()->callOnDependencyInitialize(child.get(), this);
+            try {
+                loader()->callOnDependencyInitialize(child.get(), this);
+            } catch (const ghoul::lua::LuaRuntimeException& e) {
+                LERROR("Failed to initialize requested asset " <<
+                    child->id() << " of " << id() << ". " <<
+                    e.component << ": " << e.message);
+                // TODO: rollback;
+            }
         }
     }
 
@@ -346,7 +369,14 @@ void Asset::initialize() {
     for (auto& parent : _requestingAssets) {
         std::shared_ptr<Asset> p = parent.lock();
         if (p && p->state() == State::Initialized) {
-            loader()->callOnDependencyInitialize(this, p.get());
+            try {
+                loader()->callOnDependencyInitialize(this, p.get());
+            } catch (const ghoul::lua::LuaRuntimeException& e) {
+                LERROR("Failed to initialize required asset " <<
+                    id() << " of " << p->id() << ". " <<
+                    e.component << ": " << e.message);
+                // TODO: rollback;
+            }
         }
     }
 

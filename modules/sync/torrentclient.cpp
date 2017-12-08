@@ -92,16 +92,25 @@ void TorrentClient::pollAlerts() {
     for (lt::alert const* a : alerts) {
         //LINFO(a->message());
         // if we receive the finished alert or an error, we're done
-        if (lt::alert_cast<lt::torrent_finished_alert>(a)) {
-            //LINFO(a->message());
+        if (const lt::torrent_finished_alert* alert =
+           lt::alert_cast<lt::torrent_finished_alert>(a))
+        {
+            notify(alert->handle.id());
         }
-        if (lt::alert_cast<lt::torrent_error_alert>(a)) {
-            //LINFO(a->message());
+        if (const lt::piece_finished_alert* alert =
+            lt::alert_cast<lt::piece_finished_alert>(a))
+        {
+            notify(alert->handle.id());
+        }
+        if (const lt::torrent_error_alert* alert =
+            lt::alert_cast<lt::torrent_error_alert>(a))
+        {
+            notify(alert->handle.id());
         }
     }
 }
 
-size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback) {
+size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb) {
     if (!_session) {
         LERROR("Torrent session not initialized when adding torrent");
         return -1;
@@ -117,8 +126,8 @@ size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destin
         LERROR(torrentFile << ": " << ec.message());
     }
 
-    size_t id = _nextId++;
-    _torrents.emplace(id, Torrent{id, h});
+    TorrentId id = h.id();
+    _torrents.emplace(id, Torrent{id, h, cb});
     return id;
 }
 
@@ -138,12 +147,34 @@ size_t TorrentClient::addMagnetLink(std::string magnetLink, std::string destinat
         LERROR(magnetLink << ": " << ec.message());
     }
 
-    size_t id = _nextId++;
-    _torrents.emplace(id, Torrent{id, h});
+    TorrentId id = h.id();
+    _torrents.emplace(id, Torrent{id, h, cb});
     return id;
 }
 
-void TorrentClient::removeTorrent(size_t id) {
+void TorrentClient::removeTorrent(TorrentId id) {
+}
+
+void TorrentClient::notify(TorrentId id) {
+    const auto& torrent = _torrents.find(id);
+    if (torrent == _torrents.end()) {
+        return;
+    }
+
+    libtorrent::torrent_handle h = torrent->second.handle;
+    libtorrent::torrent_status status = h.status();
+
+    TorrentProgress progress;
+
+    progress.finished = status.state == libtorrent::torrent_status::state_t::finished ||
+        status.state == libtorrent::torrent_status::state_t::seeding;
+
+    progress.nTotalBytesKnown = status.total_wanted > 0;
+    progress.nTotalBytes = status.total_wanted;
+    progress.nDownloadedBytes = status.total_wanted_done;
+
+    torrent->second.callback(progress);
+
 }
 
 

@@ -35,14 +35,28 @@
 
 namespace {
     std::string assetStateToString(openspace::Asset::State state) {
+        using State = openspace::Asset::State;
+
         switch (state) {
-        case openspace::Asset::State::Loaded: return "Loaded"; break;
-        case openspace::Asset::State::LoadingFailed: return "LoadingFailed"; break;
-        case openspace::Asset::State::Synchronizing: return "Synchronizing"; break;
-        case openspace::Asset::State::SyncRejected: return "SyncRejected"; break;
-        case openspace::Asset::State::SyncResolved: return "SyncResolved"; break;
-        case openspace::Asset::State::Initialized: return "Initialized"; break;
-        case openspace::Asset::State::InitializationFailed: return "InitializationFailed"; break;
+        case State::Loaded: return "Loaded"; break;
+        case State::LoadingFailed: return "LoadingFailed"; break;
+        case State::Synchronizing: return "Synchronizing"; break;
+        case State::SyncRejected: return "SyncRejected"; break;
+        case State::SyncResolved: return "SyncResolved"; break;
+        case State::Initialized: return "Initialized"; break;
+        case State::InitializationFailed: return "InitializationFailed"; break;
+        default: return "Unknown"; break;
+        }
+    }
+
+    std::string syncStateToString(openspace::ResourceSynchronization::State state) {
+        using State = openspace::ResourceSynchronization::State;
+
+        switch (state) {
+        case State::Unsynced: return "Unsynced"; break;
+        case State::Syncing: return "Syncing"; break;
+        case State::Resolved: return "Resolved"; break;
+        case State::Rejected: return "Rejected"; break;
         default: return "Unknown"; break;
         }
     }
@@ -75,7 +89,8 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
                                    const std::string& relativeToPath)
 {
     std::string assetPath = asset->assetFilePath();
-    const std::string assetDirectory = ghoul::filesystem::File(assetPath).directoryName();
+    const std::string assetDirectory =
+        ghoul::filesystem::File(assetPath).directoryName();
 
     if (relativeToPath != "") {
         assetPath = FileSys.relativePath(assetPath, relativeToPath);
@@ -86,17 +101,35 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
     std::vector<std::shared_ptr<Asset>> requested = asset->requestedAssets();
     std::vector<std::shared_ptr<Asset>> required = asset->requiredAssets();
 
-    if (requested.empty() && required.empty()) {
+    std::vector<std::shared_ptr<ResourceSynchronization>> resourceSyncs =
+        asset->ownSynchronizations();
+
+    if (requested.empty() && required.empty() && resourceSyncs.empty()) {
         ImGui::Text(assetText.c_str());
     } else if (ImGui::TreeNode(assetText.c_str())) {
-        ImGui::Text("Required assets:");
+
         for (const auto& child : required) {
             renderTree(child, assetDirectory);
         }
 
-        ImGui::Text("Requested assets:");
-        for (const auto& child : requested) {
-            renderTree(child, assetDirectory);
+        if (!requested.empty() && ImGui::TreeNode("Requested assets")) {
+            for (const auto& child : requested) {
+                renderTree(child, assetDirectory);
+            }
+            ImGui::TreePop();
+        }
+
+        if (!resourceSyncs.empty() && ImGui::TreeNode("Resource Synchronizations")) {
+            for (const auto& sync : resourceSyncs) {
+
+                std::string resourceText = sync->directory() +
+                    " " + syncStateToString(sync->state());
+                if (sync->state() == ResourceSynchronization::State::Syncing) {
+                    resourceText += " (" + std::to_string(static_cast<int>(sync->progress() * 100)) + "%%)";
+                }
+                ImGui::Text(resourceText.c_str());
+            }
+            ImGui::TreePop();
         }
 
         ImGui::TreePop();

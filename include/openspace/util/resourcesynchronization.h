@@ -66,6 +66,7 @@ public:
     virtual bool nTotalBytesIsKnown() = 0;
     virtual float progress();
 
+    State state();
     void wait();
     bool isResolved();
     bool isRejected();
@@ -78,7 +79,6 @@ protected:
     void reject();
     void reset();
     void begin();
-    void updateProgress(float t);
 
 private:
     void setState(State state);

@@ -94,6 +94,10 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
 void ResourceSynchronization::wait() {
 }
 
+ResourceSynchronization::State ResourceSynchronization::state() {
+    return _state;
+}
+
 bool ResourceSynchronization::isResolved() {
     return _state == State::Resolved;
 }

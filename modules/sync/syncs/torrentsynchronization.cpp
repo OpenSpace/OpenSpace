@@ -114,11 +114,12 @@ void TorrentSynchronization::start() {
     if (_enabled) {
         return;
     }
+    begin();
     _enabled = true;
     _torrentId = _torrentClient->addMagnetLink(
         _magnetLink,
         directory(),
-        [this](TorrentClient::Progress p) {
+        [this](TorrentClient::TorrentProgress p) {
             updateTorrentProgress(p);
         }
     );
@@ -129,28 +130,33 @@ void TorrentSynchronization::cancel() {
     if (_enabled) {
         _torrentClient->removeTorrent(_torrentId);
         _enabled = false;
+        reset();
     }
 }
 
 void TorrentSynchronization::clear() {
     // Todo: remove directory!
+    cancel();
 }
 
 
 size_t TorrentSynchronization::nSynchronizedBytes() {
-    return 0;
+    return _progress.nDownloadedBytes;
 }
 
 size_t TorrentSynchronization::nTotalBytes() {
-    return 0;
+    return _progress.nTotalBytes;
 }
 
 bool TorrentSynchronization::nTotalBytesIsKnown() {
-    return false;
+    return _progress.nTotalBytesKnown;
 }
 
-void TorrentSynchronization::updateTorrentProgress(TorrentClient::Progress) {
-    // TODO: implement this
+void TorrentSynchronization::updateTorrentProgress(TorrentClient::TorrentProgress progress) {
+    _progress = progress;
+    if (progress.finished && state() == State::Syncing) {
+        resolve();
+    }
 }
 
 } // namespace openspace

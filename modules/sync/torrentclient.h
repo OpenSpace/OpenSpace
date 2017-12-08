@@ -43,27 +43,34 @@ namespace openspace {
 
 class TorrentClient {
 public:
+    struct TorrentProgress {
+        bool finished = false;
+        bool nTotalBytesKnown = false;
+        size_t nTotalBytes = 0;
+        size_t nDownloadedBytes = 0;
+    };
+
+    using TorrentProgressCallback = std::function<void(TorrentProgress)>;
+
+    using TorrentId = int32_t;
+
     struct Torrent {
-        size_t id;
+        TorrentId id;
         libtorrent::torrent_handle handle;
+        TorrentProgressCallback callback;
     };
-
-    struct Progress {
-
-    };
-
-    using TorrentProgressCallback = std::function<void(Progress)>;
 
     TorrentClient();
     ~TorrentClient();
     void initialize();
     size_t addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb);
     size_t addMagnetLink(std::string magnetLink, std::string destination, TorrentProgressCallback cb);
-    void removeTorrent(size_t id);
+    void removeTorrent(TorrentId id);
     void pollAlerts();
 private:
-    size_t _nextId = 0;
-    std::unordered_map<size_t, Torrent> _torrents;
+    void notify(TorrentId id);
+
+    std::unordered_map<TorrentId, Torrent> _torrents;
     std::unique_ptr<libtorrent::session> _session;
     std::thread _torrentThread;
     std::atomic_bool _keepRunning = true;

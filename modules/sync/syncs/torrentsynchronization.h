@@ -56,11 +56,12 @@ public:
     bool nTotalBytesIsKnown() override;
 
 private:
-    void updateTorrentProgress(TorrentClient::Progress p);
+    void updateTorrentProgress(TorrentClient::TorrentProgress p);
+    std::string uniformResourceName() const;
 
     std::atomic_bool _enabled = false;
     size_t _torrentId;
-    std::string uniformResourceName() const;
+    TorrentClient::TorrentProgress _progress;
     std::string _identifier;
     std::string _magnetLink;
     std::string _synchronizationRoot;

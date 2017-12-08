@@ -12,7 +12,6 @@ asset.request("planets/trails")
 -- asset.request("dwarfplanets/pluto")
 
 
-
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
 
