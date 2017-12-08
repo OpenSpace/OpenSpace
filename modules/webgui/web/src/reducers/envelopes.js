@@ -11,6 +11,14 @@ const point = (state={}, action, value, id) => {
         anchor: anchor,
         color: value.color,
       }
+    case 'ADD_POINT':
+      return {
+        id: id,
+        position: value.position,
+        active: false,
+        anchor: false,
+        color: value.color,
+      }
     default:
       return state;
   }
@@ -27,8 +35,36 @@ const envelope = (state={}, action) => {  // state refers to individual envelope
         id: action.id,
         points: points,
         active: false,
-        size: 4,
       }
+    case 'ADD_POINT':
+      var pointId = Math.ceil(state.points.length / 2);
+      let pointValue = Object.assign({},
+          { position: {
+            x: (state.points[pointId - 1].position.x + state.points[pointId].position.x) / 2,
+            y: (state.points[pointId - 1].position.y + state.points[pointId].position.y) / 2,
+          },
+          color: action.color
+        })
+      state.points.splice(pointId, 0, point(undefined, action, pointValue, pointId));
+      return {...state, id: action.id, points: state.points.map((point, index) => ({
+              ...point,
+              id: index,
+             }))};
+    case 'SWAP_POINTS':
+      let test = state.points.map(function(element, index) {
+        if (index === action.id) 
+          return {
+            ...state.points[action.swapId],
+          };
+        else if (index === action.swapId)
+          return {
+            ...state.points[action.id],
+          };
+        else return element;
+      });
+      console.log(test);
+      return {...state, 
+        points: test};
     default:
       return state;
   }
@@ -41,13 +77,31 @@ const envelopes = (state=[], action) => {  // state refers to array of envelopes
     case 'CLEAR_ENVELOPES':
       return [];
     case 'DELETE_ENVELOPE':
-      return state.filter(envelope => envelope.active !== true)
+      return state.filter(envelope => envelope.active !== true);
+    case 'ADD_POINT':
+      return state.map(value => {
+            if(value.active === true) {
+              return envelope(value, action);
+            }
+            else { 
+             return value;
+            }
+           });
+    case 'SWAP_POINTS':
+      return  state.map(value => {
+                if(value.id === action.envelopeId) {
+                  return envelope(value, action);
+                }
+                else { 
+                 return value;
+                }
+              });
     case 'MOVE_POINT':
       return  state.map(envelope => ({
               ...envelope,
               points: envelope.points.map(point => ({
                 ...point,
-                position: (point.id === action.id) ?
+                position: (point.id === action.id && envelope.id === action.envelopeId) ?
                   action.position
                 : point.position })),
                 })

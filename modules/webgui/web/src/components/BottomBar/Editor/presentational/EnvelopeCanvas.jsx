@@ -35,8 +35,8 @@ const EnvelopeCanvas = ({
         />
       </svg>
      {points.map((point) =>
-      <Point
-      key={point.id}
+      <Point className={styles.Envelope}
+        key={point.id}
         handleClick={() => handleClick(point.id)}
         handleDrag={(e, ui) => handleDrag(e, ui, point.id)}
         height={height}

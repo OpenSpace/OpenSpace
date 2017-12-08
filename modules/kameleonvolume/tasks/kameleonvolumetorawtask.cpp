@@ -49,6 +49,7 @@ namespace {
 
     const char* KeyMinValue = "MinValue";
     const char* KeyMaxValue = "MaxValue";
+    const char* KeyVisUnit = "VisUnit";
 
     const char* _loggerCat = "KameleonVolumeToRawTask";
 } // namespace
@@ -101,7 +102,6 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
             reader.maxValue(variables[1]),
             reader.maxValue(variables[2]));
     }
-
     
     std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
         _dimensions,
@@ -132,6 +132,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     outputMetadata.setValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound);
     outputMetadata.setValue<float>(KeyMinValue, reader.minValue(_variable));
     outputMetadata.setValue<float>(KeyMaxValue, reader.maxValue(_variable));
+    outputMetadata.setValue<std::string>(KeyVisUnit, reader.getVisUnit(_variable));
 
     ghoul::DictionaryLuaFormatter formatter;
     std::string metadataString = formatter.format(outputMetadata);

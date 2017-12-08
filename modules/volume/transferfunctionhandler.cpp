@@ -43,6 +43,24 @@ static const openspace::properties::Property::PropertyInfo HistogramInfo = {
     "All the data"
 };
 
+static const openspace::properties::Property::PropertyInfo DataUnitInfo = {
+    "DataUnit",
+    "DataUnit",
+    "Unit of the data"
+};
+
+static const openspace::properties::Property::PropertyInfo MinValueInfo = {
+    "MinValue",
+    "MinValue",
+    "Minimum value in the data"
+};
+
+static const openspace::properties::Property::PropertyInfo MaxValueInfo = {
+    "MaxValue",
+    "MaxValue",
+    "Maximum value in the data"
+};
+
 namespace openspace {
     namespace volume {
 
@@ -54,6 +72,9 @@ namespace openspace {
             : properties::PropertyOwner({ "TransferFunctionHandler" }),
             _transferFunctionPath(prop),
             _transferFunctionProperty(TransferFunctionInfo),
+            _dataUnit(DataUnitInfo),
+            _minValue(MinValueInfo),
+            _maxValue(MaxValueInfo),
             _histogramProperty(HistogramInfo)
         {
             _transferFunction = std::make_shared<openspace::TransferFunction>(_transferFunctionPath);
@@ -63,6 +84,9 @@ namespace openspace {
             addProperty(_transferFunctionPath);
             addProperty(_transferFunctionProperty);
             addProperty(_histogramProperty);
+            addProperty(_dataUnit);
+            addProperty(_minValue);
+            addProperty(_maxValue);
 
             _texture = std::make_shared<ghoul::opengl::Texture>(
                 glm::size3_t(1024, 1, 1), ghoul::opengl::Texture::Format::RGBA,
@@ -93,6 +117,22 @@ namespace openspace {
             }
         }
 
+        void TransferFunctionHandler::setUnit(const std::string& unit) {
+            _dataUnit.set(unit);
+        }
+
+        void TransferFunctionHandler::setMinAndMaxValue(const float& min, const float& max) {
+            std::stringstream s_min;
+            s_min << min;
+            std::string s = s_min.str();
+            _minValue.set(s);
+            std::stringstream s_max;
+            s_max << max;
+            std::string t = s_max.str();
+            _maxValue.set(t);
+        }
+
+
         void TransferFunctionHandler::loadStoredEnvelopes() {
             TransferFunction tf;
             tf.loadEnvelopesFromFile(_filePath);
@@ -103,7 +143,7 @@ namespace openspace {
         }
 
         void TransferFunctionHandler::saveEnvelopes() {
-            _transferFunctionProperty.value().saveEnvelopesToFile(_filePath);
+           // _transferFunctionProperty.value().saveEnvelopesToFile(_filePath);
         }
 
         void TransferFunctionHandler::setFilepath(const std::string& path) {

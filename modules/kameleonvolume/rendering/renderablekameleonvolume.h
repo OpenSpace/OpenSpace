@@ -30,8 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/boxgeometry.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/transferfunction.h>
-
+#include <modules/volume/transferfunctionhandler.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
@@ -94,7 +93,7 @@ private:
     std::unique_ptr<volume::BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::shared_ptr<volume::TransferFunctionHandler> _transferFunctionHandler;
 };
 
 } // namespace kameleonvolume

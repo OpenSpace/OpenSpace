@@ -61,6 +61,7 @@ namespace {
     const char* KeyMinValue = "MinValue";
     const char* KeyMaxValue = "MaxValue";
     const char* KeyTime = "Time";
+    const char* KeyUnit = "VisUnit";
     const float SecondsInOneDay = 60 * 60 * 24;
 }
 
@@ -163,7 +164,8 @@ void RenderableTimeVaryingVolume::initialize() {
         }
 
         _transferFunctionHandler->buildHistogram(data, t.rawVolume->nCells());
-
+        _transferFunctionHandler->setUnit(t.unit);
+        _transferFunctionHandler->setMinAndMaxValue(t.minValue, t.maxValue);
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
@@ -241,6 +243,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
     t.minValue = dictionary.value<float>(KeyMinValue);
     t.maxValue = dictionary.value<float>(KeyMaxValue);
+    t.unit = dictionary.value<std::string>(KeyUnit);
 
     std::string timeString = dictionary.value<std::string>(KeyTime);
     t.time = Time::convertTime(timeString);

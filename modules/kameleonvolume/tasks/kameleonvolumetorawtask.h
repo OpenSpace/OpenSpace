@@ -47,6 +47,7 @@ private:
     std::string  _dictionaryOutputPath;
 
     std::string _variable;
+    std::string _units;
     glm::uvec3 _dimensions;
     bool _autoDomainBounds;
     glm::vec3 _lowerDomainBound;

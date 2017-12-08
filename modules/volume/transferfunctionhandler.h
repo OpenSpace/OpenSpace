@@ -30,6 +30,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/binaryproperty.h>
+#include <openspace/properties/scalarproperty.h>
 #include <openspace/util/histogram.h>
 #include <modules/volume/transferfunctionproperty.h>
 #include <modules/volume/transferfunction.h>
@@ -54,6 +55,8 @@ namespace openspace {
             void loadStoredEnvelopes();
             void saveEnvelopes();
             void setFilepath(const std::string& path);
+            void setUnit(const std::string& unit);
+            void setMinAndMaxValue(const float& min, const float& max);
 
             ghoul::opengl::Texture& getTexture();
             void uploadTexture();
@@ -64,6 +67,9 @@ namespace openspace {
         private:
             bool useTxtTexture = true;
             properties::StringProperty _transferFunctionPath;
+            properties::StringProperty _dataUnit;
+            properties::StringProperty _minValue;
+            properties::StringProperty _maxValue;
             std::string _filePath;
             properties::TransferFunctionProperty _transferFunctionProperty;
             properties::BinaryProperty _histogramProperty;

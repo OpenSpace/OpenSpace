@@ -8,6 +8,14 @@ export const addEnvelope = (points) => {
   };
 };
 
+export const addPoint = (color) => {
+  return {
+    type: 'ADD_POINT',
+    color,
+    id: nextEnvelopeId++,
+  };
+};
+
 export const deleteEnvelope = () => {
   return {
     type: 'DELETE_ENVELOPE',
@@ -26,6 +34,15 @@ export const movePoint = (id, envelopeId, position) => {
     envelopeId: envelopeId,
     id: id,
     position: position,
+  };
+};
+
+export const swapPoints = (id, swapId, envelopeId) => {
+  return {
+    type: "SWAP_POINTS",
+    id,
+    swapId,
+    envelopeId,
   };
 };
 

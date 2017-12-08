@@ -67,6 +67,7 @@ private:
         glm::uvec3 dimensions;
         glm::vec3 lowerDomainBound;
         glm::vec3 upperDomainBound;
+        std::string unit;
         bool inRam;
         bool onGpu;
         std::unique_ptr<RawVolume<float>> rawVolume;

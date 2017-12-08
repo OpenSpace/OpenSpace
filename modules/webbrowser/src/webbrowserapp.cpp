@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include "include/webbrowserapp.h"
-
 namespace openspace {
 
 WebBrowserApp::WebBrowserApp() = default;

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Draggable from 'react-draggable';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { addEnvelope, deleteEnvelope, clearEnvelopes } from '../actions';
+import { addEnvelope, deleteEnvelope, clearEnvelopes, addPoint } from '../actions';
 import EditorContainer from '../presentational/EditorContainer'
 import styles from '../style/EditorCanvas.scss';
 import DataManager from '../../../../api/DataManager';
@@ -32,7 +32,6 @@ class Editor extends Component {
   }
 
   handleRecievedEnvelopes(data) {
-    console.log(data);
     if(data !== undefined && data.Value !== "") {
       var envelopes = (eval('('+data.Value+')'));
       if (Object.keys(envelopes).length != 0 || envelopes.constructor != Object) {
@@ -83,9 +82,10 @@ class Editor extends Component {
     let defaultEnvelopePoints = [{color: color, position : { x: 0, y: height}}, {color: color, position : { x: 30, y: 0}},
                     {color: color, position : { x: 70, y: 0}}, {color: color, position : { x: 100, y: height}}];
       return (
-      <div className={styles.EditorContainer} >
+      <div >
         <button onClick={() => this.props.AddEnvelope(defaultEnvelopePoints)}>Add Envelope</button>
         <button onClick={() => this.props.DeleteEnvelope()}>Delete Envelope</button>
+        <button onClick={() => this.props.AddPoint(color)}>Add Point</button>
         <EditorContainer
           envelopes={this.props.envelopes}
           height={height}
@@ -97,6 +97,7 @@ class Editor extends Component {
 };
 Editor.propTypes = {
   AddEnvelope: PropTypes.func.isRequired,
+  AddPoint: PropTypes.func.isRequired,
   DeleteEnvelope: PropTypes.func.isRequired,
   ClearEnvelopes: PropTypes.func.isRequired,
 }
@@ -111,6 +112,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     AddEnvelope: (envelope) => {
       dispatch(addEnvelope(envelope));
+    },
+    AddPoint: (color) => {
+      dispatch(addPoint(color));
     },
     DeleteEnvelope: () => {
       dispatch(deleteEnvelope());

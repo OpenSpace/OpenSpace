@@ -10,10 +10,10 @@ const EditorContainer = ({
   width,
   envelopes
 }) => (
-  <div className={styles.EditorContainer} >
+  <div >
     <div className={styles.EnvelopeContainer}>
         {envelopes.map(envelope =>
-          <Envelope className={styles.Envelope}
+          <Envelope
             key={envelope.id}
             {...envelope}
             height={height}
@@ -22,7 +22,7 @@ const EditorContainer = ({
         )}
     </div>
     <div className={styles.HistogramContainer}>
-      <Histogram className={styles.HistogramContainer} height={height} width={width}/>
+      <Histogram height={height} width={width}/>
     </div>
   </div>
 )
