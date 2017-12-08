@@ -109,37 +109,19 @@ void main() {
     vec4 initialPosition = z_normalization(vec4(modelViewProjectionTransform * 
                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
     vs_screenSpaceDepth  = initialPosition.w;
-    // gl_Position = initialPosition;
-    // EmitVertex();
-
+    
     // texCoord    = corners[1];
     vec4 secondPosition = z_normalization(vec4(modelViewProjectionTransform * 
                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-    // gl_Position = secondPosition;
-    // EmitVertex();
-
+    
     //texCoord = corners[2];
     vec4 crossCorner = z_normalization(vec4(modelViewProjectionTransform * 
                         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-    // gl_Position = crossCorner;
-    // EmitVertex();
-    // EndPrimitive(); // First Triangle
-
-    // texCoord = corners[0];
-    // gl_Position = initialPosition;
-    // EmitVertex();
-
-    // texCoord = corners[2];
-    // gl_Position = crossCorner;
-    // EmitVertex();
     
     // texCoord = corners[3];
     vec4 thirdPosition = z_normalization(vec4(modelViewProjectionTransform * 
                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    // gl_Position = thirdPosition;
-    // EmitVertex();
-    // EndPrimitive(); // Second Triangle
-
+    
     // Testing size:
     vec4 topRight = secondPosition/secondPosition.w;
     topRight =  ((topRight + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
@@ -147,15 +129,8 @@ void main() {
     bottomLeft = ((bottomLeft + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
 
     float height = abs(topRight.y - bottomLeft.y);
-    float width  = abs(topRight.x - bottomLeft.x);
-    
-    // if ((height < (2.0 * maxBillboardSize)) ||
-    //     (width < (2.0 * maxBillboardSize))) {
-    //     ta = 1.0 - (height - maxBillboardSize)/(maxBillboardSize);
-    //     //ta = 0.5;
-    // } 
-
-    float var = (height+width);    
+    float width  = abs(topRight.x - bottomLeft.x);    
+    float var    = (height + width);    
     
     if ((height > maxBillboardSize) ||
         (width > maxBillboardSize)) {
@@ -177,7 +152,7 @@ void main() {
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
 
         // Fade-out
-        float maxVar = 3.0f * maxBillboardSize;
+        float maxVar = 2.0f * maxBillboardSize;
         float minVar = maxBillboardSize;
         ta = 1.0f - ( (var - minVar)/(maxVar - minVar) );
         if (ta == 0.0f)
@@ -191,27 +166,26 @@ void main() {
         if (ta == 0.0f)
             return;
     } 
-    {
-        // Build primitive
-        texCoord    = corners[0];
-        gl_Position = initialPosition;
-        EmitVertex();
-        texCoord    = corners[1];
-        gl_Position = secondPosition;
-        EmitVertex();
-        texCoord    = corners[2];
-        gl_Position = crossCorner;
-        EmitVertex();
-        EndPrimitive(); // First Triangle
-        texCoord    = corners[0];
-        gl_Position = initialPosition;
-        EmitVertex();
-        texCoord    = corners[2];
-        gl_Position = crossCorner;
-        EmitVertex();
-        texCoord    = corners[3];
-        gl_Position = thirdPosition;
-        EmitVertex();
-        EndPrimitive(); // Second Triangle
-    }
+    
+    // Build primitive
+    texCoord    = corners[0];
+    gl_Position = initialPosition;
+    EmitVertex();
+    texCoord    = corners[1];
+    gl_Position = secondPosition;
+    EmitVertex();
+    texCoord    = corners[2];
+    gl_Position = crossCorner;
+    EmitVertex();
+    EndPrimitive(); // First Triangle
+    texCoord    = corners[0];
+    gl_Position = initialPosition;
+    EmitVertex();
+    texCoord    = corners[2];
+    gl_Position = crossCorner;
+    EmitVertex();
+    texCoord    = corners[3];
+    gl_Position = thirdPosition;
+    EmitVertex();
+    EndPrimitive(); // Second Triangle    
 }

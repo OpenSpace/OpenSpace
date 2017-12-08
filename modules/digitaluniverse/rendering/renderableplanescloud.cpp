@@ -602,8 +602,12 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         glm::vec4 bottomLeft = vertex0 / vertex0.w;
         bottomLeft = ((bottomLeft + glm::vec4(1.0)) / glm::vec4(2.0)) * glm::vec4(viewport[2], viewport[3], 1.0, 1.0);
 
-        if ((std::fabs(topRight.y - bottomLeft.y) < _planeMinSize) ||
-            (std::fabs(topRight.x - bottomLeft.x) < _planeMinSize)) {
+        float lengthY  = std::fabs(topRight.y - bottomLeft.y);
+        float lengthX  = std::fabs(topRight.x - bottomLeft.x);
+        float lengthXY = glm::length(glm::vec2(topRight) - glm::vec2(bottomLeft));
+        float biggestAxis = lengthY > lengthX ? (lengthY > lengthXY ? lengthY : lengthXY) : 
+            (lengthX > lengthXY ? lengthX : lengthXY);
+        if (biggestAxis < _planeMinSize ) {
             continue;
         }
 

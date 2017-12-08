@@ -1,7 +1,7 @@
 return {
     -- SphericalGrid module
     {
-        Name = "Ecliptic Grid",
+        Name = "Ecliptic Sphere",
         Parent = "Root",
         Renderable = {
             Type = "RenderableSphericalGrid",
@@ -17,7 +17,7 @@ return {
         GuiPath = "/Other/Grids"
     },
     {
-        Name = "Equatorial Grid",
+        Name = "Equatorial Sphere",
         Parent = "Root",
         Renderable = {
             Type = "RenderableSphericalGrid",
@@ -33,7 +33,7 @@ return {
         GuiPath = "/Other/Grids"
     },
     {
-        Name = "Galactic Grid",
+        Name = "Galactic Sphere",
         Parent = "SolarSystem",
         Renderable = {
             Type = "RenderableSphericalGrid",

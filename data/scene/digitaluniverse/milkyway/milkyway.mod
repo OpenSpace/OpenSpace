@@ -1,7 +1,7 @@
 return {
     -- MilkyWay Galaxy (Texture)
     {   
-        Name = "MilkyWay Pic",
+        Name = "Milky Way Galaxy Image",
         Parent = "Root",
         Renderable = {
             Type = "RenderablePlanesCloud",

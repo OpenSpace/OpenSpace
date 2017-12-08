@@ -1,6 +1,6 @@
 return {
     {
-        Name = "Ecliptic Grid Labels",
+        Name = "Ecliptic Sphere Labels",
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
@@ -23,7 +23,7 @@ return {
         GuiPath = "/Other/Grids"
     },
     {
-        Name = "Equatorial Grid Labels",
+        Name = "Equatorial Sphere Labels",
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
@@ -45,9 +45,9 @@ return {
         },
         GuiPath = "/Other/Grids"
     },
-    -- Galactic Grid Labels
+    -- Galactic Sphere Labels
     {   
-        Name = "Galactic Grid Labels",
+        Name = "Galactic Sphere Labels",
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
