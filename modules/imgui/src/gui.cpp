@@ -253,6 +253,12 @@ static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
     "explaining what impact they have on the visuals."
 };
 
+static const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+    "HelpTextDelay",
+    "Tooltip Delay (in s)",
+    "This value determines the delay in seconds after which the tooltip is shown."
+};
+
 static const openspace::properties::Property::PropertyInfo HiddenInfo = {
     "IsHidden",
     "Is Hidden",
@@ -282,6 +288,7 @@ GUI::GUI()
     , _featuredProperties("Featured Properties", GuiPropertyComponent::UseTreeLayout::No)
     , _showInternals(false)
     , _showHelpText(ShowHelpInfo, true)
+    , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
     , _currentVisibility(properties::Property::Visibility::Developer)
     , _allHidden(HiddenInfo, true)
 {
@@ -304,13 +311,29 @@ GUI::GUI()
     addPropertySubOwner(_iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
 
-    addProperty(_showHelpText);
-    _showHelpText.onChange([this](){
-        _globalProperty.setShowHelpTooltip(_showHelpText);
-        _property.setShowHelpTooltip(_showHelpText);
-        _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
-        _virtualProperty.setShowHelpTooltip(_showHelpText);
-    });
+    {
+        auto showHelpTextFunc = [this](){
+            _globalProperty.setShowHelpTooltip(_showHelpText);
+            _property.setShowHelpTooltip(_showHelpText);
+            _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
+            _virtualProperty.setShowHelpTooltip(_showHelpText);
+        };
+        showHelpTextFunc();
+        _showHelpText.onChange(std::move(showHelpTextFunc));
+        addProperty(_showHelpText);
+    }
+
+    {
+        auto helpTextDelayFunc = [this](){
+            _globalProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _property.setShowHelpTooltipDelay(_helpTextDelay);
+            _screenSpaceProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _virtualProperty.setShowHelpTooltipDelay(_helpTextDelay);
+        };
+        helpTextDelayFunc();
+        _helpTextDelay.onChange(std::move(helpTextDelayFunc));
+        addProperty(_helpTextDelay);
+    }
 
     addProperty(_allHidden);
 }

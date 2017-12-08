@@ -88,6 +88,7 @@ public:
     bool _showInternals;
 
     properties::BoolProperty _showHelpText;
+    properties::FloatProperty _helpTextDelay;
 
 private:
     void renderAndUpdatePropertyVisibility();
