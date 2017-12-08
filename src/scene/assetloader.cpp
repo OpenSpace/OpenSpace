@@ -202,7 +202,22 @@ std::shared_ptr<Asset> AssetLoader::request(const std::string& name) {
     return nullptr;
 }
 
-ghoul::filesystem::Directory AssetLoader::currentDirectory() {
+void AssetLoader::unrequest(const std::string& name) {
+    std::shared_ptr<Asset> asset = has(name);
+    if (asset) {
+        try {
+            std::shared_ptr<Asset> parent = _assetStack.back();
+            parent->unrequest(asset);
+        }
+        catch (ghoul::RuntimeError& e) {
+            LERROR("Failed to unload " << name << ". " << e.component << " :" << e.message);
+        }
+    }
+
+}
+
+
+ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
     if (_assetStack.back()->hasAssetFile()) {
         return _assetStack.back()->assetDirectory();
     } else {
@@ -216,8 +231,9 @@ std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
 }
 
 
-void AssetLoader::remove(const std::string & identifier) {
+void AssetLoader::remove(const std::string& identifier) {
     ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");   
+    unrequest(identifier);
     // TODO: Implement this
     //_rootAsset->removeDependency(id);
 }
@@ -228,8 +244,11 @@ void AssetLoader::remove(const Asset* asset) {
     //_rootAsset->removeDependency(id);
 }
 
-std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
-    const auto it = _loadedAssets.find(identifier);
+std::shared_ptr<Asset> AssetLoader::has(const std::string& name) const {
+    ghoul::filesystem::Directory directory = currentDirectory();
+    std::string path = generateAssetPath(directory, name);
+
+    const auto it = _loadedAssets.find(path);
     if (it == _loadedAssets.end()) {
         return nullptr;
     }

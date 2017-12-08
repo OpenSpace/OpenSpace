@@ -65,14 +65,6 @@ std::string Asset::resolveLocalResource(std::string resourceName) {
         resourceName;
 }
 
-void Asset::handleRequests() {
-    State currentState = state();
-
-    if (currentState == State::Initialized) {
-        // ...
-    }
-}
-
 Asset::State Asset::state() const {
     return _state;
 }
@@ -361,7 +353,7 @@ void Asset::initialize() {
     // 6. Ask requested children to initialize if they are not already initialized.
     // Initialization may not happen immediately.
     for (auto& child : _requestedAssets) {
-        child->handleRequests();
+        //child->handleRequests();
     }
 
     // 7. Call dependency initialization function of this and the parent
@@ -474,22 +466,34 @@ void Asset::request(std::shared_ptr<Asset> child) {
     _requestedAssets.push_back(child);
     child->_requestingAssets.push_back(shared_from_this());
     
-    child->handleRequests();
+    // TODO: update real state!
 }
 
 void Asset::unrequest(std::shared_ptr<Asset> child) {
-    auto it = std::find(_requestedAssets.begin(),
+    auto childIt = std::find(
+        _requestedAssets.begin(),
         _requestedAssets.end(),
         child);
 
-    if (it != _requestedAssets.end()) {
-        // Do nothing if the request already exists.
+    auto parentIt = std::find_if(
+        child->_requestingAssets.begin(),
+        child->_requestingAssets.end(),
+        [this](std::weak_ptr<Asset> a) {
+            return a.lock().get() == this;
+        }
+    );
+
+    if (childIt == _requestedAssets.end() || 
+        parentIt == child->_requestingAssets.end())
+    {
+        // Do nothing if the request node not exist.
         return;
     }
-    _requestedAssets.push_back(child);
-    child->_requestingAssets.push_back(shared_from_this());
     
-    child->handleRequests();
+    _requestedAssets.erase(childIt);
+    child->_requestingAssets.erase(parentIt);
+
+    // TODO: update real state!
 }
 
 bool Asset::requests(const Asset* asset) const {

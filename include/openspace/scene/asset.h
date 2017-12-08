@@ -120,8 +120,6 @@ public:
 
     std::string resolveLocalResource(std::string resourceName);
 private:
-    void handleRequests();
-
     std::atomic<State> _state;
     AssetLoader* _loader;
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;

@@ -141,7 +141,7 @@ private:
 
     std::shared_ptr<Asset> loadAsset(std::string path);
     std::shared_ptr<Asset> getAsset(std::string path);
-    ghoul::filesystem::Directory currentDirectory();
+    ghoul::filesystem::Directory currentDirectory() const;
 
     void pushAsset(std::shared_ptr<Asset> asset);
     void popAsset();

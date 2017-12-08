@@ -75,7 +75,7 @@ bool AssetManager::update() {
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const bool add = c.second;
-        if (add && !_assetLoader->has(path)) {
+        if (add) {
             std::shared_ptr<Asset> asset = tryAddAsset(path);
         }
     }
@@ -83,7 +83,7 @@ bool AssetManager::update() {
     // Remove assets
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
-        const bool remove = c.second;
+        const bool remove = !c.second;
         if (remove && _assetLoader->has(path)) {
             tryRemoveAsset(path);
         }
