@@ -86,16 +86,38 @@ void Asset::setState(Asset::State state) {
         return;
     }
     _state = state;
-    _stateChangeCallbackMutex.lock();
-    std::vector<StateChangeCallback> callbacks;
-    callbacks.reserve(_stateChangeCallbacks.size());
-    for (const auto& it : _stateChangeCallbacks) {
-        callbacks.push_back(it.second);
+
+    for (auto& requiringAsset : _requiringAssets) {
+        if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
+            a->requiredAssetChangedState(shared_from_this());
+        }
     }
-    _stateChangeCallbackMutex.unlock();
-    for (auto& cb : callbacks) {
-        cb(state);
+    for (auto& requestingAsset : _requestingAssets) {
+        if (std::shared_ptr<Asset> a = requestingAsset.lock()) {
+            a->requestedAssetChangedState(shared_from_this());
+        }
     }
+    std::lock_guard<std::mutex> guard(_stateChangeCallbackMutex);
+    for (auto& cb : _stateChangeCallbacks) {
+        cb.second(state);
+    }
+}
+
+void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child) {
+    State childState = child->state();
+
+    if (childState == State::SyncResolved) {
+        if (isSyncResolveReady()) {
+            setState(State::SyncResolved);
+        }
+    }
+    else if (childState == State::SyncRejected) {
+        setState(State::SyncRejected);
+    }
+}
+
+void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child) {
+    // TODO: implement this
 }
 
 void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization) {
@@ -119,45 +141,44 @@ void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> synchroniz
                              ResourceSynchronization::State state)
 {
     if (state == ResourceSynchronization::State::Resolved) {
-        std::vector<std::shared_ptr<Asset>> requiredAssets = this->requiredAssets();
-        auto pendingRequiredAsset = std::find_if(
-            requiredAssets.begin(),
-            requiredAssets.end(),
-            [](std::shared_ptr<Asset>& a) {
-                return a->state() == Asset::State::Loaded ||
-                       a->state() == Asset::State::Synchronizing;
-            }
-        );
-
-        if (pendingRequiredAsset != requiredAssets.end()) {
-            // Do not change state if required assets are still synchronizing
-            return;
-        }
-
-        std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
-            this->ownSynchronizations();
-
-        auto unresolvedOwnSynchronization = std::find_if(
-            syncs.begin(),
-            syncs.end(),
-            [](std::shared_ptr<ResourceSynchronization>& s) {
-                return !s->isResolved();
-            }
-        );
-        if (unresolvedOwnSynchronization == syncs.end()) {
+        if (isSyncResolveReady()) {
             setState(State::SyncResolved);
         }
     } else if (state == ResourceSynchronization::State::Rejected) {
         setState(State::SyncRejected);
     }
+}
 
-    // Notify parents
-    std::vector<std::shared_ptr<Asset>> requiringAssets = this->requiringAssets();
-    for (auto& a : requiringAssets) {
-        if (a->state() == Asset::State::Synchronizing) {
-            a->syncStateChanged(synchronization, state);
+bool Asset::isSyncResolveReady() {
+    std::vector<std::shared_ptr<Asset>> requiredAssets = this->requiredAssets();
+
+    auto pendingRequiredAsset = std::find_if(
+        requiredAssets.begin(),
+        requiredAssets.end(),
+        [](std::shared_ptr<Asset>& a) {
+            return a->state() == Asset::State::Loaded ||
+                a->state() == Asset::State::Synchronizing;
         }
+    );
+
+    if (pendingRequiredAsset != requiredAssets.end()) {
+        // Not considered resolved if all children are not resolved
+        return false;
     }
+
+    std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
+        this->ownSynchronizations();
+
+    auto unresolvedOwnSynchronization = std::find_if(
+        syncs.begin(),
+        syncs.end(),
+        [](std::shared_ptr<ResourceSynchronization>& s) {
+            return !s->isResolved();
+        }
+    );
+
+    // To be considered resolved, all own synchronizations need to be resolved
+    return unresolvedOwnSynchronization == syncs.end();
 }
 
 std::vector<std::shared_ptr<ResourceSynchronization>> Asset::ownSynchronizations() const {
@@ -451,7 +472,8 @@ void Asset::require(std::shared_ptr<Asset> child) {
         return;
     }
     _requiredAssets.push_back(child);
-    child->_requiringAssets.push_back(shared_from_this());
+
+    child->addRequiringAsset(shared_from_this());
 }
 
 void Asset::request(std::shared_ptr<Asset> child) {
@@ -464,9 +486,67 @@ void Asset::request(std::shared_ptr<Asset> child) {
         return;
     }
     _requestedAssets.push_back(child);
-    child->_requestingAssets.push_back(shared_from_this());
     
-    // TODO: update real state!
+    child->addRequestingAsset(shared_from_this());
+}
+
+void Asset::addRequiringAsset(std::shared_ptr<Asset> parent) {
+    _requiringAssets.push_back(parent);
+}
+
+void Asset::addRequestingAsset(std::shared_ptr<Asset> parent) {
+    _requestingAssets.push_back(parent);
+
+    State parentState = parent->state();
+    State childState = state();
+
+    if (parentState == State::Synchronizing ||
+        parentState == State::SyncResolved ||
+        parentState == State::Initialized)
+    {
+        if (childState != State::Synchronizing ||
+            childState != State::SyncResolved ||
+            childState != State::Initialized)
+        {
+            startSynchronizations();
+        }
+    }
+
+    if (parentState == State::Initialized && childState == State::SyncResolved) {
+        initialize();
+    }
+}
+
+void Asset::removeRequiringAsset(std::shared_ptr<Asset> parent) {
+    auto parentIt = std::find_if(
+        _requiringAssets.begin(),
+        _requiringAssets.end(),
+        [this](std::weak_ptr<Asset> a) {
+            return a.lock().get() == this;
+        }
+    );
+
+    if (parentIt == _requiringAssets.end()) {
+        return;
+    }
+
+    _requiringAssets.erase(parentIt);
+}
+
+void Asset::removeRequestingAsset(std::shared_ptr<Asset> parent) {
+    auto parentIt = std::find_if(
+        _requestingAssets.begin(),
+        _requestingAssets.end(),
+        [this](std::weak_ptr<Asset> a) {
+            return a.lock().get() == this;
+        }
+    );
+
+    if (parentIt == _requestingAssets.end()) {
+        return;
+    }
+
+    _requestingAssets.erase(parentIt);
 }
 
 void Asset::unrequest(std::shared_ptr<Asset> child) {
@@ -475,23 +555,14 @@ void Asset::unrequest(std::shared_ptr<Asset> child) {
         _requestedAssets.end(),
         child);
 
-    auto parentIt = std::find_if(
-        child->_requestingAssets.begin(),
-        child->_requestingAssets.end(),
-        [this](std::weak_ptr<Asset> a) {
-            return a.lock().get() == this;
-        }
-    );
-
-    if (childIt == _requestedAssets.end() || 
-        parentIt == child->_requestingAssets.end())
-    {
+    if (childIt == _requestedAssets.end()) {
         // Do nothing if the request node not exist.
         return;
     }
-    
+  
     _requestedAssets.erase(childIt);
-    child->_requestingAssets.erase(parentIt);
+    
+    child->removeRequestingAsset(shared_from_this());
 
     // TODO: update real state!
 }

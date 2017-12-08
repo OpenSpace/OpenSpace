@@ -58,10 +58,7 @@ int exportAsset(lua_State* state);
 } // namespace assetloader
 
 class AssetLoader {
-public:
-    using CallbackHandle = size_t;
-    using AssetLoadCallback = std::function<void(std::shared_ptr<Asset>)>;
-    
+public:  
     /**
      * Constructor
      */
@@ -131,9 +128,6 @@ public:
     std::string generateAssetPath(const std::string& baseDirectory,
                                   const std::string& path) const;
     
-    CallbackHandle addAssetLoadCallback(AssetLoadCallback);
-    void removeAssetLoadCallback(CallbackHandle cbh);
-
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
     std::shared_ptr<Asset> request(const std::string& path);
@@ -186,10 +180,6 @@ private:
         _onDependencyDeinitializationFunctionRefs;
 
     int _assetsTableRef;
-    
-    std::unordered_map<CallbackHandle, AssetLoadCallback> _assetLoadCallbacks;
-    CallbackHandle _nextCallbackId;
-
 };
 
 

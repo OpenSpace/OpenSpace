@@ -42,13 +42,13 @@ AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader)
 {}
 
 void AssetManager::initialize() {
-    _addAssetCallbackHandle = _assetLoader->addAssetLoadCallback(
+    /*_addAssetCallbackHandle = _assetLoader->addAssetLoadCallback(
         [this] (std::shared_ptr<Asset> a) {
             a->addStateChangeCallback([a, this] (Asset::State state) {
                 assetStateChanged(a, state);
             });
         }
-     );
+     );*/
     std::shared_ptr<Asset> rootAsset = _assetLoader->rootAsset();
     rootAsset->addStateChangeCallback([&rootAsset, this] (Asset::State state) {
         assetStateChanged(rootAsset, state);
@@ -58,7 +58,7 @@ void AssetManager::initialize() {
 
 void AssetManager::deinitialize() {
     _assetLoader->rootAsset()->deinitialize();
-    _assetLoader->removeAssetLoadCallback(_addAssetCallbackHandle);
+    //_assetLoader->removeAssetLoadCallback(_addAssetCallbackHandle);
 }
 
 bool AssetManager::update() {

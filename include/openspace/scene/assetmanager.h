@@ -76,7 +76,6 @@ private:
     std::vector<std::shared_ptr<Asset>> _pendingInitializations;
 
     std::unique_ptr<AssetLoader> _assetLoader;
-    AssetLoader::CallbackHandle _addAssetCallbackHandle;
 };
 
 } // namespace openspace

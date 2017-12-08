@@ -103,10 +103,6 @@ std::shared_ptr<Asset> AssetLoader::loadAsset(std::string path) {
     ghoul::lua::runScriptFile(*_luaState, path);
     _loadedAssets.emplace(asset->id(), asset);
     
-    for (const auto& cb : _assetLoadCallbacks) {
-        cb.second(asset);
-    }
-
     asset->setState(Asset::State::Loaded);
     
     return asset;
@@ -125,19 +121,6 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         "." +
         AssetFileSuffix);
 }
-
-AssetLoader::CallbackHandle
-    AssetLoader::addAssetLoadCallback(AssetLoader::AssetLoadCallback cb)
-{
-    CallbackHandle handle = _nextCallbackId;
-    _assetLoadCallbacks.emplace(handle, cb);
-    return handle;
-}
-
-void AssetLoader::removeAssetLoadCallback(AssetLoader::CallbackHandle handle) {
-    _assetLoadCallbacks.erase(handle);
-}
-    
     
 std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
     ghoul::filesystem::Directory directory = currentDirectory();

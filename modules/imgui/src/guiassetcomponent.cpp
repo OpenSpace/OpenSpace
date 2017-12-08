@@ -98,6 +98,12 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
 
     std::string assetText = assetPath + " " + assetStateToString(asset->state());
 
+    if (asset->state() == Asset::State::Synchronizing) {
+        assetText += " (" + std::to_string(
+            static_cast<int>(asset->synchronizationProgress() * 100)
+            ) + "%%)";
+    }
+
     std::vector<std::shared_ptr<Asset>> requested = asset->requestedAssets();
     std::vector<std::shared_ptr<Asset>> required = asset->requiredAssets();
 
@@ -106,7 +112,7 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
 
     if (requested.empty() && required.empty() && resourceSyncs.empty()) {
         ImGui::Text(assetText.c_str());
-    } else if (ImGui::TreeNode(assetText.c_str())) {
+    } else if (ImGui::TreeNode(assetPath.c_str(), assetText.c_str())) {
 
         for (const auto& child : required) {
             renderTree(child, assetDirectory);
@@ -125,7 +131,9 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
                 std::string resourceText = sync->directory() +
                     " " + syncStateToString(sync->state());
                 if (sync->state() == ResourceSynchronization::State::Syncing) {
-                    resourceText += " (" + std::to_string(static_cast<int>(sync->progress() * 100)) + "%%)";
+                    resourceText += " (" + std::to_string(
+                        static_cast<int>(sync->progress() * 100)
+                        ) + "%%)";
                 }
                 ImGui::Text(resourceText.c_str());
             }

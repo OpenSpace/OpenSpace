@@ -120,6 +120,16 @@ public:
 
     std::string resolveLocalResource(std::string resourceName);
 private:
+    void requiredAssetChangedState(std::shared_ptr<Asset> a);
+    void requestedAssetChangedState(std::shared_ptr<Asset> a);
+
+    void addRequestingAsset(std::shared_ptr<Asset> a);
+    void removeRequestingAsset(std::shared_ptr<Asset> a);
+    void addRequiringAsset(std::shared_ptr<Asset> a);
+    void removeRequiringAsset(std::shared_ptr<Asset> a);
+
+    bool isSyncResolveReady();
+
     std::atomic<State> _state;
     AssetLoader* _loader;
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
