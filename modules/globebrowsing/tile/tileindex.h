@@ -30,12 +30,9 @@
 #include <ghoul/glm.h>
 #include <stdint.h>
 
-namespace ghoul {
-    class Dictionary;
-}
+namespace ghoul { class Dictionary; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct Geodetic2;
 
@@ -48,9 +45,9 @@ enum CardinalDirection {
 
 struct TileIndex {
     using TileHashKey = uint64_t;
-    
+
     int x, y, level;
-    
+
     TileIndex(int x = 0, int y = 0, int level = 0);
     TileIndex(const TileIndex& other);
 
@@ -71,7 +68,7 @@ struct TileIndex {
     }
 
     TileIndex parent() const;
-    
+
     TileIndex& operator--();
     TileIndex operator--(int);
 
@@ -117,7 +114,6 @@ struct TileIndex {
 
 std::ostream& operator<<(std::ostream& os, const TileIndex& ti);
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__

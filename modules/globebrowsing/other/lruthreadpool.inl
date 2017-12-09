@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 template<typename KeyType>
 LRUThreadPoolWorker<KeyType>::LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool)
@@ -50,7 +49,7 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
 
             // get the task from the queue
             task = _pool._queuedTasks.popMRU().second;
-            
+
         }// release lock
 
         // execute the task
@@ -68,11 +67,18 @@ LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
     }
 }
 
+template<typename KeyType>
+LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
+    : LRUThreadPool(toCopy._workers.size(), toCopy._queuedTasks.maximumCacheSize())
+{ }
+
 // the destructor joins all threads
 template<typename KeyType>
 LRUThreadPool<KeyType>::~LRUThreadPool() {
-    // Stop all threads
-    _stop = true;
+    {
+        std::unique_lock<std::mutex> lock(_queueMutex);
+        _stop = true;
+    }
     _condition.notify_all();
 
     // join them
@@ -137,5 +143,4 @@ void LRUThreadPool<KeyType>::clearEnqueuedTasks() {
     } // release lock
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

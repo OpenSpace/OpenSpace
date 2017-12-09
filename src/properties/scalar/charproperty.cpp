@@ -29,56 +29,57 @@
 #include <limits>
 #include <sstream>
 
-using std::numeric_limits;
+namespace {
 
-namespace openspace {
-namespace properties {
-
-#define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
-    [](lua_State* state, bool& success) -> TYPE {                                        \
-        success = (lua_isnumber(state, -1) == 1);                                        \
-        if (success) {                                                                   \
-            return static_cast<TYPE>(lua_tonumber(state, -1));                           \
-        }                                                                                \
-        else {                                                                           \
-            return DEFAULT_VALUE;                                                        \
-        }                                                                                \
+char fromLuaConversion(lua_State* state, bool& success) {
+    success = (lua_isnumber(state, -1) == 1);
+    if (success) {
+        return static_cast<char>(lua_tonumber(state, -1));
     }
-
-#define DEFAULT_TO_LUA_LAMBDA(TYPE)                                                      \
-    [](lua_State* state, TYPE value) -> bool {                                           \
-        lua_pushnumber(state, static_cast<lua_Number>(value));                           \
-        return true;                                                                     \
+    else {
+        return char(0);
     }
+}
 
-#define DEFAULT_FROM_STRING_LAMBDA(TYPE, DEFAULT_VALUE)                                  \
-    [](std::string value, bool& success) -> TYPE {                                       \
-        std::stringstream s(value);                                                      \
-        TYPE v;                                                                          \
-        s >> v;                                                                          \
-        success = !s.fail();                                                             \
-        if (success) {                                                                   \
-            return v;                                                                    \
-        }                                                                                \
-        else {                                                                           \
-            throw ghoul::RuntimeError("Conversion error for string: " + value);          \
-        }                                                                                \
+bool toLuaConversion(lua_State* state, char value) {
+    lua_pushnumber(state, static_cast<lua_Number>(value));
+    return true;
+}
+
+char fromStringConversion(std::string val, bool& success) {
+    std::stringstream s(val);
+    char v;
+    s >> v;
+    success = !s.fail();
+    if (success) {
+        return v;
     }
-
-#define DEFAULT_TO_STRING_LAMBDA(TYPE)                                                   \
-    [](std::string& outValue, TYPE inValue) -> bool {                                    \
-        outValue = std::to_string(inValue);                                              \
-        return true;                                                                     \
+    else {
+        throw ghoul::RuntimeError("Conversion error for string: " + val);
     }
+}
 
-REGISTER_NUMERICALPROPERTY_SOURCE(CharProperty, char, char(0),
-                                  numeric_limits<char>::lowest(),
-                                  numeric_limits<char>::max(), char(1),
-                                  DEFAULT_FROM_LUA_LAMBDA(char, char(0)),
-                                  DEFAULT_TO_LUA_LAMBDA(char),
-                                  DEFAULT_FROM_STRING_LAMBDA(char, char(0)),
-                                  DEFAULT_TO_STRING_LAMBDA(char),
-                                  LUA_TNUMBER);
+bool toStringConversion(std::string& outValue, char inValue) {
+    outValue = std::to_string(inValue);
+    return true;
+}
 
-}  // namespace properties
-} // namespace openspace
+} // namespace
+
+namespace openspace::properties {
+
+REGISTER_NUMERICALPROPERTY_SOURCE(
+    CharProperty,
+    char,
+    char(0),
+    std::numeric_limits<char>::lowest(),
+    std::numeric_limits<char>::max(),
+    char(1),
+    fromLuaConversion,
+    toLuaConversion,
+    fromStringConversion,
+    toStringConversion,
+    LUA_TNUMBER
+)
+
+} // namespace openspace::properties

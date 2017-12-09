@@ -32,10 +32,14 @@
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 #include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 #include <modules/kameleonvolume/tasks/kameleondocumentationtask.h>
+#include <modules/kameleonvolume/tasks/kameleonvolumetorawtask.h>
 
 namespace openspace {
 
-KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule("KameleonVolume") {}
+
+using namespace kameleonvolume;
+
+KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule(Name) {}
 
 void KameleonVolumeModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -46,13 +50,11 @@ void KameleonVolumeModule::internalInitialize() {
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<KameleonMetadataToJsonTask>("KameleonMetadataToJsonTask");
     fTask->registerClass<KameleonDocumentationTask>("KameleonDocumentationTask");
-
-  
+    fTask->registerClass<KameleonVolumeToRawTask>("KameleonVolumeToRawTask");
 }
 
-std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const
-{
-    return std::vector<documentation::Documentation>{KameleonMetadataToJsonTask::documentation()};
+std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const {
+    return { KameleonMetadataToJsonTask::documentation() };
 }
 
 } // namespace openspace

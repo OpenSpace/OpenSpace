@@ -23,48 +23,59 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
+
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-const glm::ivec2 TileTextureInitData::tilePixelStartOffset = glm::ivec2(-2);
-const glm::ivec2 TileTextureInitData::tilePixelSizeDifference = glm::ivec2(4);
+const glm::ivec2 TileTextureInitData::TilePixelStartOffset = glm::ivec2(-2);
+const glm::ivec2 TileTextureInitData::TilePixelSizeDifference = glm::ivec2(4);
 
-TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLuint glType,
-    Format textureFormat, ShouldAllocateDataOnCPU shouldAllocateDataOnCPU)
+TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum glType,
+                                         Format textureFormat, bool padTiles,
+                                         ShouldAllocateDataOnCPU shouldAllocateDataOnCPU)
     : _glType(glType)
     , _ghoulTextureFormat(textureFormat)
     , _shouldAllocateDataOnCPU(shouldAllocateDataOnCPU)
+    , _padTiles(padTiles)
 {
-    _dimensionsWithoutPadding = glm::ivec3(width, height, 1);
-    _dimensionsWithPadding = glm::ivec3(
-        width + tilePixelSizeDifference.x, height + tilePixelSizeDifference.y, 1);
+    _tilePixelStartOffset = padTiles ? TilePixelStartOffset : glm::ivec2(0);
+    _tilePixelSizeDifference = padTiles ? TilePixelSizeDifference : glm::ivec2(0);
+
+    _dimensions = glm::ivec3(width, height, 1);
     _nRasters = tiledatatype::numberOfRasters(_ghoulTextureFormat);
     _bytesPerDatum = tiledatatype::numberOfBytes(glType);
     _bytesPerPixel = _nRasters * _bytesPerDatum;
-    _bytesPerLine = _bytesPerPixel * _dimensionsWithPadding.x;
-    _totalNumBytes = _bytesPerLine * _dimensionsWithPadding.y;
+    _bytesPerLine = _bytesPerPixel * _dimensions.x;
+    _totalNumBytes = _bytesPerLine * _dimensions.y;
     _glTextureFormat = tiledatatype::glTextureFormat(_glType,
         _ghoulTextureFormat);
     calculateHashKey();
-};
+}
 
 TileTextureInitData::TileTextureInitData(const TileTextureInitData& original)
     : TileTextureInitData(
-        original.dimensionsWithoutPadding().x,
-        original.dimensionsWithoutPadding().y,
+        original.dimensions().x,
+        original.dimensions().y,
         original.glType(),
         original.ghoulTextureFormat(),
-        original.shouldAllocateDataOnCPU() ? ShouldAllocateDataOnCPU::Yes : ShouldAllocateDataOnCPU::No)
-{ };
+        original._padTiles,
+        original.shouldAllocateDataOnCPU() ?
+            ShouldAllocateDataOnCPU::Yes :
+            ShouldAllocateDataOnCPU::No
+    )
+{}
 
-glm::ivec3 TileTextureInitData::dimensionsWithPadding() const {
-    return _dimensionsWithPadding;
+glm::ivec3 TileTextureInitData::dimensions() const {
+    return _dimensions;
 }
 
-glm::ivec3 TileTextureInitData::dimensionsWithoutPadding() const {
-    return _dimensionsWithoutPadding;
+glm::ivec2 TileTextureInitData::tilePixelStartOffset() const {
+    return _tilePixelStartOffset;
+}
+
+glm::ivec2 TileTextureInitData::tilePixelSizeDifference() const {
+    return _tilePixelSizeDifference;
 }
 
 size_t TileTextureInitData::nRasters() const {
@@ -87,7 +98,7 @@ size_t TileTextureInitData::totalNumBytes() const {
     return _totalNumBytes;
 }
 
-GLuint TileTextureInitData::glType() const {
+GLenum TileTextureInitData::glType() const {
     return _glType;
 }
 
@@ -95,7 +106,7 @@ TileTextureInitData::Format TileTextureInitData::ghoulTextureFormat() const {
     return _ghoulTextureFormat;
 }
 
-GLint TileTextureInitData::glTextureFormat() const {
+GLenum TileTextureInitData::glTextureFormat() const {
     return _glTextureFormat;
 }
 
@@ -108,21 +119,21 @@ TileTextureInitData::HashKey TileTextureInitData::hashKey() const {
 }
 
 void TileTextureInitData::calculateHashKey() {
-    ghoul_assert(_dimensionsWithoutPadding.x > 0, "Incorrect dimension");
-    ghoul_assert(_dimensionsWithoutPadding.y > 0, "Incorrect dimension");
-    ghoul_assert(_dimensionsWithoutPadding.x <= 1024, "Incorrect dimension");
-    ghoul_assert(_dimensionsWithoutPadding.y <= 1024, "Incorrect dimension");
-    ghoul_assert(_dimensionsWithoutPadding.z == 1, "Incorrect dimension");
+    ghoul_assert(_dimensions.x > 0, "Incorrect dimension");
+    ghoul_assert(_dimensions.y > 0, "Incorrect dimension");
+    ghoul_assert(_dimensions.x <= 1024, "Incorrect dimension");
+    ghoul_assert(_dimensions.y <= 1024, "Incorrect dimension");
+    ghoul_assert(_dimensions.z == 1, "Incorrect dimension");
     unsigned int format = getUniqueIdFromTextureFormat(_ghoulTextureFormat);
     ghoul_assert(format < 256, "Incorrect format");
 
     _hashKey = 0LL;
 
-    _hashKey |= _dimensionsWithoutPadding.x;
-    _hashKey |= _dimensionsWithoutPadding.y << 10;
-    _hashKey |= _glType << (10 + 16);
+    _hashKey |= _dimensions.x;
+    _hashKey |= _dimensions.y << 10;
+    _hashKey |= static_cast<std::underlying_type_t<GLenum>>(_glType) << (10 + 16);
     _hashKey |= format << (10 + 16 + 4);
-};
+}
 
 unsigned int TileTextureInitData::getUniqueIdFromTextureFormat(
     Format textureFormat) const
@@ -144,9 +155,8 @@ unsigned int TileTextureInitData::getUniqueIdFromTextureFormat(
         case Format::DepthComponent:
             return 6;
         default:
-            ghoul_assert(false, "Unknown texture format");
+            throw ghoul::MissingCaseException();
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

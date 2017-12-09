@@ -25,11 +25,10 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/tile/tile.h>
+#include <openspace/util/concurrentjobmanager.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class RawTileDataReader;
 struct RawTile;
@@ -43,11 +42,11 @@ struct TileLoadJob : public Job<RawTile> {
      */
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
         const TileIndex& tileIndex);
-    
+
     /**
      * No data is allocated unless specified so by the TileTextureInitData of
      * rawTileDataReader but it is assumed that pboDataPtr is a mapped pointer to a pixel
-     * buffer object. 
+     * buffer object.
      */
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
         const TileIndex& tileIndex, char* pboDataPtr);
@@ -65,11 +64,11 @@ struct TileLoadJob : public Job<RawTile> {
      */
     void execute() override;
 
-	/**
-	* Marks the job as finised and releases ownership of the data.
-	* Unless the job is marked as finished, the pixel data will be deallocated
-	* when the job is deleted.
-	*/
+    /**
+    * Marks the job as finised and releases ownership of the data.
+    * Unless the job is marked as finished, the pixel data will be deallocated
+    * when the job is deleted.
+    */
     std::shared_ptr<RawTile> product() override;
 
     /**
@@ -85,10 +84,9 @@ protected:
     std::shared_ptr<RawTile> _rawTile;
     TileIndex _chunkIndex;
     char* _pboMappedDataDestination;
-	bool _hasOwnershipOfData;
+    bool _hasOwnershipOfData;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__

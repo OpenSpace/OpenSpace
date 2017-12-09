@@ -1,12 +1,8 @@
-if UseAccurateNewHorizonsKernels then
-    NewHorizonsKernels = {
-        "${SPICE}/nh_kernels/spk/NavSE_plu047_od122.bsp"
-    }
-else
-    NewHorizonsKernels = {
-        "${SPICE}/NewHorizonsKernels/nh_p4p5_revised.bsp"
-    }
-end
+local styx_radius = 0.75E4
+
+NewHorizonsKernels = {
+    "${SPICE}/new_horizons/spk/NavSE_plu047_od122.bsp"
+}
 
 return {
     -- Styx module
@@ -17,20 +13,18 @@ return {
             Type = "RenderablePlanet",
             Frame = "IAU_PLUTO",
             Body = "STYX",
+            Radius = styx_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 0.75E4,
+                Radius = styx_radius,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.jpg",
-            }
+            ColorTexture = "textures/gray.jpg",
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "STYX",
+                Target = "STYX",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -40,6 +34,7 @@ return {
                 DestinationFrame = "ECLIPJ2000"
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     {
         Name = "StyxText",
@@ -58,6 +53,7 @@ return {
                 Position = {1000000, 0, 1000000}
             },
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     },
     -- StyxTrail module
     {   
@@ -67,12 +63,13 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "STYX",
+                Target = "STYX",
                 Observer = "PLUTO BARYCENTER",
             },
             Color = {0.00, 0.62, 1.00},
             Period = 20.16155,
             Resolution = 1000
         },
+        GuiPath = "/Solar System/Dwarf Planets/Pluto"
     }
 }

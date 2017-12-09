@@ -25,9 +25,7 @@
 #include <modules/globebrowsing/cache/texturecontainer.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace openspace::globebrowsing::cache {
 
 TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
     : _initData(initData)
@@ -44,10 +42,9 @@ void TextureContainer::reset() {
         _initData.shouldAllocateDataOnCPU() ?
         ghoul::opengl::Texture::AllocateData::Yes :
         ghoul::opengl::Texture::AllocateData::No;
-    for (size_t i = 0; i < _numTextures; ++i)
-    {
+    for (size_t i = 0; i < _numTextures; ++i) {
         auto tex = std::make_unique<ghoul::opengl::Texture>(
-            _initData.dimensionsWithPadding(),
+            _initData.dimensions(),
             _initData.ghoulTextureFormat(),
             _initData.glTextureFormat(),
             _initData.glType(),
@@ -55,11 +52,11 @@ void TextureContainer::reset() {
             ghoul::opengl::Texture::WrappingMode::ClampToEdge,
             allocate
         );
-        
+
         tex->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
         tex->uploadTexture();
         tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        
+
         _textures.push_back(std::move(tex));
     }
 }
@@ -78,14 +75,14 @@ ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
     return texture;
 }
 
-const openspace::globebrowsing::TileTextureInitData& TextureContainer::tileTextureInitData() const {
+const openspace::globebrowsing::TileTextureInitData&
+TextureContainer::tileTextureInitData() const
+{
     return _initData;
-};
+}
 
 size_t TextureContainer::size() const {
     return _textures.size();
-};
+}
 
-}
-}
-}
+} // namespace openspace::globebrowsing::cache

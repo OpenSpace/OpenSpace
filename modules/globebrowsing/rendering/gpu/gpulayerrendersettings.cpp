@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObject,
                                       const LayerRenderSettings& layerSettings)
@@ -35,23 +34,17 @@ void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObjec
     gpuOpacity.setValue(programObject, layerSettings.opacity.value());
     gpuGamma.setValue(programObject, layerSettings.gamma.value());
     gpuMultiplier.setValue(programObject, layerSettings.multiplier.value());
-
-    if (layerSettings.useValueBlending) {
-        gpuValueBlending.setValue(programObject, layerSettings.valueBlending.value());
-    }
+    gpuOffset.setValue(programObject, layerSettings.offset.value());
 }
 
-void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings, ghoul::opengl::ProgramObject* programObject,
+void GPULayerRenderSettings::bind(const LayerRenderSettings&,
+                                  ghoul::opengl::ProgramObject* programObject,
                                   const std::string& nameBase)
 {
     gpuOpacity.bind(programObject, nameBase + "opacity");
     gpuGamma.bind(programObject, nameBase + "gamma");
     gpuMultiplier.bind(programObject, nameBase + "multiplier");
-    
-    if (layerSettings.useValueBlending) {
-        gpuValueBlending.bind(programObject, nameBase + "valueBlending");
-    }
+    gpuOffset.bind(programObject, nameBase + "offset");
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

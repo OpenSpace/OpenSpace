@@ -29,8 +29,7 @@
 
 #include <map>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Templated class which owns one or many <code>PixelBuffer</code>s. The
@@ -38,8 +37,7 @@ namespace globebrowsing {
  * mapped.
  */
 template <class KeyType>
-class PixelBufferContainer
-{
+class PixelBufferContainer {
 public:
     /**
      * Creates numPixelBuffers pixel buffer objects, each with numBytesPerBuffer bytes
@@ -64,7 +62,7 @@ public:
      * is already mapped or if something else failed.
      */
     void* mapBuffer(KeyType key, PixelBuffer::Access access);
-    
+
     /**
      * Finds a Pixel buffer and maps a range of it if it is available.
      * \param key is the identifier for the pixel buffer which can be used later when
@@ -77,7 +75,7 @@ public:
      * is already mapped or if something else failed.
      */
     void* mapBufferRange(KeyType key, GLintptr offset, GLsizeiptr length,
-        GLbitfield access);
+        BufferAccessMask access);
 
     /**
      * Unmaps all buffers in the PixelBufferContainer.
@@ -94,21 +92,20 @@ public:
     bool unMapBuffer(KeyType key);
 
     /**
-     * \returns the <code>GLuint</code> id of a pixel buffer identified by <code>key</code>
-     * if it currently is mapped.
+     * \returns the <code>GLuint</code> id of a pixel buffer identified by
+     * <code>key</code> if it currently is mapped.
      */
     GLuint idOfMappedBuffer(KeyType key);
 private:
     const globebrowsing::PixelBuffer::Usage _usage;
 
     std::vector<std::unique_ptr<PixelBuffer>> _pixelBuffers;
-    
+
     // Maps from KeyType to index of mapped buffers
     std::map<KeyType, int> _indexMap;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "pixelbuffercontainer.inl"
 

@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___POWERSCALEDSCALAR___H__
 #define __OPENSPACE_CORE___POWERSCALEDSCALAR___H__
 
-// glm includes
 #include <ghoul/glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -66,7 +65,7 @@ public:
     bool operator>(const PowerScaledScalar& other) const;
     bool operator<=(const PowerScaledScalar& other) const;
     bool operator>=(const PowerScaledScalar& other) const;
-    
+
     bool operator==(double other) const;
     bool operator<(double other) const;
     bool operator>(double other) const;
@@ -76,19 +75,18 @@ public:
     // glm integration
     PowerScaledScalar& operator=(const glm::vec2& rhs);
     PowerScaledScalar& operator=(float rhs);
-    
+
     friend std::ostream& operator<<(std::ostream& os, const PowerScaledScalar& rhs);
-    
+
     // allow the power scaled coordinates to access private members
     friend class PowerScaledCoordinate;
+
 private:
     // float vector used when returning float values
     glm::vec2 _data;
-
 };
 
 typedef PowerScaledScalar pss;
-
 
 } // namespace openspace
 

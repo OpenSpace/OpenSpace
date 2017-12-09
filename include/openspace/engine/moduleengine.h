@@ -33,13 +33,7 @@
 #include <ghoul/misc/assert.h>
 #include <algorithm>
 
-namespace ghoul {
-namespace systemcapabilities {
-
-struct Version;
-
-} // namespace systemcapabilities
-} // namespace ghoul
+namespace ghoul::systemcapabilities { struct Version; }
 
 namespace openspace {
 
@@ -63,7 +57,7 @@ public:
      * name
     */
     void initialize();
-    
+
     /**
      * Deinitializes all of the contained OpenSpaceModule%s by calling the
      * OpenSpaceModule::deinitialize methods.
@@ -74,19 +68,19 @@ public:
      * Registers the passed \p module with this ModuleEngine. The OpenSpaceModule::create
      * method will be called on the \p module in the process.
      * \param module The OpenSpaceModule that is to be registered
-     * \throw ghoul::RuntimeError If the name of the \p module was already registered 
+     * \throw ghoul::RuntimeError If the name of the \p module was already registered
      * previously
      * \pre \p module must not be nullptr
      */
     void registerModule(std::unique_ptr<OpenSpaceModule> module);
-    
+
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with
      * this ModuleEngine. All returned OpenSpaceModule%s are guaranteed to be initialized.
      * \return A list of all registered OpenSpaceModule%s
      */
     std::vector<OpenSpaceModule*> modules() const;
-    
+
     /**
      * Get the module subclass with given template argument. Requires the module subclass
      * to have the public static member variable <code>name</code> which must be equal to
@@ -96,8 +90,8 @@ public:
     template <class ModuleSubClass>
     ModuleSubClass* module() const {
         auto it = std::find_if(_modules.begin(), _modules.end(),
-            [](const std::unique_ptr<OpenSpaceModule>& module) {
-                return module->name() == ModuleSubClass::name;
+            [](const std::unique_ptr<OpenSpaceModule>& m) {
+                return m->name() == ModuleSubClass::Name;
             });
         if (it != _modules.end()) {
             return dynamic_cast<ModuleSubClass*>(it->get());

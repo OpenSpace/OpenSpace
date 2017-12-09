@@ -36,7 +36,7 @@ namespace openspace {
 /**
  * This singleton class represents the current simulation time in OpenSpace. It
  * internally stores the time and provides methods to set the time directly
- * (setTime(double), setTime(std::string)) using a <code>double</code> value using the 
+ * (setTime(double), setTime(std::string)) using a <code>double</code> value using the
  * number of seconds passed since the J2000 epoch or a <code>string</code> that denotes
  * a valid date string in accordance to the Spice library
  * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html). The time can
@@ -47,14 +47,13 @@ namespace openspace {
  * the number of seconds that pass for each real-time second. This value is set with
  * setDeltaTime(double), retrieved with deltaTime() and solely used in the
  * advanceTime(double), which takes a <code>tickTime</code> parameter. The value of the
- * parameter is dependent on the usage of the class and must be equal to the real-world 
+ * parameter is dependent on the usage of the class and must be equal to the real-world
  * time that has passed since the last call to the method. For example, if the
  * advanceTime(double) method is called each frame, the <code>tickTime</code> has to be
  * equal to the frame time.
  *
- * The synchronization of the simulation time requires 
+ * The synchronization of the simulation time requires
  */
-
 class Time {
 public:
     /**
@@ -67,7 +66,7 @@ public:
      * \pre \p timeString must not be empty
      */
     static double convertTime(const std::string& time);
-    
+
     Time(double secondsJ2000 = -1);
     Time(const Time& other);
 
@@ -88,7 +87,6 @@ public:
 
     static Time now();
 
-    
     /**
      * Sets the current time to the specified value in seconds past the J2000 epoch. This
      * value can be negative to represent dates before the epoch.
@@ -129,7 +127,7 @@ public:
     * \return The current time as a ISO 8601 formatted string
     */
     std::string ISO8601() const;
-    
+
     /**
      * Sets the delta time value that is the number of seconds that should pass for each
      * real-time second. This value is used in the advanceTime(double) method to easily
@@ -146,7 +144,7 @@ public:
     double deltaTime() const;
 
     /**
-     * Sets the pause function, i.e. setting the deltaTime to 0 (<code>pause</code> = 
+     * Sets the pause function, i.e. setting the deltaTime to 0 (<code>pause</code> =
      * <code>true</code>) and restoring it when the function is called with a parameter of
      * <code>false</code>.
      * \param pause If <code>true</code>, the simulation time stops;
@@ -178,7 +176,7 @@ public:
     bool timeJumped() const;
 
     void setTimeJumped(bool jumped);
-    
+
     bool paused() const;
 
     /**
@@ -198,7 +196,7 @@ private:
     double _time;
     double _dt;
     bool _timeJumped;
-    bool _timePaused = false;    
+    bool _timePaused = false;
 };
 
 } // namespace openspace

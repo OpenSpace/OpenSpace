@@ -32,32 +32,33 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 struct TimeRange {
-
     /**
     * Default constructor initializes an empty time range.
     */
     TimeRange();
 
     /**
-    * Initializes a TimeRange with both start and end time. Initializing empty timeranges 
+    * Initializes a TimeRange with both start and end time. Initializing empty timeranges
     * is OK.
     */
     TimeRange(double startTime, double endTime);
-    
+
     /**
     * Throws exception if unable to parse the provided \class ghoul::Dictionary
     */
     TimeRange(const ghoul::Dictionary& dict);
 
     /**
-    * \returns true if timeRange could be initialized from the dictionary, false otherwise.
+    * \returns true if timeRange could be initialized from the dictionary,
+    *          false otherwise.
     */
-    static bool initializeFromDictionary(const ghoul::Dictionary& dict, TimeRange& timeRange);
+    static bool initializeFromDictionary(const ghoul::Dictionary& dict,
+        TimeRange& timeRange);
 
     void include(double val);
 
     void include(const TimeRange& other);
-    
+
     double duration() const;
 
     bool isDefined() const;

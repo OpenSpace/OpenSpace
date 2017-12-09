@@ -36,12 +36,10 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul {
-namespace opengl {
+namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} // namespace opengl
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -62,7 +60,7 @@ class Translation;
  *
  * Trails can be rendered either as lines, as points, or a combination of both with
  * varying colors, line thicknesses, or fading settings. If trails are rendered as points,
- * the RenderInformation's \c stride parameter determines the number of points between 
+ * the RenderInformation's \c stride parameter determines the number of points between
  * larger points. A potential use case for this is showing the passage of time along a
  * trail by using a point separation of one hour and a subsampling of 4, you would get a
  * point every 15 minutes with every hourly point being bigger.
@@ -75,8 +73,8 @@ class RenderableTrail : public Renderable {
 public:
     ~RenderableTrail() = default;
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
@@ -86,14 +84,14 @@ public:
      * \c _floatingRenderInformation using the provided \p data
      * \param data The data that is necessary to render this Renderable
      */
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
 protected:
     explicit RenderableTrail(const ghoul::Dictionary& dictionary);
 
     /// Returns the documentation entries that the con
     static documentation::Documentation Documentation();
-   
+
     /// The layout of the VBOs
     struct TrailVBOLayout {
         float x, y, z;
@@ -111,7 +109,7 @@ protected:
     std::unique_ptr<Translation> _translation;
 
     /// The RenderInformation contains information filled in by the concrete subclasses to
-    /// be used by this class. 
+    /// be used by this class.
     struct RenderInformation {
         enum class VertexSorting {
             NewestFirst = 0,    ///< Newer vertices have a lower index than older ones
@@ -119,13 +117,13 @@ protected:
             NoSorting           ///< No ordering in the vertices; no fading applied
         };
         /// The first element in the vertex buffer to be rendered
-        GLint first = 0; 
+        GLint first = 0;
         /// The number of values to be rendered
         GLsizei count = 0;
         /// The stride between 'major' points in the array
         int stride = 1;
         /// Sorting of the vertices; required for correct fading
-        VertexSorting sorting = VertexSorting::NoSorting; 
+        VertexSorting sorting = VertexSorting::NoSorting;
 
         /// Local model matrix transformation, used for rendering in camera space
         glm::dmat4 _localTransform = glm::dmat4(1.0);
@@ -158,7 +156,7 @@ private:
     /// The option determining which rendering method to use
     properties::OptionProperty _renderingModes;
 
-    /// Program object used to render the data stored in RenderInformation 
+    /// Program object used to render the data stored in RenderInformation
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 };
 

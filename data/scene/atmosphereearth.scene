@@ -19,14 +19,16 @@ function postInitialization()
     created and initialized, but before the first render call. This is the place to set
     graphical settings for the renderables.
     ]]--
-    openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
-    openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+    openspace.set_default_gui_sorting()
 
-    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
-    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+    openspace.printInfo("Setting default values")
+    openspace.setPropertyValue("Sun.renderable.Enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", true)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    openspace.setPropertyValue("Constellation Bounds.renderable.Enabled", false)
+
+    openspace.setPropertyValue("MilkyWay.renderable.Transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.Segments", 50)
 
     openspace.printInfo("Done setting default values")
 
@@ -41,14 +43,15 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {1, 0, 0, 2},
+        Position = {1, 0, 0},
+        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
     Modules = {
         "sun",
         "earth",
-        "stars",
-        --"stars-denver",
-        "milkyway",
-        -- "milkyway-eso",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
     }
 }

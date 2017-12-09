@@ -49,8 +49,7 @@
 
 #include <math.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 const TileIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX = TileIndex(0, 0, 1);
 const TileIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = TileIndex(1, 0, 1);
@@ -58,7 +57,8 @@ const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
 
 ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
                                  std::shared_ptr<LayerManager> layerManager)
-    : minSplitDepth(2)
+    : Renderable({ { "Name", owner.name() } })
+    , minSplitDepth(2)
     , maxSplitDepth(22)
     , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
     , _owner(owner)
@@ -80,7 +80,7 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
         AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
     );
 
-    _chunkEvaluatorByAvailableTiles = 
+    _chunkEvaluatorByAvailableTiles =
         std::make_unique<chunklevelevaluator::AvailableTileData>();
     _chunkEvaluatorByProjectedArea =
     std::make_unique<chunklevelevaluator::ProjectedArea>();
@@ -93,14 +93,6 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
 // The destructor is defined here to make it feasiable to use a unique_ptr
 // with a forward declaration
 ChunkedLodGlobe::~ChunkedLodGlobe() {}
-    
-bool ChunkedLodGlobe::initialize() {
-    return true;
-}
-
-bool ChunkedLodGlobe::deinitialize() {
-    return true;
-}
 
 bool ChunkedLodGlobe::isReady() const {
     return true;
@@ -141,25 +133,26 @@ int ChunkedLodGlobe::getDesiredLevel(
         desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
     }
 
-    int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
+    int levelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
         chunk, renderData
     );
-    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
-        _owner.debugProperties().limitLevelByAvailableData) {
-        desiredLevel = glm::min(desiredLevel, desiredLevelByAvailableData);
+    if (levelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
+        _owner.debugProperties().limitLevelByAvailableData)
+    {
+        desiredLevel = glm::min(desiredLevel, levelByAvailableData);
     }
 
     desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
     return desiredLevel;
 }
-    
+
 float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     float height = 0;
-        
+
     // Get the uv coordinates to sample from
     Geodetic2 geodeticPosition = _owner.ellipsoid().cartesianToGeodetic2(position);
     int chunkLevel = findChunkNode(geodeticPosition).getChunk().tileIndex().level;
-        
+
     TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
     GeodeticPatch patch = GeodeticPatch(tileIndex);
 
@@ -174,10 +167,13 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
 
     // Get the tile providers for the height maps
     const std::vector<std::shared_ptr<Layer>>& heightMapLayers =
-        _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers();
-        
+        _layerManager->layerGroup(layergroupid::GroupID::HeightLayers).activeLayers();
+
     for (const std::shared_ptr<Layer>& layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();
+        if (!tileProvider) {
+            continue;
+        }
         // Transform the uv coordinates to the current tile texture
         ChunkTile chunkTile = tileProvider->getChunkTile(tileIndex);
         const Tile& tile = chunkTile.tile;
@@ -187,11 +183,12 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             return 0;
         }
 
-		ghoul::opengl::Texture* tileTexture = tile.texture();
-		if (!tileTexture)
-			return 0;
+        ghoul::opengl::Texture* tileTexture = tile.texture();
+        if (!tileTexture) {
+            return 0;
+        }
 
-        glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
+        glm::vec2 transformedUv = layer->TileUvToTextureSamplePosition(
             uvTransform,
             patchUV,
             glm::uvec2(tileTexture->dimensions())
@@ -203,7 +200,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         // in range [0,1] and uses the set interpolation method and clamping.
 
         glm::uvec3 dimensions = tileTexture->dimensions();
-            
+
         glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
         samplePos00 = glm::clamp(
@@ -243,22 +240,28 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             sample01 == tileProvider->noDataValueAsFloat() ||
             sample10 == tileProvider->noDataValueAsFloat() ||
             sample11 == tileProvider->noDataValueAsFloat();
-        
+
         if (anySampleIsNaN || anySampleIsNoData) {
             continue;
         }
 
-        float sample0 = sample00 * (1.0 - samplePosFract.x) + sample10 * samplePosFract.x;
-        float sample1 = sample01 * (1.0 - samplePosFract.x) + sample11 * samplePosFract.x;
+        float sample0 = sample00 * (1.f - samplePosFract.x) + sample10 * samplePosFract.x;
+        float sample1 = sample01 * (1.f - samplePosFract.x) + sample11 * samplePosFract.x;
 
-        float sample = sample0 * (1.0 - samplePosFract.y) + sample1 * samplePosFract.y;
+        float sample = sample0 * (1.f - samplePosFract.y) + sample1 * samplePosFract.y;
 
-        // Perform depth transform to get the value in meters
-        height = depthTransform.depthOffset + depthTransform.depthScale * sample;
-        // Make sure that the height value follows the layer settings.
-        // For example if the multiplier is set to a value bigger than one,
-        // the sampled height should be modified as well.
-        height = layer->renderSettings().performLayerSettings(height);
+        // Same as is used in the shader. This is not a perfect solution but
+        // if the sample is actually a no-data-value (min_float) the interpolated
+        // value might not be. Therefore we have a cut-off. Assuming no data value
+        // is smaller than -100000
+        if (sample > -100000) {
+            // Perform depth transform to get the value in meters
+            height = depthTransform.depthOffset + depthTransform.depthScale * sample;
+            // Make sure that the height value follows the layer settings.
+            // For example if the multiplier is set to a value bigger than one,
+            // the sampled height should be modified as well.
+            height = layer->renderSettings().performLayerSettings(height);
+        }
     }
     // Return the result
     return height;
@@ -268,13 +271,18 @@ void ChunkedLodGlobe::notifyShaderRecompilation() {
     _shadersNeedRecompilation = true;
 }
 
-void ChunkedLodGlobe::render(const RenderData& data) {
+void ChunkedLodGlobe::recompileShaders() {
+    _renderer->recompileShaders(_owner);
+    _shadersNeedRecompilation = false;
+}
+
+void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     stats.startNewRecord();
     if (_shadersNeedRecompilation) {
         _renderer->recompileShaders(_owner);
         _shadersNeedRecompilation = false;
     }
-        
+
     auto duration = std::chrono::system_clock::now().time_since_epoch();
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     stats.i["time"] = millis;
@@ -284,7 +292,8 @@ void ChunkedLodGlobe::render(const RenderData& data) {
 
     // Calculate the MVP matrix
     glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) * viewTransform;
+    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+                    viewTransform;
     glm::dmat4 mvp = vp * _owner.modelTransform();
 
     // Render function
@@ -303,13 +312,13 @@ void ChunkedLodGlobe::render(const RenderData& data) {
 
     _leftRoot->breadthFirst(renderJob);
     _rightRoot->breadthFirst(renderJob);
-        
+
     //_leftRoot->reverseBreadthFirst(renderJob);
     //_rightRoot->reverseBreadthFirst(renderJob);
 
     auto duration2 = std::chrono::system_clock::now().time_since_epoch();
-    auto millis2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
-    stats.i["chunk globe render time"] = millis2 - millis;
+    auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
+    stats.i["chunk globe render time"] = ms2 - millis;
 }
 
 void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
@@ -320,13 +329,13 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
             chunk.getBoundingPolyhedronCorners();
         std::vector<glm::vec4> clippingSpaceCorners(8);
         AABB3 screenSpaceBounds;
-            
+
         for (size_t i = 0; i < 8; ++i) {
             const glm::vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
             clippingSpaceCorners[i] = clippingSpaceCorner;
 
             glm::vec3 screenSpaceCorner =
-                (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
+                glm::vec3((1.0f / clippingSpaceCorner.w) * clippingSpaceCorner);
             screenSpaceBounds.expand(screenSpaceCorner);
         }
 
@@ -346,8 +355,10 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 }
 
 void ChunkedLodGlobe::update(const UpdateData& data) {
+    setBoundingSphere(static_cast<float>(
+        _owner.ellipsoid().maximumRadius() * data.modelTransform.scale
+    ));
     _renderer->update();
 }
-    
-} // namespace globebrowsing
-} // namespace openspace
+
+} // namespace openspace::globebrowsing

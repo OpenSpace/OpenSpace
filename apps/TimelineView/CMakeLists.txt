@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014-2015                                                               #
+# Copyright (c) 2014-2017                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -21,6 +21,8 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  #
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
+
+include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 
 set(APPLICATION_NAME TimelineView)
 set(APPLICATION_LINK_TO_OPENSPACE OFF)
@@ -48,16 +50,16 @@ find_package(Qt5Network)
 set(MOC_FILES "")
 qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 
-add_executable(${APPLICATION_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${HEADER_FILES} ${MOC_FILES})
+create_new_application(${APPLICATION_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${HEADER_FILES} ${MOC_FILES})
 
 target_link_libraries(${APPLICATION_NAME}
     Qt5::Widgets
     Qt5::Network
 )
 
-if (APPLE)
-INSTALL(CODE "
-   include(BundleUtilities)
-   fixup_bundle(\"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/MacOS/TimelineView\"   \"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
-   " COMPONENT Runtime)
-endif ()
+#if (APPLE)
+#    INSTALL(CODE "
+#       include(BundleUtilities)
+#       fixup_bundle(\"${application_path}/bin/openspace/Debug/Launcher.app/Contents/MacOS/Launcher\"   \"${application_path}/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
+#       " COMPONENT Runtime)
+#endif ()

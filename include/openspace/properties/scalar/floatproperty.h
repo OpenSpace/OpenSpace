@@ -28,11 +28,11 @@
  /**
  * \file floatproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class FloatProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>float</code>.
@@ -42,12 +42,10 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float);
+REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float)
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___FLOATPROPERTY___H__

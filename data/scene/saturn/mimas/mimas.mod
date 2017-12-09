@@ -3,22 +3,23 @@ return {
         Name = "Mimas",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
-            Frame = "IAU_MIMAS",
-            Body = "MIMAS",
-            Geometry = {
-                Type = "SimpleSphere",
-                Radius = 0.28E3,
-                Segments = 50
-            },
-            Textures = {
-                Color = "textures/mimas.jpg"
+            Type = "RenderableGlobe",
+            Radii = 198000,
+            SegmentsPerPatch = 64,
+            Layers = {
+                ColorLayers = {
+                    {
+                        Name = "Mimas Texture",
+                        FilePath = "textures/mimas.jpg",
+                        Enabled = true
+                    }
+                }
             }
         },
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MIMAS",
+                Target = "MIMAS",
                 Observer = "SATURN BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/sat375.bsp"
             },
@@ -27,7 +28,8 @@ return {
                 SourceFrame = "IAU_MIMAS",
                 DestinationFrame = "GALACTIC"
             }
-        }
+        },
+        GuiPath = "/Solar System/Planets/Saturn/Moons"
     },
     {
         Name = "MimasTrail",
@@ -36,12 +38,13 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MIMAS",
+                Target = "MIMAS",
                 Observer = "SATURN BARYCENTER",
             },
             Color = { 0.5, 0.3, 0.3 },
             Period = 23 / 24,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Saturn/Moons"
     }
 }

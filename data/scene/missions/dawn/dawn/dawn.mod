@@ -11,10 +11,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/mainbodydawn.obj",
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             Rotation = {
                 Source = "DAWN_SPACECRAFT",
                 Destination = "GALACTIC"
@@ -22,6 +19,7 @@ return {
             StartTime = "2007 SEP 27 08:15:00",
             EndTime = "2012 SEP 12 23:57:00"
         },
+        GuiPath = "/Solar System/Missions/Dawn",
         Ephemeris = {
             Type = "Spice",
             Body = "DAWN",
@@ -634,15 +632,13 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/solarpanelleft.obj",
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             Rotation = {
                 Source = "DAWN_SA-Y",
                 Destination = "GALACTIC"
             },
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
 
      -- Dawn Solar Array module 2
@@ -657,10 +653,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/dawn/obj/solarpanelright.obj",
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             Rotation = {
                 Source = "DAWN_SA+Y",
                 Destination = "GALACTIC"
@@ -669,6 +662,7 @@ return {
             StartTime = "2007 SEP 27 08:15:00",
             EndTime = "2012 SEP 12 12:00:00"
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
 
         -- Dawn Trail Module
@@ -703,7 +697,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "DAWN",
+                Target = "DAWN",
                 Observer = "SUN",
             },
             Color = { 0.7, 0.4, 0.9 },
@@ -711,6 +705,7 @@ return {
             EndTime = "2012 SEP 12 12:00:00",
             SampleInterval = 3600 * 24
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
  --
 --          -- Dawn Trail Module
@@ -762,6 +757,7 @@ return {
                 "CERES"
             }
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
 
      -- DawnFov 1
@@ -788,5 +784,6 @@ return {
                 "CERES"
             }
         },
+        GuiPath = "/Solar System/Missions/Dawn"
     },
 }

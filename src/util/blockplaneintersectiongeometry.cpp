@@ -36,7 +36,6 @@ namespace {
 
 namespace openspace {
 
-
 BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(
         glm::vec3 blockSize,
         glm::vec3 planeNormal,
@@ -44,13 +43,13 @@ BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(
     : _initialized(false)
     , _vaoId(0)
     , _vBufferId(0)
-    , _size(blockSize) {}
+    , _size(blockSize)
+{}
 
 BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
     glDeleteBuffers(1, &_vBufferId);
     glDeleteVertexArrays(1, &_vaoId);
 }
-
 
 void BlockPlaneIntersectionGeometry::setBlockSize(glm::vec3 size) {
     _size = size;
@@ -105,7 +104,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     if (nIntersections <3) return; // Gotta love intersections
 
     // Construct vectors vectors (vectors1 .. vectorsN) between the N points
-    
+
     std::vector< std::pair<int, float> > angles(nIntersections-1);
 
     glm::vec3 vector1 = glm::normalize(intersections[1] - intersections[0]);
@@ -148,7 +147,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
 
     glBindVertexArray(0);
 }
-    
+
 bool BlockPlaneIntersectionGeometry::initialize() {
     if (_vaoId == 0)
         glGenVertexArrays(1, &_vaoId);
@@ -173,5 +172,4 @@ void BlockPlaneIntersectionGeometry::render() {
     //glEnable(GL_CULL_FACE);
 }
 
-}
-    
+} // namespace openspace

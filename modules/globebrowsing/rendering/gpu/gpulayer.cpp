@@ -26,27 +26,81 @@
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                         const TileIndex& tileIndex, int pileSize)
 {
-    ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
-    gpuChunkTilePile.setValue(programObject, chunkTilePile);
     gpuRenderSettings.setValue(programObject, layer.renderSettings());
+    gpuLayerAdjustment.setValue(programObject, layer.layerAdjustment());
+
+    switch (layer.type()) {
+        // Intentional fall through. Same for all tile layers
+        case layergroupid::TypeID::DefaultTileLayer:
+        case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::SizeReferenceTileLayer:
+        case layergroupid::TypeID::TemporalTileLayer:
+        case layergroupid::TypeID::TileIndexTileLayer:
+        case layergroupid::TypeID::ByIndexTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer: {
+            ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
+            gpuChunkTilePile.setValue(programObject, chunkTilePile);
+            paddingStartOffset.setValue(programObject, layer.tilePixelStartOffset());
+            paddingSizeDifference.setValue(
+                programObject,
+                layer.tilePixelSizeDifference()
+            );
+            break;
+        }
+        case layergroupid::TypeID::SolidColor:
+            gpuColor.setValue(programObject, layer.otherTypesProperties().color.value());
+            break;
+        default:
+            break;
+    }
 }
 
 void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                     const std::string& nameBase, int pileSize)
 {
-    gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
-    gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
+    gpuRenderSettings.bind(
+        layer.renderSettings(),
+        programObject,
+        nameBase + "settings."
+    );
+    gpuLayerAdjustment.bind(
+        layer.layerAdjustment(),
+        programObject,
+        nameBase + "adjustment."
+    );
+
+    switch (layer.type()) {
+        // Intentional fall through. Same for all tile layers
+        case layergroupid::TypeID::DefaultTileLayer:
+        case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::SizeReferenceTileLayer:
+        case layergroupid::TypeID::TemporalTileLayer:
+        case layergroupid::TypeID::TileIndexTileLayer:
+        case layergroupid::TypeID::ByIndexTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer: {
+            gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
+            paddingStartOffset.bind(programObject, nameBase + "padding.startOffset");
+            paddingSizeDifference.bind(
+                programObject,
+                nameBase + "padding.sizeDifference"
+            );
+            break;
+        }
+        case layergroupid::TypeID::SolidColor:
+            gpuColor.bind(programObject, nameBase + "color");
+            break;
+        default:
+            break;
+    }
 }
 
 void GPULayer::deactivate() {
     gpuChunkTilePile.deactivate();
 }
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

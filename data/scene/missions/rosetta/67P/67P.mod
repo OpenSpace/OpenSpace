@@ -6,12 +6,13 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHURYUMOV-GERASIMENKO",
+                Target = "CHURYUMOV-GERASIMENKO",
                 Observer = "SUN",
             },
         },
+        GuiPath = "/Solar System/Comets/67P Churymov-Gerasimenko"
     },
-    {   
+    {
         Name = "67P",
         Parent = "67PBarycenter", 
 
@@ -22,10 +23,7 @@ return {
                 GeometryFile = "obj/67P_rotated_5_130.obj",
                 Magnification = 0,
             }, 
-            Textures = {
-                Color = "textures/gray.jpg",
-                -- Color = "textures/may9_map.jpg",
-            },
+            ColorTexture = "textures/gray.jpg",
             Projection = {
                 Sequence   = "rosettaimages",
                 SequenceType = "image-sequence",
@@ -81,6 +79,7 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
+        GuiPath = "/Solar System/Comets/67P Churymov-Gerasimenko"
     },
     -- -- 67P Trail Module
     {   
@@ -90,7 +89,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "CHURYUMOV-GERASIMENKO",
+                Target = "CHURYUMOV-GERASIMENKO",
                 Observer = "SUN",
             },
             Color = { 0.1, 0.9, 0.2 },
@@ -98,6 +97,7 @@ return {
             EndTime = "2017 JAN 01 00:00:00.000",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Comets/67P Churymov-Gerasimenko"
     },
     --[[
     {   

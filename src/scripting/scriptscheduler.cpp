@@ -39,13 +39,11 @@ namespace {
     const char* KeyForwardScript = "ForwardScript";
     const char* KeyBackwardScript = "BackwardScript";
     const char* KeyUniversalScript = "Script";
-}
-
-namespace openspace {
+} // namespace
 
 #include "scriptscheduler_lua.inl"
 
-namespace scripting {
+namespace openspace::scripting {
 
 documentation::Documentation ScriptScheduler::Documentation() {
     using namespace openspace::documentation;
@@ -63,39 +61,39 @@ documentation::Documentation ScriptScheduler::Documentation() {
                     {
                         KeyTime,
                         new TimeVerifier,
+                        Optional::No,
                         "The time at which, when the in game time passes it, the two "
                         "scripts will be executed. If the traversal is forwards (towards "
                         "+ infinity), the ForwardScript will be executed, otherwise the "
-                        "BackwardScript will be executed instead.",
-                        Optional::No
+                        "BackwardScript will be executed instead."
                     },
                     {
                         KeyUniversalScript,
                         new LuaScriptVerifier,
+                        Optional::Yes,
                         "The Lua script that will be executed when the specified time is "
                         "passed independent of its direction. This script will be "
                         "executed before the specific scripts if both versions are "
-                        "specified",
-                        Optional::Yes
+                        "specified"
                     },
                     {
                         KeyForwardScript,
                         new LuaScriptVerifier,
+                        Optional::Yes,
                         "The Lua script that is executed when OpenSpace passes the time "
-                        "in a forward direction.",
-                        Optional::Yes
+                        "in a forward direction."
                     },
                     {
                         KeyBackwardScript,
                         new LuaScriptVerifier,
+                        Optional::Yes,
                         "The Lua script that is executed when OpenSpace passes the time "
-                        "in a backward direction.",
-                        Optional::Yes
+                        "in a backward direction."
                     }
-                })
+                }),
+                Optional::No
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -104,7 +102,7 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dicti
 {
     std::string timeStr = dictionary.value<std::string>(KeyTime);
     time = Time::convertTime(timeStr);
-    
+
     // If a universal script is specified, retrieve it and add a ; as a separator so that
     // it can be added to the other scripts
     std::string universal;
@@ -112,12 +110,12 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dicti
     if (!universal.empty()) {
         universal += ";";
     }
-    
+
     if (dictionary.hasKeyAndValue<std::string>(KeyForwardScript)) {
         forwardScript =
             universal + dictionary.value<std::string>(KeyForwardScript);
     }
-    
+
     if (dictionary.hasKeyAndValue<std::string>(KeyBackwardScript)) {
         backwardScript =
             universal + dictionary.value<std::string>(KeyBackwardScript);
@@ -131,7 +129,7 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
         dictionary,
         "ScriptScheduler"
     );
-    
+
     // Create all the scheduled script first
     std::vector<ScheduledScript> scheduledScripts;
     for (size_t i = 1; i <= dictionary.size(); ++i) {
@@ -150,7 +148,7 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
             return lhs.time < rhs.time;
         }
     );
-    
+
     // Move the scheduled scripts into their SOA alignment
     // For the forward scripts, this is the forwards direction
     // For the backward scripts, we insert them in the opposite order so that we can still
@@ -170,7 +168,7 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
     double lastTime = _currentTime;
     rewind();
     progressTo(lastTime);
-    
+
     ghoul_assert(
         (_timings.size() == _forwardScripts.size()) &&
         (_timings.size() == _backwardScripts.size()),
@@ -208,14 +206,14 @@ ScriptScheduler::progressTo(double newTime)
             _timings.end(),
             newTime
          );
-        
+
         // How many values did we pass over?
         ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
         _currentIndex = static_cast<int>(prevIndex + n);
-        
+
         // Update the new time
         _currentTime = newTime;
-        
+
         return {
             _forwardScripts.begin() + prevIndex,
             _forwardScripts.begin() + _currentIndex
@@ -230,11 +228,11 @@ ScriptScheduler::progressTo(double newTime)
             _timings.begin() + prevIndex, // We can stop at the previous time
             newTime
         );
-        
+
         // How many values did we pass over?
         ptrdiff_t n = std::distance(it, _timings.begin() + prevIndex);
         _currentIndex = static_cast<int>(prevIndex - n);
-        
+
         // Update the new time
         _currentTime = newTime;
 
@@ -246,23 +244,23 @@ ScriptScheduler::progressTo(double newTime)
 }
 
 double ScriptScheduler::currentTime() const {
-    return _currentTime; 
-};
+    return _currentTime;
+}
 
 std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
     std::vector<ScheduledScript> result;
     for (size_t i = 0; i < _timings.size(); ++i) {
-        ScheduledScript script;        
+        ScheduledScript script;
         script.time = _timings[i];
         script.forwardScript = _forwardScripts[i];
         script.backwardScript = _backwardScripts[i];
-        
+
         result.push_back(std::move(script));
     }
     return result;
-};
+}
 
-LuaLibrary ScriptScheduler::luaLibrary() {    
+LuaLibrary ScriptScheduler::luaLibrary() {
     return {
         "scriptScheduler",
         {
@@ -294,6 +292,4 @@ LuaLibrary ScriptScheduler::luaLibrary() {
     };
 }
 
-} // namespace scripting
-
-} // namespace openspace
+} // namespace openspace::scripting

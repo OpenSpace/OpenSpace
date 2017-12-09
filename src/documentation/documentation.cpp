@@ -27,6 +27,7 @@
 
 #include <ghoul/misc/dictionary.h>
 
+#include <algorithm>
 #include <set>
 
 namespace {
@@ -64,7 +65,7 @@ struct WarningCompare {
 // so we have to include one ourselves
 namespace std {
 std::string to_string(std::string value) {
-    return value; 
+    return value;
 }
 
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason) {
@@ -80,16 +81,16 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
         case openspace::documentation::TestResult::Offense::Reason::WrongType:
             return "Wrong type";
         default:
-            ghoul_assert(false, "Missing case label");
+            throw ghoul::MissingCaseException();
     }
 }
-    
+
 std::string to_string(openspace::documentation::TestResult::Warning::Reason reason) {
     switch (reason) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
             return "Deprecated";
         default:
-            ghoul_assert(false, "Missing case label");
+            throw ghoul::MissingCaseException();
     }
 }
 
@@ -100,12 +101,12 @@ namespace documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
-SpecificationError::SpecificationError(TestResult res, std::string component)
-    : ghoul::RuntimeError("Error in specification", std::move(component))
+SpecificationError::SpecificationError(TestResult res, std::string comp)
+    : ghoul::RuntimeError("Error in specification", std::move(comp))
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
-    
+
     message += " (";
     for (const TestResult::Offense& o : result.offenses) {
         message += o.offender + ',';
@@ -114,7 +115,7 @@ SpecificationError::SpecificationError(TestResult res, std::string component)
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
-                                       std::string doc, Optional opt)
+                                       Optional opt, std::string doc)
     : key(std::move(k))
     , verifier(std::move(v))
     , optional(opt)
@@ -124,26 +125,24 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
     ghoul_assert(verifier, "Verifier must not be nullptr");
 }
 
-DocumentationEntry::DocumentationEntry(std::string key, Verifier* v, std::string doc,
-                                       Optional optional)
-    : DocumentationEntry(std::move(key), std::shared_ptr<Verifier>(v), std::move(doc),
-                         optional)
+DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
+                                       std::string doc)
+    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt,
+                         std::move(doc))
 {}
 
-Documentation::Documentation(std::string n, std::string id, DocumentationEntries entries,
-                             Exhaustive exh)
+Documentation::Documentation(std::string n, std::string i, DocumentationEntries ents)
     : name(std::move(n))
-    , id(std::move(id))
-    , entries(std::move(entries))
-    , exhaustive(std::move(exh))
+    , id(std::move(i))
+    , entries(std::move(ents))
 {}
 
-Documentation::Documentation(std::string n, DocumentationEntries entries, Exhaustive exh)
-    : Documentation(n, "", entries, exh)
+Documentation::Documentation(std::string n, DocumentationEntries ents)
+    : Documentation(n, "", ents)
 {}
 
-Documentation::Documentation(DocumentationEntries entries, Exhaustive exh)
-    : Documentation("", "", entries, exh)
+Documentation::Documentation(DocumentationEntries ents)
+    : Documentation("", "", ents)
 {}
 
 TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dict) {
@@ -180,33 +179,6 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
                 continue;
             }
             applyVerifier(*(p.verifier), p.key);
-        }
-    }
-
-    if (d.exhaustive) {
-        // If the documentation is exhaustive, we have to check if there are extra values
-        // in the table that are not covered by the Documentation
-
-        for (const std::string& key : dict.keys()) {
-            auto it = std::find_if(
-                d.entries.begin(),
-                d.entries.end(),
-                [&key](const DocumentationEntry& entry) {
-                    if (entry.key == DocumentationEntry::Wildcard) {
-                        return true;
-                    }
-                    else {
-                        return entry.key == key;
-                    }
-                }
-            );
-
-            if (it == d.entries.end()) {
-                result.success = false;
-                result.offenses.push_back(
-                    { key, TestResult::Offense::Reason::ExtraKey }
-                );
-            }
         }
     }
 

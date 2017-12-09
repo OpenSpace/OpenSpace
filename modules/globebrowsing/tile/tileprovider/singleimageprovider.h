@@ -27,9 +27,9 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+#include <openspace/properties/stringproperty.h>
+
+namespace openspace::globebrowsing::tileprovider {
 
 class SingleImageProvider : public TileProvider {
 public:
@@ -46,12 +46,11 @@ public:
 
 private:
     std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
-    std::string _imagePath;
     Tile _tile;
+
+    properties::StringProperty _filePath;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___SINGLE_IMAGE_PROVIDER___H__

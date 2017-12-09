@@ -28,11 +28,11 @@
  /**
  * \file intproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class IntProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>int</code>.
@@ -42,12 +42,10 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int);
+REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int)
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___INTPROPERTY___H__

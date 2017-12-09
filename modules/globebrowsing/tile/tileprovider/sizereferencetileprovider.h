@@ -29,10 +29,8 @@
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
-    
+namespace openspace::globebrowsing::tileprovider {
+
 /**
  * Constructed with an ellipsoid and uses that to render the longitudal length of each
  * of each tile.
@@ -42,9 +40,9 @@ public:
     SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
     virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
+        const TileIndex& tileIndex) const override;
 
-    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
+    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const override;
 
 private:
     int roundedLongitudalLength(const TileIndex& tileIndex) const;
@@ -53,8 +51,6 @@ private:
     Tile _backgroundTile;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__

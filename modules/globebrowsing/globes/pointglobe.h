@@ -26,15 +26,13 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/properties/scalarproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-} }
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class RenderableGlobe;
 
@@ -43,21 +41,23 @@ public:
     PointGlobe(const RenderableGlobe& owner);
     virtual ~PointGlobe();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
-    
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+
 private:
     const RenderableGlobe& _owner;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
     GLuint _vertexBufferID;
     GLuint _vaoID;
+
+    properties::FloatProperty _intensityClamp;
+    properties::FloatProperty _lightIntensity;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__

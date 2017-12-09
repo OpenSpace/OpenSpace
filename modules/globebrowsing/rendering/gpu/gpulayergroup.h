@@ -32,12 +32,9 @@
 
 #include <string>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-}}
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct ChunkTile;
 class Layer;
@@ -58,14 +55,14 @@ public:
 
     /**
      * Sets the value of <code>LayerGroup</code> to its corresponding
-     * GPU struct. OBS! Users must ensure bind has been 
+     * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
     virtual void setValue(ghoul::opengl::ProgramObject* programObject,
         const LayerGroup& layerGroup, const TileIndex& tileIndex);
 
-    /** 
-     * Binds this object with GLSL variables with identifiers starting 
+    /**
+     * Binds this object with GLSL variables with identifiers starting
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
@@ -82,7 +79,6 @@ private:
     std::vector<std::unique_ptr<GPULayer>> _gpuActiveLayers;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__

@@ -27,9 +27,9 @@
 
 namespace {
     const char* _loggerCat = "PixelBuffer";
-};
+} // namespace
 
-using namespace openspace::globebrowsing;
+namespace openspace::globebrowsing {
 
 PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
     : _numBytes(numBytes)
@@ -38,7 +38,7 @@ PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
 {
     glGenBuffers(1, &_id);
     bind();
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, 0, static_cast<GLenum>(_usage));
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, nullptr, static_cast<GLenum>(_usage));
     unbind();
 }
 
@@ -52,19 +52,21 @@ void* PixelBuffer::mapBuffer(Access access) {
     return dataPtr;
 }
 
-void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access) {
+void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length,
+                                  BufferAccessMask access)
+{
     void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
     _isMapped = dataPtr ? true : false;
     return dataPtr;
 }
 
 bool PixelBuffer::unMapBuffer() {
-    bool success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    GLboolean success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     if (!success) {
         LERROR("Unable to unmap pixel buffer, data may be corrupt!");
     }
     _isMapped = false;
-    return success;
+    return success == GL_TRUE;
 }
 
 void PixelBuffer::bind() {
@@ -82,3 +84,5 @@ bool PixelBuffer::isMapped() const {
 PixelBuffer::operator GLuint() const {
     return _id;
 }
+
+} // namespace openspace::globebrowsing

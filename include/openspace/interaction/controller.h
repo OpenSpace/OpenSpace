@@ -30,24 +30,22 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/vector_angle.hpp>
 
-namespace openspace {
-namespace interaction {
+namespace openspace::interaction {
 
-class InteractionHandler;
+class NavigationHandler;
 
 class Controller {
 public:
     Controller() :
         _handler(nullptr)
     {}
-    
-    void setHandler(InteractionHandler* handler);
+
+    void setHandler(NavigationHandler* handler);
 
 protected:
-    InteractionHandler* _handler;
+    NavigationHandler* _handler;
 };
 
-} // namespace interaction
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___CONTROLLER___H__

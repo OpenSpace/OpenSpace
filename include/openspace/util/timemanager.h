@@ -42,8 +42,12 @@ public:
     void removeKeyframesBefore(double timestamp);
     void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
+    void setTimeNextFrame(Time t);
     size_t nKeyframes() const;
+
 private:
+    bool _shouldSetTime = false;
+    Time _timeNextFrame;
     Timeline<Time> _timeline;
     SyncData<Time> _currentTime;
     void consumeKeyframes(double dt);

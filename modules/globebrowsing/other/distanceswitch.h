@@ -29,44 +29,43 @@
 #include <vector>
 
 namespace openspace {
+    class Renderable;
+    struct RenderData;
+    struct RendererTasks;
+    struct UpdateData;
+} // namespace openspace
 
-class Renderable;
-struct RenderData;
-struct UpdateData;
-
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
- * Selects a specific Renderable to be used for rendering, based on distance to the 
+ * Selects a specific Renderable to be used for rendering, based on distance to the
  * camera
-*/
+ */
 class DistanceSwitch {
 public:
     ~DistanceSwitch();
 
     bool initialize();
+    bool initializeGL();
     bool deinitialize();
+    bool deinitializeGL();
 
     /**
-     * Picks the first Renderable with the associated maxDistance greater than the 
+     * Picks the first Renderable with the associated maxDistance greater than the
      * current distance to the camera
-    */
-    void render(const RenderData& data);
+     */
+    void render(const RenderData& data, RendererTasks& rendererTask);
     void update(const UpdateData& data);
 
     /**
-     * Adds a new renderable (first argument) which may be rendered only if the distance 
-     * to the camera is less than maxDistance (second argument)
-    */
-    void addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance);
+     * Adds a new renderable
+     */
+    void addSwitchValue(std::shared_ptr<Renderable> renderable);
 
 private:
     std::vector<std::shared_ptr<Renderable>> _renderables;
-    std::vector<double> _maxDistances;
-    double _objectScale;
 };
 
-} // namespace globebrowsing
-} // openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__

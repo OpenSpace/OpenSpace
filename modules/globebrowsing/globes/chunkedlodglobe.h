@@ -33,16 +33,11 @@
 
 #include <memory>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-namespace chunklevelevaluator {
-    class Evaluator;
-} // namespace chunklevelevaluator
-    
-namespace culling {
-    class ChunkCuller;
-} // namespace culling
+namespace chunklevelevaluator { class Evaluator; }
+
+namespace culling { class ChunkCuller; }
 
 class Chunk;
 class ChunkNode;
@@ -56,12 +51,10 @@ public:
     ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
         std::shared_ptr<LayerManager> layerManager);
     ~ChunkedLodGlobe();
-    
-    bool initialize() override;
-    bool deinitialize() override;
+
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     /**
@@ -90,10 +83,10 @@ public:
      * lower than the current level of the <code>Chunks</code>s
      * <code>TileIndex</code>. If the desired level is higher than that of the
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
-     * its siblings. 
+     * its siblings.
      */
     int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
-        
+
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
      * heigh mapped surface.
@@ -107,7 +100,17 @@ public:
      */
     float getHeight(glm::dvec3 position) const;
 
+    /**
+     * Notifies the renderer to recompile its shaders the next time the render function is
+     * called. The actual shader recompilation takes place in the render function because
+     * properties that the shader depends on need to be properly synced.
+     */
     void notifyShaderRecompilation();
+
+    /**
+     * Directly recompile the shaders of the renderer.
+     */
+    void recompileShaders();
 
     const int minSplitDepth;
     const int maxSplitDepth;
@@ -115,7 +118,7 @@ public:
     std::shared_ptr<LayerManager> layerManager() const;
 
     StatsCollector stats;
-    
+
 private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
 
@@ -124,7 +127,7 @@ private:
     static const TileIndex RIGHT_HEMISPHERE_INDEX;
 
     const RenderableGlobe& _owner;
-  
+
     // Covers all negative longitudes
     std::unique_ptr<ChunkNode> _leftRoot;
 
@@ -145,7 +148,6 @@ private:
     bool _shadersNeedRecompilation;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKED_LOD_GLOBE___H__

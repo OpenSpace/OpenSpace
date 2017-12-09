@@ -39,11 +39,11 @@
 //  ---------------------------------------------------------------------------------
 //  | FF |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |
 //  ---------------------------------------------------------------------------------
-//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15  
+//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 //                    <------ newer in time                                    oldest
 //
 // In the begining the floating value starts at 0; this means that array element 0 is
-// updated and uploaded to the GPU at every frame. The FF+1 element is the newest fixed 
+// updated and uploaded to the GPU at every frame. The FF+1 element is the newest fixed
 // location and FF-1 element is the oldest fixed location (including wrapping around the
 // array) with the times of _lastPointTime and _firstPointTime.
 //
@@ -53,7 +53,7 @@
 //  ---------------------------------------------------------------------------------
 //  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    | FF |
 //  ---------------------------------------------------------------------------------
-//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15  
+//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 //                    <------ newer in time                              oldest
 //
 // Thus making the floating point traverse backwards through the array and element 0 being
@@ -81,9 +81,25 @@
 // items in memory as was shown to be much slower than the current system.   ---abock
 
 namespace {
-    const char* KeyPeriod = "Period";
-    const char* KeyResolution = "Resolution";
-}
+    static const openspace::properties::Property::PropertyInfo PeriodInfo = {
+        "Period",
+        "Period (in days)",
+        "The objects period, i.e. the length of its orbit around the parent object given "
+        "in (Earth) days. In the case of Earth, this would be a sidereal year "
+        "(=365.242 days). If this values is specified as multiples of the period, it is "
+        "possible to show the effects of precession."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Number of samples along the orbit",
+        "The number of samples along the orbit. This determines the resolution of the "
+        "trail; the tradeoff being that a higher resolution is able to resolve more "
+        "detail, but will take more resources while rendering, too. The higher, the "
+        "smoother the trail, but also more memory will be used."
+    };
+
+} // namespace
 
 namespace openspace {
 
@@ -94,28 +110,16 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
         "base_renderable_renderabletrailorbit",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableTrailOrbit"),
-                "",
-                Optional::No
-            },
-            {
-                KeyPeriod,
+                PeriodInfo.identifier,
                 new DoubleVerifier,
-                "The objects period, i.e. the length of its orbit around the parent "
-                "object given in (Earth) days. In the case of Earth, this would be a "
-                "sidereal year (=365.242 days). If this values is specified as multiples "
-                "of the period, it is possible to show the effects of precession.",
-                Optional::No
+                Optional::No,
+                PeriodInfo.description
             },
             {
-                KeyResolution,
+                ResolutionInfo.identifier,
                 new IntVerifier,
-                "The number of samples along the orbit. This determines the resolution "
-                "of the trail; the tradeoff being that a higher resolution is able to "
-                "resolve more detail, but will take more resources while rendering, too. "
-                "The higher, the smoother the trail, but also more memory will be used.",
-                Optional::No
+                Optional::No,
+                ResolutionInfo.description
             }
         }
     };
@@ -134,10 +138,11 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
 
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _period("period", "Period in days", 0.0, 0.0, 1e9)
-    , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1000000)
+    , _period(PeriodInfo, 0.0, 0.0, 1e9)
+    , _resolution(ResolutionInfo, 10000, 1, 1000000)
     , _needsFullSweep(true)
     , _indexBufferDirty(true)
+    , _previousTime(0)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -151,12 +156,12 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 
     // Period is in days
     using namespace std::chrono;
-    long long factor = duration_cast<seconds>(hours(24)).count();
-    _period = dictionary.value<double>(KeyPeriod) * factor;
+    const long long sph = duration_cast<seconds>(hours(24)).count();
+    _period = dictionary.value<double>(PeriodInfo.identifier) * sph;
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
     addProperty(_period);
 
-    _resolution = static_cast<int>(dictionary.value<double>(KeyResolution));
+    _resolution = static_cast<int>(dictionary.value<double>(ResolutionInfo.identifier));
     _resolution.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
     addProperty(_resolution);
 
@@ -164,22 +169,20 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 }
 
-bool RenderableTrailOrbit::initialize() {
-    bool res = RenderableTrail::initialize();
+void RenderableTrailOrbit::initializeGL() {
+    RenderableTrail::initializeGL();
 
     glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
     glGenBuffers(1, &_primaryRenderInformation._vBufferID);
     glGenBuffers(1, &_primaryRenderInformation._iBufferID);
-
-    return res;
 }
 
-bool RenderableTrailOrbit::deinitialize() {
+void RenderableTrailOrbit::deinitializeGL() {
     glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
     glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
     glDeleteBuffers(1, &_primaryRenderInformation._iBufferID);
 
-    return RenderableTrail::deinitialize();
+    RenderableTrail::deinitializeGL();
 }
 
 void RenderableTrailOrbit::update(const UpdateData& data) {
@@ -226,7 +229,10 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             if (_indexBufferDirty) {
                 // We only need to upload the index buffer if it has been invalidated
                 // by changing the number of values we want to represent
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _primaryRenderInformation._iBufferID);
+                glBindBuffer(
+                    GL_ELEMENT_ARRAY_BUFFER,
+                    _primaryRenderInformation._iBufferID
+                );
                 glBufferData(
                     GL_ELEMENT_ARRAY_BUFFER,
                     _indexArray.size() * sizeof(unsigned int),
@@ -251,7 +257,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // Only update the changed ones
             // Since we are using a ring buffer, the number of updated needed might be
             // bigger than our current points, which means we have to split the upload
-            // into two calls. 
+            // into two calls.
             if (report.nUpdated > 0) {
                 // deltaT is positive, so the pointer is moving backwards and update has
                 // to happen towards the front
@@ -271,7 +277,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                     // The current index is too close to the wrap around part, so we need
                     // to split the upload into two parts:
                     // 1. from the current index to the end of the array
-                    // 2. the rest starting from the beginning of the array 
+                    // 2. the rest starting from the beginning of the array
                     int first = s - i;
                     int second = n - first;
                     upload(i, first);  // 1
@@ -284,7 +290,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                 // The current index
                 int i = _primaryRenderInformation.first;
                 // Number of values
-                int n = report.nUpdated + 1; // +1 for the floating position
+                int n = std::abs(report.nUpdated) + 1; // +1 for the floating position
                 // Total size of the array
                 int s = _primaryRenderInformation.count;
 
@@ -306,26 +312,24 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     }
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
+    _previousTime = data.time.j2000Seconds();
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     const UpdateData& data)
 {
-    // If we are doing a time jump, it is in general faster to recalculate everything
-    // than to only update parts of the array
-    if (data.time.timeJumped()) {
-        _needsFullSweep = true;
-    }
     if (_needsFullSweep) {
         fullSweep(data.time.j2000Seconds());
         return { true, UpdateReport::All } ;
     }
 
+
+    const double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
-    if (data.time.deltaTime() == 0.0) {
+    if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
         return { false, 0 };
     }
 
@@ -339,7 +343,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     //
     // This might become a bigger issue if we are starting to look at very short time
     // intervals
-    const double Epsilon = 1e-7;
+
     if (std::abs(delta) < Epsilon) {
         return { false, 0 };
     }
@@ -381,7 +385,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // The previously oldest permanent point has been moved nNewPoints steps into the
         // future
         _firstPointTime += nNewPoints * secondsPerPoint;
-        
+
         return { true, nNewPoints };
     }
     else {
@@ -410,7 +414,8 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                 _primaryRenderInformation.first = 0;
             }
             else {
-                // Move the current pointer fowards one step  to be used as the new floating
+                // Move the current pointer fowards one step  to be used as the new
+                // floating
                 ++_primaryRenderInformation.first;
             }
         }

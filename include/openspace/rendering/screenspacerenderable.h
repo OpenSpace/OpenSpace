@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #ifndef __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 #define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
@@ -44,7 +44,7 @@ namespace documentation { struct Documentation; }
 
 /**
  * The base class for screen space images and screen space framebuffers.
- * This base class handles general functionality specific to planes that are rendered in 
+ * This base class handles general functionality specific to planes that are rendered in
  * front of the camera. It implements protected methods and properties for converting
  * the planes from Spherical to Euclidean coordinates and back. It also specifies the
  * interface that its children need to implement.
@@ -55,19 +55,23 @@ public:
         const ghoul::Dictionary& dictionary);
 
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable();
+    virtual ~ScreenSpaceRenderable() = default;
 
-    virtual void render() = 0;
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
-    virtual void update() = 0;
-    virtual bool isReady() const = 0;
+    virtual void render();
+
+    virtual bool initialize();
+    virtual bool initializeGL();
+    virtual bool deinitialize();
+    virtual bool deinitializeGL();
+
+    virtual void update();
+    virtual bool isReady() const;
     bool isEnabled() const;
-    
+
     glm::vec3 euclideanPosition() const;
     glm::vec3 sphericalPosition() const;
     float depth() const;
-    
+
     static documentation::Documentation Documentation();
 
 protected:
@@ -78,7 +82,7 @@ protected:
      * Converts Spherical coordinates to Euclidean.
      * \param spherical The coordinates theta and phi
      * \param radius The radius position value of the plane
-     * \return The x and y position value of the plane 
+     * \return The x and y position value of the plane
      */
     glm::vec2 toEuclidean(const glm::vec2& spherical, float radius);
 

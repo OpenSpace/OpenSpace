@@ -35,7 +35,7 @@ namespace openspace {
 namespace modelgeometry {
 
 WavefrontGeometry::WavefrontGeometry(const ghoul::Dictionary& dictionary)
-    : ModelGeometry(dictionary) 
+    : ModelGeometry(dictionary)
 {
     loadObj(_file);
 }
@@ -53,7 +53,13 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string err;
-    bool success = tinyobj::LoadObj(shapes, materials, err, filename.c_str(), filename.c_str());
+    bool success = tinyobj::LoadObj(
+        shapes,
+        materials,
+        err,
+        filename.c_str(),
+        filename.c_str()
+    );
 
     if (!success) {
         LERROR(err);
@@ -89,10 +95,11 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
     psc tmp;
     for (int i = 0; i < shapes.size(); ++i) {
         for (int j = 0; j < shapes[i].mesh.positions.size() / 3; ++j) {
-            tmp = PowerScaledCoordinate::CreatePowerScaledCoordinate(shapes[i].mesh.positions[3 * j + 0],
+            tmp = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+                shapes[i].mesh.positions[3 * j + 0],
                 shapes[i].mesh.positions[3 * j + 1],
                 shapes[i].mesh.positions[3 * j + 2]
-                );
+            );
 
             _vertices[j + currentPosition].location[0] = tmp[0];
             _vertices[j + currentPosition].location[1] = tmp[1];
@@ -104,10 +111,9 @@ bool WavefrontGeometry::loadModel(const std::string& filename) {
             _vertices[j + currentPosition].normal[2] = shapes[i].mesh.normals[3 * j + 2];
 
             if (2 * j + 1 < shapes[i].mesh.texcoords.size()) {
-                _vertices[j + currentPosition].tex[0] = shapes[i].mesh.texcoords[2 * j + 0];
-                _vertices[j + currentPosition].tex[1] = shapes[i].mesh.texcoords[2 * j + 1];
+                _vertices[j + currentPosition].tex[0] = shapes[i].mesh.texcoords[2*j + 0];
+                _vertices[j + currentPosition].tex[1] = shapes[i].mesh.texcoords[2*j + 1];
             }
-            
         }
         currentPosition += shapes[i].mesh.positions.size() / 3;
 

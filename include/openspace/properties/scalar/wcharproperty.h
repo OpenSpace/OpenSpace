@@ -28,11 +28,11 @@
  /**
  * \file wcharproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class WCharProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>wchar_t</code>.
@@ -42,12 +42,10 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
-//REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t);
+//REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t)
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___WCHARPROPERTY___H__

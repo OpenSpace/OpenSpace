@@ -29,11 +29,10 @@
 
 #include <vector>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 /**
- * The OptionProperty is a property that provides a number of predefined (using the 
+ * The OptionProperty is a property that provides a number of predefined (using the
  * addOption method) options consisting of a <code>description</code> and a
  * <code>value</code>. The available options can be queried using the options method.
  * Only values representing valid options can be used to set this property, or an error
@@ -58,21 +57,23 @@ public:
     /**
      * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
      * to its super class.
-     * \param identifier A unique identifier for this property
-     * \param guiName The GUI name that should be used to represent this property
+     * \param info The PropertyInfo structure that contains all the required static
+     * information for initializing this Property.
+     * \pre \p info.identifier must not be empty
+     * \pre \p info.guiName must not be empty
      */
-    OptionProperty(std::string identifier, std::string guiName, 
-        Property::Visibility visibility = Property::Visibility::User);
+    OptionProperty(Property::PropertyInfo info);
 
     /**
     * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
     * to its super class.
-    * \param identifier A unique identifier for this property
-    * \param guiName The GUI name that should be used to represent this property
+    * \param info The PropertyInfo structure that contains all the required static
+    * information for initializing this Property.
     * \param displayType Optional DisplayType for GUI (default RADIO)
+    * \pre \p info.identifier must not be empty
+    * \pre \p info.guiName must not be empty
     */
-    OptionProperty(std::string identifier, std::string guiName, DisplayType displayType,
-        Property::Visibility visibility = Property::Visibility::User);
+    OptionProperty(PropertyInfo info, DisplayType displayType);
 
     /**
      * Returns the name of the class for reflection purposes.
@@ -118,20 +119,19 @@ public:
 
     /**
     * Get the description of the option that matches <code>value</code>
-    * \param value The value of the option 
+    * \param value The value of the option
     */
     std::string getDescriptionByValue(int value);
 
 private:
     static const std::string OptionsKey;
-    std::string generateAdditionalDescription() const;
+    std::string generateAdditionalDescription() const override;
 
     /// The list of options which have been registered with this OptionProperty
     std::vector<Option> _options;
     DisplayType _displayType;
 };
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___OPTIONPROPERTY___H__

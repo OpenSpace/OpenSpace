@@ -36,24 +36,19 @@
 #include <openspace/rendering/renderer.h>
 #include <openspace/util/updatestructures.h>
 
-namespace ghoul {
-    class Dictionary;
-    
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace ghoul { class Dictionary; }
+namespace ghoul::filesystem { class File; }
+
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
 }
 
 namespace openspace {
 
-class RenderableVolume;
 class Camera;
 class Scene;
-    
+
 class FramebufferRenderer : public Renderer, public RaycasterListener {
 public:
     FramebufferRenderer();
@@ -64,7 +59,7 @@ public:
 
     void updateResolution();
     void updateRaycastData();
-    
+
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
@@ -72,7 +67,7 @@ public:
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
-    
+
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
@@ -80,12 +75,18 @@ public:
     virtual void updateRendererData() override;
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
-private:
 
+private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _exitPrograms;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _raycastPrograms;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _insideRaycastPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _exitPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _raycastPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _insideRaycastPrograms;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
 

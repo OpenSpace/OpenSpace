@@ -28,6 +28,7 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+
 namespace documentation {  struct Documentation; }
 
 /**
@@ -50,6 +51,9 @@ public:
     /// The key that stores the location of the SGCT configuration file that is used on
     /// application launch
     static const std::string KeyConfigSgct;
+    /// The key that defines a list of scripts for global customization that get executed
+    /// regardless of which scene is loaded
+    static const std::string KeyGlobalCustomizationScripts;
     /// The part of the key that defines the type
     static const std::string PartType;
     /// The part of the key that defines the file
@@ -66,10 +70,12 @@ public:
     static const std::string KeyDocumentation;
     /// The key that stores the factory documentation values
     static const std::string KeyFactoryDocumentation;
+    /// The key that stores the scene license documentation values
+    static const std::string KeySceneLicenseDocumentation;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigScene;
-    /// The key that stores the location of the tasks file that is initially loaded
-    static const std::string KeyConfigTask;
+    /// The key that stores the location of the tasks files
+    static const std::string KeyConfigTasksRoot;
     /// The key that stores the subdirectory containing a list of all startup scripts to
     /// be executed on application start before the scene file is loaded
     static const std::string KeyStartupScript;
@@ -78,12 +84,16 @@ public:
     static const std::string KeySettingsScript;
     /// The key that stores the settings for determining log-related settings
     static const std::string KeyLogging;
+    /// The key that stores the directory for Logging
+    static const std::string PartLogDir;
     /// The key that stores the desired LogLevel for the whole application
     /// \sa ghoul::logging::LogManager
     static const std::string PartLogLevel;
     /// The key that stores whether the log should be immediately flushed after a n
     /// \sa ghoul::logging::LogManager
     static const std::string PartImmediateFlush;
+    /// The key for prefixing PerformanceMeasurement logfiles
+    static const std::string PartLogPerformancePrefix;
     /// The key that stores a subdirectory with a description for additional
     /// ghoul::logging::Log%s to be created
     /// \sa LogFactory
@@ -124,9 +134,9 @@ public:
     static const std::string PartHttpProxyPort;
     /// The key that stores the authentication method of the http proxy
     static const std::string PartHttpProxyAuthentication;
-    /// The key that stores the username to use for authentication to access the http proxy
+    /// Key that stores the username to use for authentication to access the http proxy
     static const std::string PartHttpProxyUser;
-    /// The key that stores the password to use for authentication to access the http proxy
+    /// Key that stores the password to use for authentication to access the http proxy
     static const std::string PartHttpProxyPassword;
     /// The key that stores the dictionary containing information about debug contexts
     static const std::string KeyOpenGLDebugContext;
@@ -144,6 +154,25 @@ public:
     static const std::string PartFilterIdentifierIdentifier;
     /// The part of the key storing a list of severities that should be filtered out
     static const std::string PartFilterSeverity;
+    /// The part of the key storing whether the OpenGL state should be checked each call
+    static const std::string KeyCheckOpenGLState;
+    /// The part of the key storing whether each OpenGL call should be logged
+    static const std::string KeyLogEachOpenGLCall;
+
+    /// This key determines whether the scene graph nodes should initialized multithreaded
+    static const std::string KeyUseMultithreadedInitialization;
+
+    /// The key under which all of the loading settings are grouped
+    static const std::string KeyLoadingScreen;
+    /// The part of the key storing whether the loading screen should display the message
+    /// about current status
+    static const std::string PartShowMessage;
+    /// The part of the key storing whether the loading screen should display node names
+    static const std::string PartShowNodeNames;
+    /// The part of the key storing whether the loading screen should contain a progress
+    /// bar
+    static const std::string PartShowProgressbar;
+
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the
@@ -156,7 +185,7 @@ public:
      * \throw ghoul::RuntimeError If the configuration could not be found
      */
     static std::string findConfiguration(const std::string& filename);
-    
+
     /**
      * Load the provided configuration file (\p filename) into this Dictionary. All paths
      * that are specified in the configuration file will automatically be registered in

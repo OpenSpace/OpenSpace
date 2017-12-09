@@ -97,7 +97,7 @@ double Time::deltaTime() const {
 }
 
 void Time::setPause(bool pause) {
-    _timePaused = pause;    
+    _timePaused = pause;
 }
 
 bool Time::togglePause() {
@@ -144,7 +144,7 @@ bool Time::timeJumped() const {
 void Time::setTimeJumped(bool jumped) {
     _timeJumped = jumped;
 }
-    
+
 bool Time::paused() const {
     return _timePaused;
 }

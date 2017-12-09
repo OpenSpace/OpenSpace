@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 
-
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
 #include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
@@ -39,9 +38,8 @@
 #include <set>
 #include <unordered_map>
 
-namespace openspace {
-namespace globebrowsing {
-    
+namespace openspace::globebrowsing {
+
 //class GlobeBrowsingModule;
 struct RawTile;
 class RawTileDataReader;
@@ -76,6 +74,9 @@ public:
 
     void update();
     void reset();
+    void prepairToBeDeleted();
+
+    bool shouldBeDeleted();
 
     std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
     float noDataValueAsFloat() const;
@@ -86,6 +87,7 @@ protected:
     enum class ResetMode {
         ShouldResetAll,
         ShouldResetAllButRawTileDataReader,
+        ShouldBeDeleted,
         ShouldNotReset
     };
 
@@ -112,7 +114,7 @@ private:
     GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
-    
+
     PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey>
         _concurrentJobManager;
 
@@ -121,9 +123,9 @@ private:
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 
     ResetMode _resetMode;
+    bool _shouldBeDeleted;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__

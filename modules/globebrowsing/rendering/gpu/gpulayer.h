@@ -26,16 +26,14 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
 
 #include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayerrendersettings.h>
 #include <openspace/util/gpudata.h>
 #include <string>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-}}
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class Layer;
 struct TileIndex;
@@ -50,14 +48,14 @@ public:
 
     /**
      * Sets the value of <code>Layer</code> to its corresponding
-     * GPU struct. OBS! Users must ensure bind has been 
+     * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
     virtual void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
         const TileIndex& tileIndex, int pileSize);
 
-    /** 
-     * Binds this object with GLSL variables with identifiers starting 
+    /**
+     * Binds this object with GLSL variables with identifiers starting
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
@@ -73,9 +71,14 @@ public:
 private:
     GPUChunkTilePile gpuChunkTilePile;
     GPULayerRenderSettings gpuRenderSettings;
+    GPULayerAdjustment gpuLayerAdjustment;
+
+    GPUData<glm::ivec2> paddingStartOffset;
+    GPUData<glm::ivec2> paddingSizeDifference;
+    // Adjustment layer stuff
+    GPUData<glm::vec3> gpuColor;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__

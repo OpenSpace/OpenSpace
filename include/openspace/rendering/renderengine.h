@@ -32,22 +32,18 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
-
 namespace ghoul {
-namespace fontrendering {
-    class Font;
+    class Dictionary;
+    class SharedMemory;
 }
-namespace opengl {
-    class ProgramObject;
-}
-class Dictionary;
-class SharedMemory;
-} // namespace ghoul
+namespace ghoul::fontrendering { class Font; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace performance { class PerformanceManager; }
 namespace scripting { struct LuaLibrary; }
+
 class Camera;
 class RaycasterManager;
 class Renderer;
@@ -69,15 +65,17 @@ public:
     enum class FrametimeType {
         DtTimeAvg = 0,
         FPS,
-        FPSAvg
+        FPSAvg,
+        None
     };
 
     RenderEngine();
     ~RenderEngine();
-    
+
     void initialize();
     void initializeGL();
     void deinitialize();
+    void deinitializeGL();
 
     void setScene(Scene* scene);
     Scene* scene();
@@ -88,8 +86,6 @@ public:
     RendererImplementation rendererImplementation() const;
     RaycasterManager& raycasterManager();
 
-    // sgct wrapped functions
-    
 
     void updateShaderPrograms();
     void updateFade();
@@ -99,6 +95,8 @@ public:
         const glm::mat4& projectionMatrix);
 
     void renderScreenLog();
+    void renderVersionInformation();
+    void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
@@ -109,10 +107,10 @@ public:
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
 
-    void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
-    void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
-    void unregisterScreenSpaceRenderable(std::string name);
-    std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(std::string name);
+    void addScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void removeScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void removeScreenSpaceRenderable(const std::string& name);
+    std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(const std::string& name);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
@@ -130,7 +128,8 @@ public:
 
     std::string progressToStr(int size, double t);
 
-    void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
+    void removeRenderProgram(
+        const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.
@@ -155,13 +154,13 @@ public:
      * as a 'rendererData' variable in the dictionary.
      */
     void setRendererData(const ghoul::Dictionary& rendererData);
-    
+
     /**
     * Lets the renderer update the data to be brought into the post rendererer programs
     * as a 'resolveData' variable in the dictionary.
     */
     void setResolveData(const ghoul::Dictionary& resolveData);
-    
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
@@ -171,16 +170,14 @@ public:
     // Temporary fade functionality
     void startFading(int direction, float fadeDuration);
 
-    void sortScreenspaceRenderables();
-
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
 
     std::vector<Syncable*> getSyncables();
-    
+
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
-    RendererImplementation rendererFromString(const std::string& method);
+    RendererImplementation rendererFromString(const std::string& method) const;
 
     void renderInformation();
 
@@ -188,7 +185,7 @@ private:
     Scene* _scene;
     std::unique_ptr<RaycasterManager> _raycasterManager;
 
-    properties::BoolProperty _performanceMeasurements;
+    properties::BoolProperty _doPerformanceMeasurements;
     std::unique_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;
@@ -204,7 +201,9 @@ private:
     properties::BoolProperty _showDate;
     properties::BoolProperty _showInfo;
     properties::BoolProperty _showLog;
-    
+    properties::BoolProperty _showVersionInfo;
+    properties::BoolProperty _showCameraInfo;
+
     properties::TriggerProperty _takeScreenshot;
     bool _shouldTakeScreenshot;
     properties::BoolProperty _applyWarping;
@@ -221,7 +220,7 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
-    
+
     std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;

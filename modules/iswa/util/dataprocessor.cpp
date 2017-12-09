@@ -28,8 +28,8 @@
 #include <fstream>
 
 namespace {
-    const std::string _loggerCat = "DataProcessor";
-}
+    const char* _loggerCat = "DataProcessor";
+} // namespace
 
 namespace openspace {
 
@@ -43,29 +43,29 @@ DataProcessor::DataProcessor()
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
 }
 
-DataProcessor::~DataProcessor(){};
+DataProcessor::~DataProcessor() {};
 
-void DataProcessor::useLog(bool useLog){
+void DataProcessor::useLog(bool useLog) {
     _useLog = useLog;
 }
 
-void DataProcessor::useHistogram(bool useHistogram){
+void DataProcessor::useHistogram(bool useHistogram) {
     _useHistogram = useHistogram;
 }
 
-void DataProcessor::normValues(glm::vec2 normValues){
+void DataProcessor::normValues(glm::vec2 normValues) {
     _normValues = normValues;
 }
 
-glm::size3_t DataProcessor::dimensions(){
+glm::size3_t DataProcessor::dimensions() {
     return _dimensions;
 }
 
-glm::vec2 DataProcessor::filterValues(){
+glm::vec2 DataProcessor::filterValues() {
     return _filterValues;
 }
 
-void DataProcessor::clear(){
+void DataProcessor::clear() {
     _min.clear();
     _max.clear();
     _sum.clear();
@@ -75,16 +75,20 @@ void DataProcessor::clear(){
 }
 
 
-float DataProcessor::processDataPoint(float value, int option){
-    if(_numValues.empty()) return 0.0f;
+float DataProcessor::processDataPoint(float value, int option) {
+    if (_numValues.empty()) {
+        return 0.f;
+    }
     std::shared_ptr<Histogram> histogram = _histograms[option];
-    float mean = (1.0 / _numValues[option]) * _sum[option];
+    float mean = (1.f / _numValues[option]) * _sum[option];
     float sd = _standardDeviation[option];
 
     float v;
-    if(_useHistogram){
-        v = histogram->equalize(normalizeWithStandardScore(value, mean, sd, _histNormValues))/(float)512;
-    }else{
+    if (_useHistogram) {
+        v = histogram->equalize(
+            normalizeWithStandardScore(value, mean, sd, _histNormValues)
+        ) / 512.f;
+    } else {
         v = normalizeWithStandardScore(value, mean, sd, _normValues);
     }
 
@@ -92,90 +96,118 @@ float DataProcessor::processDataPoint(float value, int option){
     return v;
 }
 
-float DataProcessor::normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues){
-    
+float DataProcessor::normalizeWithStandardScore(float value, float mean, float sd,
+                                                glm::vec2 normalizationValues)
+{
     float zScoreMin = normalizationValues.x; //10.0f;//_normValues.x;
     float zScoreMax = normalizationValues.y; //10.0f;//_normValues.y;
     float standardScore = ( value - mean ) / sd;
     // Clamp intresting values
     standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
     //return and normalize
-    return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
+    return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );
 }
 
-float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean, float sd, glm::vec2 normalizationValues){
+float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean,
+                                                  float sd, glm::vec2 normalizationValues)
+{
     float zScoreMin = normalizationValues.x;
-    float zScoreMax = normalizationValues.y; 
+    float zScoreMax = normalizationValues.y;
 
     float value = standardScore*(zScoreMax+zScoreMin)-zScoreMin;
-    value = value*sd+mean; 
-    
-    // std::cout << value << std::endl; 
+    value = value*sd+mean;
+
+    // std::cout << value << std::endl;
     return value;
     // float standardScore = ( value - mean ) / sd;
     // // Clamp intresting values
     // standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
     // //return and normalize
-    // return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
+    // return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );
 }
 
 void DataProcessor::initializeVectors(int numOptions){
-    if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
-    if(_max.empty()) _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
-    if(_sum.empty()) _sum = std::vector<float>(numOptions, 0.0f);
-    if(_standardDeviation.empty())  _standardDeviation = std::vector<float>(numOptions, 0.0f);
-    if(_numValues.empty()) _numValues  = std::vector<float>(numOptions, 0.0f);
-    if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
+    if (_min.empty()) {
+        _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
+    }
+    if (_max.empty()) {
+        _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
+    }
+    if (_sum.empty()) {
+        _sum = std::vector<float>(numOptions, 0.0f);
+    }
+    if (_standardDeviation.empty()) {
+        _standardDeviation = std::vector<float>(numOptions, 0.0f);
+    }
+    if (_numValues.empty()) {
+        _numValues = std::vector<float>(numOptions, 0.0f);
+    }
+    if (_histograms.empty()) {
+        _histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
+    }
 }
 
-void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
-    int numSelected = selectedOptions.size();
-    std::shared_ptr<Histogram> histogram;
-    float mean, standardDeviation, filterMid, filterWidth;
+void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions) {
+    int numSelected = static_cast<int>(selectedOptions.size());
 
     _filterValues = glm::vec2(0.0);
-    if(numSelected <= 0) return;
+    if (numSelected <= 0) {
+        return;
+    }
 
-    if(!_histograms.empty()){
-        for(int option : selectedOptions){
-            if(!_useHistogram){
-                mean = (1.0/_numValues[option])*_sum[option];
-                standardDeviation = _standardDeviation[option];
-                histogram = _histograms[option];
-                
+    if (!_histograms.empty()) {
+        for (int option : selectedOptions) {
+            float filterMid;
+            float filterWidth;
+            if (!_useHistogram) {
+                float mean = (1.f / _numValues[option]) * _sum[option];
+                float standardDeviation = _standardDeviation[option];
+                std::shared_ptr<Histogram> histogram = _histograms[option];
+
                 filterMid = histogram->highestBinValue(_useHistogram);
                 filterWidth = mean+histogram->binWidth();
-                
-                filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation, _normValues);
-                filterWidth = fabs(0.5-normalizeWithStandardScore(filterWidth, mean, standardDeviation, _normValues));
-            }else{
+
+                filterMid = normalizeWithStandardScore(
+                    filterMid,
+                    mean,
+                    standardDeviation,
+                    _normValues
+                );
+                filterWidth = fabs(0.5-normalizeWithStandardScore(
+                    filterWidth,
+                    mean,
+                    standardDeviation,
+                    _normValues)
+                );
+            } else {
                 Histogram hist = _histograms[option]->equalize();
                 filterMid = hist.highestBinValue(true);
                 std::cout << filterMid << std::endl;
-                filterWidth = 1.f/512.f;
+                filterWidth = 1.f / 512.f;
             }
 
              _filterValues += glm::vec2(filterMid, filterWidth);
 
         }
-        _filterValues /= numSelected;   
+        _filterValues /= numSelected;
     }
 }
 
-void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum){
-    int numOptions = optionValues.size();
+void DataProcessor::add(std::vector<std::vector<float>>& optionValues,
+                        std::vector<float>& sum)
+{
+    int numOptions = static_cast<int>(optionValues.size());
     int numValues;
     float mean, value, variance, standardDeviation;
 
-    for(int i=0; i<numOptions; i++){
-
+    for (int i=0; i<numOptions; i++) {
         std::vector<float> values = optionValues[i];
-        numValues = values.size();
+        numValues = static_cast<int>(values.size());
 
         variance = 0;
         mean = (1.0f/numValues)*sum[i];
 
-        for(int j=0; j<numValues; j++){
+        for (int j=0; j<numValues; j++) {
             value = values[j];
             variance +=  pow(value-mean, 2);
         }
@@ -186,50 +218,95 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         float oldMean = (1.0f/_numValues[i])*_sum[i];
 
         _sum[i] += sum[i];
-        _standardDeviation[i] = sqrt(pow(standardDeviation, 2) + pow(_standardDeviation[i], 2));
+        _standardDeviation[i] = sqrt(pow(standardDeviation, 2) +
+                                pow(_standardDeviation[i], 2));
         _numValues[i] += numValues;
-        
+
 
         mean = (1.0f/_numValues[i])*_sum[i];
-        float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], _histNormValues);
-        float max = normalizeWithStandardScore(_max[i], mean, _standardDeviation[i], _histNormValues);
+        float min = normalizeWithStandardScore(
+            _min[i],
+            mean,
+            _standardDeviation[i],
+            _histNormValues
+        );
+        float max = normalizeWithStandardScore(
+            _max[i],
+            mean,
+            _standardDeviation[i],
+            _histNormValues
+        );
 
-        if(!_histograms[i]){
+        if (!_histograms[i]) {
              _histograms[i] = std::make_shared<Histogram>(min, max, 512);
         }
-        else{
-
+        else {
             const float* histData = _histograms[i]->data();
             float histMin = _histograms[i]->minValue();
             float histMax = _histograms[i]->maxValue();
             int numBins = _histograms[i]->numBins();
 
-            float unNormHistMin = unnormalizeWithStandardScore(histMin, oldMean, oldStandardDeviation, _histNormValues);
-            float unNormHistMax = unnormalizeWithStandardScore(histMax, oldMean, oldStandardDeviation, _histNormValues);
+            float unNormHistMin = unnormalizeWithStandardScore(
+                histMin,
+                oldMean,
+                oldStandardDeviation,
+                _histNormValues
+            );
+            float unNormHistMax = unnormalizeWithStandardScore(
+                histMax,
+                oldMean,
+                oldStandardDeviation,
+                _histNormValues
+            );
             //unnormalize histMin, histMax
             // min = std::min(min, histMin)
             std::shared_ptr<Histogram> newHist = std::make_shared<Histogram>(
-                std::min(min, normalizeWithStandardScore(unNormHistMin, mean, _standardDeviation[i], _histNormValues)), 
-                std::min(max, normalizeWithStandardScore(unNormHistMax, mean, _standardDeviation[i], _histNormValues)),
+                std::min(min, normalizeWithStandardScore(
+                    unNormHistMin,
+                    mean,
+                    _standardDeviation[i],
+                    _histNormValues
+                )),
+                std::min(max, normalizeWithStandardScore(
+                    unNormHistMax,
+                    mean,
+                    _standardDeviation[i],
+                    _histNormValues
+                )),
                 numBins
             );
 
-            for(int j=0; j<numBins; j++){
-                value = j*(histMax-histMin)+histMin;
-                value = unnormalizeWithStandardScore(value, oldMean, oldStandardDeviation, _histNormValues);
-                _histograms[i]->add(normalizeWithStandardScore(value, mean, _standardDeviation[i], _histNormValues), histData[j]);
+            for (int j = 0; j < numBins; j++) {
+                value = j * (histMax-histMin)+histMin;
+                value = unnormalizeWithStandardScore(
+                    value,
+                    oldMean,
+                    oldStandardDeviation,
+                    _histNormValues
+                );
+                _histograms[i]->add(normalizeWithStandardScore(
+                    value,
+                    mean,
+                    _standardDeviation[i],
+                    _histNormValues
+                ), histData[j]);
             }
             // _histograms[i]->changeRange(min, max);
             _histograms[i] = newHist;
         }
 
-        for(int j=0; j<numValues; j++){
+        for (int j = 0; j < numValues; j++) {
             value = values[j];
-            _histograms[i]->add(normalizeWithStandardScore(value, mean, _standardDeviation[i], _histNormValues), 1);
+            _histograms[i]->add(normalizeWithStandardScore(
+                value,
+                mean,
+                _standardDeviation[i],
+                _histNormValues
+            ), 1);
         }
 
         _histograms[i]->generateEqualizer();
-        
+
         std::cout << std::endl;
         _histograms[i]->print();
         std::cout << std::endl;
@@ -239,4 +316,4 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
     }
 }
 
-}
+} // namespace

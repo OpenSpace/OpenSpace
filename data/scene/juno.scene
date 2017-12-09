@@ -8,7 +8,7 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2016-07-05T10:05:00.00")
+    openspace.time.setTime("2016-07-01T10:05:00.00")
 
     dofile(openspace.absPath('${SCRIPTS}/common.lua'))
     openspace.clearKeys()
@@ -25,17 +25,23 @@ function postInitialization()
     created and initialized, but before the first render call. This is the place to set
     graphical settings for the renderables.
     ]]--
+    openspace.set_default_gui_sorting()
+
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    openspace.setPropertyValue("Sun.renderable.Enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.Enabled", true)
+    openspace.setPropertyValue("EarthMarker.renderable.Enabled", true)
 
-    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
-    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+    openspace.setPropertyValue("MilkyWay.renderable.Transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.Segments", 50)
 
-    openspace.setPropertyValue('Jupiter.renderable.performShading', false);
+    openspace.setPropertyValue('Jupiter.renderable.PerformShading', false);
 
     openspace.printInfo("Done setting default values")
+
+    openspace.mark_interesting_nodes({
+        "Jupiter", "Juno"
+    })
 end
 
 return {
@@ -43,7 +49,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Juno",
-        Position = {1, 0, 0, 5},
+        Position = {1837386367.601345, -389860693812.834839, 714830404470.398926},
+        Rotation = {-0.336540, 0.711402, -0.099212, 0.608937},
     },
     Modules = {
         "sun",
@@ -55,8 +62,10 @@ return {
         "saturn/saturn",
         "uranus",
         "neptune",
-        "stars",
-        "milkyway",
+        "stars/digitaluniverse",
+        -- "stars/denver",
+        "milkyway/digitaluniverse",
+        --"milkyway/eso",
         "missions/juno"
     }
 }

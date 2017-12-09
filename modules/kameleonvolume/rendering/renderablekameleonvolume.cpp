@@ -43,9 +43,7 @@
 
 namespace {
     const char* _loggerCat = "RenderableKameleonVolume";
-}
 
-namespace {
     const char* KeyDimensions = "Dimensions";
     const char* KeyStepSize = "StepSize";
     const char* KeyTransferFunction = "TransferFunction";
@@ -60,30 +58,104 @@ namespace {
     const char* KeyCache = "Cache";
     const char* KeyGridType = "GridType";
     const char* ValueSphericalGridType = "Spherical";
-}
+
+    static const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+        "Dimensions",
+        "Dimensions",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo VariableInfo = {
+        "Variable",
+        "Variable",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
+        "LowerDomainBound",
+        "Lower Domain Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
+        "UpperDomainBound",
+        "Upper Domain Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo DomainScaleInfo = {
+        "DomainScale",
+        "Domain scale",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
+        "LowerValueBound",
+        "Lower Value Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
+        "UpperValueBound",
+        "Upper Value Bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+        "GridType",
+        "Grid Type",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SourcePathInfo = {
+        "SourcePath",
+        "Source Path",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+        "TransferFunctionPath",
+        "Transfer Function Path",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CacheInfo = {
+        "Cache",
+        "Cache",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
+namespace kameleonvolume {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _dimensions("dimensions", "Dimensions")
-    , _variable("variable", "Variable")
-    , _lowerDomainBound("lowerDomainBound", "Lower Domain Bound")
-    , _upperDomainBound("upperDomainBound", "Upper Domain Bound")
-    , _domainScale("domainScale", "Domain scale")
+    , _dimensions(DimensionsInfo)
+    , _variable(VariableInfo)
+    , _lowerDomainBound(LowerDomainBoundInfo)
+    , _upperDomainBound(UpperDomainBoundInfo)
+    , _domainScale(DomainScaleInfo)
     , _autoDomainBounds(false)
-    , _lowerValueBound("lowerValueBound", "Lower Value Bound", 0.0, 0.0, 1)
-    , _upperValueBound("upperValueBound", "Upper Value Bound", 1, 0.01, 1)
+    , _lowerValueBound(LowerValueBoundInfo, 0.f, 0.f, 1.f)
+    , _upperValueBound(UpperValueBoundInfo, 1.f, 0.01f, 1.f)
     , _autoValueBounds(false)
-    , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
+    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _autoGridType(false)
     , _clipPlanes(nullptr)
-    , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
-    , _sourcePath("sourcePath", "Source Path")
-    , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
+    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
+    , _sourcePath(SourcePathInfo)
+    , _transferFunctionPath(TransferFunctionInfo)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
-    , _cache("cache", "Cache") {
+    , _cache(CacheInfo)
+{
 
     glm::vec3 dimensions;
     if (dictionary.getValue(KeyDimensions, dimensions)) {
@@ -101,7 +173,9 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     std::string transferFunctionPath;
     if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
         _transferFunctionPath = transferFunctionPath;
-        _transferFunction = std::make_shared<TransferFunction>(absPath(transferFunctionPath));
+        _transferFunction = std::make_shared<TransferFunction>(
+            absPath(transferFunctionPath)
+        );
     }
 
     std::string sourcePath;
@@ -155,7 +229,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
 
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
-    _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDictionary);
+    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setName("clipPlanes");
 
     bool cache;
@@ -163,14 +237,20 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         _cache = cache;
     }
 
-    _gridType.addOption(static_cast<int>(VolumeGridType::Cartesian), "Cartesian grid");
-    _gridType.addOption(static_cast<int>(VolumeGridType::Spherical), "Spherical grid");
-    _gridType.setValue(static_cast<int>(VolumeGridType::Cartesian));
+    _gridType.addOption(
+        static_cast<int>(volume::VolumeGridType::Cartesian),
+        "Cartesian grid"
+    );
+    _gridType.addOption(
+        static_cast<int>(volume::VolumeGridType::Spherical),
+        "Spherical grid"
+    );
+    _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
     std::string gridType;
     if (dictionary.getValue(KeyGridType, gridType)) {
         if (gridType == ValueSphericalGridType) {
-            _gridType.setValue(static_cast<int>(VolumeGridType::Spherical));
+            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         } else {
             _autoGridType = true;
         }
@@ -179,21 +259,25 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
 
-bool RenderableKameleonVolume::initialize() {
+void RenderableKameleonVolume::initializeGL() {
     load();
     
     _volumeTexture->uploadTexture();
     _transferFunction->update();
 
-    _raycaster = std::make_unique<KameleonVolumeRaycaster>(_volumeTexture, _transferFunction, _clipPlanes);
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        _volumeTexture,
+        _transferFunction,
+        _clipPlanes
+    );
 
     _raycaster->setStepSize(_stepSize);
     _gridType.onChange([this] {
         _raycaster->setStepSize(_stepSize);
     });
-    _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
+    _raycaster->setGridType(static_cast<volume::VolumeGridType>(_gridType.value()));
     _gridType.onChange([this] {
-        _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
+        _raycaster->setGridType(static_cast<volume::VolumeGridType>(_gridType.value()));
     });
 
     updateRaycasterModelTransform();
@@ -234,7 +318,6 @@ bool RenderableKameleonVolume::initialize() {
     addProperty(_gridType);
     addProperty(_cache);
     addPropertySubOwner(_clipPlanes.get());
-    return true;
 }
 
 void RenderableKameleonVolume::updateRaycasterModelTransform() {
@@ -244,7 +327,7 @@ void RenderableKameleonVolume::updateRaycasterModelTransform() {
     glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
     glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
 
-    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation); 
+    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation);
     modelTransform = glm::scale(modelTransform, scale);
     _raycaster->setModelTransform(modelTransform);
 }
@@ -256,7 +339,7 @@ bool RenderableKameleonVolume::cachingEnabled() {
 
 void RenderableKameleonVolume::load() {
     if (!FileSys.fileExists(_sourcePath)) {
-        LERROR("File " << _sourcePath << " does not exist."); 
+        LERROR("File " << _sourcePath << " does not exist.");
         return;
     }
     if (!cachingEnabled()) {
@@ -302,7 +385,7 @@ void RenderableKameleonVolume::loadFromPath(const std::string& path) {
 }
 
 void RenderableKameleonVolume::loadRaw(const std::string& path) {
-    RawVolumeReader<float> reader(path, _dimensions);
+    volume::RawVolumeReader<float> reader(path, _dimensions);
     _rawVolume = reader.read();
     updateTextureFromVolume();
 }
@@ -311,8 +394,8 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     KameleonVolumeReader reader(path);
 
     if (_autoValueBounds) {
-        _lowerValueBound = reader.minValue(_variable);
-        _upperValueBound = reader.maxValue(_variable);
+        _lowerValueBound = static_cast<float>(reader.minValue(_variable));
+        _upperValueBound = static_cast<float>(reader.maxValue(_variable));
     }
 
     std::vector<std::string> variables = reader.gridVariableNames();
@@ -331,20 +414,25 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
 
     if (variables.size() == 3 && _autoGridType) {
         if (variables[0] == "r" && variables[0] == "theta" && variables[0] == "phi") {
-            _gridType.setValue(static_cast<int>(VolumeGridType::Spherical));
+            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         }
         else {
-            _gridType.setValue(static_cast<int>(VolumeGridType::Cartesian));
-        }       
+            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
+        }
     }
 
     ghoul::Dictionary dict = reader.readMetaData();
-    _rawVolume = reader.readFloatVolume(_dimensions, _variable, _lowerDomainBound, _upperDomainBound);
+    _rawVolume = reader.readFloatVolume(
+        _dimensions,
+        _variable,
+        _lowerDomainBound,
+        _upperDomainBound
+    );
     updateTextureFromVolume();
 }
 
 void RenderableKameleonVolume::updateTextureFromVolume() {
-    _normalizedVolume = std::make_unique<RawVolume<GLfloat>>(_dimensions);
+    _normalizedVolume = std::make_unique<volume::RawVolume<GLfloat>>(_dimensions);
     float* in = _rawVolume->data();
     GLfloat* out = _normalizedVolume->data();
     float min = _lowerValueBound;
@@ -368,23 +456,22 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
 }
 
 void RenderableKameleonVolume::storeRaw(const std::string& path) {
-    RawVolumeWriter<float> writer(path);
+    volume::RawVolumeWriter<float> writer(path);
     writer.write(*_rawVolume);
 }
     
-bool RenderableKameleonVolume::deinitialize() {
+void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
-    return true;
 }
     
 bool RenderableKameleonVolume::isReady() const {
     return true;
 }
     
-void RenderableKameleonVolume::update(const UpdateData& data) {
+void RenderableKameleonVolume::update(const UpdateData&) {
     if (_raycaster) {
         _raycaster->setStepSize(_stepSize);
     }
@@ -394,4 +481,5 @@ void RenderableKameleonVolume::render(const RenderData& data, RendererTasks& tas
     tasks.raycasterTasks.push_back({ _raycaster.get(), data });
 }
        
+}
 }

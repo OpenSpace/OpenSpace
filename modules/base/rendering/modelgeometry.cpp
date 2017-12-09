@@ -38,14 +38,12 @@
 namespace {
     const char* _loggerCat = "ModelGeometry";
 
-    const char* KeyName = "Name";
     const char* KeyType = "Type";
     const char* KeyGeomModelFile = "GeometryFile";
     const int8_t CurrentCacheVersion = 3;
 } // namespace
 
-namespace openspace {
-namespace modelgeometry {
+namespace openspace::modelgeometry {
 
 documentation:: Documentation ModelGeometry::Documentation() {
     using namespace documentation;
@@ -56,16 +54,16 @@ documentation:: Documentation ModelGeometry::Documentation() {
             {
                 KeyType,
                 new StringVerifier,
-                "The type of the Model Geometry that should be generated",
-                Optional::No
+                Optional::No,
+                "The type of the Model Geometry that should be generated"
             },
             {
                 KeyGeomModelFile,
                 new StringVerifier,
+                Optional::No,
                 "The file that should be loaded in this ModelGeometry. The file can "
                 "contain filesystem tokens or can be specified relatively to the "
-                "location of the .mod file.",
-                Optional::No
+                "location of the .mod file."
             }
         }
     };
@@ -80,13 +78,13 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
     }
 
     const std::string geometryType = dictionary.value<std::string>(KeyType);
-    
+
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
     return factory->create(geometryType, dictionary);;
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("ModelGeometry")
+    : properties::PropertyOwner({ "ModelGeometry" })
     , _mode(GL_TRIANGLES)
 {
     documentation::testSpecificationAndThrow(
@@ -115,7 +113,12 @@ double ModelGeometry::boundingRadius() const {
 void ModelGeometry::render() {
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glDrawElements(_mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(
+        _mode,
+        static_cast<GLsizei>(_indices.size()),
+        GL_UNSIGNED_INT,
+        nullptr
+    );
     glBindVertexArray(0);
 }
 
@@ -136,7 +139,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
     if (_vertices.empty()) {
         return false;
     }
-    
+
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vbo);
     glGenBuffers(1, &_ibo);
@@ -159,7 +162,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
+        nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
     );
     glVertexAttribPointer(
         1,
@@ -247,8 +250,14 @@ bool ModelGeometry::saveCachedFile(const std::string& filename) {
         int64_t iSize = _indices.size();
         fileStream.write(reinterpret_cast<const char*>(&iSize), sizeof(int64_t));
 
-        fileStream.write(reinterpret_cast<const char*>(_vertices.data()), sizeof(Vertex) * vSize);
-        fileStream.write(reinterpret_cast<const char*>(_indices.data()), sizeof(int) * iSize);
+        fileStream.write(
+            reinterpret_cast<const char*>(_vertices.data()),
+            sizeof(Vertex) * vSize
+        );
+        fileStream.write(
+            reinterpret_cast<const char*>(_indices.data()),
+            sizeof(int) * iSize
+        );
 
         return fileStream.good();
     }
@@ -282,7 +291,10 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
         _vertices.resize(vSize);
         _indices.resize(iSize);
 
-        fileStream.read(reinterpret_cast<char*>(_vertices.data()), sizeof(Vertex) * vSize);
+        fileStream.read(
+            reinterpret_cast<char*>(_vertices.data()),
+            sizeof(Vertex) * vSize
+        );
         fileStream.read(reinterpret_cast<char*>(_indices.data()), sizeof(int) * iSize);
 
         return fileStream.good();
@@ -295,5 +307,4 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
 
 void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject&) {}
 
-}  // namespace modelgeometry
-}  // namespace openspace
+}  // namespace openspace::modelgeometry

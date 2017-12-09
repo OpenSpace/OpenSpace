@@ -45,9 +45,7 @@
 
 namespace openspace {
 
-SpaceModule::SpaceModule()
-    : OpenSpaceModule("Space")
-{}
+SpaceModule::SpaceModule() : OpenSpaceModule(Name) {}
 
 void SpaceModule::internalInitialize() {
     FactoryManager::ref().addFactory(
@@ -58,7 +56,9 @@ void SpaceModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
-    fRenderable->registerClass<RenderableConstellationBounds>("RenderableConstellationBounds");
+    fRenderable->registerClass<RenderableConstellationBounds>(
+        "RenderableConstellationBounds"
+    );
     fRenderable->registerClass<RenderablePlanet>("RenderablePlanet");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
@@ -75,9 +75,9 @@ void SpaceModule::internalInitialize() {
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
-    auto fPlanetGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
-    ghoul_assert(fPlanetGeometry, "Planet geometry factory was not created");
-    fPlanetGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
+    auto fGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
+    ghoul_assert(fGeometry, "Planet geometry factory was not created");
+    fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
 }
 
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
@@ -88,7 +88,10 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableStars::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        planetgeometry::PlanetGeometry::Documentation()
+        KeplerTranslation::Documentation(),
+        TLETranslation::Documentation(),
+        planetgeometry::PlanetGeometry::Documentation(),
+        planetgeometry::SimpleSphereGeometry::Documentation()
     };
 }
 

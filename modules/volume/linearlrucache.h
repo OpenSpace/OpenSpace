@@ -30,7 +30,8 @@
 #include <iterator>
 
 namespace openspace {
-    
+namespace volume {
+
 template <typename ValueType>
 class LinearLruCache {
 public:
@@ -86,6 +87,7 @@ private:
     size_t _capacity;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___LINEARLRUCACHE___H__

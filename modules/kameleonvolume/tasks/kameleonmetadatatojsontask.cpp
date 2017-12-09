@@ -36,9 +36,10 @@
 namespace {
     const char* KeyInput = "Input";
     const char* KeyOutput = "Output";
-}
+} // namespace
 
 namespace openspace {
+namespace kameleonvolume {
 
 KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
                                                       const ghoul::Dictionary& dictionary)
@@ -79,20 +80,24 @@ documentation::Documentation KameleonMetadataToJsonTask::documentation() {
             {
                 "Type",
                 new StringEqualVerifier("KameleonMetadataToJsonTask"),
+                Optional::No,
                 "The type of this task"
             },
             {
                 KeyInput,
                 new StringAnnotationVerifier("A file path to a cdf file"),
+                Optional::No,
                 "The cdf file to extract data from"
             },
             {
                 KeyOutput,
                 new StringAnnotationVerifier("A valid filepath"),
+                Optional::No,
                 "The json file to export data into"
             }
         }
     };
 }
 
+} // namespace kameleonvolume
 } // namespace openspace

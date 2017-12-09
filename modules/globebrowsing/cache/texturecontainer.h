@@ -30,16 +30,13 @@
 #include <memory>
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace openspace::globebrowsing::cache {
 
 /**
  * Owner of texture data used for tiles. Instead of dynamically allocating textures one
  * by one, they are created once and reused.
  */
-class TextureContainer
-{
+class TextureContainer {
 public:
     /**
      * \param initData is the description of the texture type.
@@ -51,7 +48,7 @@ public:
 
     void reset();
     void reset(size_t numTextures);
-    
+
     /**
      * \returns a pointer to a texture if there is one texture never used before.
      * If there are no textures left, nullptr is returned. TextureContainer still owns
@@ -60,7 +57,7 @@ public:
     ghoul::opengl::Texture* getTextureIfFree();
 
     const TileTextureInitData& tileTextureInitData() const;
-    
+
     /**
      * \returns the number of textures in this TextureContainer
      */
@@ -68,13 +65,12 @@ public:
 
 private:
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
-    size_t _freeTexture;
+
     const TileTextureInitData _initData;
+    size_t _freeTexture;
     size_t _numTextures;
 };
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::cache
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__

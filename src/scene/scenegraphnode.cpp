@@ -54,13 +54,14 @@
 #include "scenegraphnode_doc.inl"
 
 namespace {
-    const std::string _loggerCat = "SceneGraphNode";
-    const std::string KeyRenderable = "Renderable";
+    const char* _loggerCat = "SceneGraphNode";
+    const char* KeyRenderable = "Renderable";
+    const char* KeyGuiPath = "GuiPath";
 
-    const std::string keyTransformTranslation = "Transform.Translation";
-    const std::string keyTransformRotation = "Transform.Rotation";
-    const std::string keyTransformScale = "Transform.Scale";
-}
+    const char* keyTransformTranslation = "Transform.Translation";
+    const char* keyTransformRotation = "Transform.Rotation";
+    const char* keyTransformScale = "Transform.Scale";
+} // namespace
 
 namespace openspace {
 
@@ -71,7 +72,9 @@ const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 const std::string SceneGraphNode::KeyTag = "Tag";
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
+std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     openspace::documentation::testSpecificationAndThrow(
         SceneGraphNode::Documentation(),
         dictionary,
@@ -102,8 +105,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
         dictionary.getValue(keyTransformTranslation, translationDictionary);
-        result->_transform.translation = 
-            std::unique_ptr<Translation>(Translation::createFromDictionary(translationDictionary));
+        result->_transform.translation = Translation::createFromDictionary(
+            translationDictionary
+        );
         if (result->_transform.translation == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
                 << result->name() << "'");
@@ -116,8 +120,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
     if (dictionary.hasKey(keyTransformRotation)) {
         ghoul::Dictionary rotationDictionary;
         dictionary.getValue(keyTransformRotation, rotationDictionary);
-        result->_transform.rotation =
-            std::unique_ptr<Rotation>(Rotation::createFromDictionary(rotationDictionary));
+        result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
         if (result->_transform.rotation == nullptr) {
             LERROR("Failed to create rotation for SceneGraphNode '"
                 << result->name() << "'");
@@ -130,8 +133,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
     if (dictionary.hasKey(keyTransformScale)) {
         ghoul::Dictionary scaleDictionary;
         dictionary.getValue(keyTransformScale, scaleDictionary);
-        result->_transform.scale =
-            std::unique_ptr<Scale>(Scale::createFromDictionary(scaleDictionary));
+        result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
         if (result->_transform.scale == nullptr) {
             LERROR("Failed to create scale for SceneGraphNode '"
                 << result->name() << "'");
@@ -160,13 +162,17 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
         }
     }
 
+    if (dictionary.hasKey(KeyGuiPath)) {
+        result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
+    }
+
     LDEBUG("Successfully created SceneGraphNode '"
                    << result->name() << "'");
     return result;
 }
 
 SceneGraphNode::SceneGraphNode()
-    : properties::PropertyOwner("")
+    : properties::PropertyOwner({ "" })
     , _parent(nullptr)
     , _scene(nullptr)
     , _performanceRecord({0, 0, 0, 0, 0})
@@ -178,11 +184,10 @@ SceneGraphNode::SceneGraphNode()
     }
 {}
 
-SceneGraphNode::~SceneGraphNode() {
-    deinitialize();
-}
+SceneGraphNode::~SceneGraphNode() {}
 
-bool SceneGraphNode::initialize() {
+void SceneGraphNode::initialize() {
+    LDEBUG("Initialize: " << name());
     if (_renderable) {
         _renderable->initialize();
     }
@@ -197,23 +202,26 @@ bool SceneGraphNode::initialize() {
     if (_transform.scale) {
         _transform.scale->initialize();
     }
-
-    return true;
 }
 
-bool SceneGraphNode::deinitialize() {
+void SceneGraphNode::initializeGL() {
+    if (_renderable) {
+        _renderable->initializeGL();
+    }
+}
+
+void SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
 
     if (_renderable) {
         _renderable->deinitialize();
-        _renderable = nullptr;
     }
-    _children.clear();
+}
 
-    // reset variables
-    _parent = nullptr;
-
-    return true;
+void SceneGraphNode::deinitializeGL() {
+    if (_renderable) {
+        _renderable->deinitializeGL();
+    }
 }
 
 void SceneGraphNode::traversePreOrder(std::function<void(SceneGraphNode*)> fn) {
@@ -316,7 +324,11 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
+    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(
+        _worldPositionCached.x,
+        _worldPositionCached.y,
+        _worldPositionCached.z
+    );
 
     RenderData newData = {
         data.camera,
@@ -360,7 +372,8 @@ void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) 
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
     ghoul_assert(
         !updateScene || _scene == parent._scene,
-        "For the scene to be updated, this object must belong to the same scene as the parent"
+        "For the scene to be updated, this object must belong to the same scene as "
+        "the parent"
     );
     ghoul_assert(
         !updateScene || _parent->_scene == parent._scene,
@@ -374,7 +387,9 @@ void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) 
     }
 }
 
-void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene) {
+void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child,
+                                 UpdateScene updateScene)
+{
     ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
 
     child->_parent = this;
@@ -389,10 +404,15 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child, UpdateSc
    }
 }
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child, UpdateScene updateScene) {
-    ghoul_assert(child._dependentNodes.empty(), "Nodes cannot depend on a node being detached");
+std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child,
+                                                            UpdateScene updateScene)
+{
+    ghoul_assert(
+        child._dependentNodes.empty(),
+        "Nodes cannot depend on a node being detached"
+    );
     ghoul_assert(child._parent != nullptr, "Node must be attached to a parent");
-    
+
     // Update of deps is deffered to the removal of the node from the scene
     clearDependencies(UpdateScene::No);
 
@@ -426,7 +446,8 @@ void SceneGraphNode::addDependency(SceneGraphNode& dependency, UpdateScene updat
     }
 }
 
-void SceneGraphNode::removeDependency(SceneGraphNode& dependency, UpdateScene updateScene) {
+void SceneGraphNode::removeDependency(SceneGraphNode& dependency, UpdateScene updateScene)
+{
     dependency._dependentNodes.erase(std::remove_if(
         dependency._dependentNodes.begin(),
         dependency._dependentNodes.end(),
@@ -464,7 +485,9 @@ void SceneGraphNode::clearDependencies(UpdateScene updateScene) {
     }
 }
 
-void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene) {
+void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& dependencies,
+                                     UpdateScene updateScene)
+{
     clearDependencies(UpdateScene::No);
 
     _dependencies = dependencies;
@@ -477,6 +500,21 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
     }
 }
 
+SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
+                                                       const glm::dvec3& targetModelSpace)
+{
+    if (_renderable) {
+        return _renderable->calculateSurfacePositionHandle(targetModelSpace);
+    }
+    else {
+        return {
+            glm::dvec3(0.0, 0.0, 0.0),
+            glm::normalize(targetModelSpace),
+            0.0
+        };
+    }
+}
+
 const std::vector<SceneGraphNode*>& SceneGraphNode::dependencies() const {
     return _dependencies;
 }
@@ -485,28 +523,23 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::dependentNodes() const {
     return _dependentNodes;
 }
 
-glm::dvec3 SceneGraphNode::position() const
-{
+glm::dvec3 SceneGraphNode::position() const {
     return _transform.translation->position();
 }
 
-const glm::dmat3& SceneGraphNode::rotationMatrix() const
-{
+const glm::dmat3& SceneGraphNode::rotationMatrix() const {
     return _transform.rotation->matrix();
 }
 
-double SceneGraphNode::scale() const
-{
+double SceneGraphNode::scale() const {
     return _transform.scale->scaleValue();
 }
 
-glm::dvec3 SceneGraphNode::worldPosition() const
-{
+glm::dvec3 SceneGraphNode::worldPosition() const {
     return _worldPositionCached;
 }
 
-const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
-{
+const glm::dmat3& SceneGraphNode::worldRotationMatrix() const {
     return _worldRotationCached;
 }
 
@@ -518,9 +551,12 @@ glm::dmat4 SceneGraphNode::inverseModelTransform() const {
     return _inverseModelTransformCached;
 }
 
-double SceneGraphNode::worldScale() const
-{
+double SceneGraphNode::worldScale() const {
     return _worldScaleCached;
+}
+
+const std::string& SceneGraphNode::guiPath() const {
+    return _guiPath;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
@@ -651,18 +687,15 @@ void SceneGraphNode::updateCamera(Camera* camera) const{
     psc origin(worldPosition());
     //int i = 0;
     // the camera position
-    
+
     psc relative = camera->position();
     psc focus = camera->focusPosition();
     psc relative_focus = relative - focus;
 
     psc target = origin + relative_focus;
-    
+
     camera->setPosition(target);
     camera->setFocusPosition(origin);
-
-    //printf("target: %f, %f, %f, %f\n", target.vec4().x, target.vec4().y, target.vec4().z, target.vec4().w);
-    
 }
 
 }  // namespace openspace

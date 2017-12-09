@@ -22,43 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/rendering/framebufferrenderer.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/performance/performancemeasurement.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/framebufferrenderer.h>
-#include <string>
+#include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/volumeraycaster.h>
-#include <openspace/rendering/raycastermanager.h>
-
-#include <openspace/performance/performancemeasurement.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+
+#include <string>
 #include <vector>
 
-#include <ghoul/opengl/programobject.h>
-
 namespace {
-    const std::string _loggerCat = "FramebufferRenderer";
-    const std::string ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
-    const std::string RaycastFragmentShaderPath = "${SHADERS}/framebuffer/raycastframebuffer.frag";
-    const std::string GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
-    const std::string GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
-    const std::string RenderFragmentShaderPath = "${SHADERS}/framebuffer/renderframebuffer.frag";
-}
+    const char* _loggerCat = "FramebufferRenderer";
+    const char* ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
+    const char* RaycastFragmentShaderPath =
+        "${SHADERS}/framebuffer/raycastframebuffer.frag";
+    const char* GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
+    const char* GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
+    const char* RenderFragmentShaderPath =
+        "${SHADERS}/framebuffer/renderframebuffer.frag";
+} // namespace
 
 namespace openspace {
 
 FramebufferRenderer::FramebufferRenderer()
     : _camera(nullptr)
     , _scene(nullptr)
-    , _resolution(glm::vec2(0)) {
-}
+    , _resolution(glm::vec2(0))
+{}
 
 FramebufferRenderer::~FramebufferRenderer() {}
 
@@ -75,7 +76,7 @@ void FramebufferRenderer::initialize() {
         size, -size, 0.0f, 1.0f,
         size,    size, 0.0f, 1.0f
     };
-    
+
     glGenVertexArrays(1, &_screenQuad);
     glBindVertexArray(_screenQuad);
 
@@ -83,7 +84,14 @@ void FramebufferRenderer::initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 4,
+        nullptr
+    );
     glEnableVertexAttribArray(0);
 
     GLint defaultFbo;
@@ -104,12 +112,36 @@ void FramebufferRenderer::initialize() {
     updateRaycastData();
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture, 0);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _mainColorTexture,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _mainDepthTexture,
+        0
+    );
 
     glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _exitColorTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _exitDepthTexture, 0);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        _exitColorTexture,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
+        _exitDepthTexture,
+        0
+    );
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -119,11 +151,13 @@ void FramebufferRenderer::initialize() {
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
     try {
-        _resolveProgram = ghoul::opengl::ProgramObject::Build("Framebuffer Resolve",
+        _resolveProgram = ghoul::opengl::ProgramObject::Build(
+            "Framebuffer Resolve",
             "${SHADERS}/framebuffer/resolveframebuffer.vert",
-            "${SHADERS}/framebuffer/resolveframebuffer.frag");
-    } catch (ghoul::RuntimeError e) {
-        LERROR(e.message);
+            "${SHADERS}/framebuffer/resolveframebuffer.frag"
+        );
+    } catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
     }
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
@@ -146,9 +180,7 @@ void FramebufferRenderer::deinitialize() {
     OsEng.renderEngine().raycasterManager().removeListener(*this);
 }
 
-void FramebufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool attached) {
-    (void) raycaster;
-    (void) attached;
+void FramebufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
     _dirtyRaycastData = true;
 }
 
@@ -166,38 +198,38 @@ void FramebufferRenderer::update() {
     if (_resolveProgram->isDirty()) {
         try {
             _resolveProgram->rebuildFromFile();
-        } catch (ghoul::RuntimeError& error) {
-            LERROR(error.message);
+        } catch (const ghoul::RuntimeError& error) {
+            LERRORC(error.component, error.message);
         }
     }
 
-    for (auto &program : _exitPrograms) {
+    for (auto& program : _exitPrograms) {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
-            } catch (ghoul::RuntimeError e) {
-                LERROR(e.message);
+            } catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
             }
         }
     }
 
-    for (auto &program : _raycastPrograms) {
+    for (auto& program : _raycastPrograms) {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
-            } catch (ghoul::RuntimeError e) {
-                LERROR(e.message);
+            } catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
             }
         }
     }
 
-    for (auto &program : _insideRaycastPrograms) {
+    for (auto& program : _insideRaycastPrograms) {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
             }
-            catch (ghoul::RuntimeError e) {
-                LERROR(e.message);
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
             }
         }
     }
@@ -212,7 +244,8 @@ void FramebufferRenderer::updateResolution() {
         GL_RGBA,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
-        true);
+        true
+    );
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
     glTexImage2DMultisample(
@@ -221,7 +254,8 @@ void FramebufferRenderer::updateResolution() {
         GL_DEPTH_COMPONENT32F,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
-        true);
+        true
+    );
 
     glBindTexture(GL_TEXTURE_2D, _exitColorTexture);
     glTexImage2D(
@@ -233,10 +267,11 @@ void FramebufferRenderer::updateResolution() {
         0,
         GL_RGBA,
         GL_UNSIGNED_SHORT,
-        nullptr);
+        nullptr
+    );
 
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_2D, _exitDepthTexture);
 
@@ -249,10 +284,11 @@ void FramebufferRenderer::updateResolution() {
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
-        nullptr);
+        nullptr
+    );
 
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     _dirtyResolution = false;
 }
@@ -263,9 +299,10 @@ void FramebufferRenderer::updateRaycastData() {
     _raycastPrograms.clear();
     _insideRaycastPrograms.clear();
 
-    const std::vector<VolumeRaycaster*>& raycasters = OsEng.renderEngine().raycasterManager().raycasters();
+    const std::vector<VolumeRaycaster*>& raycasters =
+        OsEng.renderEngine().raycasterManager().raycasters();
     int nextId = 0;
-    for (auto &raycaster : raycasters) {
+    for (auto& raycaster : raycasters) {
         RaycastData data;
         data.id = nextId++;
         data.namespaceName = "HELPER";
@@ -279,7 +316,7 @@ void FramebufferRenderer::updateRaycastData() {
         dict.setValue("id", data.id);
         std::string helperPath = raycaster->getHelperPath();
         ghoul::Dictionary helpersDict;
-        if (helperPath != "") {
+        if (!helperPath.empty()) {
             helpersDict.setValue("0", helperPath);
         }
         dict.setValue("helperPaths", helpersDict);
@@ -288,7 +325,12 @@ void FramebufferRenderer::updateRaycastData() {
         _raycastData[raycaster] = data;
 
         try {
-            _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build("Volume " + std::to_string(data.id) + " exit", vsPath, ExitFragmentShaderPath, dict);
+            _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
+                "Volume " + std::to_string(data.id) + " exit",
+                vsPath,
+                ExitFragmentShaderPath,
+                dict
+            );
         } catch (ghoul::RuntimeError e) {
             LERROR(e.message);
         }
@@ -299,7 +341,8 @@ void FramebufferRenderer::updateRaycastData() {
                 "Volume " + std::to_string(data.id) + " raycast",
                 vsPath,
                 RaycastFragmentShaderPath,
-                outsideDict);
+                outsideDict
+            );
         } catch (ghoul::RuntimeError e) {
             LERROR(e.message);
         }
@@ -310,10 +353,11 @@ void FramebufferRenderer::updateRaycastData() {
                 "Volume " + std::to_string(data.id) + " inside raycast",
                 "${SHADERS}/framebuffer/resolveframebuffer.vert",
                 RaycastFragmentShaderPath,
-                insideDict);
+                insideDict
+            );
         }
-        catch (ghoul::RuntimeError e) {
-            LERROR(e.message);
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
         }
     }
     _dirtyRaycastData = false;
@@ -327,11 +371,10 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             OsEng.renderEngine().performanceManager()
         );
     }
-    
-    if (!_scene)
+
+    if (!_scene || !_camera) {
         return;
-    if (!_camera)
-        return;
+    }
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -339,7 +382,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
     Time time = OsEng.timeManager().time();
 
-    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0 };
+    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0, {} };
     RendererTasks tasks;
 
     // Capture standard fbo
@@ -364,7 +407,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get(); 
+        ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
             exitProgram->activate();
             raycaster->renderExitPoints(raycasterTask.renderData, *exitProgram);
@@ -373,7 +416,10 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
         glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
         glm::vec3 cameraPosition;
-        bool cameraIsInside = raycaster->cameraIsInside(raycasterTask.renderData, cameraPosition);
+        bool cameraIsInside = raycaster->cameraIsInside(
+            raycasterTask.renderData,
+            cameraPosition
+        );
         ghoul::opengl::ProgramObject* raycastProgram = nullptr;
 
         if (cameraIsInside) {
@@ -388,7 +434,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                 raycastProgram->activate();
             }
         }
-        
+
         if (raycastProgram) {
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
@@ -408,7 +454,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
-            raycastProgram->setUniform("windowSize", glm::vec2(_resolution));
+            raycastProgram->setUniform("windowSize", _resolution);
 
 
             glDisable(GL_DEPTH_TEST);
@@ -422,8 +468,6 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             }
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
-
-
 
             raycaster->postRaycast(_raycastData[raycaster], *raycastProgram);
             raycastProgram->deactivate();
@@ -483,4 +527,4 @@ void FramebufferRenderer::updateRendererData() {
     OsEng.renderEngine().setRendererData(dict);
 }
 
-}
+} // namespace openspace

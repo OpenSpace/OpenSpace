@@ -26,15 +26,20 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 DistanceSwitch::~DistanceSwitch() {}
 
 bool DistanceSwitch::initialize() {
-    _objectScale = 1.0;
     for (unsigned int i = 0; i < _renderables.size(); ++i) {
         _renderables[i]->initialize();
+    }
+    return true;
+}
+
+bool DistanceSwitch::initializeGL() {
+    for (unsigned int i = 0; i < _renderables.size(); ++i) {
+        _renderables[i]->initializeGL();
     }
     return true;
 }
@@ -46,45 +51,39 @@ bool DistanceSwitch::deinitialize() {
     return true;
 }
 
-
-void DistanceSwitch::render(const RenderData& data) {
-    if (_maxDistances.size() == 0) {
-        return;
+bool DistanceSwitch::deinitializeGL() {
+    for (unsigned int i = 0; i < _renderables.size(); ++i) {
+        _renderables[i]->deinitializeGL();
     }
+    return true;
+}
 
-    double distanceToCamera = distance(data.camera.positionVec3(), data.modelTransform.translation);
+void DistanceSwitch::render(const RenderData& data, RendererTasks& tasks) {
+    const double distanceToCamera =
+        distance(data.camera.positionVec3(), data.modelTransform.translation);
 
-    if (distanceToCamera > _maxDistances.back() * _objectScale) {
-        return;
-    }
+    // This distance will be enough to render the globe as one pixel if the field of
+    // view is 'fov' radians and the screen resolution is 'res' pixels.
+    const double fov = 2 * glm::pi<double>() / 6; // 60 degrees
+    int res = 2880;
 
     // linear search through nodes to find which Renderable to render
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        if (distanceToCamera < _maxDistances[i] * _objectScale) {
-            _renderables[i]->render(data);
-            return;
+    for (std::shared_ptr<Renderable> renderable : _renderables) {
+        const double distance = res * renderable->boundingSphere() / tan(fov / 2);
+        if (distanceToCamera < distance) {
+            renderable->render(data, tasks);
         }
     }
 }
 
 void DistanceSwitch::update(const UpdateData& data) {
-    _objectScale = data.modelTransform.scale;
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->update(data);
+    for (std::shared_ptr<Renderable> renderable : _renderables) {
+        renderable->update(data);
     }
 }
 
-void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable,
-                                    double maxDistance)
-{
-    ghoul_assert(maxDistance > 0, "Renderable must have a positive maxDistance");
-    if (_maxDistances.size() > 0) {
-        ghoul_assert(maxDistance > _maxDistances.back(),
-            "Renderables must be inserted in ascending order wrt distance");
-    }
+void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable) {
     _renderables.push_back(renderable);
-    _maxDistances.push_back(maxDistance);
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

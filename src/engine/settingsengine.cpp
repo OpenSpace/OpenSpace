@@ -38,27 +38,22 @@
 
 #include <string>
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo SceneInfo = {
+        "Scenes",
+        "Current Scene",
+        "Specifies the currently loaded scene. If this value is changed it will cause "
+        "the current scene to be unloaded and the newly selected scene to be loaded"
+    };
+
+} // namespace
+
 namespace openspace {
 
 SettingsEngine::SettingsEngine()
-    : properties::PropertyOwner("Global Properties")
-    , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
-    , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
-    , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
-    , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
-    , _spiceUseExceptions("enableSpiceExceptions", "Enable Spice Exceptions", false)
+    : properties::PropertyOwner({ "Global Properties" })
+    , _scenes(SceneInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    _spiceUseExceptions.onChange([this] {
-        if (_spiceUseExceptions) {
-            SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::Yes);
-        } else {
-            SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::No);
-        }
-    });
-    addProperty(_spiceUseExceptions);
-    addProperty(_busyWaitForDecode);
-    addProperty(_logSGCTOutOfOrderErrors);
-    addProperty(_useDoubleBuffering);
     addProperty(_scenes);
 }
 
@@ -66,16 +61,17 @@ void SettingsEngine::initialize() {
     // Load all matching files in the Scene
     // TODO: match regex with either with new ghoul readFiles or local code
     const std::string sceneDir = "${SCENE}";
-    const std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
+    const std::vector<std::string> scenes = ghoul::filesystem::Directory(
+        sceneDir
+    ).readFiles();
 
     for (std::size_t i = 0; i < scenes.size(); ++i) {
-        std::size_t found = scenes[i].find_last_of("/\\");
+        const std::size_t found = scenes[i].find_last_of("/\\");
         _scenes.addOption(static_cast<int>(i), scenes[i].substr(found + 1));
     }
 
     // Set interaction to change ConfigurationManager and schedule the load
-    _scenes.onChange(
-        [this, sceneDir]() {
+    _scenes.onChange([this, sceneDir]() {
         std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
         OsEng.configurationManager().setValue(
             ConfigurationManager::KeyConfigScene, sceneFile);
@@ -88,18 +84,6 @@ void SettingsEngine::setModules(const std::vector<OpenSpaceModule*>& modules) {
     for (OpenSpaceModule* m : modules) {
         addPropertySubOwner(m);
     }
-}
-
-bool SettingsEngine::busyWaitForDecode() {
-    return _busyWaitForDecode.value();
-}
-
-bool SettingsEngine::logSGCTOutOfOrderErrors() {
-    return _logSGCTOutOfOrderErrors.value();
-}
-
-bool SettingsEngine::useDoubleBuffering() {
-    return _useDoubleBuffering.value();
 }
 
 }  // namespace openspace

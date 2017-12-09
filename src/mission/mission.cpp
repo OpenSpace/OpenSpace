@@ -29,12 +29,14 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 
+#include <algorithm>
+
 namespace {
     const char* KeyName = "Name";
     const char* KeyDescription = "Description";
     const char* KeyPhases = "Phases";
     const char* KeyTimeRange = "TimeRange";
-}
+} // namespace
 
 namespace openspace {
 
@@ -48,39 +50,44 @@ documentation::Documentation MissionPhase::Documentation() {
             {
                 KeyName,
                 new StringVerifier,
+                Optional::No,
                 "The human readable name of this mission or mission phase that is "
-                "displayed to the user.",
-                Optional::No
+                "displayed to the user."
             },
             {
                 KeyDescription,
                 new StringVerifier,
-                "A description of this mission or mission phase.",
-                Optional::Yes
+                Optional::Yes,
+                "A description of this mission or mission phase."
             },
             {
                 KeyTimeRange,
                 new ReferencingVerifier("core_util_timerange"),
+                Optional::Yes,
                 "The time range for which this mission or mission phase is valid. If no "
                 "time range is specified, the ranges of sub mission phases are used "
-                "instead.",
-                Optional::Yes
+                "instead."
             },
             {
                 KeyPhases,
-                new ReferencingVerifier("core_mission_mission"),
-                "The phases into which this mission or mission phase is separated.",
-                Optional::Yes
+                new TableVerifier({
+                    {
+                        "*",
+                        new ReferencingVerifier("core_mission_mission"),
+                        Optional::Yes
+                    }
+                }),
+                Optional::Yes,
+                "The phases into which this mission or mission phase is separated."
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
 MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     _name = dict.value<std::string>(KeyName);
     dict.getValue(KeyDescription, _description);
-    
+
     ghoul::Dictionary childDicts;
     if (dict.getValue(KeyPhases, childDicts)) {
         // This is a nested mission phase
@@ -118,8 +125,8 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
             _timeRange.include(overallTimeRange);
         }
         else {
-            // Its OK to not specify an overall time range, the time range for the 
-            // subphases will simply be used. 
+            // Its OK to not specify an overall time range, the time range for the
+            // subphases will simply be used.
             _timeRange.include(timeRangeSubPhases);
         }
     }
@@ -163,8 +170,8 @@ MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
 }
 
 void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
-    ghoul_assert(maxDepth >= 0, "maxDepth must not be negative");
-    
+    //ghoul_assert(maxDepth >= 0, "maxDepth must not be negative");
+
     if (maxDepth == 0) {
         return;
     }

@@ -28,11 +28,11 @@
  /**
  * \file ulonglongproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class ULongLongProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>unsigned long long</code>.
@@ -42,12 +42,10 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(ULongLongProperty, unsigned long long);
+REGISTER_NUMERICALPROPERTY_HEADER(ULongLongProperty, unsigned long long)
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___ULONGLONGPROPERTY___H__

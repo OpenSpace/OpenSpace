@@ -36,28 +36,22 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 
-using namespace ghoul::fontrendering;
-
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
-    
 namespace {
     const char* KeyRadii = "Radii";
-}
+} // namespace
+
+namespace openspace::globebrowsing::tileprovider {
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::ID::ColorLayers))
+    : TextTileProvider(
+        LayerManager::getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
     , _backgroundTile(Tile::TileUnavailable)
 {
-	
     _fontSize = 50;
-    _font = OsEng.fontManager().font("Mono", _fontSize);
+    _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
 
     glm::dvec3 radii(1,1,1);
-    if (!dictionary.getValue(KeyRadii, radii)) {
-        throw std::runtime_error("Must define key '" + std::string(KeyRadii) + "'");
-    }
+    dictionary.getValue(KeyRadii, radii);
     _ellipsoid = Ellipsoid(radii);
 }
 
@@ -67,7 +61,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
 {
     GeodeticPatch patch(tileIndex);
     bool aboveEquator = patch.isNorthern();
-        
+
     double tileLongitudalLength = roundedLongitudalLength(tileIndex);
 
     std::string unit = "m";
@@ -78,7 +72,9 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
 
     glm::vec2 textPosition;
     textPosition.x = 0;
-    textPosition.y = aboveEquator ? _fontSize / 2 : _initData.dimensionsWithPadding().y - 3 * _fontSize / 2;
+    textPosition.y = aboveEquator ?
+        _fontSize / 2.f :
+        _initData.dimensions().y - 3.f * _fontSize / 2.f;
     glm::vec4 color(1.0, 1.0, 1.0, 1.0);
 
     fontRenderer.render(
@@ -87,7 +83,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
         color,
         " %.0f %s",
         tileLongitudalLength, unit.c_str()
-        );
+    );
 }
 
 int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileIndex) const {
@@ -102,7 +98,7 @@ int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileInde
     if (useKm) {
         l /= 1000;
     }
-    l = std::round(l);
+    l = static_cast<int>(std::round(l));
     if (useKm) {
         l *= 1000;
     }
@@ -110,12 +106,11 @@ int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileInde
     return l;
 }
 
-TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const {
+TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const
+{
     int l = roundedLongitudalLength(tileIndex);
     TileIndex::TileHashKey key = static_cast<TileIndex::TileHashKey>(l);
     return key;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

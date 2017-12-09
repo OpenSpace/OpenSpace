@@ -32,8 +32,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {    
+namespace openspace::globebrowsing {
 
 template <typename T>
 class TemplatedStatsCollector {
@@ -85,7 +84,7 @@ public:
         Enabled enabled = Enabled::Yes, const std::string& delimiter = ",");
 
     ~StatsCollector();
-        
+
     void startNewRecord();
 
     void setEnabled(bool enabled);
@@ -116,8 +115,7 @@ private:
     bool _hasWrittenHeader;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "statscollector.inl"
 

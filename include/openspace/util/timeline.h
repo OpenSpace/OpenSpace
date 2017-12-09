@@ -64,7 +64,8 @@ public:
     void removeKeyframe(size_t id);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
     void removeKeyframesAfter(double timestamp, bool inclusive = false);
-    void removeKeyframesBetween(double begin, double end, bool inclusiveBegin = false, bool inclusiveEnd = false);
+    void removeKeyframesBetween(double begin, double end, bool inclusiveBegin = false,
+        bool inclusiveEnd = false);
     size_t nKeyframes() const;
     const Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false) const;
     const Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false) const;
@@ -91,6 +92,6 @@ bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b);
 
 } // namespace openspace
 
-#include <openspace/util/timeline.inl>;
+#include <openspace/util/timeline.inl>
 
 #endif // __OPENSPACE_CORE___TIMELINE___H__

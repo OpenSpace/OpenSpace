@@ -1,4 +1,4 @@
- /*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,22 +26,22 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
- 
+
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <modules/iswa/rendering/iswacygnet.h>
 
-namespace openspace {
-
 namespace {
-    const std::string _loggerCat = "Query";
-}
+    const char* _loggerCat = "Query";
+} // namespace
+
+namespace openspace {
 
 Scene* sceneGraph() {
     return OsEng.renderEngine().scene();
@@ -80,8 +80,9 @@ properties::Property* property(const std::string& uri) {
             return property;
         }
 
-        std::shared_ptr<ScreenSpaceRenderable> ssr = OsEng.renderEngine().screenSpaceRenderable(nameUri);
-        if(ssr){
+        std::shared_ptr<ScreenSpaceRenderable> ssr =
+            OsEng.renderEngine().screenSpaceRenderable(nameUri);
+        if (ssr) {
             properties::Property* property = ssr->property(remainingUri);
             return property;
         }

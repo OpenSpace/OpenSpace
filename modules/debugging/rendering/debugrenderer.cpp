@@ -35,9 +35,8 @@
 #include <iostream>
 
 namespace {
-    const std::string _loggerCat = "DebugRenderer";
-}
-
+    const char* _loggerCat = "DebugRenderer";
+} // namespace
 
 namespace openspace {
 
@@ -45,15 +44,15 @@ DebugRenderer* DebugRenderer::_reference = nullptr;
 
 DebugRenderer::DebugRenderer()  {
     _programObject = OsEng.renderEngine().buildRenderProgram(
-        "BasicDebugShader", 
+        "BasicDebugShader",
         "${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl",
         "${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl"
         );
 }
 
 DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject)
-    : _programObject(std::move(programObject)) 
-{ 
+    : _programObject(std::move(programObject))
+{
     // nothing to do
 }
 
@@ -108,7 +107,14 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(clippingSpacePoints[0]),
+        nullptr
+    );
 
     // Draw the vertices
     glDrawArrays(mode, 0, static_cast<GLsizei>(clippingSpacePoints.size()));
@@ -120,7 +126,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
         // the errors are not caused by DebugRenderer!!
         //LERROR(error);
     }
-        
+
     // Clean up after the draw call was made
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &_vaoID);
@@ -169,7 +175,7 @@ void DebugRenderer::renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
     const Vertices& V = clippingSpaceBoxCorners;
 
     std::vector<glm::vec4> lineVertices;
-        
+
     for (size_t i = 0; i < 4; i++) {
         lineVertices.push_back(V[2 * i]);
         lineVertices.push_back(V[2 * i + 1]);
@@ -235,7 +241,7 @@ void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& ot
     renderNiceBox(clippingSpaceFrustumCorners, rgba);
     glEnable(GL_CULL_FACE);
 }
-    
+
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 void DebugRenderer::renderAABB2(const globebrowsing::AABB2& screenSpaceAABB,
                                 RGBA rgba) const
@@ -249,7 +255,7 @@ void DebugRenderer::renderAABB2(const globebrowsing::AABB2& screenSpaceAABB,
     renderVertices(vertices, GL_LINES, rgba);
 }
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    
+
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 const DebugRenderer::Vertices DebugRenderer::verticesFor(
                                         const globebrowsing::AABB3& screenSpaceAABB) const

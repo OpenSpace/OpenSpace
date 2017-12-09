@@ -32,20 +32,18 @@
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-    
+
 class StaticTranslation : public Translation {
 public:
     StaticTranslation();
     StaticTranslation(const ghoul::Dictionary& dictionary);
-    virtual glm::dvec3 position() const;
-    virtual void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 private:
     properties::DVec3Property _position;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__

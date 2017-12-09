@@ -51,18 +51,48 @@ namespace {
     const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
     const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
     const std::string _loggerCat       = "Renderable Galaxy";
-}
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "StepSize",
+        "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
+        "PointStepSize",
+        "Point Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+        "Translation",
+        "Translation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+        "Rotation",
+        "Euler rotation",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
+        "NEnabledPointsRatio",
+        "Enabled points",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize("stepSize", "Step Size", 0.012, 0.0005, 0.05)
-    , _pointStepSize("pointStepSize", "Point Step Size", 0.01, 0.01, 0.1)
-    , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
-    , _enabledPointsRatio("nEnabledPointsRatio", "Enabled points", 0.2, 0, 1) {
-
+    , _stepSize(StepSizeInfo, 0.012f, 0.0005f, 0.05f)
+    , _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
+    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
+{
     float stepSize;
     glm::vec3 scaling, translation, rotation;
     glm::vec4 color;
@@ -123,12 +153,15 @@ namespace openspace {
     
 RenderableGalaxy::~RenderableGalaxy() {}
 
-bool RenderableGalaxy::initialize() {
+void RenderableGalaxy::initializeGL() {
     // Aspect is currently hardcoded to cubic voxels.
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
     _aspect = _aspect / std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
 
-    RawVolumeReader<glm::tvec4<GLfloat>> reader(_volumeFilename, _volumeDimensions);
+    volume::RawVolumeReader<glm::tvec4<GLfloat>> reader(
+        _volumeFilename,
+        _volumeDimensions
+    );
     _volume = reader.read();
     
     _texture = std::make_unique<ghoul::opengl::Texture>(
@@ -138,8 +171,12 @@ bool RenderableGalaxy::initialize() {
         GL_FLOAT,
         ghoul::opengl::Texture::FilterMode::Linear,
         ghoul::opengl::Texture::WrappingMode::Clamp);
-   
-    _texture->setPixelData(reinterpret_cast<char*>(_volume->data()), ghoul::opengl::Texture::TakeOwnership::No);
+
+    _texture->setPixelData(reinterpret_cast<char*>(
+        _volume->data()),
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+
     _texture->setDimensions(_volume->dimensions());
     _texture->uploadTexture();
 
@@ -148,7 +185,7 @@ bool RenderableGalaxy::initialize() {
 
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
 
-    std::function<void(bool)> onChange = [&](bool enabled) {
+    auto onChange = [&](bool enabled) {
         if (enabled) {
             OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
         }
@@ -186,8 +223,6 @@ bool RenderableGalaxy::initialize() {
 
     float maxdist = 0;
     
-
-    float x, y, z, r, g, b, a;
     for (size_t i = 0; i < _nPoints; ++i) {
         float x = pointData[i * 7 + 0];
         float y = pointData[i * 7 + 1];
@@ -230,13 +265,15 @@ bool RenderableGalaxy::initialize() {
         "${MODULE_GALAXY}/shaders/points.fs",
         ghoul::Dictionary());
 
-    _pointsProgram->setIgnoreUniformLocationError(ghoul::opengl::ProgramObject::IgnoreError::Yes);
+    _pointsProgram->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
+    );
 
     GLint positionAttrib = _pointsProgram->attributeLocation("inPosition");
     GLint colorAttrib = _pointsProgram->attributeLocation("inColor");
 
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glEnableVertexAttribArray(positionAttrib);    
+    glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
@@ -245,16 +282,13 @@ bool RenderableGalaxy::initialize() {
         
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    return true;
 }
     
-bool RenderableGalaxy::deinitialize() {
+void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
-    return true;
 }
     
 bool RenderableGalaxy::isReady() const {
@@ -266,12 +300,18 @@ void RenderableGalaxy::update(const UpdateData& data) {
 
         //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
-        glm::mat4 transform = glm::rotate(glm::mat4(1.0), eulerRotation.x, glm::vec3(1, 0, 0));
+        glm::mat4 transform = glm::rotate(
+            glm::mat4(1.0),
+            eulerRotation.x,
+            glm::vec3(1, 0, 0)
+        );
         transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
 
-
-        glm::mat4 volumeTransform = glm::scale(transform, static_cast<glm::vec3>(_volumeSize));
+        glm::mat4 volumeTransform = glm::scale(
+            transform,
+            static_cast<glm::vec3>(_volumeSize)
+        );
         _pointTransform = glm::scale(transform, static_cast<glm::vec3>(_pointScaling));
        
         glm::vec4 translation = glm::vec4(static_cast<glm::vec3>(_translation), 0.0);
@@ -300,28 +340,32 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
     
 
-    float lowerRampStart = maxDim * 0.02;
-    float lowerRampEnd = maxDim * 0.5;
+    float lowerRampStart = maxDim * 0.02f;
+    float lowerRampEnd = maxDim * 0.5f;
 
-    float upperRampStart = maxDim * 2.0;
-    float upperRampEnd = maxDim * 10;
+    float upperRampStart = maxDim * 2.f;
+    float upperRampEnd = maxDim * 10.f;
 
-    float opacityCoefficient = 1.0;
+    float opacityCoefficient = 1.f;
 
     if (length < lowerRampStart) {
-        opacityCoefficient = 0; // camera really close
+        opacityCoefficient = 0.f; // camera really close
     } else if (length < lowerRampEnd) {
         opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
     } else if (length < upperRampStart) {
-        opacityCoefficient = 1.0; // sweet spot (max)
+        opacityCoefficient = 1.f; // sweet spot (max)
     } else if (length < upperRampEnd) {
-        opacityCoefficient = 1.0 - (length - upperRampStart) / (upperRampEnd - upperRampStart); //fade out
+        opacityCoefficient = 1.f - (length - upperRampStart) /
+                             (upperRampEnd - upperRampStart); //fade out
     } else {
         opacityCoefficient = 0;
     }
 
     _opacityCoefficient = opacityCoefficient;
-    ghoul_assert(_opacityCoefficient >= 0.0 && _opacityCoefficient <= 1.0, "Opacity coefficient was not between 0 and 1");
+    ghoul_assert(
+        _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
+        "Opacity coefficient was not between 0 and 1"
+    );
     if (opacityCoefficient > 0) {
         _raycaster->setOpacityCoefficient(_opacityCoefficient);
         tasks.raycasterTasks.push_back(task);
@@ -329,7 +373,9 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 float RenderableGalaxy::safeLength(const glm::vec3& vector) {
-    float maxComponent = std::max(std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z));
+    float maxComponent = std::max(
+        std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z)
+    );
     return glm::length(vector / maxComponent) * maxComponent;
 }
 

@@ -27,23 +27,19 @@
 
 #include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
-    
+namespace openspace::globebrowsing::tileprovider {
+
 /**
  * Provides <code>Tile</code>s with the chunk index rendered as text onto its tiles.
  */
 class TileIndexTileProvider : public TextTileProvider {
 public:
     TileIndexTileProvider(const ghoul::Dictionary& dict);
-    
+
     virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
+        const TileIndex& tileIndex) const override;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEINDEX_TILE_PROVIDER___H__

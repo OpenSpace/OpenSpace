@@ -27,8 +27,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(radii) {
     updateInternalCache();
@@ -42,7 +41,7 @@ void Ellipsoid::updateInternalCache() {
 
     _cached._oneOverRadiiSquared = glm::dvec3(1) / _cached._radiiSquared;
     _cached._radiiToTheFourth = _cached._radiiSquared * _cached._radiiSquared;
-        
+
     std::vector<double> radii = { _radii.x, _radii.y, _radii.z };
     std::sort(radii.begin(), radii.end());
     _cached._minimumRadius = radii[0];
@@ -59,7 +58,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     double beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
     double n = glm::length(beta * p * _cached._oneOverRadiiSquared);
     double alpha = (1.0 - beta) * (glm::length(p) / n);
-        
+
     glm::dvec3 p2 = p * p;
     glm::dvec3 d, d2, d3;
 
@@ -73,7 +72,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
         d = glm::dvec3(1.0) + alpha * _cached._oneOverRadiiSquared;
         d2 = d * d;
         d3 = d * d2;
-            
+
         s = glm::dot(p2 / (_cached._radiiSquared * d2), glm::dvec3(1.0)) - 1.0;
 
         dSdA = -2.0 * glm::dot(p2 / (_cached._radiiToTheFourth * d3), glm::dvec3(1.0));
@@ -82,7 +81,9 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     return p / d;
 }
 
-glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(const glm::dvec3& p) const {
+glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(
+                                                                const glm::dvec3& p) const
+{
     glm::dvec3 normal = p * _cached._oneOverRadiiSquared;
     return glm::normalize(normal);
 }
@@ -92,14 +93,13 @@ glm::dvec3 Ellipsoid::geodeticSurfaceNormal(Geodetic2 geodetic2) const {
     //geodetic2.lon = geodetic2.lon > M_PI ? geodetic2.lon - M_PI * 2 : geodetic2.lon;
     return glm::dvec3(
         cosLat * cos(geodetic2.lon),
-        cosLat * sin(geodetic2.lon), 
+        cosLat * sin(geodetic2.lon),
         sin(geodetic2.lat));
 }
 
 const glm::dvec3& Ellipsoid::radii() const {
     return _radii;
 }
-
 
 const glm::dvec3& Ellipsoid::radiiSquared() const {
     return _cached._radiiSquared;
@@ -132,7 +132,7 @@ double Ellipsoid::longitudalDistance(double lat, double lon1, double lon2) const
     return meanRadius * std::abs(lon2 - lon1);
 }
 
-double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const{
+double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const {
     // https://en.wikipedia.org/wiki/Meridian_arc
     // https://en.wikipedia.org/wiki/Great-circle_distance#Vector_version
 
@@ -146,22 +146,19 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
     return centralAngle * glm::length(centralNormal);
 }
 
-Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const
-{
+Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
     glm::dvec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
     return Geodetic2(
         asin(normal.z / length(normal)),    // Latitude
         atan2(normal.y, normal.x));            // Longitude
 }
 
-glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const
-{
+glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const {
     // Position on surface : height = 0
     return cartesianPosition(Geodetic3({ geodetic2, 0 }));
 }
 
-glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const
-{
+glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const {
     glm::dvec3 normal = geodeticSurfaceNormal(geodetic3.geodetic2);
     glm::dvec3 k = _cached._radiiSquared * normal;
     double gamma = sqrt(dot(k, normal));
@@ -169,5 +166,4 @@ glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const
     return rSurface + geodetic3.height * normal;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

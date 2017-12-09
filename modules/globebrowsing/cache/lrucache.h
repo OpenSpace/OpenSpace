@@ -27,10 +27,9 @@
 
 #include <list>
 #include <unordered_map>
+#include <vector>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace openspace::globebrowsing::cache {
 
 /**
  * Templated class implementing a Least-Recently-Used Cache.
@@ -41,7 +40,7 @@ class LRUCache {
 public:
     using Item = std::pair<KeyType, ValueType>;
     using Items = std::list<Item>;
-    
+
     /**
      * \param size is the maximum size of the cache given in number of cached items.
      */
@@ -63,12 +62,13 @@ public:
      * Pops the front of the queue.
      */
     Item popMRU();
-    
+
     /**
      * Pops the back of the queue.
      */
     Item popLRU();
     size_t size() const;
+    size_t maximumCacheSize() const;
 
 private:
     void putWithoutCleaning(const KeyType& key, const ValueType& value);
@@ -81,9 +81,7 @@ private:
     size_t _maximumCacheSize;
 };
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::cache
 
 #include <modules/globebrowsing/cache/lrucache.inl>
 

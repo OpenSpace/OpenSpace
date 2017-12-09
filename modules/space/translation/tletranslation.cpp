@@ -31,10 +31,12 @@
 #include <chrono>
 #include <fstream>
 #include <vector>
+#include <system_error>
 
 namespace {
     const char* KeyFile = "File";
-    
+    const char* KeyLineNum = "LineNum";
+
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
     static const std::vector<int> LeapYears = {
@@ -42,7 +44,7 @@ namespace {
         2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
         2044, 2048, 2052, 2056
     };
-    
+
     // Count the number of full days since the beginning of 2000 to the beginning of
     // the parameter 'year'
     int countDays(int year) {
@@ -52,28 +54,28 @@ namespace {
         const int Epoch = 2000;
         const int DaysRegularYear = 365;
         const int DaysLeapYear = 366;
-        
+
         if (year == Epoch) {
             return 0;
         }
-        
+
         // Get the position of the most recent leap year
         auto lb = std::lower_bound(LeapYears.begin(), LeapYears.end(), year);
-        
+
         // Get the position of the epoch
         auto y2000 = std::find(LeapYears.begin(), LeapYears.end(), Epoch);
-        
+
         // The distance between the two iterators gives us the number of leap years
         int nLeapYears = static_cast<int>(std::abs(std::distance(y2000, lb)));
-        
+
         int nYears = std::abs(year - Epoch);
         int nRegularYears = nYears - nLeapYears;
-        
+
         // Get the total number of days as the sum of leap years + non leap years
         int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
         return result;
-    };
-    
+    }
+
     // Returns the number of leap seconds that lie between the {year, dayOfYear}
     // time point and { 2000, 1 }
     int countLeapSeconds(int year, int dayOfYear) {
@@ -87,9 +89,9 @@ namespace {
                 std::tie(year, dayOfYear) < std::tie(rhs.year, rhs.dayOfYear);
             }
         };
-        
+
         const LeapSecond Epoch = { 2000, 1};
-        
+
         // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
         static const std::vector<LeapSecond> LeapSeconds = {
             { 1972, 1 },
@@ -121,25 +123,25 @@ namespace {
             { 2015, 182 },
             { 2017, 1 }
         };
-        
+
         // Get the position of the last leap second before the desired date
         LeapSecond date { year, dayOfYear };
         auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
-        
+
         // Get the position of the Epoch
         auto y2000 = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), Epoch);
-        
+
         // The distance between the two iterators gives us the number of leap years
         int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
         return nLeapSeconds;
-    };
-    
+    }
+
     double epochFromSubstring(const std::string& epochString) {
         // The epochString is in the form:
         // YYDDD.DDDDDDDD
         // With YY being the last two years of the launch epoch, the first DDD the day
         // of the year and the remaning a fractional part of the day
-        
+
         // The main overview of this function:
         // 1. Reconstruct the full year from the YY part
         // 2. Calculate the number of seconds since the beginning of the year
@@ -149,13 +151,13 @@ namespace {
         // 4. Get the number of leap seconds since January 1st, 2000 and remove them
         // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
         // midnight
-        
+
         // According to https://celestrak.com/columns/v04n03/
         // Apparently, US Space Command sees no need to change the two-line element
         // set format yet since no artificial earth satellites existed prior to 1957.
         // By their reasoning, two-digit years from 57-99 correspond to 1957-1999 and
         // those from 00-56 correspond to 2000-2056. We'll see each other again in 2057!
-        
+
         // 1. Get the full year
         std::string yearPrefix = [y = epochString.substr(0, 2)](){
             int year = std::atoi(y.c_str());
@@ -167,7 +169,7 @@ namespace {
         // 2.
         // 2.a
         double daysInYear = std::atof(epochString.substr(2).c_str());
-        
+
         // 2.b
         bool isInLeapYear = std::find(
             LeapYears.begin(),
@@ -179,12 +181,13 @@ namespace {
             // beyond the end of february (= 31+29 days)
             --daysInYear;
         }
-        
+
         // 3
         using namespace std::chrono;
         int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        double nSecondsSince2000 = (daysSince2000 + daysInYear) * SecondsPerDay;
-        
+        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
+
         // 4
         // We need to remove additionbal leap seconds past 2000 and add them prior to
         // 2000 to sync up the time zones
@@ -195,18 +198,18 @@ namespace {
 
         // 5
         double nSecondsEpochOffset = static_cast<double>(seconds(hours(12)).count());
-        
+
         // Combine all of the values
         double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
         return epoch;
     }
-    
+
     double calculateSemiMajorAxis(double meanMotion) {
         using namespace std::chrono;
         const double GravitationalConstant = 6.6740831e-11;
         const double MassEarth = 5.9721986e24;
         const double muEarth = GravitationalConstant * MassEarth;
-        
+
         // Use Kepler's 3rd law to calculate semimajor axis
         // a^3 / P^2 = mu / (2pi)^2
         // <=> a = ((mu * P^2) / (2pi^2))^(1/3)
@@ -215,14 +218,14 @@ namespace {
         // mu = G*M_earth
         using namespace std::chrono;
         double period = seconds(hours(24)).count() / meanMotion;
-        
+
         const double pisq = glm::pi<double>() * glm::pi<double>();
         double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
-        
+
         // We need the semi major axis in km instead of m
         return semiMajorAxis / 1000.0;
     }
-}
+} // namespace
 
 
 namespace openspace {
@@ -236,21 +239,25 @@ documentation::Documentation TLETranslation::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("TLETranslation"),
-                "",
                Optional::No
             },
             {
                 KeyFile,
                 new StringVerifier,
-                "Specifies the filename of the Two-Line-Element file",
-                Optional::No
+                Optional::No,
+                "Specifies the filename of the Two-Line-Element file"
+            },
+            {
+                KeyLineNum,
+                new DoubleGreaterVerifier(0),
+                Optional::No,
+                "Specifies the line number within the file where the group of 3 TLE "
+                "lines begins (1-based)."
             }
-        },
-        Exhaustive::No
+        }
     };
 }
 
-    
 TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary)
     : KeplerTranslation()
 {
@@ -259,14 +266,15 @@ TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary)
         dictionary,
         "TLETranslation"
     );
-    
+
     std::string file = dictionary.value<std::string>(KeyFile);
-    readTLEFile(file);
+    int lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
+    readTLEFile(file, lineNum);
 }
 
-void TLETranslation::readTLEFile(const std::string& filename) {
+void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
     ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
-    
+
     std::ifstream file;
     file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
     file.open(filename);
@@ -282,106 +290,93 @@ void TLETranslation::readTLEFile(const std::string& filename) {
         double meanMotion = 0.0;
         double epoch = 0.0;
     } keplerElements;
-    
-    enum class State {
-        Initial = 0,
-        ReadFirstLine,
-        ReadSecondLine,
-        Finished = ReadSecondLine
-    };
-    
-    State state = State::Initial;
 
     std::string line;
-    while (std::getline(file, line)) {
-        if (line[0] == '1') {
-            // First line
-            // Field Columns Content
-            //    1  01-01   Line number
-            //    2  03-07   Satellite number
-            //    3  08-08   Classification (U = Unclassified)
-            //    4  10-11   International Designator (Last two digits of launch year)
-            //    5  12-14   International Designator (Launch number of the year)
-            //    6  15-17   International Designator(piece of the launch)    A
-            //    7  19-20   Epoch Year(last two digits of year)
-            //    8     21-32   Epoch(day of the year and fractional portion of the day)
-            //    9     34-43   First Time Derivative of the Mean Motion divided by two
-            //    10 45-52   Second Time Derivative of Mean Motion divided by six
-            //    11 54-61   BSTAR drag term(decimal point assumed)[10] - 11606 - 4
-            //    12 63-63   The "Ephemeris type"
-            //    13 65-68     Element set  number.Incremented when a new TLE is generated
-            //    14 69-69   Checksum (modulo 10)
-        
-            keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
-            state = State::ReadFirstLine;
-        }
-        else if (line[0] == '2') {
-            if (state != State::ReadFirstLine) {
-                throw ghoul::RuntimeError(
-                    "Malformed TLE file: '" + filename + "'. Line 2 before line 1",
-                    "TLETranslation"
-                );
-            }
-            // Second line
-            //Field    Columns    Content
-            //    1  01-01  Line number
-            //    2  03-07  Satellite number
-            //    3     09-16  Inclination (degrees)
-            //    4     18-25  Right ascension of the ascending node (degrees)
-            //    5     27-33  Eccentricity (decimal point assumed)
-            //    6     35-42  Argument of perigee (degrees)
-            //    7     44-51  Mean Anomaly (degrees)
-            //    8     53-63  Mean Motion (revolutions per day)
-            //    9     64-68  Revolution number at epoch (revolutions)
-            //    10 69-69  Checksum (modulo 10)
-            
-            std::stringstream stream;
-            stream.exceptions(std::ios::failbit);
-            
-            // Get inclination
-            stream.str(line.substr(8, 8));
-            stream >> keplerElements.inclination;
-            stream.clear();
-            
-            // Get Right ascension of the ascending node
-            stream.str(line.substr(17, 8));
-            stream >> keplerElements.ascendingNode;
-            stream.clear();
+    // Loop through and throw out lines until getting to the linNum of interest
+    for (int i = 1; i < lineNum; ++i) {
+        std::getline(file, line);
+    }
+    std::getline(file, line); // Throw out the TLE title line (1st)
 
-            // Get Eccentricity
-            stream.str("0." + line.substr(26, 7));
-            stream >> keplerElements.eccentricity;
-            stream.clear();
-            
-            // Get argument of periapsis
-            stream.str(line.substr(34, 8));
-            stream >> keplerElements.argumentOfPeriapsis;
-            stream.clear();
-            
-            // Get mean anomaly
-            stream.str(line.substr(43, 8));
-            stream >> keplerElements.meanAnomaly;
-            stream.clear();
-            
-            // Get mean motion
-            stream.str(line.substr(52, 11));
-            stream >> keplerElements.meanMotion;
-            
-            state = State::ReadSecondLine;
-            break;
-        }
+    std::getline(file, line); // Get line 1 of TLE format
+    if (line[0] == '1') {
+        // First line
+        // Field Columns   Content
+        //     1   01-01   Line number
+        //     2   03-07   Satellite number
+        //     3   08-08   Classification (U = Unclassified)
+        //     4   10-11   International Designator (Last two digits of launch year)
+        //     5   12-14   International Designator (Launch number of the year)
+        //     6   15-17   International Designator(piece of the launch)    A
+        //     7   19-20   Epoch Year(last two digits of year)
+        //     8   21-32   Epoch(day of the year and fractional portion of the day)
+        //     9   34-43   First Time Derivative of the Mean Motion divided by two
+        //    10   45-52   Second Time Derivative of Mean Motion divided by six
+        //    11   54-61   BSTAR drag term(decimal point assumed)[10] - 11606 - 4
+        //    12   63-63   The "Ephemeris type"
+        //    13   65-68   Element set  number.Incremented when a new TLE is generated
+        //    14   69-69   Checksum (modulo 10)
+        keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
+    } else {
+        throw ghoul::RuntimeError("File " + filename + " @ line "
+                  + std::to_string(lineNum + 1) + " doesn't have '1' header");
     }
-    
-    if (state != State::Finished) {
-        throw ghoul::RuntimeError(
-            "Malformed TLE file: Line 1 or 2 missing",
-            "TLETranslation"
-        );
+
+    std::getline(file, line); // Get line 2 of TLE format
+    if (line[0] == '2') {
+        // Second line
+        // Field    Columns   Content
+        //     1      01-01   Line number
+        //     2      03-07   Satellite number
+        //     3      09-16   Inclination (degrees)
+        //     4      18-25   Right ascension of the ascending node (degrees)
+        //     5      27-33   Eccentricity (decimal point assumed)
+        //     6      35-42   Argument of perigee (degrees)
+        //     7      44-51   Mean Anomaly (degrees)
+        //     8      53-63   Mean Motion (revolutions per day)
+        //     9      64-68   Revolution number at epoch (revolutions)
+        //    10      69-69   Checksum (modulo 10)
+
+        std::stringstream stream;
+        stream.exceptions(std::ios::failbit);
+
+        // Get inclination
+        stream.str(line.substr(8, 8));
+        stream >> keplerElements.inclination;
+        stream.clear();
+
+        // Get Right ascension of the ascending node
+        stream.str(line.substr(17, 8));
+        stream >> keplerElements.ascendingNode;
+        stream.clear();
+
+        // Get Eccentricity
+        stream.str("0." + line.substr(26, 7));
+        stream >> keplerElements.eccentricity;
+        stream.clear();
+
+        // Get argument of periapsis
+        stream.str(line.substr(34, 8));
+        stream >> keplerElements.argumentOfPeriapsis;
+        stream.clear();
+
+        // Get mean anomaly
+        stream.str(line.substr(43, 8));
+        stream >> keplerElements.meanAnomaly;
+        stream.clear();
+
+        // Get mean motion
+        stream.str(line.substr(52, 11));
+        stream >> keplerElements.meanMotion;
+    } else {
+        throw ghoul::RuntimeError("File " + filename + " @ line "
+                  + std::to_string(lineNum + 2) + " doesn't have '2' header");
     }
-    
+    file.close();
+
     // Calculate the semi major axis based on the mean motion using kepler's laws
     keplerElements.semiMajorAxis = calculateSemiMajorAxis(keplerElements.meanMotion);
-    
+
     // Converting the mean motion (revolutions per day) to period (seconds per revolution)
     using namespace std::chrono;
     double period = seconds(hours(24)).count() / keplerElements.meanMotion;
@@ -397,5 +392,5 @@ void TLETranslation::readTLEFile(const std::string& filename) {
         keplerElements.epoch
     );
 }
-    
+
 } // namespace openspace

@@ -25,34 +25,101 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
+#include <string>
 
-namespace openspace {
-namespace globebrowsing {
-namespace layergroupid  {
+namespace openspace::globebrowsing::layergroupid {
 
-static const int NUM_LAYER_GROUPS = 7;
-static const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+static constexpr int NUM_LAYER_GROUPS = 5;
+static constexpr const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
-    "ColorOverlays",
-    "GrayScaleLayers",
-    "GrayScaleColorOverlays",
+    "Overlays",
     "NightLayers",
     "WaterMasks"
 };
 
-enum ID {
+enum GroupID {
     HeightLayers,
     ColorLayers,
-    ColorOverlays,
-    GrayScaleLayers,
-    GrayScaleColorOverlays,
+    Overlays,
     NightLayers,
-    WaterMasks
+    WaterMasks,
+    Unknown,
 };
 
-} // namespace layergroupid
-} // namespace globebrowsing
-} // namespace openspace
+static constexpr int NUM_LAYER_TYPES = 8;
+static constexpr const char* LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
+    "DefaultTileLayer",
+    "SingleImageTileLayer",
+    "SizeReferenceTileLayer",
+    "TemporalTileLayer",
+    "TileIndexTileLayer",
+    "ByIndexTileLayer",
+    "ByLevelTileLayer",
+    "SolidColor",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class TypeID {
+    Unknown = -1,
+    DefaultTileLayer = 0,
+    SingleImageTileLayer = 1,
+    SizeReferenceTileLayer = 2,
+    TemporalTileLayer = 3,
+    TileIndexTileLayer = 4,
+    ByIndexTileLayer = 5,
+    ByLevelTileLayer = 6,
+    SolidColor = 7,
+};
+
+static constexpr int NUM_ADJUSTMENT_TYPES = 3;
+static constexpr const char* ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
+    "None",
+    "ChromaKey",
+    "TransferFunction",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class AdjustmentTypeID {
+    None = 0,
+    ChromaKey = 1,
+    TransferFunction = 2,
+};
+
+static constexpr int NUM_BLEND_MODES = 5;
+static constexpr const char* BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
+    "Normal",
+    "Multiply",
+    "Add",
+    "Subtract",
+    "Color",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class BlendModeID {
+    Normal = 0,
+    Multiply = 1,
+    Add = 2,
+    Subtract = 3,
+    Color = 4,
+};
+
+TypeID getTypeIDFromTypeString(const std::string& typeString);
+
+layergroupid::GroupID getGroupIDFromName(const std::string& layerGroupName);
+
+layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
+    const std::string& adjustmentTypeName);
+
+layergroupid::BlendModeID getBlendModeIDFromName(
+    const std::string& blendModeName);
+
+} // namespace openspace::globebrowsing::layergroupid
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__

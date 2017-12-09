@@ -35,17 +35,18 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+
 #ifndef SOCKET_ERROR
 #define SOCKET_ERROR (-1)
 #endif
 
 #ifndef INVALID_SOCKET
-#define INVALID_SOCKET (_SOCKET)(~0)
+#define INVALID_SOCKET static_cast<_SOCKET>(~0)
 #endif
 
-#ifndef NO_ERROR
-#define NO_ERROR 0L
-#endif
+// #ifndef NO_ERROR
+// #define NO_ERROR 0L
+// #endif
 
 #ifndef _ERRNO
 #define _ERRNO errno
@@ -53,50 +54,119 @@
 #endif
 
 #ifdef WIN32
+using SocketResultType = int;
+#else
+using SocketResultType = size_t;
+#endif // WIN32
+
+#ifdef WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+
+#pragma warning (push)
+#pragma warning (disable: 4574) // 'INCL_WINSOCK_API_TYPEDEFS' is defined to be '0'
+
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
+
+#pragma warning (pop)
 #endif
 
 #include <openspace/network/parallelconnection.h>
+
+#include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/interactionmode.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/util/time.h>
-#include <openspace/openspace.h>
 #include <openspace/scripting/script_helper.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 
 #include <ghoul/logging/logmanager.h>
 
-//lua functions
 #include "parallelconnection_lua.inl"
 
 namespace {
     const uint32_t ProtocolVersion = 2;
     const size_t MaxLatencyDiffs = 64;
-    const std::string _loggerCat = "ParallelConnection";
-}
+    const char* _loggerCat = "ParallelConnection";
+
+    static const openspace::properties::Property::PropertyInfo PasswordInfo = {
+        "Password",
+        "Password",
+        "The general password that allows this OpenSpace instance access to the Wormhole "
+        "server."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HostPasswordInfo = {
+        "HostPassword",
+        "Host Password",
+        "The password that is required to take control of the joint session and thus "
+        "send all commands to connected clients."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PortInfo = {
+        "Port",
+        "Port",
+        "The port on which the Wormhole server is listening to connections from "
+        "OpenSpace."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AddressInfo = {
+        "Address",
+        "Address",
+        "The address of the Wormhole server either as a DNS name or an IP address."
+    };
+
+    static const openspace::properties::Property::PropertyInfo NameInfo = {
+        "Name",
+        "Connection Name",
+        "The name of this OpenSpace instance that will be potentially broadcast to other "
+        "connected instances."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BufferTimeInfo = {
+        "BufferTime",
+        "Buffer Time",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
+        "TimeKeyframeInterval",
+        "Time keyframe interval",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
+        "CameraKeyframeInterval",
+        "Camera Keyframe interval",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
+        "TimeTolerance",
+        "Time tolerance",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
 
 ParallelConnection::ParallelConnection()
-    : properties::PropertyOwner("ParallelConnection")
-    , _password("password", "Password")
-    , _hostPassword("hostPassword", "Host Password")
-    , _port("port", "Port", "20501")
-    , _address("address", "Address", "localhost")
-    , _name("name", "Connection name", "Anonymous")
-    , _bufferTime("bufferTime", "Buffer Time", 1, 0.5, 10)
-    , _timeKeyframeInterval("timeKeyframeInterval", "Time keyframe interval", 0.1, 0, 1)
-    , _cameraKeyframeInterval("cameraKeyframeInterval", "Camera Keyframe interval", 0.1, 0, 1)
-    , _timeTolerance("timeTolerance", "Time tolerance", 1, 0.5, 5)
+    : properties::PropertyOwner({ "ParallelConnection" })
+    , _password(PasswordInfo)
+    , _hostPassword(HostPasswordInfo)
+    , _port(PortInfo, "20501")
+    , _address(AddressInfo, "localhost")
+    , _name(NameInfo, "Anonymous")
+    , _bufferTime(BufferTimeInfo, 1, 0.5, 10)
+    , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _timeTolerance(TimeToleranceInfo, 1.f, 0.5f, 5.f)
     , _lastTimeKeyframeTimestamp(0)
     , _lastCameraKeyframeTimestamp(0)
     , _clientSocket(INVALID_SOCKET)
@@ -114,11 +184,11 @@ ParallelConnection::ParallelConnection()
     , _handlerThread(nullptr)
 {
     addProperty(_name);
-    
+
     addProperty(_port);
     addProperty(_address);
     addProperty(_bufferTime);
-    
+
     addProperty(_password);
     addProperty(_hostPassword);
 
@@ -127,62 +197,63 @@ ParallelConnection::ParallelConnection()
     addProperty(_timeTolerance);
 
     _connectionEvent = std::make_shared<ghoul::Event<>>();
-    _handlerThread = std::make_unique<std::thread>(&ParallelConnection::threadManagement, this);
+    _handlerThread = std::make_unique<std::thread>(
+        &ParallelConnection::threadManagement,
+        this
+    );
 }
-        
-ParallelConnection::~ParallelConnection(){
-            
-    //signal that a disconnect should occur
+
+ParallelConnection::~ParallelConnection() {
+    // signal that a disconnect should occur
     signalDisconnect();
-            
-    //signal that execution has stopped
+
+    // signal that execution has stopped
     _isRunning.store(false);
-            
-    //join handler
+
+    // join handler
     _handlerThread->join();
 }
-        
-void ParallelConnection::threadManagement(){
+
+void ParallelConnection::threadManagement() {
     // The _disconnectCondition.wait(unqlock) stalls
     // How about moving this out of the thread and into the destructor? ---abock
-    
-    //while we're still running
+
+    // while we're still running
     while(_isRunning){
-        {
-            //lock disconnect mutex mutex
-            //not really needed since no data is modified but conditions need a mutex
-            std::unique_lock<std::mutex> disconnectLock(_disconnectMutex);
-            //wait for a signal to disconnect
-            _disconnectCondition.wait(disconnectLock, [this]() { return _disconnect.load(); });
-                
-            //perform actual disconnect
-            disconnect();
-                    
-        }
+        // lock disconnect mutex mutex
+        // not really needed since no data is modified but conditions need a mutex
+        std::unique_lock<std::mutex> disconnectLock(_disconnectMutex);
+        // wait for a signal to disconnect
+        _disconnectCondition.wait(
+            disconnectLock,
+            [this]() { return _disconnect.load(); }
+        );
+
+        // perform actual disconnect
+        disconnect();
     }
 }
-        
-void ParallelConnection::signalDisconnect(){
+
+void ParallelConnection::signalDisconnect() {
     //signal handler thread to disconnect
     _disconnect = true;
     _sendCondition.notify_all(); // Allow send function to terminate.
     _disconnectCondition.notify_all(); // Unblock thread management thread.
 }
-        
-void ParallelConnection::closeSocket(){
-            
+
+void ParallelConnection::closeSocket() {
     /*
         Windows shutdown options
         * SD_RECIEVE
         * SD_SEND
         * SD_BOTH
-             
+
         Linux & Mac shutdown options
         * SHUT_RD (Disables further receive operations)
         * SHUT_WR (Disables further send operations)
         * SHUT_RDWR (Disables further send and receive operations)
         */
-            
+
 #ifdef WIN32
     shutdown(_clientSocket, SD_BOTH);
     closesocket(_clientSocket);
@@ -190,40 +261,39 @@ void ParallelConnection::closeSocket(){
     shutdown(_clientSocket, SHUT_RDWR);
     close(_clientSocket);
 #endif
-            
+
     _clientSocket = INVALID_SOCKET;
 }
-        
-void ParallelConnection::disconnect(){
-    //we're disconnecting
-            
-    if (_clientSocket != INVALID_SOCKET){
-                
-        //must be run before trying to join communication threads, else the threads are stuck trying to receive data
+
+void ParallelConnection::disconnect() {
+    // We're disconnecting
+    if (_clientSocket != INVALID_SOCKET) {
+        // Must be run before trying to join communication threads, else the threads are
+        // stuck trying to receive data
         closeSocket();
-                
-        //tell connection thread to stop trying to connect
-        _tryConnect.store(false);
-                
-        //tell send thread to stop sending and listen thread to stop listenin
-        _isConnected.store(false);
+
+        // Ttell connection thread to stop trying to connect
+        _tryConnect = false;
+
+        // Tell send thread to stop sending and listen thread to stop listenin
+        _isConnected = false;
 
         setStatus(Status::Disconnected);
-               
-        //join connection thread and delete it
-        if(_connectionThread != nullptr){
+
+        // join connection thread and delete it
+        if (_connectionThread != nullptr) {
             _connectionThread->join();
             _connectionThread = nullptr;
         }
-                
-        //join send thread and delete it
-        if (_sendThread != nullptr){
+
+        // join send thread and delete it
+        if (_sendThread != nullptr) {
             _sendThread->join();
             _sendThread = nullptr;
         }
-                
-        //join listen thread and delete it
-        if( _listenThread != nullptr){
+
+        // join listen thread and delete it
+        if (_listenThread != nullptr) {
             _listenThread->join();
             _listenThread = nullptr;
         }
@@ -232,64 +302,70 @@ void ParallelConnection::disconnect(){
         _disconnect = false;
     }
 }
-        
-void ParallelConnection::clientConnect(){
 
-    //we're already connected (or already trying to connect), do nothing (dummy check)
-    if(_isConnected.load() || _tryConnect.load()){
+void ParallelConnection::clientConnect() {
+    // We're already connected (or already trying to connect), do nothing (dummy check)
+    if (_isConnected.load() || _tryConnect.load()) {
         return;
     }
-            
-    if (!initNetworkAPI()){
+
+    if (!initNetworkAPI()) {
         LERROR("Failed to initialize network API for Parallel Connection");
         return;
     }
-            
-    struct addrinfo *addresult = NULL, hints;
-    
+
+    struct addrinfo* addresult = NULL;
+    struct addrinfo hints;
+
     memset(&hints, 0, sizeof(hints));
-    
+
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
     hints.ai_flags = AI_PASSIVE;
 
     // Resolve the local address and port to be used by the server
-    int result = getaddrinfo(_address.value().c_str(), _port.value().c_str(), &hints, &addresult);
-    if (result != 0)
-    {
+    int result = getaddrinfo(
+        _address.value().c_str(),
+        _port.value().c_str(),
+        &hints,
+        &addresult
+    );
+    if (result != 0) {
         LERROR("Failed to parse hints for Parallel Connection");
         return;
     }
-            
-    //we're not connected
-    _isConnected.store(false);
-            
-    //we want to try and establish a connection
-    _tryConnect.store(true);
-            
-    //start connection thread
-    _connectionThread = std::make_unique<std::thread>(&ParallelConnection::establishConnection, this, addresult);
-            
+
+    // We're not connected
+    _isConnected = false;
+
+    // We want to try and establish a connection
+    _tryConnect = true;
+
+    // Start connection thread
+    _connectionThread = std::make_unique<std::thread>(
+        &ParallelConnection::establishConnection,
+        this,
+        addresult
+    );
 }
 
-void ParallelConnection::establishConnection(addrinfo *info){
-
+void ParallelConnection::establishConnection(addrinfo *info) {
     _clientSocket = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
-            
-    if (_clientSocket == INVALID_SOCKET){
+
+    if (_clientSocket == INVALID_SOCKET) {
         freeaddrinfo(info);
         LERROR("Failed to create client socket, disconnecting.");
 
-        //signal a disconnect
+        // Signal a disconnect
         signalDisconnect();
     }
-            
+
     int trueFlag = 1;
     int falseFlag = 0;
     int result;
-            
-    //set no delay
+
+    // Set no delay
     result = setsockopt(
         _clientSocket,                      // socket affected
         IPPROTO_TCP,                        // set option at TCP level
@@ -297,8 +373,8 @@ void ParallelConnection::establishConnection(addrinfo *info){
         reinterpret_cast<char*>(&trueFlag), // the cast is historical cruft
         sizeof(int)                         // length of option value
     );
-    
-    //set send timeout
+
+    // Set send timeout
     int timeout = 0;
     result = setsockopt(
         _clientSocket,
@@ -307,8 +383,8 @@ void ParallelConnection::establishConnection(addrinfo *info){
         reinterpret_cast<char*>(&timeout),
         sizeof(timeout)
     );
-    
-    //set receive timeout
+
+    // Set receive timeout
     result = setsockopt(
         _clientSocket,
         SOL_SOCKET,
@@ -327,7 +403,7 @@ void ParallelConnection::establishConnection(addrinfo *info){
     if (result == SOCKET_ERROR) {
         LERROR("Failed to set socket option 'reuse address'. Error code: " << _ERRNO);
     }
-    
+
     result = setsockopt(
         _clientSocket,
         SOL_SOCKET,
@@ -338,28 +414,31 @@ void ParallelConnection::establishConnection(addrinfo *info){
     if (result == SOCKET_ERROR) {
         LERROR("Failed to set socket option 'keep alive'. Error code: " << _ERRNO);
     }
-    
+
     LINFO("Attempting to connect to server "<< _address << " on port " << _port);
-                
+
     // Try to connect
     result = connect(_clientSocket, info->ai_addr, static_cast<int>(info->ai_addrlen));
-                
+
     // If the connection was successfull
     if (result != SOCKET_ERROR) {
         LINFO("Connection established with server at ip: "<< _address);
-                    
+
         // We're connected
-        _isConnected.store(true);
-                    
+        _isConnected = true;
+
         // Start sending messages
         _sendThread = std::make_unique<std::thread>(&ParallelConnection::sendFunc, this);
-                    
+
         // Start listening for communication
-        _listenThread = std::make_unique<std::thread>(&ParallelConnection::listenCommunication, this);
-                    
+        _listenThread = std::make_unique<std::thread>(
+            &ParallelConnection::listenCommunication,
+            this
+        );
+
         // We no longer need to try to establish connection
-        _tryConnect.store(false);
-                    
+        _tryConnect = false;
+
         _sendBufferMutex.lock();
         _sendBuffer.clear();
         _sendBufferMutex.unlock();
@@ -370,7 +449,7 @@ void ParallelConnection::establishConnection(addrinfo *info){
         LINFO("Connection attempt failed.");
         signalDisconnect();
     }
-            
+
     // Cleanup
     freeaddrinfo(info);
 }
@@ -379,7 +458,7 @@ void ParallelConnection::sendAuthentication() {
     std::string name = _name.value();
     // Length of this nodes name
     uint32_t nameLength = static_cast<uint32_t>(name.length());
-            
+
     // Total size of the buffer: (passcode + namelength + name)
     size_t size = 2 * sizeof(uint32_t) + nameLength;
 
@@ -390,14 +469,22 @@ void ParallelConnection::sendAuthentication() {
     uint32_t passCode = hash(_password.value());
 
     // Write passcode to buffer
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&passCode), reinterpret_cast<char*>(&passCode) + sizeof(uint32_t));
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&passCode),
+        reinterpret_cast<char*>(&passCode) + sizeof(uint32_t)
+    );
 
     // Write the length of the nodes name to buffer
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&nameLength), reinterpret_cast<char*>(&nameLength) + sizeof(uint32_t));
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&nameLength),
+        reinterpret_cast<char*>(&nameLength) + sizeof(uint32_t)
+    );
 
     // Write this node's name to buffer
     buffer.insert(buffer.end(), name.begin(), name.end());
-            
+
     // Send buffer
     queueOutMessage(Message(MessageType::Authentication, buffer));
 }
@@ -409,29 +496,29 @@ void ParallelConnection::queueInMessage(const Message& message) {
 
 void ParallelConnection::handleMessage(const Message& message) {
     switch (message.type){
-    case MessageType::Data:
-        dataMessageReceived(message.content);
-        break;
-    case MessageType::ConnectionStatus:
-        connectionStatusMessageReceived(message.content);
-        break;
-    case MessageType::NConnections:
-        nConnectionsMessageReceived(message.content);
-        break;
-    default:
-        //unknown message type
-        break;
+        case MessageType::Data:
+            dataMessageReceived(message.content);
+            break;
+        case MessageType::ConnectionStatus:
+            connectionStatusMessageReceived(message.content);
+            break;
+        case MessageType::NConnections:
+            nConnectionsMessageReceived(message.content);
+            break;
+        default:
+            //unknown message type
+            break;
     }
 }
 
 /*
 void ParallelConnection::initializationMessageReceived(){
-            
+
     int result;
-            
+
     uint32_t id, datasize;
     uint16_t numscripts;
-            
+
     std::vector<char> buffer;
     buffer.resize(sizeof(id));
 
@@ -448,25 +535,25 @@ void ParallelConnection::initializationMessageReceived(){
         //error
     }
     datasize = *(reinterpret_cast<uint32_t*>(buffer.data()));
-            
+
     buffer.clear();
     buffer.resize(sizeof(uint16_t));
     //read number of scripts
     result = receiveData(_clientSocket, buffer, sizeof(numscripts), 0);
     if(result < 0){
         //error
-    }        
+    }
     numscripts = *(reinterpret_cast<uint16_t*>(buffer.data()));
-            
+
     //length of current script
     uint16_t scriptlen;
-            
+
     buffer.clear();
     buffer.resize(sizeof(scriptlen));
-            
+
     //holder for current script
     std::string script;
-            
+
     for(int n = 0; n < numscripts; ++n){
         //read length of script
         result = receiveData(_clientSocket, buffer, sizeof(numscripts), 0);
@@ -474,40 +561,41 @@ void ParallelConnection::initializationMessageReceived(){
             //error
         }
         scriptlen = *(reinterpret_cast<uint16_t*>(buffer.data()));
-                
+
         //resize buffer
         buffer.clear();
         buffer.resize(scriptlen);
-                
+
         //read script
         result = receiveData(_clientSocket, buffer, scriptlen, 0);
 
         //assign current script
         script.clear();
         script.assign(buffer.begin(), buffer.end());
-                
+
         //queue received script
         OsEng.scriptEngine().queueScript(script);
     }
-            
+
     //we've gone through all scripts, initialization is done
     buffer.clear();
     writeHeader(buffer, MessageTypes::InitializationCompleted);
-            
+
     //let the server know
     std::cout << "initialization message recieved queue" << std::endl;
     queueMessage(InitializationCompleted, buffer);
-            
-    //we also need to force a time jump just to ensure that the server and client are synced
+
+    // we also need to force a time jump just to ensure that the server and client are
+    // synced
     _initializationTimejumpRequired.store(true);
-            
+
 }
 */
 
 double ParallelConnection::calculateBufferedKeyframeTime(double originalTime) {
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
 
-    double timeDiff = OsEng.runTime() - originalTime;
+    double timeDiff = OsEng.windowWrapper().applicationTime() - originalTime;
     if (_latencyDiffs.size() == 0) {
         _initialTimeDiff = timeDiff;
     }
@@ -527,11 +615,13 @@ double ParallelConnection::latencyStandardDeviation() const {
         accumulatedLatencyDiff += diff;
         accumulatedLatencyDiffSquared += diff*diff;
     }
-    double expectedLatencyDiffSquared = accumulatedLatencyDiffSquared / _latencyDiffs.size();
+    double expectedLatencyDiffSquared = accumulatedLatencyDiffSquared /
+                                        _latencyDiffs.size();
     double expectedLatencyDiff = accumulatedLatencyDiff / _latencyDiffs.size();
 
     // V(X) = E(x^2) - E(x)^2
-    double latencyVariance = expectedLatencyDiffSquared - expectedLatencyDiff*expectedLatencyDiff;
+    double latencyVariance = expectedLatencyDiffSquared -
+                             expectedLatencyDiff*expectedLatencyDiff;
     return std::sqrt(latencyVariance);
 }
 
@@ -541,22 +631,27 @@ double ParallelConnection::timeTolerance() const {
 
 void ParallelConnection::dataMessageReceived(const std::vector<char>& messageContent) {
     // The type of data message received
-    uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));   
-    std::vector<char> buffer(messageContent.begin() + sizeof(uint32_t), messageContent.end());
- 
+    uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));
+    std::vector<char> buffer(
+        messageContent.begin() + sizeof(uint32_t),
+        messageContent.end()
+    );
+
     switch (static_cast<datamessagestructures::Type>(type)) {
         case datamessagestructures::Type::CameraData: {
             datamessagestructures::CameraKeyframe kf(buffer);
             kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
-            OsEng.interactionHandler().removeKeyframesAfter(kf._timestamp);
-            interaction::KeyframeInteractionMode::CameraPose pose;
+            OsEng.navigationHandler().keyframeNavigator().removeKeyframesAfter(
+                kf._timestamp);
+            interaction::KeyframeNavigator::CameraPose pose;
             pose.focusNode = kf._focusNode;
             pose.position = kf._position;
             pose.rotation = kf._rotation;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            OsEng.interactionHandler().addKeyframe(kf._timestamp, pose);
+            OsEng.navigationHandler().keyframeNavigator().addKeyframe(
+                kf._timestamp, pose);
             break;
         }
         case datamessagestructures::Type::TimeData: {
@@ -576,11 +671,16 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            OsEng.scriptEngine().queueScript(sm._script, scripting::ScriptEngine::RemoteScripting::No);         
+            OsEng.scriptEngine().queueScript(
+                sm._script,
+                scripting::ScriptEngine::RemoteScripting::No
+            );
             break;
         }
         default: {
-            LERROR("Unidentified data message with identifier " << type << " received in parallel connection.");
+            LERROR("Unidentified data message with identifier " << type <<
+                   " received in parallel connection."
+            );
             break;
         }
     }
@@ -606,9 +706,8 @@ void ParallelConnection::queueOutMessage(const Message& message) {
     _sendBuffer.push_back(message);
     _sendCondition.notify_all();
 }
-        
-void ParallelConnection::sendFunc(){
-    int result;
+
+void ParallelConnection::sendFunc() {
     // While we're connected
     while (_isConnected && !_disconnect) {
         // Wait for signal then lock mutex and send first queued message
@@ -647,7 +746,9 @@ void ParallelConnection::sendFunc(){
                 reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
             );
 
-            result = send(
+            // result is most likely size_t, but send might return a different type on
+            // different platforms
+            auto result = send(
                 _clientSocket,
                 header.data(),
                 static_cast<int>(header.size()),
@@ -661,7 +762,8 @@ void ParallelConnection::sendFunc(){
             );
 
             if (result == SOCKET_ERROR) {
-                LERROR("Failed to send message.\nError: " <<
+                LERROR(
+                    "Failed to send message.\nError: " <<
                     _ERRNO << " detected in connection, disconnecting."
                 );
                 signalDisconnect();
@@ -675,7 +777,7 @@ void ParallelConnection::sendFunc(){
     _sendBuffer.clear();
 
 }
-        
+
 void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>& message)
 {
     if (message.size() < 2 * sizeof(uint32_t)) {
@@ -700,7 +802,7 @@ void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>
         hostName = std::string(&message[pointer], hostNameSize);
     }
     pointer += hostNameSize;
-    
+
     if (status > Status::Host) {
         LERROR("Invalid status.");
         return;
@@ -718,7 +820,7 @@ void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>
 
     setStatus(status);
 
-    OsEng.interactionHandler().clearKeyframes();
+    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
     OsEng.timeManager().clearKeyframes();
 
 }
@@ -735,35 +837,39 @@ void ParallelConnection::nConnectionsMessageReceived(const std::vector<char>& me
 
 
 
-//void ParallelConnection::initializationRequestMessageReceived(const std::vector<char>& message){
-            /*
+//void ParallelConnection::initializationRequestMessageReceived(
+                                                       // const std::vector<char>& message
+// {
+/*
     //get current state as scripts
     std::vector<std::string> scripts;
     std::map<std::string, std::string>::iterator state_it;
     {
         //mutex protect
         std::lock_guard<std::mutex> lock(_currentStateMutex);
-                
+
         for(state_it = _currentState.begin();
             state_it != _currentState.end();
             ++state_it){
-            scripts.push_back(scriptFromPropertyAndValue(state_it->first, state_it->second));
+            scripts.push_back(
+                scriptFromPropertyAndValue(state_it->first, state_it->second)
+            );
         }
     }
-            
+
     //get requester ID
     std::vector<char> buffer;
     buffer.resize(sizeof(uint32_t));
     receiveData(_clientSocket, buffer, sizeof(uint32_t), 0);
     uint32_t requesterID = *reinterpret_cast<uint32_t*>(buffer.data());
-            
+
     //total number of scripts sent
     uint16_t numscripts = 0;
-            
+
     //temporary buffers
     std::vector<char> scriptbuffer;
     std::vector<char> tmpbuffer;
-            
+
     //serialize and encode all scripts into scriptbuffer
     std::vector<std::string>::iterator script_it;
     datamessagestructures::ScriptMessage sm;
@@ -776,31 +882,43 @@ void ParallelConnection::nConnectionsMessageReceived(const std::vector<char>& me
         //serialize current script
         tmpbuffer.clear();
         sm.serialize(tmpbuffer);
-                
+
         //and insert into full buffer
         scriptbuffer.insert(scriptbuffer.end(), tmpbuffer.begin(), tmpbuffer.end());
-                
+
         //increment number of scripts
         numscripts++;
     }
-            
+
     //write header
     buffer.clear();
     writeHeader(buffer, MessageTypes::Initialization);
-            
+
     //write client ID to receive init message
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&requesterID), reinterpret_cast<char*>(&requesterID) + sizeof(uint32_t));
-            
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&requesterID),
+        reinterpret_cast<char*>(&requesterID) + sizeof(uint32_t)
+    );
+
     //write total size of data chunk
     uint32_t totlen = static_cast<uint32_t>(scriptbuffer.size());
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&totlen), reinterpret_cast<char*>(&totlen) + sizeof(uint32_t));
-            
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&totlen),
+        reinterpret_cast<char*>(&totlen) + sizeof(uint32_t)
+    );
+
     //write number of scripts
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&numscripts), reinterpret_cast<char*>(&numscripts) + sizeof(uint16_t));
-            
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&numscripts),
+        reinterpret_cast<char*>(&numscripts) + sizeof(uint16_t)
+    );
+
     //write all scripts
     buffer.insert(buffer.end(), scriptbuffer.begin(), scriptbuffer.end());
-            
+
     //queue message
     std::cout << "initializationRequest queue" << std::endl;
     queueMessage(MessageType::Initialization, buffer);
@@ -815,7 +933,7 @@ void ParallelConnection::listenCommunication() {
     std::vector<char> messageBuffer;
 
     int nBytesRead = 0;
-            
+
     // While we're still connected
     while (_isConnected.load()) {
         // Receive the header data
@@ -824,7 +942,10 @@ void ParallelConnection::listenCommunication() {
         // If enough data was received
         if (nBytesRead <= 0) {
             if (!_disconnect) {
-                LERROR("Error " << _ERRNO << " detected in connection when reading header, disconnecting!");
+                LERROR(
+                    "Error " << _ERRNO <<
+                    " detected in connection when reading header, disconnecting!"
+                );
                 signalDisconnect();
             }
             break;
@@ -844,7 +965,10 @@ void ParallelConnection::listenCommunication() {
         uint32_t messageSizeIn = *(ptr++);
 
         if (protocolVersionIn != ProtocolVersion) {
-            LERROR("Protocol versions do not match. Server version: " << protocolVersionIn << ", Client version: " << ProtocolVersion);
+            LERROR(
+                "Protocol versions do not match. Server version: " <<
+                protocolVersionIn << ", Client version: " << ProtocolVersion
+            );
             signalDisconnect();
             break;
         }
@@ -862,7 +986,9 @@ void ParallelConnection::listenCommunication() {
 
         if (nBytesRead <= 0) {
             if (!_disconnect) {
-                LERROR("Error " << _ERRNO << " detected in connection when reading message, disconnecting!");
+                LERROR(
+                    "Error " << _ERRNO <<
+                    " detected in connection when reading message, disconnecting!");
                 signalDisconnect();
             }
             break;
@@ -877,8 +1003,8 @@ void ParallelConnection::listenCommunication() {
 int ParallelConnection::receiveData(_SOCKET& socket, std::vector<char>& buffer,
                                     int length, int flags)
 {
-    int result = 0;
-    int received = 0;
+    SocketResultType result = 0;
+    SocketResultType received = 0;
     while (result < length) {
         received = recv(socket, buffer.data() + result, length - result, flags);
 
@@ -893,9 +1019,9 @@ int ParallelConnection::receiveData(_SOCKET& socket, std::vector<char>& buffer,
         }
     }
 
-    return result;
+    return static_cast<int>(result);
 }
-        
+
 void ParallelConnection::setPort(std::string port){
     _port = std::move(port);
 }
@@ -903,12 +1029,11 @@ void ParallelConnection::setPort(std::string port){
 void ParallelConnection::setAddress(std::string address){
     _address = std::move(address);
 }
-        
+
 void ParallelConnection::setName(std::string name){
     _name = std::move(name);
 }
-        
-       
+
 void ParallelConnection::requestHostship(){
     std::vector<char> buffer;
     uint32_t passcode = hash(_hostPassword);
@@ -959,7 +1084,7 @@ void ParallelConnection::sendScript(std::string script) {
 
     datamessagestructures::ScriptMessage sm;
     sm._script = std::move(script);
-    
+
     std::vector<char> buffer;
     sm.serialize(buffer);
 
@@ -967,7 +1092,7 @@ void ParallelConnection::sendScript(std::string script) {
 }
 
 void ParallelConnection::resetTimeOffset() {
-    OsEng.interactionHandler().clearKeyframes();
+    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
     OsEng.timeManager().clearKeyframes();
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
     _latencyDiffs.clear();
@@ -980,12 +1105,12 @@ void ParallelConnection::preSynchronization() {
         handleMessage(message);
         _receiveBuffer.pop_front();
     }
-    
+
     if (status() == Status::Host) {
         if (OsEng.timeManager().time().timeJumped()) {
             _timeJumped = true;
         }
-        double now = OsEng.runTime();
+        double now = OsEng.windowWrapper().applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
@@ -997,7 +1122,7 @@ void ParallelConnection::preSynchronization() {
         }
     }
 }
-         
+
 void ParallelConnection::setStatus(Status status) {
     if (_status != status) {
         _status = status;
@@ -1037,27 +1162,28 @@ const std::string& ParallelConnection::hostName() {
 }
 
 void ParallelConnection::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = OsEng.interactionHandler().focusNode();
+    SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = OsEng.interactionHandler().focusNodeToCameraVector();
+    kf._position = OsEng.navigationHandler().focusNodeToCameraVector();
 
-    kf._followNodeRotation = OsEng.interactionHandler().interactionMode()->followingNodeRotation();
+    kf._followNodeRotation =
+                     OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = OsEng.interactionHandler().focusNodeToCameraRotation();
+        kf._rotation = OsEng.navigationHandler().focusNodeToCameraRotation();
     } else {
-        kf._rotation = OsEng.interactionHandler().camera()->rotationQuaternion();
+        kf._rotation = OsEng.navigationHandler().camera()->rotationQuaternion();
     }
 
     kf._focusNode = focusNode->name();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.runTime();
+    kf._timestamp = OsEng.windowWrapper().applicationTime();
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;
@@ -1072,7 +1198,7 @@ void ParallelConnection::sendCameraKeyframe() {
 void ParallelConnection::sendTimeKeyframe() {
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::TimeKeyframe kf;
-    
+
     Time& time = OsEng.timeManager().time();
 
     kf._dt = time.deltaTime();
@@ -1081,7 +1207,7 @@ void ParallelConnection::sendTimeKeyframe() {
     kf._time = time.j2000Seconds();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.runTime();
+    kf._timestamp = OsEng.windowWrapper().applicationTime();
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;
@@ -1109,13 +1235,12 @@ uint32_t ParallelConnection::hash(const std::string& val) {
     hashVal += (hashVal << 15);
 
     return hashVal;
-};
-
+}
 
 std::shared_ptr<ghoul::Event<>> ParallelConnection::connectionEvent() {
     return _connectionEvent;
 }
-        
+
 scripting::LuaLibrary ParallelConnection::luaLibrary() {
     return {
         "parallel",

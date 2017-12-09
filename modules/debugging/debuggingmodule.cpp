@@ -24,6 +24,7 @@
 
 #include <modules/debugging/debuggingmodule.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 
@@ -33,16 +34,20 @@
 
 namespace openspace {
 
-DebuggingModule::DebuggingModule()
-    : OpenSpaceModule("Debugging")
-{}
+DebuggingModule::DebuggingModule() : OpenSpaceModule(Name) {}
 
 void DebuggingModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
-
 }
+
+std::vector<documentation::Documentation> DebuggingModule::documentations() const {
+    return {
+        RenderableDebugPlane::Documentation()
+    };
+}
+
 
 } // namespace openspace

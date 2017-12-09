@@ -29,12 +29,9 @@
 
 #include <string>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-}}
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct TileDepthTransform;
 
@@ -45,26 +42,25 @@ class GPUTileDepthTransform {
 public:
     /**
      * Sets the value of <code>TileDepthTransform</code> to its corresponding
-     * GPU struct. OBS! Users must ensure bind has been 
+     * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
     void setValue(ghoul::opengl::ProgramObject* programObject,
         const TileDepthTransform& depthTransform);
 
-    /** 
-     * Binds GLSL variables with identifiers starting with 
-     * nameBase within the provided shader program with this object. 
+    /**
+     * Binds GLSL variables with identifiers starting with
+     * nameBase within the provided shader program with this object.
      * After this method has been called, users may invoke setValue.
      */
     void bind(ghoul::opengl::ProgramObject* programObject,
         const std::string& nameBase);
-    
+
 private:
     GPUData<float> _gpuDepthOffset;
     GPUData<float> _gpuDepthScale;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPUTILEDEPTHTRANSFORM___H__

@@ -169,10 +169,7 @@ return {
                 GeometryFile = "models/orx_base_resized_12_sep_2016.obj",
                 Magnification = 0,
             },
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -182,7 +179,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = "SUN",
                 Kernels = OsirisRexKernels
             },
@@ -192,6 +189,7 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     {
         Name = "ORX_OCAMS_POLYCAM",
@@ -204,10 +202,7 @@ return {
                 GeometryFile = "models/orx_polycam_resized_12_sep_2016.obj",
                 Magnification = 0,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -225,6 +220,7 @@ return {
                 DestinationFrame = "ORX_SPACECRAFT",
             },
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     {
         Name = "ORX_REXIS",
@@ -237,10 +233,7 @@ return {
                 GeometryFile = "models/orx_rexis_resized_12_sep_2016.obj",
                 Magnification = 0,
             }, 
-            Textures = {
-                Type = "simple",
-                Color =  "textures/osirisTex.png",
-            },
+            ColorTexture = "textures/osirisTex.png",
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -258,6 +251,7 @@ return {
                 DestinationFrame = "ORX_SPACECRAFT",
             },
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     {
         Name = "POLYCAM FOV",
@@ -276,6 +270,7 @@ return {
                 BENNU_BODY -- Bennu
             }
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     { 
         Name = "REXIS FOV",
@@ -297,6 +292,7 @@ return {
                 [BENNU_BODY] = "IAU_BENNU"
             }
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
     --[[
     -- Latest image taken by POLYCAM
@@ -345,15 +341,16 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Frame = "IAU_EARTH",
-            Observer = "EARTH",
+                Observer = "EARTH",
             },
             Color = { 0.9, 0.9, 0.0 },
             StartTime = "2016 SEP 8 23:05:00.50",
             EndTime = "2016 SEP 9 00:05:00",
             SampleInterval = 60,
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
 
     -- Trail relative to solar system barycenter
@@ -364,7 +361,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = "SUN",
             },
             Color = { 0.2, 0.9, 0.2 },
@@ -372,6 +369,7 @@ return {
             EndTime = "2023 SEP 24 12:00:00",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
 
     -- Trail relative to Bennu
@@ -382,7 +380,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "OSIRIS-REX",
+                Target = "OSIRIS-REX",
                 Observer = BENNU_BODY,
             },
             Color = { 0.9, 0.2, 0.9 },
@@ -390,5 +388,6 @@ return {
             EndTime = "2023 SEP 24 12:00:00",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Missions/OSIRIS REx"
     },
 }

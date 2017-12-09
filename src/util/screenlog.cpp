@@ -29,7 +29,7 @@
 using std::string;
 
 namespace openspace {
-    
+
 ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
     : _timeToLive(std::move(timeToLive))
     , _logLevel(logLevel)
@@ -38,20 +38,21 @@ ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
 ScreenLog::~ScreenLog() {}
 
 void ScreenLog::removeExpiredEntries() {
+    std::lock_guard<std::mutex> guard(_mutex);
     auto t = std::chrono::steady_clock::now();
     auto ttl = _timeToLive;
-    
-    _entries.erase(
-        std::remove_if(
-            _entries.begin(),
-            _entries.end(),
-            [&t, &ttl](const LogEntry& e) { return (t - e.timeStamp) > ttl; }
-        ),
-        _entries.end()
+
+    auto rit = std::remove_if(
+        _entries.begin(),
+        _entries.end(),
+        [&t, &ttl](const LogEntry& e) { return (t - e.timeStamp) > ttl; }
     );
+
+    _entries.erase(rit, _entries.end() );
 }
 
 void ScreenLog::log(LogLevel level, const string& category, const string& message) {
+    std::lock_guard<std::mutex> guard(_mutex);
     if (level >= _logLevel) {
         _entries.push_back({
             level,
@@ -62,8 +63,9 @@ void ScreenLog::log(LogLevel level, const string& category, const string& messag
         });
     }
 }
-    
-const std::vector<ScreenLog::LogEntry>& ScreenLog::entries() const {
+
+std::vector<ScreenLog::LogEntry> ScreenLog::entries() const {
+    std::lock_guard<std::mutex> guard(_mutex);
     return _entries;
 }
 

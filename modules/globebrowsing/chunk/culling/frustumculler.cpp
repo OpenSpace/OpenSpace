@@ -28,9 +28,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/util/updatestructures.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace culling {
+namespace openspace::globebrowsing::culling {
 
 FrustumCuller::FrustumCuller(AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
@@ -40,11 +38,12 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     // Calculate the MVP matrix
     glm::dmat4 modelTransform = chunk.owner().modelTransform();
     glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 modelViewProjectionTransform = glm::dmat4(data.camera.projectionMatrix())
-        * viewTransform * modelTransform;
+    glm::dmat4 modelViewProjectionTransform = glm::dmat4(
+        data.camera.sgctInternal.projectionMatrix()
+    ) * viewTransform * modelTransform;
 
     const std::vector<glm::dvec4>& corners = chunk.getBoundingPolyhedronCorners();
-        
+
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
     std::vector<glm::vec4> clippingSpaceCorners(8);
@@ -52,13 +51,13 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
         glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
         clippingSpaceCorners[i] = cornerClippingSpace;
 
-        glm::dvec3 ndc = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+        glm::dvec3 ndc = glm::dvec3(
+            (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
+        );
         bounds.expand(ndc);
     }
-        
+
     return !(_viewFrustum.intersects(bounds));
 }
 
-} // namespace culling
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::culling

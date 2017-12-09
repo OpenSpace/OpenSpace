@@ -28,14 +28,14 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const std::string _loggerCat = "DataPlane";
-}
+    const char* _loggerCat = "DataPlane";
+} // namespace
 
 namespace openspace {
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :DataCygnet(dictionary)
-{     
+{
     _programName = "DataPlaneProgram";
     _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
     _fsPath = "${MODULE_ISWA}/shaders/dataplane_fs.glsl";
@@ -43,24 +43,24 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
 DataPlane::~DataPlane(){}
 
-bool DataPlane::initialize(){
+void DataPlane::initialize() {
     IswaCygnet::initialize();
 
-    if(_group){
+    if (_group) {
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
-    }else{
+    } else {
         _dataProcessor = std::make_shared<DataProcessorText>();
 
         //If autofiler is on, background values property should be hidden
-        _autoFilter.onChange([this](){
-            // If autofiler is selected, use _dataProcessor to set backgroundValues 
+        _autoFilter.onChange([this]() {
+            // If autofiler is selected, use _dataProcessor to set backgroundValues
             // and unregister backgroundvalues property.
-            if(_autoFilter.value()){
+            if (_autoFilter.value()) {
                 _backgroundValues.setValue(_dataProcessor->filterValues());
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
-            // else if autofilter is turned off, register backgroundValues 
+            // else if autofilter is turned off, register backgroundValues
             } else {
                 _backgroundValues.setVisibility(properties::Property::Visibility::All);
                 //_backgroundValues.setVisible(true);
@@ -73,22 +73,20 @@ bool DataPlane::initialize(){
     setPropertyCallbacks();
 
     _autoFilter.setValue(true);
-
-    return true;
 }
 
 bool DataPlane::createGeometry() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    
+
     // ============================
     //         GEOMETRY (quad)
     // ============================
     // GLfloat x,y, z;
     float s = _data->spatialScale.x;
-    const GLfloat x = s*_data->scale.x/2.0;
-    const GLfloat y = s*_data->scale.y/2.0;
-    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat x = s*_data->scale.x/2.f;
+    const GLfloat y = s*_data->scale.y/2.f;
+    const GLfloat z = s*_data->scale.z/2.f;
     const GLfloat w = _data->spatialScale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
@@ -105,9 +103,23 @@ bool DataPlane::createGeometry() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(0)
+    );
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 
     return true;
 }
@@ -157,14 +169,19 @@ std::vector<float*> DataPlane::textureData(){
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     // ===========
-    std::vector<float*> d = _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
+    std::vector<float*> d = _dataProcessor->processData(
+        _dataBuffer,
+        _dataOptions,
+        _textureDimensions
+    );
 
     // FOR TESTING
     // ===========
     end = std::chrono::system_clock::now();
     _numOfBenchmarks++;
     std::chrono::duration<double> elapsed_seconds = end-start;
-    _avgBenchmarkTime = ( (_avgBenchmarkTime * (_numOfBenchmarks-1)) + elapsed_seconds.count() ) / _numOfBenchmarks;
+    _avgBenchmarkTime = ((_avgBenchmarkTime * (_numOfBenchmarks - 1))
+                         + elapsed_seconds.count()) / _numOfBenchmarks;
     std::cout << " processData() " << name() << std::endl;
     std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
     std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
@@ -173,4 +190,4 @@ std::vector<float*> DataPlane::textureData(){
     return d;
 }
 
-}// namespace openspace
+} // namespace openspace

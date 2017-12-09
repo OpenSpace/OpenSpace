@@ -31,9 +31,9 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string KeyStart = "Start";
-    const std::string KeyEnd = "End";
-}
+    const char* KeyStart = "Start";
+    const char* KeyEnd = "End";
+} // namespace
 
 namespace openspace {
 
@@ -46,17 +46,16 @@ documentation::Documentation TimeRange::Documentation() {
             {
                 KeyStart,
                 new StringAnnotationVerifier("A string representing a valid date"),
-                "The start date of the time range",
-                Optional::No
+                Optional::No,
+                "The start date of the time range"
             },
             {
                 KeyEnd,
                 new StringAnnotationVerifier("A string representing a valid date"),
-                "The end date of the time range",
-                Optional::No
+                Optional::No,
+                "The end date of the time range"
             }
-        },
-        Exhaustive::Yes
+        }
     };
 }
 
@@ -68,14 +67,16 @@ TimeRange::TimeRange(double startTime, double endTime)
     : start(startTime)
     , end(endTime)
 {}
-    
+
 TimeRange::TimeRange(const ghoul::Dictionary& dict) {
     if (!initializeFromDictionary(dict, *this)) {
         throw std::runtime_error("Unable to read TimeRange from dictionary");
     }
 }
 
-bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRange& timeRange) {
+bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict,
+                                         TimeRange& timeRange)
+{
     std::string startTimeStr;
     std::string endTimeStr;
 
@@ -83,7 +84,7 @@ bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRang
     success &= dict.getValue(KeyStart, startTimeStr);
     success &= dict.getValue(KeyEnd, endTimeStr);
     if (success) {
-        // Parse to date. 
+        // Parse to date.
         // @TODO converting string to time stamp should not rely on Spice
         timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);
         timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(endTimeStr);
@@ -95,14 +96,14 @@ bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRang
     }
 }
 
-void TimeRange::include(double val){
+void TimeRange::include(double val) {
     if (start > val) {
         start = val;
     }
     if (end < val) {
         end = val;
     }
-};
+}
 
 void TimeRange::include(const TimeRange& other) {
     if (other.start < start) {
@@ -119,7 +120,7 @@ double TimeRange::duration() const {
 }
 
 bool TimeRange::isDefined() const {
-    return start <= end; 
+    return start <= end;
 }
 
 bool TimeRange::isEmpty() const {

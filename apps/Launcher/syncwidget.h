@@ -30,6 +30,7 @@
 #include <QMap>
 
 #include <openspace/engine/downloadmanager.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <libtorrent/torrent_handle.hpp>
 
@@ -51,7 +52,7 @@ Q_OBJECT
 public:
     SyncWidget(QWidget* parent, Qt::WindowFlags f = 0);
     ~SyncWidget();
-    
+
     void setSceneFiles(QMap<QString, QString> sceneFiles);
 
 private slots:
@@ -93,7 +94,10 @@ private:
     void clear();
     QStringList selectedScenes() const;
 
-    void handleFileFutureAddition(const std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>>& futures);
+    void handleFileFutureAddition(
+        const std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>>&
+        futures
+    );
 
     void handleDirectFiles();
     void handleFileRequest();
@@ -111,13 +115,20 @@ private:
     QList<FileRequest> _fileRequests;
     QList<TorrentFile> _torrentFiles;
 
+    std::mutex _filesDownloadingMutex;
+    std::set<std::string> _filesDownloading;
+
     std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>> _futures;
-    std::map<std::shared_ptr<openspace::DownloadManager::FileFuture>, InfoWidget*> _futureInfoWidgetMap;
+    std::map<
+        std::shared_ptr<openspace::DownloadManager::FileFuture>,
+        InfoWidget*
+    > _futureInfoWidgetMap;
 
     std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>> _futuresToAdd;
     std::atomic_flag _mutex;
 
     std::unique_ptr<openspace::DownloadManager> _downloadManager;
+    openspace::scripting::ScriptEngine _scriptEngine;
 
 };
 

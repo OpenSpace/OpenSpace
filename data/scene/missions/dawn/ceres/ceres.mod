@@ -13,10 +13,7 @@ return {
                 Radius = 6.390E5,
                 Segments = 100
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
+            ColorTexture = "textures/gray.png",
             StartTime = "2010 JAN 01 00:00:00",
             EndTime = "2018 JAN 22 12:00:00"
         },
@@ -34,7 +31,8 @@ return {
             Type = "Spice",
             Frame = "IAU_CERES",
             Reference = "GALACTIC"
-        }
+        },
+        GuiPath = "/Solar System/Dwarf Planets/Ceres"
     },
     --[[ Ceres Trail Module
     {   

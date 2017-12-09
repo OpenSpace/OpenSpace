@@ -39,7 +39,7 @@
 namespace openspace {
 
 IswaModule::IswaModule()
-    : OpenSpaceModule("ISWA")
+    : OpenSpaceModule(Name)
 {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Initialize,
@@ -48,7 +48,7 @@ IswaModule::IswaModule()
         }
     );
 }
-    
+
 scripting::LuaLibrary IswaModule::luaLibrary() const {
     return IswaManager::luaLibrary();
 }

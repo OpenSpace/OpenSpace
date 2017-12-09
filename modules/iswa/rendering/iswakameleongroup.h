@@ -28,13 +28,14 @@
 #include <modules/iswa/rendering/iswadatagroup.h>
 
 namespace openspace {
+
 class IswaKameleonGroup : public IswaDataGroup{
 public:
     IswaKameleonGroup(std::string name, std::string type);
     ~IswaKameleonGroup();
 
-    virtual void clearGroup();
-    
+    virtual void clearGroup() override;
+
     std::vector<int> fieldlineValue();
     void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
     void changeCdf(std::string path);

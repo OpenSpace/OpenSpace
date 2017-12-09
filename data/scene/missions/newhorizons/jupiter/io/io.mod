@@ -1,3 +1,5 @@
+local io_radius = 1.8213E6
+
 return {
     -- Io module
     {   
@@ -7,14 +9,15 @@ return {
             Type = "RenderablePlanetProjection",
             Frame = "IAU_IO", 
             Body = "IO",
+            Radius = io_radius,
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 1.8213E6,
+                Radius = io_radius,
                 Segments = 100
             },
+            ColorTexture = "textures/io.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/io.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },
@@ -42,7 +45,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "IO",
+                Target = "IO",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
@@ -52,6 +55,7 @@ return {
                 DestinationFrame = "ECLIPJ2000",
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
         --[[
         Ephemeris = {
             Type = "Spice",
@@ -74,7 +78,7 @@ return {
         Parent = "Io",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 7.4},
+            Size = 10^7.4,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Io-Text.png",
@@ -86,6 +90,7 @@ return {
                 Position = {0, -10000000, 0}
             },
         },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     },
     -- IoTrail module
     {   
@@ -95,12 +100,13 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "IO",
+                Target = "IO",
                 Observer = "JUPITER BARYCENTER",
             },
             Color = { 0.4, 0.4, 0.2 },
             Period =  42 / 24,
             Resolution = 1000
-        }
+        },
+        GuiPath = "/Solar System/Planets/Jupiter/Moons"
     }
 }

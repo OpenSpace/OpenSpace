@@ -31,14 +31,14 @@
 #include <chrono>
 #include <string>
 
-namespace openspace {
-namespace performance {
+namespace openspace::performance {
 
 class PerformanceManager;
 
 class PerformanceMeasurement {
 public:
-    PerformanceMeasurement(std::string identifier, performance::PerformanceManager* manager);
+    PerformanceMeasurement(std::string identifier,
+        performance::PerformanceManager* manager);
     ~PerformanceMeasurement();
 
 private:
@@ -47,7 +47,7 @@ private:
 
     std::chrono::high_resolution_clock::time_point _startTime;
 };
-    
+
 #define __MERGE(a,b)  a##b
 #define __LABEL(a) __MERGE(unique_name_, a)
 
@@ -58,8 +58,7 @@ private:
             (name), \
             OsEng.renderEngine().performanceManager() \
         )
-    
-} // namespace performance
-} // namespace openspace
+
+} // namespace openspace::performance
 
 #endif // __OPENSPACE_CORE___PERFORMANCEMEASUREMENT___H__

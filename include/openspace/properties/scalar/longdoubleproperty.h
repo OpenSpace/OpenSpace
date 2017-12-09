@@ -28,11 +28,11 @@
  /**
  * \file longdoubleproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class LongDoubleProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>long double</code>.
@@ -42,12 +42,10 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double);
+REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double)
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___LONGDOUBLEPROPERTY___H__

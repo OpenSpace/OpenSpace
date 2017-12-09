@@ -38,11 +38,9 @@
 #include <memory>
 #include <set>
 
-namespace openspace {
+namespace openspace { class SyncBuffer; }
 
-class SyncBuffer;
-
-namespace scripting {
+namespace openspace::scripting {
 
 /**
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
@@ -63,27 +61,27 @@ public:
      * \throw LuaRuntimeException If the creation of the new Lua state fails
      */
     void initialize();
-    
+
     /**
      * Cleans the internal Lua state and leaves the ScriptEngine in a state to be newly
      * initialize%d.
      */
     void deinitialize();
-    
+
     void initializeLuaState(lua_State* state);
 
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
-    
+
     bool runScript(const std::string& script);
     bool runScriptFile(const std::string& filename);
 
     bool writeLog(const std::string& script);
 
-    virtual void presync(bool isMaster);
-    virtual void encode(SyncBuffer* syncBuffer);
-    virtual void decode(SyncBuffer* syncBuffer);
-    virtual void postsync(bool isMaster);
+    virtual void presync(bool isMaster) override;
+    virtual void encode(SyncBuffer* syncBuffer) override;
+    virtual void decode(SyncBuffer* syncBuffer) override;
+    virtual void postsync(bool isMaster) override;
 
     void queueScript(const std::string &script, RemoteScripting remoteScripting);
 
@@ -92,34 +90,30 @@ public:
     std::vector<std::string> cachedScripts();
 
     std::vector<std::string> allLuaFunctions() const;
-    
-    //parallel functions
-    //bool parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script);
-    //bool shouldScriptBeSent(const std::string &library, const std::string &function);
-    //void cacheScript(const std::string &library, const std::string &function, const std::string &script);
-    
+
     static std::string OpenSpaceLibraryName;
-    
+
 private:
-    bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
+    bool registerLuaLibrary(lua_State* state, LuaLibrary& library);
+    void addLibraryFunctions(lua_State* state, LuaLibrary& library, bool replace);
 
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
-    
+
     void addBaseLibrary();
     void remapPrintFunction();
-    
+
     std::string generateJson() const override;
 
     ghoul::lua::LuaState _state;
-    std::set<LuaLibrary> _registeredLibraries;
-    
+    std::vector<LuaLibrary> _registeredLibraries;
+
+
     //sync variables
     std::mutex _mutex;
     std::vector<std::pair<std::string, bool>> _queuedScripts;
     std::vector<std::string> _receivedScripts;
     std::string _currentSyncedScript;
-    
+
     //parallel variables
     //std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
     //std::mutex _cachedScriptsMutex;
@@ -131,7 +125,6 @@ private:
     std::string _logFilename;
 };
 
-} // namespace scripting
-} // namespace openspace
+} // namespace openspace::scripting
 
 #endif // __OPENSPACE_CORE___SCRIPTENGINE___H__

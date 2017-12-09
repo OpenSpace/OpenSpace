@@ -28,11 +28,11 @@
  /**
  * \file doubleproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class DoubleProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>double</code>.
@@ -42,12 +42,10 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(DoubleProperty, double);
+REGISTER_NUMERICALPROPERTY_HEADER(DoubleProperty, double)
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___DOUBLEPROPERTY___H__

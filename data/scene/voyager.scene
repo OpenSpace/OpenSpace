@@ -1,0 +1,67 @@
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    -- openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.time.setTime("1977 SEP 10 12:00:00")
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+end
+
+function postInitialization()
+    openspace.printInfo("Setting default values")
+
+    openspace.set_default_gui_sorting()
+
+    openspace.setPropertyValueSingle("Global Properties.GlobeBrowsing.GdalWrapper.LogGdalErrors", false)
+    openspace.setPropertyValueSingle("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
+
+    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+
+    openspace.printInfo("Done setting default values")
+
+    -- Defined in scene_helper.lua
+    -- Used to create focus buttons for a subset of scenegraph nodes
+    openspace.mark_interesting_nodes({
+        "Earth", "Voyager 1", "Voyager 2", "Jupiter", "Saturn", "Uranus", "Neptune"
+    })
+end
+
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "Earth",
+        Position = {0, 0, 0},
+        Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
+    },
+    Modules = {
+        -- # Solar system objects
+        "sun",
+        "mercury",
+        "venus",
+        "earth",
+        "moon",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        -- "satellites",
+
+        -- "grids",
+        -- "digitaluniverse",
+        "stars/digitaluniverse",
+        "milkyway/digitaluniverse",
+
+        "missions/voyager"
+    }
+}
+

@@ -28,9 +28,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/util/updatestructures.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace culling {
+namespace openspace::globebrowsing::culling {
 
 bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     // Calculations are done in the reference frame of the globe. Hence, the camera
@@ -58,26 +56,30 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     // real closest point,
     glm::dvec3 corners[4];
     corners[0] = ellipsoid.cartesianSurfacePosition(
-        chunk.surfacePatch().getCorner(NORTH_WEST));
+        chunk.surfacePatch().getCorner(NORTH_WEST)
+    );
     corners[1] = ellipsoid.cartesianSurfacePosition(
-        chunk.surfacePatch().getCorner(NORTH_EAST));
+        chunk.surfacePatch().getCorner(NORTH_EAST)
+    );
     corners[2] = ellipsoid.cartesianSurfacePosition(
-        chunk.surfacePatch().getCorner(SOUTH_WEST));
+        chunk.surfacePatch().getCorner(SOUTH_WEST)
+    );
     corners[3] = ellipsoid.cartesianSurfacePosition(
-        chunk.surfacePatch().getCorner(SOUTH_EAST));
+        chunk.surfacePatch().getCorner(SOUTH_EAST)
+    );
 
     for (int i = 0; i < 4; ++i) {
-        float distance = glm::length(cameraPosition - corners[i]);
+        double distance = glm::length(cameraPosition - corners[i]);
         if (distance < glm::length(cameraPosition - objectPosition)) {
             objectPosition = corners[i];
         }
     }
-        
+
     return isCullable(cameraPosition, globePosition, objectPosition,
                         maxHeight, minimumGlobeRadius);
 }
 
-bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition, 
+bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
                                const glm::dvec3& globePosition,
                                const glm::dvec3& objectPosition,
                                double objectBoundingSphereRadius,
@@ -86,20 +88,18 @@ bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
     double distanceToHorizon =
         sqrt(pow(length(cameraPosition - globePosition), 2) -
         pow(minimumGlobeRadius, 2));
-    
+
     double minimumAllowedDistanceToObjectFromHorizon = sqrt(
         pow(length(objectPosition - globePosition), 2) -
         pow(minimumGlobeRadius - objectBoundingSphereRadius, 2));
-    
+
     // Minimum allowed for the object to be occluded
     double minimumAllowedDistanceToObjectSquared =
         pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2)
         + pow(objectBoundingSphereRadius, 2);
-    
+
     double distanceToObjectSquared = pow(length(objectPosition - cameraPosition), 2);
     return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
 }
 
-} // namespace culling
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::culling

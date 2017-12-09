@@ -27,8 +27,7 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct PixelRegion {
     using PixelCoordinate = glm::ivec2;
@@ -44,7 +43,7 @@ struct PixelRegion {
     PixelRegion(const PixelRegion& o);
     PixelRegion(const PixelCoordinate& pixelStart = PixelCoordinate(0, 0),
         const PixelRange& numberOfPixels = PixelRange(0, 0));
-        
+
     /**
      * Sets one of the sides of the pixel region the specified position. This changes
      * the number of pixels in the region.
@@ -57,9 +56,9 @@ struct PixelRegion {
     void setTop(int p);
     void setRight(int x);
     void setBottom(int y);
-        
+
     /**
-     * Aligns one the sides of the pixel regino to the specified position. This does 
+     * Aligns one the sides of the pixel regino to the specified position. This does
      * not change the number of pixels within the region.
      *
      * Example: Side = left and pos = 16:
@@ -70,7 +69,7 @@ struct PixelRegion {
     void alignTop(int y);
     void alignRight(int x);
     void alignBottom(int y);
-        
+
     void scale(const glm::dvec2& s);
     void scale(double s);
     void downscalePow2(int exponent, PixelCoordinate wrt = { 0, 0 });
@@ -100,7 +99,6 @@ struct PixelRegion {
     PixelRange numPixels;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__

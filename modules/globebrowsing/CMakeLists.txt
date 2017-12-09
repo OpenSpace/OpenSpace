@@ -25,6 +25,8 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.h
+    
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
@@ -57,19 +59,14 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffercontainer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffercontainer.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
 
@@ -79,12 +76,14 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuheightlayer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayeradjustment.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayerrendersettings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroupid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.h
@@ -102,8 +101,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/defaulttileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
@@ -123,6 +121,9 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule_lua.inl
+
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.cpp
 
@@ -151,7 +152,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp
@@ -159,13 +159,16 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuheightlayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayeradjustment.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayerrendersettings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputiledepthtransform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroupid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.cpp
 
@@ -178,8 +181,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/defaulttileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
@@ -211,7 +213,9 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilefragcolor.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexheight.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tileheight.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexskirt.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globeshading.hglsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
@@ -219,10 +223,13 @@ source_group("Shader Files" FILES ${SHADER_FILES})
 create_new_module(
     "GlobeBrowsing"
     globebrowsing_module
+    STATIC
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
 option(OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL "Use GDAL" ON)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
     if (WIN32)
@@ -236,7 +243,7 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
             openspace-module-globebrowsing
             ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
         )
-        set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal201.dll" PARENT_SCOPE)
+        register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal202.dll")
     else (WIN32)
         find_package(GDAL REQUIRED)
 
@@ -251,5 +258,5 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
             ${GDAL_LIBRARY}
         )
     endif () # WIN32
-    target_compile_definitions(openspace-module-globebrowsing PRIVATE GLOBEBROWSING_USE_GDAL)
+    target_compile_definitions(openspace-module-globebrowsing PUBLIC GLOBEBROWSING_USE_GDAL)
 endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL

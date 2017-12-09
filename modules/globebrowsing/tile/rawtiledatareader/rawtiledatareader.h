@@ -40,8 +40,7 @@
 
 #include <string>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class GeodeticPatch;
 
@@ -50,7 +49,7 @@ public:
     using PerformPreprocessing = ghoul::Boolean;
 
     RawTileDataReader(const TileTextureInitData& initData,
-        PerformPreprocessing preprocess = PerformPreprocessing::No);
+                      PerformPreprocessing preprocess = PerformPreprocessing::No);
     virtual ~RawTileDataReader() = default;
 
     /**
@@ -58,17 +57,17 @@ public:
      * which gets returned.
      */
     std::shared_ptr<RawTile> readTileData(TileIndex tileIndex,
-        char* dataDestination, char* pboMappedDataDestination);
+        char* dataDestination, char* pboMappedDataDestination) const;
     TileDepthTransform getDepthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
     const PixelRegion::PixelRange fullPixelSize() const;
-    
+
     /**
      * \returns the maximum chunk level available in the dataset. Should be a value
      * between 2 and 31.
      */
-    virtual int maxChunkLevel() = 0;
-    
+    virtual int maxChunkLevel() const = 0;
+
     /**
      * Reset the dataset to its initial state. This is the place to clear any cache used.
      */
@@ -76,19 +75,17 @@ public:
     virtual float noDataValueAsFloat() const = 0;
     virtual int rasterXSize() const = 0;
     virtual int rasterYSize() const = 0;
+    virtual int dataSourceNumRasters() const = 0;
     virtual float depthOffset() const;
     virtual float depthScale() const;
-  
+    PixelRegion fullPixelRegion() const;
+
     /**
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
-    std::shared_ptr<RawTile> defaultTileData();
-    
-    /// Padding around all tiles to read to make sure edge blending works.
-    const static PixelRegion padding; // same as the two above
+    std::shared_ptr<RawTile> defaultTileData() const;
 
 protected:
-
     /**
      * This function should set the variables <code>_cached</code>,
      * <code>_dataLayout</code> and <code>_depthTransform</code>.
@@ -96,29 +93,30 @@ protected:
     virtual void initialize() = 0;
 
     /**
-     * Call this in the constructor of the class extending <code>RawTileDataReader</code>
-     */
-    void ensureInitialized();
-
-    /**
      * The function returns a transform to map
      * the pixel coordinates to cover the whole geodetic lat long space.
      */
     virtual std::array<double, 6> getGeoTransform() const;
-    
+
     /**
      * Read image data as described by the given <code>IODescription</code>.
      * \param <code>io</code> describes how to read the data.
      * \param <code>worstError</code> should be set to the error code returned when
      * reading the data.
      */
-    virtual void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const = 0;
+    void readImageData(
+        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const;
+
+    /**
+     * The default does not affect the IODescription but this function can be used for
+     * example to flip the y axis.
+     */
+    virtual IODescription adjustIODescription(const IODescription& io) const;
 
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;
 
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const = 0;
+    IODescription getIODescription(const TileIndex& tileIndex) const;
 
     /**
      * Get the pixel corresponding to a specific position on the globe defined by the
@@ -155,9 +153,10 @@ protected:
         int rasterBand, const IODescription& io, char* dst, int depth = 0) const;
 
     std::shared_ptr<TileMetaData> getTileMetaData(
-        std::shared_ptr<RawTile> result, const PixelRegion& region);
+        std::shared_ptr<RawTile> result, const PixelRegion& region) const;
     TileDepthTransform calculateTileDepthTransform();
-    RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult) const;
+    RawTile::ReadError postProcessErrorCheck(
+        std::shared_ptr<const RawTile> ioResult) const;
 
     struct Cached {
         int _maxLevel = -1;
@@ -166,12 +165,8 @@ protected:
     const TileTextureInitData _initData;
     PerformPreprocessing _preprocess;
     TileDepthTransform _depthTransform;
-
-private:
-    bool _hasBeenInitialized;    
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__

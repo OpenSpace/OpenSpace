@@ -47,17 +47,19 @@ documentation::Documentation Rotation::Documentation() {
             {
                 KeyType,
                 new StringAnnotationVerifier("Must name a valid Rotation type."),
+                Optional::No,
                 "The type of the rotation that is described in this element. The "
                 "available types of rotations depend on the configuration of the "
                 "application and can be written to disk on application startup into the "
-                "FactoryDocumentation.",
-                Optional::No
+                "FactoryDocumentation."
             }
         }
     };
 }
 
-std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Rotation> Rotation::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
 
     std::string rotationType = dictionary.value<std::string>(KeyType);
@@ -66,18 +68,18 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary
     return result;
 }
 
-Rotation::Rotation() 
-    : properties::PropertyOwner("Rotation")
+Rotation::Rotation()
+    : properties::PropertyOwner({ "Rotation" })
 {}
-    
+
 Rotation::Rotation(const ghoul::Dictionary&)
-    : properties::PropertyOwner("Rotation")
+    : properties::PropertyOwner({ "Rotation" })
 {}
-    
+
 bool Rotation::initialize() {
     return true;
 }
-    
+
 const glm::dmat3& Rotation::matrix() const {
     return _matrix;
 }

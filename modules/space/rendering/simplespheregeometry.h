@@ -31,11 +31,13 @@
 #include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
+    class Renderable;
+    class PowerScaledSphere;
+} // namespace openspace
 
-class Renderable;
-class PowerScaledSphere;
+namespace openspace::documentation { struct Documentation; }
 
-namespace planetgeometry {
+namespace openspace::planetgeometry {
 
 class SimpleSphereGeometry : public PlanetGeometry {
 public:
@@ -45,16 +47,17 @@ public:
     bool initialize(Renderable* parent) override;
     void deinitialize() override;
     void render() override;
+
+    static documentation::Documentation Documentation();
+
 private:
     void createSphere();
 
-    float _modRadius;
     properties::Vec3Property _radius;
     properties::IntProperty _segments;
     PowerScaledSphere* _sphere;
 };
 
-} // namespace planetgeometry
-} // namespace openspace
+} // namespace openspace::planetgeometry
 
 #endif // __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__

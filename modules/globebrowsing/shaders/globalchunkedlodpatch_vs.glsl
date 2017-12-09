@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,21 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/tilevertexheight.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tilevertexskirt.hglsl>
+
+layout(location = 1) in vec2 in_uv;
+
+out vec2 fs_uv;
+out vec4 fs_position;
+out vec3 ellipsoidNormalCameraSpace;
+out LevelWeights levelWeights;
+out vec3 positionCameraSpace;
+
+#if USE_ACCURATE_NORMALS
+out vec3 ellipsoidTangentThetaCameraSpace;
+out vec3 ellipsoidTangentPhiCameraSpace;
+#endif //USE_ACCURATE_NORMALS
 
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
@@ -39,24 +53,24 @@ uniform vec2 lonLatScalingFactor;
 uniform vec3 cameraPosition;
 uniform float chunkMinHeight;
 
-layout(location = 1) in vec2 in_uv;
+uniform float distanceScaleFactor;
+uniform int chunkLevel;
 
-out vec2 fs_uv;
-out vec4 fs_position;
-out vec3 ellipsoidNormalCameraSpace;
-out LevelWeights levelWeights;
-out vec3 positionCameraSpace;
 
-PositionNormalPair globalInterpolation() {
+PositionNormalPair globalInterpolation(vec2 uv) {
     vec2 lonLatInput;
-    lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_uv.y; // Lat
-    lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_uv.x; // Lon
-    PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);
+    lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * uv.y; // Lat
+    lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * uv.x; // Lon
+    PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(
+        lonLatInput.y,
+        lonLatInput.x,
+        radiiSquared
+    );
     return positionPairModelSpace;
 }
 
 void main() {
-    PositionNormalPair pair = globalInterpolation();
+    PositionNormalPair pair = globalInterpolation(in_uv);
     float distToVertexOnEllipsoid =
         length(pair.position + pair.normal * chunkMinHeight - cameraPosition);
 
@@ -70,14 +84,32 @@ void main() {
     levelWeights = getLevelWeights(levelInterpolationParameter);
 
     // Get the height value
-    float height = getTileVertexHeight(in_uv, levelWeights);
+    float height = getTileHeight(in_uv, levelWeights);
 
     // Apply skirts
     height -= getTileVertexSkirtLength();
-    
+
+#if USE_ACCURATE_NORMALS
+    // Calculate tangents
+    // tileDelta is a step length (epsilon). Should be small enough for accuracy but not
+    // Too small for precision. 1 / 512 is good.
+    const float tileDelta = 1.0 / 512.0;
+    PositionNormalPair pair10 = globalInterpolation(
+        in_uv + vec2(1.0, 0.0) * tileDelta
+    );
+    PositionNormalPair pair01 = globalInterpolation(
+        in_uv + vec2(0.0, 1.0) * tileDelta
+    );
+    vec3 ellipsoidTangentTheta = normalize(pair10.position - pair.position);
+    vec3 ellipsoidTangentPhi = normalize(pair01.position - pair.position);
+    ellipsoidTangentThetaCameraSpace = mat3(modelViewTransform) * ellipsoidTangentTheta;
+    ellipsoidTangentPhiCameraSpace = mat3(modelViewTransform) * ellipsoidTangentPhi;
+#endif // USE_ACCURATE_NORMALS
+
     // Add the height in the direction of the normal
     pair.position += pair.normal * height;
-    vec4 positionClippingSpace = modelViewProjectionTransform * vec4(pair.position, 1);
+    vec4 positionClippingSpace =
+        modelViewProjectionTransform * vec4(pair.position, 1);
 
     // Write output
     fs_uv = in_uv;

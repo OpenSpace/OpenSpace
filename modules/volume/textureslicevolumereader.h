@@ -34,12 +34,17 @@
 #include <unordered_map>
 
 namespace openspace {
+namespace volume {
 
-template <typename Voxel>
+template <typename Type>
 class TextureSliceVolumeReader {
 public:
-    typedef Voxel VoxelType;
-    TextureSliceVolumeReader(std::vector<std::string> paths, size_t sliceCacheMaxItems, size_t sliceCacheSize);
+    using VoxelType = Type;
+
+    TextureSliceVolumeReader(std::vector<std::string> paths, size_t sliceCacheMaxItems,
+        size_t sliceCacheSize);
+    virtual ~TextureSliceVolumeReader() = default;
+
     VoxelType get(const glm::ivec3& coordinates) const;
     virtual glm::ivec3 dimensions() const;
     void setPaths(const std::vector<std::string> paths);
@@ -52,6 +57,7 @@ private:
     bool _initialized;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #include "textureslicevolumereader.inl"

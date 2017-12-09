@@ -32,19 +32,17 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul { namespace fontrendering {
-class Font;
-class FontRenderer;
-}}
+namespace ghoul::fontrendering {
+    class Font;
+    class FontRenderer;
+} // namespace ghoul::fontrendering
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 /**
- * Enables a simple way of providing tiles with any type of rendered text. 
- * Internally it handles setting up a FBO for rendering the text, and defines a new 
- * interface, consisting of only a single method for subclasses to implement: 
+ * Enables a simple way of providing tiles with any type of rendered text.
+ * Internally it handles setting up a FBO for rendering the text, and defines a new
+ * interface, consisting of only a single method for subclasses to implement:
  * renderText(const FontRenderer&, const TileIndex&) const;
  */
 class TextTileProvider : public TileProvider {
@@ -55,6 +53,9 @@ public:
     TextTileProvider(const TileTextureInitData& initData, size_t fontSize = 48);
     virtual ~TextTileProvider() override;
 
+    bool initialize() override;
+    bool deinitialize() override;
+
     // The TileProvider interface below is implemented in this class
     virtual Tile getTile(const TileIndex& tileIndex) override;
     virtual Tile::Status getTileStatus(const TileIndex& index) override;
@@ -64,18 +65,18 @@ public:
     virtual int maxLevel() override;
 
     /**
-     * Allow overriding of hash function. 
+     * Allow overriding of hash function.
      * Default is <code>TileIndex::hashKey()</code>
      *
      * \param tileIndex tileIndex to hash
      * \returns hashkey used for in LRU cache for this tile
      */
     virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
-        
+
     /**
-     * Uses the fontRenderer to render some text onto the tile texture provided in 
-     * backgroundTile(const TileIndex& tileIndex). 
-     * 
+     * Uses the fontRenderer to render some text onto the tile texture provided in
+     * backgroundTile(const TileIndex& tileIndex).
+     *
      * \param fontRenderer used for rendering text onto texture
      * \param tileIndex associated with the tile to be rendered onto
      */
@@ -91,14 +92,12 @@ private:
     Tile
         createChunkIndexTile(const TileIndex& tileIndex);
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-	
+
     GLuint _fbo;
-  
+
     cache::MemoryAwareTileCache* _tileCache;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXT_TILE_PROVIDER___H__

@@ -46,27 +46,54 @@
 #include <memory>
 #include <fstream>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-
 namespace {
     const char* KeyGeometry = "Geometry";
     const char* KeyRadius = "Radius";
-    const char* KeyColorTexture = "Textures.Color";
-    const char* KeyNightTexture = "Textures.Night";
-    const char* KeyHeightTexture = "Textures.Height";
-    const char* KeyShading = "PerformShading";
 
-    
-    
-    static const std::string _loggerCat = "RenderablePlanet";
+    static const char* _loggerCat = "RenderablePlanet";
 
-    const char* keyFrame                         = "Frame";
     const char* keyShadowGroup                   = "Shadow_Group";
     const char* keyShadowSource                  = "Source";
     const char* keyShadowCaster                  = "Caster";
-    const char* keyBody                          = "Body";
+
+    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+        "ColorTexture",
+        "Color Base Texture",
+        "The path to the base color texture that is used on the planet prior to any "
+        "image projection."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightTextureInfo = {
+        "HeightTexture",
+        "Heightmap Texture",
+        "The path to the height map texture that is used for the planet. If no height "
+        "map is specified the planet does not use a height field."
+    };
+
+    static const openspace::properties::Property::PropertyInfo NightTextureInfo = {
+        "NightTexture",
+        "Night Texture",
+        "The path to the night texture that is used for the part of the planet that is "
+        "facing away from the Sun. If no night texture is loaded, the night side of the "
+        "planet is rendered dark."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
+         "HeightExaggeration",
+         "Height Exaggeration",
+         "This value determines the level of height exaggeration that is applied to a "
+         "potential height field. A value of '0' inhibits the height field, whereas a "
+         "value of '1' uses the measured height field."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+        "PerformShading",
+        "Perform Shading",
+        "If this value is enabled, the model will be shaded based on the relative "
+        "location to the Sun. If this value is disabled, shading is disabled and the "
+        "entire model is rendered brightly. If this value is 'false', any existing night "
+        "texture will not be used."
+    };
 } // namespace
 
 namespace openspace {
@@ -80,42 +107,51 @@ documentation::Documentation RenderablePlanet::Documentation() {
             {
                 KeyGeometry,
                 new ReferencingVerifier("space_geometry_planet"),
-                "Specifies the planet geometry that is used for this RenderablePlanet.",
-                Optional::No
+                Optional::No,
+                "Specifies the planet geometry that is used for this RenderablePlanet."
             },
             {
                 KeyRadius,
                 new DoubleVerifier,
+                Optional::Yes,
                 "Specifies the radius of the planet. If this value is not specified, it "
-                "will try to query the SPICE library for radius values.",
-                Optional::Yes
+                "will try to query the SPICE library for radius values."
             },
             {
-                KeyColorTexture,
+                ColorTextureInfo.identifier,
                 new StringVerifier,
-                "Specifies the color texture that is used for this RenderablePlanet.",
-                Optional::Yes
+                Optional::Yes,
+                ColorTextureInfo.description
             },
             {
-                KeyHeightTexture,
+                HeightTextureInfo.identifier,
                 new StringVerifier,
-                "Specifies the height texture that is used for this RenderablePlanet.",
-                Optional::Yes
+                Optional::Yes,
+                HeightTextureInfo.description
             },
             {
-                KeyNightTexture,
+                NightTextureInfo.identifier,
                 new StringVerifier,
-                "Specifies the texture that is used for the night side of this "
-                "RenderablePlanet.",
-                Optional::Yes
+                Optional::Yes,
+                NightTextureInfo.description
             },
             {
-                KeyShading,
+                PerformShadingInfo.identifier,
                 new BoolVerifier,
-                "Specifies whether the planet should be rendered shaded by the Sun. If "
-                "this value is 'false', any existing night texture will not be used. "
-                "This value defaults to 'true'.",
-                Optional::Yes
+                Optional::Yes,
+                PerformShadingInfo.description
+            },
+            {
+                HeightExaggerationInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                HeightExaggerationInfo.description
+            },
+            {
+                PerformShadingInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                PerformShadingInfo.description
             }
         }
     };
@@ -123,15 +159,15 @@ documentation::Documentation RenderablePlanet::Documentation() {
 
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorTexturePath("colorTexture", "Color Texture")
-    , _nightTexturePath("nightTexture", "Night Texture")
-    , _heightMapTexturePath("heightMap", "Heightmap Texture")
+    , _colorTexturePath(ColorTextureInfo)
+    , _nightTexturePath(NightTextureInfo)
+    , _heightMapTexturePath(HeightTextureInfo)
     , _programObject(nullptr)
     , _texture(nullptr)
     , _nightTexture(nullptr)
-    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 10.f)
+    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 10.f)
     , _geometry(nullptr)
-    , _performShading("performShading", "Perform Shading", true)
+    , _performShading(PerformShadingInfo, true)
     , _alpha(1.f)
     , _planetRadius(0.f)
     , _hasNightTexture(false)
@@ -155,7 +191,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(KeyRadius)) {
         // If the user specified a radius, we want to use this
-        _planetRadius = dictionary.value<double>(KeyRadius);
+        _planetRadius = static_cast<float>(dictionary.value<double>(KeyRadius));
     }
     else if (SpiceManager::ref().hasValue(name, "RADII") ) {
         // If the user didn't specfify a radius, but Spice has a radius, we can use this
@@ -165,7 +201,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
         geomDict.setValue(KeyRadius, radius);
 
-        _planetRadius = (radius.x + radius.y + radius.z) / 3.0;
+        _planetRadius = static_cast<float>((radius.x + radius.y + radius.z) / 3.0);
     }
     else {
         LERRORC("RenderablePlanet", "Missing radius specification");
@@ -173,27 +209,33 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geomDict);
 
-    if (dictionary.hasKey(KeyColorTexture)) {
-        _colorTexturePath = absPath(dictionary.value<std::string>(KeyColorTexture));
+    if (dictionary.hasKey(ColorTextureInfo.identifier)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(
+            ColorTextureInfo.identifier
+        ));
     }
 
-    if (dictionary.hasKey(KeyNightTexture)) {
+    if (dictionary.hasKey(NightTextureInfo.identifier)) {
         _hasNightTexture = true;
-        _nightTexturePath = absPath(dictionary.value<std::string>(KeyNightTexture));
+        _nightTexturePath = absPath(dictionary.value<std::string>(
+            NightTextureInfo.identifier
+        ));
     }
 
-    if (dictionary.hasKey(KeyHeightTexture)) {
+    if (dictionary.hasKey(HeightTextureInfo.identifier)) {
         _hasHeightTexture = true;
-        _heightMapTexturePath = absPath(dictionary.value<std::string>(KeyHeightTexture));
+        _heightMapTexturePath = absPath(dictionary.value<std::string>(
+            HeightTextureInfo.identifier
+        ));
     }
 
-    if (dictionary.hasKey(KeyShading)) {
-        _performShading = dictionary.value<bool>(KeyShading);
+    if (dictionary.hasKey(PerformShadingInfo.identifier)) {
+        _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
 
     addPropertySubOwner(_geometry.get());
 
-    auto loadTextureCallback = [this]() {loadTexture(); };
+    auto loadTextureCallback = [this]() { loadTexture(); };
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(loadTextureCallback);
 
@@ -203,7 +245,16 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     addProperty(_heightMapTexturePath);
     _heightMapTexturePath.onChange(loadTextureCallback);
 
+    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
+        _heightExaggeration = static_cast<float>(
+            dictionary.value<double>(HeightExaggerationInfo.identifier)
+        );
+    }
     addProperty(_heightExaggeration);
+
+    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
+        _performShading = dictionary.value<bool>(HeightExaggerationInfo.identifier);
+    }
     addProperty(_performShading);
 
     // Shadow data:
@@ -228,9 +279,11 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                         sourceName, sourceRadius));
                 }
                 else {
-                    LWARNING("No Radius value expecified for Shadow Source Name " 
-                        << sourceName << " from " << name 
-                        << " planet.\nDisabling shadows for this planet.");
+                    LWARNING(
+                        "No Radius value expecified for Shadow Source Name "
+                        << sourceName << " from " << name
+                        << " planet.\nDisabling shadows for this planet."
+                    );
                     disableShadows = true;
                     break;
                 }
@@ -282,16 +335,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     }
 }
 
-bool RenderablePlanet::initialize() {
+void RenderablePlanet::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        std::stringstream ss;
-        ss << "Checking System State. OpenGL error: " << errString << std::endl;
-        LERROR(ss.str());
-    }
 
     if (_programObject == nullptr && _shadowEnabled && _hasNightTexture) {
         // shadow program
@@ -299,14 +344,14 @@ bool RenderablePlanet::initialize() {
             "shadowNightProgram",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl");
-    } 
+    }
     else if (_programObject == nullptr && _shadowEnabled) {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowProgram",
             "${MODULE_SPACE}/shaders/shadow_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_fs.glsl");
-    } 
+    }
     else if (_programObject == nullptr && _hasNightTexture) {
         // Night texture program
         _programObject = renderEngine.buildRenderProgram(
@@ -325,28 +370,14 @@ bool RenderablePlanet::initialize() {
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        std::stringstream ss;
-        ss << "Error after load shading programs. OpenGL error: " << errString << std::endl;
-        LERROR(ss.str());
-    }
-
     _geometry->initialize(this);
 
     _programObject->deactivate();
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Shader Programs Creation. OpenGL error: " << errString);
-    }
-    
     loadTexture();
-
-    return isReady();
 }
 
-bool RenderablePlanet::deinitialize() {
+void RenderablePlanet::deinitializeGL() {
     if (_geometry) {
         _geometry->deinitialize();
         _geometry = nullptr;
@@ -361,8 +392,6 @@ bool RenderablePlanet::deinitialize() {
     _geometry = nullptr;
     _texture = nullptr;
     _nightTexture = nullptr;
-
-    return true;
 }
 
 bool RenderablePlanet::isReady() const {
@@ -373,44 +402,58 @@ bool RenderablePlanet::isReady() const {
     return ready;
 }
 
-void RenderablePlanet::render(const RenderData& data) {
+void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     // activate shader
     _programObject->activate();
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     // scale the planet to appropriate size since the planet is a unit sphere
     //glm::mat4 transform = glm::mat4(1);
-    
+
     //earth needs to be rotated for that to work.
-    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
-    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
-    //glm::dmat4 rotProp = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0));
+    glm::dmat4 rot = glm::rotate(
+        glm::dmat4(1.0),
+        glm::half_pi<double>(),
+        glm::dvec3(1, 0, 0)
+    );
+    glm::dmat4 roty = glm::rotate(
+        glm::dmat4(1.0),
+        glm::half_pi<double>(),
+        glm::dvec3(0, -1, 0)
+    );
+    //glm::dmat4 rotProp = glm::rotate(
+    //    glm::dmat4(1.0),
+    //    glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0)
+    //);
     modelTransform = modelTransform * rot * roty /** rotProp*/;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _programObject->setUniform("transparency", _alpha);
     _programObject->setUniform(
-        "modelViewProjectionTransform", 
+        "modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));
 
     // Normal Transformation
-    glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
-    glm::mat4 translateCamTrans = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
-    float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
-    glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
+    //glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
+    //glm::mat4 translateCamTrans = glm::translate(
+    //    glm::mat4(1.0),
+    //    -data.camera.position().vec3()
+    //);
+    //float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
+    //glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
 
 //    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
 //        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
-    
+
     setPscUniforms(*_programObject.get(), data.camera, data.position);
-    
+
     _programObject->setUniform("_performShading", _performShading);
 
     _programObject->setUniform("_hasHeightMap", _hasHeightTexture);
@@ -420,7 +463,6 @@ void RenderablePlanet::render(const RenderData& data) {
     ghoul::opengl::TextureUnit dayUnit;
     ghoul::opengl::TextureUnit nightUnit;
     ghoul::opengl::TextureUnit heightUnit;
-
 
     dayUnit.activate();
     _texture->bind();
@@ -451,24 +493,49 @@ void RenderablePlanet::render(const RenderData& data) {
         shadowDataArray.reserve(_shadowConfArray.size());
 
         for (const auto & shadowConf : _shadowConfArray) {
-            // TO REMEMBER: all distances and lengths in world coordinates are in meters!!! We need to move this to view space...
+            // TO REMEMBER: all distances and lengths in world coordinates are in meters!!
+            // We need to move this to view space...
             // Getting source and caster:
-            glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(shadowConf.source.first, "SUN", "GALACTIC", {}, _time, lt);
+            glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
+                shadowConf.source.first,
+                "SUN",
+                "GALACTIC",
+                {},
+                _time,
+                lt
+            );
             sourcePos           *= 1000.0; // converting to meters
-            glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, _time, lt);
+            glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
+                shadowConf.caster.first,
+                "SUN",
+                "GALACTIC",
+                {},
+                _time,
+                lt
+            );
             casterPos           *= 1000.0; // converting to meters
-            psc caster_pos       = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
+            psc caster_pos       = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+                casterPos.x,
+                casterPos.y,
+                casterPos.z
+            );
 
-            
-            // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
-            glm::vec3 planetCasterVec   = (caster_pos - data.position).vec3();
-            glm::vec3 sourceCasterVec   = glm::vec3(casterPos - sourcePos);
-            float sc_length             = glm::length(sourceCasterVec);
-            glm::vec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) * sourceCasterVec;
-            float d_test                = glm::length(planetCasterVec - planetCaster_proj);
-            float xp_test               = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
-            float rp_test               = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
-                        
+            // First we determine if the caster is shadowing the current planet (all
+            // calculations in World Coordinates):
+            glm::vec3 planetCasterVec = (caster_pos - data.position).vec3();
+            glm::vec3 sourceCasterVec = glm::vec3(casterPos - sourcePos);
+            float sc_length = glm::length(sourceCasterVec);
+            glm::vec3 planetCaster_proj =
+                (glm::dot(planetCasterVec, sourceCasterVec) /
+                (sc_length*sc_length)) * sourceCasterVec;
+            float d_test = glm::length(planetCasterVec - planetCaster_proj);
+            float xp_test =
+                shadowConf.caster.second * sc_length /
+                (shadowConf.source.second + shadowConf.caster.second);
+            float rp_test =
+                shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) /
+                xp_test;
+
             double casterDistSun = glm::length(casterPos);
             float planetDistSun = glm::length(data.position.vec3());
 
@@ -478,12 +545,13 @@ void RenderablePlanet::render(const RenderData& data) {
             if (((d_test - rp_test) < _planetRadius) &&
                 (casterDistSun < planetDistSun) ) {
                 // The current caster is shadowing the current planet
-                shadowData.isShadowing       = true;
-                shadowData.rs                = shadowConf.source.second;
-                shadowData.rc                = shadowConf.caster.second;
-                shadowData.sourceCasterVec   = sourceCasterVec;
-                shadowData.xp                = xp_test;
-                shadowData.xu                = shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
+                shadowData.isShadowing = true;
+                shadowData.rs = shadowConf.source.second;
+                shadowData.rc = shadowConf.caster.second;
+                shadowData.sourceCasterVec = sourceCasterVec;
+                shadowData.xp = xp_test;
+                shadowData.xu =
+                    shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
                 shadowData.casterPositionVec = glm::vec3(casterPos);
             }
             shadowDataArray.push_back(shadowData);
@@ -530,14 +598,20 @@ void RenderablePlanet::render(const RenderData& data) {
 void RenderablePlanet::update(const UpdateData& data) {
     // set spice-orientation in accordance to timestamp
     _stateMatrix = data.modelTransform.rotation;
-    //_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
+    //_stateMatrix = SpiceManager::ref().positionTransformMatrix(
+    //    _frame,
+    //    "GALACTIC",
+    //    data.time
+    //);
     _time = data.time.j2000Seconds();
 }
 
 void RenderablePlanet::loadTexture() {
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
         if (_texture) {
             if (_texture->numberOfChannels() == 1) {
                 _texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_RED });
@@ -546,54 +620,47 @@ void RenderablePlanet::loadTexture() {
             LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
             _texture->uploadTexture();
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than
+            // linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
 
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error after reading color texture. OpenGL error: " << errString);
-    }
-
     if (_hasNightTexture) {
         _nightTexture = nullptr;
         if (_nightTexturePath.value() != "") {
-            _nightTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath));
+            _nightTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_nightTexturePath)
+            );
             if (_nightTexture) {
                 LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
                 _nightTexture->uploadTexture();
                 _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                //_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                //_nightTexture->setFilter(
+                //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+                //);
             }
         }
     }
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error after reading night texture. OpenGL error: " << errString);
-    }
-    
     if (_hasHeightTexture) {
         _heightMapTexture = nullptr;
         if (_heightMapTexturePath.value() != "") {
-            _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_heightMapTexturePath));
+            _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_heightMapTexturePath)
+            );
             if (_heightMapTexture) {
                 LDEBUG("Loaded texture from '" << _heightMapTexturePath << "'");
                 _heightMapTexture->uploadTexture();
                 _heightMapTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                //_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                //_nightTexture->setFilter(
+                //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+                //);
             }
         }
     }
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error after reading height mapping texture. OpenGL error: " << errString);
-    }
 }
 
-}  // namespace openspace
+} // namespace openspace

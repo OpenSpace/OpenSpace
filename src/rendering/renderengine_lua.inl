@@ -22,9 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
-
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 /**
 * \ingroup LuaScripts
@@ -58,7 +56,7 @@ int toggleFade(lua_State* L) {
     }
 
     double t = luaL_checknumber(L, -1);
-    
+
     float fadedIn = 1.0;
     int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
 
@@ -78,7 +76,7 @@ int fadeIn(lua_State* L) {
     }
 
     double t = luaL_checknumber(L, -1);
-            
+
     OsEng.renderEngine().startFading(1, static_cast<float>(t));
     return 0;
 }
@@ -99,7 +97,7 @@ int fadeOut(lua_State* L) {
     return 0;
 }
 
-int registerScreenSpaceRenderable(lua_State* L) {
+int addScreenSpaceRenderable(lua_State* L) {
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
@@ -112,17 +110,19 @@ int registerScreenSpaceRenderable(lua_State* L) {
         ghoul::lua::luaDictionaryFromState(L, d);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("registerScreenSpaceRenderable", e.what());
+        LERRORC("addScreenSpaceRenderable", e.what());
         return 0;
     }
 
-    std::shared_ptr<ScreenSpaceRenderable> s( ScreenSpaceRenderable::createFromDictionary(d) );
-    OsEng.renderEngine().registerScreenSpaceRenderable(s);
-      
+    std::shared_ptr<ScreenSpaceRenderable> s(
+        ScreenSpaceRenderable::createFromDictionary(d)
+    );
+    OsEng.renderEngine().addScreenSpaceRenderable(s);
+
     return 1;
 }
 
-int unregisterScreenSpaceRenderable(lua_State* L) {
+int removeScreenSpaceRenderable(lua_State* L) {
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
@@ -132,17 +132,20 @@ int unregisterScreenSpaceRenderable(lua_State* L) {
 
     std::string name = luaL_checkstring(L, -1);
 
-    std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(name);
+    std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(
+        name
+    );
     if (!s) {
-        LERRORC("unregisterScreenSpaceRenderable", errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
+        LERRORC(
+            "removeScreenSpaceRenderable",
+            errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'"
+        );
         return 0;
     }
 
-    OsEng.renderEngine().unregisterScreenSpaceRenderable(s);
-      
+    OsEng.renderEngine().removeScreenSpaceRenderable(s);
+
     return 1;
 }
 
-} // namespace luascriptfunctions
-
-}// namespace openspace
+}// namespace openspace::luascriptfunctions

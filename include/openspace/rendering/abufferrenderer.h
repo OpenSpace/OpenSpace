@@ -42,7 +42,7 @@
 #include <openspace/util/updatestructures.h>
 
 namespace ghoul {
-    
+
 namespace filesystem { class File; }
 
 namespace opengl {
@@ -57,7 +57,7 @@ namespace openspace {
 class RenderableVolume;
 class Camera;
 class Scene;
-    
+
 class ABufferRenderer : public Renderer, public RaycasterListener {
 public:
     ABufferRenderer();
@@ -71,12 +71,13 @@ public:
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
 
+    using Renderer::preRaycast;
     void preRaycast(const RaycasterTask& raycasterTask);
+    using Renderer::postRaycast;
     void postRaycast(const RaycasterTask& raycasterTask);
 
-    void update();
+    void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
-
 
     /**
      * Update render data
@@ -84,13 +85,13 @@ public:
      */
     virtual void updateRendererData() override;
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
-private:
 
+private:
     void clear();
     void updateResolution();
     void updateRaycastData();
     void updateResolveDictionary();
-    
+
     Camera* _camera;
     Scene* _scene;
     glm::ivec2 _resolution;
@@ -99,18 +100,20 @@ private:
     bool _dirtyRendererData;
     bool _dirtyRaycastData;
     bool _dirtyResolveDictionary;
-    
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
-    
+
     /**
      * When a volume is attached or detached from the scene graph,
      * the resolve program needs to be recompiled.
      * The _volumes map keeps track of which volumes that can
      * be rendered using the current resolve program, along with their raycast data
      * (id, namespace, etc)
-     */ 
+     */
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
-    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _boundsPrograms;
+    std::map<
+        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _boundsPrograms;
     std::vector<std::string> _helperPaths;
 
     ghoul::Dictionary _resolveDictionary;

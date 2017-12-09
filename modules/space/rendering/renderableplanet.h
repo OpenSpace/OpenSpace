@@ -39,20 +39,15 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
 }
 
 namespace openspace {
 
-namespace planetgeometry {
-class PlanetGeometry;
-}
-
 namespace documentation { struct Documentation; }
+namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanet : public Renderable {
 public:
@@ -73,28 +68,29 @@ public:
 public:
     RenderablePlanet(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 protected:
     void loadTexture();
+
 private:
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _nightTexturePath;
     properties::StringProperty _heightMapTexturePath;
-    
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;    
+    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-    
+
     properties::FloatProperty _heightExaggeration;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
@@ -108,8 +104,6 @@ private:
     bool _hasHeightTexture;
     bool _shadowEnabled;
     double _time;
-
-    bool tempPic;
 };
 
 } // namespace openspace

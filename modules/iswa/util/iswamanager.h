@@ -33,8 +33,21 @@
 #include <future>
 #include <ghoul/glm.h>
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+
+
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
+#endif // WIN32
+
 #include <ccmc/Kameleon.h>
+
+#ifdef WIN32
+#pragma warning (pop)
 #endif
+
+#endif
+
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/downloadmanager.h>
@@ -44,14 +57,14 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/properties/selectionproperty.h>
-#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 
 
 namespace openspace {
+
 class IswaBaseGroup;
-class IswaCygnet; 
+class IswaCygnet;
 
 struct CdfInfo {
     std::string name;
@@ -79,7 +92,9 @@ struct MetadataFuture {
 };
 
 
-class IswaManager : public ghoul::Singleton<IswaManager>, public properties::PropertyOwner {
+class IswaManager : public ghoul::Singleton<IswaManager>,
+                    public properties::PropertyOwner
+{
     friend class ghoul::Singleton<IswaManager>;
 
 public:
@@ -95,10 +110,12 @@ public:
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);
-    std::string iswaUrl(int id, double timestamp = OsEng.timeManager().time().j2000Seconds(), std::string type = "image");
+    std::string iswaUrl(int id,
+        double timestamp = OsEng.timeManager().time().j2000Seconds(),
+        std::string type = "image");
 
     std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
-    
+
     std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();
     std::map<std::string, std::shared_ptr<IswaBaseGroup>>& groups();
     std::map<std::string, std::vector<CdfInfo>>& cdfInformation();
@@ -111,12 +128,13 @@ public:
 
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
+
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data);
     std::string jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data);
     std::string parseKWToLuaTable(CdfInfo info, std::string cut="z");
-    
+
     void createScreenSpace(int id);
     void createPlane(std::shared_ptr<MetadataFuture> data);
     void createSphere(std::shared_ptr<MetadataFuture> data);
@@ -124,7 +142,7 @@ private:
 
     void fillCygnetInfo(std::string jsonString);
     void registerGroup(std::string groupName, std::string type);
-    
+
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _type;
     std::map<int, std::string> _geom;
@@ -138,6 +156,7 @@ private:
 
     ghoul::Event<> _iswaEvent;
 
+    std::string _baseUrl;
 };
 
 } //namespace openspace

@@ -35,11 +35,7 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
-} // namespace opengl
-} // namespace ghoul
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -59,6 +55,7 @@ public:
 
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
+
     void addToCommand(std::string c);
     std::string sanitizeInput(std::string str);
 
@@ -72,7 +69,6 @@ private:
     properties::Vec4Property _historyTextColor;
     properties::IntProperty _historyLength;
 
-    
     size_t _inputPosition;
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand;

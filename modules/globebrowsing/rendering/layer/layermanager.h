@@ -28,14 +28,14 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 #include <functional>
 
-namespace openspace {
-namespace globebrowsing {
-    
+namespace openspace::globebrowsing {
+
 struct LayerGroup;
 
 /**
@@ -45,8 +45,15 @@ class LayerManager : public properties::PropertyOwner  {
 public:
     LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
 
+    void initialize();
+    void deinitialize();
+
+    std::shared_ptr<Layer> addLayer(layergroupid::GroupID groupId,
+        ghoul::Dictionary layerDict);
+    void deleteLayer(layergroupid::GroupID groupId, std::string layerName);
+
     const LayerGroup& layerGroup(size_t groupId);
-    const LayerGroup& layerGroup(layergroupid::ID);
+    const LayerGroup& layerGroup(layergroupid::GroupID);
 
     bool hasAnyBlendingLayersEnabled() const;
 
@@ -55,17 +62,17 @@ public:
     void update();
     void reset(bool includingDisabled = false);
 
-    static TileTextureInitData getTileTextureInitData(layergroupid::ID id,
-        size_t preferredTileSize = 0);
+    static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
+                                                      bool padTiles,
+                                                      size_t preferredTileSize = 0);
 
-    static bool shouldPerformPreProcessingOnLayergroup(layergroupid::ID id);
+    static bool shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id);
     void onChange(std::function<void(void)> callback);
 
 private:
     std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__

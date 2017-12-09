@@ -31,8 +31,12 @@ namespace openspace {
 
 class DebuggingModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "Debugging";
+
     DebuggingModule();
-    
+
+    std::vector<documentation::Documentation> documentations() const override;
+
 protected:
     void internalInitialize() override;
 };

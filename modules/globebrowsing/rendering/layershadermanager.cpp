@@ -35,13 +35,17 @@
 
 #include <ghoul/opengl/programobject.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-bool LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
-    const LayerGroupPreprocessingData& other) const {
-    return lastLayerIdx == other.lastLayerIdx &&
-        layerBlendingEnabled == other.layerBlendingEnabled;
+bool
+LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
+    const LayerGroupPreprocessingData& other) const
+{
+    return layerType == other.layerType &&
+           blendMode == other.blendMode &&
+           layerAdjustmentType == other.layerAdjustmentType &&
+           lastLayerIdx == other.lastLayerIdx &&
+           layerBlendingEnabled == other.layerBlendingEnabled;
 }
 
 bool LayerShaderManager::LayerShaderPreprocessingData::operator==(
@@ -72,36 +76,49 @@ LayerShaderManager::LayerShaderPreprocessingData
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
         LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData
             layeredTextureInfo;
-        auto layerGroup = layerManager->layerGroup(i);
-        layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
+
+        const LayerGroup& layerGroup = layerManager->layerGroup(i);
+        std::vector<std::shared_ptr<Layer>> layers = layerGroup.activeLayers();
+
+        // This check was implicit before;  not sure if it will fire or will be handled
+        // elsewhere
+        //ghoul_assert(
+        //    !layerGroup.activeLayers().empty(),
+        //    "If activeLayers is empty the following line will lead to an overflow"
+        //);
+        layeredTextureInfo.lastLayerIdx = static_cast<int>(
+            layerGroup.activeLayers().size() - 1
+        );
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
+
+        for (const std::shared_ptr<Layer>& layer : layers) {
+            layeredTextureInfo.layerType.push_back(layer->type());
+            layeredTextureInfo.blendMode.push_back(layer->blendMode());
+            layeredTextureInfo.layerAdjustmentType.push_back(
+                layer->layerAdjustment().type()
+            );
+        }
 
         preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
     }
-        
-    const auto& generalProps = globe.generalProperties();
-    const auto& debugProps = globe.debugProperties();
+
+    const RenderableGlobe::GeneralProperties& generalProps = globe.generalProperties();
+    const RenderableGlobe::DebugProperties& debugProps = globe.debugProperties();
     auto& pairs = preprocessingData.keyValuePairs;
-        
+
+    pairs.emplace_back("useAccurateNormals",
+        std::to_string(generalProps.useAccurateNormals)
+    );
     pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
     pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
     pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
     pairs.emplace_back("showHeightResolution",
-        std::to_string(debugProps.showHeightResolution));
+        std::to_string(debugProps.showHeightResolution)
+    );
     pairs.emplace_back("showHeightIntensities",
-        std::to_string(debugProps.showHeightIntensities));
+        std::to_string(debugProps.showHeightIntensities)
+    );
     pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
-
-    pairs.emplace_back("tilePaddingStart",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.start.x) + "," +
-        std::to_string(RawTileDataReader::padding.start.y) + ")"
-    );
-    pairs.emplace_back("tilePaddingSizeDiff",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
-        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
-    );
 
     return preprocessingData;
 }
@@ -114,7 +131,7 @@ LayerShaderManager::LayerShaderManager(const std::string& shaderName,
     , _fsPath(fsPath)
     , _updatedOnLastCall(false)
 {}
-    
+
 LayerShaderManager::~LayerShaderManager() {
     if (_programObject) {
         RenderEngine& renderEngine = OsEng.renderEngine();
@@ -153,7 +170,49 @@ void LayerShaderManager::recompileShaderProgram(
             "blend" + groupName,
             textureTypes[i].layerBlendingEnabled
         );
+
+        // This is to avoid errors from shader preprocessor
+        std::string keyLayerType = groupName + "0" + "LayerType";
+        shaderDictionary.setValue(keyLayerType, 0);
+
+        for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
+            std::string key = groupName + std::to_string(j) + "LayerType";
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].layerType[j])
+            );
+        }
+
+        // This is to avoid errors from shader preprocessor
+        std::string keyBlendMode = groupName + "0" + "BlendMode";
+        shaderDictionary.setValue(keyBlendMode, 0);
+
+        for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
+            std::string key = groupName + std::to_string(j) + "BlendMode";
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].blendMode[j])
+            );
+        }
+
+        // This is to avoid errors from shader preprocessor
+        std::string keyLayerAdjustmentType = groupName + "0" + "LayerAdjustmentType";
+        shaderDictionary.setValue(keyLayerAdjustmentType, 0);
+
+        for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
+            std::string key = groupName + std::to_string(j) + "LayerAdjustmentType";
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].layerAdjustmentType[j])
+            );
+        }
     }
+
+    ghoul::Dictionary layerGroupNames;
+    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
+        layerGroupNames.setValue(std::to_string(i), layergroupid::LAYER_GROUP_NAMES[i]);
+    }
+    shaderDictionary.setValue("layerGroups", layerGroupNames);
 
     // Other settings such as "useAtmosphere"
     auto keyValuePairs = _preprocessingData.keyValuePairs;
@@ -181,5 +240,4 @@ bool LayerShaderManager::updatedOnLastCall() {
     return _updatedOnLastCall;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

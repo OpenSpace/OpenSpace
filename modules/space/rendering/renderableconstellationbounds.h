@@ -29,6 +29,8 @@
 
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/programobject.h>
 #include <array>
 
@@ -49,13 +51,12 @@ class RenderableConstellationBounds : public Renderable {
 public:
     RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     static documentation::Documentation Documentation();
 
@@ -94,27 +95,25 @@ private:
      */
     void selectionPropertyHasChanged();
 
-    std::string _vertexFilename; ///< The filename containing the constellation bounds
-    std::string _constellationFilename; ///< The file containing constellation names
+    /// The filename containing the constellation bounds
+    properties::StringProperty _vertexFilename;
+
+    /// The file containing constellation names
+    properties::StringProperty _constellationFilename;
+
+    /// Determines the color of the constellation lines
+    properties::Vec3Property _color;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
-    
+
     using Vertex = std::array<float, 3>;
     std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
 
-    /// The radius of the celestial sphere onto which the bounds are drawn
-    properties::FloatProperty _distance;
-
     /// The property that stores all indices of constellations that should be drawn
     properties::SelectionProperty _constellationSelection;
-
-    std::string _originReferenceFrame; ///< Reference frame in which bounds are defined
-    
-    /// Used to translate between the origin reference frame and the target frame
-    glm::dmat3 _stateMatrix;
 
     GLuint _vao;
     GLuint _vbo;

@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/other/lruthreadpool.h>
 
 #include <modules/globebrowsing/tile/tileloadjob.h>
@@ -36,21 +37,20 @@
 
 #include <ghoul/logging/logmanager.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 namespace {
     const char* _loggerCat = "AsyncTileDataProvider";
-}
+} // namespace
 
 AsyncTileDataProvider::AsyncTileDataProvider(const std::string& name,
     const std::shared_ptr<RawTileDataReader> rawTileDataReader)
     : _name(name)
     , _rawTileDataReader(rawTileDataReader)
-    , _concurrentJobManager(
-        std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10))
+    , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
     , _pboContainer(nullptr)
     , _resetMode(ResetMode::ShouldResetAllButRawTileDataReader)
+    , _shouldBeDeleted(false)
 {
     _globeBrowsingModule = OsEng.moduleEngine().module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
@@ -93,14 +93,14 @@ std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::getRawTiles() {
         finishedJob = popFinishedRawTile();
     }
     return readyResults;
-}   
+}
 
 std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
     if (_concurrentJobManager.numFinishedJobs() > 0) {
         // Now the tile load job looses ownerwhip of the data pointer
         std::shared_ptr<RawTile> product =
             _concurrentJobManager.popFinishedJob()->product();
-      
+
         TileIndex::TileHashKey key = product->tileIndex.hashKey();
         // No longer enqueued. Remove from set of enqueued tiles
         _enqueuedTileRequests.erase(key);
@@ -122,7 +122,7 @@ std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
     }
     else
         return nullptr;
-}   
+}
 
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) {
     // Only satisfies if it is not already enqueued. Also bumps the request to the top.
@@ -176,7 +176,6 @@ void AsyncTileDataProvider::updatePboUsage() {
 }
 
 void AsyncTileDataProvider::update() {
-    updatePboUsage();
     endUnfinishedJobs();
 
     // May reset
@@ -203,8 +202,19 @@ void AsyncTileDataProvider::update() {
             }
             break;
         }
-        case ResetMode::ShouldNotReset:
+        case ResetMode::ShouldBeDeleted: {
+            // Clean all finished jobs
+            getRawTiles();
+            // Only allow resetting if there are no jobs currently running
+            if (_enqueuedTileRequests.size() == 0) {
+                _shouldBeDeleted = true;
+            }
             break;
+        }
+        case ResetMode::ShouldNotReset: {
+            updatePboUsage();
+            break;
+        }
         default:
             break;
     }
@@ -219,9 +229,18 @@ void AsyncTileDataProvider::reset() {
         "'" + _name + "'");
 }
 
+void AsyncTileDataProvider::prepairToBeDeleted() {
+    _resetMode = ResetMode::ShouldBeDeleted;
+    endEnqueuedJobs();
+}
+
+bool AsyncTileDataProvider::shouldBeDeleted() {
+    return _shouldBeDeleted;
+}
+
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
     ghoul_assert(_enqueuedTileRequests.size() == 0, "No enqueued requests left");
-  
+
     // Re-initialize PBO container
     if (_globeBrowsingModule->tileCache()->shouldUsePbo()) {
         size_t pboNumBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
@@ -246,5 +265,4 @@ float AsyncTileDataProvider::noDataValueAsFloat() const {
     return _rawTileDataReader->noDataValueAsFloat();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

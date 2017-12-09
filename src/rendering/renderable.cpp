@@ -23,18 +23,18 @@
  ****************************************************************************************/
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
 
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     const char* _loggerCat = "Renderable";
@@ -42,7 +42,13 @@ namespace {
     const char* keyEnd = "EndTime";
     const char* KeyType = "Type";
     const char* KeyTag = "Tag";
-}
+
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "This setting determines whether this object will be visible or not."
+    };
+} // namespace
 
 namespace openspace {
 
@@ -56,11 +62,17 @@ documentation::Documentation Renderable::Documentation() {
         {
             KeyType,
             new StringAnnotationVerifier("A valid Renderable created by a factory"),
-            "This key specifies the type of Renderable that gets created. It has to be one"
-            "of the valid Renderables that are available for creation (see the "
+            Optional::No,
+            "This key specifies the type of Renderable that gets created. It has to be "
+            "one of the valid Renderables that are available for creation (see the "
             "FactoryDocumentation for a list of possible Renderables), which depends on "
-            "the configration of the application",
-            Optional::No
+            "the configration of the application"
+        },
+        {
+            EnabledInfo.identifier,
+            new BoolVerifier,
+            Optional::Yes,
+            EnabledInfo.description
         }
         }
     };
@@ -70,15 +82,18 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     // The name is passed down from the SceneGraphNode
-    std::string name;
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success, "The SceneGraphNode did not set the 'name' key");
+    ghoul_assert(
+        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
+        "The SceneGraphNode did not set the 'name' key"
+    );
+    std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
 
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(factory, "Renderable factory did not exist");
     std::unique_ptr<Renderable> result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a Renderable object of type '" << renderableType << "'");
@@ -88,18 +103,9 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     return result;
 }
 
-Renderable::Renderable()
-    : properties::PropertyOwner("renderable")
-    , _enabled("enabled", "Is Enabled", true)
-    , _renderBin(RenderBin::Opaque)
-    , _startTime("")
-    , _endTime("")
-    , _hasTimeInterval(false)
-{}
-
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("renderable")
-    , _enabled("enabled", "Is Enabled", true)
+    : properties::PropertyOwner({ "renderable" })
+    , _enabled(EnabledInfo, true)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
@@ -115,16 +121,18 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
-        if (!tagName.empty())
+        if (!tagName.empty()) {
             addTag(std::move(tagName));
+        }
     } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
         ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
         std::vector<std::string> keys = tagNames.keys();
         std::string tagName;
         for (const std::string& key : keys) {
             tagName = tagNames.value<std::string>(key);
-            if (!tagName.empty())
+            if (!tagName.empty()) {
                 addTag(std::move(tagName));
+            }
         }
     }
 
@@ -132,10 +140,22 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
         _hasTimeInterval = true;
     }
 
+    if (dictionary.hasKey(EnabledInfo.identifier)) {
+        _enabled = dictionary.value<bool>(EnabledInfo.identifier);
+    }
+
     addProperty(_enabled);
 }
 
 Renderable::~Renderable() {}
+
+void Renderable::initialize() {}
+
+void Renderable::initializeGL() {}
+
+void Renderable::deinitialize() {}
+
+void Renderable::deinitializeGL() {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;
@@ -147,11 +167,18 @@ float Renderable::boundingSphere() const {
 
 void Renderable::update(const UpdateData&) {}
 
-void Renderable::render(const RenderData& data, RendererTasks&) {
-    render(data);
-}
+void Renderable::render(const RenderData&, RendererTasks&) {}
 
-void Renderable::render(const RenderData&) {}
+SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
+                                                       const glm::dvec3& targetModelSpace)
+{
+    glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
+    return {
+        directionFromCenterToTarget * static_cast<double>(boundingSphere()),
+        directionFromCenterToTarget,
+        0.0
+    };
+}
 
 void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
                                 const Camera& camera,
@@ -189,8 +216,9 @@ bool Renderable::getInterval(double& start, double& end) {
         end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
         return true;
     }
-    else
+    else {
         return false;
+    }
 }
 
 bool Renderable::isReady() const {
@@ -202,8 +230,8 @@ bool Renderable::isEnabled() const {
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
-    _enabled.onChange([=] () {
-            callback(isEnabled());
+    _enabled.onChange([this, c{ std::move(callback) }]() {
+        c(isEnabled());
     });
 }
 

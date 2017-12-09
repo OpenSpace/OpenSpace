@@ -29,8 +29,8 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const std::string _loggerCat = "TexturePlane";
-}
+    const char* _loggerCat = "TexturePlane";
+} // namespace
 
 namespace openspace {
 
@@ -58,15 +58,15 @@ void TexturePlane::setUniforms(){
 bool TexturePlane::createGeometry() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-    
+
     // ============================
     //         GEOMETRY (quad)
     // ============================
 
     float s = _data->spatialScale.x;
-    const GLfloat x = s*_data->scale.x/2.0;
-    const GLfloat y = s*_data->scale.y/2.0;
-    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat x = s*_data->scale.x/2.f;
+    const GLfloat y = s*_data->scale.y/2.f;
+    const GLfloat z = s*_data->scale.z/2.f;
     const GLfloat w = _data->spatialScale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
@@ -83,9 +83,23 @@ bool TexturePlane::createGeometry() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(0)
+    );
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 
     return true;
 }

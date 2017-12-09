@@ -38,10 +38,37 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const char* KeySize = "Size";
-    const char* KeyBillboard = "Billboard";
-    const char* KeyBlendMode = "BlendMode";
-    const char* KeyTexture = "Texture";
+    enum BlendMode {
+        BlendModeNormal = 0,
+        BlendModeAdditive
+    };
+
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "Texture",
+        "Texture",
+        "This value specifies an image that is loaded from disk and is used as a texture "
+        "that is applied to this plane. This image has to be square."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BillboardInfo = {
+        "Billboard",
+        "Billboard mode",
+        "This value specifies whether the plane is a billboard, which means that it is "
+        "always facing the camera. If this is false, it can be oriented using other "
+        "transformations."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size (in meters)",
+        "This value specifies the size of the plane in meters."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+        "BlendMode",
+        "Blending Mode",
+        "This determines the blending mode that is applied to this plane."
+    };
 } // namespace
 
 namespace openspace {
@@ -53,46 +80,41 @@ documentation::Documentation RenderablePlane::Documentation() {
         "base_renderable_plane",
         {
             {
-                KeySize,
+                SizeInfo.identifier,
                 new DoubleVerifier,
-                "Specifies the size of the square plane in meters.",
-                Optional::No
+                Optional::No,
+                SizeInfo.description
             },
             {
-                KeyBillboard,
+                BillboardInfo.identifier,
                 new BoolVerifier,
-                "Specifies whether the plane is a billboard, which means that it is "
-                "always facing the camera. If this is false, it can be oriented using "
-                "other transformations. The default is 'false'.",
-                Optional::Yes
+                Optional::Yes,
+                BillboardInfo.description
             },
             {
-                KeyBlendMode,
+                BlendModeInfo.identifier,
                 new StringInListVerifier({ "Normal", "Additive" }),
-                "Specifies the blend mode that is applied to this plane. The default "
-                "value is 'Normal'.",
-                Optional::Yes
+                Optional::Yes,
+                BlendModeInfo.description, // + " The default value is 'Normal'.",
             },
             {
-                KeyTexture,
+                TextureInfo.identifier,
                 new StringVerifier,
-                "Specifies the texture that is applied to this plane. This image has to "
-                "be a square image.",
-                Optional::No
+                Optional::No,
+                TextureInfo.description,
             }
         }
     };
 }
 
-
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath("texture", "Texture")
-    , _billboard("billboard", "Billboard", false)
-    , _size("size", "Size", 10, 0, std::pow(10, 25))
+    , _texturePath(TextureInfo)
+    , _billboard(BillboardInfo, false)
+    , _size(SizeInfo, 10.f, 0.f, 1e25f)
+    , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _shader(nullptr)
     , _texture(nullptr)
-    , _blendMode(BlendMode::Normal)
     , _quad(0)
     , _vertexPositionBuffer(0)
     , _planeIsDirty(false)
@@ -104,23 +126,39 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         "RenderablePlane"
     );
 
-    _size = dictionary.value<double>(KeySize);
+    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
 
-    if (dictionary.hasKey(KeyBillboard)) {
-        _billboard = dictionary.value<bool>(KeyBillboard);
+    if (dictionary.hasKey(BillboardInfo.identifier)) {
+        _billboard = dictionary.value<bool>(BillboardInfo.identifier);
     }
 
-    if (dictionary.hasKey(KeyBlendMode)) {
-        const std::string v = dictionary.value<std::string>(KeyBlendMode);
+    _blendMode.addOptions({
+        { BlendModeNormal, "Normal" },
+        { BlendModeAdditive, "Additive"}
+    });
+    _blendMode.onChange([&]() {
+        switch (_blendMode) {
+            case BlendModeNormal:
+                setRenderBin(Renderable::RenderBin::Opaque);
+                break;
+            case BlendModeAdditive:
+                setRenderBin(Renderable::RenderBin::Transparent);
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    });
+
+    if (dictionary.hasKey(BlendModeInfo.identifier)) {
+        const std::string v = dictionary.value<std::string>(BlendModeInfo.identifier);
         if (v == "Normal") {
-            _blendMode = BlendMode::Normal;
+            _blendMode = BlendModeNormal;
         }
         else if (v == "Additive") {
-            _blendMode = BlendMode::Additive;
-            setRenderBin(Renderable::RenderBin::Transparent);
+            _blendMode = BlendModeAdditive;
         }
     }
-    _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 
     addProperty(_billboard);
@@ -140,7 +178,7 @@ bool RenderablePlane::isReady() const {
     return _shader && _texture;
 }
 
-bool RenderablePlane::initialize() {
+void RenderablePlane::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -148,14 +186,12 @@ bool RenderablePlane::initialize() {
     _shader = OsEng.renderEngine().buildRenderProgram("PlaneProgram",
         "${MODULE_BASE}/shaders/plane_vs.glsl",
         "${MODULE_BASE}/shaders/plane_fs.glsl"
-        );
+    );
 
     loadTexture();
-
-    return isReady();
 }
 
-bool RenderablePlane::deinitialize() {
+void RenderablePlane::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -170,17 +206,19 @@ bool RenderablePlane::deinitialize() {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-
-    return true;
 }
 
-void RenderablePlane::render(const RenderData& data) {
+void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
     //if (_projectionListener){
-    //    //get parent node-texture and set with correct dimensions  
-    //    SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
+    //    //get parent node-texture and set with correct dimensions
+    //    SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(
+    //        _nodeName
+    //    )->parent();
     //    if (textureNode != nullptr){
-    //        RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
+    //        RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(
+    //            textureNode->renderable()
+    //        );
     //        _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
     //        unsigned int h = _texture->height();
     //        unsigned int w = _texture->width();
@@ -197,29 +235,32 @@ void RenderablePlane::render(const RenderData& data) {
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         rotationTransform *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
         glm::dmat4(1.0);
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 modelViewTransform =
+        data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
-    
+
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
     _shader->setUniform("texture1", unit);
 
     bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::Framebuffer;
 
     bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
-        _shader->setUniform("additiveBlending", _blendMode == BlendMode::Additive);
+        _shader->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
     }
 
-    bool additiveBlending = _blendMode == BlendMode::Additive && usingFramebufferRenderer;
+    bool additiveBlending = _blendMode == BlendModeAdditive && usingFramebufferRenderer;
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -261,13 +302,16 @@ void RenderablePlane::loadTexture() {
             );
             texture->uploadTexture();
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than
+            // linear
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
             _texture = std::move(texture);
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
+            _textureFile->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
         }
     }
 }
@@ -294,12 +338,12 @@ void RenderablePlane::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
-    
+
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
-        1, 
+        1,
         2,
         GL_FLOAT,
         GL_FALSE,

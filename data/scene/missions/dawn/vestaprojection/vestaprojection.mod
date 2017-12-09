@@ -11,9 +11,9 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "${OPENSPACE_DATA}/scene/vestaprojection_2/obj/VestaComet_5000.obj",
             },
+            ColorTexture = "textures/dummy.jpg",
             Textures = {
                 Type = "simple",
-                Color = "textures/dummy.jpg",
                 Project = "textures/projectMe.png",
                 Default = "textures/defaultProj_backup.png"
             },
@@ -93,7 +93,8 @@ return {
                 --"${OPENSPACE_DATA}/spice/DAWN_KERNELS/pck/dawn_vesta_v06.tpc",
                 "${OPENSPACE_DATA}/spice/DawnKernels/spk/sb_vesta_071107.bsp",
             }
-        }
+        },
+        GuiPath = "/Solar System/Asteroid Belt/Vesta"
     },
     -- Vesta Trail Module
     {   
@@ -103,13 +104,14 @@ return {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "VESTA",
+                Target = "VESTA",
                 Observer = "SUN",
             },
             Color = { 0.7, 0.8, 0.7 },
             StartTime = "2007 JUL 20 12:00:00",
             EndTime = "2018 JAN 22 12:00:00",
             SampleInterval = 3600 * 24
-        }
+        },
+        GuiPath = "/Solar System/Asteroid Belt/Vesta"
     }
 }

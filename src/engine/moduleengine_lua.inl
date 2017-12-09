@@ -25,8 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/lua/ghoul_lua.h>
 
-namespace openspace {
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 /**
  * \ingroup LuaScripts
@@ -44,7 +43,7 @@ int isLoaded(lua_State* L) {
     std::string moduleName = lua_tostring(L, -1);
 
     std::vector<OpenSpaceModule*> modules = OsEng.moduleEngine().modules();
-    
+
     auto it = std::find_if(
         modules.begin(),
         modules.end(),
@@ -61,5 +60,4 @@ int isLoaded(lua_State* L) {
     return 1;
 }
 
-} // namespace luascriptfunctions
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

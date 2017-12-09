@@ -31,8 +31,7 @@
 
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Class to hold vertex data and handling OpenGL interfacing and rendering.
@@ -54,7 +53,7 @@ public:
         Positions usePositions = Positions::No,
         TextureCoordinates useTextures = TextureCoordinates::No,
         Normals useNormals = Normals::No);
-    
+
     ~TriangleSoup();
 
     // Setters
@@ -83,7 +82,6 @@ protected:
         GLfloat position[4];
         GLfloat texture[2];
         GLfloat normal[3];
-    private:
         GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
     };
 
@@ -102,7 +100,6 @@ private:
     bool _gpuDataNeedUpdate;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TRIANGLESOUP___H__

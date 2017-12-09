@@ -28,21 +28,20 @@
 #include <modules/base/rendering/modelgeometry.h>
 
 namespace openspace {
+    class RenderableModel;
+    class RenderableModelProjection;
+} // namespace openspace
 
-class RenderableModel;
-class RenderableModelProjection;
-
-namespace modelgeometry {
+namespace openspace::modelgeometry {
 
 class MultiModelGeometry : public ModelGeometry {
 public:
     MultiModelGeometry(const ghoul::Dictionary& dictionary);
 
 private:
-    bool loadModel(const std::string& filename);
+    virtual bool loadModel(const std::string& filename) override;
 };
 
-}  // namespace modelgeometry
-}  // namespace openspace
+}  // namespace openspace::modelgeometry
 
 #endif // __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__

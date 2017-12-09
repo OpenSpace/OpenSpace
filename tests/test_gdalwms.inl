@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
-
 #ifdef GLOBEBROWSING_USE_GDAL
 
 #include "gdal.h"
@@ -47,17 +45,17 @@
 class GdalWmsTest : public testing::Test {};
 
 TEST_F(GdalWmsTest, Simple) {
-    GDALDataset *poDataset;
-    GDALAllRegister();
+    //GDALDatasetH poDataset;
+    //GDALAllRegister();
 
-    
-    std::string res = GDALVersionInfo("format");
-    
-    std::cout << res << std::endl;
+    //
+    //std::string res = GDALVersionInfo("format");
+    //
+    //std::cout << res << std::endl;
 
-    std::string testFile = absPath("${TESTDIR}/gdal/TERRA_CR_B143_2016-04-12.wms");
+    //std::string testFile = absPath("${TESTDIR}/gdal/TERRA_CR_B143_2016-04-12.wms");
 
-    poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
+    //poDataset = GDALOpen(testFile.c_str(), GA_ReadOnly);
 
     // This assertion fails
     //ASSERT_NE(poDataset, nullptr) << "Failed to load testFile";

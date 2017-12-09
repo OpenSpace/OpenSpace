@@ -30,10 +30,10 @@
 #include <iterator>
 
 namespace openspace {
-    
+namespace volume {
+
 template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
 class LruCache {
-    typedef KeyType K;
 public:
     LruCache(size_t capacity) {
         _capacity = capacity;
@@ -73,6 +73,7 @@ public:
     size_t capacity() {
         return _capacity;
     };
+
 private:
     void insert(const KeyType& key, const ValueType& value) {
         if (_cache.size() == _capacity) {
@@ -81,11 +82,14 @@ private:
         auto iter = _tracker.insert(_tracker.end(), key);
         _cache[key] = std::make_pair(value, iter);
     };
-    ContainerType<KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>> _cache;
+    ContainerType<
+        KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>
+    > _cache;
     std::list<KeyType> _tracker;
     size_t _capacity;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___LRUCACHE___H__

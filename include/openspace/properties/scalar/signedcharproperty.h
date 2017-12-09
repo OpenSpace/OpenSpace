@@ -28,11 +28,11 @@
  /**
  * \file signedcharproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class SignedCharProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>signed char</code>.
@@ -42,12 +42,10 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char);
+REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char)
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___SIGNEDCHARPROPERTY___H__

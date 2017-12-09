@@ -1,17 +1,17 @@
-*~
-*.swp
 .DS_Store
 .vscode
 /bin/
 /build/
 /cache/
-Thumbs.db
-tmp/
-
-/documentation
 /doc
+/documentation
 /ext/SGCT
+/logs
+tmp/
+Thumbs.db
 
+*~
+*.swp
 *.gglsl
 *.GhoulGenerated.glsl
 *.OpenSpaceGenerated.glsl
@@ -30,7 +30,6 @@ install_manifest.txt
 .project
 
 shaders/ABuffer/constants.hglsl
-log.html
 ScriptLog.txt
 
 data/scene/atmosphereearth/textures
@@ -56,8 +55,8 @@ data/scene/lodglobes/uranus/textures
 data/scene/lodglobes/venus/textures
 data/scene/mars/textures
 data/scene/mercury/textures
-data/scene/milkyway/textures
-data/scene/milkyway-eso/textures
+data/scene/milkyway/digitaluniverse/textures
+data/scene/milkyway/eso/textures
 data/scene/missions/dawn/ceres/textures
 data/scene/missions/dawn/dawn/obj
 data/scene/missions/dawn/dawn/textures
@@ -88,6 +87,9 @@ data/scene/missions/rosetta/67P/rosettaimages
 data/scene/missions/rosetta/67P/textures
 data/scene/missions/rosetta/rosetta/rosetta
 data/scene/missions/rosetta/rosetta/textures
+data/scene/missions/voyager/**/*.png
+data/scene/missions/voyager/**/*.jpg
+data/scene/missions/voyager/**/*.obj
 data/scene/moon/textures
 data/scene/neptune/textures
 data/scene/pluto/textures
@@ -99,12 +101,12 @@ data/scene/saturn/rhea/textures
 data/scene/saturn/saturn/textures
 data/scene/saturn/tethys/textures
 data/scene/saturn/titan/textures
-data/scene/stars/colorbv.cmap
-data/scene/stars/speck
-data/scene/stars/textures
-data/scene/stars-denver/denver_colorbv.cmap
-data/scene/stars-denver/speck
-data/scene/stars-denver/textures
+data/scene/stars/digitaluniverse/colorbv.cmap
+data/scene/stars/digitaluniverse/speck
+data/scene/stars/digitaluniverse/textures
+data/scene/stars/denver/denver_colorbv.cmap
+data/scene/stars/denver/speck
+data/scene/stars/denver/textures
 data/scene/sun/textures
 data/scene/uranus/textures
 data/scene/venus/textures
@@ -118,4 +120,19 @@ data/spice/nh_kernels
 data/spice/OsirisRexKernels
 data/spice/plu055.bsp
 data/spice/Rosetta
+data/spice/voyager
 data/spice/sat375.bsp
+data/spice/new_horizons/
+data/scene/mars/map_datasets/mars_COL_v006_mars2000_rgb.tif
+data/scene/mars/map_datasets/mars_COL_v006_mars2000_rgb.vrt
+data/spice/Juno/
+data/scene/digitaluniverse/*/data/*.dat
+data/scene/digitaluniverse/*/data/*.data
+data/scene/digitaluniverse/*/speck/*.speck
+data/scene/digitaluniverse/*/speck/*.cmap
+data/scene/digitaluniverse/*/speck/*.label
+data/scene/digitaluniverse/*/textures/*.jpg
+data/scene/digitaluniverse/*/textures/*.pbm
+data/scene/digitaluniverse/*/textures/*.png
+data/scene/digitaluniverse/*/textures/*.sgi
+customization.lua

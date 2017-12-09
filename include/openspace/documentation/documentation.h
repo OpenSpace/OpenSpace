@@ -34,11 +34,9 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 using Optional = ghoul::Boolean;
-using Exhaustive = ghoul::Boolean;
 
 /**
  * The TestResult structure returns the information from the #testSpecification method. It
@@ -49,7 +47,7 @@ using Exhaustive = ghoul::Boolean;
 struct TestResult {
     /**
      * An Offense is a violation against a specific verifier. The Offense::offender is the
-     * key that caused the offense (in the case of nested tables, it will be fully 
+     * key that caused the offense (in the case of nested tables, it will be fully
      * qualified identifier) and the Offense::Reason is the reason that caused the
      * offense.
      */
@@ -62,7 +60,7 @@ struct TestResult {
             ExtraKey,         ///< The exhaustive documentation contained an extra key
             WrongType,        ///< The key's value was not of the expected type
             Verification,     ///< The value did not pass a necessary non-type verifier
-            UnknownIdentifier ///< If the identifier for a ReferencingVerifier did not exist
+            UnknownIdentifier ///< The identifier for a ReferencingVerifier did not exist
         };
         /// The offending key that caused the Offense. In the case of a nested table,
         /// this value will be the fully qualified name of the key
@@ -70,7 +68,7 @@ struct TestResult {
         /// The Reason that caused this offense
         Reason reason;
     };
-    
+
     /**
      * A warning is some value that that does not exactly adhere to the specification, but
      * that also does not violate so badly to warrant an Offense. This, for example, could
@@ -144,8 +142,8 @@ struct DocumentationEntry {
 
     /**
      * The constructor for a DocumentationEntry describing a \p key in a Documentation.
-     * The value for the key (or each value in the case of the 
-     * DocumentationEntry::Wildcard) is tested using the \p verifier, that specifies the 
+     * The value for the key (or each value in the case of the
+     * DocumentationEntry::Wildcard) is tested using the \p verifier, that specifies the
      * conditions that the \p key%'s value has to fulfill. The textual documentation
      * \p doc shall describe the usage of the key-value pair and will be printed for human
      * consumption for example in the DocumentationEngine. Each DocumentationEntry can
@@ -163,7 +161,7 @@ struct DocumentationEntry {
      * \pre \p verifier must not be nullptr
      */
     DocumentationEntry(std::string key, std::shared_ptr<Verifier> verifier,
-                       std::string doc = "", Optional optional = Optional::No);
+        Optional optional, std::string doc = "");
 
     /**
     * The constructor for a DocumentationEntry describing a \p key in a Documentation.
@@ -186,8 +184,8 @@ struct DocumentationEntry {
     * \pre \p key must not be empty
     * \pre \p verifier must not be nullptr
     */
-    DocumentationEntry(std::string key, Verifier* verifier, std::string doc = "",
-        Optional optional = Optional::No);
+    DocumentationEntry(std::string key, Verifier* verifier, Optional optional,
+        std::string doc = "");
 
     /// The key that is described by this DocumentationEntry
     std::string key;
@@ -205,21 +203,17 @@ struct DocumentationEntry {
  * used to impose restrictions on keys and values and determine whether a given
  * ghoul::Dictionary adheres to these specifications (see #testSpecification and
  * #testSpecificationAndThrow methods). Each Documentation consists of a human-readable
- * \c name, a list of DocumentationEntry%s that each describe a single key value, and a
- * flag whether these entries are Exhaustive or not. If a Documentation is Exhaustive, a
- * ghoul::Dictionary that contains additional keys will fail the specification, whereas a
- * non-exhaustive Documentation allow for other (potentially non used) keys. The most
- * convenient way of creating a Documentation is by using nested initializer lists:
+ * \c name, and a list of DocumentationEntry%s that each describe a single key value. The
+ * most convenient way of creating a Documentation is by using nested initializer lists:
  *\verbatim
 Documentation doc = {
     "Documentation for an arbitrary dictionary",
     { // A list of DocumentationEntry%s; also specified using initializer lists
         { "key1", new IntVerifier, "Documentation key1", Optional::Yes },
         { "key2", new FloatVerifier, "Documentation key2" },
-        { "key3", new StringVerifier } 
-    },
-    Exhaustive::Yes
-+;
+        { "key3", new StringVerifier }
+    }
+};
 \endverbatim
  *
  * If multiple DocumentationEntries cover the same key, they are all evaluated for that
@@ -237,31 +231,23 @@ struct Documentation {
      * Documentation%s to reference this entry
      * \param entries A list of DocumentationEntry%s that describe the individual keys for
      * this entrie Documentation
-     * \param exhaustive Determines whether the \p entries are an exhaustive specification
-     * of the object or whether additional, potentially unused, keys are allowed
      */
-    Documentation(std::string name, std::string id, DocumentationEntries entries = {},
-        Exhaustive exhaustive = Exhaustive::No);
+    Documentation(std::string name, std::string id, DocumentationEntries entries = {});
 
     /**
     * Creates a Documentation with a human-readable \p name.
     * \param name The human-readable name of this Documentation
     * \param entries A list of DocumentationEntry%s that describe the individual keys for
     * this entrie Documentation
-    * \param exhaustive Determines whether the \p entries are an exhaustive specification
-    * of the object or whether additional, potentially unused, keys are allowed
     */
-    Documentation(std::string name, DocumentationEntries entries = {},
-        Exhaustive exhaustive = Exhaustive::No);
+    Documentation(std::string name, DocumentationEntries entries = {});
 
     /**
     * Creates a Documentation.
     * \param entries A list of DocumentationEntry%s that describe the individual keys for
     * this entrie Documentation
-    * \param exhaustive Determines whether the \p entries are an exhaustive specification
-    * of the object or whether additional, potentially unused, keys are allowed
     */
-    Documentation(DocumentationEntries entries = {}, Exhaustive exhaustive = Exhaustive::No);
+    Documentation(DocumentationEntries entries = {});
 
     /// The human-readable name of the Documentation
     std::string name;
@@ -269,8 +255,6 @@ struct Documentation {
     std::string id;
     /// A list of specifications that are describing this Documentation
     DocumentationEntries entries;
-    /// A flag to say wheter the DocumentationEntries are an exhaustive description
-    Exhaustive exhaustive;
 };
 
 /**
@@ -303,9 +287,7 @@ TestResult testSpecification(const Documentation& documentation,
 void testSpecificationAndThrow(const Documentation& documentation,
     const ghoul::Dictionary& dictionary, std::string component);
 
-} // namespace documentation
-
-} // namespace openspace
+} // namespace openspace::documentation
 
 // Make the overload for std::to_string available for the Offense::Reason for easier
 // error logging

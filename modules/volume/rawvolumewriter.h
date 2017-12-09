@@ -30,28 +30,31 @@
 #include <modules/volume/rawvolume.h>
 
 namespace openspace {
+namespace volume {
 
 template <typename VoxelType>
 class RawVolumeWriter {
 public:
     RawVolumeWriter(std::string path, size_t bufferSize = 1024);
-    void setPath(const std::string& path);    
+    void setPath(const std::string& path);
     glm::uvec3 dimensions() const;
     void setDimensions(const glm::uvec3& dimensions);
     void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
-               const std::function<void(float t)>& onProgress = [](float t) {});
+               const std::function<void(float)>& onProgress = [](float) {});
     void write(const RawVolume<VoxelType>& volume);
 
     size_t coordsToIndex(const glm::uvec3& coords) const;
     glm::ivec3 indexToCoords(size_t linear) const;
+
 private:
     glm::ivec3 _dimensions;
     std::string _path;
-    size_t _bufferSize;    
+    size_t _bufferSize;
 };
 
-} // namespace openspace 
+} // namespace volume
+} // namespace openspace
 
-#include "rawvolumewriter.inl";
+#include "rawvolumewriter.inl"
 
 #endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__

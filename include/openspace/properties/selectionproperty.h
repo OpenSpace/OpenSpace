@@ -29,8 +29,7 @@
 
 #include <vector>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 class SelectionProperty : public TemplateProperty<std::vector<int>> {
 public:
@@ -39,16 +38,20 @@ public:
         std::string description;
     };
 
-    SelectionProperty(std::string identifier, std::string guiName,
-        Property::Visibility visibility = Property::Visibility::User);
-    
+    SelectionProperty(Property::PropertyInfo info);
+
     void addOption(Option option);
     void removeOptions();
     const std::vector<Option>& options() const;
 
+    using TemplateProperty<std::vector<int>>::operator std::vector<int>;
+
+    using TemplateProperty<std::vector<int>>::operator=;
+
+
 private:
     static const std::string OptionsKey;
-    std::string generateAdditionalDescription() const;
+    std::string generateAdditionalDescription() const override;
 
     /// The list of options which have been registered with this OptionProperty
     std::vector<Option> _options;
@@ -60,24 +63,27 @@ std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className();
 
 template <>
 template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(lua_State* state, bool& success);
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(
+    lua_State* state, bool& success);
 
 template <>
 template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State* state, std::vector<int> value);
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(
+    lua_State* state, std::vector<int> value);
 
 template <>
 int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua();
 
 template <>
 template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(std::string value, bool& success);
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(
+    std::string value, bool& success);
 
 template <>
 template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string& outValue, std::vector<int> inValue);
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
+    std::string& outValue, std::vector<int> inValue);
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___SELECTIONPROPERTY___H__

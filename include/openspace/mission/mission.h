@@ -34,13 +34,14 @@
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
 namespace documentation {  struct Documentation; }
 
 /**
  * Used to represent a named period of time within a mission. Allows nested phases, i.e.
  * phases within phases. Designed for WORM usage (Write Once, Read Multiple), and,
  * therefore, has only accessors.
- * 
+ *
  * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an
  * optional MissionPhase::description, and optional subphases.
  */
@@ -113,7 +114,7 @@ protected:
      * \pre maxDepth must not be negative
      */
     void phaseTrace(double time, Trace& trace, int maxDepth) const;
-    
+
     /// The name of the MissionPhase
     std::string _name;
     /// The description of the MissionPhase

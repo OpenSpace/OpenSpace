@@ -25,17 +25,13 @@
 #ifndef __OPENSPACE_CORE___POWERSCALEDCOORDINATE___H__
 #define __OPENSPACE_CORE___POWERSCALEDCOORDINATE___H__
 
-// open space includes
-// glm includes
 #include <ghoul/glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-namespace openspace
-{
+namespace openspace {
 
-// forward declare the power scaled scalars
 class PowerScaledScalar;
 
 class PowerScaledCoordinate {
@@ -52,10 +48,11 @@ public:
     // Sets the power scaled coordinates with w = 0
     PowerScaledCoordinate(glm::vec3 v);
 
-    static PowerScaledCoordinate CreatePowerScaledCoordinate(double d1, double d2, double d3);
+    static PowerScaledCoordinate CreatePowerScaledCoordinate(double d1, double d2,
+        double d3);
 
     // get functions
-    // return the full, unmodified PSC 
+    // return the full, unmodified PSC
     const glm::vec4& vec4() const;
 
     // returns the rescaled, "normal" coordinates

@@ -33,18 +33,17 @@
 #include <queue>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
-namespace openspace {
-namespace globebrowsing {    
+namespace openspace::globebrowsing {
 
-template<typename KeyType>
-class LRUThreadPool;
+template<typename KeyType> class LRUThreadPool;
 
 template<typename KeyType>
 class LRUThreadPoolWorker {
-public: 
+public:
     LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
     void operator()();
 private:
@@ -65,6 +64,7 @@ template<typename KeyType>
 class LRUThreadPool {
 public:
     LRUThreadPool(size_t numThreads, size_t queueSize);
+    LRUThreadPool(const LRUThreadPool& toCopy);
     ~LRUThreadPool();
 
     void enqueue(std::function<void()> f, KeyType key);
@@ -74,7 +74,7 @@ public:
     void clearEnqueuedTasks();
 
 private:
-    
+
     struct DefaultHasher {
         unsigned long long operator()(const KeyType& key) const {
             return static_cast<unsigned long long>(key);
@@ -91,8 +91,7 @@ private:
     bool _stop;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "lruthreadpool.inl"
 

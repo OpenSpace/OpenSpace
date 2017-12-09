@@ -36,7 +36,7 @@
 
 namespace {
     const char* _loggerCat = "ModuleEngine";
-}
+} // namespace
 
 namespace openspace {
 
@@ -56,32 +56,32 @@ void ModuleEngine::deinitialize() {
     LDEBUG("Finished destroying modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
-    ghoul_assert(module, "Module must not be nullptr");
-    
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m) {
+    ghoul_assert(m, "Module must not be nullptr");
+
     auto it = std::find_if(
         _modules.begin(),
         _modules.end(),
-        [&module](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->name() == module->name();
+        [&m](std::unique_ptr<OpenSpaceModule>& rhs) {
+            return rhs->name() == m->name();
         }
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + module->name() + "' was registered before",
+            "Module name '" + m->name() + "' was registered before",
             "ModuleEngine"
         );
     }
-    
-    LDEBUG("Registering module '" << module->name() << "'");
-    module->initialize();
-    LDEBUG("Registered module '" << module->name() << "'");
-    _modules.push_back(std::move(module));
+
+    LDEBUG("Registering module '" << m->name() << "'");
+    m->initialize();
+    LDEBUG("Registered module '" << m->name() << "'");
+    _modules.push_back(std::move(m));
 }
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     std::vector<OpenSpaceModule*> result;
-    for (auto& m : _modules) {
+    for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         result.push_back(m.get());
     }
     return result;
@@ -90,7 +90,7 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
 ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
     ghoul::systemcapabilities::Version version = { 0, 0, 0 };
 
-    for (const auto& m : _modules) {
+    for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         version = std::max(version, m->requiredOpenGLVersion());
     }
 
@@ -108,7 +108,6 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
                 "Checks whether a specific module is loaded"
             }
         }
-
     };
 }
 

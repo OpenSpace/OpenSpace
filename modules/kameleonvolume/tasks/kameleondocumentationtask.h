@@ -30,6 +30,7 @@
 #include <string>
 
 namespace openspace {
+namespace kameleonvolume {
 
 class KameleonDocumentationTask : public Task {
 public:
@@ -37,12 +38,13 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
-    
+
 private:
     std::string _inputPath;
     std::string _outputPath;
 };
 
+} // namespace kameleonvolume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONDOCUMENTATIONTASK___H__

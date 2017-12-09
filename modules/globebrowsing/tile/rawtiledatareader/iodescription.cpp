@@ -26,8 +26,7 @@
 
 #include <modules/globebrowsing/tile/pixelregion.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 IODescription IODescription::cut(PixelRegion::Side side, int pos) {
     PixelRegion readPreCut = read.region;
@@ -42,7 +41,7 @@ IODescription IODescription::cut(PixelRegion::Side side, int pos) {
 
     PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
     PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
-        
+
     if (cutSize.x == 0 || cutSize.y == 0) {
         ghoul_assert(
             read.region.equals(readPreCut),
@@ -62,5 +61,4 @@ IODescription IODescription::cut(PixelRegion::Side side, int pos) {
     return whatCameOff;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

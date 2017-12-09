@@ -32,12 +32,10 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul {
-namespace opengl {
+namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} 
-} // namespace ghoul
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -51,12 +49,12 @@ class RenderableSphere : public Renderable {
 public:
     RenderableSphere(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
@@ -71,6 +69,8 @@ private:
     properties::IntProperty _segments;
 
     properties::FloatProperty _transparency;
+
+    float _fadeOutThreshold;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;

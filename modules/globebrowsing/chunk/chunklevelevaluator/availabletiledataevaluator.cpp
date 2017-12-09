@@ -31,18 +31,16 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace chunklevelevaluator {
-    
-int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
+namespace openspace::globebrowsing::chunklevelevaluator {
+
+int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData&) const {
     auto layerManager = chunk.owner().chunkedLodGlobe()->layerManager();
     // auto layers = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
     int currLevel = chunk.tileIndex().level;
-        
+
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         for (const auto& layer : layerManager->layerGroup(i).activeLayers()) {
-            Tile::Status status = layer->tileProvider()->getTileStatus(chunk.tileIndex());
+            Tile::Status status = layer->getTileStatus(chunk.tileIndex());
             if (status == Tile::Status::OK) {
                 return UnknownDesiredLevel;
             }
@@ -52,6 +50,4 @@ int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& dat
     return currLevel - 1;
 }
 
-} // namespace chunklevelevaluator
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::chunklevelevaluator

@@ -30,15 +30,14 @@
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 void GPUHeightLayer::setValue(ghoul::opengl::ProgramObject* programObject,
                               const Layer& layer, const TileIndex& tileIndex,
                               int pileSize)
 {
     GPULayer::setValue(programObject, layer, tileIndex, pileSize);
-    _gpuDepthTransform.setValue(programObject, layer.tileProvider()->depthTransform());
+    _gpuDepthTransform.setValue(programObject, layer.depthTransform());
 }
 
 void GPUHeightLayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
@@ -49,5 +48,4 @@ void GPUHeightLayer::bind(ghoul::opengl::ProgramObject* programObject, const Lay
 }
 
 
-}  // namespace globebrowsing
-}  // namespace openspace
+}  // namespace openspace::globebrowsing

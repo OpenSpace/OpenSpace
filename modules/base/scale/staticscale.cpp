@@ -28,8 +28,13 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const char* KeyValue = "Scale";
-}
+    static const openspace::properties::Property::PropertyInfo ScaleInfo = {
+        "Scale",
+        "Scale",
+        "This value is used as a scaling factor for the scene graph node that this "
+        "transformation is attached to relative to its parent."
+    };
+} // namespace
 
 namespace openspace {
 
@@ -40,31 +45,29 @@ documentation::Documentation StaticScale::Documentation() {
         "base_scale_static",
         {
             {
-                KeyValue,
+                ScaleInfo.identifier,
                 new DoubleVerifier,
-                "The scaling factor by which the scenegraph node is scaled."
+                Optional::No,
+                ScaleInfo.description
             }
         }
     };
 }
 
 StaticScale::StaticScale()
-    : _scaleValue("scale", "Scale", 1.0, 1.0, 1000.0)
+    : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6)
 {
     addProperty(_scaleValue);
-}
 
+    _scaleValue.onChange([&](){ _scale = _scaleValue; });
+}
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
     : StaticScale()
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
-    
-    _scaleValue = static_cast<float>(dictionary.value<double>(KeyValue));
-}
 
-double StaticScale::scaleValue() const {
-    return _scaleValue;
+    _scaleValue = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
 }
 
 } // namespace openspace

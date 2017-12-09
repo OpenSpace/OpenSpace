@@ -24,10 +24,8 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace cache {
-    
+namespace openspace::globebrowsing::cache {
+
 template<typename KeyType, typename ValueType, typename HasherType>
 LRUCache<KeyType, ValueType, HasherType>::LRUCache(size_t size)
     : _maximumCacheSize(size)
@@ -121,6 +119,11 @@ size_t LRUCache<KeyType, ValueType, HasherType>::size() const {
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
+size_t LRUCache<KeyType, ValueType, HasherType>::maximumCacheSize() const {
+    return _maximumCacheSize;
+}
+
+template<typename KeyType, typename ValueType, typename HasherType>
 void LRUCache<KeyType, ValueType, HasherType>::putWithoutCleaning(const KeyType& key,
                                                                   const ValueType& value)
 {
@@ -158,6 +161,4 @@ LRUCache<KeyType, ValueType, HasherType>::cleanAndFetchPopped()
     return toReturn;
 }
 
-} // namespace cache
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::cache

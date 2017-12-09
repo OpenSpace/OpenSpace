@@ -27,9 +27,21 @@
 
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/glm.h>
+
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
+#endif // WIN32
+
 #include <ccmc/Kameleon.h>
+
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
 #endif
+
 
 #include <set>
 
@@ -47,10 +59,12 @@ public:
     TransformationManager();
     ~TransformationManager();
 
-    glm::dmat3 frameTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
+    glm::dmat3 frameTransformationMatrix(const std::string& from, const std::string& to,
+        double ephemerisTime) const;
 
 private:
-    glm::dmat3 kameleonTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
+    glm::dmat3 kameleonTransformationMatrix(const std::string& from,
+        const std::string& to, double ephemerisTime) const;
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     std::shared_ptr<ccmc::Kameleon> _kameleon;

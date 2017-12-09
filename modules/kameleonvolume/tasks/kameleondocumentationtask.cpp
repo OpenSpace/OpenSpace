@@ -38,16 +38,19 @@
 namespace {
     const char* KeyInput = "Input";
     const char* KeyOutput = "Output";
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/kameleondocumentation/main.hbs";
+    const char* MainTemplateFilename =
+        "${OPENSPACE_DATA}/web/kameleondocumentation/main.hbs";
     const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
     const char* JsFilename = "${OPENSPACE_DATA}/web/kameleondocumentation/script.js";
     const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
     const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
-}
+} // namespace
 
 namespace openspace {
+namespace kameleonvolume {
 
-KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary) {
+KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
+{
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -89,8 +92,16 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     std::string jsContent;
     std::back_insert_iterator<std::string> jsInserter(jsContent);
 
-    std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
-    std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+    std::copy(
+        std::istreambuf_iterator<char>{handlebarsInput},
+        std::istreambuf_iterator<char>(),
+        jsInserter
+    );
+    std::copy(
+        std::istreambuf_iterator<char>{jsInput},
+        std::istreambuf_iterator<char>(),
+        jsInserter
+    );
 
     std::ifstream bootstrapInput(absPath(BootstrapFilename));
     std::ifstream cssInput(absPath(CssFilename));
@@ -98,8 +109,16 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     std::string cssContent;
     std::back_insert_iterator<std::string> cssInserter(cssContent);
 
-    std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
-    std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+    std::copy(
+        std::istreambuf_iterator<char>{bootstrapInput},
+        std::istreambuf_iterator<char>(),
+        cssInserter
+    );
+    std::copy(
+        std::istreambuf_iterator<char>{cssInput},
+        std::istreambuf_iterator<char>(),
+        cssInserter
+    );
 
     std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
     std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
@@ -145,20 +164,24 @@ documentation::Documentation KameleonDocumentationTask::documentation() {
             {
                 "Type",
                 new StringEqualVerifier("KameleonDocumentationTask"),
+                Optional::No,
                 "The type of this task"
             },
             {
                 KeyInput,
                 new StringAnnotationVerifier("A file path to a cdf file"),
+                Optional::No,
                 "The cdf file to extract data from"
             },
             {
                 KeyOutput,
                 new StringAnnotationVerifier("A valid filepath"),
+                Optional::No,
                 "The html file to write documentation to"
             }
         }
     };
 }
 
+} // namespace kameleonvolume
 } // namespace openspace

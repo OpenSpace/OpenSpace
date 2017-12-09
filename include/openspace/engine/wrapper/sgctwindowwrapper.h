@@ -49,6 +49,7 @@ public:
 
     double averageDeltaTime() const override;
     double deltaTime() const override;
+    double applicationTime() const override;
     glm::vec2 mousePosition() const override;
     uint32_t mouseButtons(int maxNumber) const override;
     glm::ivec2 currentWindowSize() const override;
@@ -63,20 +64,25 @@ public:
     bool isMaster() const override;
     bool isUsingSwapGroups() const override;
     bool isSwapGroupMaster() const override;
-    
+
     glm::mat4 viewProjectionMatrix() const override;
     glm::mat4 modelMatrix() const override;
     void setNearFarClippingPlane(float near, float far) override;
     void setEyeSeparationDistance(float distance) override;
-    
+
     glm::ivec4 viewportPixelCoordinates() const override;
-    
+
     bool isExternalControlConnected() const override;
     void sendMessageToExternalControl(const std::vector<char>& message) const override;
 
     bool isSimpleRendering() const override;
 
     void takeScreenshot(bool applyWarping = false) const override;
+
+    void swapBuffer() const override;
+
+    int nWindows() const override;
+    int currentWindowId() const override;
 
 private:
     properties::FloatProperty _eyeSeparation;

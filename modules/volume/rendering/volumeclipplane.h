@@ -28,12 +28,10 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
 
-// Forward declare to minimize dependencies
-namespace ghoul {
-    class Dictionary;
-}
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
+namespace volume {
 
 class VolumeClipPlane : public properties::PropertyOwner {
 public:
@@ -48,6 +46,7 @@ private:
 
 };
 
-}  // namespace openspace
+} // namespace volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__

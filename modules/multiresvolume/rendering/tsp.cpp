@@ -22,23 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//#include <sgct.h>
 #include <modules/multiresvolume/rendering/tsp.h>
 
-// ghoul
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
 
-// std
 #include <algorithm>
 #include <math.h>
 #include <queue>
 
 namespace {
-    const std::string _loggerCat = "TSP";
-}
+    const char* _loggerCat = "TSP";
+} // namespace
 
 namespace openspace {
 
@@ -154,7 +151,7 @@ bool TSP::construct() {
     // Loop over the OTs (one per BST node)
     for (unsigned int OT = 0; OT<numBSTNodes_; ++OT) {
 
-        // Start at the root of each OT  
+        // Start at the root of each OT
         unsigned int OTNode = OT*numOTNodes_;
 
         // Calculate BST level (first level is level 0)
@@ -307,7 +304,7 @@ bool TSP::calculateSpatialError() {
             average += *it;
         }
 
-        averages[brick] = average / static_cast<double>(numBrickVals);
+        averages[brick] = static_cast<float>(average / static_cast<double>(numBrickVals));
     }
 
     // Spatial SNR stats

@@ -53,11 +53,11 @@ class RenderableTrailTrajectory : public RenderableTrail {
 public:
     explicit RenderableTrailTrajectory(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     void update(const UpdateData& data) override;
-   
+
     static documentation::Documentation Documentation();
 
 private:

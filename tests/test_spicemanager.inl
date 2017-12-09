@@ -414,8 +414,23 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix) {
             EXPECT_DOUBLE_EQ(referenceMatrix[i][j], positionMatrix[j][i]) << "Position-matrix not set or has wrong values";
         }
     }
+
+#if defined __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif defined __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
     // transform reference position into new frame
     mxvg_c(referenceMatrix, state, 3, 3, state_t);
+
+#if defined __clang__
+#pragma clang diagnostic pop
+#elif defined __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
     position = positionMatrix * position;
     // check transformed values match 
@@ -451,10 +466,12 @@ TEST_F(SpiceManagerTest, getFieldOfView) {
 
     ASSERT_TRUE(found == SPICETRUE);
     //check vectors have correct values
-    for (int i = 0; i < res.bounds.size(); i++){
-        for (int j = 0; j < 3; j++){
-            EXPECT_DOUBLE_EQ(bounds_ref[i][j], res.bounds[i][j]) << "One or more Field of View Boundary vectors \
-                                                                 differ from expected output";
+    for (size_t i = 0; i < res.bounds.size(); i++) {
+        for (size_t j = 0; j < 3; j++) {
+            EXPECT_DOUBLE_EQ(
+                bounds_ref[i][j],
+                res.bounds[i][static_cast<glm::length_t>(j)]
+            ) << "One or more Field of View Boundary vectors differ from expected output";
         }
     }
 }

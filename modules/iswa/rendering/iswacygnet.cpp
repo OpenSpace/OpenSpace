@@ -34,15 +34,26 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const std::string _loggerCat = "IswaCygnet";
-}
+    const char* _loggerCat = "IswaCygnet";
+
+    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+        "Delete",
+        "Delete",
+        "" // @TODO Missing documentation
+    };
+    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+        "Alpha",
+        "Alpha",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
 
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _delete("delete", "Delete")
-    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
+    , _delete(DeleteInfo)
+    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)
@@ -69,7 +80,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Frame",_data->frame);
     dictionary.getValue("CoordinateType", _data->coordinateType);
     dictionary.getValue("XOffset", xOffset);
-    
+
     _data->id = (int) renderableId;
     _data->updateTime = (int) updateTime;
     _data->spatialScale = spatialScale;
@@ -104,13 +115,14 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 }
 
 IswaCygnet::~IswaCygnet(){}
-bool IswaCygnet::initialize(){
+
+void IswaCygnet::initialize() {
     _textures.push_back(nullptr);
-    
-    if(!_data->groupName.empty()){
+
+    if (!_data->groupName.empty()) {
         initializeGroup();
-    }else{
-        _delete.onChange([this](){
+    } else {
+        _delete.onChange([this]() {
             deinitialize();
             OsEng.scriptEngine().queueScript(
                 "openspace.removeSceneGraphNode('" + name() + "')",
@@ -118,36 +130,36 @@ bool IswaCygnet::initialize(){
             );
         });
     }
-    
+
     initializeTime();
     createGeometry();
     createShader();
     downloadTextureResource();
-
-    return true;
 }
 
-bool IswaCygnet::deinitialize(){
-     if(!_data->groupName.empty())
+void IswaCygnet::deinitialize() {
+    if (!_data->groupName.empty()) {
         _group->groupEvent()->unsubscribe(name());
+    }
 
     unregisterProperties();
     destroyGeometry();
     destroyShader();
-
-    return true;
 }
 
 bool IswaCygnet::isReady() const{
     bool ready = true;
-    if (!_shader)
+    if (!_shader) {
         ready &= false;
+    }
     return ready;
 }
 
-void IswaCygnet::render(const RenderData& data){
-    if(!readyToRender()) return;
-    
+void IswaCygnet::render(const RenderData& data, RendererTasks&){
+    if (!readyToRender()) {
+        return;
+    }
+
     psc position = data.position;
     glm::mat4 transform = glm::mat4(1.0);
 
@@ -158,8 +170,11 @@ void IswaCygnet::render(const RenderData& data){
     }
     transform = transform*_rotation;
 
-    position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.w);
-    
+    position += transform * glm::vec4(
+        _data->spatialScale.x * _data->offset,
+        _data->spatialScale.w
+    );
+
     // Activate shader
     _shader->activate();
     glEnable(GL_ALPHA_TEST);
@@ -178,28 +193,36 @@ void IswaCygnet::render(const RenderData& data){
     _shader->deactivate();
 }
 
-void IswaCygnet::update(const UpdateData& data){
-
-    if (!_enabled)
+void IswaCygnet::update(const UpdateData&) {
+    if (!_enabled) {
         return;
+    }
 
     // the texture resource is downloaded ahead of time, so we need to
     // now if we are going backwards or forwards
     double clockwiseSign = (OsEng.timeManager().time().deltaTime()>0) ? 1.0 : -1.0;
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    );
+    _stateMatrix = TransformationManager::ref().frameTransformationMatrix(
+        _data->frame,
+        "GALACTIC",
+        _openSpaceTime
+    );
 
-    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
-                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    bool timeToUpdate =
+        (fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _data->updateTime &&
+        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
+    if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         bool success = updateTextureResource();
-        if(success)
+        if (success) {
             _textureDirty = true;
+        }
     }
 
-    if(_textureDirty && _data->updateTime != 0 && timeToUpdate) {
+    if (_textureDirty && _data->updateTime != 0 && timeToUpdate) {
         updateTexture();
         _textureDirty = false;
 
@@ -208,13 +231,14 @@ void IswaCygnet::update(const UpdateData& data){
         _lastUpdateOpenSpaceTime =_openSpaceTime;
     }
 
-    if(!_transferFunctions.empty())
-        for(auto tf : _transferFunctions)
+    if (!_transferFunctions.empty()) {
+        for (const std::shared_ptr<TransferFunction>& tf : _transferFunctions) {
             tf->update();
+        }
+    }
 }
 
-
-bool IswaCygnet::destroyShader(){
+bool IswaCygnet::destroyShader() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -223,45 +247,47 @@ bool IswaCygnet::destroyShader(){
     return true;
 }
 
-void IswaCygnet::registerProperties(){
-}
+void IswaCygnet::registerProperties() {}
 
-void IswaCygnet::unregisterProperties(){
-}
+void IswaCygnet::unregisterProperties() {}
 
-void IswaCygnet::initializeTime(){
+void IswaCygnet::initializeTime() {
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
     _lastUpdateOpenSpaceTime = 0.0;
 
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    );
     _lastUpdateRealTime = _realTime;
 
     _minRealTimeUpdateInterval = 100;
 }
 
-bool IswaCygnet::createShader(){
+bool IswaCygnet::createShader() {
     if (_shader == nullptr) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram(_programName,
             _vsPath,
             _fsPath
-            );
-        if (!_shader) return false;
+        );
+        if (!_shader) {
+            return false;
+        }
     }
     return true;
 }
 
-void IswaCygnet::initializeGroup(){
+void IswaCygnet::initializeGroup() {
     _group = IswaManager::ref().iswaGroup(_data->groupName);
 
     //Subscribe to enable and delete property
     auto groupEvent = _group->groupEvent();
-    groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+    groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict) {
         LDEBUG(name() + " Event enabledChanged");
         _enabled.setValue(dict.value<bool>("enabled"));
     });
 
-    groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict){
+    groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict) {
         LDEBUG(name() + " Event alphaChanged");
         _alpha.setValue(dict.value<float>("alpha"));
     });

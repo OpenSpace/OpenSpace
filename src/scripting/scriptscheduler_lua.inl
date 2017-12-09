@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 int loadFile(lua_State* L) {
     int nArguments = lua_gettop(L);
@@ -38,7 +38,7 @@ int loadFile(lua_State* L) {
     OsEng.scriptScheduler().loadScripts(
         ghoul::lua::loadDictionaryFromFile(missionFileName, L)
     );
-    
+
     return 0;
 }
 
@@ -98,4 +98,4 @@ int clear(lua_State* L) {
     return 0;
 }
 
-} // namespace luascriptfunction
+} // namespace openspace::luascriptfunction

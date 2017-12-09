@@ -34,41 +34,34 @@
 
 #include <climits>
 
-namespace {
-    const char* KeyType = "Type";
-}
-
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 unsigned int TileProvider::_numTileProviders = 0;
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
+    layergroupid::TypeID layerTypeID,
     const ghoul::Dictionary& dictionary)
 {
-    std::string type = "LRUCaching";
-    dictionary.getValue(KeyType, type);
+    std::string type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();
     std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
+    if (!result) {
+        throw ghoul::RuntimeError("Unable to create tile provider");
+    }
     return result;
 }
 
 TileProvider::TileProvider()
-    : properties::PropertyOwner("tileProvider")
+    : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
-{
-    initialize();
-}
+{}
 
 TileProvider::TileProvider(const ghoul::Dictionary&)
-    : properties::PropertyOwner("tileProvider")
+    : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
-{
-    initialize();
-}
+{}
 
 float TileProvider::noDataValueAsFloat() {
     ghoul_assert(_initialized, "TileProvider was not initialized.");
@@ -87,7 +80,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     }
     maxParents -= parents;
 
-    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
+    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside
     //         the range of defined data.
     int maximumLevel = maxLevel();
     while (tileIndex.level > maximumLevel){
@@ -97,9 +90,9 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     if(maxParents < 0){
         return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
     }
-    
-    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
-    //         has a loaded tile ready to use. 
+
+    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
+    //         has a loaded tile ready to use.
     while (tileIndex.level > 1) {
         Tile tile = getTile(tileIndex);
         if (tile.status() != Tile::Status::OK) {
@@ -113,7 +106,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
             return ChunkTile{ tile, uvTransform, TileDepthTransform() };
         }
     }
-    
+
     return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
 }
 
@@ -153,7 +146,7 @@ bool TileProvider::initialize() {
         _numTileProviders--;
         return false;
     }
-  
+
     _initialized = true;
     return true;
 }
@@ -162,16 +155,17 @@ void TileProvider::initializeDefaultTile() {
     ghoul_assert(_defaultTile.texture() == nullptr,
         "Default tile should not have been created");
     using namespace ghoul::opengl;
-        
+
     // Create pixel data
     TileTextureInitData initData(8, 8, GL_UNSIGNED_BYTE, Texture::Format::RGBA,
+                                 false,
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
-    int numBytes = initData.totalNumBytes();
+    size_t numBytes = initData.totalNumBytes();
     char* pixels = new char[numBytes];
     memset(pixels, 0, numBytes);
 
     // Create ghoul texture
-    _defaultTileTexture = std::make_unique<Texture>(initData.dimensionsWithPadding());
+    _defaultTileTexture = std::make_unique<Texture>(initData.dimensions());
     _defaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
     _defaultTileTexture->setPixelData(pixels);
     _defaultTileTexture->uploadTexture();
@@ -190,6 +184,4 @@ Tile TileProvider::getDefaultTile() const {
     return _defaultTile;
 }
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider

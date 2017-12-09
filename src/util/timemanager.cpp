@@ -23,7 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/util/timemanager.h>
+
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/util/timeline.h>
 
@@ -34,7 +36,10 @@ using datamessagestructures::TimeKeyframe;
 void TimeManager::preSynchronization(double dt) {
 //    double now = OsEng.runTime();
     removeKeyframesBefore(_latestConsumedTimestamp);
-    if (_timeline.nKeyframes() == 0) {
+    if (_shouldSetTime) {
+        time().setTime(_timeNextFrame.j2000Seconds());
+        _shouldSetTime = false;
+    } else if (_timeline.nKeyframes() == 0) {
         time().advanceTime(dt);
     } else {
         consumeKeyframes(dt);
@@ -42,14 +47,23 @@ void TimeManager::preSynchronization(double dt) {
 }
 
 void TimeManager::consumeKeyframes(double dt) {
-    double now = OsEng.runTime();
-    
-    const std::deque<Keyframe<Time>>& keyframes = _timeline.keyframes();
-    auto firstFutureKeyframe = std::lower_bound(keyframes.begin(), keyframes.end(), now, &compareKeyframeTimeWithTime);
+    double now = OsEng.windowWrapper().applicationTime();
 
-    bool consumingTimeJump = std::find_if(keyframes.begin(), firstFutureKeyframe, [] (const Keyframe<Time>& f) {
-        return f.data.timeJumped();
-    }) != firstFutureKeyframe;
+    const std::deque<Keyframe<Time>>& keyframes = _timeline.keyframes();
+    auto firstFutureKeyframe = std::lower_bound(
+        keyframes.begin(),
+        keyframes.end(),
+        now,
+        &compareKeyframeTimeWithTime
+    );
+
+    bool consumingTimeJump = std::find_if(
+        keyframes.begin(),
+        firstFutureKeyframe,
+        [](const Keyframe<Time>& f) {
+            return f.data.timeJumped();
+        }
+    ) != firstFutureKeyframe;
 
     if (firstFutureKeyframe == keyframes.end()) {
         // All keyframes are in the past.
@@ -96,9 +110,11 @@ void TimeManager::consumeKeyframes(double dt) {
 
         const double secondsOffTolerance = OsEng.parallelConnection().timeTolerance();
 
-        double predictedTime = time().j2000Seconds() + time().deltaTime() * (next.timestamp - now);
-        bool withinTolerance = std::abs(predictedTime - nextTime.j2000Seconds()) < std::abs(nextTime.deltaTime() * secondsOffTolerance);
-        
+        double predictedTime = time().j2000Seconds() + time().deltaTime() *
+                               (next.timestamp - now);
+        bool withinTolerance = std::abs(predictedTime - nextTime.j2000Seconds()) <
+                               std::abs(nextTime.deltaTime() * secondsOffTolerance);
+
         if (nextTime.deltaTime() == time().deltaTime() && withinTolerance) {
             time().advanceTime(dt);
             return;
@@ -109,12 +125,12 @@ void TimeManager::consumeKeyframes(double dt) {
         double t2 = next.timestamp;
 
         double parameter = (t1 - t0) / (t2 - t0);
-        
+
         double y0 = time().j2000Seconds();
-        double yPrime0 = time().deltaTime();
+        // double yPrime0 = time().deltaTime();
 
         double y2 = nextTime.j2000Seconds();
-        double yPrime2 = nextTime.deltaTime();
+        // double yPrime2 = nextTime.deltaTime();
 
         double y1 = (1 - parameter) * y0 + parameter * y2;
         double y1Prime = (y1 - y0) / dt;
@@ -123,8 +139,6 @@ void TimeManager::consumeKeyframes(double dt) {
         time().setTime(y1, false);
     }
 }
-
-
 
 void TimeManager::addKeyframe(double timestamp, Time time) {
     _timeline.addKeyframe(timestamp, time);
@@ -141,6 +155,11 @@ void TimeManager::removeKeyframesBefore(double timestamp) {
 
 void TimeManager::clearKeyframes() {
     _timeline.clearKeyframes();
+}
+
+void TimeManager::setTimeNextFrame(Time t) {
+    _shouldSetTime = true;
+    _timeNextFrame = t;
 }
 
 size_t TimeManager::nKeyframes() const {

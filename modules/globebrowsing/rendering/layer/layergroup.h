@@ -35,23 +35,25 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-
-namespace tileprovider {
-    class TileProvider;
-}
+namespace tileprovider { class TileProvider; }
 
 /**
  * Convenience class for dealing with multiple <code>Layer</code>s.
  */
 struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(std::string name);
-    LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict);
+    LayerGroup(layergroupid::GroupID id);
+    LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict);
+
+    void initialize();
+    void deinitialize();
 
     /// Updates all layers tile providers within this group
     void update();
+
+    std::shared_ptr<Layer> addLayer(const ghoul::Dictionary& layerDict);
+    void deleteLayer(const std::string& layerName);
 
     /// @returns const vector of all layers
     const std::vector<std::shared_ptr<Layer>>& layers() const;
@@ -67,6 +69,7 @@ struct LayerGroup : public properties::PropertyOwner {
     void onChange(std::function<void(void)> callback);
 
 private:
+    const layergroupid::GroupID _groupId;
     std::vector<std::shared_ptr<Layer>> _layers;
     std::vector<std::shared_ptr<Layer>> _activeLayers;
 
@@ -74,7 +77,6 @@ private:
     std::function<void(void)> _onChangeCallback;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__

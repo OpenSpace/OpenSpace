@@ -31,18 +31,13 @@
 
 #include <memory>
 
-namespace ghoul {
-    class Dictionary;
+namespace ghoul { class Dictionary; }
+namespace ghoul::opengl { class ProgramObject; }
 
-    namespace opengl { class ProgramObject; }
-} // namespace ghoul
+namespace openspace { class Renderable; }
+namespace openspace::documentation { struct Documentation; }
 
-namespace openspace {
-
-class Renderable;
-
-namespace documentation {  struct Documentation; }
-namespace modelgeometry {
+namespace openspace::modelgeometry {
 
 class ModelGeometry : public properties::PropertyOwner {
 public:
@@ -58,11 +53,11 @@ public:
 
     ModelGeometry(const ghoul::Dictionary& dictionary);
     virtual ~ModelGeometry() = default;
-    
+
     virtual bool initialize(Renderable* parent);
     virtual void deinitialize();
     void render();
-    
+
     virtual bool loadModel(const std::string& filename) = 0;
     void changeRenderMode(const GLenum mode);
     //bool getVertices(std::vector<Vertex>* vertexList);
@@ -89,7 +84,6 @@ protected:
     std::string _file;
 };
 
-}  // namespace modelgeometry
-}  // namespace openspace
+}  // namespace openspace::modelgeometry
 
 #endif // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__

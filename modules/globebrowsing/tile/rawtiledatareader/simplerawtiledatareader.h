@@ -39,8 +39,7 @@
 
 #include <string>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class GeodeticPatch;
 
@@ -54,22 +53,20 @@ public:
 
     // Public virtual function overloading
     virtual void reset() override;
-    virtual int maxChunkLevel() override;
+    virtual int maxChunkLevel() const override;
     virtual float noDataValueAsFloat() const override;
     virtual int rasterXSize() const override;
     virtual int rasterYSize() const override;
+    virtual int dataSourceNumRasters() const override;
     virtual float depthOffset() const override;
     virtual float depthScale() const override;
 
 protected:
-
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const override;
+    virtual IODescription adjustIODescription(const IODescription& io) const override;
 
 private:
     // Private virtual function overloading
     virtual void initialize() override;
-    virtual void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const override;
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const override;
 
@@ -78,7 +75,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _dataTexture;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__

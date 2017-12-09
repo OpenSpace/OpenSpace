@@ -25,12 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PRIORITIZING_CONCURRENT_JOB_MANAGER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___PRIORITIZING_CONCURRENT_JOB_MANAGER___H__
 
-#include <modules/globebrowsing/other/concurrentqueue.h>
 #include <modules/globebrowsing/other/lruthreadpool.h>
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
 
-namespace openspace {
-namespace globebrowsing {
+#include <openspace/util/concurrentjobmanager.h>
+#include <openspace/util/concurrentqueue.h>
+
+#include <mutex>
+
+namespace openspace::globebrowsing {
 
 /**
  * Concurrent job manager which prioritizes which jobs to work on depending on which
@@ -41,7 +43,7 @@ namespace globebrowsing {
 template<typename P, typename KeyType>
 class PrioritizingConcurrentJobManager {
 public:
-    PrioritizingConcurrentJobManager(std::shared_ptr<LRUThreadPool<KeyType>> pool);
+    PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);
 
     /**
      * Enqueues a job which is identified using a given key
@@ -83,12 +85,13 @@ public:
 
 private:
     ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
+    std::mutex _finishedJobsMutex;
     /// An LRU thread pool is used since the jobs can be bumped and hence prioritized.
-    std::shared_ptr<LRUThreadPool<KeyType>> _threadPool;
+    LRUThreadPool<KeyType> _threadPool;
+
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include "prioritizingconcurrentjobmanager.inl"
 

@@ -39,22 +39,26 @@
 #include <modules/base/rendering/renderableplane.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/base/rendering/multimodelgeometry.h>
-#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspacedashboard.h>
+#include <modules/base/rendering/screenspaceimagelocal.h>
+#include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
+#include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/statictranslation.h>
 
+#include <modules/base/rotation/fixedrotation.h>
+#include <modules/base/rotation/luarotation.h>
 #include <modules/base/rotation/staticrotation.h>
 
+#include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
 
 #include <ghoul/filesystem/filesystem>
 
 namespace openspace {
 
-BaseModule::BaseModule() 
-    : OpenSpaceModule("Base")
-{}
+BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize() {
     FactoryManager::ref().addFactory(
@@ -66,11 +70,13 @@ void BaseModule::internalInitialize() {
         "ScreenSpaceRenderable"
     );
 
-    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
-    fScreenSpaceRenderable->registerClass<ScreenSpaceImage>("ScreenSpaceImage");
-    fScreenSpaceRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
+    fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
+    fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
+    fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
+    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
@@ -85,21 +91,25 @@ void BaseModule::internalInitialize() {
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
+    fTranslation->registerClass<LuaTranslation>("LuaTranslation");
     fTranslation->registerClass<StaticTranslation>("StaticTranslation");
 
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
+    fRotation->registerClass<FixedRotation>("FixedRotation");
+    fRotation->registerClass<LuaRotation>("LuaRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
 
     auto fScale = FactoryManager::ref().factory<Scale>();
     ghoul_assert(fScale, "Scale factory was not created");
 
+    fScale->registerClass<LuaScale>("LuaScale");
     fScale->registerClass<StaticScale>("StaticScale");
 
-    auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
-    ghoul_assert(fModelGeometry, "Model geometry factory was not created");
-    fModelGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
+    auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
+    ghoul_assert(fGeometry, "Model geometry factory was not created");
+    fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {
@@ -109,10 +119,16 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
+        ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),
-        ScreenSpaceImage::Documentation(),
+        ScreenSpaceImageLocal::Documentation(),
+        ScreenSpaceImageOnline::Documentation(),
+        FixedRotation::Documentation(),
+        LuaRotation::Documentation(),
         StaticRotation::Documentation(),
+        LuaScale::Documentation(),
         StaticScale::Documentation(),
+        LuaTranslation::Documentation(),
         StaticTranslation::Documentation(),
         modelgeometry::ModelGeometry::Documentation(),
     };

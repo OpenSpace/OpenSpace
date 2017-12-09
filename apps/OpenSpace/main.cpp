@@ -28,7 +28,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/opengl/ghoul_gl.h>
+//#include <ghoul/opengl/ghoul_gl.h>
 
 #include <sgct.h>
 
@@ -42,9 +42,15 @@
 #include <fmt/format.h>
 
 #include <Windows.h>
-#include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4091)
+#include <dbghelp.h>
+#pragma warning (pop)
+#endif // _MSC_VER
 
 #endif // WIN32
 
@@ -60,7 +66,7 @@
 #define DEVELOPER_MODE
 
 namespace {
-    
+
 const char* _loggerCat = "main";
 sgct::Engine* SgctEngine;
 
@@ -72,7 +78,6 @@ const char* SpoutTag = "Spout";
 LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
     SYSTEMTIME stLocalTime;
     GetLocalTime(&stLocalTime);
-
 
     LFATAL("Printing Stack Trace that lead to the crash:");
     std::vector<std::string> stackTrace = ghoul::stackTrace();
@@ -133,7 +138,7 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 }
 
 #endif // WIN32
-    
+
 #ifdef OPENVR_SUPPORT
 sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
 #endif
@@ -166,7 +171,6 @@ std::vector<SpoutWindow> SpoutWindows;
 #endif // OPENSPACE_HAS_SPOUT
 
 
-
 std::pair<int, int> supportedOpenGLVersion() {
     // Just create a window in order to retrieve the available OpenGL version before we
     // create the real window
@@ -182,9 +186,9 @@ std::pair<int, int> supportedOpenGLVersion() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
-    
+
     glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-    
+
     // By creating an offscreen window, the user will not know that we created this window
     GLFWwindow* offscreen = glfwCreateWindow(128, 128, "", nullptr, nullptr);
     glfwMakeContextCurrent(offscreen);
@@ -197,7 +201,7 @@ std::pair<int, int> supportedOpenGLVersion() {
     // And get rid of the window again
     glfwDestroyWindow(offscreen);
     glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
-    
+
     return { major, minor };
 }
 
@@ -211,14 +215,14 @@ void mainInitFunc() {
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
     OsEng.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
-    
+
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.
     for (size_t i = 0; i < SgctEngine->getNumberOfWindows(); ++i) {
         if (SgctEngine->getWindowPtr(i)->checkIfTagExists(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = SgctEngine->getWindowPtr(i);
-            
+
             // If we have an OpenVRWindow, initialize OpenVR.
             sgct::SGCTOpenVR::initialize(
                 SgctEngine->getNearClippingPlane(), SgctEngine->getFarClippingPlane()
@@ -264,7 +268,7 @@ void mainInitFunc() {
 
         const sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
         const bool hasStereo =
-            (sm != sgct::SGCTWindow::No_Stereo) && 
+            (sm != sgct::SGCTWindow::No_Stereo) &&
             (sm < sgct::SGCTWindow::Side_By_Side_Stereo);
 
         if (hasStereo) {
@@ -299,7 +303,7 @@ void mainInitFunc() {
         LWARNING(
             "Spout was requested, but OpenSpace was compiled without Spout support."
         );
-        
+
 #endif // OPENSPACE_HAS_SPOUT
     }
     LTRACE("main::mainInitFunc(end)");
@@ -307,7 +311,6 @@ void mainInitFunc() {
 
 void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(begin)");
-    OsEng.setRunTime(sgct::Engine::getTime());
     OsEng.preSynchronization();
     LTRACE("main::mainPreSyncFunc(end)");
 }
@@ -354,6 +357,20 @@ void mainRenderFunc() {
         projectionMatrix
     );
     LTRACE("main::mainRenderFunc(end)");
+}
+
+void mainDraw2DFunc() {
+    LTRACE("main::mainDraw2DFunc(begin)");
+
+    OsEng.drawOverlays();
+
+    // SGCT gets angry if we change this in our function
+    glEnable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+
+
+    LTRACE("main::mainDraw2DFunc(end)");
 }
 
 void mainPostDrawFunc() {
@@ -436,10 +453,10 @@ void mainMousePosCallback(double x, double y) {
     }
 }
 
-void mainMouseScrollCallback(double, double posY) {
+void mainMouseScrollCallback(double posX, double posY) {
     LTRACE("main::mainMouseScrollCallback(begin");
     if (SgctEngine->isMaster()) {
-        OsEng.mouseScrollWheelCallback(posY);
+        OsEng.mouseScrollWheelCallback(posX, posY);
     }
     LTRACE("main::mainMouseScrollCallback(end)");
 }
@@ -475,7 +492,7 @@ void mainLogCallback(const char* msg) {
 
 int main_main(int argc, char** argv) {
     std::pair<int, int> glVersion = supportedOpenGLVersion();
-    
+
     // Create the OpenSpace engine and get arguments for the SGCT engine
     // @CLEANUP:  Replace the return valua with throwing an exception --abock
     std::vector<std::string> sgctArguments;
@@ -486,42 +503,43 @@ int main_main(int argc, char** argv) {
         sgctArguments,
         requestQuit
     );
-    
+
     if (requestQuit) {
         return EXIT_SUCCESS;
     }
-    
+
     LINFO("Detected OpenGL version: " << glVersion.first << "." << glVersion.second);
-    
+
     // Create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());
-    
+
     char** newArgv = new char*[newArgc];
     for (int i = 0; i < newArgc; ++i) {
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
     }
-    
+
     // Need to set this before the creation of the sgct::Engine
     sgct::MessageHandler::instance()->setLogToConsole(false);
     sgct::MessageHandler::instance()->setShowTime(false);
     sgct::MessageHandler::instance()->setLogToCallback(true);
     sgct::MessageHandler::instance()->setLogCallback(mainLogCallback);
-    
+
 #ifdef __APPLE__
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 #endif
-    
+
     LDEBUG("Creating SGCT Engine");
     SgctEngine = new sgct::Engine(newArgc, newArgv);
-    
+
     // Deallocate sgct c arguments
     delete[] newArgv;
-    
+
     // Bind functions
     SgctEngine->setInitOGLFunction(mainInitFunc);
     SgctEngine->setPreSyncFunction(mainPreSyncFunc);
     SgctEngine->setPostSyncPreDrawFunction(mainPostSyncPreDrawFunc);
     SgctEngine->setDrawFunction(mainRenderFunc);
+    SgctEngine->setDraw2DFunction(mainDraw2DFunc);
     SgctEngine->setPostDrawFunction(mainPostDrawFunc);
     SgctEngine->setKeyboardCallbackFunction(mainKeyboardCallback);
     SgctEngine->setMouseButtonCallbackFunction(mainMouseButtonCallback);
@@ -529,17 +547,17 @@ int main_main(int argc, char** argv) {
     SgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
     SgctEngine->setExternalControlCallback(mainExternalControlCallback);
     SgctEngine->setCharCallbackFunction(mainCharCallback);
-    
+
     // Disable the immediate exit of the application when the ESC key is pressed
     SgctEngine->setExitKey(SGCT_KEY_UNKNOWN);
-    
+
     sgct::MessageHandler::instance()->setNotifyLevel(sgct::MessageHandler::NOTIFY_ALL);
-    
+
     // Set encode and decode functions
     // NOTE: starts synchronizing before init functions
     sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
     sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
-    
+
     // Try to open a window
     LDEBUG("Initialize SGCT Engine");
     std::map<std::pair<int, int>, sgct::Engine::RunMode> versionMapping = {
@@ -549,23 +567,24 @@ int main_main(int argc, char** argv) {
         { { 4, 2 }, sgct::Engine::RunMode::OpenGL_4_2_Core_Profile },
         { { 4, 3 }, sgct::Engine::RunMode::OpenGL_4_3_Core_Profile },
         { { 4, 4 }, sgct::Engine::RunMode::OpenGL_4_4_Core_Profile },
-        { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile }
+        { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile },
+        { { 4, 6 }, sgct::Engine::RunMode::OpenGL_4_6_Core_Profile }
     };
     ghoul_assert(
         versionMapping.find(glVersion) != versionMapping.end(),
         "Unknown OpenGL version. Missing statement in version mapping map"
     );
-    
+
     auto cleanup = [&](){
         OsEng.deinitialize();
-        
+
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
         sgct::MessageHandler::instance()->setLogToCallback(false);
         sgct::MessageHandler::instance()->setLogCallback(nullptr);
-        
+
         LDEBUG("Destroying OpenSpaceEngine");
         openspace::OpenSpaceEngine::destroy();
-        
+
         LDEBUG("Destroying SGCT Engine");
         delete SgctEngine;
 
@@ -588,26 +607,26 @@ int main_main(int argc, char** argv) {
         }
 #endif // OPENSPACE_HAS_SPOUT
     };
-    
+
     bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
-    
+
     if (!initSuccess) {
         LFATAL("Initializing failed");
         cleanup();
         return EXIT_FAILURE;
     }
-    
+
     // Main loop
     LDEBUG("Starting rendering loop");
     SgctEngine->render();
     LDEBUG("Ending rendering loop");
-    
+
     cleanup();
-    
+
     // Exit program
-    exit(EXIT_SUCCESS); 
+    exit(EXIT_SUCCESS);
 }
-    
+
 } // namespace
 
 int main(int argc, char** argv) {

@@ -27,9 +27,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace openspace::globebrowsing::tileprovider {
 
 class TileProviderByIndex : public TileProvider {
 public:
@@ -47,12 +45,12 @@ public:
 private:
     TileProvider* indexProvider(const TileIndex& tileIndex) const;
 
-    std::unordered_map<TileIndex::TileHashKey, std::shared_ptr<TileProvider>> _tileProviderMap;
+    std::unordered_map<
+        TileIndex::TileHashKey, std::shared_ptr<TileProvider>
+    > _tileProviderMap;
     std::shared_ptr<TileProvider> _defaultTileProvider;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_INDEX___H__

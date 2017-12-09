@@ -13,13 +13,36 @@ helper.scheduledScript.reversible = {}
 -- scenes
 helper.setCommonKeys = function()
     openspace.bindKeyLocal(
-        "F1",
-        helper.property.invert('Global Properties.OnScreenGUI.Main.enabled'),
-        "Toggles the visibility of the on-screen GUI."
-    )
-    openspace.bindKeyLocal(
         "F2",
-        helper.property.invert("RenderEngine.performanceMeasurements"),
+        [[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Properties.Enabled');
+        local c = openspace.getPropertyValue('Global Properties.ImGUI.Main.IsHidden');
+        openspace.setPropertyValue('Global Properties.ImGUI.*.Enabled', false);
+        if b and c then
+            -- This can happen if the main properties window is enabled, the main gui is enabled
+            -- and then closed again. So the main properties window is enabled, but also all
+            -- windows are hidden
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', false);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', true);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', true);
+        else
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', not b);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', not b);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);
+        end]],
+        "Shows or hides the properties window"
+    )
+
+    openspace.bindKeyLocal(
+        "F3",
+        [[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled');
+        openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Enabled', not b);
+        openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);]],
+        "Shows or hides the entire user interface"
+    )
+
+    openspace.bindKeyLocal(
+        "F4",
+        helper.property.invert("RenderEngine.PerformanceMeasurements"),
         "Toogles performance measurements that shows rendering time informations."
     )
 
@@ -30,7 +53,7 @@ helper.setCommonKeys = function()
     )
     openspace.bindKeyLocal(
         "PRINT_SCREEN",
-        "openspace.setPropertyValueSingle('RenderEngine.takeScreenshot', nil)",
+        "openspace.setPropertyValueSingle('RenderEngine.TakeScreenshot', nil)",
         "Saves the contents of the screen to a file in the working directory."
     )
     openspace.bindKey(
@@ -52,19 +75,19 @@ helper.setCommonKeys = function()
 
     openspace.bindKey(
         "f",
-        helper.property.invert('Interaction.horizontalFriction'),
-        "Toggles the horizontal friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely."
+        helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+        "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely."
     )
 
     openspace.bindKey(
         "Shift+f",
-        helper.property.invert('Interaction.verticalFriction'),
-        "Toggles the vertical friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely."
+        helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+        "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely."
     )
     openspace.bindKey(
         "Ctrl+f",
-        helper.property.invert('Interaction.rotationalFriction'),
-        "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around its own axis indefinitely."
+        helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+        "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely."
     )
 
     openspace.bindKey(
@@ -116,12 +139,12 @@ end
 
 -- Function that returns the string that enables/disables the renderable 'renderable'
 helper.renderable.toggle = function(renderable)
-    return helper.property.invert(renderable .. ".renderable.enabled")
+    return helper.property.invert(renderable .. ".renderable.Enabled")
 end
 
 -- Function that returns the string that sets the enabled property of <renderable> to <enabled>
 helper.renderable.setEnabled = function(renderable, enabled)
-    return "openspace.setPropertyValue('" .. renderable .. ".renderable.enabled', " .. (enabled and "true" or "false") .. ");";
+    return "openspace.setPropertyValue('" .. renderable .. ".renderable.Enabled', " .. (enabled and "true" or "false") .. ");";
 end
 
 -- Function that returns a lua table specifying a reversible ScheduledScript for 

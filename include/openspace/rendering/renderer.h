@@ -32,16 +32,11 @@
 #include <vector>
 #include <map>
 
-namespace ghoul {
-    class Dictionary;
-    
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace ghoul { class Dictionary; }
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
 }
 
 namespace openspace {
@@ -49,12 +44,14 @@ namespace openspace {
 class RenderableVolume;
 class Camera;
 class Scene;
-    
+
 class Renderer {
 public:
+    virtual ~Renderer() = default;
+
     virtual void initialize() = 0;
     virtual void deinitialize() = 0;
-    
+
     virtual void setCamera(Camera* camera) = 0;
     virtual void setScene(Scene* scene) = 0;
     virtual void setResolution(glm::ivec2 res) = 0;
@@ -63,22 +60,22 @@ public:
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.
     */
-    virtual void preRaycast(ghoul::opengl::ProgramObject& programObject) {};
+    virtual void preRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
 
     /**
     * Tear down raycasting for the specified program object.
     */
-    virtual void postRaycast(ghoul::opengl::ProgramObject& programObject) {};
+    virtual void postRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
 
 
     virtual void update() = 0;
+
     virtual void render(float blackoutFactor, bool doPerformanceMeasurements) = 0;
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() = 0;
-    
 };
 
 } // openspace

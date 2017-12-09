@@ -31,10 +31,8 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <openspace/util/updatestructures.h>
 
-namespace openspace {
-namespace globebrowsing {
-namespace chunklevelevaluator {
-    
+namespace openspace::globebrowsing::chunklevelevaluator {
+
 int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
@@ -45,19 +43,19 @@ int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const 
 
     glm::dvec3 cameraPosition =
         glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
-        
+
     Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
         ellipsoid.cartesianToGeodetic2(cameraPosition)
     );
     glm::dvec3 patchNormal = ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
-        
+
     Chunk::BoundingHeights heights = chunk.getBoundingHeights();
     double heightToChunk = heights.min;
 
     // Offset position according to height
     patchPosition += patchNormal * heightToChunk;
-    
+
     glm::dvec3 cameraToChunk = patchPosition - cameraPosition;
 
     // Calculate desired level based on distance
@@ -71,6 +69,4 @@ int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const 
     return desiredLevel;
 }
 
-} // namespace chunklevelevaluator
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::chunklevelevaluator

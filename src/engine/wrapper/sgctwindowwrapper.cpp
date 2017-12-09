@@ -22,23 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include "sgct.h"
-
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
+
+#include "sgct.h"
 
 #undef near
 #undef far
 
 namespace {
     const char* GuiWindowTag = "GUI";
-}
+
+    static const openspace::properties::Property::PropertyInfo EyeSeparationInfo = {
+        "EyeSeparation",
+        "Eye Separation",
+        "Sets a static eye separation for use in stereoscopic rendering. If no "
+        "stereoscopic rendering is performed, this value is unused."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowStatsGraphInfo = {
+        "ShowStatsGraph",
+        "Show Statistics Graph",
+        "Toggles the rendering of the SGCT statistics graph that is rendered on top of "
+        "every image. The statistics show the frame time, synchronization time, and many "
+        "other timings as reported by SGCT."
+    };
+} // namespace
 
 namespace openspace {
 
 SGCTWindowWrapper::SGCTWindowWrapper()
-    : _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
-    , _showStatsGraph("showStatsGraph", "Show Stats Graph", false)
+    : _eyeSeparation(EyeSeparationInfo, 0.f, 0.f, 10.f)
+    , _showStatsGraph(ShowStatsGraphInfo, false)
 {
     _showStatsGraph.onChange([this](){
         sgct::Engine::instance()->setStatsGraphVisibility(_showStatsGraph);
@@ -50,7 +64,7 @@ SGCTWindowWrapper::SGCTWindowWrapper()
         setEyeSeparationDistance(_eyeSeparation);
     });
 }
-    
+
 void SGCTWindowWrapper::terminate() {
     sgct::Engine::instance()->terminate();
 }
@@ -58,7 +72,7 @@ void SGCTWindowWrapper::terminate() {
 void SGCTWindowWrapper::setBarrier(bool enabled) {
     sgct::SGCTWindow::setBarrier(enabled);
 }
-    
+
 void SGCTWindowWrapper::setSynchronization(bool enabled) {
     sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled);
 }
@@ -76,7 +90,7 @@ void SGCTWindowWrapper::clearAllWindows(const glm::vec4& clearColor) {
 bool SGCTWindowWrapper::windowHasResized() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
 }
-    
+
 double SGCTWindowWrapper::averageDeltaTime() const {
     return sgct::Engine::instance()->getAvgDt();
 }
@@ -84,26 +98,30 @@ double SGCTWindowWrapper::averageDeltaTime() const {
 double SGCTWindowWrapper::deltaTime() const {
     return sgct::Engine::instance()->getDt();
 }
-    
+
+double SGCTWindowWrapper::applicationTime() const {
+    return sgct::Engine::getTime();
+}
+
 glm::vec2 SGCTWindowWrapper::mousePosition() const {
     int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     double posX, posY;
     sgct::Engine::instance()->getMousePos(id, &posX, &posY);
     return glm::vec2(posX, posY);
 }
-    
+
 uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
     int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     uint32_t result = 0;
     for (int i = 0; i < maxNumber; ++i) {
         bool button = (sgct::Engine::instance()->getMouseButton(id, i) != 0);
-        if (button)
+        if (button) {
             result |= (1 << i);
-        
+        }
     }
     return result;
 }
-    
+
 glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
     auto window = sgct::Engine::instance()->getCurrentWindowPtr();
     switch (window->getStereoMode()) {
@@ -123,7 +141,7 @@ glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
                 window->getYResolution());
     }
 }
-    
+
 glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
     int x, y;
     auto window = sgct::Engine::instance()->getCurrentWindowPtr();
@@ -132,7 +150,8 @@ glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
 }
 
 glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
-    sgct_core::Viewport* viewport = sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+    sgct_core::Viewport* viewport =
+                          sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
     if (viewport != nullptr){
         if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
             int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
@@ -143,7 +162,7 @@ glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
     }
     throw WindowWrapperException("No viewport available");
 }
-    
+
 glm::vec2 SGCTWindowWrapper::dpiScaling() const {
     return glm::vec2(
         sgct::Engine::instance()->getCurrentWindowPtr()->getXScale(),
@@ -153,11 +172,12 @@ glm::vec2 SGCTWindowWrapper::dpiScaling() const {
 
 int SGCTWindowWrapper::currentNumberOfAaSamples() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
-} 
-    
+}
+
 bool SGCTWindowWrapper::isRegularRendering() const {
     sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
     std::size_t nViewports = w->getNumberOfViewports();
+    (void)nViewports; // Unused in Release mode
     ghoul_assert(nViewports > 0, "At least one viewport must exist at this time");
     sgct_core::Viewport* vp = w->getViewport(0);
     sgct_core::NonLinearProjection* nlp = vp->getNonLinearProjectionPtr();
@@ -179,7 +199,7 @@ bool SGCTWindowWrapper::isGuiWindow() const {
         GuiWindowTag
     );
 }
-    
+
 bool SGCTWindowWrapper::isMaster() const {
     return sgct::Engine::instance()->isMaster();
 }
@@ -191,7 +211,7 @@ bool SGCTWindowWrapper::isSwapGroupMaster() const {
 bool SGCTWindowWrapper::isUsingSwapGroups() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
 }
-    
+
 glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
 }
@@ -199,7 +219,7 @@ glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
 glm::mat4 SGCTWindowWrapper::modelMatrix() const {
     return sgct::Engine::instance()->getModelMatrix();
 }
-    
+
 void SGCTWindowWrapper::setNearFarClippingPlane(float nearPlane, float farPlane) {
     sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);
 }
@@ -210,39 +230,51 @@ void SGCTWindowWrapper::setEyeSeparationDistance(float distance) {
 
 glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {
     int x1, xSize, y1, ySize;
-    sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(x1,
-                                                                                   y1,
-                                                                                   xSize,
-                                                                                   ySize);
+    sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(
+        x1,
+        y1,
+        xSize,
+        ySize
+    );
     return glm::ivec4(x1, xSize, y1, ySize);
 }
-    
+
 bool SGCTWindowWrapper::isExternalControlConnected() const {
     return sgct::Engine::instance()->isExternalControlConnected();
 }
-    
-void SGCTWindowWrapper::sendMessageToExternalControl(const std::vector<char>& message) const {
+
+void SGCTWindowWrapper::sendMessageToExternalControl(
+                                                   const std::vector<char>& message) const
+{
     sgct::Engine::instance()->sendMessageToExternalControl(
         message.data(),
         static_cast<int>(message.size())
     );
 }
-    
-bool SGCTWindowWrapper::isSimpleRendering() const {
-    return (sgct::Engine::instance()->getCurrentRenderTarget() != sgct::Engine::NonLinearBuffer);
 
+bool SGCTWindowWrapper::isSimpleRendering() const {
+    return (sgct::Engine::instance()->getCurrentRenderTarget() !=
+            sgct::Engine::NonLinearBuffer);
 }
-    
+
 void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
     sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
     sgct::Engine::instance()->takeScreenshot();
 }
-    
-//void forEachWindow(std::function<void (void)> function) {
-//    size_t n = sgct::Engine::instance()->getNumberOfWindows();
-//    for (size_t i = 0; i < n; ++i)
-//        function();
-//}
-    
-} // namespace openspace
 
+void SGCTWindowWrapper::swapBuffer() const {
+    GLFWwindow* w = glfwGetCurrentContext();
+    glfwSwapBuffers(w);
+
+    glfwPollEvents();
+}
+
+int SGCTWindowWrapper::nWindows() const {
+    return static_cast<int>(sgct::Engine::instance()->getNumberOfWindows());
+}
+
+int SGCTWindowWrapper::currentWindowId() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
+}
+
+} // namespace openspace

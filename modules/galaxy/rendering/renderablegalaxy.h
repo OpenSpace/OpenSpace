@@ -41,8 +41,8 @@ public:
     RenderableGalaxy(const ghoul::Dictionary& dictionary);
     ~RenderableGalaxy();
     
-    bool initialize() override;
-    bool deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
@@ -63,7 +63,7 @@ private:
     std::string _pointsFilename;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
-    std::unique_ptr<RawVolume<glm::tvec4<GLfloat>>> _volume;
+    std::unique_ptr<volume::RawVolume<glm::tvec4<GLfloat>>> _volume;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     glm::mat4 _pointTransform;
     glm::vec3 _aspect;

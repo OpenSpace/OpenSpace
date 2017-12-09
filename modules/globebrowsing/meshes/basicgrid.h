@@ -31,8 +31,7 @@
 
 #include <vector>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class BasicGrid : public Grid {
 public:
@@ -46,7 +45,7 @@ public:
      * \param useNormals determines whether or not to upload any vertex normal data
      * to the GPU.
     */
-    BasicGrid(unsigned int xSegments, unsigned int ySegments, 
+    BasicGrid(unsigned int xSegments, unsigned int ySegments,
         TriangleSoup::Positions usePositions,
         TriangleSoup::TextureCoordinates useTextureCoordinates,
         TriangleSoup::Normals useNormals);
@@ -67,7 +66,6 @@ private:
     inline size_t numVertices(int xSegments, int ySegments);
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___BASICGRIDGEOMETRY___H__

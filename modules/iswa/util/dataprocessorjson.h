@@ -34,11 +34,14 @@ public:
     DataProcessorJson();
     virtual ~DataProcessorJson();
 
-    virtual std::vector<std::string> readMetadata(std::string data, glm::size3_t& dimensions) override;
-    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;
-    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
+    virtual std::vector<std::string> readMetadata(std::string data,
+        glm::size3_t& dimensions) override;
+    virtual void addDataValues(std::string data,
+        properties::SelectionProperty& dataOptions) override;
+    virtual std::vector<float*> processData(std::string data,
+        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 };
- 
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___DATAPROCESSORJSON___H__

@@ -33,11 +33,10 @@
 #include <vector>
 #include <memory>
 
-namespace ghoul {
-    class Dictionary;
-}
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
+namespace volume {
 
 class VolumeClipPlanes : public properties::PropertyOwner {
 public:
@@ -47,11 +46,13 @@ public:
     void deinitialize();
     std::vector<glm::vec3> normals();
     std::vector<glm::vec2> offsets();
+
 private:
     properties::IntProperty _nClipPlanes;
     std::vector<std::shared_ptr<VolumeClipPlane>> _clipPlanes;
 };
 
-}  // namespace openspace
+} // namepsace volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANES___H__

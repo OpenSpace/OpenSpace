@@ -27,7 +27,6 @@
 #include <openspace/util/syncbuffer.h>
 #include <openspace/query/query.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/interactionhandler.h>
 
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -36,7 +35,7 @@
 namespace openspace {
 
     //////////////////////////////////////////////////////////////////////////////////////
-    //                                        CAMERA                                        //
+    //                                        CAMERA                                    //
     //////////////////////////////////////////////////////////////////////////////////////
 
     namespace {
@@ -74,7 +73,7 @@ namespace openspace {
     void Camera::setPositionVec3(Vec3 pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _position = pos;
-      
+
         _cachedCombinedViewMatrix.isDirty = true;
     }
 
@@ -111,7 +110,7 @@ namespace openspace {
     void Camera::rotate(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _rotation = rotation * static_cast<glm::dquat>(_rotation);
-      
+
         _cachedViewDirection.isDirty = true;
         _cachedLookupVector.isDirty = true;
         _cachedViewRotationMatrix.isDirty = true;
@@ -177,7 +176,9 @@ namespace openspace {
 
     const Camera::Mat4& Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
-            _cachedViewRotationMatrix.datum = glm::mat4_cast(glm::inverse(static_cast<glm::dquat>(_rotation)));
+            _cachedViewRotationMatrix.datum = glm::mat4_cast(
+                glm::inverse(static_cast<glm::dquat>(_rotation))
+            );
         }
         return _cachedViewRotationMatrix.datum;
     }
@@ -206,7 +207,7 @@ namespace openspace {
         _cachedCombinedViewMatrix.isDirty = true;
     }
 
-    
+
     void Camera::serialize(std::ostream& os) const {
         Vec3 p = positionVec3();
         Quat q = rotationQuaternion();
@@ -224,7 +225,7 @@ namespace openspace {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
-    //                                    SGCT INTERNAL                                    //
+    //                                    SGCT INTERNAL                                 //
     //////////////////////////////////////////////////////////////////////////////////////
     Camera::SgctInternal::SgctInternal()
         : _viewMatrix()

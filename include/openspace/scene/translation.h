@@ -42,13 +42,14 @@ namespace documentation {  struct Documentation; }
 
 class Translation : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Translation> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Translation> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     Translation();
     virtual ~Translation() = default;
     virtual bool initialize();
 
-    virtual glm::dvec3 position() const = 0;
+    virtual glm::dvec3 position() const;
     virtual void update(const UpdateData& data);
 
     glm::dvec3 position(double time);
@@ -63,6 +64,8 @@ protected:
     void notifyObservers();
 
     std::function<void()> _onParameterChangeCallback;
+
+    glm::dvec3 _positionValue;
 };
 
 } // namespace openspace

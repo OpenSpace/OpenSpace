@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/scene/scenegraphnode.h>
+
 namespace openspace {
 namespace luascriptfunctions {
 
@@ -65,35 +67,51 @@ int writeDocumentation(lua_State* L) {
  */
 int addVirtualProperty(lua_State* L) {
     const int nArguments = lua_gettop(L);
-    if (nArguments != 6) {
-        return luaL_error(L, "Expected %i arguments, got %i", 6, nArguments);
+    if (nArguments != 7) {
+        return luaL_error(L, "Expected %i arguments, got %i", 7, nArguments);
     }
 
-    const std::string type = lua_tostring(L, -6);
-    const std::string name = lua_tostring(L, -5);
-    const std::string identifier = lua_tostring(L, -4);
+    const std::string type = lua_tostring(L, -7);
+    const std::string name = lua_tostring(L, -6);
+    const std::string identifier = lua_tostring(L, -5);
+    const std::string description = lua_tostring(L, -4);
 
     std::unique_ptr<properties::Property> prop;
     if (type == "BoolProperty") {
         bool v = lua_toboolean(L, -3);
-        prop = std::make_unique<properties::BoolProperty>(identifier, name, v);
+        prop = std::make_unique<properties::BoolProperty>(
+            properties::Property::PropertyInfo{ identifier, name, description },
+            v
+        );
     }
     else if (type == "IntProperty") {
         int v = static_cast<int>(lua_tonumber(L, -3));
         int min = static_cast<int>(lua_tonumber(L, -2));
         int max = static_cast<int>(lua_tonumber(L, -1));
 
-        prop = std::make_unique<properties::IntProperty>(identifier, name, v, min, max);
+        prop = std::make_unique<properties::IntProperty>(
+            properties::Property::PropertyInfo{ identifier, name, description },
+            v,
+            min,
+            max
+        );
     }
     else if (type == "FloatProperty") {
         float v = static_cast<float>(lua_tonumber(L, -3));
         float min = static_cast<float>(lua_tonumber(L, -2));
         float max = static_cast<float>(lua_tonumber(L, -1));
 
-        prop = std::make_unique<properties::FloatProperty>(identifier, name, v, min, max);
+        prop = std::make_unique<properties::FloatProperty>(
+            properties::Property::PropertyInfo{ identifier, name, description },
+            v,
+            min,
+            max
+        );
     }
     else if (type == "TriggerProperty") {
-        prop = std::make_unique<properties::TriggerProperty>(identifier, name);
+        prop = std::make_unique<properties::TriggerProperty>(
+            properties::Property::PropertyInfo{ identifier, name, description }
+        );
     }
     else {
         return luaL_error(L, "Unknown property type '%s'", type.c_str());
@@ -128,9 +146,9 @@ int removeVirtualProperty(lua_State* L) {
 int removeAllVirtualProperties(lua_State* L) {
     const int nArguments = lua_gettop(L);
     if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
     }
-    
+
     std::vector<properties::Property*> ps = OsEng.virtualPropertyManager().properties();
     for (properties::Property* p : ps) {
         OsEng.virtualPropertyManager().removeProperty(p);
@@ -139,6 +157,79 @@ int removeAllVirtualProperties(lua_State* L) {
     return 0;
 }
 
+/**
+ * \ingroup LuaScripts
+ * addTag()
+ * Adds a Tag to a SceneGraphNode
+ */
+int addTag(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 2) {
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    }
+
+    const std::string uri = lua_tostring(L, -2);
+    const std::string tag = lua_tostring(L, -1);
+
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
+    if (!node) {
+        return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
+    }
+
+    node->addTag(std::move(tag));
+
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * removeTag():
+ * Removes a tag from a SceneGraphNode
+ */
+int removeTag(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 2) {
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    }
+
+    const std::string uri = lua_tostring(L, -2);
+    const std::string tag = lua_tostring(L, -1);
+
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
+    if (!node) {
+        return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
+    }
+
+    node->removeTag(tag);
+
+    return 0;
+}
+
+/**
+* \ingroup LuaScripts
+* downloadFile():
+* Downloads a file from Lua interpreter
+*/
+int downloadFile(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 2)
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    std::string uri = luaL_checkstring(L, -2);
+    std::string savePath = luaL_checkstring(L, -1);
+
+    const std::string _loggerCat = "OpenSpaceEngine";
+    LINFO("Downloading file from " << uri);
+    DownloadManager dm = openspace::DownloadManager("", 1, false);
+    std::shared_ptr<openspace::DownloadManager::FileFuture> future =
+        dm.downloadFile(uri, absPath("${SCENE}/" + savePath), true, true, 5);
+    if (!future || (future && !future->isFinished)) {
+        std::string errorMsg = "Download failed";
+        if (future)
+            errorMsg += ": " + future->errorMessage;
+        return luaL_error(L, errorMsg.c_str());
+    }
+    return 1;
+}
 
 } // namespace luascriptfunctions
 } // namespace openspace

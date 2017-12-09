@@ -209,7 +209,7 @@ enum class Key {
     Menu = 348,
     Last = Menu
 };
-    
+
 struct KeyWithModifier {
     Key key;
     KeyModifier modifier;
@@ -217,6 +217,7 @@ struct KeyWithModifier {
 
 KeyWithModifier stringToKey(std::string str);
 bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs);
+bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs);
 
 static const std::map<std::string, KeyModifier> KeyModifierMapping = {
     { "SHIFT", KeyModifier::Shift },
@@ -359,13 +360,13 @@ static const std::map<std::string, Key> KeyMapping = {
 };
 
 } // namespace openspace
-    
+
 namespace std {
-    
+
 std::string to_string(openspace::Key key);
 std::string to_string(openspace::KeyModifier mod);
 std::string to_string(openspace::KeyWithModifier key);
-    
+
 } // namespace std
 
 #endif // __OPENSPACE_CORE___KEYS___H__

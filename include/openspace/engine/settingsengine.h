@@ -34,7 +34,7 @@
 #include <vector>
 
 namespace openspace {
-    
+
 class OpenSpaceModule;
 
 class SettingsEngine : public properties::PropertyOwner {
@@ -42,19 +42,11 @@ public:
     SettingsEngine();
 
     void initialize();
-    
-    void setModules(const std::vector<OpenSpaceModule*>& modules);
 
-    bool busyWaitForDecode();
-    bool logSGCTOutOfOrderErrors();
-    bool useDoubleBuffering();
+    void setModules(const std::vector<OpenSpaceModule*>& modules);
 
 private:
     properties::OptionProperty _scenes;
-    properties::BoolProperty _busyWaitForDecode;
-    properties::BoolProperty _logSGCTOutOfOrderErrors;
-    properties::BoolProperty _useDoubleBuffering;
-    properties::BoolProperty _spiceUseExceptions;
 };
 
 } // namespace openspace

@@ -34,18 +34,16 @@
 #include <openspace/util/boxgeometry.h>
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-        class TextureUnit;
-        class ProgramObject;
-    }
-}
+namespace ghoul::opengl {
+    class Texture;
+    class TextureUnit;
+    class ProgramObject;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
 struct RenderData;
-class RaycastData;
+struct RaycastData;
 
 class GalaxyRaycaster : public VolumeRaycaster {
 public:
@@ -54,11 +52,16 @@ public:
     virtual ~GalaxyRaycaster();
     void initialize();
     void deinitialize();
-    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
-    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
-    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
-    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
+    void renderEntryPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    bool cameraIsInside(const RenderData& data,
+        glm::vec3& localPosition) override;
 
 
     std::string getBoundsVsPath() const override;

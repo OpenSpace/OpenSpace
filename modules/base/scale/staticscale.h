@@ -30,21 +30,20 @@
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
-    
+
 namespace documentation { struct Documentation; }
-    
+
 class StaticScale : public Scale {
 public:
     StaticScale();
     StaticScale(const ghoul::Dictionary& dictionary);
-    double scaleValue() const;
 
     static documentation::Documentation Documentation();
 
 private:
     properties::FloatProperty _scaleValue;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___STATICSCALE___H__

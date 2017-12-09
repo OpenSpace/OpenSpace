@@ -34,8 +34,8 @@
 #include <cstring>
 
 namespace {
-    const std::string _loggerCat = "AtlasManager";
-}
+    const char* _loggerCat = "AtlasManager";
+} // namespace
 
 namespace openspace {
 
@@ -91,10 +91,10 @@ unsigned int AtlasManager::atlasMapBuffer() {
 }
 
 void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices) {
-    int nBrickIndices = brickIndices.size();
+    size_t nBrickIndices = brickIndices.size();
 
     _requiredBricks.clear();
-    for (int i = 0; i < nBrickIndices; i++) {
+    for (size_t i = 0; i < nBrickIndices; i++) {
         _requiredBricks.insert(brickIndices[i]);
     }
 
@@ -105,7 +105,7 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
     }
 
     // Stats
-    _nUsedBricks = _requiredBricks.size();
+    _nUsedBricks = static_cast<unsigned int>(_requiredBricks.size());
     _nStreamedBricks = 0;
     _nDiskReads = 0;
 
@@ -149,14 +149,13 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
     memcpy(to, _atlasMap.data(), sizeof(GLint)*_atlasMap.size());
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
 }
 
 void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex, float* mappedBuffer) {
     while (_brickMap.count(firstBrickIndex) && firstBrickIndex <= lastBrickIndex) firstBrickIndex++;
     while (_brickMap.count(lastBrickIndex) && lastBrickIndex >= firstBrickIndex) lastBrickIndex--;
     if (lastBrickIndex < firstBrickIndex) return;
-    
+
     int sequenceLength = lastBrickIndex - firstBrickIndex + 1;
     float* sequenceBuffer = new float[sequenceLength*_nBrickVals];
     size_t bufferSize = sequenceLength * _brickSize;
@@ -171,7 +170,7 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex, float* ma
             unsigned int atlasCoords = _freeAtlasCoords.back();
             _freeAtlasCoords.pop_back();
             int level = _nOtLevels - floor(log((7.0 * (float(brickIndex % _nOtNodes)) + 1.0))/log(8)) - 1;
-            assert(atlasCoords <= 0x0FFFFFFF);
+            ghoul_assert(atlasCoords <= 0x0FFFFFFF, "@MISSING");
             unsigned int atlasData = (level << 28) + atlasCoords;
             _brickMap.insert(std::pair<unsigned int, unsigned int>(brickIndex, atlasData));
             _nStreamedBricks++;
@@ -194,7 +193,6 @@ void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoo
     int y = (linearAtlasCoords / _nBricksPerDim) % _nBricksPerDim;
     int z = linearAtlasCoords / _nBricksPerDim / _nBricksPerDim;
 
-
     unsigned int xMin = x*_paddedBrickDim;
     unsigned int yMin = y*_paddedBrickDim;
     unsigned int zMin = z*_paddedBrickDim;
@@ -206,7 +204,6 @@ void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoo
     for (unsigned int zValCoord = zMin; zValCoord<zMax; ++zValCoord) {
         for (unsigned int yValCoord = yMin; yValCoord<yMax; ++yValCoord) {
             for (unsigned int xValCoord = xMin; xValCoord<xMax; ++xValCoord) {
-
                 unsigned int idx =
                     xValCoord +
                     yValCoord*_atlasDim +
@@ -233,7 +230,8 @@ void AtlasManager::pboToAtlas(BUFFER_INDEX bufferIndex) {
         dim[2],                     // depth
         GL_RED,                     // format
         GL_FLOAT,                   // type
-        NULL);                      // *pixels
+        NULL                        // *pixels
+    );
     glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
@@ -255,9 +253,8 @@ unsigned int AtlasManager::getNumStreamedBricks() {
     return _nStreamedBricks;
 }
 
-
 glm::size3_t AtlasManager::textureSize() {
     return _textureAtlas->dimensions();
 }
 
-}
+} // namespace openspace

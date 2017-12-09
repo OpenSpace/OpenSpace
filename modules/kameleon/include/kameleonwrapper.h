@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__
 #define __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/std_based_type.hpp>
 
 #include <tuple>
@@ -35,7 +36,7 @@ namespace ccmc {
     class Kameleon;
     class Model;
     class Interpolator;
-}
+} // namespace ccmc
 
 namespace openspace {
 
@@ -51,7 +52,6 @@ struct LinePoint {
 
 class KameleonWrapper {
 public:
-
     enum class Model {
         OpenGGCM,
         BATSRUS,        // Magnetosphere
@@ -73,7 +73,7 @@ public:
         SOUTH,
         FAROUT
     };
-    
+
     enum class GridType {
         Cartesian,
         Spherical,
@@ -90,38 +90,38 @@ public:
     void close();
 
     float* getUniformSampledValues(
-        const std::string& var, 
+        const std::string& var,
         const glm::size3_t& outDimensions);
 
-    float* getUniformSliceValues(    
-    const std::string& var, 
+    float* getUniformSliceValues(
+    const std::string& var,
     const glm::size3_t& outDimensions,
     const float& zSlice);
 
     float* getUniformSampledVectorValues(
-        const std::string& xVar, 
+        const std::string& xVar,
         const std::string& yVar,
-        const std::string& zVar, 
+        const std::string& zVar,
         const glm::size3_t& outDimensions);
 
     Fieldlines getClassifiedFieldLines(
         const std::string& xVar,
-        const std::string& yVar, 
+        const std::string& yVar,
         const std::string& zVar,
-        const std::vector<glm::vec3>& seedPoints, 
+        const std::vector<glm::vec3>& seedPoints,
         float stepSize);
 
     Fieldlines getFieldLines(
         const std::string& xVar,
-        const std::string& yVar, 
+        const std::string& yVar,
         const std::string& zVar,
-        const std::vector<glm::vec3>& seedPoints, 
-        float stepSize, 
+        const std::vector<glm::vec3>& seedPoints,
+        float stepSize,
         const glm::vec4& color);
 
     Fieldlines getLorentzTrajectories(
         const std::vector<glm::vec3>& seedPoints,
-        const glm::vec4& color, 
+        const glm::vec4& color,
         float stepsize);
 
     glm::vec3 getModelBarycenterOffset();
@@ -146,21 +146,21 @@ private:
     TraceLine traceCartesianFieldline(
         const std::string& xVar,
         const std::string& yVar,
-        const std::string& zVar, 
+        const std::string& zVar,
         const glm::vec3& seedPoint,
-        float stepSize, 
-        TraceDirection direction, 
+        float stepSize,
+        TraceDirection direction,
         FieldlineEnd& end);
 
     TraceLine traceLorentzTrajectory(
         const glm::vec3& seedPoint,
-        float stepsize, 
+        float stepsize,
         float eCharge);
-    
+
     void getGridVariables(std::string& x, std::string& y, std::string& z);
     GridType getGridType(
-        const std::string& x, 
-        const std::string& y, 
+        const std::string& x,
+        const std::string& y,
         const std::string& z);
     Model getModelType();
     glm::vec4 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);

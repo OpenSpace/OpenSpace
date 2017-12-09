@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #ifndef __OPENSPACE_CORE___SCENE___H__
 #define __OPENSPACE_CORE___SCENE___H__
 
@@ -32,9 +32,12 @@
 #include <set>
 #include <mutex>
 
+#include <openspace/scene/scenelicense.h>
+#include <openspace/scene/scenelicensewriter.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/scripting/scriptengine.h>
+
 #include <ghoul/opengl/programobject.h>
 
 namespace ghoul { class Dictionary; }
@@ -58,7 +61,8 @@ public:
         * \param component The optional compoment that caused this exception to be thrown
         * \pre message may not be empty
         */
-        explicit InvalidSceneError(const std::string& message, const std::string& component = "");
+        explicit InvalidSceneError(const std::string& message,
+            const std::string& component = "");
     };
 
     // constructors & destructor
@@ -69,6 +73,12 @@ public:
      * Initalizes the SceneGraph
      */
     void initialize();
+
+    /**
+     * Initializes the OpenGL part of the SceneGraph
+     */
+    void initializeGL();
+
 
     /**
      * Clear the scene graph,
@@ -115,12 +125,16 @@ public:
     /**
      * Add a node and all its children to the scene.
      */
-    void addNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
+    void addNode(SceneGraphNode* node,
+        UpdateDependencies updateDeps = UpdateDependencies::Yes);
 
     /**
      * Remove a node and all its children from the scene.
      */
-    void removeNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
+    void removeNode(SceneGraphNode* node,
+        UpdateDependencies updateDeps = UpdateDependencies::Yes);
+
+    void addSceneLicense(SceneLicense license);
 
     /**
      * Update dependencies.
@@ -131,6 +145,14 @@ public:
      * Return a vector of all scene graph nodes in the scene.
      */
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
+
+    /**
+     * Write information about the license information for the scenegraph nodes that are
+     * contained in this scene
+     * \param path The file path that will contain the documentation about the licenses
+     * used in this scene
+     */
+    void writeSceneLicenseDocumentation(const std::string& path) const;
 
     /**
      * Return a a map from name to scene graph node.
@@ -159,6 +181,8 @@ private:
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
     std::vector<SceneGraphNode*> _circularNodes;
     std::map<std::string, SceneGraphNode*> _nodesByName;
+
+    std::vector<SceneLicense> _licenses;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;

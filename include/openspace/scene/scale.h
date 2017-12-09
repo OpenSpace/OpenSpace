@@ -37,19 +37,24 @@ namespace openspace {
 
 struct UpdateData;
 
-namespace documentation { struct Documentation; };
+namespace documentation { struct Documentation; }
 
 class Scale : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Scale> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Scale> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     Scale();
     virtual ~Scale() = default;
+
     virtual bool initialize();
-    virtual double scaleValue() const = 0;
+    virtual double scaleValue() const;
     virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
+
+protected:
+    double _scale;
 };
 
 }  // namespace openspace

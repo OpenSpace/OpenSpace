@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_worker_thread_pool.h 33666 2016-03-07 05:21:07Z goatbar $
+ * $Id: cpl_worker_thread_pool.h 37003 2016-12-23 14:54:07Z goatbar $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL worker thread pool
@@ -41,6 +41,7 @@
  * @since GDAL 2.1
  */
 
+#ifndef DOXYGEN_SKIP
 class CPLWorkerThreadPool;
 
 typedef struct
@@ -56,7 +57,7 @@ typedef struct
     CPLWorkerThreadPool *poTP;
     CPLJoinableThread   *hThread;
     int                  bMarkedAsWaiting;
-    //CPLWorkerThreadJob  *psNextJob;
+    // CPLWorkerThreadJob  *psNextJob;
 
     CPLMutex            *hMutex;
     CPLCond             *hCond;
@@ -68,7 +69,9 @@ typedef enum
     CPLWTS_STOP,
     CPLWTS_ERROR
 } CPLWorkerThreadState;
+#endif  // ndef DOXYGEN_SKIP
 
+/** Pool of worker threads */
 class CPL_DLL CPLWorkerThreadPool
 {
         std::vector<CPLWorkerThread> aWT;
@@ -97,6 +100,7 @@ class CPL_DLL CPLWorkerThreadPool
         bool SubmitJobs(CPLThreadFunc pfnFunc, const std::vector<void*>& apData);
         void WaitCompletion(int nMaxRemainingJobs = 0);
 
+        /** Return the number of threads setup */
         int GetThreadCount() const { return (int)aWT.size(); }
 };
 

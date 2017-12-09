@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /******************************************************************************
- * $Id: ogrvrt.xsd 33680 2016-03-08 09:59:03Z rouault $
+ * $Id: ogrvrt.xsd 36883 2016-12-15 13:31:12Z rouault $
  *
  * Project:  GDAL/OGR
  * Purpose:  XML Schema for OGR VRT files.
@@ -249,6 +249,20 @@
             <xs:enumeration value="wkbCurveZM"/>
             <xs:enumeration value="wkbSurfaceZM"/>
 
+            <!-- below is new in GDAL 2.2 -->
+            <xs:enumeration value="wkbPolyhedralSurface"/>
+            <xs:enumeration value="wkbTIN"/>
+            <xs:enumeration value="wkbTriangle"/>
+            <xs:enumeration value="wkbPolyhedralSurfaceZ"/>
+            <xs:enumeration value="wkbTINZ"/>
+            <xs:enumeration value="wkbTriangleZ"/>
+            <xs:enumeration value="wkbPolyhedralSurfaceM"/>
+            <xs:enumeration value="wkbTINM"/>
+            <xs:enumeration value="wkbTriangleM"/>
+            <xs:enumeration value="wkbPolyhedralSurfaceZM"/>
+            <xs:enumeration value="wkbTINZM"/>
+            <xs:enumeration value="wkbTriangleZM"/>
+
         </xs:restriction>
     </xs:simpleType>
 
@@ -346,6 +360,11 @@
             </xs:annotation>
         </xs:attribute>
         <xs:attribute name="z" type="nonEmptyStringType">
+            <xs:annotation>
+                <xs:documentation>Only used if encoding = "PointFromColumns"</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="m" type="nonEmptyStringType">
             <xs:annotation>
                 <xs:documentation>Only used if encoding = "PointFromColumns"</xs:documentation>
             </xs:annotation>

@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 template <class KeyType>
 PixelBufferContainer<KeyType>::PixelBufferContainer(size_t numBytesPerBuffer,
@@ -53,7 +52,7 @@ void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access 
             _pixelBuffers[i]->unbind();
             if (dataPtr) { // Success in mapping
                 // Add this index to the map of mapped pixel buffers
-                _indexMap.emplace(key, i);
+                _indexMap.emplace(key, static_cast<int>(i));
                 return dataPtr;
             }
         }
@@ -63,16 +62,16 @@ void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access 
 
 template <class KeyType>
 void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset,
-    GLsizeiptr length, GLbitfield access)
+    GLsizeiptr length, BufferAccessMask access)
 {
     typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     bool notFoundAmongMappedBuffers = iter == _indexMap.end();
-    
+
     if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
         ghoul_assert(_pixelBuffers[iter->second], "Incorrect index map");
         return nullptr;
     }
-  
+
     // Find a pixel buffer that is unmapped
     for (int i = 0; i < _pixelBuffers.size(); ++i) {
         bool bufferIsMapped = _pixelBuffers[i]->isMapped();
@@ -126,5 +125,4 @@ GLuint PixelBufferContainer<KeyType>::idOfMappedBuffer(KeyType key) {
     return 0;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

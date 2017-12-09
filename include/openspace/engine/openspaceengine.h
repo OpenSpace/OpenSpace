@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
@@ -35,20 +36,16 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    
-class Dictionary;
-
-namespace cmdparser { class CommandlineParser; }
-namespace fontrendering { class FontManager; }
-
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
+namespace ghoul::cmdparser { class CommandlineParser; }
+namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
 class ConfigurationManager;
 class DownloadManager;
 class GUI;
+class LoadingScreen;
 class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
@@ -62,7 +59,10 @@ class SyncEngine;
 class TimeManager;
 class WindowWrapper;
 
-namespace interaction { class InteractionHandler; }
+namespace interaction {
+    class NavigationHandler;
+    class KeyBindingManager;
+}
 namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -78,9 +78,7 @@ public:
         std::vector<std::string>& sgctArguments, bool& requestClose);
     static void destroy();
     static OpenSpaceEngine& ref();
-
-    double runTime();
-    void setRunTime(double t);
+    static bool isCreated();
 
     // callbacks
     void initialize();
@@ -90,31 +88,28 @@ public:
     void postSynchronizationPreDraw();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
+    void drawOverlays();
     void postDraw();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier mod);
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double pos);
+    void mouseScrollWheelCallback(double posX, double posY);
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
 
     void scheduleLoadScene(std::string scenePath);
 
-    void enableBarrier();
-    void disableBarrier();
-    
     void writeDocumentation();
     void toggleShutdownMode();
-    
-    void runPostInitializationScripts(const std::string& sceneDescription);
 
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
     LuaConsole& console();
     DownloadManager& downloadManager();
     ModuleEngine& moduleEngine();
+    LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelConnection& parallelConnection();
     RenderEngine& renderEngine();
@@ -122,13 +117,14 @@ public:
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
-    interaction::InteractionHandler& interactionHandler();
+    interaction::NavigationHandler& navigationHandler();
+    interaction::KeyBindingManager& keyBindingManager();
     properties::PropertyOwner& globalPropertyOwner();
     scripting::ScriptEngine& scriptEngine();
     scripting::ScriptScheduler& scriptScheduler();
     VirtualPropertyManager& virtualPropertyManager();
 
-    
+
     // This method is only to be called from Modules
     enum class CallbackOption {
         Initialize = 0,  // Callback for the end of the initialization
@@ -138,16 +134,17 @@ public:
         PreSync,         // Callback for the end of the pre-sync function
         PostSyncPreDraw, // Callback for the end of the post-sync-pre-draw function
         Render,          // Callback for the end of the render function
+        Draw2D,          // Callback for the two-dimensional rendering functions
         PostDraw         // Callback for the end of the post-draw function
     };
-    
+
     // Registers a callback for a specific CallbackOption
     void registerModuleCallback(CallbackOption option, std::function<void()> function);
-    
+
     // Registers a callback that is called when a new keyboard event is received
     void registerModuleKeyboardCallback(
         std::function<bool (Key, KeyModifier, KeyAction)> function);
-    
+
     // Registers a callback that is called when a new character event is received
     void registerModuleCharCallback(
         std::function<bool (unsigned int, KeyModifier)> function);
@@ -155,14 +152,16 @@ public:
     // Registers a callback that is called when a new mouse button is received
     void registerModuleMouseButtonCallback(
        std::function<bool (MouseButton, MouseAction)> function);
-    
+
     // Registers a callback that is called when a new mouse movement is received
     void registerModuleMousePositionCallback(
         std::function<void (double, double)> function);
-    
+
     // Registers a callback that is called when a scroll wheel change is received
-    void registerModuleMouseScrollWheelCallback(std::function<bool (double)> function);
-    
+    void registerModuleMouseScrollWheelCallback(
+        std::function<bool (double, double)> function
+    );
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.
@@ -177,8 +176,10 @@ private:
     void gatherCommandlineArguments();
     void loadFonts();
     void runPreInitializationScripts(const std::string& sceneDescription);
+    void runPostInitializationScripts(const std::string& sceneDescription);
+    void runGlobalCustomizationScripts(const std::string& sceneDescription);
     void configureLogging();
-    
+
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<SceneManager> _sceneManager;
@@ -194,38 +195,45 @@ private:
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
-    std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
+    std::unique_ptr<interaction::NavigationHandler> _navigationHandler;
+    std::unique_ptr<interaction::KeyBindingManager> _keyBindingManager;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
-    
+
+    std::unique_ptr<LoadingScreen> _loadingScreen;
+
+    struct {
+        properties::StringProperty versionString;
+        properties::StringProperty sourceControlInformation;
+    } _versionInformation;
+
     bool _scheduledSceneSwitch;
     std::string _scenePath;
 
     struct {
         std::vector<std::function<void()>> initialize;
         std::vector<std::function<void()>> deinitialize;
-        
+
         std::vector<std::function<void()>> initializeGL;
         std::vector<std::function<void()>> deinitializeGL;
-        
+
         std::vector<std::function<void()>> preSync;
         std::vector<std::function<void()>> postSyncPreDraw;
         std::vector<std::function<void()>> render;
+        std::vector<std::function<void()>> draw2D;
         std::vector<std::function<void()>> postDraw;
-        
+
         std::vector<std::function<bool (Key, KeyModifier, KeyAction)>> keyboard;
         std::vector<std::function<bool (unsigned int, KeyModifier)>> character;
-        
+
         std::vector<std::function<bool (MouseButton, MouseAction)>> mouseButton;
         std::vector<std::function<void (double, double)>> mousePosition;
-        std::vector<std::function<bool (double)>> mouseScrollWheel;
+        std::vector<std::function<bool (double, double)>> mouseScrollWheel;
     } _moduleCallbacks;
-    
-    double _runTime;
 
     // Structure that is responsible for the delayed shutdown of the application
     struct {

@@ -29,8 +29,7 @@
 #include <memory>
 #include <math.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 template <typename T>
 class Angle {
@@ -97,8 +96,8 @@ public:
     Angle<T>& normalizeAround(const Angle<T>& center);
 
     /**
-    * Clamps the angle to the interval [min, max]. 
-    * Default arguments are [0, 2pi]. 
+    * Clamps the angle to the interval [min, max].
+    * Default arguments are [0, 2pi].
     */
     Angle<T>& clamp(const Angle<T>& min = ZERO, const Angle<T>& max = FULL);
 
@@ -121,7 +120,7 @@ public:
     Angle<T> getClamped(const Angle<T>& min = ZERO, const Angle<T>& max = FULL) const;
 
     Angle<T> getAbs() const;
-    
+
 private:
     T _radians;
 };
@@ -129,8 +128,7 @@ private:
 using dAngle = Angle<double>;
 using fAngle = Angle<float>;
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #include <modules/globebrowsing/geometry/angle.inl>
 

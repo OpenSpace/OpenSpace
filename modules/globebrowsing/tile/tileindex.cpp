@@ -34,21 +34,20 @@ namespace {
     const char* KeyLevel = "Level";
     const char* KeyX = "X";
     const char* KeyY = "Y";
-}
+} // namespace
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
-TileIndex::TileIndex(int x, int y, int level)
-    : x(x), y(y), level(level)
+TileIndex::TileIndex(int x_, int y_, int level_)
+    : x(x_), y(y_), level(level_)
 {}
 
 TileIndex::TileIndex(const TileIndex& other)
     : x(other.x), y(other.y), level(other.level)
 {}
 
-TileIndex::TileIndex(const Geodetic2& point, int level)
-    : level(level)
+TileIndex::TileIndex(const Geodetic2& point, int level_)
+    : level(level_)
 {
     int numIndicesAtLevel = 1 << level;
     double u = 0.5 + point.lon / (2 * glm::pi<double>());
@@ -56,8 +55,8 @@ TileIndex::TileIndex(const Geodetic2& point, int level)
     double xIndexSpace = u * numIndicesAtLevel;
     double yIndexSpace = v * numIndicesAtLevel;
 
-    x = floor(xIndexSpace);
-    y = floor(yIndexSpace);
+    x = static_cast<int>(floor(xIndexSpace));
+    y = static_cast<int>(floor(yIndexSpace));
 }
 
 TileIndex::TileIndex(const ghoul::Dictionary& dict) {
@@ -112,18 +111,16 @@ int TileIndex::manhattan(const TileIndex& other) const {
     return std::abs(x - other.x) + std::abs(y - other.y);
 }
 
-/**
-Creates a hash which can be used as key in hash maps.
-    
-+-------+------------+-------+------------+
-| USAGE | BIT RANGE  | #BITS | MAX VALUE  |
-+-------+------------+-------+------------+
-| level |   0 -  5   |   5   |         31 |
-|     x |   5 - 35   |  30   | 1073741824 |
-|     y |  35 - 64   |  29   |  536870912 |
-+-------+------------+-------+------------+
-     
-*/
+// Creates a hash which can be used as key in hash maps.
+//
+// +-------+------------+-------+------------+
+// | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+// +-------+------------+-------+------------+
+// | level |   0 -  5   |   5   |         31 |
+// |     x |   5 - 35   |  30   | 1073741824 |
+// |     y |  35 - 64   |  29   |  536870912 |
+// +-------+------------+-------+------------+
+
 TileIndex::TileHashKey TileIndex::hashKey() const {
     TileHashKey key = 0LL;
     key |= level;
@@ -154,5 +151,4 @@ std::ostream& operator<<(std::ostream& os, const TileIndex& ci) {
     return os;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

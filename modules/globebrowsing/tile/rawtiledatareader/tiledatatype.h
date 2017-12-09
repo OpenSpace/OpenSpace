@@ -34,13 +34,11 @@
 #include <gdal.h>
 #endif // GLOBEBROWSING_USE_GDAL
 
-namespace openspace {
-namespace globebrowsing {
-namespace tiledatatype {
+namespace openspace::globebrowsing::tiledatatype {
 
 #ifdef GLOBEBROWSING_USE_GDAL
-GLuint getOpenGLDataType(GDALDataType gdalType);
-GDALDataType getGdalDataType(GLuint glType);
+    GLenum getOpenGLDataType(GDALDataType gdalType);
+GDALDataType getGdalDataType(GLenum glType);
 TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
 TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType);
 size_t getMaximumValue(GDALDataType gdalType);
@@ -48,14 +46,12 @@ size_t numberOfBytes(GDALDataType gdalType);
 float interpretFloat(GDALDataType gdalType, const char* src);
 #endif // GLOBEBROWSING_USE_GDAL
 
-GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format);
+GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format);
 size_t numberOfRasters(ghoul::opengl::Texture::Format format);
-size_t numberOfBytes(GLuint glType);
-size_t getMaximumValue(GLuint glType);
-float interpretFloat(GLuint glType, const char* src);
+size_t numberOfBytes(GLenum glType);
+size_t getMaximumValue(GLenum glType);
+float interpretFloat(GLenum glType, const char* src);
 
-} // namespace tiledatatype
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tiledatatype
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__

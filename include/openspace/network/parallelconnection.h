@@ -25,20 +25,16 @@
 #ifndef __OPENSPACE_CORE___PARALLELCONNECTION___H__
 #define __OPENSPACE_CORE___PARALLELCONNECTION___H__
 
-//openspace includes
 #include <openspace/network/messagestructures.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/numericalproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-//glm includes
 #include <glm/gtx/quaternion.hpp>
 
-//ghoul includes
 #include <ghoul/designpattern/event.h>
 
-//std includes
 #include <string>
 #include <vector>
 #include <deque>
@@ -47,8 +43,6 @@
 #include <mutex>
 #include <map>
 #include <condition_variable>
-
-
 
 #if defined(WIN32) || defined(__MING32__) || defined(__MING64__)
 typedef size_t _SOCKET;
@@ -131,8 +125,7 @@ class ParallelConnection : public properties::PropertyOwner {
     int nConnections();
     std::shared_ptr<ghoul::Event<>> connectionEvent();
 
-            
-            
+
 private:
     //@TODO change this into the ghoul hasher for client AND server
     uint32_t hash(const std::string &val);
@@ -177,7 +170,7 @@ private:
 
     double _lastTimeKeyframeTimestamp;
     double _lastCameraKeyframeTimestamp;
-            
+
     _SOCKET _clientSocket;
 
     std::atomic<bool> _isConnected;
@@ -192,14 +185,14 @@ private:
 
     std::condition_variable _disconnectCondition;
     std::mutex _disconnectMutex;
-            
+
     std::condition_variable _sendCondition;
     std::deque<Message> _sendBuffer;
     std::mutex _sendBufferMutex;
 
     std::deque<Message> _receiveBuffer;
     std::mutex _receiveBufferMutex;
-            
+
     std::atomic<bool> _timeJumped;
     std::mutex _latencyMutex;
     std::deque<double> _latencyDiffs;

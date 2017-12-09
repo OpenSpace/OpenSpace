@@ -33,8 +33,7 @@
 
 #include <string>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 struct IODescription {
     struct ReadData {
@@ -42,17 +41,16 @@ struct IODescription {
         PixelRegion region;
         PixelRegion fullRegion;
     } read;
-    
+
     struct WriteData {
         PixelRegion region;
         size_t bytesPerLine;
         size_t totalNumBytes;
     } write;
-    
+
     IODescription cut(PixelRegion::Side side, int pos);
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__

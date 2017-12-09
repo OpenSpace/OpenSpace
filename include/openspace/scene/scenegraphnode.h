@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
@@ -48,6 +48,7 @@ class Translation;
 class Scale;
 class Scene;
 struct UpdateData;
+struct SurfacePositionHandle;
 
 namespace documentation { struct Documentation; }
 
@@ -68,14 +69,17 @@ public:
     static const std::string KeyParentName;
     static const std::string KeyDependencies;
     static const std::string KeyTag;
-    
+
     SceneGraphNode();
     ~SceneGraphNode();
 
-    static std::unique_ptr<SceneGraphNode> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<SceneGraphNode> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
-    bool initialize();
-    bool deinitialize();
+    void initialize();
+    void initializeGL();
+    void deinitialize();
+    void deinitializeGL();
 
     void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
     void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
@@ -83,14 +87,21 @@ public:
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
 
-    void attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene = UpdateScene::Yes);
-    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child, UpdateScene updateScene = UpdateScene::Yes);
+    void attachChild(std::unique_ptr<SceneGraphNode> child,
+        UpdateScene updateScene = UpdateScene::Yes);
+    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child,
+        UpdateScene updateScene = UpdateScene::Yes);
     void setParent(SceneGraphNode& parent, UpdateScene updateScene = UpdateScene::Yes);
 
-    void addDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
-    void removeDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
+    void addDependency(SceneGraphNode& dependency,
+        UpdateScene updateScene = UpdateScene::Yes);
+    void removeDependency(SceneGraphNode& dependency,
+        UpdateScene updateScene = UpdateScene::Yes);
     void clearDependencies(UpdateScene updateScene = UpdateScene::Yes);
-    void setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene = UpdateScene::Yes);
+    void setDependencies(const std::vector<SceneGraphNode*>& dependencies,
+        UpdateScene updateScene = UpdateScene::Yes);
+    SurfacePositionHandle calculateSurfacePositionHandle(
+        const glm::dvec3& targetModelSpace);
 
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;
@@ -121,6 +132,8 @@ public:
     const Renderable* renderable() const;
     Renderable* renderable();
 
+    const std::string& guiPath() const;
+
     static documentation::Documentation Documentation();
 
 private:
@@ -137,6 +150,8 @@ private:
     PerformanceRecord _performanceRecord;
 
     std::unique_ptr<Renderable> _renderable;
+
+    std::string _guiPath;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {

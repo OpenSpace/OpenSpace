@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-SyncEngine::SyncEngine(unsigned int syncBufferSize) 
+SyncEngine::SyncEngine(unsigned int syncBufferSize)
     : _syncBuffer(syncBufferSize)
 {
     ghoul_assert(syncBufferSize > 0, "syncBufferSize must be bigger than 0");
@@ -87,7 +87,7 @@ void SyncEngine::removeSyncable(Syncable* syncable) {
 }
 
 void SyncEngine::removeSyncables(const std::vector<Syncable*>& syncables) {
-    for (const auto& syncable : syncables) {
+    for (Syncable* syncable : syncables) {
         removeSyncable(syncable);
     }
 }

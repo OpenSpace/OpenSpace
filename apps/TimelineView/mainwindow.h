@@ -65,7 +65,7 @@ private:
     ControlWidget* _timeControlWidget;
     InformationWidget* _informationWidget;
     TimelineWidget* _timelineWidget;
-    
+
     QTcpSocket* _socket;
 
     bool _isConnected = false;

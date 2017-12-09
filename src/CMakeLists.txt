@@ -1,26 +1,28 @@
-#########################################################################################
-#                                                                                       #
-# OpenSpace                                                                             #
-#                                                                                       #
-# Copyright (c) 2014-2015                                                               #
-#                                                                                       #
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
-# software and associated documentation files (the "Software"), to deal in the Software #
-# without restriction, including without limitation the rights to use, copy, modify,    #
-# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    #
-# permit persons to whom the Software is furnished to do so, subject to the following   #
-# conditions:                                                                           #
-#                                                                                       #
-# The above copyright notice and this permission notice shall be included in all copies #
-# or substantial portions of the Software.                                              #
-#                                                                                       #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   #
-# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         #
-# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    #
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  #
-# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  #
-# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
-#########################################################################################
+##########################################################################################
+#                                                                                        #
+# OpenSpace                                                                              #
+#                                                                                        #
+# Copyright (c) 2014-2017                                                                #
+#                                                                                        #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
+# software and associated documentation files (the "Software"), to deal in the Software  #
+# without restriction, including without limitation the rights to use, copy, modify,     #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to     #
+# permit persons to whom the Software is furnished to do so, subject to the following    #
+# conditions:                                                                            #
+#                                                                                        #
+# The above copyright notice and this permission notice shall be included in all copies  #
+# or substantial portions of the Software.                                               #
+#                                                                                        #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   #
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
+##########################################################################################
+
+include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
 set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/openspace.cpp
@@ -42,14 +44,18 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/interactionmode.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/interaction/mousestate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
-    # ${OPENSPACE_BASE_DIR}/src/mission/missionphasesequencer.cpp
     ${OPENSPACE_BASE_DIR}/src/network/networkengine.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection_lua.inl
@@ -61,6 +67,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/stringlistproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
@@ -114,6 +121,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/query/query.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
@@ -126,6 +134,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/scene/scenelicense.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/sceneloader.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
@@ -139,6 +149,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
@@ -150,11 +161,12 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
-    ${OPENSPACE_BASE_DIR}/src/util/syncdata.cpp
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/task.cpp
     ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/threadpool.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/timeconversion.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timeline.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
@@ -163,8 +175,14 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/gpudata.cpp
 )
 
+if (APPLE)
+    set(OPENSPACE_SOURCE
+        ${OPENSPACE_SOURCE}
+        ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    )
+endif ()
+
 set(OPENSPACE_HEADER
-    ${OPENSPACE_BASE_DIR}/include/openspace/openspace.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
@@ -182,9 +200,17 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionhandler.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmode.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousestate.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
@@ -204,6 +230,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalarproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
@@ -260,6 +287,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
@@ -273,6 +301,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicense.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
@@ -284,6 +314,12 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/distanceconstants.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/distanceconversion.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
@@ -300,15 +336,24 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/timeconversion.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )
+
+if (APPLE)
+    set(OPENSPACE_HEADER
+        ${OPENSPACE_HEADER}
+        ${OPENSPACE_BASE_DIR}/include/openspace/interaction/touchbar.h
+    )
+endif ()
 
 # Place files into source groups
 foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
@@ -318,12 +363,36 @@ foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
     string(REPLACE "${OPENSPACE_BASE_DIR}/include/openspace/" "" file ${file})
     get_filename_component(directory ${file} DIRECTORY)
     if (NOT directory STREQUAL "")
+        # Visual Studio wants '\' for the path separator
         string(REPLACE "/" "\\" directory ${directory})
+
+        # It looks nicer if the directory starts with a capital letter
+        # First extract the first letter, make it upper case and then reassemble the name
         string(SUBSTRING ${directory} 0 1 FIRST_LETTER)
         string(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
         string(REGEX REPLACE "^.(.*)" "${FIRST_LETTER}\\1" directory "${directory}")
+
         source_group("${directory}" FILES ${original_file})
     else ()
         source_group("" FILES ${original_file})
     endif ()
-endforeach () 
+endforeach ()
+
+##########################################################################################
+# Create OpenSpace target
+##########################################################################################
+add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+# In order to be able to include libOpenSpace files
+target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
+# In order to be able to include module files
+target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
+# In order to be able to include the module_registration file
+target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
+
+configure_file(
+    ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template
+    ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h
+    @ONLY IMMEDIATE
+)
+
+set_openspace_compile_settings(libOpenSpace)

@@ -34,6 +34,8 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/timerange.h>
 
+#include <openspace/properties/stringproperty.h>
+
 #include <ghoul/misc/dictionary.h>
 
 #include <memory>
@@ -42,15 +44,13 @@
 
 struct CPLXMLNode;
 
-namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
-    
+namespace openspace::globebrowsing::tileprovider {
+
 /**
  * Interface for stringifying OpenSpace Time instances.
  *
  * Once OpenSpace has a proper Time format class, this should be handled by that instead
- * of here.    
+ * of here.
  */
 struct TimeFormat {
     virtual ~TimeFormat() = default;
@@ -81,6 +81,15 @@ struct YYYYMMDD_hhmmss : public TimeFormat {
 };
 
 /**
+ * Stringifies OpenSpace to the format "YYYYMMDD_hhmm"
+ * Example: 20160908_2305
+ */
+struct YYYYMMDD_hhmm : public TimeFormat {
+    virtual ~YYYYMMDD_hhmm() override = default;
+    virtual std::string stringify(const Time& t) const override;
+};
+
+/**
  * Stringifies OpenSpace to the format "YYYY-MM-DDThh:mm:ssZ"
  * Example: 2016-09-08T23:05:05Z
  */
@@ -88,7 +97,7 @@ struct YYYY_MM_DDThhColonmmColonssZ : public TimeFormat {
     virtual ~YYYY_MM_DDThhColonmmColonssZ() override = default;
     virtual std::string stringify(const Time& t) const override;
 };
-    
+
 /**
  * Stringifies OpenSpace to the format "YYYY-MM-DDThh:mm:ssZ"
  * Example: 2016-09-08T23:05:05Z
@@ -101,7 +110,7 @@ struct YYYY_MM_DDThh_mm_ssZ : public TimeFormat {
 /**
  * Static factory class for providing different TimeFormats.
  * A time format stringifier is retrieved by a name of the format.
- * See implementation of <code>init()</code> to see what time 
+ * See implementation of <code>init()</code> to see what time
  * id formats are supported.
  */
 struct TimeIdProviderFactory {
@@ -113,7 +122,7 @@ struct TimeIdProviderFactory {
      * See implementation of <code>init()</code> for supported time formats.
      *
      * \param format - name of TimeFormat, eg "YYYY-MM-DDThh:mm:ssZ".
-     * \returns a concrete TimeFormat used to stringify instances of Time 
+     * \returns a concrete TimeFormat used to stringify instances of Time
      */
     static TimeFormat* getProvider(const std::string& format);
 
@@ -122,12 +131,14 @@ struct TimeIdProviderFactory {
      */
     static void init();
 
-    static std::unordered_map<std::string, std::unique_ptr<TimeFormat>> _timeIdProviderMap;
+    static std::unordered_map<
+        std::string, std::unique_ptr<TimeFormat>
+    > _timeIdProviderMap;
     static bool initialized;
 };
 
 /**
- * Used to quantize time to descrete values. 
+ * Used to quantize time to descrete values.
  */
 struct TimeQuantizer {
     TimeQuantizer() {}
@@ -135,13 +146,13 @@ struct TimeQuantizer {
     TimeQuantizer(const Time& start, const Time& end, const std::string& resolutionStr);
 
     /**
-     * Takes a time resulition string and parses it into a double 
+     * Takes a time resulition string and parses it into a double
      * value representing the time resolution as seconds.
      *
      * Example: parseTimeResolutionStr("1d");
-     * 
+     *
      * \param resoltutionStr with the format {number}{unit}
-     *        where supported units are: 
+     *        where supported units are:
      *        (s)econds, (m)inutes, (h)ours, (d)ays, (y)ears
      *
      * \returns the time resolution in seconds
@@ -177,12 +188,12 @@ private:
  * Provide <code>Tile</code>s from web map services that have temporal resolution.
  *
  * TemporalTileProviders are instantiated using a ghoul::Dictionary,
- * and must define a filepath to a Openspace Temporal dataset description file. 
+ * and must define a filepath to a Openspace Temporal dataset description file.
  * This is an xml-file that defines the same meta data as the GDAL wms description
- * (http://www.gdal.org/frmt_wms.html), but augmented with some 
- * extra tags describing the temporal properties of the dataset. See 
+ * (http://www.gdal.org/frmt_wms.html), but augmented with some
+ * extra tags describing the temporal properties of the dataset. See
  * <code>TemporalTileProvider::TemporalXMLTags</code>
- * 
+ *
  */
 class TemporalTileProvider : public TileProvider {
 public:
@@ -190,6 +201,8 @@ public:
      * Dictionary constructor. Must provide KeyFilePath as defined in .cpp file.
      */
     TemporalTileProvider(const ghoul::Dictionary& dictionary);
+
+    bool initialize() override;
 
     // These methods implements the TileProvider interface
 
@@ -200,15 +213,16 @@ public:
     virtual void reset() override;
     virtual int maxLevel() override;
 
+    using TimeKey = std::string;
 
-    typedef std::string TimeKey;
-
-    std::shared_ptr<TileProvider> getTileProvider(Time t = OsEng.timeManager().time());
-    std::shared_ptr<TileProvider> getTileProvider(TimeKey timekey);
+    std::shared_ptr<TileProvider> getTileProvider(
+        const Time& t = OsEng.timeManager().time());
+    std::shared_ptr<TileProvider> getTileProvider(
+        const TimeKey& timekey);
 
 private:
     /**
-     * A placeholder string that must be provided in the WMS template url. This 
+     * A placeholder string that must be provided in the WMS template url. This
      * placeholder will be replaced by quantized date-time strings during run time
      * in order to access the datasets for different instances of time.
      */
@@ -233,8 +247,8 @@ private:
         static const char* TIME_END;
 
         /**
-         * Tag should contain the time resolution of the dataset. 
-         * The resolution is defined by a number along with a unit specifying how 
+         * Tag should contain the time resolution of the dataset.
+         * The resolution is defined by a number along with a unit specifying how
          * often the dataset is updated temporally. Supported units are:
          * (s)econds, (m)inutes, (h)ours, (d)ays, (y)ears.
          *
@@ -245,12 +259,11 @@ private:
 
         /**
          * Tag should contain a string specifying the date-time format expected by the
-         * WMS. 
+         * WMS.
          */
         static const char* TIME_FORMAT;
     };
 
-        
     /**
      * Create a GDAL dataset description based on the time t
      * \param t Time to generate a GDAL dataset description for
@@ -266,12 +279,12 @@ private:
     std::string getGdalDatasetXML(TimeKey key);
 
     /**
-     * Instantiates a new TileProvder for the temporal dataset at the time 
-     * specified. 
-     * 
+     * Instantiates a new TileProvder for the temporal dataset at the time
+     * specified.
+     *
      * This method replaced the <code>URL_TIME_PLACEHOLDER</code> in the template URL
      * with the provided timekey, the opens a new GDAL dataset with that URL.
-     * 
+     *
      * \param timekey time specifying dataset's temporality
      * \returns newly instantiated TileProvider
      */
@@ -279,14 +292,14 @@ private:
 
     /**
      * Takes as input a Openspace Temporal dataset description, extracts the temporal
-     * metadata provided by reading the <code>TemporalXMLTags</code>, removes the 
-     * read tags from the description, and returns a GDAL template GDAL dataset 
-     * description. The template GDAL dataset description has the a 
+     * metadata provided by reading the <code>TemporalXMLTags</code>, removes the
+     * read tags from the description, and returns a GDAL template GDAL dataset
+     * description. The template GDAL dataset description has the a
      * <code>URL_TIME_PLACEHOLDER</code> still in it, which needs to be replaced before
      * GDAL can open it as a GDALDataset.
      *
      * \param xml Openspace Temporal dataset description
-     * \returns a GDAL template data description. 
+     * \returns a GDAL template data description.
      */
     std::string consumeTemporalMetaData(const std::string &xml);
 
@@ -297,30 +310,35 @@ private:
      * \param defaultVal value to return if key was not found
      * \returns the value of the Key, or defaultVal if key was undefined.
      */
-    std::string getXMLValue(CPLXMLNode* node, const std::string& key, const std::string& defaultVal);
+    std::string getXMLValue(CPLXMLNode* node, const std::string& key,
+        const std::string& defaultVal);
 
     /**
      * Ensures that the TemporalTileProvider is up to date.
      */
     void ensureUpdated();
 
-    std::string _datasetFile;
+    bool readFilePath();
+
+    // Used for creation of time specific instances of CachingTileProvider
+    ghoul::Dictionary _initDict;
+    properties::StringProperty _filePath;
     std::string _gdalXmlTemplate;
 
     std::unordered_map<TimeKey, std::shared_ptr<TileProvider>> _tileProviderMap;
 
-    // Used for creation of time specific instances of CachingTileProvider
-    ghoul::Dictionary _initDict;
 
     std::shared_ptr<TileProvider> _currentTileProvider;
-        
+
     TimeFormat* _timeFormat;
     TimeQuantizer _timeQuantizer;
+
+    std::vector<Time> _preCacheTimes;
+
+    bool _successfulInitialization;
 };
 
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing::tileprovider
 
 #endif // GLOBEBROWSING_USE_GDAL
 

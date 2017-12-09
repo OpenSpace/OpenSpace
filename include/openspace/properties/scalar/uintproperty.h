@@ -28,11 +28,11 @@
  /**
  * \file uintproperty.h
  *
- * \addtogroup openspace 
+ * \addtogroup openspace
  * @{
- * \addtogroup properties 
+ * \addtogroup properties
  * @{
- 
+
  * \class UIntProperty
  * This class is a concrete implementation of openspace::properties::TemplateProperty with
  * the type <code>unsigned int</code>.
@@ -42,12 +42,10 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(UIntProperty, unsigned int);
+REGISTER_NUMERICALPROPERTY_HEADER(UIntProperty, unsigned int)
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___UINTPROPERTY___H__

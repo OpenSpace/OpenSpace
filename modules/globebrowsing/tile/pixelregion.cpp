@@ -26,13 +26,12 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace {
-namespace globebrowsing {
-   
+namespace openspace::globebrowsing {
+
 PixelRegion::PixelRegion(const PixelCoordinate& pixelStart,
                          const PixelRange& numberOfPixels)
     : start(pixelStart)
-    , numPixels(numberOfPixels) 
+    , numPixels(numberOfPixels)
 {}
 
 PixelRegion::PixelRegion(const PixelRegion& o)
@@ -92,20 +91,20 @@ void PixelRegion::align(Side side, int pos) {
     }
 }
 
-void PixelRegion::alignLeft(int x) { 
-    start.x = x; 
-}
-    
-void PixelRegion::alignTop(int y) { 
-    start.y = y; 
+void PixelRegion::alignLeft(int x) {
+    start.x = x;
 }
 
-void PixelRegion::alignRight(int x) { 
-    start.x = x - numPixels.x; 
+void PixelRegion::alignTop(int y) {
+    start.y = y;
 }
 
-void PixelRegion::alignBottom(int y) { 
-    start.y = y - numPixels.y; 
+void PixelRegion::alignRight(int x) {
+    start.x = x - numPixels.x;
+}
+
+void PixelRegion::alignBottom(int y) {
+    start.y = y - numPixels.y;
 }
 
 void PixelRegion::scale(const glm::dvec2& s) {
@@ -119,12 +118,12 @@ void PixelRegion::scale(double s) {
 
 void PixelRegion::downscalePow2(int exponent, PixelCoordinate wrt) {
     start += wrt;
-    start.x = ceil(start.x / static_cast<float>(pow(2, exponent)));// >>= exponent;
-    start.y = ceil(start.y / static_cast<float>(pow(2, exponent)));// >>= exponent;
+    start.x = static_cast<int>(ceil(start.x / static_cast<float>(pow(2, exponent))));
+    start.y = static_cast<int>(ceil(start.y / static_cast<float>(pow(2, exponent))));
     numPixels.x =
-        ceil(numPixels.x / static_cast<float>(pow(2, exponent)));// >>= exponent;
+        static_cast<int>(ceil(numPixels.x / static_cast<float>(pow(2, exponent))));
     numPixels.y =
-        ceil(numPixels.y / static_cast<float>(pow(2, exponent)));// >>= exponent;
+        static_cast<int>(ceil(numPixels.y / static_cast<float>(pow(2, exponent))));
     start -= wrt;
 }
 
@@ -240,16 +239,11 @@ int PixelRegion::area() const {
 
 int PixelRegion::edge(Side side) const {
     switch (side) {
-    case Side::LEFT:
-        return start.x;
-    case Side::TOP:
-        return start.y;
-    case Side::RIGHT:
-        return start.x + numPixels.x;
-    case Side::BOTTOM:
-        return start.y + numPixels.y;
-    default:
-        ghoul_assert(false, "Missing case label");
+        case Side::LEFT:   return start.x;
+        case Side::TOP:    return start.y;
+        case Side::RIGHT:  return start.x + numPixels.x;
+        case Side::BOTTOM: return start.y + numPixels.y;
+        default:           throw ghoul::MissingCaseException();
     }
 }
 
@@ -263,13 +257,15 @@ PixelRegion::PixelCoordinate PixelRegion::end() const {
 
 bool PixelRegion::lineIntersect(Side side, int p) {
     switch (side) {
-    case Side::LEFT:
-    case Side::RIGHT:
-        return start.x <= p && p <= (start.x + numPixels.x);
+        case Side::LEFT:
+        case Side::RIGHT:
+            return start.x <= p && p <= (start.x + numPixels.x);
 
-    case Side::TOP:
-    case Side::BOTTOM:
-        return start.y <= p && p <= (start.y + numPixels.y);
+        case Side::TOP:
+        case Side::BOTTOM:
+            return start.y <= p && p <= (start.y + numPixels.y);
+        default:
+            throw ghoul::MissingCaseException();
     }
 }
 
@@ -283,5 +279,4 @@ bool PixelRegion::equals(const PixelRegion& r) const {
     return start == r.start && numPixels == r.numPixels;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

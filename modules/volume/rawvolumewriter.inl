@@ -26,20 +26,22 @@
 #include <modules/volume/volumeutils.h>
 
 namespace openspace {
+namespace volume {
 
 template <typename VoxelType>
-    RawVolumeWriter<VoxelType>::RawVolumeWriter(std::string path, size_t bufferSize)
+RawVolumeWriter<VoxelType>::RawVolumeWriter(std::string path, size_t bufferSize)
     : _path(path)
-    , _bufferSize(bufferSize) {}
+    , _bufferSize(bufferSize)
+{}
 
 template <typename VoxelType>
 size_t RawVolumeWriter<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
-    return volumeutils::coordsToIndex(cartesian, dimensions());
+    return coordsToIndex(cartesian, dimensions());
 }
 
 template <typename VoxelType>
 glm::ivec3 RawVolumeWriter<VoxelType>::indexToCoords(size_t linear) const {
-    return volumeutils::indexToCoords(linear, dimensions());
+    return volume::indexToCoords(linear, dimensions());
 }
 
 template <typename VoxelType>
@@ -52,21 +54,21 @@ glm::uvec3 RawVolumeWriter<VoxelType>::dimensions() const {
     return _dimensions;
 }
 
-
 template <typename VoxelType>
-void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::uvec3&)>& fn,
-                                       const std::function<void(float t)>& onProgress)
+void RawVolumeWriter<VoxelType>::write(
+                                    const std::function<VoxelType(const glm::uvec3&)>& fn,
+                                    const std::function<void(float t)>& onProgress)
 {
     glm::uvec3 dims = dimensions();
 
     size_t size = static_cast<size_t>(dims.x) *
         static_cast<size_t>(dims.y) *
         static_cast<size_t>(dims.z);
-    
+
     std::vector<VoxelType> buffer(_bufferSize);
     std::ofstream file(_path, std::ios::binary);
 
-    int nChunks = size / _bufferSize;
+    int nChunks = static_cast<int>(size / _bufferSize);
     if (size % _bufferSize > 0) {
         nChunks++;
     }
@@ -78,23 +80,26 @@ void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::
         for (bufferPos = 0; bufferPos < bufferSize; bufferPos++, i++) {
             buffer[bufferPos] = fn(indexToCoords(i));
         }
-        file.write(reinterpret_cast<char*>(buffer.data()), bufferSize * sizeof(VoxelType));
+        file.write(
+            reinterpret_cast<char*>(buffer.data()),
+            bufferSize * sizeof(VoxelType)
+        );
         onProgress(static_cast<float>(c + 1) / nChunks);
     }
     file.close();
 }
 
-template <typename VoxelType>    
+template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     setDimensions(volume.dimensions());
-    reinterpret_cast<const char*>(volume.data());
 
     const char* const buffer = reinterpret_cast<const char*>(volume.data());
     size_t length = volume.nCells() * sizeof(VoxelType);
-    
+
     std::ofstream file(_path, std::ios::binary);
     file.write(buffer, length);
     file.close();
 }
 
+} // namespace volume
 } // namespace openspace

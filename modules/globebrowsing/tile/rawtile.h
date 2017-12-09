@@ -33,14 +33,12 @@
 #include <memory>
 #include <sstream>
 
-namespace openspace {
-namespace globebrowsing {
-    
+namespace openspace::globebrowsing {
+
 struct TileMetaData;
 class TileTextureInitData;
 
 struct RawTile {
-
     enum class ReadError {
         None = 0,
         Debug = 1,
@@ -57,12 +55,10 @@ struct RawTile {
     TileIndex tileIndex;
     ReadError error;
     GLuint pbo;
-   
+
     static RawTile createDefault(const TileTextureInitData& initData);
 };
 
-} // namespace globebrowsing
-} // namespace openspace
-
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__

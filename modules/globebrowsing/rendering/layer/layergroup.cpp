@@ -26,34 +26,68 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace {
+    const char* _loggerCat = "LayerGroup";
+    const char* KeyFallback = "Fallback";
+    static const openspace::properties::Property::PropertyInfo BlendTileInfo = {
+        "BlendTileLevels",
+        "Blend between levels",
+        "If this value is enabled, images between different levels are interpolated, "
+        "rather than switching between levels abruptly. This makes transitions smoother "
+        "and more visually pleasing.",
+        openspace::properties::Property::Visibility::Hidden
+    };
+} // namespace
 
-LayerGroup::LayerGroup(std::string name)
-    : properties::PropertyOwner(std::move(name))
-    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", false)
+namespace openspace::globebrowsing {
+
+LayerGroup::LayerGroup(layergroupid::GroupID id)
+    : properties::PropertyOwner({ std::move(layergroupid::LAYER_GROUP_NAMES[id]) })
+    , _groupId(id)
+    , _levelBlendingEnabled(BlendTileInfo, true)
 {
     addProperty(_levelBlendingEnabled);
 }
 
-LayerGroup::LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict)
-    : LayerGroup(layergroupid::LAYER_GROUP_NAMES[id])
+LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
+    : LayerGroup(id)
 {
     for (size_t i = 0; i < dict.size(); i++) {
         std::string dictKey = std::to_string(i + 1);
         ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
 
         try {
-            _layers.push_back(std::make_shared<Layer>(id, layerDict));
+            addLayer(layerDict);
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
+
+            if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyFallback)) {
+                LWARNING("Unable to create layer. Initializing fallback layer.");
+                ghoul::Dictionary fallbackLayerDict =
+                layerDict.value<ghoul::Dictionary>(KeyFallback);
+                try {
+                    addLayer(fallbackLayerDict);
+                }
+                catch (const ghoul::RuntimeError& except) {
+                    LERRORC(except.component, except.message);
+                    continue;
+                }
+            }
             continue;
         }
     }
+}
 
-    for (const auto& layer : _layers) {
-        addPropertySubOwner(layer.get());
+void LayerGroup::initialize() {
+    for (const std::shared_ptr<Layer>& l : _layers) {
+        l->initialize();
+    }
+}
+
+void LayerGroup::deinitialize() {
+    for (const std::shared_ptr<Layer>& l : _layers) {
+        l->deinitialize();
     }
 }
 
@@ -62,10 +96,60 @@ void LayerGroup::update() {
 
     for (const auto& layer : _layers) {
         if (layer->enabled()) {
-            layer->tileProvider()->update();
+            layer->update();
             _activeLayers.push_back(layer);
         }
     }
+}
+
+std::shared_ptr<Layer> LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+    if (!layerDict.hasKeyAndValue<std::string>("Name")) {
+        LERROR("'Name' must be specified for layer.");
+        return nullptr;
+    }
+    auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);
+    layer->onChange(_onChangeCallback);
+    if (hasPropertySubOwner(layer->name())) {
+        LINFO("Layer with name " + layer->name() + " already exists.");
+        _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+        return nullptr;
+    }
+    else {
+        _layers.push_back(layer);
+        //update();
+        if (_onChangeCallback) {
+            _onChangeCallback();
+        }
+        addPropertySubOwner(layer.get());
+        _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+        return layer;
+    }
+}
+
+void LayerGroup::deleteLayer(const std::string& layerName) {
+    for (std::vector<std::shared_ptr<Layer>>::iterator it = _layers.begin();
+         it != _layers.end();
+         ++it)
+    {
+        if (it->get()->name() == layerName) {
+            removePropertySubOwner(it->get());
+            (*it)->deinitialize();
+            _layers.erase(it);
+            update();
+            if (_onChangeCallback) {
+                _onChangeCallback();
+            }
+            LINFO("Deleted layer " + layerName);
+
+            if (_layers.empty()) {
+                _levelBlendingEnabled.setVisibility(
+                    properties::Property::Visibility::Hidden
+                );
+            }
+            return;
+        }
+    }
+    LERROR("Could not find layer " + layerName);
 }
 
 const std::vector<std::shared_ptr<Layer>>& LayerGroup::layers() const {
@@ -81,12 +165,11 @@ int LayerGroup::pileSize() const{
 }
 
 void LayerGroup::onChange(std::function<void(void)> callback) {
-    _onChangeCallback = callback;
-    _levelBlendingEnabled.onChange(callback);
+    _onChangeCallback = std::move(callback);
+    _levelBlendingEnabled.onChange(_onChangeCallback);
     for (const std::shared_ptr<Layer>& layer : _layers) {
-        layer->onChange(callback);
+        layer->onChange(_onChangeCallback);
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

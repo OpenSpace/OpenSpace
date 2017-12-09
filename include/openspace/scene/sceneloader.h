@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCENELOADER___H__
 
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scenelicense.h>
 #include <openspace/util/camera.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -33,6 +34,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace openspace {
 
@@ -51,12 +53,14 @@ public:
     /**
      * Import a directory of scene contents into an existing scene.
      */
-    std::vector<SceneGraphNode*> importDirectory(Scene& scene, const std::string& directory);
+    std::pair<std::vector<SceneGraphNode*>, std::vector<SceneLicense>>
+    importDirectory(Scene& scene, const std::string& directory);
 
     /**
      * Import a scene graph node from a dictionary into an existing scene.
      */
-    SceneGraphNode* importNodeDictionary(Scene& scene, const ghoul::Dictionary& dictionary);
+    SceneGraphNode* importNodeDictionary(Scene& scene,
+        const ghoul::Dictionary& dictionary);
 
 private:
     struct LoadedNode {
@@ -96,12 +100,19 @@ private:
     /**
      * Load a mod file.
      */
-    std::vector<SceneLoader::LoadedNode> loadModule(const std::string& path, lua_State* luaState);
+    std::vector<SceneLoader::LoadedNode> loadModule(const std::string& path,
+        lua_State* luaState);
+
+    /**
+     * Loads an existing license file
+     */
+    std::vector<SceneLicense> loadLicense(const std::string& path, std::string module);
 
     /**
      * Load a directory.
      */
-    std::vector<SceneLoader::LoadedNode> loadDirectory(const std::string& path, lua_State* luaState);
+    std::pair<std::vector<SceneLoader::LoadedNode>, std::vector<SceneLicense>>
+    loadDirectory(const std::string& path, lua_State* luaState);
 
     /**
      * Load a camera from a dictionary
@@ -111,7 +122,8 @@ private:
     /**
      * Add loaded nodes to an existing scene
      */
-    std::vector<SceneGraphNode*> addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& nodes);
+    std::vector<SceneGraphNode*> addLoadedNodes(Scene& scene,
+        std::vector<SceneLoader::LoadedNode>&& nodes);
 };
 
 } // namespace openspace

@@ -48,7 +48,7 @@ RosettaKernels = {
     "${OPENSPACE_DATA}/spice/Rosetta/PCK/ROS_CGS_RSOC_V03.TPC",
 }
 
-RotationMatrix = {
+local RotationMatrix = {
     0, 1, 0,
     0, 0, 1,
     1, 0, 0
@@ -63,7 +63,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "ROSETTA",
+                Target = "ROSETTA",
                 Observer = "SUN",
                 Kernels = RosettaKernels
             },  
@@ -72,7 +72,8 @@ return {
                 SourceFrame = "ROS_SPACECRAFT",
                 DestinationFrame = "GALACTIC",
             }
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "RosettaModel",
@@ -83,7 +84,8 @@ return {
                 -- The scale of the model is in cm; OpenSpace is in m
                 Scale = 0.01
             }
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_black_foil",
@@ -95,12 +97,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/black_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-        }
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_black_parts",
@@ -112,12 +112,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/black_parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-        }
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_dish",
@@ -129,20 +127,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/dish.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/dish_AO.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/dish_AO.png",
+            ModelTransform = RotationMatrix
         },
-        -- Transform = {
-        --     Rotation = {
-        --         Type = "SpiceRotation",
-        --         SourceFrame = "-226071", -- ROS_HGA
-        --         DestinationFrame = "ROS_SPACECRAFT",
-        --     }
-        -- }
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_parts",
@@ -154,13 +142,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/parts2_AO.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
-        }
+            ColorTexture = "textures/parts2_AO.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_silver_foil",
@@ -172,13 +157,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/silver_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
-        }
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_vents",
@@ -190,13 +172,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/vents.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
-        }
+            ColorTexture = "textures/tex_01.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_wing_a",
@@ -208,20 +187,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/wingA.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/tex_01.png",
+            ModelTransform = RotationMatrix
         },
-        -- Transform = {
-        --     Rotation = {
-        --         Type = "SpiceRotation",
-        --         SourceFrame = "-226015", -- ROS_SA
-        --         DestinationFrame = "ROS_SPACECRAFT",
-        --     }
-        -- }
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Rosetta_wing_b",
@@ -233,13 +202,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/wingB.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
+            ColorTexture = "textures/tex_01.png",
+            ModelTransform = RotationMatrix
         },
+        GuiPath = "/Solar System/Missions/Rosetta"
         -- Transform = {
         --     Rotation = {
         --         Type = "SpiceRotation",
@@ -258,13 +224,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/yellow_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_gold_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
-        }
+            ColorTexture = "textures/foil_gold_ramp.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae",
@@ -274,7 +237,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PHILAE",
+                Target = "PHILAE",
                 Observer = "CHURYUMOV-GERASIMENKO",
                 Kernels = RosettaKernels
             },
@@ -288,7 +251,8 @@ return {
                 -- The scale of the model is in cm; OpenSpace is in m
                 Scale = 0.01
             }
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae_foil",
@@ -300,13 +264,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_foil.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
-        }
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae_lids",
@@ -318,13 +279,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_lids.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/parts2_AO.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
-        }
+            ColorTexture = "textures/parts2_AO.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae_parts",
@@ -336,13 +294,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_parts.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/foil_silver_ramp.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-
-        }
+            ColorTexture = "textures/foil_silver_ramp.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "Philae_solarp",
@@ -354,12 +309,10 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "rosetta/lander_solarp.obj"
             },
-            Textures = {
-                Type = "simple",
-                Color = "textures/tex_01.png"
-            },
-            Rotation = { ModelTransform = RotationMatrix }
-        }
+            ColorTexture = "textures/tex_01.png",
+            ModelTransform = RotationMatrix
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "RosettaCometTrail",
@@ -368,7 +321,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "ROSETTA",
+                Target = "ROSETTA",
                 Observer = "CHURYUMOV-GERASIMENKO",
             },
             Color = { 0.288, 0.375, 0.934 },
@@ -376,6 +329,7 @@ return {
             EndTime = "2016 SEP 30 12:00:00",
             SampleInterval = 3600,
         },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     {
         Name = "PhilaeTrail",
@@ -384,7 +338,7 @@ return {
             Type = "RenderableTrailTrajectory",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "PHILAE",
+                Target = "PHILAE",
                 Observer = "CHURYUMOV-GERASIMENKO",
             },
             Color = { 0.8, 0.5, 1.0 },
@@ -392,12 +346,14 @@ return {
             EndTime = "2014 NOV 12 17:00:00",
             SampleInterval = 2,
         },
-    },    
+        GuiPath = "/Solar System/Missions/Rosetta"
+    },
     {
         Name = "NAVCAM",
         Parent = "Rosetta",
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
-    {   
+    {
         Name = "NAVCAM FOV",
         Parent = "NAVCAM",
         Renderable = {
@@ -422,6 +378,7 @@ return {
                 ["CHURYUMOV-GERASIMENKO"] = "67P/C-G_CK"
             }
         },
+        GuiPath = "/Solar System/Missions/Rosetta"
     },
     -- Latest image taken by NAVCAM
     { 
@@ -435,6 +392,7 @@ return {
             Instrument = "ROS_NAVCAM-A",
             Moving = false,
             Texture = "textures/defaultProj.png",
-        }
+        },
+        GuiPath = "/Solar System/Missions/Rosetta"
     }
 }

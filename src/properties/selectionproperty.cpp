@@ -27,36 +27,36 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace {
-    const std::string _loggerCat = "SelectionProperty";
+    const char* _loggerCat = "SelectionProperty";
 
-    const std::string Delimiter = ",";
-}
+    const char Delimiter = ',';
+} // namespace
 
-namespace openspace {
-namespace properties {
+namespace openspace::properties {
 
 const std::string SelectionProperty::OptionsKey = "Options";
 
-SelectionProperty::SelectionProperty(std::string identifier, std::string guiName,
-                                     Property::Visibility visibility)
-    : TemplateProperty(std::move(identifier), std::move(guiName), std::vector<int>(),
-                       visibility)
+SelectionProperty::SelectionProperty(Property::PropertyInfo info)
+    : TemplateProperty(std::move(info), std::vector<int>())
 {}
 
 void SelectionProperty::addOption(Option option) {
     // @REFACTOR from optionproperty.cpp, possible refactoring? ---abock
     for (const Option& o : _options) {
         if (o.value == option.value) {
-            LWARNING("The value of option {" << o.value << " -> " << o.description <<
+            LWARNINGC(
+                "SelectionProperty",
+                "The value of option {" << o.value << " -> " << o.description <<
                 "} was already registered when trying to add option {" << option.value <<
-                " -> " << option.description << "}");
+                " -> " << option.description << "}"
+            );
             return;
         }
     }
     _options.push_back(std::move(option));
 }
 
-void SelectionProperty::removeOptions(){
+void SelectionProperty::removeOptions() {
     _options.clear();
 }
 
@@ -71,7 +71,9 @@ std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className() {
 
 template <>
 template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(lua_State* state, bool& success) {
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(
+                                                          lua_State* state, bool& success)
+{
     static const int KEY = -2;
     static const int VAL = -1;
 
@@ -103,7 +105,9 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaVa
 
 template <>
 template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State* state, std::vector<int> value) {
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(
+                                                 lua_State* state, std::vector<int> value)
+{
     //@NOTE Untested ---abock
     lua_newtable(state);
     for (size_t i = 0; i < value.size(); ++i) {
@@ -121,13 +125,15 @@ int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua() {
 
 template <>
 template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(std::string value, bool& success) {
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(
+                                                         std::string value, bool& success)
+{
     std::vector<int> result;
     size_t pos = 0;
     while ((pos = value.find(Delimiter)) != std::string::npos) {
         std::string token = value.substr(0, pos);
         result.push_back(std::stoi(token));
-        value.erase(0, pos + Delimiter.length());
+        value.erase(0, pos + 1); // 1: Delimiter.length()
     }
     success = true;
     return result;
@@ -135,10 +141,13 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromStrin
 
 template <>
 template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string& outValue, std::vector<int> inValue) {
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
+                                          std::string& outValue, std::vector<int> inValue)
+{
     outValue = "[";
-    for (int i : inValue)
+    for (int i : inValue) {
         outValue += std::to_string(i) + Delimiter;
+    }
     outValue += "]";
     return true;
 }
@@ -149,13 +158,13 @@ std::string SelectionProperty::generateAdditionalDescription() const {
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
         result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
-        if (i != _options.size() - 1)
+        if (i != _options.size() - 1) {
             result += ",";
+        }
     }
 
     result += "}";
     return result;
 }
 
-} // namespace properties
-} // namespace openspace
+} // namespace openspace::properties

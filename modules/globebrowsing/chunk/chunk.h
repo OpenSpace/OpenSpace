@@ -32,11 +32,9 @@
 
 #include <vector>
 
-namespace openspace {
+namespace openspace { struct RenderData; }
 
-struct RenderData;
-
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class RenderableGlobe;
 struct TileIndex;
@@ -55,7 +53,7 @@ public:
         WantMerge,
         WantSplit,
     };
-        
+
     Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex,
           bool initVisible = true);
 
@@ -68,7 +66,7 @@ public:
      * return Status::WANT_MERGE, if it is larger it will return Status::WANT_SPLIT,
      * otherwise Status::DO_NOTHING.
      *
-     * \returns The Status of the chunk. 
+     * \returns The Status of the chunk.
      */
     Status update(const RenderData& data);
 
@@ -82,7 +80,7 @@ public:
     const RenderableGlobe& owner() const;
     const TileIndex tileIndex() const;
     bool isVisible() const;
-        
+
     /**
      * Returns BoundingHeights that fits the Chunk as tightly as possible.
      *
@@ -101,7 +99,6 @@ private:
     const GeodeticPatch _surfacePatch;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK___H__

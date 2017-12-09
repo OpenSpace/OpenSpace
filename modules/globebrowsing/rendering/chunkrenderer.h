@@ -27,15 +27,11 @@
 
 #include <memory>
 
-namespace ghoul { namespace opengl {
-    class ProgramObject;
-} }
+namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
+namespace openspace { struct RenderData; }
 
-struct RenderData;
-
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 class Chunk;
 class Grid;
@@ -87,6 +83,9 @@ private:
         std::shared_ptr<GPULayerManager> gpuLayerManager,
         const Chunk& chunk);
 
+    void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
+                           const Chunk& chunk, const RenderData& data);
+
     // shared pointer to a grid which can be the same for all rendered chunks.
     std::shared_ptr<Grid> _grid;
     std::shared_ptr<LayerManager> _layerManager;
@@ -100,7 +99,6 @@ private:
     std::shared_ptr<GPULayerManager> _localGpuLayerManager;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK_RENDERER___H__

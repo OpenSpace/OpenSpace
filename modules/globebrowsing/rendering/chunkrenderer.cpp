@@ -33,13 +33,12 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/util/updatestructures.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
                              std::shared_ptr<LayerManager> layerManager)
     : _grid(grid)
-    ,_layerManager(layerManager)
+    , _layerManager(layerManager)
 {
     _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
             "GlobalChunkedLodPatch",
@@ -86,14 +85,14 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 
     // Now the shader program can be accessed
     ghoul::opengl::ProgramObject* programObject = layeredShaderManager->programObject();
-        
+
     if (layeredShaderManager->updatedOnLastCall()) {
         gpuLayerManager->bind(programObject, *_layerManager);
     }
 
     // Activate the shader program
     programObject->activate();
-        
+
     gpuLayerManager->setValue(programObject, *_layerManager, tileIndex);
 
     // The length of the skirts is proportional to its size
@@ -107,13 +106,81 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     if (chunk.owner().debugProperties().showHeightResolution) {
         programObject->setUniform("vertexResolution",
             glm::vec2(_grid->xSegments(), _grid->ySegments()));
-    }       
-        
+    }
+
     return programObject;
 }
 
-void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
+void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
+                                      const Chunk& chunk, const RenderData& data)
+{
+    glm::dmat4 modelTransform = chunk.owner().modelTransform();
+    glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
+    glm::dmat4 modelViewTransform = viewTransform * modelTransform;
 
+    const bool nightLayersActive =
+        !_layerManager->layerGroup(layergroupid::NightLayers).activeLayers().empty();
+    const bool waterLayersActive =
+        !_layerManager->layerGroup(layergroupid::WaterMasks).activeLayers().empty();
+
+    if (nightLayersActive ||
+        waterLayersActive ||
+        chunk.owner().generalProperties().atmosphereEnabled ||
+        chunk.owner().generalProperties().performShading)
+    {
+        glm::vec3 directionToSunWorldSpace =
+            glm::normalize(-data.modelTransform.translation);
+        glm::vec3 directionToSunCameraSpace =
+            glm::vec3(viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+        programObject.setUniform(
+            "lightDirectionCameraSpace", -directionToSunCameraSpace);
+    }
+
+    if (chunk.owner().generalProperties().performShading) {
+        programObject.setUniform(
+            "orenNayarRoughness",
+            chunk.owner().generalProperties().orenNayarRoughness);
+    }
+
+    if (chunk.owner().generalProperties().useAccurateNormals &&
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
+    {
+        glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(Quad::SOUTH_WEST));
+        glm::dvec3 corner10 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(Quad::SOUTH_EAST));
+        glm::dvec3 corner01 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(Quad::NORTH_WEST));
+        glm::dvec3 corner11 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(Quad::NORTH_EAST));
+
+        // This is an assumption that the height tile has a resolution of 64 * 64
+        // If it does not it will still produce "correct" normals. If the resolution is
+        // higher the shadows will be softer, if it is lower, pixels will be visible.
+        // Since default is 64 this will most likely work fine.
+        float tileDelta = 1.0f / 64.0f;
+        glm::vec3 deltaTheta0 = glm::vec3(corner10 - corner00) * tileDelta;
+        glm::vec3 deltaTheta1 = glm::vec3(corner11 - corner01) * tileDelta;
+        glm::vec3 deltaPhi0 = glm::vec3(corner01 - corner00) * tileDelta;
+        glm::vec3 deltaPhi1 = glm::vec3(corner11 - corner10) * tileDelta;
+
+        // Transform to camera space
+        glm::mat3 modelViewTransformMat3 = glm::mat3(modelViewTransform);
+        deltaTheta0 = modelViewTransformMat3 * deltaTheta0;
+        deltaTheta1 = modelViewTransformMat3 * deltaTheta1;
+        deltaPhi0 = modelViewTransformMat3 * deltaPhi0;
+        deltaPhi1 = modelViewTransformMat3 * deltaPhi1;
+
+        // Upload uniforms
+        programObject.setUniform("deltaTheta0", glm::length(deltaTheta0));
+        programObject.setUniform("deltaTheta1", glm::length(deltaTheta1));
+        programObject.setUniform("deltaPhi0", glm::length(deltaPhi0));
+        programObject.setUniform("deltaPhi1", glm::length(deltaPhi1));
+        programObject.setUniform("tileDelta", tileDelta);
+    }
+}
+
+void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
         _globalLayerShaderManager,
         _globalGpuLayerManager,
@@ -130,17 +197,18 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
         glm::dvec3 cameraPosition = glm::dvec3(
             inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
-        float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
-            ellipsoid.minimumRadius();
+        float distanceScaleFactor = static_cast<float>(
+            chunk.owner().generalProperties().lodScaleFactor * ellipsoid.minimumRadius()
+        );
         programObject->setUniform("cameraPosition", glm::vec3(cameraPosition));
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
         programObject->setUniform("chunkLevel", chunk.tileIndex().level);
     }
-        
+
     // Calculate other uniform variables needed for rendering
     Geodetic2 swCorner = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
     auto patchSize = chunk.surfacePatch().size();
-        
+
     glm::dmat4 modelTransform = chunk.owner().modelTransform();
     glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
     glm::mat4 modelViewTransform = glm::mat4(viewTransform * modelTransform);
@@ -155,20 +223,24 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     programObject->setUniform("radiiSquared", glm::vec3(ellipsoid.radiiSquared()));
 
     if (_layerManager->layerGroup(
-            layergroupid::NightLayers).activeLayers().size() > 0 ||
+            layergroupid::GroupID::NightLayers).activeLayers().size() > 0 ||
         _layerManager->layerGroup(
-            layergroupid::WaterMasks).activeLayers().size() > 0 ||
+            layergroupid::GroupID::WaterMasks).activeLayers().size() > 0 ||
         chunk.owner().generalProperties().atmosphereEnabled ||
-        chunk.owner().generalProperties().performShading) {
-        // This code temporary until real light sources can be implemented.
-        glm::vec3 directionToSunWorldSpace =
-            glm::normalize(-data.modelTransform.translation);
-        glm::vec3 directionToSunCameraSpace =
-            (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+        chunk.owner().generalProperties().performShading)
+    {
         programObject->setUniform("modelViewTransform", modelViewTransform);
-        programObject->setUniform(
-            "lightDirectionCameraSpace", -directionToSunCameraSpace);
     }
+
+    if (chunk.owner().generalProperties().useAccurateNormals &&
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
+    {
+        // Apply an extra scaling to the height if the object is scaled
+        programObject->setUniform(
+            "heightScale", static_cast<float>(data.modelTransform.scale));
+    }
+
+    setCommonUniforms(*programObject, chunk, data);
 
     // OpenGL rendering settings
     glEnable(GL_DEPTH_TEST);
@@ -177,16 +249,15 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
 
     // render
     _grid->geometry().drawUsingActiveProgram();
-        
+
     _globalGpuLayerManager->deactivate();
-    
+
     // disable shader
     programObject->deactivate();
-        
+
 }
 
 void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
-        
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
         _localLayerShaderManager,
         _localGpuLayerManager,
@@ -201,8 +272,11 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
 
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
-        float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
-            chunk.owner().ellipsoid().minimumRadius();
+        float distanceScaleFactor = static_cast<float>(
+            chunk.owner().generalProperties().lodScaleFactor *
+            chunk.owner().ellipsoid().minimumRadius()
+        );
+
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
         programObject->setUniform("chunkLevel", chunk.tileIndex().level);
     }
@@ -219,7 +293,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
         Geodetic2 corner = chunk.surfacePatch().getCorner(q);
         glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
         glm::dvec3 cornerCameraSpace =
-            glm::dvec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
+            glm::dvec3(modelViewTransform * glm::dvec4(cornerModelSpace, 1));
         cornersCameraSpace[i] = cornerCameraSpace;
         programObject->setUniform(cornerNames[i], vec3(cornerCameraSpace));
     }
@@ -233,22 +307,18 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
                 cornersCameraSpace[Quad::SOUTH_WEST]));
 
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
-    programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
+    programObject->setUniform(
+        "projectionTransform",
+        data.camera.sgctInternal.projectionMatrix()
+    );
 
-    if (_layerManager->layerGroup(
-            layergroupid::NightLayers).activeLayers().size() > 0 ||
-        _layerManager->layerGroup(
-            layergroupid::WaterMasks).activeLayers().size() > 0 ||
-        chunk.owner().generalProperties().atmosphereEnabled ||
-        chunk.owner().generalProperties().performShading)
-    {
-        glm::vec3 directionToSunWorldSpace =
-            glm::normalize(-data.modelTransform.translation);
-        glm::vec3 directionToSunCameraSpace =
-            (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+    if (_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0) {
+        // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
-            "lightDirectionCameraSpace", -directionToSunCameraSpace);
+            "heightScale", static_cast<float>(data.modelTransform.scale));
     }
+
+    setCommonUniforms(*programObject, chunk, data);
 
     // OpenGL rendering settings
     glEnable(GL_DEPTH_TEST);
@@ -257,12 +327,11 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
     // render
     _grid->geometry().drawUsingActiveProgram();
-        
+
     _localGpuLayerManager->deactivate();
 
     // disable shader
     programObject->deactivate();
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace:;globebrowsing

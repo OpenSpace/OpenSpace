@@ -26,28 +26,96 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <ghoul/glm.h>
 #include <memory>
+#include <future>
+
+namespace openspace::globebrowsing {
+    class RenderableGlobe;
+    struct TileIndex;
+    struct Geodetic2;
+    struct Geodetic3;
+
+    namespace cache { class MemoryAwareTileCache; }
+} // namespace openspace::globebrowsing
 
 namespace openspace {
 
-namespace globebrowsing {
-namespace cache {
-    class MemoryAwareTileCache;
-}
-}
+class Camera;
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "GlobeBrowsing";
+
     GlobeBrowsingModule();
 
+    void goToChunk(int x, int y, int level);
+    void goToGeo(double latitude, double longitude);
+    void goToGeo(double latitude, double longitude, double altitude);
+
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
-    
-    static const std::string name;
+    scripting::LuaLibrary luaLibrary() const override;
+    globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
+
+#ifdef GLOBEBROWSING_USE_GDAL
+
+    struct Layer {
+        std::string name;
+        std::string url;
+    };
+    using Capabilities = std::vector<Layer>;
+
+    // Stores the mapping between globe to names
+    struct UrlInfo {
+        std::string name;
+        std::string url;
+    };
+
+    // Registers then user-usable name
+    void loadWMSCapabilities(std::string name, std::string globe, std::string url);
+    Capabilities capabilities(const std::string& name);
+
+    std::vector<UrlInfo> urlInfo(const std::string& globe) const;
+
+    void removeWMSServer(const std::string& name);
+
+#endif // GLOBEBROWSING_USE_GDAL
 
 protected:
     void internalInitialize() override;
+
 private:
+    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
+                   bool resetCameraDirection);
+    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
+                       bool resetCameraDirection);
+    void goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3,
+                       bool resetCameraDirection);
+    void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
+
+    /**
+     \return a comma separated list of layer group names.
+     */
+    static std::string layerGroupNamesList();
+
+    /**
+     \return a comma separated list of layer type names.
+     */
+    static std::string layerTypeNamesList();
+
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
+
+#ifdef GLOBEBROWSING_USE_GDAL
+
+    // name -> capabilities
+    std::map<std::string, std::future<Capabilities>> _inFlightCapabilitiesMap;
+    // name -> capabilities
+    std::map<std::string, Capabilities> _capabilitiesMap;
+
+
+    std::multimap<std::string, UrlInfo> _urlList;
+
+#endif // GLOBEBROWSING_USE_GDAL
 };
 
 } // namespace openspace

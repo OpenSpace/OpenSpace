@@ -42,11 +42,9 @@
 #include <stdint.h>
 
 namespace {
-    static const std::string _loggerCat = "RenderableStars";
+    const char* _loggerCat = "RenderableStars";
 
     const char* KeyFile = "File";
-    const char* KeyTexture = "Texture";
-    const char* KeyColorMap = "ColorMap";
 
     const int8_t CurrentCacheVersion = 1;
 
@@ -79,7 +77,49 @@ namespace {
 
         float speed;
     };
-}
+
+    static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
+        "Texture",
+        "Point Spread Function Texture",
+        "The path to the texture that should be used as a point spread function for the "
+        "stars."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+        "ColorMap",
+        "ColorBV Texture",
+        "The path to the texture that is used to convert from the B-V value of the star "
+        "to its color. The texture is used as a one dimensional lookup function."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
+        "ColorOption",
+        "Color Option",
+        "This value determines which quantity is used for determining the color of the "
+        "stars."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+        "Transparency",
+        "Transparency",
+        "This value is a multiplicative factor that is applied to the transparency of "
+        "all stars."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+        "ScaleFactor",
+        "Scale Factor",
+        "This value is used as a multiplicative factor that is applied to the apparent "
+        "size of each star."
+    };
+
+    static const openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
+        "MinBillboardSize",
+        "Min Billboard Size",
+        "This value is used as a lower limit on the size of stars that are rendered. Any "
+        "stars that have a smaller apparent size will be discarded entirely."
+    };
+}  // namespace
 
 namespace openspace {
 
@@ -92,54 +132,70 @@ documentation::Documentation RenderableStars::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableStars"),
-                "",
                 Optional::No
             },
             {
                 KeyFile,
                 new StringVerifier,
+                Optional::No,
                 "The path to the SPECK file that contains information about the stars "
-                "being rendered.",
-                Optional::No
+                "being rendered."
             },
             {
-                KeyTexture,
+                PsfTextureInfo.identifier,
                 new StringVerifier,
-                "The path to the texture that should be used as a point spread function "
-                "for the stars. The path is relative to the location of the .mod file "
-                "and can contain file system token.",
-                Optional::No
+                Optional::No,
+                PsfTextureInfo.description
             },
             {
-                KeyColorMap,
+                ColorTextureInfo.identifier,
                 new StringVerifier,
-                "The path to the texture that is used to convert from the B-V value of "
-                "the star to its color. The texture is used as a one dimensional lookup "
-                "function.",
-                Optional::No
+                Optional::No,
+                ColorTextureInfo.description
+            },
+            {
+                ColorOptionInfo.identifier,
+                new StringInListVerifier({
+                    "Color", "Velocity", "Speed"
+                }),
+                Optional::Yes,
+                ColorOptionInfo.description
+            },
+            {
+                TransparencyInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TransparencyInfo.description
+            },
+            {
+                ScaleFactorInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                ScaleFactorInfo.description
+            },
+            {
+                MinBillboardSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                MinBillboardSizeInfo.description
             }
         }
     };
 }
 
-
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _pointSpreadFunctionTexturePath("psfTexture", "Point Spread Function Texture")
+    , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _pointSpreadFunctionTexture(nullptr)
     , _pointSpreadFunctionTextureIsDirty(true)
-    , _colorTexturePath("colorTexture", "ColorBV Texture")
+    , _colorTexturePath(ColorTextureInfo)
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _colorOption(
-        "colorOption",
-        "Color Option",
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _dataIsDirty(true)
-    , _alphaValue("alphaValue", "Transparency", 1.f, 0.f, 1.f)
-    , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)
-    , _minBillboardSize("minBillboardSize", "Min Billboard Size", 1.f, 1.f, 100.f)
+    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
+    , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
     , _program(nullptr)
     , _speckFile("")
     , _nValuesPerStar(0)
@@ -154,42 +210,73 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         "RenderableStars"
     );
 
-    _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
+        PsfTextureInfo.identifier
+    ));
     _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
 
-    _colorTexturePath = absPath(dictionary.value<std::string>(KeyColorMap));
+    _colorTexturePath = absPath(dictionary.value<std::string>(
+        ColorTextureInfo.identifier
+    ));
     _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
     _speckFile = absPath(dictionary.value<std::string>(KeyFile));
 
-    //_colorOption.addOptions({
-    //    { ColorOption::Color, "Color" },
-    //    { ColorOption::Velocity, "Velocity" },
-    //    { ColorOption::Speed, "Speed" }
-    //});
-    _colorOption.addOption(ColorOption::Color, "Color");
-    _colorOption.addOption(ColorOption::Velocity, "Velocity");
-    _colorOption.addOption(ColorOption::Speed, "Speed");
+    _colorOption.addOptions({
+        { ColorOption::Color, "Color" },
+        { ColorOption::Velocity, "Velocity" },
+        { ColorOption::Speed, "Speed" }
+    });
+    if (dictionary.hasKey(ColorOptionInfo.identifier)) {
+        const std::string colorOption = dictionary.value<std::string>(
+            ColorOptionInfo.identifier
+        );
+        if (colorOption == "Color") {
+            _colorOption = ColorOption::Color;
+        }
+        else if (colorOption == "Velocity") {
+            _colorOption = ColorOption::Velocity;
+        }
+        else {
+            _colorOption = ColorOption::Speed;
+        }
+    }
+    _colorOption.onChange([&] { _dataIsDirty = true; });
     addProperty(_colorOption);
-    
-    _colorOption.onChange([&]{ _dataIsDirty = true;});
 
-    addProperty(_pointSpreadFunctionTexturePath);
     _pointSpreadFunctionTexturePath.onChange(
         [&]{ _pointSpreadFunctionTextureIsDirty = true; }
     );
     _pointSpreadFunctionFile->setCallback(
         [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
     );
+    addProperty(_pointSpreadFunctionTexturePath);
 
-    addProperty(_colorTexturePath);
     _colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
     _colorTextureFile->setCallback(
         [&](const File&) { _colorTextureIsDirty = true; }
     );
+    addProperty(_colorTexturePath);
 
+    if (dictionary.hasKey(TransparencyInfo.identifier)) {
+        _alphaValue = static_cast<float>(
+            dictionary.value<double>(TransparencyInfo.identifier)
+        );
+    }
     addProperty(_alphaValue);
+
+    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
+        _scaleFactor = static_cast<float>(
+            dictionary.value<double>(ScaleFactorInfo.identifier)
+        );
+    }
     addProperty(_scaleFactor);
+
+    if (dictionary.hasKey(MinBillboardSizeInfo.identifier)) {
+        _minBillboardSize = static_cast<float>(
+            dictionary.value<double>(MinBillboardSizeInfo.identifier)
+        );
+    }
     addProperty(_minBillboardSize);
 }
 
@@ -199,25 +286,20 @@ bool RenderableStars::isReady() const {
     return (_program != nullptr) && (!_fullData.empty());
 }
 
-bool RenderableStars::initialize() {
-    bool completeSuccess = true;
-
+void RenderableStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("Star",
         "${MODULE_SPACE}/shaders/star_vs.glsl",
         "${MODULE_SPACE}/shaders/star_fs.glsl",
         "${MODULE_SPACE}/shaders/star_ge.glsl");
 
-    if (!_program) {
-        return false;
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
     }
-    completeSuccess &= loadData();
-    completeSuccess &= (_pointSpreadFunctionTexture != nullptr);
-
-    return completeSuccess;
 }
 
-bool RenderableStars::deinitialize() {
+void RenderableStars::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
@@ -231,16 +313,15 @@ bool RenderableStars::deinitialize() {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
     }
-    return true;
 }
 
-void RenderableStars::render(const RenderData& data) {
+void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     _program->activate();
 
     // @Check overwriting the scaling from the camera; error as parsec->meter conversion
     // is done twice? ---abock
-    glm::vec2 scaling = glm::vec2(1, -19);  
+    glm::vec2 scaling = glm::vec2(1, -19);
 
     glm::mat4 modelMatrix = glm::mat4(1.0);
     glm::mat4 viewMatrix       = data.camera.viewMatrix();
@@ -258,8 +339,11 @@ void RenderableStars::render(const RenderData& data) {
     _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
-    _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
-    
+    _program->setUniform(
+        "screenSize",
+        glm::vec2(OsEng.renderEngine().renderingResolution())
+    );
+
     setPscUniforms(*_program.get(), data.camera, data.position);
     _program->setUniform("scaling", scaling);
 
@@ -281,7 +365,7 @@ void RenderableStars::render(const RenderData& data) {
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _program->setIgnoreUniformLocationError(IgnoreError::No);
     _program->deactivate();
-    
+
     glDepthMask(true);
 }
 
@@ -324,38 +408,85 @@ void RenderableStars::update(const UpdateData&) {
         const int colorOption = _colorOption;
         switch (colorOption) {
         case ColorOption::Color:
-            glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
-                reinterpret_cast<void*>(offsetof(ColorVBOLayout, position)));
-            glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
-                reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor)));
-            
+            glVertexAttribPointer(
+                positionAttrib,
+                4,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                nullptr // = offsetof(ColorVBOLayout, position)
+            );
+            glVertexAttribPointer(
+                brightnessDataAttrib,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor))
+            );
+
             break;
         case ColorOption::Velocity:
             {
-                glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, position)));
-                glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor)));
+                glVertexAttribPointer(
+                    positionAttrib,
+                    4,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    nullptr // = offsetof(VelocityVBOLayout, position)
+                );
+                glVertexAttribPointer(
+                    brightnessDataAttrib,
+                    3,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor))
+                );
 
                 GLint velocityAttrib = _program->attributeLocation("in_velocity");
                 glEnableVertexAttribArray(velocityAttrib);
-                glVertexAttribPointer(velocityAttrib, 3, GL_FLOAT, GL_TRUE, stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)));
+                glVertexAttribPointer(
+                    velocityAttrib,
+                    3,
+                    GL_FLOAT,
+                    GL_TRUE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
+                );
 
                 break;
             }
         case ColorOption::Speed:
             {
-                glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, position)));
-                glVertexAttribPointer(brightnessDataAttrib, 3, GL_FLOAT, GL_FALSE, stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor)));
+                glVertexAttribPointer(
+                    positionAttrib,
+                    4,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    nullptr // = offsetof(SpeedVBOLayout, position)
+                );
+                glVertexAttribPointer(
+                    brightnessDataAttrib,
+                    3,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor))
+                );
 
                 GLint speedAttrib = _program->attributeLocation("in_speed");
                 glEnableVertexAttribArray(speedAttrib);
-                glVertexAttribPointer(speedAttrib, 1, GL_FLOAT, GL_TRUE, stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed)));
-
+                glVertexAttribPointer(
+                    speedAttrib,
+                    1,
+                    GL_FLOAT,
+                    GL_TRUE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed))
+                );
             }
         }
 
@@ -363,7 +494,7 @@ void RenderableStars::update(const UpdateData&) {
         glBindVertexArray(0);
 
         _dataIsDirty = false;
-    }    
+    }
 
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
@@ -372,14 +503,16 @@ void RenderableStars::update(const UpdateData&) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_pointSpreadFunctionTexturePath)
             );
-            
+
             if (_pointSpreadFunctionTexture) {
                 LDEBUG("Loaded texture from '" <<
                     absPath(_pointSpreadFunctionTexturePath) << "'"
                );
                 _pointSpreadFunctionTexture->uploadTexture();
             }
-            _pointSpreadFunctionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _pointSpreadFunctionTexture->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            );
 
             _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
                 _pointSpreadFunctionTexturePath
@@ -397,7 +530,9 @@ void RenderableStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (_colorTexturePath.value() != "") {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_colorTexturePath)
+            );
             if (_colorTexture) {
                 LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
                 _colorTexture->uploadTexture();
@@ -522,7 +657,7 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
         int8_t version = 0;
         fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
         if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed, deleting old cache");
+            LINFO("The format of the cached file has changed: deleting old cache");
             fileStream.close();
             FileSys.deleteFile(file);
             return false;
@@ -622,8 +757,6 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 layout.value.position = { {
                     position[0], position[1], position[2], position[3]
                 } };
-                    
-
 
 #ifdef USING_STELLAR_TEST_GRID
                 layout.value.bvColor = _fullData[i + 3];

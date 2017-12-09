@@ -38,18 +38,15 @@
 #include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
 
 // Forward declare to minimize dependencies
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace ghoul::filesystem { class File; }
+
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
 }
 
 namespace openspace {
-// Forward declare
+
 class TSP;
 class AtlasManager;
 class BrickSelector;
@@ -60,11 +57,8 @@ class HistogramManager;
 class ErrorHistogramManager;
 class LocalErrorHistogramManager;
 
+
 class RenderableMultiresVolume : public Renderable {
-
-
-
-
 public:
     RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
     ~RenderableMultiresVolume();
@@ -74,16 +68,14 @@ public:
     bool setSelectorType(Selector selector);
     bool initializeSelector();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
     virtual void update(const UpdateData& data) override;
     virtual void render(const RenderData& data, RendererTasks& tasks);
 
-  
-     
     //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
     //virtual std::string getHeaderPath() override;
     //virtual std::string getHelperPath() override;

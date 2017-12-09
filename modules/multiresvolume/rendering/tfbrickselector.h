@@ -25,10 +25,11 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
 
-#include <vector>
 #include <modules/multiresvolume/rendering/brickselection.h>
 #include <modules/multiresvolume/rendering/brickselector.h>
 #include <modules/multiresvolume/rendering/brickcover.h>
+
+#include <vector>
 
 namespace openspace {
 
@@ -38,7 +39,8 @@ class TransferFunction;
 
 class TfBrickSelector : public BrickSelector {
 public:
-    TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf,
+        int memoryBudget, int streamingBudget);
 
     ~TfBrickSelector();
 
@@ -48,8 +50,8 @@ public:
     void setMemoryBudget(int memoryBudget);
     void setStreamingBudget(int streamingBudget);
     bool calculateBrickErrors();
- private:
 
+private:
     TSP* _tsp;
     ErrorHistogramManager* _histogramManager;
     TransferFunction* _transferFunction;
@@ -63,7 +65,6 @@ public:
 
     int _memoryBudget;
     int _streamingBudget;
-    
 };
 
 } // namespace openspace

@@ -36,13 +36,12 @@
 #include <mutex>
 #include <memory>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 /**
  * Function for passing GDAL error messages to the GHOUL logging system.
  */
-static void gdalErrorHandler(CPLErr eErrClass, int errNo, const char* msg);
+void gdalErrorHandler(CPLErr eErrClass, int errNo, const char* msg);
 
 /**
  * Singleton class interfacing with global GDAL functions.
@@ -78,9 +77,9 @@ public:
 private:
     GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
     ~GdalWrapper() = default;
-    
+
     void setGdalProxyConfiguration();
-    
+
     properties::BoolProperty _logGdalErrors;
     properties::IntProperty _gdalMaximumCacheSize;
 
@@ -88,8 +87,7 @@ private:
     static std::mutex _mutexLock;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // GLOBEBROWSING_USE_GDAL
 
