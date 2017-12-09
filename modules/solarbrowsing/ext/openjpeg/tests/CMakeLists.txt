@@ -45,6 +45,9 @@ add_executable(compare_raw_files ${compare_raw_files_SRCS})
 add_executable(test_tile_encoder test_tile_encoder.c)
 target_link_libraries(test_tile_encoder ${OPENJPEG_LIBRARY_NAME})
 
+add_executable(test_decode_area test_decode_area.c)
+target_link_libraries(test_decode_area ${OPENJPEG_LIBRARY_NAME})
+
 # Let's try a couple of possibilities:
 add_test(NAME tte0 COMMAND test_tile_encoder)
 add_test(NAME tte1 COMMAND test_tile_encoder 3 2048 2048 1024 1024 8 1 tte1.j2k)
@@ -79,6 +82,30 @@ add_test(NAME rta4 COMMAND j2k_random_tile_access tte4.j2k)
 set_property(TEST rta4 APPEND PROPERTY DEPENDS tte4)
 add_test(NAME rta5 COMMAND j2k_random_tile_access tte5.j2k)
 set_property(TEST rta5 APPEND PROPERTY DEPENDS tte5)
+
+add_test(NAME tda_prep_reversible_no_precinct COMMAND test_tile_encoder 1 256 256 32 32 8 0 reversible_no_precinct.j2k 4 4 3 0 0 1)
+add_test(NAME tda_reversible_no_precinct COMMAND test_decode_area -q reversible_no_precinct.j2k)
+set_property(TEST tda_reversible_no_precinct APPEND PROPERTY DEPENDS tda_prep_reversible_no_precinct)
+
+add_test(NAME tda_prep_reversible_203_201_17_19_no_precinct COMMAND test_tile_encoder 1 203 201 17 19 8 0 reversible_203_201_17_19_no_precinct.j2k 4 4 3 0 0 1)
+add_test(NAME tda_reversible_203_201_17_19_no_precinct COMMAND test_decode_area -q reversible_203_201_17_19_no_precinct.j2k)
+set_property(TEST tda_reversible_203_201_17_19_no_precinct APPEND PROPERTY DEPENDS tda_prep_reversible_203_201_17_19_no_precinct)
+
+add_test(NAME tda_prep_reversible_with_precinct COMMAND test_tile_encoder 1 256 256 32 32 8 0 reversible_with_precinct.j2k 4 4 3 0 0 1 16 16)
+add_test(NAME tda_reversible_with_precinct COMMAND test_decode_area -q reversible_with_precinct.j2k)
+set_property(TEST tda_reversible_with_precinct APPEND PROPERTY DEPENDS tda_prep_reversible_with_precinct)
+
+add_test(NAME tda_prep_irreversible_no_precinct COMMAND test_tile_encoder 1 256 256 32 32 8 1 irreversible_no_precinct.j2k 4 4 3 0 0 1)
+add_test(NAME tda_irreversible_no_precinct COMMAND test_decode_area -q irreversible_no_precinct.j2k)
+set_property(TEST tda_irreversible_no_precinct APPEND PROPERTY DEPENDS tda_prep_irreversible_no_precinct)
+
+add_test(NAME tda_prep_irreversible_203_201_17_19_no_precinct COMMAND test_tile_encoder 1 203 201 17 19 8 1 irreversible_203_201_17_19_no_precinct.j2k 4 4 3 0 0 1)
+add_test(NAME tda_irreversible_203_201_17_19_no_precinct COMMAND test_decode_area -q irreversible_203_201_17_19_no_precinct.j2k)
+set_property(TEST tda_irreversible_203_201_17_19_no_precinct APPEND PROPERTY DEPENDS tda_prep_irreversible_203_201_17_19_no_precinct)
+
+add_test(NAME tda_prep_strip COMMAND test_tile_encoder 1 256 256 256 256 8 0 tda_single_tile.j2k)
+add_test(NAME tda_strip COMMAND test_decode_area -q -strip_height 3 -strip_check tda_single_tile.j2k)
+set_property(TEST tda_strip APPEND PROPERTY DEPENDS tda_prep_strip)
 
 add_executable(include_openjpeg include_openjpeg.c)
 

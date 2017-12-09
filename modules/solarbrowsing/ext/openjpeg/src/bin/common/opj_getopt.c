@@ -160,12 +160,15 @@ again:
     }
 
     if (argv[opj_optind][0] == '-') { /* long option */
-        char* arg = argv[opj_optind] + 1;
+        char* arg;
         const opj_option_t* o;
         o = longopts;
         len = sizeof(longopts[0]);
 
         if (param > 1) {
+            if (opj_optind + 1 >= argc) {
+                return -1;
+            }
             arg = argv[opj_optind + 1];
             opj_optind++;
         } else {

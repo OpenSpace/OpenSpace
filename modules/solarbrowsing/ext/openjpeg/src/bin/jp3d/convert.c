@@ -316,6 +316,7 @@ opj_volume_t* pgxtovolume(char *relpath, opj_cparameters_t *parameters)
             cmptparm.bigendian = 0;
         } else {
             fprintf(stdout, "[ERROR] Bad pgx header, please check input file\n");
+            fclose(f);
             return NULL;
         }
 

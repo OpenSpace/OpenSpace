@@ -51,7 +51,7 @@ if(UNIX)
 endif()
 set_target_properties(openjpwl
   PROPERTIES ${OPENJPEG_LIBRARY_PROPERTIES})
-if(${CMAKE_VERSION} VERSION_GREATER "2.8.11")
+if(NOT ${CMAKE_VERSION} VERSION_LESS "2.8.12")
   target_compile_options(openjpwl PRIVATE ${OPENJPEG_LIBRARY_COMPILE_OPTIONS})
 endif()
 

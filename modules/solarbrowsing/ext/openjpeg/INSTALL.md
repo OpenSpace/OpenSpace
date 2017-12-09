@@ -61,7 +61,35 @@ Note 4 : On MacOS, if it does not work, try adding the following flag to the cma
 ## MacOS (XCode) - WINDOWS (VisualStudio, etc)
 
 You can use cmake to generate the project files for the IDE you are using (VC2010, XCode, etc).
-Type 'cmake --help' for available generators on your platform.
+Type `cmake --help` for available generators on your platform.
+
+Examples for Windows with Visual Studio C++ compiler:
+
+If using directly the cl compiler:
+
+```
+cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE:string="Release" -DBUILD_SHARED_LIBS:bool=on -DCMAKE_INSTALL_PREFIX:path="%USERPROFILE%" -DCMAKE_LIBRARY_PATH:path="%USERPROFILE%" -DCMAKE_INCLUDE_PATH:path="%USERPROFILE%\include" ..
+```
+
+To compile a 64-bit application, open 64-Bit Visual C\+\+ toolset on the command line and run cmake. For further information, please refer to: [How to: Enable a 64-Bit Visual C\+\+ Toolset on the Command Line](https://msdn.microsoft.com/en-us/library/x4d2c09s.aspx).
+
+
+If you do not want directly use the cl compiler, you could use:
+
+```
+cmake -DCMAKE_BUILD_TYPE:string="Release" -DBUILD_SHARED_LIBS:bool=on -DCMAKE_INSTALL_PREFIX:path="%USERPROFILE%" -DCMAKE_LIBRARY_PATH:path="%USERPROFILE%" -DCMAKE_INCLUDE_PATH:path="%USERPROFILE%\include" ..
+```
+
+To create Visual Studio solution (.sln) and project files (.vcproj / .vcxproj):
+```
+cmake -G "Visual Studio 14 2015" -DCMAKE_BUILD_TYPE:string="Release" -DBUILD_SHARED_LIBS:bool=on -DCMAKE_INSTALL_PREFIX:path="%USERPROFILE%" -DCMAKE_LIBRARY_PATH:path="%USERPROFILE%" -DCMAKE_INCLUDE_PATH:path="%USERPROFILE%\include" ..
+```
+
+64-bit application:
+```
+cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE:string="Release" -DBUILD_SHARED_LIBS:bool=on -DCMAKE_INSTALL_PREFIX:path="%USERPROFILE%" -DCMAKE_LIBRARY_PATH:path="%USERPROFILE%" -DCMAKE_INCLUDE_PATH:path="%USERPROFILE%\include" ..
+```
+
 
 # Enabling CPU specific optimizations
 
@@ -74,21 +102,27 @@ CPUs)
 
 With gcc/clang, it is possible to enable those instruction sets with the following :
 
+```
 cmake -DCMAKE_C_FLAGS="-O3 -msse4.1 -DNDEBUG" ..
+```
 
+```
 cmake -DCMAKE_C_FLAGS="-O3 -mavx2 -DNDEBUG" ..
+```
 
 (AVX2 implies SSE4.1)
 
 Or if the binary is dedicated to run on the machine where it has
 been compiled :
 
+```
 cmake -DCMAKE_C_FLAGS="-O3 -march=native -DNDEBUG" ..
+```
 
 # Modifying OpenJPEG
 
 Before committing changes, run:
-scripts/prepare-commit.sh
+```scripts/prepare-commit.sh```
 
 # Using OpenJPEG
 

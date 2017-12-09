@@ -44,3 +44,4 @@ NR-DEC-issue559-eci-091-CIELab.jp2-256-decode-md5
 NR-DEC-kodak_2layers_lrcp.j2c-31-decode-md5
 NR-DEC-kodak_2layers_lrcp.j2c-32-decode-md5
 NR-DEC-issue135.j2k-68-decode-md5
+NR-DEC-db11217111510058.jp2-306-decode-md5

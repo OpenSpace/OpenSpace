@@ -1332,7 +1332,7 @@ opj_image_t* pgxtoimage(const char *filename, opj_cparameters_t *parameters)
     return image;
 }
 
-#define CLAMP(x,a,b) x < a ? a : (x > b ? b : x)
+#define CLAMP(x,a,b) ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))
 
 static INLINE int clamp(const int value, const int prec, const int sgnd)
 {
@@ -1412,25 +1412,59 @@ int imagetopgx(opj_image_t * image, const char *outfile)
             nbytes = 4;
         }
 
-        for (i = 0; i < w * h; i++) {
-            /* FIXME: clamp func is being called within a loop */
-            const int val = clamp(image->comps[compno].data[i],
-                                  (int)comp->prec, (int)comp->sgnd);
-
-            for (j = nbytes - 1; j >= 0; j--) {
-                int v = (int)(val >> (j * 8));
-                unsigned char byte = (unsigned char)v;
-                res = fwrite(&byte, 1, 1, fdest);
-
-                if (res < 1) {
-                    fprintf(stderr, "failed to write 1 byte for %s\n", name);
+        if (nbytes == 1) {
+            unsigned char* line_buffer = malloc((size_t)w);
+            if (line_buffer == NULL) {
+                fprintf(stderr, "Out of memory");
+                goto fin;
+            }
+            for (j = 0; j < h; j++) {
+                if (comp->prec == 8 && comp->sgnd == 0) {
+                    for (i = 0; i < w; i++) {
+                        line_buffer[i] = (unsigned char)CLAMP(image->comps[compno].data[j * w + i], 0,
+                                                              255);
+                    }
+                } else {
+                    for (i = 0; i < w; i++) {
+                        line_buffer[i] = (unsigned char)
+                                         clamp(image->comps[compno].data[j * w + i],
+                                               (int)comp->prec, (int)comp->sgnd);
+                    }
+                }
+                res = fwrite(line_buffer, 1, (size_t)w, fdest);
+                if (res != (size_t)w) {
+                    fprintf(stderr, "failed to write %d bytes for %s\n", w, name);
                     if (total > 256) {
                         free(name);
                     }
+                    free(line_buffer);
                     goto fin;
                 }
             }
+            free(line_buffer);
+        } else {
+
+            for (i = 0; i < w * h; i++) {
+                /* FIXME: clamp func is being called within a loop */
+                const int val = clamp(image->comps[compno].data[i],
+                                      (int)comp->prec, (int)comp->sgnd);
+
+                for (j = nbytes - 1; j >= 0; j--) {
+                    int v = (int)(val >> (j * 8));
+                    unsigned char byte = (unsigned char)v;
+                    res = fwrite(&byte, 1, 1, fdest);
+
+                    if (res < 1) {
+                        fprintf(stderr, "failed to write 1 byte for %s\n", name);
+                        if (total > 256) {
+                            free(name);
+                        }
+                        goto fin;
+                    }
+                }
+            }
         }
+
         if (total > 256) {
             free(name);
         }

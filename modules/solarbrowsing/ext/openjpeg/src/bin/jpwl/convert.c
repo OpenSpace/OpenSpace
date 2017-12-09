@@ -737,6 +737,7 @@ opj_image_t* bmptoimage(const char *filename, opj_cparameters_t *parameters)
 
         if (fread(RGB, sizeof(unsigned char), (3 * W + PAD) * H,
                   IN) != (3 * W + PAD) * H) {
+            fclose(IN);
             free(RGB);
             opj_image_destroy(image);
             fprintf(stderr,

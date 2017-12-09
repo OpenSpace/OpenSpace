@@ -32,7 +32,7 @@ include_regular_expression("^.*$")
 #-----------------------------------------------------------------------------
 # OPENJPEG version number, useful for packaging and doxygen doc:
 set(OPENJPEG_VERSION_MAJOR 2)
-set(OPENJPEG_VERSION_MINOR 2)
+set(OPENJPEG_VERSION_MINOR 3)
 set(OPENJPEG_VERSION_BUILD 0)
 set(OPENJPEG_VERSION
   "${OPENJPEG_VERSION_MAJOR}.${OPENJPEG_VERSION_MINOR}.${OPENJPEG_VERSION_BUILD}")
@@ -55,6 +55,7 @@ set(PACKAGE_VERSION
 #   2.1.1 |  7
 #   2.1.2 |  7
 #   2.2.0 |  7
+#   2.3.0 |  7
 # above is the recommendation by the OPJ team. If you really need to override this default,
 # you can specify your own OPENJPEG_SOVERSION at cmake configuration time:
 # cmake -DOPENJPEG_SOVERSION:STRING=42 /path/to/openjpeg
@@ -173,6 +174,7 @@ configure_file(
 #-----------------------------------------------------------------------------
 # OpenJPEG build configuration options.
 option(BUILD_SHARED_LIBS "Build OpenJPEG shared library and link executables against it." ON)
+option(BUILD_STATIC_LIBS "Build OpenJPEG static library." ON)
 set (EXECUTABLE_OUTPUT_PATH ${OPENJPEG_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
 set (LIBRARY_OUTPUT_PATH ${OPENJPEG_BINARY_DIR}/bin CACHE PATH "Single output directory for building all libraries.")
 mark_as_advanced(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)
@@ -253,7 +255,7 @@ if(BUILD_JPIP_SERVER)
 endif()
 add_subdirectory(src/lib)
 option(BUILD_LUTS_GENERATOR "Build utility to generate t1_luts.h" OFF)
-option(BUILD_BENCH_DWT "Build bench_dwt utility (development benchmark)" OFF)
+option(BUILD_UNIT_TESTS "Build unit tests (bench_dwt, test_sparse_array, etc..)" OFF)
 
 #-----------------------------------------------------------------------------
 # Build Applications
@@ -349,8 +351,8 @@ include (cmake/OpenJPEGCPack.cmake)
 
 #-----------------------------------------------------------------------------
 # pkgconfig support
-# enabled by default on Unix, disabled by default on other platforms
-if(UNIX)
+# enabled by default on Unix or if using GCC, disabled by default on other platforms
+if(UNIX OR CMAKE_COMPILER_IS_GNUCC)
   option(BUILD_PKGCONFIG_FILES "Build and install pkg-config files" ON)
 else()
   option(BUILD_PKGCONFIG_FILES "Build and install pkg-config files" OFF)

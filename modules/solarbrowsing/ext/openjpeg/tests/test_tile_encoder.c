@@ -60,6 +60,16 @@ static void info_callback(const char *msg, void *client_data)
     fprintf(stdout, "[INFO] %s", msg);
 }
 
+static INLINE OPJ_UINT32 opj_uint_max(OPJ_UINT32  a, OPJ_UINT32  b)
+{
+    return (a > b) ? a : b;
+}
+
+static INLINE OPJ_UINT32 opj_uint_min(OPJ_UINT32  a, OPJ_UINT32  b)
+{
+    return (a < b) ? a : b;
+}
+
 /* -------------------------------------------------------------------------- */
 
 #define NUM_COMPS_MAX 4
@@ -70,7 +80,7 @@ int main(int argc, char *argv[])
     opj_image_t * l_image;
     opj_image_cmptparm_t l_params [NUM_COMPS_MAX];
     opj_stream_t * l_stream;
-    OPJ_UINT32 l_nb_tiles;
+    OPJ_UINT32 l_nb_tiles_width, l_nb_tiles_height, l_nb_tiles;
     OPJ_UINT32 l_data_size;
     size_t len;
 
@@ -98,9 +108,18 @@ int main(int argc, char *argv[])
     int comp_prec;
     int irreversible;
     const char *output_file;
+    int cblockw_init = 64;
+    int cblockh_init = 64;
+    int numresolution = 6;
+    OPJ_UINT32 offsetx = 0;
+    OPJ_UINT32 offsety = 0;
+    int quality_loss = 1;
+    int is_rand = 0;
 
-    /* should be test_tile_encoder 3 2000 2000 1000 1000 8 tte1.j2k */
-    if (argc == 9) {
+    opj_set_default_encoder_parameters(&l_param);
+
+    /* should be test_tile_encoder 3 2000 2000 1000 1000 8 tte1.j2k [64 64] [6] [0 0] [0] [256 256] */
+    if (argc >= 9) {
         num_comps = (OPJ_UINT32)atoi(argv[1]);
         image_width = atoi(argv[2]);
         image_height = atoi(argv[3]);
@@ -109,6 +128,28 @@ int main(int argc, char *argv[])
         comp_prec = atoi(argv[6]);
         irreversible = atoi(argv[7]);
         output_file = argv[8];
+        if (argc >= 11) {
+            quality_loss = 0;
+            cblockw_init = atoi(argv[9]);
+            cblockh_init = atoi(argv[10]);
+        }
+        if (argc >= 12) {
+            numresolution = atoi(argv[11]);
+        }
+        if (argc >= 14) {
+            offsetx = (OPJ_UINT32)atoi(argv[12]);
+            offsety = (OPJ_UINT32)atoi(argv[13]);
+        }
+        if (argc >= 15) {
+            is_rand = atoi(argv[14]);
+        }
+        for (i = 15; i + 1 < (OPJ_UINT32)argc &&
+                l_param.res_spec < OPJ_J2K_MAXRLVLS; i += 2) {
+            l_param.csty |= 0x01;
+            l_param.prcw_init[l_param.res_spec] = atoi(argv[i]);
+            l_param.prch_init[l_param.res_spec] = atoi(argv[i + 1]);
+            l_param.res_spec ++;
+        }
     } else {
         num_comps = 3;
         image_width = 2000;
@@ -122,8 +163,11 @@ int main(int argc, char *argv[])
     if (num_comps > NUM_COMPS_MAX) {
         return 1;
     }
-    l_nb_tiles = (OPJ_UINT32)(image_width / tile_width) * (OPJ_UINT32)(
-                     image_height / tile_height);
+    l_nb_tiles_width = (offsetx + (OPJ_UINT32)image_width +
+                        (OPJ_UINT32)tile_width - 1) / (OPJ_UINT32)tile_width;
+    l_nb_tiles_height = (offsety + (OPJ_UINT32)image_height +
+                         (OPJ_UINT32)tile_height - 1) / (OPJ_UINT32)tile_height;
+    l_nb_tiles = l_nb_tiles_width * l_nb_tiles_height;
     l_data_size = (OPJ_UINT32)tile_width * (OPJ_UINT32)tile_height *
                   (OPJ_UINT32)num_comps * (OPJ_UINT32)(comp_prec / 8);
 
@@ -134,16 +178,21 @@ int main(int argc, char *argv[])
     fprintf(stdout,
             "Encoding random values -> keep in mind that this is very hard to compress\n");
     for (i = 0; i < l_data_size; ++i) {
-        l_data[i] = (OPJ_BYTE)i; /*rand();*/
+        if (is_rand) {
+            l_data[i] = (OPJ_BYTE)rand();
+        } else {
+            l_data[i] = (OPJ_BYTE)i;
+        }
     }
 
-    opj_set_default_encoder_parameters(&l_param);
     /** you may here add custom encoding parameters */
     /* rate specifications */
     /** number of quality layers in the stream */
-    l_param.tcp_numlayers = 1;
-    l_param.cp_fixed_quality = 1;
-    l_param.tcp_distoratio[0] = 20;
+    if (quality_loss) {
+        l_param.tcp_numlayers = 1;
+        l_param.cp_fixed_quality = 1;
+        l_param.tcp_distoratio[0] = 20;
+    }
     /* is using others way of calculation */
     /* l_param.cp_disto_alloc = 1 or l_param.cp_fixed_alloc = 1 */
     /* l_param.tcp_rates[0] = ... */
@@ -157,6 +206,10 @@ int main(int argc, char *argv[])
     l_param.tile_size_on = OPJ_TRUE;
     l_param.cp_tdx = tile_width;
     l_param.cp_tdy = tile_height;
+
+    /* code block size */
+    l_param.cblockw_init = cblockw_init;
+    l_param.cblockh_init = cblockh_init;
 
     /* use irreversible encoding ?*/
     l_param.irreversible = irreversible;
@@ -187,7 +240,7 @@ int main(int argc, char *argv[])
     /* l_param.mode = 0;*/
 
     /** number of resolutions */
-    l_param.numresolution = 6;
+    l_param.numresolution = numresolution;
 
     /** progression order to use*/
     /** OPJ_LRCP, OPJ_RLCP, OPJ_RPCL, PCRL, CPRL */
@@ -221,8 +274,8 @@ int main(int argc, char *argv[])
         l_current_param_ptr->sgnd = 0;
         l_current_param_ptr->prec = (OPJ_UINT32)comp_prec;
 
-        l_current_param_ptr->x0 = 0;
-        l_current_param_ptr->y0 = 0;
+        l_current_param_ptr->x0 = offsetx;
+        l_current_param_ptr->y0 = offsety;
 
         ++l_current_param_ptr;
     }
@@ -251,10 +304,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    l_image->x0 = 0;
-    l_image->y0 = 0;
-    l_image->x1 = (OPJ_UINT32)image_width;
-    l_image->y1 = (OPJ_UINT32)image_height;
+    l_image->x0 = offsetx;
+    l_image->y0 = offsety;
+    l_image->x1 = offsetx + (OPJ_UINT32)image_width;
+    l_image->y1 = offsety + (OPJ_UINT32)image_height;
     l_image->color_space = OPJ_CLRSPC_SRGB;
 
     if (! opj_setup_encoder(l_codec, &l_param, l_image)) {
@@ -286,7 +339,18 @@ int main(int argc, char *argv[])
     }
 
     for (i = 0; i < l_nb_tiles; ++i) {
-        if (! opj_write_tile(l_codec, i, l_data, l_data_size, l_stream)) {
+        OPJ_UINT32 tile_y = i / l_nb_tiles_width;
+        OPJ_UINT32 tile_x = i % l_nb_tiles_width;
+        OPJ_UINT32 tile_x0 = opj_uint_max(l_image->x0, tile_x * (OPJ_UINT32)tile_width);
+        OPJ_UINT32 tile_y0 = opj_uint_max(l_image->y0,
+                                          tile_y * (OPJ_UINT32)tile_height);
+        OPJ_UINT32 tile_x1 = opj_uint_min(l_image->x1,
+                                          (tile_x + 1) * (OPJ_UINT32)tile_width);
+        OPJ_UINT32 tile_y1 = opj_uint_min(l_image->y1,
+                                          (tile_y + 1) * (OPJ_UINT32)tile_height);
+        OPJ_UINT32 tilesize = (tile_x1 - tile_x0) * (tile_y1 - tile_y0) *
+                              (OPJ_UINT32)num_comps * (OPJ_UINT32)(comp_prec / 8);
+        if (! opj_write_tile(l_codec, i, l_data, tilesize, l_stream)) {
             fprintf(stderr, "ERROR -> test_tile_encoder: failed to write the tile %d!\n",
                     i);
             opj_stream_destroy(l_stream);

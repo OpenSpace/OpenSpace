@@ -79,7 +79,6 @@ set(BLACKLIST_JPEG2000
     issue420.jp2 #kdu_jp2info ok
     27ac957758a35d00d6765a0c86350d9c.SIGFPE.d25.537.jpc #kdu_jp2info crash
     3672da2f1f67bbecad27d7181b4e9d7c.SIGFPE.d25.805.jpc #kdu_jp2info crash
-    issue476.jp2 #kdu_jp2info ok
     issue475.jp2 #kdu_jp2info ok
     issue413.jp2 #kdu_jp2info ok
     issue823.jp2 #kdu_jp2info ok

@@ -152,6 +152,10 @@ typedef struct opj_decompress_params {
     int num_threads;
     /* Quiet */
     int quiet;
+    /** number of components to decode */
+    OPJ_UINT32 numcomps;
+    /** indices of components to decode */
+    OPJ_UINT32* comps_indices;
 } opj_decompress_parameters;
 
 /* -------------------------------------------------------------------------- */
@@ -227,6 +231,10 @@ static void decode_help_display(void)
             "    If 'C' is specified (default), values are clipped.\n"
             "    If 'S' is specified, values are scaled.\n"
             "    A 0 value can be specified (meaning original bit depth).\n");
+    fprintf(stdout, "  -c first_comp_index[,second_comp_index][,...]\n"
+            "    OPTIONAL\n"
+            "    To limit the number of components to decoded.\n"
+            "    Component indices are numbered starting at 0.\n");
     fprintf(stdout, "  -force-rgb\n"
             "    Force output image colorspace to RGB\n"
             "  -upsample\n"
@@ -234,8 +242,8 @@ static void decode_help_display(void)
             "  -split-pnm\n"
             "    Split output components to different files when writing to PNM\n");
     if (opj_has_thread_support()) {
-        fprintf(stdout, "  -threads <num_threads>\n"
-                "    Number of threads to use for decoding.\n");
+        fprintf(stdout, "  -threads <num_threads|ALL_CPUS>\n"
+                "    Number of threads to use for decoding or ALL_CPUS for all available cores.\n");
     }
     fprintf(stdout, "  -quiet\n"
             "    Disable output from the library and other output.\n");
@@ -560,7 +568,7 @@ int parse_cmdline_decoder(int argc, char **argv,
         {"quiet", NO_ARG,  NULL, 1},
     };
 
-    const char optlist[] = "i:o:r:l:x:d:t:p:"
+    const char optlist[] = "i:o:r:l:x:d:t:p:c:"
 
                            /* UniPG>> */
 #ifdef USE_JPWL
@@ -768,6 +776,25 @@ int parse_cmdline_decoder(int argc, char **argv,
         case 'p': { /* Force precision */
             if (!parse_precision(opj_optarg, parameters)) {
                 return 1;
+            }
+        }
+        break;
+
+        /* ----------------------------------------------------- */
+        case 'c': { /* Componenets */
+            const char* iter = opj_optarg;
+            while (1) {
+                parameters->numcomps ++;
+                parameters->comps_indices = (OPJ_UINT32*) realloc(
+                                                parameters->comps_indices,
+                                                parameters->numcomps * sizeof(OPJ_UINT32));
+                parameters->comps_indices[parameters->numcomps - 1] =
+                    (OPJ_UINT32) atoi(iter);
+                iter = strchr(iter, ',');
+                if (iter == NULL) {
+                    break;
+                }
+                iter ++;
             }
         }
         break;
@@ -1015,6 +1042,9 @@ static void destroy_parameters(opj_decompress_parameters* parameters)
             free(parameters->precision);
             parameters->precision = NULL;
         }
+
+        free(parameters->comps_indices);
+        parameters->comps_indices = NULL;
     }
 }
 
@@ -1297,6 +1327,7 @@ int main(int argc, char **argv)
     int failed = 0;
     OPJ_FLOAT64 t, tCumulative = 0;
     OPJ_UINT32 numDecompressedImages = 0;
+    OPJ_UINT32 cp_reduce;
 
     /* set decoding parameters to default values */
     set_default_parameters(&parameters);
@@ -1308,6 +1339,14 @@ int main(int argc, char **argv)
     if (parse_cmdline_decoder(argc, argv, &parameters, &img_fol) == 1) {
         failed = 1;
         goto fin;
+    }
+
+    cp_reduce = parameters.core.cp_reduce;
+    if (getenv("USE_OPJ_SET_DECODED_RESOLUTION_FACTOR") != NULL) {
+        /* For debugging/testing purposes, do not set the cp_reduce member */
+        /* if USE_OPJ_SET_DECODED_RESOLUTION_FACTOR is defined, but used */
+        /* the opj_set_decoded_resolution_factor() API instead */
+        parameters.core.cp_reduce = 0;
     }
 
 
@@ -1446,11 +1485,50 @@ int main(int argc, char **argv)
             goto fin;
         }
 
+        if (parameters.numcomps) {
+            if (! opj_set_decoded_components(l_codec,
+                                             parameters.numcomps,
+                                             parameters.comps_indices,
+                                             OPJ_FALSE)) {
+                fprintf(stderr,
+                        "ERROR -> opj_decompress: failed to set the component indices!\n");
+                opj_destroy_codec(l_codec);
+                opj_stream_destroy(l_stream);
+                opj_image_destroy(image);
+                failed = 1;
+                goto fin;
+            }
+        }
+
+        if (getenv("USE_OPJ_SET_DECODED_RESOLUTION_FACTOR") != NULL) {
+            /* For debugging/testing purposes, and also an illustration on how to */
+            /* use the alternative API opj_set_decoded_resolution_factor() instead */
+            /* of setting parameters.cp_reduce */
+            if (! opj_set_decoded_resolution_factor(l_codec, cp_reduce)) {
+                fprintf(stderr,
+                        "ERROR -> opj_decompress: failed to set the resolution factor tile!\n");
+                opj_destroy_codec(l_codec);
+                opj_stream_destroy(l_stream);
+                opj_image_destroy(image);
+                failed = 1;
+                goto fin;
+            }
+        }
+
         if (!parameters.nb_tile_to_decode) {
+            if (getenv("SKIP_OPJ_SET_DECODE_AREA") != NULL &&
+                    parameters.DA_x0 == 0 &&
+                    parameters.DA_y0 == 0 &&
+                    parameters.DA_x1 == 0 &&
+                    parameters.DA_y1 == 0) {
+                /* For debugging/testing purposes, */
+                /* do nothing if SKIP_OPJ_SET_DECODE_AREA env variable */
+                /* is defined and no decoded area has been set */
+            }
             /* Optional if you want decode the entire image */
-            if (!opj_set_decode_area(l_codec, image, (OPJ_INT32)parameters.DA_x0,
-                                     (OPJ_INT32)parameters.DA_y0, (OPJ_INT32)parameters.DA_x1,
-                                     (OPJ_INT32)parameters.DA_y1)) {
+            else if (!opj_set_decode_area(l_codec, image, (OPJ_INT32)parameters.DA_x0,
+                                          (OPJ_INT32)parameters.DA_y0, (OPJ_INT32)parameters.DA_x1,
+                                          (OPJ_INT32)parameters.DA_y1)) {
                 fprintf(stderr, "ERROR -> opj_decompress: failed to set the decoded area\n");
                 opj_stream_destroy(l_stream);
                 opj_destroy_codec(l_codec);
@@ -1470,15 +1548,14 @@ int main(int argc, char **argv)
                 goto fin;
             }
         } else {
-
-            /* It is just here to illustrate how to use the resolution after set parameters */
-            /*if (!opj_set_decoded_resolution_factor(l_codec, 5)) {
-                fprintf(stderr, "ERROR -> opj_decompress: failed to set the resolution factor tile!\n");
-                opj_destroy_codec(l_codec);
-                opj_stream_destroy(l_stream);
-                opj_image_destroy(image);
-                failed = 1; goto fin;
-            }*/
+            if (!(parameters.DA_x0 == 0 &&
+                    parameters.DA_y0 == 0 &&
+                    parameters.DA_x1 == 0 &&
+                    parameters.DA_y1 == 0)) {
+                if (!(parameters.quiet)) {
+                    fprintf(stderr, "WARNING: -d option ignored when used together with -t\n");
+                }
+            }
 
             if (!opj_get_decoded_tile(l_codec, l_stream, image, parameters.tile_index)) {
                 fprintf(stderr, "ERROR -> opj_decompress: failed to decode tile!\n");

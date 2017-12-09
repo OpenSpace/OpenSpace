@@ -230,7 +230,7 @@ OPJ_BOOL opj_t1_encode_cblks(opj_t1_t *t1,
 
 /**
 Decode the code-blocks of a tile
-@param tp Thread pool
+@param tcd TCD handle
 @param pret Pointer to return value
 @param tilec The tile to decode
 @param tccp Tile coding parameters
@@ -238,7 +238,7 @@ Decode the code-blocks of a tile
 @param p_manager_mutex mutex for the event manager
 @param check_pterm whether PTERM correct termination should be checked
 */
-void opj_t1_decode_cblks(opj_thread_pool_t* tp,
+void opj_t1_decode_cblks(opj_tcd_t* tcd,
                          volatile OPJ_BOOL* pret,
                          opj_tcd_tilecomp_t* tilec,
                          opj_tccp_t* tccp,
