@@ -57,6 +57,14 @@ void GuiComponent::setEnabled(bool enabled) {
     _isEnabled = enabled;
 }
 
+void GuiComponent::setShowHelpTooltip(bool showHelpTooltip) {
+    _showHelpTooltip = showHelpTooltip;
+}
+
+void GuiComponent::setShowHelpTooltipDelay(double delay) {
+    _tooltipDelay = delay;
+}
+
 void GuiComponent::initialize() {}
 
 void GuiComponent::initializeGL() {}

@@ -183,14 +183,6 @@ void GuiPropertyComponent::setHasRegularProperties(bool hasOnlyRegularProperties
     _hasOnlyRegularProperties = hasOnlyRegularProperties;
 }
 
-void GuiPropertyComponent::setShowHelpTooltip(bool showHelpTooltip) {
-    _showHelpTooltip = showHelpTooltip;
-}
-
-void GuiPropertyComponent::setShowHelpTooltipDelay(double delay) {
-    _tooltipDelay = delay;
-}
-
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
     if (owner->propertiesRecursive().empty()) {
         return;
