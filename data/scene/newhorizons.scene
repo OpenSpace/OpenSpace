@@ -194,6 +194,9 @@ function postInitialization()
     openspace.mark_interesting_nodes({
         "Pluto", "NewHorizons", "Charon"
     })
+
+    openspace.printInfo("Receiving four errors about SCLK_DATA_TYPE_98 are expected.")
+
 end
 
 return {

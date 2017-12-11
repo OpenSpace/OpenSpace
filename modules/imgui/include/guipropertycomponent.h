@@ -59,8 +59,6 @@ public:
 
     void setVisibility(properties::Property::Visibility visibility);
     void setHasRegularProperties(bool hasOnlyRegularProperties);
-    void setShowHelpTooltip(bool showHelpTooltip);
-    void setShowHelpTooltipDelay(double delay);
 
     void render() override;
 
@@ -78,9 +76,6 @@ protected:
 
     properties::BoolProperty _useTreeLayout;
     properties::StringListProperty _treeOrdering;
-
-    bool _showHelpTooltip;
-    double _tooltipDelay;
 };
 
 } // namespace openspace::gui
