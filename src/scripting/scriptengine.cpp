@@ -274,6 +274,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         ghoul::lua::runScriptFile(state, absPath(script));
 
         library.documentations.clear();
+
         // Then, we extract the documentation information from the file
         lua_pushstring(state, "documentation");
         lua_gettable(state, -2);
@@ -303,10 +304,9 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 lua_pop(state, 1);
 
                 library.documentations.push_back({ name, arguments, documentation });
-
             }
-            lua_pop(state, 1);
         }
+        lua_pop(state, 1);
     }
 }
 

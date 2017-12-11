@@ -720,6 +720,13 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         LFATALC(e.component, e.message);
     }
 
+    // Run the global configuration scripts
+    try {
+        runGlobalCustomizationScripts(scenePath);
+    } catch (ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
+
     // Write keyboard documentation.
     if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
         keyBindingManager().writeDocumentation(
@@ -884,6 +891,36 @@ void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescr
             "Error executing '" << PostInitializationFunction << "': " <<
             lua_tostring(state, -1)
         );
+    }
+}
+
+void OpenSpaceEngine::runGlobalCustomizationScripts(const std::string& sceneDescription) {
+    // @CLEANUP:  Move this into the scene loading?  ---abock
+    LINFO("Running Global initialization scripts");
+    ghoul::lua::LuaState state;
+    OsEng.scriptEngine().initializeLuaState(state);
+
+    // First execute the script to get all global variables
+    ghoul::lua::runScriptFile(state, absPath(sceneDescription));
+
+    std::string k = ConfigurationManager::KeyGlobalCustomizationScripts;
+    if (_configurationManager->hasKey(k)) {
+        ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(k);
+        for (int i = 1; i <= dict.size(); ++i) {
+            std::string script = dict.value<std::string>(std::to_string(i));
+
+            if (FileSys.fileExists(script)) {
+                try {
+                    LINFO("Running global customization script: " << script);
+                    ghoul::lua::runScriptFile(state, absPath(script));
+                } catch (ghoul::RuntimeError& e) {
+                    LERRORC(e.component, e.message);
+                }
+            }
+            else {
+                LDEBUG("Ignoring non-existing script file: " << script);
+            }
+        }
     }
 }
 
@@ -1506,6 +1543,9 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "string, string",
                 "Removes a tag (second argument) from a scene graph node (first argument)"
             }
+        },
+        {
+            absPath("${SCRIPTS}/common_scripts.lua")
         }
     };
 }

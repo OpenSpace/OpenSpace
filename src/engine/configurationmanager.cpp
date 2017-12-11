@@ -48,6 +48,8 @@ const string ConfigurationManager::KeyPaths = "Paths";
 const string ConfigurationManager::KeyCache = "CACHE";
 const string ConfigurationManager::KeyFonts = "Fonts";
 const string ConfigurationManager::KeyConfigSgct = "SGCTConfig";
+const string ConfigurationManager::KeyGlobalCustomizationScripts =
+    "GlobalCustomizationScripts";
 
 const string ConfigurationManager::PartType = "Type";
 const string ConfigurationManager::PartFile = "File";

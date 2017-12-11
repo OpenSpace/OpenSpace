@@ -58,9 +58,10 @@ bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
 
     int i = 1;
     for (std::string& v : val) {
-        lua_pushstring(state, std::to_string(i).c_str());
+        lua_pushnumber(state, i);
         lua_pushstring(state, v.c_str());
         lua_settable(state, -3);
+        ++i;
     }
 
     return true;
