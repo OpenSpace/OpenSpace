@@ -121,7 +121,33 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         "." +
         AssetFileSuffix);
 }
-    
+
+void AssetLoader::addAssetStateChangeListener(AssetStateChangeListener* listener) {
+    const auto it = std::find(
+        _assetStateChangeListeners.begin(),
+        _assetStateChangeListeners.end(),
+        listener
+    );
+
+    if (it == _assetStateChangeListeners.end()) {
+        _assetStateChangeListeners.push_back(listener);
+    }
+}
+
+void AssetLoader::removeAssetStateChangeListener(AssetStateChangeListener* listener) {
+    _assetStateChangeListeners.erase(std::remove(
+        _assetStateChangeListeners.begin(),
+        _assetStateChangeListeners.end(),
+        listener
+    ));
+}
+
+void AssetLoader::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
+    for (auto& listener : _assetStateChangeListeners) {
+        listener->assetStateChanged(asset, state);
+    }
+}
+
 std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
     ghoul::filesystem::Directory directory = currentDirectory();
     std::string path = generateAssetPath(directory, name);
@@ -217,14 +243,6 @@ std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
 void AssetLoader::remove(const std::string& identifier) {
     ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");   
     unrequest(identifier);
-    // TODO: Implement this
-    //_rootAsset->removeDependency(id);
-}
-
-void AssetLoader::remove(const Asset* asset) {
-    ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");
-    // TODO: Implement this
-    //_rootAsset->removeDependency(id);
 }
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& name) const {

@@ -69,55 +69,32 @@ Asset::State Asset::state() const {
     return _state;
 }
 
-Asset::CallbackHandle Asset::addStateChangeCallback(StateChangeCallback cb) {
-    std::lock_guard<std::mutex> guard(_stateChangeCallbackMutex);
-    CallbackHandle h = _nextCallbackHandle++;
-    _stateChangeCallbacks.emplace(h, cb);
-    return h;
-}
-    
-void Asset::removeStateChangeCallback(Asset::CallbackHandle handle) {
-    std::lock_guard<std::mutex> guard(_stateChangeCallbackMutex);
-    _stateChangeCallbacks.erase(handle);
-}
-
 void Asset::setState(Asset::State state) {
     if (_state == state) {
         return;
     }
     _state = state;
 
+    std::shared_ptr<Asset> thisAsset = shared_from_this();
+
     for (auto& requiringAsset : _requiringAssets) {
         if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
-            a->requiredAssetChangedState(shared_from_this());
+            a->requiredAssetChangedState(thisAsset);
         }
     }
-    for (auto& requestingAsset : _requestingAssets) {
-        if (std::shared_ptr<Asset> a = requestingAsset.lock()) {
-            a->requestedAssetChangedState(shared_from_this());
-        }
-    }
-    std::lock_guard<std::mutex> guard(_stateChangeCallbackMutex);
-    for (auto& cb : _stateChangeCallbacks) {
-        cb.second(state);
-    }
+
+    _loader->assetStateChanged(thisAsset, state);
 }
 
 void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child) {
     State childState = child->state();
-
     if (childState == State::SyncResolved) {
         if (isSyncResolveReady()) {
             setState(State::SyncResolved);
         }
-    }
-    else if (childState == State::SyncRejected) {
+    } else if (childState == State::SyncRejected) {
         setState(State::SyncRejected);
     }
-}
-
-void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child) {
-    // TODO: implement this
 }
 
 void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization) {
@@ -274,7 +251,7 @@ bool Asset::restartSynchronizations() {
 }
 
 float Asset::synchronizationProgress() {
-    std::vector<std::shared_ptr<Asset>> assets = subTreeAssets();
+    std::vector<std::shared_ptr<Asset>> assets = requiredSubTreeAssets();
 
     size_t nTotalBytes = 0;
     size_t nSyncedBytes = 0;
@@ -502,11 +479,13 @@ void Asset::addRequestingAsset(std::shared_ptr<Asset> parent) {
 
     if (parentState == State::Synchronizing ||
         parentState == State::SyncResolved ||
-        parentState == State::Initialized)
+        parentState == State::Initialized ||
+        parentState == State::InitializationFailed)
     {
-        if (childState != State::Synchronizing ||
-            childState != State::SyncResolved ||
-            childState != State::Initialized)
+        if (childState != State::Synchronizing &&
+            childState != State::SyncResolved &&
+            childState != State::Initialized &&
+            childState != State::InitializationFailed)
         {
             startSynchronizations();
         }

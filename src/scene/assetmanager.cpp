@@ -42,23 +42,14 @@ AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader)
 {}
 
 void AssetManager::initialize() {
-    /*_addAssetCallbackHandle = _assetLoader->addAssetLoadCallback(
-        [this] (std::shared_ptr<Asset> a) {
-            a->addStateChangeCallback([a, this] (Asset::State state) {
-                assetStateChanged(a, state);
-            });
-        }
-     );*/
+    _assetLoader->addAssetStateChangeListener(this);
     std::shared_ptr<Asset> rootAsset = _assetLoader->rootAsset();
-    rootAsset->addStateChangeCallback([&rootAsset, this] (Asset::State state) {
-        assetStateChanged(rootAsset, state);
-    });
     rootAsset->initialize();
 }
 
 void AssetManager::deinitialize() {
     _assetLoader->rootAsset()->deinitialize();
-    //_assetLoader->removeAssetLoadCallback(_addAssetCallbackHandle);
+    _assetLoader->removeAssetStateChangeListener(this);
 }
 
 bool AssetManager::update() {
@@ -94,6 +85,10 @@ bool AssetManager::update() {
 }
 
 void AssetManager::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
+    if (asset->requestingAssets().empty()) {
+        return;
+    }
+
     if (rootAsset()->state() == Asset::State::Initialized) {
         if (state == Asset::State::Loaded) {
             asset->startSynchronizations();
@@ -156,7 +151,7 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
     
 std::shared_ptr<Asset> AssetManager::tryAddAsset(const std::string& path) {
     try {
-        _assetLoader->add(path);
+        return _assetLoader->add(path);
     } catch (const ghoul::RuntimeError& e) {
         LERROR("Error adding asset: " << e.component << ": " << e.message);
     }

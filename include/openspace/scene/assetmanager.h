@@ -51,7 +51,7 @@ class Asset;
  * from the system if it is not a dependency of a loaded asset.
  */
 
-class AssetManager {
+class AssetManager : AssetStateChangeListener {
 public:
     AssetManager(
         std::unique_ptr<AssetLoader> loader
@@ -64,12 +64,13 @@ public:
     void removeAll();
     std::shared_ptr<Asset> rootAsset();
 
+    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override;
+
     bool update();
     scripting::LuaLibrary luaLibrary();
 private:
     std::shared_ptr<Asset> tryAddAsset(const std::string& path);
     bool tryRemoveAsset(const std::string& path);
-    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state);
 
     std::unordered_map<std::string, bool> _pendingStateChangeCommands;
     std::mutex _pendingInitializationsMutex;

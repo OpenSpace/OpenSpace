@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___ASSETLOADER___H__
 #define __OPENSPACE_CORE___ASSETLOADER___H__
 
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/asset.h>
 
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/resourcesynchronization.h>
@@ -42,7 +42,6 @@
 
 namespace openspace {
 
-class Asset;
 
 namespace assetloader {
 int onInitialize(lua_State* state);
@@ -56,6 +55,11 @@ int syncedResource(lua_State* state);
 int noOperation(lua_State* state);
 int exportAsset(lua_State* state);
 } // namespace assetloader
+
+class AssetStateChangeListener {
+public:
+    virtual void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) = 0;
+};
 
 class AssetLoader {
 public:  
@@ -84,12 +88,6 @@ public:
      */
     void remove(const std::string& identifier);
 
-    /**
-    * Remove the asset as a dependency on the root asset
-    * The asset is unloaded synchronously
-    */
-    void remove(const Asset* asset);
-    
     /**
     * Returns the asset identified by the identifier,
     * if the asset is loaded. Otherwise return nullptr.
@@ -127,6 +125,11 @@ public:
 
     std::string generateAssetPath(const std::string& baseDirectory,
                                   const std::string& path) const;
+
+
+    void addAssetStateChangeListener(AssetStateChangeListener* listener);
+    void removeAssetStateChangeListener(AssetStateChangeListener* listener);
+    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state);
     
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
@@ -178,6 +181,8 @@ private:
         _onDependencyInitializationFunctionRefs;
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
         _onDependencyDeinitializationFunctionRefs;
+
+    std::vector<AssetStateChangeListener*> _assetStateChangeListeners;
 
     int _assetsTableRef;
 };

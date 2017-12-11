@@ -75,9 +75,6 @@ public:
     std::string assetName() const;
     AssetLoader* loader() const;
     State state() const;
-
-    CallbackHandle addStateChangeCallback(StateChangeCallback cb);
-    void removeStateChangeCallback(CallbackHandle handle);
     
     void setState(State state);
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
@@ -121,7 +118,6 @@ public:
     std::string resolveLocalResource(std::string resourceName);
 private:
     void requiredAssetChangedState(std::shared_ptr<Asset> a);
-    void requestedAssetChangedState(std::shared_ptr<Asset> a);
 
     void addRequestingAsset(std::shared_ptr<Asset> a);
     void removeRequestingAsset(std::shared_ptr<Asset> a);
@@ -157,11 +153,6 @@ private:
     // Synchronization callback handles
     std::unordered_map<ResourceSynchronization*, ResourceSynchronization::CallbackHandle>
         _syncCallbackHandles;
-    
-    CallbackHandle _nextCallbackHandle;
-    std::unordered_map<CallbackHandle, StateChangeCallback> _stateChangeCallbacks;
-    std::mutex _stateChangeCallbackMutex;
-    
 };
 
 } // namespace openspace

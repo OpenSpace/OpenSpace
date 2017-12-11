@@ -1,3 +1,3 @@
 asset.request('keybindings')
 asset.request('solarsystem')
-asset.request('missions/newhorizons/spice/spice')
+asset.require('missions/newhorizons/spice/spice')
