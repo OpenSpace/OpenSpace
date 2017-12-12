@@ -28,7 +28,7 @@
 #include <ghoul/glm.h>
 
 namespace {
-    const char* _loggerCat = "DataProcessorKameleon";
+    constexpr const char* _loggerCat = "DataProcessorKameleon";
 } // namespace
 
 namespace openspace {

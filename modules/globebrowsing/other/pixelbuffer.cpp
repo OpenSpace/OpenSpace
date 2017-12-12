@@ -26,7 +26,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "PixelBuffer";
+    constexpr const char* _loggerCat = "PixelBuffer";
 } // namespace
 
 namespace openspace::globebrowsing {

@@ -38,7 +38,7 @@
 #include <modules/iswa/rendering/iswacygnet.h>
 
 namespace {
-    const char* _loggerCat = "Query";
+    constexpr const char* _loggerCat = "Query";
 } // namespace
 
 namespace openspace {

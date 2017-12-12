@@ -35,7 +35,7 @@
 #include <iostream>
 
 namespace {
-    const char* _loggerCat = "DebugRenderer";
+    constexpr const char* _loggerCat = "DebugRenderer";
 } // namespace
 
 namespace openspace {

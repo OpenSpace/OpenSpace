@@ -67,11 +67,11 @@
 
 namespace {
 
-const char* _loggerCat = "main";
+constexpr const char* _loggerCat = "main";
 sgct::Engine* SgctEngine;
 
-const char* OpenVRTag = "OpenVR";
-const char* SpoutTag = "Spout";
+constexpr const char* OpenVRTag = "OpenVR";
+constexpr const char* SpoutTag = "Spout";
 
 #ifdef WIN32
 

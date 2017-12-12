@@ -49,19 +49,19 @@
 #include <string>
 
 namespace {
-    const char* _loggerCat        = "RenderablePlanesCloud";
-    const char* KeyFile           = "File";
-    const char* keyUnit           = "Unit";
-    const char* MeterUnit         = "m";
-    const char* KilometerUnit     = "Km";
-    const char* ParsecUnit        = "pc";
-    const char* KiloparsecUnit    = "Kpc";
-    const char* MegaparsecUnit    = "Mpc";
-    const char* GigaparsecUnit    = "Gpc";
-    const char* GigalightyearUnit = "Gly";
+    constexpr const char* _loggerCat        = "RenderablePlanesCloud";
+    constexpr const char* KeyFile           = "File";
+    constexpr const char* keyUnit           = "Unit";
+    constexpr const char* MeterUnit         = "m";
+    constexpr const char* KilometerUnit     = "Km";
+    constexpr const char* ParsecUnit        = "pc";
+    constexpr const char* KiloparsecUnit    = "Kpc";
+    constexpr const char* MegaparsecUnit    = "Mpc";
+    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const char* GigalightyearUnit = "Gly";
 
-    const int8_t CurrentCacheVersion = 2;
-    const float PARSEC = 0.308567756E17f;
+    constexpr int8_t CurrentCacheVersion = 2;
+    constexpr float PARSEC = 0.308567756E17f;
 
     enum BlendMode {
         BlendModeNormal = 0,

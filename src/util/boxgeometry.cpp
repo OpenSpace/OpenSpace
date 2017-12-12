@@ -27,7 +27,7 @@
 #include <string>
 
 namespace {
-    const char* _loggerCat = "BoxGeometry";
+    constexpr const char* _loggerCat = "BoxGeometry";
 } // namespace
 
 namespace openspace {

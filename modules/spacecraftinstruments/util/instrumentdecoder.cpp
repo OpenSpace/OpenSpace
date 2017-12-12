@@ -29,10 +29,10 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* _loggerCat  = "InstrumentDecoder";
-    const char* keyDetector = "DetectorType";
-    const char* keySpice    = "Spice";
-    const char* keyStopCommand = "StopCommand";
+    constexpr const char* _loggerCat  = "InstrumentDecoder";
+    constexpr const char* keyDetector = "DetectorType";
+    constexpr const char* keySpice    = "Spice";
+    constexpr const char* keyStopCommand = "StopCommand";
 } // namespace
 
 namespace openspace {

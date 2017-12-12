@@ -153,8 +153,8 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     ghoul_assert(FileSys.fileExists(filename), "File must exist");
 
     // ${BASE_PATH}
-    string basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
-        + FileSystem::TokenClosingBraces;
+    string basePathToken = FileSystem::TokenOpeningBraces + string(_keyBasePath) +
+        FileSystem::TokenClosingBraces;
 
     // Retrieving the directory in which the configuration file lies
     string absolutePath = FileSys.absolutePath(filename);

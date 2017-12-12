@@ -34,8 +34,8 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "TaskRunner";
-}
+    constexpr const char* _loggerCat = "TaskRunner";
+} // namespace
 
 namespace openspace {
 

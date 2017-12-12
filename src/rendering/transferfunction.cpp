@@ -38,7 +38,7 @@
 #include <iostream>
 
 namespace {
-    const char* _loggerCat = "TransferFunction";
+    constexpr const char* _loggerCat = "TransferFunction";
 
     // @TODO Replace with Filesystem::File extension
     bool hasExtension(const std::string& filepath, const std::string& extension) {

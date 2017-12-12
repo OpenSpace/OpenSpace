@@ -38,13 +38,13 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "PerformanceManager";
+    constexpr const char* _loggerCat = "PerformanceManager";
 
-    const char* GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
+    constexpr const char* GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
     // Probably 255 performance blocks per node are enough, so we can get away with
     // 4 bytes (one uint8_t for the number, one uint8_t for the reference count to keep
     // the global memory alive, and 2 bytes to enforce alignment)
-    const size_t GlobalSharedMemorySize = 4;
+    constexpr const size_t GlobalSharedMemorySize = 4;
 
     struct GlobalMemory {
         uint8_t number;
@@ -53,7 +53,7 @@ namespace {
         std::array<uint8_t, 2> alignment;
     };
 
-    const char* LocalSharedMemoryNameBase = "PerformanceMeasurement_";
+    constexpr const char* LocalSharedMemoryNameBase = "PerformanceMeasurement_";
 } // namespace
 
 namespace openspace::performance {

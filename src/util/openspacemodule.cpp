@@ -34,8 +34,8 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "OpenSpaceModule";
-    const char* ModuleBaseToken = "MODULE_";
+    constexpr const char* _loggerCat = "OpenSpaceModule";
+    constexpr const char* ModuleBaseToken = "MODULE_";
 } // namespace
 
 namespace openspace {
@@ -55,7 +55,7 @@ void OpenSpaceModule::initialize() {
 
     std::string moduleToken =
         ghoul::filesystem::FileSystem::TokenOpeningBraces +
-        ModuleBaseToken +
+        std::string(ModuleBaseToken) +
         upperName +
         ghoul::filesystem::FileSystem::TokenClosingBraces;
 

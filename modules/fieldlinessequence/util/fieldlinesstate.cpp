@@ -33,10 +33,10 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "FieldlinesState";
-    const int CurrentVersion = 0;
+    constexpr const char* _loggerCat = "FieldlinesState";
+    constexpr const int CurrentVersion = 0;
     using json = nlohmann::json;
-}
+} // namespace
 
 namespace openspace {
 

@@ -33,7 +33,7 @@
 namespace openspace::properties {
 
 namespace {
-    const char* _loggerCat = "PropertyOwner";
+    constexpr const char* _loggerCat = "PropertyOwner";
 } // namespace
 
 
