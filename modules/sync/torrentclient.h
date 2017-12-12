@@ -29,6 +29,7 @@
 #include <string>
 #include <memory>
 #include <thread>
+#include <mutex>
 #include <unordered_map>
 
 #include "libtorrent/torrent_handle.hpp"
@@ -73,6 +74,7 @@ private:
     std::unordered_map<TorrentId, Torrent> _torrents;
     std::unique_ptr<libtorrent::session> _session;
     std::thread _torrentThread;
+    std::mutex _mutex;
     std::atomic_bool _keepRunning = true;
 };
 

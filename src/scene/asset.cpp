@@ -108,9 +108,6 @@ void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child) {
 
 void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child) {
     State childState = child->state();
-
-    LINFO("requestedAssetChangedState: " << child->id() << " to " << static_cast<int>(child->state()));
-
     if (child->hasInitializedParent()) {
         if (childState == State::Loaded) {
             child->startSynchronizations();
@@ -340,7 +337,7 @@ bool Asset::startSynchronizations() {
 
 bool Asset::cancelAllSynchronizations() {
     bool cancelledAnySync = false;
-    for (auto& child : requiredAssets()) {
+    for (auto& child : childAssets()) {
         bool cancelled = child->cancelAllSynchronizations();
         if (cancelled) {
             cancelledAnySync = true;
@@ -360,7 +357,27 @@ bool Asset::cancelAllSynchronizations() {
 }
 
 bool Asset::cancelUnwantedSynchronizations() {
-    return false;
+    if (hasSyncingOrResolvedParent()) {
+        return false;
+    }
+    bool cancelledAnySync = false;
+    for (auto& child : childAssets()) {
+        bool cancelled = child->cancelUnwantedSynchronizations();
+        if (cancelled) {
+            cancelledAnySync = true;
+        }
+    }
+    for (const auto& s : ownSynchronizations()) {
+        if (s->isSyncing()) {
+            cancelledAnySync = true;
+            s->cancel();
+            setState(State::Loaded);
+        }
+    }
+    if (cancelledAnySync) {
+        setState(State::Loaded);
+    }
+    return cancelledAnySync;
 }
 
 bool Asset::restartAllSynchronizations() {
@@ -521,6 +538,8 @@ void Asset::deinitialize() {
     if (state() != Asset::State::Initialized) {
         return;
     }
+
+    LDEBUG("Denitializing asset " << id());
 
     // Notify children
     for (auto& dependency : _requiredAssets) {

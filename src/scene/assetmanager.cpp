@@ -82,15 +82,15 @@ bool AssetManager::update() {
 }
 
 void AssetManager::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
-    LINFO(asset->id() << " changed state to " << static_cast<int>(state));
+    //LINFO(asset->id() << " changed state to " << static_cast<int>(state));
 }
 
 void AssetManager::assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
-    LINFO(parent->id() << " requested " << child->id());
+    //LINFO(parent->id() << " requested " << child->id());
 }
 
 void AssetManager::assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
-    LINFO(parent->id() << " unrequested " << child->id());
+    //LINFO(parent->id() << " unrequested " << child->id());
 }
 
 void AssetManager::add(const std::string& path) {

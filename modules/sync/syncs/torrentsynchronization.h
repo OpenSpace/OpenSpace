@@ -58,6 +58,8 @@ public:
 private:
     void updateTorrentProgress(TorrentClient::TorrentProgress p);
     std::string uniformResourceName() const;
+    bool hasSyncFile();
+    void createSyncFile();
 
     std::atomic_bool _enabled = false;
     size_t _torrentId;

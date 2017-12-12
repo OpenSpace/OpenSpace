@@ -34,6 +34,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <fstream>
+
 
 namespace {
     const char* _loggerCat = "TorrentSynchronization";
@@ -115,6 +117,11 @@ void TorrentSynchronization::start() {
         return;
     }
     begin();
+
+    if (hasSyncFile()) {
+        resolve();
+    }
+
     _enabled = true;
     _torrentId = _torrentClient->addMagnetLink(
         _magnetLink,
@@ -123,7 +130,6 @@ void TorrentSynchronization::start() {
             updateTorrentProgress(p);
         }
     );
-
 }
 
 void TorrentSynchronization::cancel() {
@@ -139,6 +145,19 @@ void TorrentSynchronization::clear() {
     cancel();
 }
 
+bool TorrentSynchronization::hasSyncFile() {
+    std::string path = directory() + ".ossync";
+    return FileSys.fileExists(path);
+}
+
+void TorrentSynchronization::createSyncFile() {
+    std::string dir = directory();
+    std::string filepath = dir + ".ossync";
+    FileSys.createDirectory(dir, ghoul::filesystem::Directory::Recursive::Yes);
+    std::ofstream syncFile(filepath, std::ofstream::out);
+    syncFile << "Synchronized";
+    syncFile.close();
+}
 
 size_t TorrentSynchronization::nSynchronizedBytes() {
     return _progress.nDownloadedBytes;
@@ -155,6 +174,7 @@ bool TorrentSynchronization::nTotalBytesIsKnown() {
 void TorrentSynchronization::updateTorrentProgress(TorrentClient::TorrentProgress progress) {
     _progress = progress;
     if (progress.finished && state() == State::Syncing) {
+        createSyncFile();
         resolve();
     }
 }

@@ -87,8 +87,11 @@ void TorrentClient::initialize() {
 
 void TorrentClient::pollAlerts() {
     std::vector<libtorrent::alert*> alerts;
-    _session->pop_alerts(&alerts);
-
+    {
+        std::lock_guard<std::mutex> guard(_mutex);
+        _session->pop_alerts(&alerts);
+    }
+    
     for (lt::alert const* a : alerts) {
         //LINFO(a->message());
         // if we receive the finished alert or an error, we're done
@@ -111,6 +114,8 @@ void TorrentClient::pollAlerts() {
 }
 
 size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb) {
+    std::lock_guard<std::mutex> guard(_mutex);
+
     if (!_session) {
         LERROR("Torrent session not initialized when adding torrent");
         return -1;
@@ -132,6 +137,8 @@ size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destin
 }
 
 size_t TorrentClient::addMagnetLink(std::string magnetLink, std::string destination, TorrentProgressCallback cb) {
+    std::lock_guard<std::mutex> guard(_mutex);
+
     // TODO: register callback!
     if (!_session) {
         LERROR("Torrent session not initialized when adding torrent");
@@ -153,9 +160,23 @@ size_t TorrentClient::addMagnetLink(std::string magnetLink, std::string destinat
 }
 
 void TorrentClient::removeTorrent(TorrentId id) {
+    std::lock_guard<std::mutex> guard(_mutex);
+
+    const auto it = _torrents.find(id);
+    if (it == _torrents.end()) {
+        return;
+    }
+
+    libtorrent::torrent_handle h = it->second.handle;
+    _session->remove_torrent(h);
+
+    _torrents.erase(it);
+
 }
 
 void TorrentClient::notify(TorrentId id) {
+    std::lock_guard<std::mutex> guard(_mutex);
+
     const auto& torrent = _torrents.find(id);
     if (torrent == _torrents.end()) {
         return;
