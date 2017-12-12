@@ -15,11 +15,10 @@ return {
             ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
             Texture = "textures/point3.png",
             -- Fade in value in the same unit as "Unit"
-            --FadeInThreshould = 4.7,
-            FadeInThreshould = 90.0,
+            FadeInDistances = {45.0, 90.0},
             Unit = "Mpc",
-            BillboardMaxSize = 200.0,
-            BillboardMinSize = 1.5,
+            BillboardMaxSize = 50.0,
+            BillboardMinSize = 0.0,
         },
         GuiPath = "/Universe/Galaxies"
     }

@@ -173,13 +173,14 @@ namespace {
         "Debug option for rendering of billboards and texts."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
-        "FadeInThreshould",
-        "Fade-In Threshould",
-        "This value determines distance from the center of our galaxy from which the" 
-        "astronomical object is visible before starting fading-in it."
+    static const openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+        "FadeInDistances",
+        "Fade-In Start and End distances",
+        "These values determine the initial and final distances from the center of "
+        "our galaxy from which the astronomical object will start and end "
+        "fading-in."
     };
-
+    
     static const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in effect",
@@ -312,10 +313,10 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 TransformationMatrixInfo.description
             },
             {
-                FadeInThreshouldInfo.identifier,
-                new DoubleVerifier,
+                FadeInDistancesInfo.identifier,
+                new Vector2Verifier<double>,
                 Optional::Yes,
-                FadeInThreshouldInfo.description
+                FadeInDistancesInfo.description
             },
             {
                 DisableFadeInInfo.identifier,
@@ -369,7 +370,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.0, 100.0)
+    , _fadeInDistance(FadeInDistancesInfo, glm::vec2(0.0f), glm::vec2(0.0), glm::vec2(100.0))
     , _disableFadeInDistance(DisableFadeInInfo, true)
     , _billboardMaxSize(BillboardMaxSizeInfo, 400.0, 0.0, 1000.0)
     , _billboardMinSize(BillboardMinSizeInfo, 0.0, 0.0, 100.0)
@@ -561,8 +562,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
     }
 
-    if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
-        float fadeInValue = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
+    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+        glm::vec2 fadeInValue = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
         _fadeInDistance.set(fadeInValue);
         _disableFadeInDistance.set(false);
         addProperty(_fadeInDistance);
@@ -836,21 +837,21 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.0f;
     if (!_disableFadeInDistance) {        
         float distCamera = glm::length(data.camera.positionVec3());
-        // Exponential Fading
-        //double term      = std::exp(distCamera/scale - _fadeInDistance);
-        //float func       = static_cast<float>(term / (term + 1.0));        
-
-        //// Let's not waste performance
-        //if (func < 0.01) {
-        //    return;
-        //}
-
-        //if (!std::isinf(term)) {
-        //    fadeInVariable = func;
-        //}
         
+        /*
         // Linear Fading
         float funcValue = static_cast<float>((1.0 / double(_fadeInDistance*scale))*(distCamera));
+        fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
+
+        if (funcValue < 0.01) {
+            return;
+        }
+        */
+
+        glm::vec2 fadeRange = _fadeInDistance;
+        float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
+        float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        float funcValue = a * distCamera + b;
         fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
 
         if (funcValue < 0.01) {
@@ -1468,7 +1469,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         }            
     }
 
-    _fadeInDistance.setMaxValue(10.0f * biggestCoord);
+    _fadeInDistance.setMaxValue(glm::vec2(10.0f * biggestCoord));
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {

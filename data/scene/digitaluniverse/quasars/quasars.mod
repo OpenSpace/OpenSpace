@@ -13,9 +13,9 @@ return {
             Unit = "Mpc",
             ScaleFactor = 537.31,
             -- Fade in value in the same unit as "Unit"
-            FadeInThreshould = 1000.0,
-            BillboardMaxSize = 200.0,
-            BillboardMinSize = 0.5,
+            FadeInDistances = {300.0, 1000.0},
+            BillboardMaxSize = 50.0,
+            BillboardMinSize = 0.0,
         },
         GuiPath = "/Universe/Quasars"
     }
