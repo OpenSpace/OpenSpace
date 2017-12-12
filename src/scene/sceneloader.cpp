@@ -37,21 +37,21 @@
 #include <unordered_set>
 
 namespace {
-    const char* _loggerCat = "SceneLoader";
-    const char* KeyPathScene = "ScenePath";
-    const char* KeyModules = "Modules";
-    const char* ModuleExtension = ".mod";
-    const char* LicenseExtension = ".license";
+    constexpr const char* _loggerCat = "SceneLoader";
+    constexpr const char* KeyPathScene = "ScenePath";
+    constexpr const char* KeyModules = "Modules";
+    constexpr const char* ModuleExtension = ".mod";
+    constexpr const char* LicenseExtension = ".license";
     //const char* KeyPathModule = "ModulePath";
 
     //const char* RootNodeName = "Root";
-    const char* KeyName = "Name";
-    const char* KeyParentName = "Parent";
+    constexpr const char* KeyName = "Name";
+    constexpr const char* KeyParentName = "Parent";
     //const char* KeyDependencies = "Dependencies";
-    const char* KeyCamera = "Camera";
-    const char* KeyCameraFocus = "Focus";
-    const char* KeyCameraPosition = "Position";
-    const char* KeyCameraRotation = "Rotation";
+    constexpr const char* KeyCamera = "Camera";
+    constexpr const char* KeyCameraFocus = "Focus";
+    constexpr const char* KeyCameraPosition = "Position";
+    constexpr const char* KeyCameraRotation = "Rotation";
 
     struct ModuleInformation {
         ghoul::Dictionary dictionary;

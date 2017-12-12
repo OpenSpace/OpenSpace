@@ -28,7 +28,7 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "DataProcessor";
+    constexpr const char* _loggerCat = "DataProcessor";
 } // namespace
 
 namespace openspace {

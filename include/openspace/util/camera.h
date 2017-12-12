@@ -157,22 +157,22 @@ public:
     } sgctInternal;
 
     // Deprecated
-    [[deprecated("Replaced by Camera::setPositionVec3()")]]
+    // [[deprecated("Replaced by Camera::setPositionVec3()")]]
     void setPosition(psc pos);
-    [[deprecated("Replaced by Camera::setFocusPositionVec3()")]]
+    // [[deprecated("Replaced by Camera::setFocusPositionVec3()")]]
     void setFocusPosition(psc pos);
-    [[deprecated("Replaced by Camera::positionVec3()")]]
+    // [[deprecated("Replaced by Camera::positionVec3()")]]
     psc position() const;
-    [[deprecated("Replaced by Camera::unsynchedPositionVec3()")]]
+    // [[deprecated("Replaced by Camera::unsynchedPositionVec3()")]]
     psc unsynchedPosition() const;
-    [[deprecated("Replaced by Camera::focusPositionVec3()")]]
+    // [[deprecated("Replaced by Camera::focusPositionVec3()")]]
     psc focusPosition() const;
     // @TODO use Camera::SgctInternal interface instead
-    [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
+    // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;
-    [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
+    // [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
     const glm::mat4& projectionMatrix() const;
-    [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
+    // [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
     const glm::mat4& viewProjectionMatrix() const;
 
 

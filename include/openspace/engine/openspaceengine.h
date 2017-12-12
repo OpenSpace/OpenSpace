@@ -105,8 +105,6 @@ public:
     void writeDocumentation();
     void toggleShutdownMode();
 
-    void runPostInitializationScripts(const std::string& sceneDescription);
-
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
     LuaConsole& console();
@@ -180,6 +178,8 @@ private:
     void gatherCommandlineArguments();
     void loadFonts();
     void runPreInitializationScripts(const std::string& sceneDescription);
+    void runPostInitializationScripts(const std::string& sceneDescription);
+    void runGlobalCustomizationScripts(const std::string& sceneDescription);
     void configureLogging();
 
     // Components

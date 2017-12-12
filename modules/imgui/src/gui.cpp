@@ -253,6 +253,19 @@ static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
     "explaining what impact they have on the visuals."
 };
 
+static const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+    "HelpTextDelay",
+    "Tooltip Delay (in s)",
+    "This value determines the delay in seconds after which the tooltip is shown."
+};
+
+static const openspace::properties::Property::PropertyInfo HiddenInfo = {
+    "IsHidden",
+    "Is Hidden",
+    "If this value is true, all GUI items will not be rendered, regardless of their "
+    "status"
+};
+
 } // namespace
 
 namespace openspace::gui {
@@ -272,36 +285,83 @@ GUI::GUI()
     )
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
-    , _featuredProperties("Featured Properties",
-        GuiPropertyComponent::UseTreeLayout::No,
-        GuiPropertyComponent::IsTopLevelWindow::Yes)
+    , _featuredProperties("Featured Properties", GuiPropertyComponent::UseTreeLayout::No)
     , _showInternals(false)
     , _showHelpText(ShowHelpInfo, true)
+    , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
     , _currentVisibility(properties::Property::Visibility::Developer)
+    , _allHidden(HiddenInfo, true)
 {
     addPropertySubOwner(_help);
     addPropertySubOwner(_performance);
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
+    _featuredProperties.setEnabled(true);
+    addPropertySubOwner(_featuredProperties);
     addPropertySubOwner(_virtualProperty);
 #ifdef GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_globeBrowsing);
 #endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
+    _spaceTime.setEnabled(true);
     addPropertySubOwner(_spaceTime);
     addPropertySubOwner(_mission);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     addPropertySubOwner(_iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
 
-    addProperty(_showHelpText);
-    _showHelpText.onChange([this](){
-        _globalProperty.setShowHelpTooltip(_showHelpText);
-        _property.setShowHelpTooltip(_showHelpText);
-        _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
-        _virtualProperty.setShowHelpTooltip(_showHelpText);
-    });
+    {
+        auto showHelpTextFunc = [this](){
+            _help.setShowHelpTooltip(_showHelpText);
+            _filePath.setShowHelpTooltip(_showHelpText);
+#ifdef GLOBEBROWSING_USE_GDAL
+            _globeBrowsing.setShowHelpTooltip(_showHelpText);
+#endif // GLOBEBROWSING_USE_GDAL
+            _performance.setShowHelpTooltip(_showHelpText);
+            _globalProperty.setShowHelpTooltip(_showHelpText);
+            _property.setShowHelpTooltip(_showHelpText);
+            _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
+            _virtualProperty.setShowHelpTooltip(_showHelpText);
+            _spaceTime.setShowHelpTooltip(_showHelpText);
+            _mission.setShowHelpTooltip(_showHelpText);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+            _iswa.setShowHelpTooltip(_showHelpText);
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+            _parallel.setShowHelpTooltip(_showHelpText);
+            _featuredProperties.setShowHelpTooltip(_showHelpText);
+        };
+        showHelpTextFunc();
+        _showHelpText.onChange(std::move(showHelpTextFunc));
+        addProperty(_showHelpText);
+    }
+
+    {
+        auto helpTextDelayFunc = [this](){
+            _help.setShowHelpTooltipDelay(_helpTextDelay);
+            _filePath.setShowHelpTooltipDelay(_helpTextDelay);
+#ifdef GLOBEBROWSING_USE_GDAL
+            _globeBrowsing.setShowHelpTooltipDelay(_helpTextDelay);
+#endif // GLOBEBROWSING_USE_GDAL
+            _performance.setShowHelpTooltipDelay(_helpTextDelay);
+            _globalProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _property.setShowHelpTooltipDelay(_helpTextDelay);
+            _screenSpaceProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _virtualProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _spaceTime.setShowHelpTooltipDelay(_helpTextDelay);
+            _mission.setShowHelpTooltipDelay(_helpTextDelay);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+            _iswa.setShowHelpTooltipDelay(_helpTextDelay);
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+            _parallel.setShowHelpTooltipDelay(_helpTextDelay);
+            _featuredProperties.setShowHelpTooltipDelay(_helpTextDelay);
+        };
+        helpTextDelayFunc();
+        _helpTextDelay.onChange(std::move(helpTextDelayFunc));
+        addProperty(_helpTextDelay);
+    }
+
+    addProperty(_allHidden);
 }
 
 void GUI::initialize() {
@@ -626,8 +686,11 @@ void GUI::endFrame() {
         _performance.render();
     }
 
-    if (_isEnabled) {
-        render();
+    if (!_allHidden) {
+
+        if (_isEnabled) {
+            render();
+        }
 
         if (_globalProperty.isEnabled()) {
             _globalProperty.render();
@@ -666,11 +729,13 @@ void GUI::endFrame() {
             _mission.render();
         }
 
-        // We always want to render the Space/Time component
-        _spaceTime.render();
+        if (_spaceTime.isEnabled()) {
+            _spaceTime.render();
+        }
 
-        // We always want to render the featured properties component
-        _featuredProperties.render();
+        if (_featuredProperties.isEnabled()) {
+            _featuredProperties.render();
+        }
     }
 
     ImGui::Render();
@@ -744,7 +809,11 @@ bool GUI::charCallback(unsigned int character, KeyModifier) {
 }
 
 void GUI::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+
     ImGui::Begin("OpenSpace GUI", nullptr);
+    
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     bool property = _property.isEnabled();
     ImGui::Checkbox("Scene Graph Properties", &property);
@@ -754,9 +823,17 @@ void GUI::render() {
     ImGui::Checkbox("ScreenSpace Properties", &screenSpaceProperty);
     _screenSpaceProperty.setEnabled(screenSpaceProperty);
 
+    bool featuredProperties = _featuredProperties.isEnabled();
+    ImGui::Checkbox("Featured Properties", &featuredProperties);
+    _featuredProperties.setEnabled(featuredProperties);
+
     bool globalProperty = _globalProperty.isEnabled();
     ImGui::Checkbox("Global Properties", &globalProperty);
     _globalProperty.setEnabled(globalProperty);
+
+    bool spacetime = _spaceTime.isEnabled();
+    ImGui::Checkbox("Space/Time", &spacetime);
+    _spaceTime.setEnabled(spacetime);
 
     bool parallel = _parallel.isEnabled();
     ImGui::Checkbox("Parallel Connection", &parallel);

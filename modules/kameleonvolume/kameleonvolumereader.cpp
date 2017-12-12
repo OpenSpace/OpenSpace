@@ -44,7 +44,7 @@
 #endif // WIN32
 
 namespace {
-    const char* _loggerCat = "KameleonVolumeReader";
+    constexpr const char* _loggerCat = "KameleonVolumeReader";
 } // namespace
 
 namespace openspace {

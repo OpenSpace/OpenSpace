@@ -31,7 +31,7 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "BlockPlaneIntersectionGeometry";
+    constexpr const char* _loggerCat = "BlockPlaneIntersectionGeometry";
 } // namespace
 
 namespace openspace {

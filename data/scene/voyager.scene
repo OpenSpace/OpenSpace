@@ -1,5 +1,3 @@
-dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
-
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -7,7 +5,7 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
-    set_default_dashboard()
+    openspace.set_default_dashboard()
 
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
@@ -20,6 +18,8 @@ end
 function postInitialization()
     openspace.printInfo("Setting default values")
 
+    openspace.set_default_gui_sorting()
+
     openspace.setPropertyValueSingle("Global Properties.GlobeBrowsing.GdalWrapper.LogGdalErrors", false)
     openspace.setPropertyValueSingle("Earth.RenderableGlobe.Debug.LevelByProjectedAreaElseDistance", false)
 
@@ -29,7 +29,7 @@ function postInitialization()
 
     -- Defined in scene_helper.lua
     -- Used to create focus buttons for a subset of scenegraph nodes
-    mark_interesting_nodes({
+    openspace.mark_interesting_nodes({
         "Earth", "Voyager 1", "Voyager 2", "Jupiter", "Saturn", "Uranus", "Neptune"
     })
 end

@@ -88,11 +88,14 @@ public:
     bool _showInternals;
 
     properties::BoolProperty _showHelpText;
+    properties::FloatProperty _helpTextDelay;
 
 private:
     void renderAndUpdatePropertyVisibility();
 
     properties::Property::Visibility _currentVisibility;
+
+    properties::BoolProperty _allHidden;
 
     std::vector<ImGuiContext*> _contexts;
 };

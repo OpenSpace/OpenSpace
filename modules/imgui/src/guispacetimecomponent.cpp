@@ -27,7 +27,6 @@
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
 
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
@@ -36,16 +35,59 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 
+#include <imgui_internal.h>
+
 namespace {
     static const ImVec2 Size = ImVec2(350, 500);
+
+    static const openspace::properties::Property::PropertyInfo MinMaxInfo = {
+        "MinMax",
+        "Minimum/Maximum value for delta time",
+        "This value determines the minimum and maximum value for the delta time slider."
+    };
+
+    void showTooltip(const std::string& message, double delay) {
+        // Hackish way to enfore a window size for TextWrapped (SetNextWindowSize did not
+        // do the trick)
+        constexpr std::string::size_type FirstLineLength = 64;
+        if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > delay) {
+            ImGui::BeginTooltip();
+            ImGui::Text(
+                "%s",
+                message.substr(0, std::min(message.size() - 1, FirstLineLength)).c_str()
+            );
+            if (message.size() > FirstLineLength) {
+                ImGui::TextWrapped(
+                    "%s",
+                    message.substr(std::min(message.size() - 1, FirstLineLength)).c_str()
+                );
+            }
+
+            ImGui::EndTooltip();
+        }
+    }
+
 } // namespace
 
 namespace openspace::gui {
 
-GuiSpaceTimeComponent::GuiSpaceTimeComponent() : GuiComponent("Space/Time") {}
+GuiSpaceTimeComponent::GuiSpaceTimeComponent()
+    : GuiComponent("Space/Time")
+    , _minMaxDeltaTime(MinMaxInfo, 100000.f, 0.f, 1e8f, 1.f, 5.f)
+    , _localMinMaxDeltatime(100000.f)
+{
+    _minMaxDeltaTime.onChange([this]() {
+        _localMinMaxDeltatime = _minMaxDeltaTime;
+    });
+    addProperty(_minMaxDeltaTime);
+}
 
 void GuiSpaceTimeComponent::render() {
-    ImGui::Begin(name().c_str(), nullptr, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+    bool v = _isEnabled;
+    ImGui::Begin(name().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     std::vector<SceneGraphNode*> nodes =
         OsEng.renderEngine().scene()->allSceneGraphNodes();
@@ -58,21 +100,10 @@ void GuiSpaceTimeComponent::render() {
         }
     );
 
-    ImGui::BeginGroup();
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(
-            "%s",
-            "These buttons and the dropdown menu determine the focus object in the scene "
-            "that is the center of all camera movement"
-        );
-    }
-
     CaptionText("Focus Selection");
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    ImGui::Text("%s", "Focus on:");
-    ImGui::SameLine();
     // Buttons for important SceneGraphNodes
     for (SceneGraphNode* n : nodes) {
         const std::vector<std::string>& tags = n->tags();
@@ -108,7 +139,7 @@ void GuiSpaceTimeComponent::render() {
     }
     int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
 
-    bool hasChanged = ImGui::Combo("Focus Node", &currentPosition, nodeNames.c_str());
+    bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.setPropertyValue('NavigationHandler.Origin', '" +
@@ -117,8 +148,6 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
-    ImGui::EndGroup();
-
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
     ImGui::Separator();
@@ -126,15 +155,6 @@ void GuiSpaceTimeComponent::render() {
     ImGui::Separator();
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-
-
-    ImGui::BeginGroup();
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(
-            "%s",
-            "These elements determine the simulation time inside OpenSpace."
-        );
-    }
 
     CaptionText("Time Controls");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
@@ -155,15 +175,14 @@ void GuiSpaceTimeComponent::render() {
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(
-            "%s",
-            "Entering a date here and confirming with ENTER sets the current simulation "
-            "time to the entered date. The format of the date has to be either ISO 8601 "
-            "YYYY-MM-DDThh:mm:ss (2017-08-27T04:00:00) or YYYY MMM DD hh:mm:ss "
-            "(2017 MAY 01 12:00:00). The hours are in 24h and specified as UTC."
-        );
-    }
+
+    showTooltip(
+        "Entering a date here and confirming with ENTER sets the current simulation time "
+        "to the entered date. The format of the date has to be either ISO 8601 "
+        "YYYY-MM-DDThh:mm:ss (2017-08-27T04:00:00) or YYYY MMM DD hh:mm:ss "
+        "(2017 MAY 01 12:00:00). The hours are in 24h and specified as UTC.",
+        _tooltipDelay
+    );
 
     auto incrementTime = [](int days) {
         using namespace std::chrono;
@@ -189,12 +208,7 @@ void GuiSpaceTimeComponent::render() {
     };
 
     bool minusMonth = ImGui::Button("-Month");
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(
-            "%s",
-            "OBS: A month here equals 30 days."
-        );
-    }
+    showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
     if (minusMonth) {
         incrementTime(-30);
     }
@@ -244,39 +258,39 @@ void GuiSpaceTimeComponent::render() {
     if (plusMonth) {
         incrementTime(30);
     }
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(
-            "%s",
-            "OBS: A month here equals 30 days."
-        );
-    }
+    showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
+    bool minMaxChanged = ImGui::InputFloat(
+        "Time slider range",
+        &_localMinMaxDeltatime
+    );
+    if (minMaxChanged) {
+        _minMaxDeltaTime = _localMinMaxDeltatime;
+    }
 
     float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-    bool changed = ImGui::SliderFloat(
+    bool deltaChanged = ImGui::SliderFloat(
         "Delta Time",
         &deltaTime,
-        -100000.f,
-        100000.f,
-        "%.3f",
+        -_minMaxDeltaTime,
+        _minMaxDeltaTime,
+        "%.6f",
         5.f
     );
-    if (changed) {
+    if (deltaChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip(
-            "%s",
-            "This determines the simulation time increment, that is the passage "
-            "of time in OpenSpace relative to a wall clock. Times are expressed as "
-            "simulation time / real world time."
-        );
-    }
+    showTooltip(
+        "This determines the simulation time increment, that is the passage of time in "
+        "OpenSpace relative to a wall clock. Times are expressed as simulation time / "
+        "real world time.",
+        _tooltipDelay
+    );
 
     bool isPaused = OsEng.timeManager().time().paused();
 
@@ -372,9 +386,6 @@ void GuiSpaceTimeComponent::render() {
         );
     }
     ImGui::SameLine();
-
-
-    ImGui::EndGroup();
 
     ImGui::End();
 

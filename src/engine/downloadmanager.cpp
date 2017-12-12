@@ -49,11 +49,11 @@
 #endif
 
 namespace {
-    const char* _loggerCat = "DownloadManager";
+    constexpr const char* _loggerCat = "DownloadManager";
 
-    const char* RequestIdentifier = "identifier";
-    const char* RequestFileVersion = "file_version";
-    const char* RequestApplicationVersion = "application_version";
+    constexpr const char* RequestIdentifier = "identifier";
+    constexpr const char* RequestFileVersion = "file_version";
+    constexpr const char* RequestApplicationVersion = "application_version";
 
     struct ProgressInformation {
         std::shared_ptr<openspace::DownloadManager::FileFuture> future;

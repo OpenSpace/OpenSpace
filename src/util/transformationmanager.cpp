@@ -27,7 +27,7 @@
 #include <ghoul/logging/logmanager.h>
 
  namespace {
-    const char* _loggerCat = "TransformationManager";
+     constexpr const char* _loggerCat = "TransformationManager";
  } // namespace
 
 namespace openspace {

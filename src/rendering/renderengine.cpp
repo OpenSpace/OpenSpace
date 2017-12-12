@@ -78,15 +78,15 @@
 #include "renderengine_lua.inl"
 
 namespace {
-    const char* _loggerCat = "RenderEngine";
+    constexpr const char* _loggerCat = "RenderEngine";
 
-    const char* KeyRenderingMethod = "RenderingMethod";
-    const std::chrono::seconds ScreenLogTimeToLive(15);
-    const char* DefaultRenderingMethod = "ABuffer";
-    const char* RenderFsPath = "${SHADERS}/render.frag";
+    constexpr const char* KeyRenderingMethod = "RenderingMethod";
+    constexpr const std::chrono::seconds ScreenLogTimeToLive(15);
+    constexpr const char* DefaultRenderingMethod = "ABuffer";
+    constexpr const char* RenderFsPath = "${SHADERS}/render.frag";
 
-    const char* KeyFontMono = "Mono";
-    const char* KeyFontLight = "Light";
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const char* KeyFontLight = "Light";
 
     static const openspace::properties::Property::PropertyInfo PerformanceInfo = {
         "PerformanceMeasurements",
@@ -589,6 +589,15 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         "Shutdown in: %.2fs/%.2fs",
         timer,
         fullTime
+    );
+
+    RenderFontCr(
+        *_fontDate,
+        penPosition,
+        "%s",
+        // Important: length of this string is the same as the shutdown time text
+        // to make them align
+        "Press ESC again to abort"
     );
 }
 

@@ -191,7 +191,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     OsEng.registerModuleKeyboardCallback(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
-            if (gui.isEnabled() || gui._performance.isEnabled()) {
+            // A list of all the windows that can show up by themselves
+            if (gui.isEnabled() || gui._performance.isEnabled() ||
+                gui._property.isEnabled())
+            {
                 return gui.keyCallback(key, mod, action);
             }
             else {
@@ -202,7 +205,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     OsEng.registerModuleCharCallback(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
-            if (gui.isEnabled() || gui._performance.isEnabled()) {
+            // A list of all the windows that can show up by themselves
+            if (gui.isEnabled() || gui._performance.isEnabled() ||
+                gui._property.isEnabled())
+            {
                 return gui.charCallback(codepoint, modifier);
             }
             else {
@@ -213,7 +219,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     OsEng.registerModuleMouseButtonCallback(
         [&](MouseButton button, MouseAction action) -> bool {
-            if (gui.isEnabled() || gui._performance.isEnabled()) {
+            // A list of all the windows that can show up by themselves
+            if (gui.isEnabled() || gui._performance.isEnabled() ||
+                gui._property.isEnabled())
+            {
                 return gui.mouseButtonCallback(button, action);
             }
             else {
@@ -224,7 +233,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     OsEng.registerModuleMouseScrollWheelCallback(
         [&](double, double posY) -> bool {
-            if (gui.isEnabled() || gui._performance.isEnabled()) {
+            // A list of all the windows that can show up by themselves
+            if (gui.isEnabled() || gui._performance.isEnabled() ||
+                gui._property.isEnabled())
+            {
                 return gui.mouseWheelCallback(posY);
             }
             else {

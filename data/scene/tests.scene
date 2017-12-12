@@ -1,5 +1,3 @@
-dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
-
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the

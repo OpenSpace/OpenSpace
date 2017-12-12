@@ -51,6 +51,9 @@ public:
     /// The key that stores the location of the SGCT configuration file that is used on
     /// application launch
     static const std::string KeyConfigSgct;
+    /// The key that defines a list of scripts for global customization that get executed
+    /// regardless of which scene is loaded
+    static const std::string KeyGlobalCustomizationScripts;
     /// The part of the key that defines the type
     static const std::string PartType;
     /// The part of the key that defines the file

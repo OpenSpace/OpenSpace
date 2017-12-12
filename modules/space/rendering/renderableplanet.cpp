@@ -47,14 +47,14 @@
 #include <fstream>
 
 namespace {
-    const char* KeyGeometry = "Geometry";
-    const char* KeyRadius = "Radius";
+    constexpr const char* KeyGeometry = "Geometry";
+    constexpr const char* KeyRadius = "Radius";
 
-    static const char* _loggerCat = "RenderablePlanet";
+    constexpr const char* _loggerCat = "RenderablePlanet";
 
-    const char* keyShadowGroup                   = "Shadow_Group";
-    const char* keyShadowSource                  = "Source";
-    const char* keyShadowCaster                  = "Caster";
+    constexpr const char* keyShadowGroup                   = "Shadow_Group";
+    constexpr const char* keyShadowSource                  = "Source";
+    constexpr const char* keyShadowCaster                  = "Caster";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",

@@ -32,9 +32,9 @@
 #include <cstring>
 
 namespace {
-    const char* _loggerCat = "SequenceParser";
+    constexpr const char* _loggerCat = "SequenceParser";
 
-    const char* PlaybookIdentifierName = "Playbook";
+    constexpr const char* PlaybookIdentifierName = "Playbook";
 } // namespace
 
 namespace openspace {

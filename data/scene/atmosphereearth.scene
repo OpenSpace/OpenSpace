@@ -1,5 +1,3 @@
-dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
-
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -7,7 +5,7 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
-    set_default_dashboard()
+    openspace.set_default_dashboard()
 
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
@@ -22,6 +20,8 @@ function postInitialization()
     created and initialized, but before the first render call. This is the place to set
     graphical settings for the renderables.
     ]]--
+    openspace.set_default_gui_sorting()
+
     openspace.printInfo("Setting default values")
     openspace.setPropertyValue("Sun.renderable.Enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.Enabled", true)

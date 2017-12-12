@@ -41,7 +41,7 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "TileDataType";
+    constexpr const char* _loggerCat = "TileDataType";
 } // namespace
 
 namespace openspace::globebrowsing::tiledatatype {

@@ -101,16 +101,16 @@ using namespace ghoul::logging;
 using namespace ghoul::cmdparser;
 
 namespace {
-    const char* _loggerCat = "OpenSpaceEngine";
-    const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
+    constexpr const char* _loggerCat = "OpenSpaceEngine";
+    constexpr const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
 
-    const char* SgctConfigArgumentCommand = "-config";
+    constexpr const char* SgctConfigArgumentCommand = "-config";
 
-    const char* PreInitializeFunction = "preInitialization";
-    const char* PostInitializationFunction = "postInitialization";
+    constexpr const char* PreInitializeFunction = "preInitialization";
+    constexpr const char* PostInitializationFunction = "postInitialization";
 
-    const int CacheVersion = 1;
-    const int DownloadVersion = 1;
+    constexpr const int CacheVersion = 1;
+    constexpr const int DownloadVersion = 1;
 
     const glm::ivec3 FontAtlasSize{ 1536, 1536, 1 };
 
@@ -584,12 +584,14 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         }
     );
 
+    bool errorWithPreInit = false;
     // Run start up scripts
     try {
         runPreInitializationScripts(scenePath);
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
+        errorWithPreInit = true;
     }
 
     Scene* scene;
@@ -630,60 +632,68 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     // an OpenGL context
     std::atomic_bool initializeFinished(false);
     bool errorWhileLoading = false;
-    std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading, this]() {
-        _loadingScreen->postMessage("Creating scene...");
-        _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
-        try {
-            scene = _sceneManager->loadScene(scenePath);
+    std::thread t([&scene, scenePath, &initializeFinished, &errorWhileLoading,
+                   &errorWithPreInit, this]()
+    {
+        if (errorWithPreInit) {
+            _loadingScreen->postMessage("Failed loading scene '" + scenePath + "'");
+            _loadingScreen->setCatastrophicError(LoadingScreen::CatastrophicError::Yes);
         }
-        catch (const ghoul::FileNotFoundError& e) {
-            LERRORC(e.component, e.message);
-            errorWhileLoading = true;
-            return;
-        }
-        catch (const Scene::InvalidSceneError& e) {
-            LERRORC(e.component, e.message);
-            errorWhileLoading = true;
-            return;
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-            errorWhileLoading = true;
-            return;
-        }
-        catch (const std::exception& e) {
-            LERROR(e.what());
-            errorWhileLoading = true;
-            return;
-        }
-        catch (...) {
-            LERROR("Unknown error loading the scene");
-            errorWhileLoading = true;
-            return;
-        }
+        else {
+            _loadingScreen->postMessage("Creating scene...");
+            _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
+            try {
+                scene = _sceneManager->loadScene(scenePath);
+            }
+            catch (const ghoul::FileNotFoundError& e) {
+                LERRORC(e.component, e.message);
+                errorWhileLoading = true;
+                return;
+            }
+            catch (const Scene::InvalidSceneError& e) {
+                LERRORC(e.component, e.message);
+                errorWhileLoading = true;
+                return;
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+                errorWhileLoading = true;
+                return;
+            }
+            catch (const std::exception& e) {
+                LERROR(e.what());
+                errorWhileLoading = true;
+                return;
+            }
+            catch (...) {
+                LERROR("Unknown error loading the scene");
+                errorWhileLoading = true;
+                return;
+            }
 
-        Scene* previousScene = _renderEngine->scene();
-        if (previousScene) {
-            _syncEngine->removeSyncables(_timeManager->getSyncables());
-            _syncEngine->removeSyncables(_renderEngine->getSyncables());
-            _syncEngine->removeSyncable(_scriptEngine.get());
+            Scene* previousScene = _renderEngine->scene();
+            if (previousScene) {
+                _syncEngine->removeSyncables(_timeManager->getSyncables());
+                _syncEngine->removeSyncables(_renderEngine->getSyncables());
+                _syncEngine->removeSyncable(_scriptEngine.get());
 
-            _renderEngine->setScene(nullptr);
-            _renderEngine->setCamera(nullptr);
-            _sceneManager->unloadScene(*previousScene);
+                _renderEngine->setScene(nullptr);
+                _renderEngine->setCamera(nullptr);
+                _sceneManager->unloadScene(*previousScene);
+            }
+
+            // Initialize the RenderEngine
+            _renderEngine->setScene(scene);
+            _renderEngine->setCamera(scene->camera());
+            _renderEngine->setGlobalBlackOutFactor(0.0);
+            _renderEngine->startFading(1, 3.0);
+
+            _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
+
+            scene->initialize();
+            _loadingScreen->postMessage("Finished initializing");
+            initializeFinished = true;
         }
-
-        // Initialize the RenderEngine
-        _renderEngine->setScene(scene);
-        _renderEngine->setCamera(scene->camera());
-        _renderEngine->setGlobalBlackOutFactor(0.0);
-        _renderEngine->startFading(1, 3.0);
-
-        _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
-
-        scene->initialize();
-        _loadingScreen->postMessage("Finished initializing");
-        initializeFinished = true;
     });
 
     // While the SceneGraphNodes initialize themselves, we can hand over control to the
@@ -716,6 +726,13 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     }
     catch (const ghoul::RuntimeError& e) {
         LFATALC(e.component, e.message);
+    }
+
+    // Run the global configuration scripts
+    try {
+        runGlobalCustomizationScripts(scenePath);
+    } catch (ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
     }
 
     // Write keyboard documentation.
@@ -797,26 +814,26 @@ void OpenSpaceEngine::writeDocumentation() {
 void OpenSpaceEngine::gatherCommandlineArguments() {
     commandlineArgumentPlaceholders.configurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
+        commandlineArgumentPlaceholders.configurationName, "-config", "-c",
         "Provides the path to the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.sgctConfigurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        &commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
+        commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
         "Provides the path to the SGCT configuration file, overriding the value set in "
         "the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.sceneName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        &commandlineArgumentPlaceholders.sceneName, "-scene", "", "Provides the path to "
+        commandlineArgumentPlaceholders.sceneName, "-scene", "", "Provides the path to "
         "the scene file, overriding the value set in the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.cacheFolder = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        &commandlineArgumentPlaceholders.cacheFolder, "-cacheDir", "", "Provides the "
+        commandlineArgumentPlaceholders.cacheFolder, "-cacheDir", "", "Provides the "
         "path to a cache file, overriding the value set in the OpenSpace configuration "
         "file"
     ));
@@ -882,6 +899,36 @@ void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescr
             "Error executing '" << PostInitializationFunction << "': " <<
             lua_tostring(state, -1)
         );
+    }
+}
+
+void OpenSpaceEngine::runGlobalCustomizationScripts(const std::string& sceneDescription) {
+    // @CLEANUP:  Move this into the scene loading?  ---abock
+    LINFO("Running Global initialization scripts");
+    ghoul::lua::LuaState state;
+    OsEng.scriptEngine().initializeLuaState(state);
+
+    // First execute the script to get all global variables
+    ghoul::lua::runScriptFile(state, absPath(sceneDescription));
+
+    std::string k = ConfigurationManager::KeyGlobalCustomizationScripts;
+    if (_configurationManager->hasKey(k)) {
+        ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(k);
+        for (int i = 1; i <= dict.size(); ++i) {
+            std::string script = dict.value<std::string>(std::to_string(i));
+
+            if (FileSys.fileExists(script)) {
+                try {
+                    LINFO("Running global customization script: " << script);
+                    ghoul::lua::runScriptFile(state, absPath(script));
+                } catch (ghoul::RuntimeError& e) {
+                    LERRORC(e.component, e.message);
+                }
+            }
+            else {
+                LDEBUG("Ignoring non-existing script file: " << script);
+            }
+        }
     }
 }
 
@@ -1327,6 +1374,10 @@ void OpenSpaceEngine::drawOverlays() {
             // and we won't need this if we are shutting down
             _renderEngine->renderCameraInformation();
         }
+        else {
+            // If we are in shutdown mode, we can display the remaining time
+            _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
+        }
         _console->render();
     }
 
@@ -1437,12 +1488,10 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int siz
 void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
-        LINFO("Disabled shutdown mode");
         _shutdown.inShutdown = false;
     }
     else {
         // Else, we have to enable it
-        LINFO("Shutting down OpenSpace");
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
     }
@@ -1502,6 +1551,9 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "string, string",
                 "Removes a tag (second argument) from a scene graph node (first argument)"
             }
+        },
+        {
+            absPath("${SCRIPTS}/common_scripts.lua")
         }
     };
 }

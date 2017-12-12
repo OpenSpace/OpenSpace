@@ -13,12 +13,35 @@ helper.scheduledScript.reversible = {}
 -- scenes
 helper.setCommonKeys = function()
     openspace.bindKeyLocal(
-        "F1",
-        helper.property.invert('Global Properties.ImGUI.Main.Enabled'),
-        "Toggles the visibility of the on-screen GUI."
-    )
-    openspace.bindKeyLocal(
         "F2",
+        [[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Properties.Enabled');
+        local c = openspace.getPropertyValue('Global Properties.ImGUI.Main.IsHidden');
+        openspace.setPropertyValue('Global Properties.ImGUI.*.Enabled', false);
+        if b and c then
+            -- This can happen if the main properties window is enabled, the main gui is enabled
+            -- and then closed again. So the main properties window is enabled, but also all
+            -- windows are hidden
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', false);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', true);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', true);
+        else
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', not b);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', not b);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);
+        end]],
+        "Shows or hides the properties window"
+    )
+
+    openspace.bindKeyLocal(
+        "F3",
+        [[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled');
+        openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Enabled', not b);
+        openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);]],
+        "Shows or hides the entire user interface"
+    )
+
+    openspace.bindKeyLocal(
+        "F4",
         helper.property.invert("RenderEngine.PerformanceMeasurements"),
         "Toogles performance measurements that shows rendering time informations."
     )

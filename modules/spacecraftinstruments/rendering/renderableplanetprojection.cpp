@@ -52,14 +52,14 @@
 #endif
 
 namespace {
-    const char* _loggerCat = "RenderablePlanetProjection";
+    constexpr const char* _loggerCat = "RenderablePlanetProjection";
 
-    const char* KeyGeometry = "Geometry";
-    const char* KeyProjection = "Projection";
+    constexpr const char* KeyGeometry = "Geometry";
+    constexpr const char* KeyProjection = "Projection";
 
-    const char* KeyRadius = "Geometry.Radius";
+    constexpr const char* KeyRadius = "Geometry.Radius";
 //    const char* keyShading = "PerformShading";
-    const char* _mainFrame = "GALACTIC";
+    constexpr const char* _mainFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
