@@ -93,13 +93,13 @@ AssetLoader::~AssetLoader() {
 }
 
 void AssetLoader::trackAsset(std::shared_ptr<Asset> asset) {
-    _loadedAssets.emplace(asset->id(), asset);
+    _trackedAssets.emplace(asset->id(), asset);
 }
 
 void AssetLoader::untrackAsset(Asset* asset) {
-    auto it = _loadedAssets.find(asset->id());
-    if (it != _loadedAssets.end()) {
-        _loadedAssets.erase(it);
+    auto it = _trackedAssets.find(asset->id());
+    if (it != _trackedAssets.end()) {
+        _trackedAssets.erase(it);
     }
 }
 
@@ -252,9 +252,9 @@ std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
     std::string path = generateAssetPath(directory, name);
 
     // Check if asset is already loaded.
-    const auto it = _loadedAssets.find(path);
+    const auto it = _trackedAssets.find(path);
 
-    if (it != _loadedAssets.end()) {
+    if (it != _trackedAssets.end()) {
         std::shared_ptr<Asset> a = it->second.lock();
         if (a != nullptr) {
             return a;
@@ -343,8 +343,8 @@ std::shared_ptr<Asset> AssetLoader::has(const std::string& name) const {
     ghoul::filesystem::Directory directory = currentDirectory();
     std::string path = generateAssetPath(directory, name);
 
-    const auto it = _loadedAssets.find(path);
-    if (it == _loadedAssets.end()) {
+    const auto it = _trackedAssets.find(path);
+    if (it == _trackedAssets.end()) {
         return nullptr;
     }
     return it->second.lock();

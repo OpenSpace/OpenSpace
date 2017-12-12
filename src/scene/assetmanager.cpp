@@ -41,8 +41,8 @@ AssetManager::AssetManager(
     std::unique_ptr<AssetLoader> loader,
     std::unique_ptr<SynchronizationWatcher> syncWatcher
 )
-    : _assetLoader(std::move(loader))
-    , _synchronizationWatcher(std::move(syncWatcher))
+    : _synchronizationWatcher(std::move(syncWatcher))
+    , _assetLoader(std::move(loader))
 {}
 
 void AssetManager::initialize() {

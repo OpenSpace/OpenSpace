@@ -80,23 +80,28 @@ public:
     ~AssetLoader();
 
     /**
-     * Add the asset as a request for the root asset
-     * The asset is loaded synchronously
+     * Add the asset as a request of the root asset
      */
     std::shared_ptr<Asset> add(const std::string& identifier);
 
     /**
-     * Remove the asset as a dependency on the root asset
-     * The asset is unloaded synchronously
+     * Remove the asset as a request of the root asset
      */
     void remove(const std::string& identifier);
 
+    /**
+     * Enable the asset to be reused when the same path is required/requested again
+     */
     void trackAsset(std::shared_ptr<Asset> asset);
+
+    /**
+     * Disable the asset from being reused when the same path is required/requested again
+     */
     void untrackAsset(Asset* asset);
 
     /**
-    * Returns the asset identified by the identifier,
-    * if the asset is loaded. Otherwise return nullptr.
+    * Return the asset identified by the identifier,
+    * if the asset is tracked. Otherwise return nullptr.
     */
     std::shared_ptr<Asset> has(const std::string& identifier) const;
 
@@ -115,19 +120,36 @@ public:
     */
     const std::string& assetRootDirectory() const;
 
+    /**
+     * Load an asset
+     */
     bool loadAsset(std::shared_ptr<Asset> asset);
 
+    /**
+     * Call the onInitialize function specified in the asset file
+     */
     void callOnInitialize(Asset* asset);
 
+    /**
+     * Call the onDeinitialize function specified in the asset file
+     */
     void callOnDeinitialize(Asset* asset);
 
-    void callOnDependencyInitialize(Asset* asset, Asset* dependant);
+    /**
+     * Call the dependency.onInitialize function specified in the asset file
+     */
+    void callOnDependencyInitialize(Asset* dependency, Asset* asset);
 
-    void callOnDependencyDeinitialize(Asset* asset, Asset* dependant);
+    /**
+     * Call the dependency.onDeinitialize function specified in the asset file
+     */
+    void callOnDependencyDeinitialize(Asset* dependency, Asset* asset);
 
+    /**
+     * Generate the absolute path for an asset specified as `path` relative to `baseDirectory`
+     */
     std::string generateAssetPath(const std::string& baseDirectory,
                                   const std::string& path) const;
-
 
     /**
      * Add listener to asset state changes
@@ -159,9 +181,6 @@ private:
     std::shared_ptr<Asset> request(const std::string& path);
     void unrequest(const std::string& path);
 
-    /**
-     * Add the global assets table to the lua stack.
-     */
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
 
@@ -193,12 +212,11 @@ private:
     friend int assetloader::syncedResource(lua_State* state);
     friend int assetloader::exportAsset(lua_State* state);
 
+    // Member variables
     std::shared_ptr<Asset> _rootAsset;
     std::shared_ptr<Asset> _currentAsset;
-    std::unordered_map<std::string, std::weak_ptr<Asset>> _loadedAssets;
-
+    std::unordered_map<std::string, std::weak_ptr<Asset>> _trackedAssets;
     SynchronizationWatcher* _synchronizationWatcher;
-
     std::string _assetRootDirectory;
     ghoul::lua::LuaState* _luaState;
 

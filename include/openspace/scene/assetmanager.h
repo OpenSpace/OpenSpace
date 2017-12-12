@@ -79,8 +79,8 @@ private:
     std::mutex _pendingInitializationsMutex;
     std::vector<std::shared_ptr<Asset>> _pendingInitializations;
 
-    std::unique_ptr<AssetLoader> _assetLoader;
     std::unique_ptr<SynchronizationWatcher> _synchronizationWatcher;
+    std::unique_ptr<AssetLoader> _assetLoader;
 };
 
 } // namespace openspace

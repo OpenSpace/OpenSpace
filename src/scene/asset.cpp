@@ -407,7 +407,7 @@ void Asset::initialize() {
     // 5. Call dependency initialization function of the child and this
     // if the requested child was initialized before this.
     for (auto& child : _requestedAssets) {
-        if (child->state() == State::Initialized) {
+        if (child->isInitialized()) {
             try {
                 loader()->callOnDependencyInitialize(child.get(), this);
             } catch (const ghoul::lua::LuaRuntimeException& e) {
