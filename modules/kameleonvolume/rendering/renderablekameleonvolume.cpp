@@ -42,22 +42,22 @@
 #include <modules/volume/rawvolume.h>
 
 namespace {
-    const char* _loggerCat = "RenderableKameleonVolume";
+    constexpr const char* _loggerCat = "RenderableKameleonVolume";
 
-    const char* KeyDimensions = "Dimensions";
-    const char* KeyStepSize = "StepSize";
-    const char* KeyTransferFunction = "TransferFunction";
-    const char* KeySource = "Source";
-    const char* KeyVariable = "Variable";
-    const char* KeyLowerDomainBound = "LowerDomainBound";
-    const char* KeyUpperDomainBound = "UpperDomainBound";
-    const char* KeyDomainScale = "DomainScale";
-    const char* KeyLowerValueBound = "LowerValueBound";
-    const char* KeyUpperValueBound = "UpperValueBound";
-    const char* KeyClipPlanes = "ClipPlanes";
-    const char* KeyCache = "Cache";
-    const char* KeyGridType = "GridType";
-    const char* ValueSphericalGridType = "Spherical";
+    constexpr const char* KeyDimensions = "Dimensions";
+    constexpr const char* KeyStepSize = "StepSize";
+    constexpr const char* KeyTransferFunction = "TransferFunction";
+    constexpr const char* KeySource = "Source";
+    constexpr const char* KeyVariable = "Variable";
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    constexpr const char* KeyDomainScale = "DomainScale";
+    constexpr const char* KeyLowerValueBound = "LowerValueBound";
+    constexpr const char* KeyUpperValueBound = "UpperValueBound";
+    constexpr const char* KeyClipPlanes = "ClipPlanes";
+    constexpr const char* KeyCache = "Cache";
+    constexpr const char* KeyGridType = "GridType";
+    constexpr const char* ValueSphericalGridType = "Spherical";
 
     static const openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",

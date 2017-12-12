@@ -25,7 +25,7 @@
 #include <modules/multiresvolume/rendering/shenbrickselector.h>
 
 namespace {
-    const char* _loggerCat = "ShenBrickSelector";
+    constexpr const char* _loggerCat = "ShenBrickSelector";
 } // namespace
 
 namespace openspace {

@@ -41,9 +41,9 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const char* _loggerCat = "ScriptEngine";
+    constexpr const char* _loggerCat = "ScriptEngine";
 
-    const int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
+    constexpr int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
 } // namespace
 
 namespace openspace::scripting {

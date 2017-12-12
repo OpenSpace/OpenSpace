@@ -37,11 +37,11 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* _loggerCat = "Renderable";
-    const char* keyStart = "StartTime";
-    const char* keyEnd = "EndTime";
-    const char* KeyType = "Type";
-    const char* KeyTag = "Tag";
+    constexpr const char* _loggerCat = "Renderable";
+    constexpr const char* keyStart = "StartTime";
+    constexpr const char* keyEnd = "EndTime";
+    constexpr const char* KeyType = "Type";
+    constexpr const char* KeyTag = "Tag";
 
     static const openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",

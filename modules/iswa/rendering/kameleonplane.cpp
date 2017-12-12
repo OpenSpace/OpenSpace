@@ -32,7 +32,7 @@
 
 namespace {
     using json = nlohmann::json;
-    const char* _loggerCat = "KameleonPlane";
+    constexpr const char* _loggerCat = "KameleonPlane";
 
     static const openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",

@@ -64,7 +64,7 @@
 #include "scene_lua.inl"
 
 namespace {
-    const char* _loggerCat = "Scene";
+    constexpr const char* _loggerCat = "Scene";
 } // namespace
 
 namespace openspace {

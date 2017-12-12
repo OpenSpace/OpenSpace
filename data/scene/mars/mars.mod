@@ -35,7 +35,7 @@ return {
                 ColorLayers = {
                     {
                         Name = "MOC WA AMNH Color",
-                        FilePath = "map_datasets/mars_COL_v006_mars2000_rgb.vrt",
+                        FilePath = "map_service_configs/Utah/Mars_Color.xml",
                         Enabled = true
                     },
                     {

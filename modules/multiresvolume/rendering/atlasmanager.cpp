@@ -34,7 +34,7 @@
 #include <cstring>
 
 namespace {
-    const char* _loggerCat = "AtlasManager";
+    constexpr const char* _loggerCat = "AtlasManager";
 } // namespace
 
 namespace openspace {

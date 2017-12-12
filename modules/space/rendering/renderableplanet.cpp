@@ -49,18 +49,13 @@
 #include <math.h>
 
 namespace {
-    const char* KeyGeometry      = "Geometry";
-    const char* KeyRadius        = "Radius";
-    const char* KeyColorTexture  = "Textures.Color";
-    const char* KeyNightTexture  = "Textures.Night";
-    const char* KeyHeightTexture = "Textures.Height";
-    const char* KeyShading       = "PerformShading";
+    constexpr const char* KeyGeometry     = "Geometry";
+    constexpr const char* KeyRadius       = "Radius";
+    constexpr const char* _loggerCat      = "RenderablePlanet";
 
-    static const char* _loggerCat = "RenderablePlanet";
-
-    const char* keyShadowGroup                   = "Shadow_Group";
-    const char* keyShadowSource                  = "Source";
-    const char* keyShadowCaster                  = "Caster";
+    constexpr const char* keyShadowGroup  = "Shadow_Group";
+    constexpr const char* keyShadowSource = "Source";
+    constexpr const char* keyShadowCaster = "Caster";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",

@@ -36,12 +36,12 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "TemporalTileProvider";
+    constexpr const char* _loggerCat = "TemporalTileProvider";
 
-    const char* KeyFilePath = "FilePath";
-    const char* KeyBasePath = "BasePath";
-    const char* KeyPreCacheStartTime = "PreCacheStartTime";
-    const char* KeyPreCacheEndTime = "PreCacheEndTime";
+    constexpr const char* KeyFilePath = "FilePath";
+    constexpr const char* KeyBasePath = "BasePath";
+    constexpr const char* KeyPreCacheStartTime = "PreCacheStartTime";
+    constexpr const char* KeyPreCacheEndTime = "PreCacheEndTime";
 
     static const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",

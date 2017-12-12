@@ -54,13 +54,13 @@
 #include "scenegraphnode_doc.inl"
 
 namespace {
-    const char* _loggerCat = "SceneGraphNode";
-    const char* KeyRenderable = "Renderable";
-    const char* KeyGuiPath = "GuiPath";
+    constexpr const char* _loggerCat = "SceneGraphNode";
+    constexpr const char* KeyRenderable = "Renderable";
+    constexpr const char* KeyGuiPath = "GuiPath";
 
-    const char* keyTransformTranslation = "Transform.Translation";
-    const char* keyTransformRotation = "Transform.Rotation";
-    const char* keyTransformScale = "Transform.Scale";
+    constexpr const char* keyTransformTranslation = "Transform.Translation";
+    constexpr const char* keyTransformRotation = "Transform.Rotation";
+    constexpr const char* keyTransformScale = "Transform.Scale";
 } // namespace
 
 namespace openspace {

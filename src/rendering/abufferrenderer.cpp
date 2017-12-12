@@ -46,12 +46,14 @@
 #include <iterator>
 
 namespace {
-    const char* _loggerCat = "ABufferRenderer";
-    const char* BoundsFragmentShaderPath = "${SHADERS}/abuffer/boundsabuffer.frag";
-    const char* RenderFragmentShaderPath = "${SHADERS}/abuffer/renderabuffer.frag";
-    const int MaxRaycasters = 32;
-    const int MaxLayers = 32;
-    const int MaxAverageLayers = 8;
+    constexpr const char* _loggerCat = "ABufferRenderer";
+    constexpr const char* BoundsFragmentShaderPath =
+        "${SHADERS}/abuffer/boundsabuffer.frag";
+    constexpr const char* RenderFragmentShaderPath =
+        "${SHADERS}/abuffer/renderabuffer.frag";
+    constexpr int MaxRaycasters = 32;
+    constexpr int MaxLayers = 32;
+    constexpr int MaxAverageLayers = 8;
 } // namespace
 
 namespace openspace {

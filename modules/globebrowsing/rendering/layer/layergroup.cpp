@@ -27,8 +27,9 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace {
-    const char* _loggerCat = "LayerGroup";
-    const char* KeyFallback = "Fallback";
+    constexpr const char* _loggerCat = "LayerGroup";
+    constexpr const char* KeyFallback = "Fallback";
+
     static const openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",

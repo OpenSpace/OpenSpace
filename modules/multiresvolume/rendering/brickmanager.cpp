@@ -32,7 +32,7 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "BrickManager";
+    constexpr const char* _loggerCat = "BrickManager";
 } // namespace
 
 namespace openspace {

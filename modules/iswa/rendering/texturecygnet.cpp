@@ -27,7 +27,7 @@
 #include <ghoul/io/texture/texturereader.h>
 
 namespace {
-    const char* _loggerCat = "TextureCygnet";
+    constexpr const char* _loggerCat = "TextureCygnet";
 } // namespace
 
 namespace openspace {

@@ -31,7 +31,7 @@
 #include <vector>
 
 namespace {
-    const char* _loggerCat = "Keys";
+    constexpr const char* _loggerCat = "Keys";
 } // namespace
 
 namespace openspace {
