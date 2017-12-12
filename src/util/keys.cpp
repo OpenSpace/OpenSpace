@@ -119,6 +119,11 @@ bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
     }
 }
 
+bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
+    return (lhs.key == rhs.key) && (lhs.modifier == rhs.modifier);
+}
+
+
 } // namespace openspace
 
 namespace std {

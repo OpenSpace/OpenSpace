@@ -82,8 +82,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
         _texturePath = absPath(_texturePath);
         _textureFile = new ghoul::filesystem::File(_texturePath);
     }
-
-    loadTexture();
 }
 
 RenderablePlaneProjection::~RenderablePlaneProjection() {

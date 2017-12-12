@@ -194,6 +194,10 @@ return {
                         FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
                     },
                     {
+                        Name = "World Imagery",
+                        FilePath = "map_service_configs/ESRI/World_Imagery.wms",
+                    },
+                    {
                         Name = "Temporal VIIRS SNPP",
                         Type = "TemporalTileLayer",
                         FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
