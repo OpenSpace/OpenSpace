@@ -235,6 +235,29 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
 
 void AssetLoader::unloadAsset(std::shared_ptr<Asset> asset) {
     tearDownAssetLuaTable(asset.get());
+    for (int ref : _onInitializationFunctionRefs[asset.get()]) {
+       luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
+    }
+    _onInitializationFunctionRefs.clear();
+
+    for (int ref : _onDeinitializationFunctionRefs[asset.get()]) {
+        luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
+    }
+    _onDeinitializationFunctionRefs.clear();
+
+    for (const auto it : _onDependencyInitializationFunctionRefs[asset.get()]) {
+        for (int ref : it.second) {
+            luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
+        }
+    }
+    _onDependencyInitializationFunctionRefs[asset.get()].clear();
+
+    for (const auto it : _onDependencyDeinitializationFunctionRefs[asset.get()]) {
+        for (int ref : it.second) {
+            luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
+        }
+    }
+    _onDependencyDeinitializationFunctionRefs[asset.get()].clear();
 }
 
 std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
