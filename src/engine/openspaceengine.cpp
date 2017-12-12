@@ -597,7 +597,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     }
 
     bool showNodeNames = true;
-    std::string kNames = 
+    std::string kNames =
         ConfigurationManager::KeyLoadingScreen + "." +
         ConfigurationManager::PartShowNodeNames;
 

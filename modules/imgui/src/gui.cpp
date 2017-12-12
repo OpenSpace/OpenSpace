@@ -812,7 +812,7 @@ void GUI::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     ImGui::Begin("OpenSpace GUI", nullptr);
-    
+
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     bool property = _property.isEnabled();
