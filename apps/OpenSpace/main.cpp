@@ -351,24 +351,33 @@ void mainRenderFunc() {
     }
 #endif
 
-    OsEng.render(
-        SgctEngine->getModelMatrix(),
-        viewMatrix,
-        projectionMatrix
-    );
+    try {
+        OsEng.render(
+            SgctEngine->getModelMatrix(),
+            viewMatrix,
+            projectionMatrix
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
     LTRACE("main::mainRenderFunc(end)");
 }
 
 void mainDraw2DFunc() {
     LTRACE("main::mainDraw2DFunc(begin)");
 
-    OsEng.drawOverlays();
+    try {
+        OsEng.drawOverlays();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
 
     // SGCT gets angry if we change this in our function
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-
 
     LTRACE("main::mainDraw2DFunc(end)");
 }
