@@ -123,6 +123,7 @@ private:
     properties::Vec4Property _textColor;
     properties::FloatProperty _textSize;
     properties::FloatProperty _textMinSize;
+    properties::FloatProperty _textMaxSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
     properties::OptionProperty _colorOption;

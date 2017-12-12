@@ -111,6 +111,7 @@ namespace openspace {
         bool _labelDataIsDirty;
 
         int _textMinSize;
+        int _textMaxSize;
         int _planeStartingIndexPos;
         int _textureVariableIndex;
 

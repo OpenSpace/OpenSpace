@@ -152,11 +152,11 @@ void main() {
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
 
         // Fade-out
-        float maxVar = 2.0f * maxBillboardSize;
-        float minVar = maxBillboardSize;
-        ta = 1.0f - ( (var - minVar)/(maxVar - minVar) );
-        if (ta == 0.0f)
-           return;
+        // float maxVar = 2.0f * maxBillboardSize;
+        // float minVar = maxBillboardSize;
+        // ta = 1.0f - ( (var - minVar)/(maxVar - minVar) );
+        // if (ta == 0.0f)
+        //    return;
     } 
     else if (width < 2.0f * minBillboardSize) {
         //return;

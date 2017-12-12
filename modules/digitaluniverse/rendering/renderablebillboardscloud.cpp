@@ -128,6 +128,13 @@ namespace {
         "objects being rendered."
     };
 
+    static const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+        "TextMaxSize",
+        "Text Max Size",
+        "The maximum size (in pixels) of the text for the labels for the astronomical "
+        "objects being rendered."
+    };
+
     static const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -281,6 +288,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 LabelMinSizeInfo.description
             },
             {
+                LabelMaxSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelMaxSizeInfo.description
+            },
+            {
                 ColorOptionInfo.identifier,
                 new StringListVerifier,
                 Optional::Yes,
@@ -352,6 +365,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     )
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _textMinSize(LabelMinSizeInfo, 8.0, 0.5, 24.0)
+    , _textMaxSize(LabelMaxSizeInfo, 500.0, 0.0, 1000.0)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -536,6 +550,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
         }         
         addProperty(_textMinSize);
+
+        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
+            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+        }
+        addProperty(_textMaxSize);
     }
 
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
@@ -595,7 +614,7 @@ void RenderableBillboardsCloud::initializeGL() {
             _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
                 ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
-            size_t _fontSize = 30;
+            size_t _fontSize = 50;
             _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
         }
@@ -775,6 +794,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
             textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
+            _textMaxSize,
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,

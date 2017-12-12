@@ -16,6 +16,7 @@ return {
             TextColor = { 0.3, 0.3, 0.8, 1.0 },
             TextSize = 14.8,
             TextMinSize = 10.0,
+            TextMaxSize = 200.0,
             Unit = "pc"
         },
         GuiPath = "/Milky Way/Exoplanets"
