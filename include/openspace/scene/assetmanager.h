@@ -28,7 +28,7 @@
 #include <openspace/scene/asset.h>
 
 #include <openspace/scene/assetloader.h>
-#include <openspace/util/resourcesynchronizer.h>
+#include <openspace/util/synchronizationwatcher.h>
 
 #include <openspace/scripting/lualibrary.h>
 
@@ -51,11 +51,12 @@ class Asset;
  * from the system if it is not a dependency of a loaded asset.
  */
 
-class AssetManager : AssetStateChangeListener {
+class AssetManager : AssetListener {
 public:
-    AssetManager(
-        std::unique_ptr<AssetLoader> loader
-    );
+    AssetManager(std::unique_ptr<AssetLoader> loader,
+        std::unique_ptr<SynchronizationWatcher> syncWatcher);
+
+    virtual ~AssetManager() = default;
 
     void initialize();
     void deinitialize();
@@ -65,6 +66,8 @@ public:
     std::shared_ptr<Asset> rootAsset();
 
     void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override;
+    void assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) override;
+    void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) override;
 
     bool update();
     scripting::LuaLibrary luaLibrary();
@@ -77,6 +80,7 @@ private:
     std::vector<std::shared_ptr<Asset>> _pendingInitializations;
 
     std::unique_ptr<AssetLoader> _assetLoader;
+    std::unique_ptr<SynchronizationWatcher> _synchronizationWatcher;
 };
 
 } // namespace openspace

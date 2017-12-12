@@ -162,11 +162,11 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledsphere.cpp
     ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
     ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
-    ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronizer.cpp
     ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/synchronizationwatcher.cpp
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/task.cpp
     ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
@@ -338,11 +338,11 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledsphere.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronizer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/synchronizationwatcher.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h

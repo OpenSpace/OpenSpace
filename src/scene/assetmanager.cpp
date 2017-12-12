@@ -37,19 +37,23 @@ namespace {
 }
 
 namespace openspace {
-AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader)
+AssetManager::AssetManager(
+    std::unique_ptr<AssetLoader> loader,
+    std::unique_ptr<SynchronizationWatcher> syncWatcher
+)
     : _assetLoader(std::move(loader))
+    , _synchronizationWatcher(std::move(syncWatcher))
 {}
 
 void AssetManager::initialize() {
-    _assetLoader->addAssetStateChangeListener(this);
+    _assetLoader->addAssetListener(this);
     std::shared_ptr<Asset> rootAsset = _assetLoader->rootAsset();
     rootAsset->initialize();
 }
 
 void AssetManager::deinitialize() {
     _assetLoader->rootAsset()->deinitialize();
-    _assetLoader->removeAssetStateChangeListener(this);
+    _assetLoader->removeAssetListener(this);
 }
 
 bool AssetManager::update() {
@@ -71,6 +75,8 @@ bool AssetManager::update() {
         }
     }
 
+    _synchronizationWatcher->notify();
+
     // Remove assets
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
@@ -89,19 +95,38 @@ void AssetManager::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State 
         return;
     }
 
-    if (rootAsset()->state() == Asset::State::Initialized) {
-        if (state == Asset::State::Loaded) {
-            asset->startSynchronizations();
-        }
-        if (state == Asset::State::SyncResolved) {
-            std::lock_guard<std::mutex> guard(_pendingInitializationsMutex);
-            _pendingInitializations.push_back(asset);
-        }
-    } else {
-        asset->deinitialize();
-    }
+    LINFO(asset->id() << " changed state to " << static_cast<int>(state));
     // Todo: Check if assets should start syncing or if they should init.
     // flags: autoSync, autoInit ?
+}
+
+void AssetManager::assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
+    LINFO(parent->id() << " requested " << child->id());
+/*
+    if (parent->isLoaded() && !child->isLoaded()) {
+        child->load();
+    }
+    if (parent->isSynchronized() && child->isLoaded() && !child->isSynchronized()) {
+        child->startSynchronizations();
+    }
+    if (parent->isInitialized() && child->isInitReady() && !child->isInitialized()) {
+        child->initialize();
+    }*/
+}
+
+void AssetManager::assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
+
+    LINFO(parent->id() << " unrequested " << child->id());
+    /*
+    if (child->isInitialized() && !child->shouldBeInitialized()) {
+        child->uninitialize();
+    }
+    if (child->isSynchronizing() && !child->shouldBeSynchronized()) {
+        child->cancelSynchronizations();
+    }
+    if (child->isLoaded() && child->shouldBeLoaded()) {
+        child->unload();
+    }*/
 }
 
 void AssetManager::add(const std::string& path) {

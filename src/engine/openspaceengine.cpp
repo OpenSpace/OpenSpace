@@ -58,7 +58,7 @@
 
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/openspacemodule.h>
-#include <openspace/util/resourcesynchronizer.h>
+#include <openspace/util/synchronizationwatcher.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/time.h>
@@ -411,8 +411,12 @@ void OpenSpaceEngine::create(int argc, char** argv,
     sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
 
     // Set up asset loader
+    std::unique_ptr<SynchronizationWatcher> w = std::make_unique<SynchronizationWatcher>();
+    SynchronizationWatcher* rawWatcher = w.get();
+
     _engine->_assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), "${ASSETS}")
+        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), rawWatcher, "${ASSETS}"),
+        std::move(w)
     );
     //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }

@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___ASSET___H__
 
 #include <openspace/util/resourcesynchronization.h>
+#include <openspace/util/synchronizationwatcher.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -59,12 +60,14 @@ public:
     /**
      * Root asset constructor
      */
-    Asset(AssetLoader* loader);
+    Asset(AssetLoader* loader, SynchronizationWatcher* watcher);
 
     /**
     * Regular asset constructor
     */
-    Asset(AssetLoader* loader, ghoul::filesystem::File assetPath);
+    Asset(AssetLoader* loader,
+        SynchronizationWatcher* watcher,
+        ghoul::filesystem::File assetPath);
     
     ~Asset();
 
@@ -76,24 +79,31 @@ public:
     AssetLoader* loader() const;
     State state() const;
     
-    void setState(State state);
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     std::vector<std::shared_ptr<ResourceSynchronization>> ownSynchronizations() const;
 
     void syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
                           ResourceSynchronization::State s);
 
+    void load();
+    bool isLoaded() const;
+    void unload();
+    void unloadIfUnwanted();
+
     // Sync
-    bool isSynchronized();
+    bool isSynchronized() const;
     bool startSynchronizations();
-    bool cancelSynchronizations();
-    bool restartSynchronizations();
+    bool cancelAllSynchronizations();
+    bool cancelUnwantedSynchronizations();
+    bool restartAllSynchronizations();
     float synchronizationProgress();
 
     // Init
-    bool isInitReady() const;
+    bool hasInitializedRequester() const;
+    bool isInitialized() const;
     void initialize();
     void deinitialize();
+    void deinitializeIfUnwanted();
 
     // Dependency graph
     bool requires(const Asset* asset) const;
@@ -103,33 +113,34 @@ public:
     void request(std::shared_ptr<Asset> child);
     void unrequest(std::shared_ptr<Asset> child);
 
-    std::vector<std::shared_ptr<Asset>> requestedAssets();
-    std::vector<std::shared_ptr<Asset>> requestingAssets();
-    std::vector<std::shared_ptr<Asset>> requiredAssets();
-    std::vector<std::shared_ptr<Asset>> requiringAssets();
+    std::vector<std::shared_ptr<Asset>> requestedAssets() const;
+    std::vector<std::shared_ptr<Asset>> requestingAssets() const;
+    std::vector<std::shared_ptr<Asset>> requiredAssets() const;
+    std::vector<std::shared_ptr<Asset>> requiringAssets() const;
 
     std::vector<std::shared_ptr<Asset>> requiredSubTreeAssets();
     std::vector<std::shared_ptr<Asset>> subTreeAssets();
-    std::vector<std::shared_ptr<Asset>> childAssets();
+    std::vector<std::shared_ptr<Asset>> childAssets() const;
+    std::vector<std::shared_ptr<Asset>> parentAssets() const;
 
     bool isRequired() const;
     bool isRequested() const;
+    bool shouldBeInitialized() const;
 
     std::string resolveLocalResource(std::string resourceName);
 private:
-    void requiredAssetChangedState(std::shared_ptr<Asset> a);
+    void setState(State state);
 
-    void addRequestingAsset(std::shared_ptr<Asset> a);
-    void removeRequestingAsset(std::shared_ptr<Asset> a);
-    void addRequiringAsset(std::shared_ptr<Asset> a);
-    void removeRequiringAsset(std::shared_ptr<Asset> a);
+    void requiredAssetChangedState(std::shared_ptr<Asset> a);
+    void requestedAssetChangedState(std::shared_ptr<Asset> a);
 
     bool isSyncResolveReady();
 
     std::atomic<State> _state;
     AssetLoader* _loader;
+    SynchronizationWatcher* _synchronizationWatcher;
+
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
-    mutable std::mutex _synchronizationsMutex;
 
     bool _hasAssetPath;
     // The name of the asset
@@ -150,9 +161,8 @@ private:
     // Assets that refers to this asset as a requested asset
     std::vector<std::weak_ptr<Asset>> _requestingAssets;
     
-    // Synchronization callback handles
-    std::unordered_map<ResourceSynchronization*, ResourceSynchronization::CallbackHandle>
-        _syncCallbackHandles;
+    // Synchronization watches
+    std::vector<SynchronizationWatcher::WatchHandle> _syncWatches;
 };
 
 } // namespace openspace

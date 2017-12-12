@@ -56,20 +56,23 @@ int noOperation(lua_State* state);
 int exportAsset(lua_State* state);
 } // namespace assetloader
 
-class AssetStateChangeListener {
+class AssetListener {
 public:
     virtual void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) = 0;
+    virtual void assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) = 0;
+    virtual void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) = 0;
 };
+
+class SynchronizationWatcher;
 
 class AssetLoader {
 public:  
     /**
      * Constructor
      */
-    AssetLoader(
-        ghoul::lua::LuaState& luaState,
-        std::string assetRoot
-    );
+    AssetLoader(ghoul::lua::LuaState& luaState,
+        SynchronizationWatcher* syncWatcher,
+        std::string assetRoot);
 
     /**
      * Destructor
@@ -88,17 +91,14 @@ public:
      */
     void remove(const std::string& identifier);
 
+    void trackAsset(std::shared_ptr<Asset> asset);
+    void untrackAsset(Asset* asset);
+
     /**
     * Returns the asset identified by the identifier,
     * if the asset is loaded. Otherwise return nullptr.
     */
     std::shared_ptr<Asset> has(const std::string& identifier) const;
-
-    /**
-     * Return all assets loaded using the loadAsset method.
-     * Non-recursive (does not include imports of the loaded assets)
-     */
-    //std::vector<std::shared_ptr<Asset>> loadedAssets();
 
     /**
      * Return the lua state
@@ -115,6 +115,8 @@ public:
     */
     const std::string& assetRootDirectory() const;
 
+    bool loadAsset(std::shared_ptr<Asset> asset);
+
     void callOnInitialize(Asset* asset);
 
     void callOnDeinitialize(Asset* asset);
@@ -127,22 +129,46 @@ public:
                                   const std::string& path) const;
 
 
-    void addAssetStateChangeListener(AssetStateChangeListener* listener);
-    void removeAssetStateChangeListener(AssetStateChangeListener* listener);
+    /**
+     * Add listener to asset state changes
+     */
+    void addAssetListener(AssetListener* listener);
+
+    /**
+     * Remove listener to asset state changes
+     */
+    void removeAssetListener(AssetListener* listener);
+
+    /**
+     * Notify listeners about asset state change
+     */
     void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state);
+
+    /**
+     * Notify listeners about new requests
+     */
+    void assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child);
+
+    /**
+     * Notify listeners about removed requests
+     */
+    void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child);
     
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
     std::shared_ptr<Asset> request(const std::string& path);
     void unrequest(const std::string& path);
 
-    std::shared_ptr<Asset> loadAsset(std::string path);
+    /**
+     * Add the global assets table to the lua stack.
+     */
+    void setUpAssetLuaTable(Asset* asset);
+    void tearDownAssetLuaTable(Asset* asset);
+
     std::shared_ptr<Asset> getAsset(std::string path);
     ghoul::filesystem::Directory currentDirectory() const;
 
-    void pushAsset(std::shared_ptr<Asset> asset);
-    void popAsset();
-    void updateLuaGlobals();
+    void setCurrentAsset(std::shared_ptr<Asset> asset);
     void addLuaDependencyTable(Asset* dependant, Asset* dependency);
 
     // Lua functions
@@ -168,11 +194,16 @@ private:
     friend int assetloader::exportAsset(lua_State* state);
 
     std::shared_ptr<Asset> _rootAsset;
-    std::unordered_map<std::string, std::shared_ptr<Asset>> _loadedAssets;
-    std::vector<std::shared_ptr<Asset>> _assetStack;
+    std::shared_ptr<Asset> _currentAsset;
+    std::unordered_map<std::string, std::weak_ptr<Asset>> _loadedAssets;
+
+    SynchronizationWatcher* _synchronizationWatcher;
 
     std::string _assetRootDirectory;
     ghoul::lua::LuaState* _luaState;
+
+    // State change listeners
+    std::vector<AssetListener*> _assetListeners;
 
     // References to lua values
     std::unordered_map<Asset*, std::vector<int>> _onInitializationFunctionRefs;
@@ -181,9 +212,6 @@ private:
         _onDependencyInitializationFunctionRefs;
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
         _onDependencyDeinitializationFunctionRefs;
-
-    std::vector<AssetStateChangeListener*> _assetStateChangeListeners;
-
     int _assetsTableRef;
 };
 
