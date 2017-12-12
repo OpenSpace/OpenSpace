@@ -54,7 +54,19 @@
 
 #ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+// CPL throws warning about missing DLL interface
+#pragma warning (disable : 4251)
+#endif // _MSC_VER
+
 #include <cpl_string.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
 #endif // GLOBEBROWSING_USE_GDAL
 
 #include "globebrowsingmodule_lua.inl"

@@ -297,11 +297,7 @@ bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft,
                                       std::vector<std::string> potentialTargets)
 {
     image.target = "VOID";
-    // we have (?) to cast to int, unfortunately
-    // Why? --abock
-    // because: old comment --m
-
-    int exposureTime = image.timeRange.duration();
+    int exposureTime = static_cast<int>(image.timeRange.duration());
     if (exposureTime == 0) {
         exposureTime = 1;
     }
