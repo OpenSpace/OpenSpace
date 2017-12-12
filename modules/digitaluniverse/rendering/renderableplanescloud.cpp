@@ -157,11 +157,12 @@ namespace {
         "Debug option for rendering of billboards and texts."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
-        "FadeInThreshould",
-        "Fade-In Threshould",
-        "This value determines distance from the center of our galaxy from which the"
-        "astronomical object is visible before starting fading-in it."
+    static const openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+        "FadeInDistances",
+        "Fade-In Start and End Distances",
+        "These values determine the initial and final distances from the center of "
+        "our galaxy from which the astronomical object will start and end "
+        "fading-in."
     };
 
     static const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
@@ -272,10 +273,10 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 ScaleFactorInfo.description,
             },
             {
-                FadeInThreshouldInfo.identifier,
-                new DoubleVerifier,
+                FadeInDistancesInfo.identifier,
+                new Vector2Verifier<float>,
                 Optional::Yes,
-                FadeInThreshouldInfo.description
+                FadeInDistancesInfo.description
             },
             {
                 DisableFadeInInfo.identifier,
@@ -316,7 +317,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)        
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _fadeInDistance(FadeInThreshouldInfo, 0.0, 0.1, 1000.0)
+    , _fadeInDistance(FadeInDistancesInfo, glm::vec2(0.0), glm::vec2(0.0), glm::vec2(200000.0))
     , _disableFadeInDistance(DisableFadeInInfo, true)
     , _planeMinSize(PlaneMinSizeInfo, 0.5, 0.0, 500.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -473,8 +474,8 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         _sluminosity = static_cast<float>(dictionary.value<double>(ScaleLuminosityInfo.identifier));
     }
 
-    if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
-        float fadeInValue = static_cast<float>(dictionary.value<double>(FadeInThreshouldInfo.identifier));
+    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+        glm::vec2 fadeInValue = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
         _fadeInDistance.set(fadeInValue);
         _disableFadeInDistance.set(false);
         addProperty(_fadeInDistance);
@@ -745,14 +746,24 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.0f;
     if (!_disableFadeInDistance) {
         double distCamera = glm::length(data.camera.positionVec3());
-        float funcValue = static_cast<float>((1.0 / double(_fadeInDistance))*(distCamera / scale));
-        
-        // Let's not waste performance
+        //float funcValue = static_cast<float>((1.0 / double(_fadeInDistance))*(distCamera / scale));
+        //
+        //// Let's not waste performance
+        //if (funcValue < 0.01) {
+        //    return;
+        //}
+
+        //fadeInVariable = funcValue > 1.0 ? 1.0 : funcValue;
+
+        glm::vec2 fadeRange = _fadeInDistance;
+        float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
+        float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        float funcValue = a * distCamera + b;
+        fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
+
         if (funcValue < 0.01) {
             return;
         }
-
-        fadeInVariable = funcValue > 1.0 ? 1.0 : funcValue;
     }
 
     glm::dmat4 modelMatrix =
@@ -1335,7 +1346,7 @@ void RenderablePlanesCloud::createPlanes() {
 
         _dataIsDirty = false;
 
-        _fadeInDistance.setMaxValue(10.0f * maxSize);
+        _fadeInDistance.setMaxValue(glm::vec2(10.0f * maxSize));
     }
 
     if (_hasLabel && _labelDataIsDirty) {

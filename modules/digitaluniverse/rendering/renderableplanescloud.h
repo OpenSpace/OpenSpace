@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
@@ -121,7 +122,7 @@ namespace openspace {
         properties::FloatProperty _textSize;
         properties::BoolProperty _drawElements;
         properties::OptionProperty _blendMode;
-        properties::FloatProperty _fadeInDistance;
+        properties::Vec2Property _fadeInDistance;
         properties::BoolProperty _disableFadeInDistance;
         properties::FloatProperty _planeMinSize;
 

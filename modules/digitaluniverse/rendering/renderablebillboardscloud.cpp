@@ -175,7 +175,7 @@ namespace {
 
     static const openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
-        "Fade-In Start and End distances",
+        "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
         "fading-in."

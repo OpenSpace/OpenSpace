@@ -15,6 +15,7 @@ return {
             ScaleLuminosity = 1.0,           
             -- Fade in value in the same unit as "Unit"
             FadeInThreshould = 119441,
+            FadeInDistances = {1400.0, 119441.0},
             PlaneMinSize = 5.0,
             Unit = "pc",
         },        

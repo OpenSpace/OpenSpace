@@ -55,7 +55,7 @@ return {
                 0.0,              0.0,            0.0,           1.0
                 },
             -- Fade in value in the same unit as "Unit"
-            FadeInThreshould = 0.1,
+            FadeInDistances = {0.05, 0.1},
             PlaneMinSize = 5.0,
             Unit = "Mpc",
         },        
