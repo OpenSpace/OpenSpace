@@ -108,6 +108,13 @@ namespace {
         "objects being rendered."
     };
 
+    static const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+        "TextMaxSize",
+        "Text Max Size",
+        "The maximum size (in pixels) of the text for the labels for the astronomical "
+        "objects being rendered."
+    };
+
     static const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -208,7 +215,13 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 new IntVerifier,
                 Optional::Yes,
                 LabelMinSizeInfo.description
-            },                
+            },
+            {
+                LabelMaxSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                LabelMaxSizeInfo.description
+            },
             {
                 TransformationMatrixInfo.identifier,
                 new Matrix4x4Verifier<double>,
@@ -252,6 +265,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _hasLabel(false)
     , _labelDataIsDirty(true)
     , _textMinSize(0)
+    , _textMaxSize(200)
     , _planeStartingIndexPos(0)
     , _textureVariableIndex(0)        
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
@@ -370,7 +384,11 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
-        }         
+        }
+
+        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
+            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+        }
     }
 
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
@@ -591,6 +609,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
             _textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
+            _textMaxSize,
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,

@@ -108,6 +108,13 @@ namespace {
         "objects being rendered."
     };
 
+    static const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+        "TextMaxSize",
+        "Text Max Size",
+        "The maximum size (in pixels) of the text for the labels for the astronomical "
+        "objects being rendered."
+    };
+
     static const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
@@ -208,6 +215,12 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 LabelMinSizeInfo.description
             },
             {
+                LabelMaxSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                LabelMaxSizeInfo.description
+            },
+            {
                 TransformationMatrixInfo.identifier,
                 new Matrix4x4Verifier<double>,
                 Optional::Yes,
@@ -232,6 +245,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _hasLabel(false)
     , _labelDataIsDirty(true)
     , _textMinSize(0)
+    , _textMaxSize(200)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     //, _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
@@ -348,6 +362,10 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
+        }
+
+        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
+            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
         }
     }
 
@@ -523,6 +541,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data, const glm::dmat4& 
             _textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
+            _textMaxSize,
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,
