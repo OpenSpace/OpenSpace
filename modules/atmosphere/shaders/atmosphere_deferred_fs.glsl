@@ -643,7 +643,9 @@ void main() {
                 dvec4 fragObjectCoords       = dInverseModelTransformMatrix * fragWorldCoords;
                 
                 // Distance of the pixel in the gBuffer to the observer
-                double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
+                // JCC (12/12/2017): AMD distance function is buggy.
+                //double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
+                double pixelDepth = length(cameraPositionInObject.xyz - fragObjectCoords.xyz);
                 
                 // All calculations are done in Km:
                 pixelDepth *= 0.001;
