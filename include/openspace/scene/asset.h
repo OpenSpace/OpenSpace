@@ -85,13 +85,16 @@ public:
     void syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
                           ResourceSynchronization::State s);
 
+    bool hasLoadedParent() const;
     void load();
     bool isLoaded() const;
     void unload();
     void unloadIfUnwanted();
 
     // Sync
+    bool hasSyncingOrResolvedParent() const;
     bool isSynchronized() const;
+    bool isSyncingOrResolved() const;
     bool startSynchronizations();
     bool cancelAllSynchronizations();
     bool cancelUnwantedSynchronizations();
@@ -99,7 +102,7 @@ public:
     float synchronizationProgress();
 
     // Init
-    bool hasInitializedRequester() const;
+    bool hasInitializedParent() const;
     bool isInitialized() const;
     void initialize();
     void deinitialize();
@@ -108,6 +111,7 @@ public:
     // Dependency graph
     bool requires(const Asset* asset) const;
     void require(std::shared_ptr<Asset> asset);
+    void unrequire(std::shared_ptr<Asset> asset);
 
     bool requests(const Asset* child) const;
     void request(std::shared_ptr<Asset> child);

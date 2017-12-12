@@ -71,10 +71,8 @@ public:
 
     bool update();
     scripting::LuaLibrary luaLibrary();
-private:
-    std::shared_ptr<Asset> tryAddAsset(const std::string& path);
-    bool tryRemoveAsset(const std::string& path);
 
+private:
     std::unordered_map<std::string, bool> _pendingStateChangeCommands;
     std::mutex _pendingInitializationsMutex;
     std::vector<std::shared_ptr<Asset>> _pendingInitializations;

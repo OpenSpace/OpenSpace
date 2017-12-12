@@ -21,7 +21,7 @@ local registerSceneGraphNodes = function (sceneAsset, nodes)
     sceneAsset.onDeinitialize(function ()
         for i = #nodes, 1, -1 do
             node = nodes[i]
-            openspace.removeSceneGraphNode(node) 
+            openspace.removeSceneGraphNode(node.Name)
         end
     end)
 end

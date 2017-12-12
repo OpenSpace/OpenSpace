@@ -394,6 +394,7 @@ int removeSceneGraphNode(lua_State* L) {
             );
         return 0;
     }
+    node->deinitializeGL();
     parent->detachChild(*node);
     return 1;
 }

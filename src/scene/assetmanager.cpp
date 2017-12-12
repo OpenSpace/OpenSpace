@@ -57,76 +57,40 @@ void AssetManager::deinitialize() {
 }
 
 bool AssetManager::update() {
-    // Initialize assets
-    {
-        std::lock_guard<std::mutex> guard(_pendingInitializationsMutex);
-        for (const auto& a : _pendingInitializations) {
-            a->initialize();
-        }
-        _pendingInitializations.clear();
-    }
-
     // Add assets
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const bool add = c.second;
         if (add) {
-            std::shared_ptr<Asset> asset = tryAddAsset(path);
+            std::shared_ptr<Asset> asset = _assetLoader->add(path);
         }
     }
-
-    _synchronizationWatcher->notify();
-
     // Remove assets
     for (const auto& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const bool remove = !c.second;
         if (remove && _assetLoader->has(path)) {
-            tryRemoveAsset(path);
+            _assetLoader->remove(path);
         }
     }
-
     _pendingStateChangeCommands.clear();
+
+    // Change state based on synchronizations
+    _synchronizationWatcher->notify();
+
     return false;
 }
 
 void AssetManager::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
-    if (asset->requestingAssets().empty()) {
-        return;
-    }
-
     LINFO(asset->id() << " changed state to " << static_cast<int>(state));
-    // Todo: Check if assets should start syncing or if they should init.
-    // flags: autoSync, autoInit ?
 }
 
 void AssetManager::assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
     LINFO(parent->id() << " requested " << child->id());
-/*
-    if (parent->isLoaded() && !child->isLoaded()) {
-        child->load();
-    }
-    if (parent->isSynchronized() && child->isLoaded() && !child->isSynchronized()) {
-        child->startSynchronizations();
-    }
-    if (parent->isInitialized() && child->isInitReady() && !child->isInitialized()) {
-        child->initialize();
-    }*/
 }
 
 void AssetManager::assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
-
     LINFO(parent->id() << " unrequested " << child->id());
-    /*
-    if (child->isInitialized() && !child->shouldBeInitialized()) {
-        child->uninitialize();
-    }
-    if (child->isSynchronizing() && !child->shouldBeSynchronized()) {
-        child->cancelSynchronizations();
-    }
-    if (child->isLoaded() && child->shouldBeLoaded()) {
-        child->unload();
-    }*/
 }
 
 void AssetManager::add(const std::string& path) {
@@ -172,25 +136,6 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             }
         }
     };
-}
-    
-std::shared_ptr<Asset> AssetManager::tryAddAsset(const std::string& path) {
-    try {
-        return _assetLoader->add(path);
-    } catch (const ghoul::RuntimeError& e) {
-        LERROR("Error adding asset: " << e.component << ": " << e.message);
-    }
-    return nullptr;
-}
-
-bool AssetManager::tryRemoveAsset(const std::string& path) {
-    try {
-        _assetLoader->remove(path);
-    } catch (const ghoul::RuntimeError& e) {
-        LERROR("Error removing asset: " << e.component << ": " << e.message);
-        return false;
-    }
-    return true;
 }
 
 }

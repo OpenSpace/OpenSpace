@@ -126,6 +126,11 @@ public:
     bool loadAsset(std::shared_ptr<Asset> asset);
 
     /**
+     * Unload an asset
+     */
+    void unloadAsset(std::shared_ptr<Asset> asset);
+
+    /**
      * Call the onInitialize function specified in the asset file
      */
     void callOnInitialize(Asset* asset);

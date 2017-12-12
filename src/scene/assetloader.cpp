@@ -233,6 +233,10 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     return true;
 }
 
+void AssetLoader::unloadAsset(std::shared_ptr<Asset> asset) {
+    tearDownAssetLuaTable(asset.get());
+}
+
 std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
                                            const std::string& assetPath) const
 {

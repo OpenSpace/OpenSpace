@@ -56,24 +56,6 @@ Asset::Asset(AssetLoader* loader,
 {}
 
 Asset::~Asset() {
-
-    /*
-    auto parentIt = std::find_if(
-        child->_requiringAssets.begin(),
-        child->_requiringAssets.end(),
-        [this](std::weak_ptr<Asset> a) {
-        return a.lock().get() == this;
-    }
-    );
-
-    if (parentIt == _requiringAssets.end()) {
-        return;
-    }
-
-    child->_requiringAssets.erase(parentIt);
-    */
-
-
     for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
         _synchronizationWatcher->unwatchSynchronization(h);
     }
@@ -129,7 +111,7 @@ void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child) {
 
     LINFO("requestedAssetChangedState: " << child->id() << " to " << static_cast<int>(child->state()));
 
-    if (child->hasInitializedRequester()) {
+    if (child->hasInitializedParent()) {
         if (childState == State::Loaded) {
             child->startSynchronizations();
         }
@@ -234,7 +216,74 @@ bool Asset::isSynchronized() const {
            s == State::InitializationFailed;
 }
 
-bool Asset::hasInitializedRequester() const {
+bool Asset::isSyncingOrResolved() const {
+    State s = state();
+    return s == State::Synchronizing ||
+        s == State::SyncResolved ||
+        s == State::Initialized ||
+        s == State::InitializationFailed;
+}
+
+bool Asset::hasLoadedParent() const {
+    for (const auto& p : _requiringAssets) {
+        std::shared_ptr<Asset> parent = p.lock();
+        if (!parent) {
+            continue;
+        }
+        if (parent->isLoaded()) {
+            return true;
+        }
+    }
+    for (const auto& p : _requestingAssets) {
+        std::shared_ptr<Asset> parent = p.lock();
+        if (!parent) {
+            continue;
+        }
+        if (parent->isLoaded()) {
+            return true;
+        }
+        if (parent->hasLoadedParent()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Asset::hasSyncingOrResolvedParent() const {
+    for (const auto& p : _requiringAssets) {
+        std::shared_ptr<Asset> parent = p.lock();
+        if (!parent) {
+            continue;
+        }
+        if (parent->isSyncingOrResolved()) {
+            return true;
+        }
+    }
+    for (const auto& p : _requestingAssets) {
+        std::shared_ptr<Asset> parent = p.lock();
+        if (!parent) {
+            continue;
+        }
+        if (parent->isSyncingOrResolved()) {
+            return true;
+        }
+        if (parent->hasSyncingOrResolvedParent()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Asset::hasInitializedParent() const {
+    for (const auto& p : _requiringAssets) {
+        std::shared_ptr<Asset> parent = p.lock();
+        if (!parent) {
+            continue;
+        }
+        if (parent->isInitialized()) {
+            return true;
+        }
+    }
     for (const auto& p : _requestingAssets) {
         std::shared_ptr<Asset> parent = p.lock();
         if (!parent) {
@@ -243,7 +292,7 @@ bool Asset::hasInitializedRequester() const {
         if (parent->isInitialized()) {
             return true;
         }
-        if (parent->hasInitializedRequester()) {
+        if (parent->hasInitializedParent()) {
             return true;
         }
     }
@@ -356,11 +405,28 @@ void Asset::load() {
 }
 
 void Asset::unloadIfUnwanted() {
-
+    if (hasLoadedParent()) {
+        return;
+    }
+    unload();
 }
 
 void Asset::unload() {
+    LDEBUG("Unloading asset " << id());
 
+    if (!isLoaded()) {
+        return;
+    }
+
+    loader()->unloadAsset(shared_from_this());
+    setState(State::Unloaded);
+
+    for (std::shared_ptr<Asset> child : requiredAssets()) {
+        unrequire(child);
+    }
+    for (std::shared_ptr<Asset> child : requestedAssets()) {
+        unrequest(child);
+    }
 }
 
 void Asset::initialize() {
@@ -445,7 +511,10 @@ void Asset::initialize() {
 }
 
 void Asset::deinitializeIfUnwanted() {
-
+    if (hasInitializedParent()) {
+        return;
+    }
+    deinitialize();
 }
 
 void Asset::deinitialize() {
@@ -455,20 +524,43 @@ void Asset::deinitialize() {
 
     // Notify children
     for (auto& dependency : _requiredAssets) {
-        loader()->callOnDependencyDeinitialize(dependency.get(), this);
+        try {
+            loader()->callOnDependencyDeinitialize(dependency.get(), this);
+        }
+        catch (const ghoul::lua::LuaRuntimeException& e) {
+            LERROR("Failed to deinitialize requested asset " <<
+                dependency->id() << " of " << id() << ". " <<
+                e.component << ": " << e.message);
+            // TODO: rollback?
+        }
     }
     for (auto& dependency : _requestedAssets) {
         if (dependency->state() == State::Initialized) {
-            loader()->callOnDependencyDeinitialize(dependency.get(), this);
+            try {
+                loader()->callOnDependencyDeinitialize(dependency.get(), this);
+            }
+            catch (const ghoul::lua::LuaRuntimeException& e) {
+                LERROR("Failed to deinitialize requested asset " <<
+                    dependency->id() << " of " << id() << ". " <<
+                    e.component << ": " << e.message);
+                // TODO: rollback?
+            }
         }
     }
 
+
+    try {
+        loader()->callOnDeinitialize(this);
+    }
+    catch (const ghoul::lua::LuaRuntimeException& e) {
+        LERROR("Failed to deinitialize asset " << id() << ". " <<
+            e.component << ": " << e.message);
+        // TODO: rollback?
+        return;
+    }
     // Call onDeinitialize in Lua
-    loader()->callOnDeinitialize(this);
 
     setState(Asset::State::Loaded);
-
-
 
     // Make sure no dependencies are left dangling
     for (auto& dependency : childAssets()) {
@@ -541,6 +633,43 @@ void Asset::require(std::shared_ptr<Asset> child) {
         child->initialize();
     }
 }
+
+void Asset::unrequire(std::shared_ptr<Asset> child) {
+    if (state() != Asset::State::Unloaded) {
+        throw ghoul::RuntimeError("Cannot unrequire child asset is in a loaded state");
+    }
+
+    auto childIt = std::find(
+        _requiredAssets.begin(),
+        _requiredAssets.end(),
+        child);
+
+    if (childIt == _requiredAssets.end()) {
+        // Do nothing if the request node not exist.
+        return;
+    }
+
+    _requiredAssets.erase(childIt);
+
+    auto parentIt = std::find_if(
+        child->_requiringAssets.begin(),
+        child->_requiringAssets.end(),
+        [this](std::weak_ptr<Asset> a) {
+            return a.lock().get() == this;
+        }
+    );
+
+    if (parentIt == child->_requiringAssets.end()) {
+        return;
+    }
+
+    child->_requiringAssets.erase(parentIt);
+
+    child->deinitializeIfUnwanted();
+    child->cancelUnwantedSynchronizations();
+    child->unloadIfUnwanted();
+}
+
 
 void Asset::request(std::shared_ptr<Asset> child) {
     auto it = std::find(_requestedAssets.begin(),
