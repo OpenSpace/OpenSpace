@@ -37,14 +37,14 @@
 #include <thread>
 
 namespace {
-    const char* _loggerCat = "NetworkEngine";
+    constexpr const char* _loggerCat = "NetworkEngine";
 
-    const char* StatusMessageIdentifierName = "StatusMessage";
-    const char* MappingIdentifierIdentifierName = "IdentifierMapping";
-    const char* InitialMessageFinishedIdentifierName = "InitialMessageFinished";
+    constexpr const char* StatusMessageIdentifierName = "StatusMessage";
+    constexpr const char* MappingIdentifierIdentifierName = "IdentifierMapping";
+    constexpr const char* InitialMessageFinishedIdentifierName = "InitialMessageFinished";
 
-    const char MessageTypeLuaScript = '0';
-    const char MessageTypeExternalControlConnected = '1';
+    constexpr const char MessageTypeLuaScript = '0';
+    constexpr const char MessageTypeExternalControlConnected = '1';
 } // namespace
 
 namespace openspace {

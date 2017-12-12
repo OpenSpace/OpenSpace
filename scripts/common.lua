@@ -13,14 +13,6 @@ helper.scheduledScript.reversible = {}
 -- scenes
 helper.setCommonKeys = function()
     openspace.bindKeyLocal(
-        "F1",
-        [[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled');
-        openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Enabled', not b);
-        openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);]],
-        "Shows or hides the entire user interface"
-    )
-
-    openspace.bindKeyLocal(
         "F2",
         [[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Properties.Enabled');
         local c = openspace.getPropertyValue('Global Properties.ImGUI.Main.IsHidden');
@@ -31,8 +23,10 @@ helper.setCommonKeys = function()
             -- windows are hidden
             openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', false);
             openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', true);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', true);
         else
             openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', not b);
+            openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', not b);
             openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);
         end]],
         "Shows or hides the properties window"
@@ -40,6 +34,14 @@ helper.setCommonKeys = function()
 
     openspace.bindKeyLocal(
         "F3",
+        [[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled');
+        openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Enabled', not b);
+        openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);]],
+        "Shows or hides the entire user interface"
+    )
+
+    openspace.bindKeyLocal(
+        "F4",
         helper.property.invert("RenderEngine.PerformanceMeasurements"),
         "Toogles performance measurements that shows rendering time informations."
     )

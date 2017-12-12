@@ -65,7 +65,7 @@
 #include <openspace/interaction/navigationhandler.h>
 
 namespace {
-    const char* _loggerCat = "TouchInteraction";
+    constexpr const char* _loggerCat = "TouchInteraction";
 
     static const openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",

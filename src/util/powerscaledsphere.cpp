@@ -28,7 +28,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "PowerScaledSphere";
+    constexpr const char* _loggerCat = "PowerScaledSphere";
 } // namespace
 
 namespace openspace {

@@ -99,16 +99,16 @@ using namespace ghoul::logging;
 using namespace ghoul::cmdparser;
 
 namespace {
-    const char* _loggerCat = "OpenSpaceEngine";
-    const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
+    constexpr const char* _loggerCat = "OpenSpaceEngine";
+    constexpr const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
 
-    const char* SgctConfigArgumentCommand = "-config";
+    constexpr const char* SgctConfigArgumentCommand = "-config";
 
-    const char* PreInitializeFunction = "preInitialization";
-    const char* PostInitializationFunction = "postInitialization";
+    constexpr const char* PreInitializeFunction = "preInitialization";
+    constexpr const char* PostInitializationFunction = "postInitialization";
 
-    const int CacheVersion = 1;
-    const int DownloadVersion = 1;
+    constexpr const int CacheVersion = 1;
+    constexpr const int DownloadVersion = 1;
 
     const glm::ivec3 FontAtlasSize{ 1536, 1536, 1 };
 
@@ -720,6 +720,13 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         LFATALC(e.component, e.message);
     }
 
+    // Run the global configuration scripts
+    try {
+        runGlobalCustomizationScripts(scenePath);
+    } catch (ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
+
     // Write keyboard documentation.
     if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
         keyBindingManager().writeDocumentation(
@@ -799,26 +806,26 @@ void OpenSpaceEngine::writeDocumentation() {
 void OpenSpaceEngine::gatherCommandlineArguments() {
     commandlineArgumentPlaceholders.configurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
+        commandlineArgumentPlaceholders.configurationName, "-config", "-c",
         "Provides the path to the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.sgctConfigurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        &commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
+        commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
         "Provides the path to the SGCT configuration file, overriding the value set in "
         "the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.sceneName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        &commandlineArgumentPlaceholders.sceneName, "-scene", "", "Provides the path to "
+        commandlineArgumentPlaceholders.sceneName, "-scene", "", "Provides the path to "
         "the scene file, overriding the value set in the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.cacheFolder = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        &commandlineArgumentPlaceholders.cacheFolder, "-cacheDir", "", "Provides the "
+        commandlineArgumentPlaceholders.cacheFolder, "-cacheDir", "", "Provides the "
         "path to a cache file, overriding the value set in the OpenSpace configuration "
         "file"
     ));
@@ -884,6 +891,36 @@ void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescr
             "Error executing '" << PostInitializationFunction << "': " <<
             lua_tostring(state, -1)
         );
+    }
+}
+
+void OpenSpaceEngine::runGlobalCustomizationScripts(const std::string& sceneDescription) {
+    // @CLEANUP:  Move this into the scene loading?  ---abock
+    LINFO("Running Global initialization scripts");
+    ghoul::lua::LuaState state;
+    OsEng.scriptEngine().initializeLuaState(state);
+
+    // First execute the script to get all global variables
+    ghoul::lua::runScriptFile(state, absPath(sceneDescription));
+
+    std::string k = ConfigurationManager::KeyGlobalCustomizationScripts;
+    if (_configurationManager->hasKey(k)) {
+        ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(k);
+        for (int i = 1; i <= dict.size(); ++i) {
+            std::string script = dict.value<std::string>(std::to_string(i));
+
+            if (FileSys.fileExists(script)) {
+                try {
+                    LINFO("Running global customization script: " << script);
+                    ghoul::lua::runScriptFile(state, absPath(script));
+                } catch (ghoul::RuntimeError& e) {
+                    LERRORC(e.component, e.message);
+                }
+            }
+            else {
+                LDEBUG("Ignoring non-existing script file: " << script);
+            }
+        }
     }
 }
 
@@ -1506,6 +1543,9 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "string, string",
                 "Removes a tag (second argument) from a scene graph node (first argument)"
             }
+        },
+        {
+            absPath("${SCRIPTS}/common_scripts.lua")
         }
     };
 }

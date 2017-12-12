@@ -124,6 +124,7 @@ private:
     bool _labelDataIsDirty;
 
     int _textMinSize;
+    int _textMaxSize;
 
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;

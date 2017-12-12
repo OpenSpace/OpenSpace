@@ -34,7 +34,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* _loggerCat = "IswaCygnet";
+    constexpr const char* _loggerCat = "IswaCygnet";
 
     static const openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",

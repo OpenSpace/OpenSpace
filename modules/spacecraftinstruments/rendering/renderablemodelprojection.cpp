@@ -43,13 +43,13 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const char* _loggerCat = "RenderableModelProjection";
+    constexpr const char* _loggerCat = "RenderableModelProjection";
 
-    const char* keyGeometry = "Geometry";
-    const char* keyProjection = "Projection";
-    const char* keyBoundingSphereRadius = "BoundingSphereRadius";
+    constexpr const char* keyGeometry = "Geometry";
+    constexpr const char* keyProjection = "Projection";
+    constexpr const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
-    const char* DestinationFrame = "GALACTIC";
+    constexpr const char* DestinationFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",

@@ -33,7 +33,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* _loggerCat = "DataCygnet";
+    constexpr const char* _loggerCat = "DataCygnet";
 
     static const openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",

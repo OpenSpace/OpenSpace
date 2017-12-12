@@ -64,7 +64,7 @@
 #include "scene_lua.inl"
 
 namespace {
-    const char* _loggerCat = "Scene";
+    constexpr const char* _loggerCat = "Scene";
 } // namespace
 
 namespace openspace {
@@ -489,6 +489,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Checks whether the specifies SceneGraphNode is present in the current "
                 "scene"
             }
+        },
+        {
+            absPath("${SCRIPTS}/scene_helper.lua")
         }
     };
 }

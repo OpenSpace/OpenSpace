@@ -25,7 +25,7 @@
 #include <openspace/properties/optionproperty.h>
 
 namespace {
-    const char* _loggerCat = "OptionProperty";
+    constexpr const char* _loggerCat = "OptionProperty";
 } // namespace
 
 namespace openspace::properties {

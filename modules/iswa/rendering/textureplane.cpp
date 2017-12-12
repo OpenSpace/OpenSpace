@@ -29,7 +29,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* _loggerCat = "TexturePlane";
+    constexpr const char* _loggerCat = "TexturePlane";
 } // namespace
 
 namespace openspace {

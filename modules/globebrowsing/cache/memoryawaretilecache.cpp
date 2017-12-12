@@ -36,7 +36,7 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "MemoryAwareTileCache";
+    constexpr const char* _loggerCat = "MemoryAwareTileCache";
 
     static const openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
         "CpuAllocatedTileData",

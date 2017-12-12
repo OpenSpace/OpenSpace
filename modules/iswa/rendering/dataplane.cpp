@@ -28,7 +28,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* _loggerCat = "DataPlane";
+    constexpr const char* _loggerCat = "DataPlane";
 } // namespace
 
 namespace openspace {

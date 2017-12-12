@@ -60,7 +60,7 @@
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
-    const char* _loggerCat = "GlobeBrowsingModule";
+    constexpr const char* _loggerCat = "GlobeBrowsingModule";
 
 #ifdef GLOBEBROWSING_USE_GDAL
     openspace::GlobeBrowsingModule::Capabilities

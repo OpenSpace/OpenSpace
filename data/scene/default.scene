@@ -18,8 +18,6 @@ local vrt_folders = {
     }
 }
 
-dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
-
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -74,7 +72,7 @@ function preInitialization()
 end
 
 function postInitialization()
-    set_default_gui_sorting()
+    openspace.set_default_gui_sorting()
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -105,7 +103,7 @@ function postInitialization()
 
     -- Defined in scene_helper.lua
     -- Used to create focus buttons for a subset of scenegraph nodes
-    mark_interesting_nodes({
+    openspace.mark_interesting_nodes({
         "Earth", "Mars", "Moon"
     })
 end

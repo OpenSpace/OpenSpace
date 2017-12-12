@@ -32,7 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "SimpleTfBrickSelector";
+    constexpr const char* _loggerCat = "SimpleTfBrickSelector";
 } // namespace
 
 namespace openspace {

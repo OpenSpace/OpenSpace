@@ -1,7 +1,5 @@
 KernelCase = 2 -- Right now we only have the image times for case 2
 
-dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
-
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -83,7 +81,7 @@ function postInitialization()
     created and initialized, but before the first render call. This is the place to set
     graphical settings for the renderables.
     ]]--
-    set_default_gui_sorting()
+    openspace.set_default_gui_sorting()
 
     openspace.printInfo("Setting default values")
     openspace.setPropertyValue("Sun.renderable.Enabled", false)
@@ -106,7 +104,7 @@ function postInitialization()
 
     openspace.navigation.resetCameraDirection()
 
-    mark_interesting_nodes({
+    openspace.mark_interesting_nodes({
         "OsirisRex", "BennuBarycenter", "Earth"
     })
 end

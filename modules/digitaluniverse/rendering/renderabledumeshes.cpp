@@ -47,19 +47,19 @@
 #include <stdint.h>
 
 namespace {
-    const char* _loggerCat        = "RenderableDUMeshes";
-    const char* KeyFile           = "File";
-    const char* keyColor          = "Color";
-    const char* keyUnit           = "Unit";
-    const char* MeterUnit         = "m";
-    const char* KilometerUnit     = "Km";
-    const char* ParsecUnit        = "pc";
-    const char* KiloparsecUnit    = "Kpc";
-    const char* MegaparsecUnit    = "Mpc";
-    const char* GigaparsecUnit    = "Gpc";
-    const char* GigalightyearUnit = "Gly";
+    constexpr const char* _loggerCat        = "RenderableDUMeshes";
+    constexpr const char* KeyFile           = "File";
+    constexpr const char* keyColor          = "Color";
+    constexpr const char* keyUnit           = "Unit";
+    constexpr const char* MeterUnit         = "m";
+    constexpr const char* KilometerUnit     = "Km";
+    constexpr const char* ParsecUnit        = "pc";
+    constexpr const char* KiloparsecUnit    = "Kpc";
+    constexpr const char* MegaparsecUnit    = "Mpc";
+    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const char* GigalightyearUnit = "Gly";
 
-    const int8_t CurrentCacheVersion = 1;
+    constexpr const int8_t CurrentCacheVersion = 1;
     const float PARSEC = 0.308567756E17;
 
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
@@ -105,6 +105,13 @@ namespace {
         "TextMinSize",
         "Text Min Size",
         "The minimal size (in pixels) of the text for the labels for the astronomical "
+        "objects being rendered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+        "TextMaxSize",
+        "Text Max Size",
+        "The maximum size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
@@ -208,6 +215,12 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 LabelMinSizeInfo.description
             },
             {
+                LabelMaxSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                LabelMaxSizeInfo.description
+            },
+            {
                 TransformationMatrixInfo.identifier,
                 new Matrix4x4Verifier<double>,
                 Optional::Yes,
@@ -232,6 +245,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _hasLabel(false)
     , _labelDataIsDirty(true)
     , _textMinSize(0)
+    , _textMaxSize(200)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     //, _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
@@ -348,6 +362,10 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
+        }
+
+        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
+            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
         }
     }
 
@@ -523,6 +541,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data, const glm::dmat4& 
             _textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
+            _textMaxSize,
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,

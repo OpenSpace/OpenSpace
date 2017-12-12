@@ -41,9 +41,9 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const char* _loggerCat = "ScriptEngine";
+    constexpr const char* _loggerCat = "ScriptEngine";
 
-    const int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
+    constexpr int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
 } // namespace
 
 namespace openspace::scripting {
@@ -274,6 +274,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         ghoul::lua::runScriptFile(state, absPath(script));
 
         library.documentations.clear();
+
         // Then, we extract the documentation information from the file
         lua_pushstring(state, "documentation");
         lua_gettable(state, -2);
@@ -303,10 +304,9 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 lua_pop(state, 1);
 
                 library.documentations.push_back({ name, arguments, documentation });
-
             }
-            lua_pop(state, 1);
         }
+        lua_pop(state, 1);
     }
 }
 

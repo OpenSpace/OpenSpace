@@ -64,19 +64,22 @@
 #include <chrono>
 
 namespace {
-    const char* _loggerCat = "RenderableMultiresVolume";
-    const char* KeyDataSource = "Source";
-    const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    const char* KeyHints = "Hints";
-    const char* KeyTransferFunction = "TransferFunction";
+    constexpr const char* _loggerCat = "RenderableMultiresVolume";
+    constexpr const char* KeyDataSource = "Source";
+    constexpr const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
+    constexpr const char* KeyHints = "Hints";
+    constexpr const char* KeyTransferFunction = "TransferFunction";
 
-    const char* KeyVolumeName = "VolumeName";
-    const char* KeyBrickSelector = "BrickSelector";
-    const char* KeyStartTime = "StartTime";
-    const char* KeyEndTime = "EndTime";
-    const char* GlslHelpersPath = "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
-    const char* GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
-    const char* GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
+    constexpr const char* KeyVolumeName = "VolumeName";
+    constexpr const char* KeyBrickSelector = "BrickSelector";
+    constexpr const char* KeyStartTime = "StartTime";
+    constexpr const char* KeyEndTime = "EndTime";
+    constexpr const char* GlslHelpersPath =
+        "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
+    constexpr const char* GlslHelperPath =
+        "${MODULES}/multiresvolume/shaders/helper.glsl";
+    constexpr const char* GlslHeaderPath =
+        "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
 
     static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {

@@ -72,7 +72,7 @@
 
 namespace {
     using json = nlohmann::json;
-    const char* _loggerCat = "IswaManager";
+    constexpr const char* _loggerCat = "IswaManager";
 } // namespace
 
 namespace openspace {

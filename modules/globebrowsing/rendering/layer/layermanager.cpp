@@ -29,7 +29,7 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 namespace {
-    const char* _loggerCat = "LayerManager";
+    constexpr const char* _loggerCat = "LayerManager";
 } // namespace
 
 namespace openspace::globebrowsing {
