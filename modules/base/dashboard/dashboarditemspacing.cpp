@@ -22,51 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#include <modules/base/dashboard/dashboarditemspacing.h>
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
-
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-}
+namespace {
+    static const openspace::properties::Property::PropertyInfo SpacingInfo = {
+        "Spacing",
+        "Spacing",
+        "This value determines the spacing (in pixels) that this item represents. The "
+        "default value is 15."
+    };
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
+documentation::Documentation DashboardItemSpacing::Documentation() {
+    using namespace documentation;
+    return {
+        "DashboardItem Spacing",
+        "base_dashboarditem_spacing",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("DashboardItemSpacing"),
+                Optional::No
+            },
+            {
+                SpacingInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                SpacingInfo.description
+            }
+        }
+    };
+}
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
-public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+DashboardItemSpacing::DashboardItemSpacing(ghoul::Dictionary dictionary)
+    : DashboardItem("Spacing")
+    , _spacing(SpacingInfo, 15.f, 0.f, 2048.f)
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "DashboardItemSpacing"
+    );
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    if (dictionary.hasKey(SpacingInfo.identifier)) {
+        _spacing = static_cast<float>(dictionary.value<double>(SpacingInfo.identifier));
+    }
+    addProperty(_spacing);
+}
 
-    bool isReady() const override;
-    void update() override;
+void DashboardItemSpacing::render(glm::vec2& penPosition) {
+    penPosition.y -= _spacing;
+}
 
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-    static documentation::Documentation Documentation();
-
-private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-};
+glm::vec2 DashboardItemSpacing::size() const {
+    return { 0.f, _spacing };
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__

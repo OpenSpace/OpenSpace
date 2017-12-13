@@ -25,6 +25,7 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
+    openspace.set_default_dashboard()
 
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")

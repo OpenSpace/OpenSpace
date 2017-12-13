@@ -22,51 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMANGLE___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMANGLE___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/dashboarditem.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-}
+#include <utility>
+
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
+class SceneGraphNode;
+
 namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
+class DashboardItemAngle : public DashboardItem {
 public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+    DashboardItemAngle(ghoul::Dictionary dictionary);
+    virtual ~DashboardItemAngle() = default;
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void render(glm::vec2& penPosition) override;
 
-    bool isReady() const override;
-    void update() override;
-
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
+    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 
 private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+    enum Type {
+        Node = 0,
+        Focus,
+        Camera
+    };
+    
+    struct Component {
+        properties::OptionProperty type;
+        properties::StringProperty nodeName;
+        SceneGraphNode* node;
+    };
 
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+    std::pair<glm::dvec3, std::string> positionAndLabel(Component& mainComp) const;
+
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+    Component _source;
+    Component _reference;
+    Component _destination;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMANGLE___H__

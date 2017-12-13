@@ -26,7 +26,24 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
-    openspace.set_default_gui_sorting()
+    openspace.set_default_dashboard()
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSpacing",
+        Spacing = 50
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Node",
+        SourceNodeName = "NewHorizons",
+        DestinationType = "Node Surface",
+        DestinationNodeName = "Pluto"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemInstruments"
+    })
 
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")

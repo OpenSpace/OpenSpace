@@ -22,51 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#ifndef __OPENSPACE_CORE___DASHBOARD___H__
+#define __OPENSPACE_CORE___DASHBOARD___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
+#include <openspace/rendering/dashboarditem.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-}
+#include <ghoul/glm.h>
+
+#include <memory>
+#include <vector>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
+class DashboardItem;
+
+class Dashboard : public properties::PropertyOwner {
 public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+    Dashboard();
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void render(glm::vec2& penPosition);
 
-    bool isReady() const override;
-    void update() override;
+    void addDashboardItem(std::unique_ptr<DashboardItem> item);
+    bool hasItem(int index) const;
+    const DashboardItem& item(int index) const;
+    void removeDashboardItem(int index);
+    void removeDashboardItems();
 
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
+    /**
+    * Returns the Lua library that contains all Lua functions available to affect the
+    * rendering.
+    */
     static scripting::LuaLibrary luaLibrary();
 
-    static documentation::Documentation Documentation();
-
 private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+    std::vector<std::unique_ptr<DashboardItem>> _items;
 };
 
-} // namespace openspace
+} // openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#endif // __OPENSPACE_CORE___DASHBOARD___H__

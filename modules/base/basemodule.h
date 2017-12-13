@@ -35,7 +35,9 @@ public:
 
     BaseModule();
     virtual ~BaseModule() = default;
+
     std::vector<documentation::Documentation> documentations() const override;
+    std::vector<scripting::LuaLibrary> luaLibraries() const override;
 
 protected:
     void internalInitialize() override;

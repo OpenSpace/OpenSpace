@@ -893,10 +893,20 @@ void GUI::render() {
         addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
 
-    bool addDashboard = ImGui::Button("Add Dashboard");
+    bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
         OsEng.scriptEngine().queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
+    if (addDashboardCopy) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.addScreenSpaceRenderable({ "
+                "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
+            "});",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }

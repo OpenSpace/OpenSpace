@@ -22,51 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#ifndef __OPENSPACE_CORE___DASHBOARDFRAMERATE___H__
+#define __OPENSPACE_CORE___DASHBOARDFRAMERATE___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/dashboarditem.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+
+#include <ghoul/misc/dictionary.h>
 
 namespace ghoul::fontrendering {
     class Font;
-    class FontRenderer;
-}
+} // namespace ghoul::fontrendering
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
+class DashboardItemFramerate : public DashboardItem {
 public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+    enum class FrametimeType {
+        DtTimeAvg = 0,
+        FPS,
+        FPSAvg,
+        None
+    };
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    DashboardItemFramerate(ghoul::Dictionary dict);
 
-    bool isReady() const override;
-    void update() override;
-
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
-
+    void render(glm::vec2& penPosition) override;
+    glm::vec2 size() const override;
     static documentation::Documentation Documentation();
 
 private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+    properties::OptionProperty _frametimeType;
 
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
-} // namespace openspace
+} // openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#endif // __OPENSPACE_CORE___DASHBOARDFRAMERATE___H__

@@ -22,51 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/dashboarditem.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul::fontrendering {
     class Font;
-    class FontRenderer;
-}
+} // namespace ghoul::fontrendering
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
+class DashboardItemMission : public DashboardItem {
 public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+    DashboardItemMission(ghoul::Dictionary dictionary);
+    virtual ~DashboardItemMission() = default;
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void render(glm::vec2& penPosition) override;
 
-    bool isReady() const override;
-    void update() override;
-
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
+    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 
 private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
 
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__

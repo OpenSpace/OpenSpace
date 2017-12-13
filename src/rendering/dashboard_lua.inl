@@ -22,51 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <modules/base/rendering/screenspacedashboard.h>
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+namespace openspace::luascriptfunctions {
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
+/**
+* \ingroup LuaScripts
+* addDashboardItem(table):
+*/
+int addDashboardItem(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
+    int type = lua_type(L, -1);
+    if (type == LUA_TTABLE) {
+        ghoul::Dictionary d;
+        try {
+            ghoul::lua::luaDictionaryFromState(L, d);
+        }
+        catch (const ghoul::lua::LuaFormatException& e) {
+            LERRORC("addDashboardItem", e.what());
+            return 0;
+        }
+
+        OsEng.dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+        return 0;
+    }
+    else {
+        return luaL_error(L, "Expected argument of type 'string' or 'table'");
+    }
 }
 
-namespace openspace {
+/**
+* \ingroup LuaScripts
+* removeDashboardItems():
+*/
+int removeDashboardItems(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments > 1) {
+        return luaL_error(L, "Expected %i or %i arguments, got %i", 0, 1, nArguments);
+    }
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
+    OsEng.dashboard().removeDashboardItems();
+    return 0;
+}
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
-public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
-
-    bool initializeGL() override;
-    bool deinitializeGL() override;
-
-    bool isReady() const override;
-    void update() override;
-
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-    static documentation::Documentation Documentation();
-
-private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+}// namespace openspace::luascriptfunctions
