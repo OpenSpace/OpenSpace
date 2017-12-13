@@ -366,6 +366,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         irradianceFactor = 1.0;
     } else {
         attenuation = analyticTransmittance(r, mu, t);
+        //attenuation = transmittance(r, mu, t); 
     }
 
     // cos(PI-thetaH) = dist/r
@@ -500,7 +501,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     //groundRadiance = groundReflectance.rgb * RLStar;
 
     // Specular reflection from sun on oceans and rivers  
-    if ((waterReflectance > 0.1) && (dotNS > -0.2f)/*(muSun > 0.0)*/) {
+    if ((waterReflectance > 0.1) && /*(dotNS > -0.2f)*/(muSun > 0.0)) {
         vec3  h         = normalize(s - v);
         // Fresnell Schlick's approximation
         float fresnel   = 0.02f + 0.98f * pow(1.0f - dot(-v, h), 5.0f);
@@ -647,6 +648,13 @@ void main() {
                 //double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
                 double pixelDepth = length(cameraPositionInObject.xyz - fragObjectCoords.xyz);
                 
+                // JCC (12/13/2017): TRick to remove floating error in texture.
+                // We see a squared noise on planet's surface when seeing the planet
+                // from far away.
+                if (length(cameraPositionInObject.xyz) > 1e8) {
+                    pixelDepth += 1000000.0;
+                }
+
                 // All calculations are done in Km:
                 pixelDepth *= 0.001;
                 fragObjectCoords.xyz *= 0.001;
