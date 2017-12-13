@@ -48,7 +48,7 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2015-07-14T11:49:00.00")
+    openspace.time.setTime("2015-07-14T08:00:00.00")
 
     -- Load the common helper functions
     dofile(openspace.absPath('${SCRIPTS}/common.lua'))
