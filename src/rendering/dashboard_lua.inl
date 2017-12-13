@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <modules/base/rendering/screenspacedashboard.h>
 
 namespace openspace::luascriptfunctions {
 
@@ -36,37 +38,36 @@ int addDashboardItem(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
     }
 
-    const int type = lua_type(L, -1);
-    if (type != LUA_TTABLE) {
-        return luaL_error(L, "Expected argument of type 'table'");
-    }
+    int type = lua_type(L, -1);
+    if (type == LUA_TTABLE) {
+        ghoul::Dictionary d;
+        try {
+            ghoul::lua::luaDictionaryFromState(L, d);
+        }
+        catch (const ghoul::lua::LuaFormatException& e) {
+            LERRORC("addDashboardItem", e.what());
+            return 0;
+        }
 
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(L, d);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addDashboardItem", e.what());
+        OsEng.dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
         return 0;
     }
-    
-    OsEng.dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
-
-    return 0;
+    else {
+        return luaL_error(L, "Expected argument of type 'string' or 'table'");
+    }
 }
 
 /**
 * \ingroup LuaScripts
-* removeDashboardItems(table):
+* removeDashboardItems():
 */
 int removeDashboardItems(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    if (nArguments > 1) {
+        return luaL_error(L, "Expected %i or %i arguments, got %i", 0, 1, nArguments);
     }
 
     OsEng.dashboard().removeDashboardItems();
-
     return 0;
 }
 

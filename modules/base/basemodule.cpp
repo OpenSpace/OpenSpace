@@ -172,4 +172,10 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
     };
 }
 
+std::vector<scripting::LuaLibrary> BaseModule::luaLibraries() const {
+    return {
+        ScreenSpaceDashboard::luaLibrary()
+    };
+}
+
 } // namespace openspace

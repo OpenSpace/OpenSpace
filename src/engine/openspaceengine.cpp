@@ -523,6 +523,10 @@ void OpenSpaceEngine::initialize() {
 
     for (OpenSpaceModule* module : _moduleEngine->modules()) {
         _scriptEngine->addLibrary(module->luaLibrary());
+
+        for (scripting::LuaLibrary& l : module->luaLibraries()) {
+            _scriptEngine->addLibrary(l);
+        }
     }
 
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL

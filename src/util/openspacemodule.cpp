@@ -78,6 +78,10 @@ scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
+std::vector<scripting::LuaLibrary> OpenSpaceModule::luaLibraries() const {
+    return {};
+}
+
 ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
     return { 3, 3, 0 };
 }
