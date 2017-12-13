@@ -506,6 +506,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     _shader->setUniform("OcclusionDepth", 1.f - _depth);
     _shader->setUniform("Alpha", _alpha);
     _shader->setUniform("ModelTransform", modelTransform);
+
     _shader->setUniform(
         "ViewProjectionMatrix",
         OsEng.renderEngine().camera()->viewProjectionMatrix()
