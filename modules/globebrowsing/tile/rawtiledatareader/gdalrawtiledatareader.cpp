@@ -37,11 +37,21 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+ // CPL throws warning about missing DLL interface
+#pragma warning (disable : 4251)
+#endif // _MSC_VER
+
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
 #include <cpl_virtualmem.h>
 
 #include <gdal_priv.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
 
 #include <algorithm>
 

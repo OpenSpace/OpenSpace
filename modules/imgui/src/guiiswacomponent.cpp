@@ -55,7 +55,7 @@ void GuiIswaComponent::render() {
     bool oldIonDataValue = _ionData;
 
     ImGui::SetNextWindowCollapsed(_isCollapsed);
-    
+
     bool e = _isEnabled;
     ImGui::Begin("ISWA", &e, WindowSize, 0.5f);
     _isEnabled = e;

@@ -342,7 +342,12 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
                 [inputFileTypeString](std::string str) {
                     const size_t extLength = inputFileTypeString.length();
                     std::string sub = str.substr(str.length() - extLength, extLength);
-                    std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
+                    std::transform(
+                        sub.begin(),
+                        sub.end(),
+                        sub.begin(),
+                        [](char c) { return static_cast<char>(::tolower(c)); }
+                    );
                     return sub != inputFileTypeString;
                 }), _sourceFiles.end());
         // Ensure that there are available and valid source files left
@@ -416,7 +421,12 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
 bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& model) {
     std::string modelStr;
     if (_dictionary->getValue(KeyJsonSimulationModel, modelStr)) {
-        std::transform(modelStr.begin(), modelStr.end(), modelStr.begin(), ::tolower);
+        std::transform(
+            modelStr.begin(),
+            modelStr.end(),
+            modelStr.begin(),
+            [](char c) { return static_cast<char>(::tolower(c)); }
+        );
         model = fls::stringToModel(modelStr);
     } else {
         LERROR(_name << ": Must specify '" << KeyJsonSimulationModel << "'");
