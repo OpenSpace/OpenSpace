@@ -651,8 +651,18 @@ void main() {
                 // JCC (12/13/2017): TRick to remove floating error in texture.
                 // We see a squared noise on planet's surface when seeing the planet
                 // from far away.
-                if (length(cameraPositionInObject.xyz) > 1e8) {
-                    pixelDepth += 1000000.0;
+                float dC = float(length(cameraPositionInObject.xyz));
+                float x1 = 1e8;
+                if (dC > x1) {
+                    pixelDepth += 1000.0;
+                    float alpha     = 1000.0;
+                    float beta      = 1000000.0;
+                    float x2        = 1e9; 
+                    float diffGreek = beta - alpha;
+                    float diffDist  = x2 - x1;
+                    float varA = diffGreek/diffDist;
+                    float varB = (alpha - varA * x1);
+                    pixelDepth += double(varA * dC + varB); 
                 }
 
                 // All calculations are done in Km:
