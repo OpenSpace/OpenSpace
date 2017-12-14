@@ -31,6 +31,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -267,8 +268,8 @@ void RenderableShadowCylinder::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
         "ShadowCylinderProgram",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_fs.glsl"
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_fs.glsl")
     );
 }
 

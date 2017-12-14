@@ -263,15 +263,18 @@ namespace openspace {
     void RenderablePoints::initializeGL() {
         RenderEngine& renderEngine = OsEng.renderEngine();
         if (_hasSpriteTexture) {
-            _program = renderEngine.buildRenderProgram("RenderablePoints",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl");
+            _program = renderEngine.buildRenderProgram(
+                "RenderablePoints",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
+            );
         }
         else {
-            _program = renderEngine.buildRenderProgram("RenderablePoints",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl");// ,
-                //"${MODULE_DIGITALUNIVERSE}/shaders/points_gs.glsl");
+            _program = renderEngine.buildRenderProgram(
+                "RenderablePoints",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl")
+            );
         }
     }
 

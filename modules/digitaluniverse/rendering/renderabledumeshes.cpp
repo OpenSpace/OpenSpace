@@ -391,9 +391,11 @@ bool RenderableDUMeshes::isReady() const {
 
 void RenderableDUMeshes::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = renderEngine.buildRenderProgram("RenderableDUMeshes",
-        "${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl");
+    _program = renderEngine.buildRenderProgram(
+        "RenderableDUMeshes",
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
+    );
 
     bool success = loadData();
     if (!success) {

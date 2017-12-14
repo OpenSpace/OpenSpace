@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -67,8 +68,9 @@ PointGlobe::~PointGlobe() {
 void PointGlobe::initialize() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "PointGlobe",
-        "${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl",
-        "${MODULE_GLOBEBROWSING}/shaders/pointglobe_fs.glsl");
+        absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_fs.glsl")
+    );
 
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vertexBufferID);

@@ -509,10 +509,12 @@ void RenderableBillboardsCloud::initialize() {
 void RenderableBillboardsCloud::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
         
-    _program = renderEngine.buildRenderProgram("RenderableBillboardsCloud",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl");
+    _program = renderEngine.buildRenderProgram(
+        "RenderableBillboardsCloud",
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl")
+    );
 
     if (_hasPolygon) {
         createPolygonTexture();

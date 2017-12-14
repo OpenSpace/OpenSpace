@@ -9,8 +9,8 @@ function preInitialization()
     ]]--
     openspace.set_default_dashboard()
 
-    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
-    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/naif0012.tls"))
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/pck00010.tpc"))
 
     --local startTime = "2019 APR 16 12:03:00.00"
     openspace.time.setTime("2016 SEP 8 23:00:00.500")
@@ -73,7 +73,7 @@ function preInitialization()
         "Toggles the visibility of the text marking the location of the Earth."
     )
 
-    openspace.scriptScheduler.loadFile("${OPENSPACE_DATA}/scene/missions/osirisrex/scheduled_scripts.lua")
+    openspace.scriptScheduler.loadFile(openspace.absPath("${OPENSPACE_DATA}/scene/missions/osirisrex/scheduled_scripts.lua"))
 end
 
 function postInitialization()

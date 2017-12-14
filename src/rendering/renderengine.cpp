@@ -51,6 +51,7 @@
 #include <openspace/util/screenlog.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -688,7 +689,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        absPath(RenderFsPath),
         dict
     );
 
@@ -718,7 +719,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        absPath(RenderFsPath),
         csPath,
         dict
     );

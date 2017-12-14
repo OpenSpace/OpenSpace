@@ -27,8 +27,8 @@ function preInitialization()
     ]]--
     openspace.set_default_dashboard()
 
-    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
-    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/naif0012.tls"))
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/pck00010.tpc"))
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
@@ -133,7 +133,7 @@ return {
         -- "satellites",
         
         "grids",
-        "digitaluniverse",
+        -- "digitaluniverse",
         "stars/digitaluniverse",
         "milkyway/digitaluniverse"
     }

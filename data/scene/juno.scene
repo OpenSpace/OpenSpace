@@ -7,8 +7,8 @@ function preInitialization()
     ]]--
     openspace.set_default_dashboard()
 
-    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
-    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/naif0012.tls"))
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/pck00010.tpc"))
 
     openspace.time.setTime("2016-07-01T10:05:00.00")
 

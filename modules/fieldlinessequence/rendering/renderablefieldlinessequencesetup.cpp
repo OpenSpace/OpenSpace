@@ -266,8 +266,8 @@ void RenderableFieldlinesSequence::initialize() {
     // Setup shader program
     _shaderProgram = OsEng.renderEngine().buildRenderProgram(
         "FieldlinesSequence",
-        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl",
-        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl"
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
 
     if (!_shaderProgram) {

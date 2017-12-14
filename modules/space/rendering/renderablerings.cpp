@@ -186,10 +186,11 @@ bool RenderableRings::isReady() const {
 void RenderableRings::initializeGL() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("RingProgram",
-            "${MODULE_SPACE}/shaders/rings_vs.glsl",
-            "${MODULE_SPACE}/shaders/rings_fs.glsl"
-            );
+        _shader = renderEngine.buildRenderProgram(
+            "RingProgram",
+            absPath("${MODULE_SPACE}/shaders/rings_vs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
+        );
         _shader->setIgnoreUniformLocationError(
             ghoul::opengl::ProgramObject::IgnoreError::Yes
         );

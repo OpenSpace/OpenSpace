@@ -96,7 +96,7 @@ std::string OpenSpaceModule::modulePath() const {
     );
 
     // First try the internal module directory
-    if (FileSys.directoryExists("${MODULES}/" + moduleName)) {
+    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleName))) {
         return absPath("${MODULES}/" + moduleName);
     }
     else { // Otherwise, it might be one of the external directories

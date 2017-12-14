@@ -115,8 +115,8 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
 {
     _program = ghoul::opengl::ProgramObject::Build(
         "Loading Screen",
-        "${SHADERS}/loadingscreen.vert",
-        "${SHADERS}/loadingscreen.frag"
+        absPath("${SHADERS}/loadingscreen.vert"),
+        absPath("${SHADERS}/loadingscreen.frag")
     );
 
     _loadingFont = OsEng.fontManager().font(

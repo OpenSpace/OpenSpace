@@ -919,12 +919,12 @@ void OpenSpaceEngine::runGlobalCustomizationScripts(const std::string& sceneDesc
     if (_configurationManager->hasKey(k)) {
         ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(k);
         for (int i = 1; i <= dict.size(); ++i) {
-            std::string script = dict.value<std::string>(std::to_string(i));
+            std::string script = absPath(dict.value<std::string>(std::to_string(i)));
 
             if (FileSys.fileExists(script)) {
                 try {
                     LINFO("Running global customization script: " << script);
-                    ghoul::lua::runScriptFile(state, absPath(script));
+                    ghoul::lua::runScriptFile(state, script);
                 } catch (ghoul::RuntimeError& e) {
                     LERRORC(e.component, e.message);
                 }

@@ -529,8 +529,8 @@ void GUI::deinitialize() {
 void GUI::initializeGL() {
     _program = ghoul::opengl::ProgramObject::Build(
         "GUI",
-        "${MODULE_IMGUI}/shaders/gui_vs.glsl",
-        "${MODULE_IMGUI}/shaders/gui_fs.glsl"
+        absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
+        absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
     if (!_program) {
         return;
