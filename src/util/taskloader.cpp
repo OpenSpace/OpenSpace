@@ -65,8 +65,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& path) {
     std::string absTasksFile = absPath(path);
-    using RawPath = ghoul::filesystem::FileSystem::RawPath;
-    if (!FileSys.fileExists(absTasksFile, RawPath::Yes)) {
+    if (!FileSys.fileExists(ghoul::filesystem::File(absTasksFile))) {
         LERROR("Could not load tasks file '" << absTasksFile << "'. " <<
             "File not found");
         return std::vector<std::unique_ptr<Task>>();

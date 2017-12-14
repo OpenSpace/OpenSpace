@@ -43,6 +43,7 @@
 
 #include <openspace/performance/performancemeasurement.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -190,8 +191,8 @@ void FramebufferRenderer::initialize() {
     try {
         _resolveProgram = ghoul::opengl::ProgramObject::Build(
             "Framebuffer Resolve",
-            "${SHADERS}/framebuffer/resolveframebuffer.vert",
-            "${SHADERS}/framebuffer/resolveframebuffer.frag"
+            absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
+            absPath("${SHADERS}/framebuffer/resolveframebuffer.frag")
         );
     } catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);

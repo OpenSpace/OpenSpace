@@ -297,7 +297,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
             }
         }
         script += "}";
-        
+
         executeScript(
             p->fullyQualifiedIdentifier(),
             std::move(script),

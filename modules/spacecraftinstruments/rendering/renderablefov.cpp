@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 #include <glm/gtx/projection.hpp>
@@ -301,8 +302,8 @@ void RenderableFov::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "FovProgram",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl"
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
     );
 
     // Fetch information about the specific instrument

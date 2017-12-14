@@ -198,8 +198,8 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 void RenderableConstellationBounds::initializeGL() {
     _program = OsEng.renderEngine().buildRenderProgram(
         "ConstellationBounds",
-        "${MODULE_SPACE}/shaders/constellationbounds_vs.glsl",
-        "${MODULE_SPACE}/shaders/constellationbounds_fs.glsl"
+        absPath("${MODULE_SPACE}/shaders/constellationbounds_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
     );
 
 

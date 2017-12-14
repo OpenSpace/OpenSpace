@@ -502,9 +502,11 @@ void RenderablePlanesCloud::initialize() {
 void RenderablePlanesCloud::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     
-    _program = renderEngine.buildRenderProgram("RenderablePlanesCloud",
-        "${MODULE_DIGITALUNIVERSE}/shaders/plane2_vs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/plane2_fs.glsl");
+    _program = renderEngine.buildRenderProgram(
+        "RenderablePlanesCloud",
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane2_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane2_fs.glsl")
+    );
             
     createPlanes();
 

@@ -338,7 +338,7 @@ bool RenderableKameleonVolume::cachingEnabled() {
 }
 
 void RenderableKameleonVolume::load() {
-    if (!FileSys.fileExists(_sourcePath)) {
+    if (!FileSys.fileExists(ghoul::filesystem::File(_sourcePath))) {
         LERROR("File " << _sourcePath << " does not exist.");
         return;
     }

@@ -183,9 +183,10 @@ void RenderablePlane::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-    _shader = OsEng.renderEngine().buildRenderProgram("PlaneProgram",
-        "${MODULE_BASE}/shaders/plane_vs.glsl",
-        "${MODULE_BASE}/shaders/plane_fs.glsl"
+    _shader = OsEng.renderEngine().buildRenderProgram(
+        "PlaneProgram",
+        absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
     );
 
     loadTexture();

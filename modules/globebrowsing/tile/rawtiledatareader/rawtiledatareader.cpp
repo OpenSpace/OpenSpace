@@ -361,8 +361,8 @@ PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
     // ref: https://www.wolframalpha.com/input/?i=X+%3D+a0+%2B+a1P+%2B+a2L,
     //      +Y+%3D+b0+%2B+b1P+%2B+b2L,+solve+for+P+and+L
 
-    double Xp = a[0] + P*a[1] + L*a[2];
-    double Yp = b[0] + P*b[1] + L*b[2];
+    [[ maybe_unused ]] double Xp = a[0] + P*a[1] + L*a[2];
+    [[ maybe_unused ]] double Yp = b[0] + P*b[1] + L*b[2];
 
     ghoul_assert(std::abs(X - Xp) < 1e-10, "inverse should yield X as before");
     ghoul_assert(std::abs(Y - Yp) < 1e-10, "inverse should yield Y as before");

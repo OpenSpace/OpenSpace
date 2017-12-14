@@ -24,9 +24,6 @@
 
 #include <openspace/rendering/renderengine.h>
 
-#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
-#include <modules/spacecraftinstruments/util/imagesequencer.h>
-#endif
 #include <openspace/util/syncdata.h>
 
 #include <openspace/openspace.h>
@@ -37,7 +34,10 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
+#include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
+#include <openspace/rendering/dashboard.h>
+#include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -47,14 +47,12 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/distanceconversion.h>
 #include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
-#include <openspace/util/spicemanager.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -99,12 +97,6 @@ namespace {
         "and rendering of the scene graph nodes are collected each frame. These values "
         "provide some information about the impact of individual nodes on the overall "
         "performance."
-    };
-
-    static const openspace::properties::Property::PropertyInfo FrametimeInfo = {
-        "FrametimeType",
-        "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed."
     };
 
     static const openspace::properties::Property::PropertyInfo ShowDateInfo = {
@@ -233,9 +225,6 @@ RenderEngine::RenderEngine()
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _log(nullptr)
-    , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _showDate(ShowDateInfo, true)
-    , _showInfo(ShowInfoInfo, true)
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
@@ -286,16 +275,6 @@ RenderEngine::RenderEngine()
     });
     addProperty(_doPerformanceMeasurements);
 
-    _frametimeType.addOptions({
-        { static_cast<int>(FrametimeType::DtTimeAvg), "Average Deltatime" },
-        { static_cast<int>(FrametimeType::FPS), "Frames per second" },
-        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
-        { static_cast<int>(FrametimeType::None), "None" }
-    });
-    addProperty(_frametimeType);
-
-    addProperty(_showDate);
-    addProperty(_showInfo);
     addProperty(_showLog);
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
@@ -602,7 +581,21 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     // Print some useful information on the master viewport
     if (wrapper.isMaster() && wrapper.isSimpleRendering()) {
-        renderInformation();
+        std::unique_ptr<performance::PerformanceMeasurement> perf;
+        if (_performanceManager) {
+            perf = std::make_unique<performance::PerformanceMeasurement>(
+                "Main Dashboard::render",
+                OsEng.renderEngine().performanceManager()
+            );
+    }
+        glm::vec2 penPosition = glm::vec2(
+            10.f,
+            fontResolution().y
+        );
+        
+        penPosition.y -= OsEng.console().currentHeight();
+
+        OsEng.dashboard().render(penPosition);
     }
 
     if (_showFrameNumber) {
@@ -748,7 +741,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        absPath(RenderFsPath),
         dict
     );
 
@@ -778,7 +771,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        absPath(RenderFsPath),
         csPath,
         dict
     );
@@ -991,7 +984,8 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(
         return RendererImplementation::Invalid;
     }
 }
-
+/*
+<<<<<<< HEAD
 std::string RenderEngine::progressToStr(int size, double t) {
     std::string progress = "|";
     int g = static_cast<int>((t * (size - 1)) + 1);
@@ -1413,6 +1407,9 @@ void RenderEngine::renderInformation() {
     }
 }
 
+=======
+>>>>>>> master
+*/
 void RenderEngine::renderCameraInformation() {
     if (!_showCameraInfo) {
         return;

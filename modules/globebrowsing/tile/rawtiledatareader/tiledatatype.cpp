@@ -25,8 +25,19 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
 #ifdef GLOBEBROWSING_USE_GDAL
+#ifdef _MSC_VER
+#pragma warning (push)
+ // CPL throws warning about missing DLL interface
+#pragma warning (disable : 4251)
+#endif // _MSC_VER
+
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
 #endif // GLOBEBROWSING_USE_GDAL
 
 #include <ghoul/logging/logmanager.h>

@@ -94,9 +94,10 @@ bool TouchMarker::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
     try {
-        _shader = OsEng.renderEngine().buildRenderProgram("MarkerProgram",
-            "${MODULE_TOUCH}/shaders/marker_vs.glsl",
-            "${MODULE_TOUCH}/shaders/marker_fs.glsl"
+        _shader = OsEng.renderEngine().buildRenderProgram(
+            "MarkerProgram",
+            absPath("${MODULE_TOUCH}/shaders/marker_vs.glsl"),
+            absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
         );
     }
     catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {

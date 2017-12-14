@@ -529,8 +529,8 @@ void GUI::deinitialize() {
 void GUI::initializeGL() {
     _program = ghoul::opengl::ProgramObject::Build(
         "GUI",
-        "${MODULE_IMGUI}/shaders/gui_vs.glsl",
-        "${MODULE_IMGUI}/shaders/gui_fs.glsl"
+        absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
+        absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
     if (!_program) {
         return;
@@ -812,7 +812,7 @@ void GUI::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     ImGui::Begin("OpenSpace GUI", nullptr);
-    
+
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     bool property = _property.isEnabled();
@@ -893,10 +893,20 @@ void GUI::render() {
         addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
 
-    bool addDashboard = ImGui::Button("Add Dashboard");
+    bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
         OsEng.scriptEngine().queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
+    if (addDashboardCopy) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.addScreenSpaceRenderable({ "
+                "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
+            "});",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }

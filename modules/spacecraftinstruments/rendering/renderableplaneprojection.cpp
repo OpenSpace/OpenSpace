@@ -100,8 +100,8 @@ void RenderablePlaneProjection::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
         "Image Plane",
-        "${MODULE_BASE}/shaders/imageplane_vs.glsl",
-        "${MODULE_BASE}/shaders/imageplane_fs.glsl"
+        absPath("${MODULE_BASE}/shaders/imageplane_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/imageplane_fs.glsl")
     );
 
     setTarget(_defaultTarget);

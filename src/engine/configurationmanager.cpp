@@ -157,8 +157,7 @@ void ConfigurationManager::loadFromFile(const string& filename) {
         FileSystem::TokenClosingBraces;
 
     // Retrieving the directory in which the configuration file lies
-    string absolutePath = FileSys.absolutePath(filename);
-    string basePath = ghoul::filesystem::File(absolutePath).directoryName();
+    string basePath = ghoul::filesystem::File(filename).directoryName();
     FileSys.registerPathToken(basePathToken, basePath);
 
     ghoul::lua::LuaState state;
