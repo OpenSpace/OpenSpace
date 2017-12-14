@@ -226,14 +226,18 @@ RenderablePlanetProjection::~RenderablePlanetProjection() {}
 void RenderablePlanetProjection::initializeGL() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "projectiveProgram",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl"
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl")
     );
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build(
         "fboPassProgram",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_fs.glsl"
+        absPath(
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_vs.glsl"
+        ),
+        absPath(
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_fs.glsl"
+        )
     );
 
     loadTextures();

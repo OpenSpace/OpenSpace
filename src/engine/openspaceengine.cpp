@@ -41,6 +41,8 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/rendering/dashboard.h>
+#include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/scriptscheduler.h>
@@ -146,6 +148,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
                                  std::unique_ptr<WindowWrapper> windowWrapper)
     : _configurationManager(new ConfigurationManager)
     , _sceneManager(new SceneManager)
+    , _dashboard(new Dashboard)
     , _downloadManager(nullptr)
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
@@ -177,13 +180,14 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 {
     _navigationHandler->setPropertyOwner(_globalPropertyNamespace.get());
 
-    // New property subowners also have to be added to the OnScreenGuiModule callback!
+    // New property subowners also have to be added to the ImGuiModule callback!
     _globalPropertyNamespace->addPropertySubOwner(_navigationHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
     _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
     _globalPropertyNamespace->addPropertySubOwner(_console.get());
+    _globalPropertyNamespace->addPropertySubOwner(_dashboard.get());
 
 
     _versionInformation.versionString.setReadOnly(true);
@@ -211,6 +215,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Task>>(),
         "Task"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
+        "DashboardItem"
     );
 
     SpiceManager::initialize();
@@ -515,6 +523,10 @@ void OpenSpaceEngine::initialize() {
 
     for (OpenSpaceModule* module : _moduleEngine->modules()) {
         _scriptEngine->addLibrary(module->luaLibrary());
+
+        for (scripting::LuaLibrary& l : module->luaLibraries()) {
+            _scriptEngine->addLibrary(l);
+        }
     }
 
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
@@ -597,7 +609,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     }
 
     bool showNodeNames = true;
-    std::string kNames = 
+    std::string kNames =
         ConfigurationManager::KeyLoadingScreen + "." +
         ConfigurationManager::PartShowNodeNames;
 
@@ -907,12 +919,12 @@ void OpenSpaceEngine::runGlobalCustomizationScripts(const std::string& sceneDesc
     if (_configurationManager->hasKey(k)) {
         ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(k);
         for (int i = 1; i <= dict.size(); ++i) {
-            std::string script = dict.value<std::string>(std::to_string(i));
+            std::string script = absPath(dict.value<std::string>(std::to_string(i)));
 
             if (FileSys.fileExists(script)) {
                 try {
                     LINFO("Running global customization script: " << script);
-                    ghoul::lua::runScriptFile(state, absPath(script));
+                    ghoul::lua::runScriptFile(state, script);
                 } catch (ghoul::RuntimeError& e) {
                     LERRORC(e.component, e.message);
                 }
@@ -1625,6 +1637,11 @@ ConfigurationManager& OpenSpaceEngine::configurationManager() {
 LuaConsole& OpenSpaceEngine::console() {
     ghoul_assert(_console, "LuaConsole must not be nullptr");
     return *_console;
+}
+
+Dashboard& OpenSpaceEngine::dashboard() {
+    ghoul_assert(_dashboard, "Dashboard must not be nullptr");
+    return *_dashboard;
 }
 
 DownloadManager& OpenSpaceEngine::downloadManager() {

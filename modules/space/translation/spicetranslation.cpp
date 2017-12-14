@@ -147,13 +147,13 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
         // Due to the specification, we can be sure it is either a Dictionary or a string
         if (dictionary.hasValue<std::string>(KeyKernels)) {
             std::string kernel = dictionary.value<std::string>(KeyKernels);
-            loadKernel(kernel);
+            loadKernel(absPath(kernel));
         }
         else {
             ghoul::Dictionary kernels = dictionary.value<ghoul::Dictionary>(KeyKernels);
             for (size_t i = 1; i <= kernels.size(); ++i) {
                 std::string kernel = kernels.value<std::string>(std::to_string(i));
-                loadKernel(kernel);
+                loadKernel(absPath(kernel));
             }
         }
     }

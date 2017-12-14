@@ -227,9 +227,11 @@ void RenderableSphere::initializeGL() {
     _sphere->initialize();
 
     // pscstandard
-    _shader = OsEng.renderEngine().buildRenderProgram("Sphere",
-        "${MODULE_BASE}/shaders/sphere_vs.glsl",
-        "${MODULE_BASE}/shaders/sphere_fs.glsl");
+    _shader = OsEng.renderEngine().buildRenderProgram(
+        "Sphere",
+        absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
+    );
 
     loadTexture();
 }

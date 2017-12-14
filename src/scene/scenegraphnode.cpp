@@ -86,22 +86,6 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     std::string name = dictionary.value<std::string>(KeyName);
     result->setName(name);
 
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
-        ghoul::Dictionary renderableDictionary;
-        dictionary.getValue(KeyRenderable, renderableDictionary);
-
-        renderableDictionary.setValue(KeyName, name);
-
-        result->_renderable = Renderable::createFromDictionary(renderableDictionary);
-        if (result->_renderable == nullptr) {
-            LERROR("Failed to create renderable for SceneGraphNode '"
-                   << result->name() << "'");
-            return nullptr;
-        }
-        result->addPropertySubOwner(result->_renderable.get());
-        LDEBUG("Successfully created renderable for '" << result->name() << "'");
-    }
-
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
         dictionary.getValue(keyTransformTranslation, translationDictionary);
@@ -141,6 +125,23 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
         result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG("Successfully created scale for '" << result->name() << "'");
+    }
+
+    // We initialize the renderable last as it probably has the most dependencies
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
+        ghoul::Dictionary renderableDictionary;
+        dictionary.getValue(KeyRenderable, renderableDictionary);
+
+        renderableDictionary.setValue(KeyName, name);
+
+        result->_renderable = Renderable::createFromDictionary(renderableDictionary);
+        if (result->_renderable == nullptr) {
+            LERROR("Failed to create renderable for SceneGraphNode '"
+                << result->name() << "'");
+            return nullptr;
+        }
+        result->addPropertySubOwner(result->_renderable.get());
+        LDEBUG("Successfully created renderable for '" << result->name() << "'");
     }
 
     if (dictionary.hasKey(KeyTag)) {

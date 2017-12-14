@@ -173,7 +173,7 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions) {
                     standardDeviation,
                     _normValues
                 );
-                filterWidth = fabs(0.5-normalizeWithStandardScore(
+                filterWidth = fabs(0.5f-normalizeWithStandardScore(
                     filterWidth,
                     mean,
                     standardDeviation,

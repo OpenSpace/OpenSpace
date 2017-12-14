@@ -27,6 +27,9 @@
 
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/rendering/dashboard.h>
+
 namespace ghoul::fontrendering {
     class Font;
     class FontRenderer;
@@ -35,6 +38,7 @@ namespace ghoul::fontrendering {
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+namespace scripting { struct LuaLibrary; }
 
 class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
 public:
@@ -47,13 +51,20 @@ public:
     bool isReady() const override;
     void update() override;
 
+    Dashboard& dashboard();
+    const Dashboard& dashboard() const;
+
+    static scripting::LuaLibrary luaLibrary();
+
     static documentation::Documentation Documentation();
 
 private:
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+    Dashboard _dashboard;
+    properties::BoolProperty _useMainDashboard;
+    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
+    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
 };
 
 } // namespace openspace

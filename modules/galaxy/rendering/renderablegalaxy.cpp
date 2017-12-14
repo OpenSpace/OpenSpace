@@ -260,10 +260,12 @@ void RenderableGalaxy::initializeGL() {
 
 
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _pointsProgram = renderEngine.buildRenderProgram("Galaxy points",
-        "${MODULE_GALAXY}/shaders/points.vs",
-        "${MODULE_GALAXY}/shaders/points.fs",
-        ghoul::Dictionary());
+    _pointsProgram = renderEngine.buildRenderProgram(
+        "Galaxy points",
+        absPath("${MODULE_GALAXY}/shaders/points.vs"),
+        absPath("${MODULE_GALAXY}/shaders/points.fs"),
+        ghoul::Dictionary()
+    );
 
     _pointsProgram->setIgnoreUniformLocationError(
         ghoul::opengl::ProgramObject::IgnoreError::Yes

@@ -115,8 +115,8 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
 {
     _program = ghoul::opengl::ProgramObject::Build(
         "Loading Screen",
-        "${SHADERS}/loadingscreen.vert",
-        "${SHADERS}/loadingscreen.frag"
+        absPath("${SHADERS}/loadingscreen.vert"),
+        absPath("${SHADERS}/loadingscreen.frag")
     );
 
     _loadingFont = OsEng.fontManager().font(
@@ -268,7 +268,7 @@ void LoadingScreen::render() {
 
     //
     // Clear background
-    // 
+    //
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(ClearBufferMask::GL_COLOR_BUFFER_BIT);
 
@@ -279,7 +279,7 @@ void LoadingScreen::render() {
 
     //
     // Render logo
-    // 
+    //
     _program->activate();
 
     ghoul::opengl::TextureUnit unit;
@@ -321,7 +321,7 @@ void LoadingScreen::render() {
         // Depending on the progress, we only want to draw the progress bar to a mixture
         // of the lowerleft and upper right extent
 
-        float progress = _nItems != 0 ? 
+        float progress = _nItems != 0 ?
             static_cast<float>(_iProgress) / static_cast<float>(_nItems) :
             0.f;
 
@@ -409,7 +409,7 @@ void LoadingScreen::render() {
 
     //
     // "Loading" text
-    // 
+    //
     using FR = ghoul::fontrendering::FontRenderer;
     FR& renderer = FR::defaultRenderer();
 
@@ -520,12 +520,12 @@ void LoadingScreen::render() {
 
                     bool barOverlap = _showProgressbar ?
                         rectOverlaps(
-                            ndcToScreen(progressbarLl, res), 
+                            ndcToScreen(progressbarLl, res),
                             ndcToScreen(progressbarUr, res),
                             ll,
                             ur
-                        ) : 
-                    false;
+                        ) :
+                        false;
 
                     if (logoOverlap || loadingOverlap || messageOverlap || barOverlap) {
                         continue;

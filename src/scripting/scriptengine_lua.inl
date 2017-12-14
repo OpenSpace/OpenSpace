@@ -198,7 +198,7 @@ int absolutePath(lua_State* L) {
 
     std::string path = luaL_checkstring(L, -1);
     path = absPath(path);
-    path = FileSys.convertPathSeparator(path, '/');
+    //path = FileSys.convertPathSeparator(path, '/');
     lua_pushstring(L, path.c_str());
     return 1;
 }

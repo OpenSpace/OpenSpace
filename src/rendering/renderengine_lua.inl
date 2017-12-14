@@ -119,7 +119,7 @@ int addScreenSpaceRenderable(lua_State* L) {
     );
     OsEng.renderEngine().addScreenSpaceRenderable(s);
 
-    return 1;
+    return 0;
 }
 
 int removeScreenSpaceRenderable(lua_State* L) {
@@ -145,7 +145,7 @@ int removeScreenSpaceRenderable(lua_State* L) {
 
     OsEng.renderEngine().removeScreenSpaceRenderable(s);
 
-    return 1;
+    return 0;
 }
 
 }// namespace openspace::luascriptfunctions

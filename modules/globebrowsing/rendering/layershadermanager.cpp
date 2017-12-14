@@ -33,6 +33,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace openspace::globebrowsing {
@@ -225,8 +226,8 @@ void LayerShaderManager::recompileShaderProgram(
 
     _programObject = OsEng.renderEngine().buildRenderProgram(
         _shaderName,
-        _vsPath,
-        _fsPath,
+        absPath(_vsPath),
+        absPath(_fsPath),
         shaderDictionary
     );
 
