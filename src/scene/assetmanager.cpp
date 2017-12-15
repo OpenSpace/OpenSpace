@@ -54,6 +54,7 @@ void AssetManager::initialize() {
 void AssetManager::deinitialize() {
     _assetLoader->rootAsset()->deinitialize();
     _assetLoader->removeAssetListener(this);
+    _assetLoader = nullptr;
 }
 
 bool AssetManager::update() {

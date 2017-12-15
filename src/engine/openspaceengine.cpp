@@ -438,6 +438,7 @@ void OpenSpaceEngine::destroy() {
         _engine->parallelConnection().signalDisconnect();
     }
 
+    _engine->assetManager().deinitialize();
     _engine->_scene = nullptr;
 
     _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());

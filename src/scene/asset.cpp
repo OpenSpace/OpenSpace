@@ -109,22 +109,20 @@ void Asset::setState(Asset::State state) {
 
     for (auto& requiringAsset : _requiringAssets) {
         if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
-            a->requiredAssetChangedState(thisAsset);
+            a->requiredAssetChangedState(thisAsset, state);
         }
     }
 
     for (auto& requestingAsset : _requestingAssets) {
         if (std::shared_ptr<Asset> a = requestingAsset.lock()) {
-            a->requestedAssetChangedState(thisAsset);
+            a->requestedAssetChangedState(thisAsset, state);
         }
     }
 }
 
-void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child) {
+void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child, Asset::State childState) {
     ghoul_assert(!isInitialized(),
         "Required asset changing state while parent asset is initialized");
-
-    State childState = child->state();
     if (childState == State::SyncResolved) {
         if (isSyncResolveReady()) {
             setState(State::SyncResolved);
@@ -134,8 +132,7 @@ void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child) {
     }
 }
 
-void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child) {
-    State childState = child->state();
+void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child, Asset::State childState) {
     if (child->hasInitializedParent()) {
         if (childState == State::Loaded) {
             child->startSynchronizations();
@@ -163,9 +160,6 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
 void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> synchronization,
                              ResourceSynchronization::State state)
 {
-    ghoul_assert(!isInitialized(),
-        "Synchronization changing state while asset is initialized");
-
     if (state == ResourceSynchronization::State::Resolved) {
         if (!isSynchronized() && isSyncResolveReady()) {
             setState(State::SyncResolved);
@@ -178,17 +172,16 @@ void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> synchroniz
 bool Asset::isSyncResolveReady() {
     std::vector<std::shared_ptr<Asset>> requiredAssets = this->requiredAssets();
 
-    auto pendingRequiredAsset = std::find_if(
+    auto unsynchronizedAsset = std::find_if(
         requiredAssets.begin(),
         requiredAssets.end(),
         [](std::shared_ptr<Asset>& a) {
-            return a->state() == Asset::State::Loaded ||
-                a->state() == Asset::State::Synchronizing;
+            return !a->isSynchronized();
         }
     );
 
-    if (pendingRequiredAsset != requiredAssets.end()) {
-        // Not considered resolved if all children are not resolved
+    if (unsynchronizedAsset != requiredAssets.end()) {
+        // Not considered resolved if there is one or more unresolved children
         return false;
     }
 
@@ -333,9 +326,13 @@ bool Asset::isInitialized() const {
 }
 
 bool Asset::startSynchronizations() {
-    // Do not attempt to resync if this is already initialized
-    if (state() == State::Initialized) {
-        return false;
+    for (auto& child : requestedAssets()) {
+        child->startSynchronizations();
+    }
+
+    // Do not attempt to resync if this is already done
+    if (isSyncingOrResolved()) {
+        return state() != State::SyncResolved;
     }
 
     setState(State::Synchronizing);
@@ -348,9 +345,6 @@ bool Asset::startSynchronizations() {
             foundUnresolved = true;
         }
     }
-    for (auto& child : requestedAssets()) {
-        child->startSynchronizations();
-    }
 
     // Now synchronize its own synchronizations.
     for (const auto& s : ownSynchronizations()) {
@@ -360,7 +354,7 @@ bool Asset::startSynchronizations() {
         }
     }
     // If all syncs are resolved (or no syncs exist), mark as resolved.
-    if (!foundUnresolved) {
+    if (!isInitialized() && !foundUnresolved) {
         setState(State::SyncResolved);
     }
     return foundUnresolved;
@@ -419,7 +413,6 @@ bool Asset::restartAllSynchronizations() {
 float Asset::requiredSynchronizationProgress() {
     std::vector<std::shared_ptr<Asset>> assets = requiredSubTreeAssets();
     return syncProgress(assets);
-
 }
 
 float Asset::requestedSynchronizationProgress() {
@@ -428,13 +421,11 @@ float Asset::requestedSynchronizationProgress() {
 }
 
 void Asset::load() {
-    LDEBUG("Loading asset " << id());
-
     if (isLoaded()) {
         return;
     }
 
-    bool loaded = loader()->loadAsset(shared_from_this());  
+    bool loaded = loader()->loadAsset(shared_from_this());
     setState(loaded ? State::Loaded : State::LoadingFailed);
 }
 
@@ -446,8 +437,6 @@ void Asset::unloadIfUnwanted() {
 }
 
 void Asset::unload() {
-    LDEBUG("Unloading asset " << id());
-
     if (!isLoaded()) {
         return;
     }
@@ -653,20 +642,28 @@ void Asset::require(std::shared_ptr<Asset> child) {
         return;
     }
     _requiredAssets.push_back(child);
-
-    
     child->_requiringAssets.push_back(shared_from_this());
 
     if (!child->isLoaded()) {
         child->load();
     }
-
-    if (isSynchronized() && child->isLoaded() && !child->isSynchronized()) {
-        child->startSynchronizations();
+    if (!child->isLoaded()) {
+        unrequire(child);
     }
 
-    if (isInitialized() && child->isSynchronized() && !child->isInitialized()) {
-        child->initialize();
+    if (isSynchronized()) {
+        if (child->isLoaded() && !child->isSynchronized()) {
+            child->startSynchronizations();
+        }
+    }
+
+    if (isInitialized()) {
+        if (child->isSynchronized() && !child->isInitialized()) {
+            child->initialize();
+        }
+        if (!child->isInitialized()) {
+            unrequire(child);
+        }
     }
 }
 
@@ -717,29 +714,18 @@ void Asset::request(std::shared_ptr<Asset> child) {
         return;
     }
     _requestedAssets.push_back(child);
-    
     child->_requestingAssets.push_back(shared_from_this());
 
     if (!child->isLoaded()) {
         child->load();
     }
-    if (!child->isLoaded()) {
-        unrequest(child);
+
+    if (isSynchronized() && child->isLoaded() && !child->isSynchronized()) {
+        child->startSynchronizations();
     }
 
-    if (isSynchronized()) {
-        if (child->isLoaded() && !child->isSynchronized()) {
-            child->startSynchronizations();
-        }
-    }
-
-    if (isInitialized()) {
-        if (child->isSynchronized() && !child->isInitialized()) {
-            child->initialize();
-        }
-        if (!child->isInitialized()) {
-            unrequest(child);
-        }
+    if (isInitialized() && child->isSynchronized() && !child->isInitialized()) {
+        child->initialize();
     }
 }
 

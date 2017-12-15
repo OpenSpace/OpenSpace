@@ -94,9 +94,11 @@ AssetLoader::~AssetLoader() {
 
 void AssetLoader::trackAsset(std::shared_ptr<Asset> asset) {
     _trackedAssets.emplace(asset->id(), asset);
+    setUpAssetLuaTable(asset.get());
 }
 
 void AssetLoader::untrackAsset(Asset* asset) {
+    tearDownAssetLuaTable(asset);
     auto it = _trackedAssets.find(asset->id());
     if (it != _trackedAssets.end()) {
         _trackedAssets.erase(it);
@@ -210,7 +212,7 @@ void AssetLoader::tearDownAssetLuaTable(Asset* asset) {
 
 bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     std::shared_ptr<Asset> parentAsset = _currentAsset;
-    setUpAssetLuaTable(asset.get());
+
     setCurrentAsset(asset);
     ghoul::OnScopeExit e([this, parentAsset] {
         setCurrentAsset(parentAsset);
@@ -218,7 +220,6 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     
     if (!FileSys.fileExists(asset->assetFilePath())) {
         LERROR("Could not load asset '" << asset->assetFilePath() << "': File does not exist.");
-        tearDownAssetLuaTable(asset.get());
         return false;
     }
 
@@ -226,7 +227,6 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
         ghoul::lua::runScriptFile(*_luaState, asset->assetFilePath());
     } catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR("Could not load asset '" << asset->assetFilePath() << "': " << e.message);
-        tearDownAssetLuaTable(asset.get());
         return false;
     }
 
@@ -234,7 +234,6 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
 }
 
 void AssetLoader::unloadAsset(std::shared_ptr<Asset> asset) {
-    tearDownAssetLuaTable(asset.get());
     for (int ref : _onInitializationFunctionRefs[asset.get()]) {
        luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
     }
