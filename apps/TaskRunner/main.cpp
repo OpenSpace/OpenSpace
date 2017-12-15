@@ -45,6 +45,7 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/util/taskloader.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
@@ -91,7 +92,7 @@ void performTasks(const std::string& path) {
         );
         ProgressBar progressBar(100);
         auto onProgress = [&progressBar](float progress) {
-            progressBar.print(progress * 100);
+            progressBar.print(static_cast<int>(progress * 100.f));
         };
         task.perform(onProgress);
     }
@@ -145,13 +146,28 @@ int main(int argc, char** argv) {
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
         );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
+        "ResourceSynchronization"
+    );
+
 
     openspace::ConfigurationManager configuration;
     std::string configurationFile = configuration.findConfiguration(ConfigurationFile);
     configuration.loadFromFile(configurationFile);
 
+    ghoul::Dictionary moduleConfigurations;
+    if (configuration.hasKeyAndValue<ghoul::Dictionary>(
+        ConfigurationManager::KeyModuleConfigurations))
+    {
+        configuration.getValue<ghoul::Dictionary>(
+            ConfigurationManager::KeyModuleConfigurations,
+            moduleConfigurations
+        );
+    }
+
     ModuleEngine moduleEngine;
-    moduleEngine.initialize();
+    moduleEngine.initialize(moduleConfigurations);
     LINFO("Initialization done.");
 
     // Parse commandline arguments

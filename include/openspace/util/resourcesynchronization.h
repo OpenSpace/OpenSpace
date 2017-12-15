@@ -36,6 +36,12 @@
 
 namespace openspace {
 
+struct SynchronizationConfiguration {
+    std::string syncRoot;
+    std::vector<std::string> httpRepositories;
+    bool allowSynchronization;
+};
+
 class ResourceSynchronization
     : public std::enable_shared_from_this<ResourceSynchronization>
 {
@@ -55,6 +61,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     ResourceSynchronization();
+    void configure(std::shared_ptr<SynchronizationConfiguration> config);
     virtual ~ResourceSynchronization();
     virtual std::string directory() = 0;
     virtual void start() = 0;

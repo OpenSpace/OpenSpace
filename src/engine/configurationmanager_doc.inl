@@ -285,13 +285,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "default is false."
         },
         {
-            ConfigurationManager::KeyHttpSynchronizationRepositories,
-            new StringListVerifier("URLs to http synchronization repositories"),
-            Optional::Yes,
-            "Configures the list of http synchronization repositories to load "
-            "resources from. The first URL will be tried first."
-        },
-        {
             ConfigurationManager::KeyHttpProxy,
             new TableVerifier({
                 {
@@ -462,6 +455,12 @@ documentation::Documentation ConfigurationManager::Documentation() {
             Optional::Yes,
             "Values in this table describe the behavior of the loading screen that is "
             "displayed while the scene graph is created and initialized."
+        },
+        {
+            ConfigurationManager::KeyModuleConfigurations,
+            new TableVerifier,
+            Optional::Yes,
+            "Configurations for each module"
         }
         }
     };

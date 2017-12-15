@@ -45,8 +45,12 @@ namespace {
 
 namespace openspace {
 
-TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict)
+TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict,
+                                               const std::string& synchronizationRoot,
+                                               TorrentClient* torrentClient)
     : openspace::ResourceSynchronization()
+    , _synchronizationRoot(synchronizationRoot)
+    , _torrentClient(torrentClient)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -56,13 +60,10 @@ TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict)
 
     _identifier = dict.value<std::string>(KeyIdentifier);
     _magnetLink = dict.value<std::string>(KeyMagnet);
+}
 
-    // Configure synchronization based on global settings in SyncModule 
-    // TODO: For testability and decreaing deps, make it possible to inject this instead.
-    // For example, allow this configuration to be done by the TemplateFactory.
-    SyncModule* syncModule = OsEng.moduleEngine().module<SyncModule>();
-    _synchronizationRoot = syncModule->synchronizationRoot();
-    _torrentClient = syncModule->torrentClient();
+TorrentSynchronization::~TorrentSynchronization() {
+    cancel();
 }
 
 documentation::Documentation TorrentSynchronization::Documentation() {
@@ -160,18 +161,22 @@ void TorrentSynchronization::createSyncFile() {
 }
 
 size_t TorrentSynchronization::nSynchronizedBytes() {
+    std::lock_guard<std::mutex> g(_progressMutex);
     return _progress.nDownloadedBytes;
 }
 
 size_t TorrentSynchronization::nTotalBytes() {
+    std::lock_guard<std::mutex> g(_progressMutex);
     return _progress.nTotalBytes;
 }
 
 bool TorrentSynchronization::nTotalBytesIsKnown() {
+    std::lock_guard<std::mutex> g(_progressMutex);
     return _progress.nTotalBytesKnown;
 }
 
 void TorrentSynchronization::updateTorrentProgress(TorrentClient::TorrentProgress progress) {
+    std::lock_guard<std::mutex> g(_progressMutex);
     _progress = progress;
     if (progress.finished && state() == State::Syncing) {
         createSyncFile();

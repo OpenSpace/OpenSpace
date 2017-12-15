@@ -99,7 +99,8 @@ public:
     bool cancelAllSynchronizations();
     bool cancelUnwantedSynchronizations();
     bool restartAllSynchronizations();
-    float synchronizationProgress();
+    float requestedSynchronizationProgress();
+    float requiredSynchronizationProgress();
 
     // Init
     bool hasInitializedParent() const;

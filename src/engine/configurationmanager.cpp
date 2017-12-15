@@ -86,8 +86,6 @@ const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
 
 const string ConfigurationManager::KeyOnScreenTextScaling = "OnScreenTextScaling";
 
-const string ConfigurationManager::KeyHttpSynchronizationRepositories = "HttpSynchronizationRepositories";
-
 const string ConfigurationManager::KeyHttpProxy = "HttpProxy";
 const string ConfigurationManager::PartHttpProxyAddress = "Address";
 const string ConfigurationManager::PartHttpProxyPort = "Port";
@@ -113,6 +111,8 @@ const string ConfigurationManager::KeyLoadingScreen = "LoadingScreen";
 const string ConfigurationManager::PartShowMessage = "ShowMessage";
 const string ConfigurationManager::PartShowNodeNames = "ShowNodeNames";
 const string ConfigurationManager::PartShowProgressbar = "ShowProgressbar";
+
+const string ConfigurationManager::KeyModuleConfigurations = "ModuleConfigurations";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;

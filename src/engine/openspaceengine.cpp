@@ -375,8 +375,18 @@ void OpenSpaceEngine::create(int argc, char** argv,
         " (" << OPENSPACE_VERSION_STRING << ")"
     );
 
+    ghoul::Dictionary moduleConfigurations;
+    if (_engine->configurationManager().hasKeyAndValue<ghoul::Dictionary>(
+        ConfigurationManager::KeyModuleConfigurations))
+    {
+        _engine->configurationManager().getValue<ghoul::Dictionary>(
+            ConfigurationManager::KeyModuleConfigurations,
+            moduleConfigurations
+        );
+    }
+
     // Register modules
-    _engine->_moduleEngine->initialize();
+    _engine->_moduleEngine->initialize(moduleConfigurations);
 
     // After registering the modules, the documentations for the available classes
     // can be added as well

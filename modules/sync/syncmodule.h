@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -38,10 +38,11 @@ public:
     virtual ~SyncModule() = default;
     std::vector<documentation::Documentation> documentations() const override;
     std::string synchronizationRoot() const;
+    void addHttpSynchronizationRepository(const std::string& repository);
     std::vector<std::string> httpSynchronizationRepositories() const;
     TorrentClient* torrentClient();
 protected:
-    void internalInitialize() override;
+    void internalInitialize(const ghoul::Dictionary& configuration) override;
 private:
     TorrentClient _torrentClient;
     std::vector<std::string> _httpSynchronizationRepositories;

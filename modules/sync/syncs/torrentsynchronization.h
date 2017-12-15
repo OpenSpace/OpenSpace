@@ -43,7 +43,12 @@ class TorrentSynchronizationJob;
 
 class TorrentSynchronization : public ResourceSynchronization {
 public:
-    TorrentSynchronization(const ghoul::Dictionary& dict);
+    TorrentSynchronization(const ghoul::Dictionary& dict,
+                           const std::string& synchronizationRoot,
+                           TorrentClient* client);
+
+
+    virtual ~TorrentSynchronization();
     static documentation::Documentation Documentation();
 
     std::string directory() override;
@@ -64,6 +69,7 @@ private:
     std::atomic_bool _enabled = false;
     size_t _torrentId;
     TorrentClient::TorrentProgress _progress;
+    std::mutex _progressMutex;
     std::string _identifier;
     std::string _magnetLink;
     std::string _synchronizationRoot;

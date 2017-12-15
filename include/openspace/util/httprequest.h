@@ -189,6 +189,8 @@ protected:
     bool initDownload() override;
     bool deinitDownload() override;
     size_t handleData(HttpRequest::Data d) override;
+
+    static std::mutex _directoryCreationMutex;
 private:
     std::string _destination;
     std::ofstream _file;

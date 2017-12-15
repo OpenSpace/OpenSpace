@@ -120,8 +120,6 @@ public:
     static const std::string KeyRenderingMethod;
     /// The key that determines whether a new cache folder is used for each scene file
     static const std::string KeyPerSceneCache;
-    // The key that stores the list of urls to http resource sync repositories
-    static const std::string KeyHttpSynchronizationRepositories;
     /// The key that stores the http proxy settings for the downloadmanager
     static const std::string KeyHttpProxy;
     /// The key that stores the address of the http proxy
@@ -168,6 +166,8 @@ public:
     /// The part of the key storing whether the loading screen should contain a progress
     /// bar
     static const std::string PartShowProgressbar;
+    /// The key used to specify module specific configurations
+    static const std::string KeyModuleConfigurations;
 
 
     /**

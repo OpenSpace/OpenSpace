@@ -91,7 +91,7 @@ void TorrentClient::pollAlerts() {
         std::lock_guard<std::mutex> guard(_mutex);
         _session->pop_alerts(&alerts);
     }
-    
+
     for (lt::alert const* a : alerts) {
         //LINFO(a->message());
         // if we receive the finished alert or an error, we're done

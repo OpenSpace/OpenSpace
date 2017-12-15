@@ -32,6 +32,31 @@
 
 namespace {
     const char* _loggerCat = "Asset";
+
+    float syncProgress(std::vector<std::shared_ptr<openspace::Asset>> assets) {
+        size_t nTotalBytes = 0;
+        size_t nSyncedBytes = 0;
+
+        for (const auto& a : assets) {
+            const std::vector<std::shared_ptr<openspace::ResourceSynchronization>> syncs =
+                a->ownSynchronizations();
+
+            for (const auto& sync : syncs) {
+                if (sync->nTotalBytesIsKnown()) {
+                    nTotalBytes += sync->nTotalBytes();
+                    nSyncedBytes += sync->nSynchronizedBytes();
+                } else if (sync->isSyncing()) {
+                    // A resource is still synchronizing but its size is unknown.
+                    // Impossible to know the global progress.
+                    return 0;
+                }
+            }
+        }
+        if (nTotalBytes == 0) {
+            return 0.f;
+        }
+        return static_cast<float>(nSyncedBytes) / static_cast<float>(nTotalBytes);
+    }
 }
 
 namespace openspace {
@@ -96,6 +121,9 @@ void Asset::setState(Asset::State state) {
 }
 
 void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child) {
+    ghoul_assert(!isInitialized(),
+        "Required asset changing state while parent asset is initialized");
+
     State childState = child->state();
     if (childState == State::SyncResolved) {
         if (isSyncResolveReady()) {
@@ -135,6 +163,9 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
 void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> synchronization,
                              ResourceSynchronization::State state)
 {
+    ghoul_assert(!isInitialized(),
+        "Synchronization changing state while asset is initialized");
+
     if (state == ResourceSynchronization::State::Resolved) {
         if (!isSynchronized() && isSyncResolveReady()) {
             setState(State::SyncResolved);
@@ -317,7 +348,7 @@ bool Asset::startSynchronizations() {
             foundUnresolved = true;
         }
     }
-    for (auto& child : requiredAssets()) {
+    for (auto& child : requestedAssets()) {
         child->startSynchronizations();
     }
 
@@ -385,29 +416,15 @@ bool Asset::restartAllSynchronizations() {
     return startSynchronizations();
 }
 
-float Asset::synchronizationProgress() {
+float Asset::requiredSynchronizationProgress() {
     std::vector<std::shared_ptr<Asset>> assets = requiredSubTreeAssets();
+    return syncProgress(assets);
 
-    size_t nTotalBytes = 0;
-    size_t nSyncedBytes = 0;
+}
 
-    for (const auto& a : assets) {
-        const std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
-            a->ownSynchronizations();
-
-        for (const auto& sync : syncs) {
-            if (sync->nTotalBytesIsKnown()) {
-                nTotalBytes += sync->nTotalBytes();
-                nSyncedBytes += sync->nSynchronizedBytes();
-            } else {
-                return 0;
-            }
-        }
-    }
-    if (nTotalBytes == 0) {
-        return 1.f;
-    }
-    return static_cast<float>(nSyncedBytes) / static_cast<float>(nTotalBytes);
+float Asset::requestedSynchronizationProgress() {
+    std::vector<std::shared_ptr<Asset>> assets = subTreeAssets();
+    return syncProgress(assets);
 }
 
 void Asset::load() {
@@ -706,13 +723,23 @@ void Asset::request(std::shared_ptr<Asset> child) {
     if (!child->isLoaded()) {
         child->load();
     }
-
-    if (isSynchronized() && child->isLoaded() && !child->isSynchronized()) {
-        child->startSynchronizations();
+    if (!child->isLoaded()) {
+        unrequest(child);
     }
 
-    if (isInitialized() && child->isSynchronized() && !child->isInitialized()) {
-        child->initialize();
+    if (isSynchronized()) {
+        if (child->isLoaded() && !child->isSynchronized()) {
+            child->startSynchronizations();
+        }
+    }
+
+    if (isInitialized()) {
+        if (child->isSynchronized() && !child->isInitialized()) {
+            child->initialize();
+        }
+        if (!child->isInitialized()) {
+            unrequest(child);
+        }
     }
 }
 
@@ -733,8 +760,8 @@ void Asset::unrequest(std::shared_ptr<Asset> child) {
         child->_requestingAssets.begin(),
         child->_requestingAssets.end(),
         [this](std::weak_ptr<Asset> a) {
-        return a.lock().get() == this;
-    }
+            return a.lock().get() == this;
+        }
     );
 
     if (parentIt == child->_requestingAssets.end()) {

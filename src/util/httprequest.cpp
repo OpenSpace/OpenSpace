@@ -291,8 +291,12 @@ bool HttpFileDownload::initDownload() {
 
     ghoul::filesystem::File destinationFile = _destination;
     ghoul::filesystem::Directory d = destinationFile.directoryName();
-    if (!FileSys.directoryExists(d)) {
-        FileSys.createDirectory(d, ghoul::filesystem::Directory::Recursive::Yes);
+
+    {
+        std::lock_guard<std::mutex> g(_directoryCreationMutex);
+        if (!FileSys.directoryExists(d)) {
+            FileSys.createDirectory(d, ghoul::filesystem::Directory::Recursive::Yes);
+        }
     }
 
     _file = std::ofstream(_destination, std::ofstream::binary);
@@ -313,6 +317,8 @@ size_t HttpFileDownload::handleData(HttpRequest::Data d) {
     _file.write(d.buffer, d.size);
     return d.size;
 }
+
+std::mutex HttpFileDownload::_directoryCreationMutex;
 
 SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)
     : SyncHttpDownload(std::move(url))

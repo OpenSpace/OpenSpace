@@ -34,7 +34,12 @@ namespace openspace {
 
 class HttpSynchronization : public ResourceSynchronization {
 public:
-    HttpSynchronization(const ghoul::Dictionary& dict);
+    HttpSynchronization(
+        const ghoul::Dictionary& dict,
+        const std::string& synchronizationRoot,
+        const std::vector<std::string>& synchronizationRepositories
+    );
+
     virtual ~HttpSynchronization();
 
     static documentation::Documentation Documentation();
@@ -54,9 +59,9 @@ private:
     bool hasSyncFile();
     void createSyncFile();
 
-    std::atomic_bool _nTotalBytesKnown;
-    std::atomic_size_t _nTotalBytes;
-    std::atomic_size_t _nSynchronizedBytes;
+    std::atomic_bool _nTotalBytesKnown = false;
+    std::atomic_size_t _nTotalBytes = 0;
+    std::atomic_size_t _nSynchronizedBytes = 0;
 
     std::atomic_bool _shouldCancel = false;
     std::string _identifier;

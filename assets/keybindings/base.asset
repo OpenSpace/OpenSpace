@@ -1,1 +1,3 @@
-dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'));
+asset.onInitialize(function()
+	dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'));
+end)

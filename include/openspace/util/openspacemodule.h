@@ -34,8 +34,12 @@
 #include <string>
 #include <vector>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 namespace documentation {  struct Documentation; }
+
+class ModuleEngine;
 
 /**
  * This class is the base class for an OpenSpace module. A module groups functionality
@@ -61,7 +65,8 @@ public:
      * is set in the OpenSpaceModule constructor. This method will call the
      * internalInitialize method for further customization for each subclass.
      */
-    void initialize();
+    void initialize(const ModuleEngine* moduleEngine,
+                    const ghoul::Dictionary& configuration);
 
     /**
      * Empty deinitialization method that will call the internalDeinitialize method for
@@ -97,6 +102,12 @@ protected:
     virtual void internalInitialize();
 
     /**
+    * Customization point for each derived class. The internalInitialize method is called
+    * by the initiailze method.
+    */
+    virtual void internalInitialize(const ghoul::Dictionary& configuration);
+
+    /**
      * Customization point for each derived class. The internalDeinitialize method is
      * called by the deinitialize method.
      */
@@ -107,6 +118,14 @@ protected:
      * path tokens.
      */
     std::string modulePath() const;
+
+    /**
+     * Returns a const pointer to the module engine
+     */
+    const ModuleEngine* moduleEngine() const;
+
+private:
+    const ModuleEngine* _moduleEngine;
 };
 
 } // namespace openspace

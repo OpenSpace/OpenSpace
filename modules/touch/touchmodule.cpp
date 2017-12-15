@@ -112,6 +112,10 @@ TouchModule::TouchModule()
     addPropertySubOwner(touch);
     addPropertySubOwner(markers);
 
+    if (!OpenSpaceEngine::isCreated()) {
+        return;
+    }
+
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::InitializeGL,
         [&]() {

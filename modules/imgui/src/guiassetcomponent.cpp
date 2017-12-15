@@ -100,7 +100,7 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
 
     if (asset->state() == Asset::State::Synchronizing) {
         assetText += " (" + std::to_string(
-            static_cast<int>(asset->synchronizationProgress() * 100)
+            static_cast<int>(asset->requiredSynchronizationProgress() * 100)
             ) + "%%)";
     }
 

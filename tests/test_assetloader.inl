@@ -39,7 +39,6 @@
 
 #include <exception>
 
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
@@ -79,7 +78,6 @@ protected:
     }
 
     openspace::Scene _scene;
-    std::unique_ptr<openspace::ResourceSynchronizer> _resourceSynchronizer;
     std::unique_ptr<openspace::AssetLoader> _assetLoader;
     bool _passedTest;
 };
@@ -96,17 +94,17 @@ int passTest(lua_State* state) {
 
 TEST_F(AssetLoaderTest, Assertions) {
     try {
-        _assetLoader->loadAsset("passassertion");
+        _assetLoader->add("passassertion");
     }
     catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();
     }
-    EXPECT_THROW(_assetLoader->loadAsset("failassertion"), ghoul::lua::LuaRuntimeException);
+    EXPECT_THROW(_assetLoader->add("failassertion"), ghoul::lua::LuaRuntimeException);
 }
 
 TEST_F(AssetLoaderTest, BasicExportImport) {
     try {
-        _assetLoader->loadAsset("import");
+        _assetLoader->add("import");
     }
     catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();
@@ -115,7 +113,7 @@ TEST_F(AssetLoaderTest, BasicExportImport) {
 
 TEST_F(AssetLoaderTest, AssetFuncitons) {
     try {
-        _assetLoader->loadAsset("assetfunctionsexist");
+        _assetLoader->add("assetfunctionsexist");
     } catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();
     }
@@ -123,7 +121,7 @@ TEST_F(AssetLoaderTest, AssetFuncitons) {
 
 TEST_F(AssetLoaderTest, DependencyFuncitons) {
     try {
-        _assetLoader->loadAsset("dependencyfunctionsexist");
+        _assetLoader->add("dependencyfunctionsexist");
     }
     catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();
@@ -132,7 +130,7 @@ TEST_F(AssetLoaderTest, DependencyFuncitons) {
 
 TEST_F(AssetLoaderTest, AssetInitialization) {
     try {
-        std::shared_ptr<openspace::Asset> asset = _assetLoader->loadAsset("initialization");
+        std::shared_ptr<openspace::Asset> asset = _assetLoader->add("initialization");
         asset->initialize();
         EXPECT_TRUE(passed());
     }

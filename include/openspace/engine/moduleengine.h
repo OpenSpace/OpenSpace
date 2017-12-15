@@ -56,7 +56,7 @@ public:
      * \throw ghoul::RuntimeError If two modules in the default modules have the same
      * name
     */
-    void initialize();
+    void initialize(const ghoul::Dictionary& moduleConfigurations);
 
     /**
      * Deinitializes all of the contained OpenSpaceModule%s by calling the
@@ -72,7 +72,8 @@ public:
      * previously
      * \pre \p module must not be nullptr
      */
-    void registerModule(std::unique_ptr<OpenSpaceModule> module);
+    void registerModule(std::unique_ptr<OpenSpaceModule> module,
+                        const ghoul::Dictionary& configuration);
 
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with

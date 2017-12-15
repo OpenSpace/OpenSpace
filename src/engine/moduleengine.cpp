@@ -29,6 +29,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <algorithm>
 
@@ -40,9 +41,14 @@ namespace {
 
 namespace openspace {
 
-void ModuleEngine::initialize() {
+void ModuleEngine::initialize(const ghoul::Dictionary& moduleConfigurations) {
     for (OpenSpaceModule* m : AllModules()) {
-        registerModule(std::unique_ptr<OpenSpaceModule>(m));
+        const std::string name = m->name();
+        ghoul::Dictionary configuration;
+        if (moduleConfigurations.hasKey(name)) {
+            moduleConfigurations.getValue(name, configuration);
+        }
+        registerModule(std::unique_ptr<OpenSpaceModule>(m), configuration);
     }
 }
 
@@ -56,7 +62,9 @@ void ModuleEngine::deinitialize() {
     LDEBUG("Finished destroying modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m) {
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,
+                                  const ghoul::Dictionary& configuration)
+{
     ghoul_assert(m, "Module must not be nullptr");
 
     auto it = std::find_if(
@@ -74,7 +82,7 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m) {
     }
 
     LDEBUG("Registering module '" << m->name() << "'");
-    m->initialize();
+    m->initialize(this, configuration);
     LDEBUG("Registered module '" << m->name() << "'");
     _modules.push_back(std::move(m));
 }

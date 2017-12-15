@@ -52,8 +52,14 @@ namespace {
 
 namespace openspace {
 
-HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict)
+HttpSynchronization::HttpSynchronization(
+    const ghoul::Dictionary& dict,
+    const std::string& synchronizationRoot,
+    const std::vector<std::string>& synchronizationRepositories
+)
     : openspace::ResourceSynchronization()
+    , _synchronizationRoot(synchronizationRoot)
+    , _synchronizationRepositories(synchronizationRepositories)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -63,13 +69,6 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict)
 
     _identifier = dict.value<std::string>(KeyIdentifier);
     _version = static_cast<int>(dict.value<double>(KeyVersion));
-
-    // Configure synchronization based on global settings in SyncModule 
-    // TODO: For testability and decreaing deps, make it possible to inject this instead.
-    // For example, allow this configuration to be done by the TemplateFactory.
-    const SyncModule* syncModule = OsEng.moduleEngine().module<SyncModule>();
-    _synchronizationRoot = syncModule->synchronizationRoot();
-    _synchronizationRepositories = syncModule->httpSynchronizationRepositories();
 }
 
 HttpSynchronization::~HttpSynchronization() {
