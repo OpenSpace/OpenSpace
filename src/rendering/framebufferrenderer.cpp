@@ -1164,7 +1164,7 @@ float FramebufferRenderer::hdrBackground() const {
     return _hdrBackground;
 }
 
-const int FramebufferRenderer::nAaSamples() const {
+int FramebufferRenderer::nAaSamples() const {
     return _nAaSamples;
 }
 

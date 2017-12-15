@@ -58,17 +58,12 @@
 
 
 namespace {
-    const char* KeyGeometry = "Geometry";
-    const char* KeyRadius   = "Radius";
-    
     static const char* _loggerCat = "RenderableAtmosphere";
 
-    const char* keyFrame        = "Frame";
     const char* keyShadowGroup  = "ShadowGroup";
     const char* keyShadowSource = "Source";
     const char* keyShadowCaster = "Caster";
-    const char* keyBody         = "Body";
-
+    
     const char* keyAtmosphere               = "Atmosphere";
     const char* keyAtmosphereRadius         = "AtmosphereRadius";
     const char* keyPlanetRadius             = "PlanetRadius";
@@ -82,9 +77,6 @@ namespace {
     const char* keyMiePhaseConstant         = "G";
     const char* keyImage                    = "Image";
     const char* keyToneMappingOp            = "ToneMapping";
-    const char* keyExposure                 = "Exposure";
-    const char* keyBackground               = "Background";
-    const char* keyGamma                    = "Gamma";
     const char* keyATMDebug                 = "Debug";
     const char* keyTextureScale             = "PreCalculatedTextureScale";
     const char* keySaveTextures             = "SaveCalculatedTextures";
@@ -662,8 +654,6 @@ namespace openspace {
     }
 
     void RenderableAtmosphere::initializeGL() {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-
         if (_atmosphereEnabled) {
             _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
             if (_deferredcaster) {

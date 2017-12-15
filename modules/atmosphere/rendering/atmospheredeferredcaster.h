@@ -133,17 +133,14 @@ private:
     GLuint _deltaSRayleighTableTexture;
     GLuint _deltaSMieTableTexture;
     GLuint _deltaJTableTexture;
-    GLuint _dummyTexture;
     GLuint _atmosphereTexture;
-    GLuint _atmosphereDepthTexture;
-
+    
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
 
     // Atmosphere Data
     bool _atmosphereCalculated;
-    bool _atmosphereEnabled;
     bool _ozoneEnabled;
     bool _sunFollowingCameraEnabled;
     float _atmosphereRadius;
@@ -162,11 +159,6 @@ private:
     glm::vec3 _mieExtinctionCoeff;
     glm::dvec3 _ellipsoidRadii;
 
-    // Atmosphere Texture Data Geometry
-    GLuint _atmosphereFBO;
-    GLuint _atmosphereRenderVAO;
-    GLuint _atmosphereRenderVBO;
-
     // Atmosphere Textures Dimmensions
     int _transmittance_table_width;
     int _transmittance_table_height;
@@ -179,9 +171,7 @@ private:
     int _mu_s_samples;
     int _nu_samples;
 
-
     glm::dmat4 _modelTransform;
-    float _stepSize;
     double _time;
 
     // Eclipse Shadows

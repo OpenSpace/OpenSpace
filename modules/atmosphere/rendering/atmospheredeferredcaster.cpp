@@ -102,10 +102,10 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     : _transmittanceProgramObject(nullptr)
     , _irradianceProgramObject(nullptr)
     , _irradianceSupTermsProgramObject(nullptr)
+    , _irradianceFinalProgramObject(nullptr)
     , _inScatteringProgramObject(nullptr)
     , _inScatteringSupTermsProgramObject(nullptr)
     , _deltaEProgramObject(nullptr)
-    , _irradianceFinalProgramObject(nullptr)
     , _deltaSProgramObject(nullptr)
     , _deltaSSupTermsProgramObject(nullptr)
     , _deltaJProgramObject(nullptr)
@@ -118,10 +118,23 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _deltaSMieTableTexture(0)
     , _deltaJTableTexture(0)
     , _atmosphereTexture(0)
-    , _atmosphereDepthTexture(0)
-    , _atmosphereFBO(0)
-    , _atmosphereRenderVAO(0)
-    , _atmosphereRenderVBO(0)
+    , _atmosphereCalculated(false)
+    , _ozoneEnabled(false)
+    , _sunFollowingCameraEnabled(false)
+    , _atmosphereRadius(0.f)
+    , _atmospherePlanetRadius(0.f)
+    , _planetAverageGroundReflectance(0.f)
+    , _planetGroundRadianceEmittion(0.f)
+    , _rayleighHeightScale(0.f)
+    , _ozoneHeightScale(0.f)
+    , _mieHeightScale(0.f)
+    , _miePhaseConstant(0.f)
+    , _sunRadianceIntensity(50.0f)
+    , _rayleighScatteringCoeff(glm::vec3(0.f))
+    , _ozoneExtinctionCoeff(glm::vec3(0.f))
+    , _mieScatteringCoeff(glm::vec3(0.f))
+    , _mieExtinctionCoeff(glm::vec3(0.f))
+    , _ellipsoidRadii(glm::dvec3(0.0))
     , _transmittance_table_width(256)
     , _transmittance_table_height(64)
     , _irradiance_table_width(64)
@@ -132,29 +145,9 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _mu_samples(128)
     , _mu_s_samples(32)
     , _nu_samples(8)
-    , _atmosphereCalculated(false)
-    , _atmosphereEnabled(false)
-    , _ozoneEnabled(false)
-    , _sunFollowingCameraEnabled(false)
-    , _atmosphereRadius(0.f)
-    , _atmospherePlanetRadius(0.f)
-    , _planetAverageGroundReflectance(0.f)
-    , _planetGroundRadianceEmittion(0.f)
-    , _rayleighHeightScale(0.f)
-    , _ozoneHeightScale(0.f)
-    , _mieHeightScale(0.f)
-    , _miePhaseConstant(0.f)    
-    , _rayleighScatteringCoeff(glm::vec3(0.f))
-    , _ozoneExtinctionCoeff(glm::vec3(0.f))
-    , _mieScatteringCoeff(glm::vec3(0.f))
-    , _mieExtinctionCoeff(glm::vec3(0.f))
-    , _ellipsoidRadii(glm::dvec3(0.0))
-    , _sunRadianceIntensity(50.0f)
     , _hardShadowsEnabled(false)    
     , _calculationTextureScale(1.0)
-    , _saveCalculationTextures(false)    
-
-
+    , _saveCalculationTextures(false)
 {}
 
 void AtmosphereDeferredcaster::initialize()
@@ -166,8 +159,6 @@ void AtmosphereDeferredcaster::initialize()
 
 void AtmosphereDeferredcaster::deinitialize()
 {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
     _transmittanceProgramObject        = nullptr;
     _irradianceProgramObject           = nullptr;
     _irradianceSupTermsProgramObject   = nullptr;
@@ -244,7 +235,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
             program.setUniform("dInverseScaleTransformMatrix", glm::inverse(dfScaleCamTransf));
 
             // World to Eye Space in OS
-            program.setUniform("dInverseCamRotTransform", glm::mat4_cast((glm::dquat)renderData.camera.rotationQuaternion()));
+            program.setUniform("dInverseCamRotTransform", glm::mat4_cast(static_cast<glm::dquat>(renderData.camera.rotationQuaternion())));
 
             program.setUniform("dInverseSgctEyeToWorldTranform", glm::inverse(renderData.camera.combinedViewMatrix()));
 
@@ -292,9 +283,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData, const De
                     sourcePos *= KM_TO_M; // converting to meters
                     glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, _time, lt);
                     casterPos *= KM_TO_M; // converting to meters
-                    psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
-
-
+                   
                     // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
                     glm::dvec3 planetCasterVec = casterPos - renderData.position.dvec3();
                     glm::dvec3 sourceCasterVec = casterPos - sourcePos;
@@ -498,8 +487,6 @@ void AtmosphereDeferredcaster::enablePrecalculationTexturesSaving() {
 }
 
 void AtmosphereDeferredcaster::loadComputationPrograms() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
     //============== Transmittance T =================
     if (!_transmittanceProgramObject) {
         _transmittanceProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -605,8 +592,6 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
 }
 
 void AtmosphereDeferredcaster::unloadComputationPrograms() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
     if (_transmittanceProgramObject) {
         _transmittanceProgramObject = nullptr;
     }
@@ -813,7 +798,6 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
             _transmittance_table_width, _transmittance_table_height);
     }
     _transmittanceProgramObject->deactivate();
-    GLenum err;
     
     // line 2 in algorithm 4.1
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaETableTexture, 0);
@@ -948,10 +932,10 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
         glViewport(0, 0, _delta_e_table_width, _delta_e_table_height);
         _irradianceSupTermsProgramObject->activate();
         if (scatteringOrder == 2) {
-            _irradianceSupTermsProgramObject->setUniform("firstIteraction", (int)1);
+            _irradianceSupTermsProgramObject->setUniform("firstIteraction", static_cast<int>(1));
         }
         else {
-            _irradianceSupTermsProgramObject->setUniform("firstIteraction", (int)0);
+            _irradianceSupTermsProgramObject->setUniform("firstIteraction", static_cast<int>(0));
         }
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
@@ -1146,16 +1130,16 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(std::unique_p
     shaderProg->setUniform("betaMieExtinction", _mieExtinctionCoeff);
     shaderProg->setUniform("mieG", _miePhaseConstant);
     shaderProg->setUniform("sunRadiance", _sunRadianceIntensity);
-    shaderProg->setUniform("TRANSMITTANCE_W", (int)_transmittance_table_width);
-    shaderProg->setUniform("TRANSMITTANCE_H", (int)_transmittance_table_height);
-    shaderProg->setUniform("SKY_W", (int)_irradiance_table_width);
-    shaderProg->setUniform("SKY_H", (int)_irradiance_table_height);
-    shaderProg->setUniform("OTHER_TEXTURES_W", (int)_delta_e_table_width);
-    shaderProg->setUniform("OTHER_TEXTURES_H", (int)_delta_e_table_height);
-    shaderProg->setUniform("SAMPLES_R", (int)_r_samples);
-    shaderProg->setUniform("SAMPLES_MU", (int)_mu_samples);
-    shaderProg->setUniform("SAMPLES_MU_S", (int)_mu_s_samples);
-    shaderProg->setUniform("SAMPLES_NU", (int)_nu_samples); 
+    shaderProg->setUniform("TRANSMITTANCE_W", static_cast<int>(_transmittance_table_width));
+    shaderProg->setUniform("TRANSMITTANCE_H", static_cast<int>(_transmittance_table_height));
+    shaderProg->setUniform("SKY_W", static_cast<int>(_irradiance_table_width));
+    shaderProg->setUniform("SKY_H", static_cast<int>(_irradiance_table_height));
+    shaderProg->setUniform("OTHER_TEXTURES_W", static_cast<int>(_delta_e_table_width));
+    shaderProg->setUniform("OTHER_TEXTURES_H", static_cast<int>(_delta_e_table_height));
+    shaderProg->setUniform("SAMPLES_R", static_cast<int>(_r_samples));
+    shaderProg->setUniform("SAMPLES_MU", static_cast<int>(_mu_samples));
+    shaderProg->setUniform("SAMPLES_MU_S", static_cast<int>(_mu_s_samples));
+    shaderProg->setUniform("SAMPLES_NU", static_cast<int>(_nu_samples));
     shaderProg->setUniform("ozoneLayerEnabled", _ozoneEnabled);
     shaderProg->setUniform("HO", _ozoneHeightScale);
     shaderProg->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
@@ -1266,7 +1250,9 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(const GLenum color_buffer_at
         int k = 0;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                ppmFile << (unsigned int)pixels[k] << " " << (unsigned int)pixels[k + 1] << " " << (unsigned int)pixels[k + 2] << " ";
+                ppmFile << static_cast<unsigned int>(pixels[k]) << " "
+                        << static_cast<unsigned int>(pixels[k + 1]) << " "
+                        << static_cast<unsigned int>(pixels[k + 2]) << " ";
                 k += 3;
             }
             ppmFile << std::endl;

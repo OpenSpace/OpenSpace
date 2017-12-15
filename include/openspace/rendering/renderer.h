@@ -61,7 +61,7 @@ public:
     virtual void setGamma(const float gamma) = 0;
 
     virtual float hdrBackground() const = 0;
-    virtual const int nAaSamples() const = 0;
+    virtual int nAaSamples() const = 0;
     virtual const double * mSSAPattern() const = 0;
 
     /**

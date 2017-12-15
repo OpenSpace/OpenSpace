@@ -75,7 +75,7 @@ public:
     void setGamma(const float gamma) override;
 
     float hdrBackground() const override;
-    const int nAaSamples() const override;
+    int nAaSamples() const override;
     const double * mSSAPattern() const override;
 
     using Renderer::preRaycast;

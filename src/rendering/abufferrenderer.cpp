@@ -771,7 +771,7 @@ float ABufferRenderer::hdrBackground() const {
     return _hdrBackground;
 }
 
-const int ABufferRenderer::nAaSamples() const {
+int ABufferRenderer::nAaSamples() const {
     return _nAaSamples;
 }
 
