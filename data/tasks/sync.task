@@ -1,0 +1,8 @@
+return {{
+    Type = "SyncAssetTask",
+    Asset = "solarsystem"
+},
+{
+    Type = "SyncAssetTask",
+    Asset = "newhorizons"
+}}
