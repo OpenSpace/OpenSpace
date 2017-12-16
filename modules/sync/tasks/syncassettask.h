@@ -27,15 +27,14 @@
 
 #include <openspace/util/task.h>
 
+#include <openspace/scene/asset.h>
+#include <openspace/scene/assetloader.h>
+
 #include <string>
 #include <memory>
 #include <unordered_set>
 
-#include <openspace/scene/asset.h>
-#include <openspace/scene/assetloader.h>
-
 namespace openspace {
-
 
 class SyncAssetTask : public Task {
 public:

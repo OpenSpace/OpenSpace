@@ -38,14 +38,14 @@ namespace {
         using State = openspace::Asset::State;
 
         switch (state) {
-        case State::Loaded: return "Loaded"; break;
-        case State::LoadingFailed: return "LoadingFailed"; break;
-        case State::Synchronizing: return "Synchronizing"; break;
-        case State::SyncRejected: return "SyncRejected"; break;
-        case State::SyncResolved: return "SyncResolved"; break;
-        case State::Initialized: return "Initialized"; break;
-        case State::InitializationFailed: return "InitializationFailed"; break;
-        default: return "Unknown"; break;
+        case State::Loaded: return "Loaded";
+        case State::LoadingFailed: return "LoadingFailed";
+        case State::Synchronizing: return "Synchronizing";
+        case State::SyncRejected: return "SyncRejected";
+        case State::SyncResolved: return "SyncResolved";
+        case State::Initialized: return "Initialized";
+        case State::InitializationFailed: return "InitializationFailed";
+        default: return "Unknown";
         }
     }
 
@@ -53,11 +53,11 @@ namespace {
         using State = openspace::ResourceSynchronization::State;
 
         switch (state) {
-        case State::Unsynced: return "Unsynced"; break;
-        case State::Syncing: return "Syncing"; break;
-        case State::Resolved: return "Resolved"; break;
-        case State::Rejected: return "Rejected"; break;
-        default: return "Unknown"; break;
+        case State::Unsynced: return "Unsynced";
+        case State::Syncing: return "Syncing";
+        case State::Resolved: return "Resolved";
+        case State::Rejected: return "Rejected";
+        default: return "Unknown";
         }
     }
 }
@@ -101,7 +101,7 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
     if (asset->state() == Asset::State::Synchronizing) {
         assetText += " (" + std::to_string(
             static_cast<int>(asset->requiredSynchronizationProgress() * 100)
-            ) + "%%)";
+            ) + "%)";
     }
 
     std::vector<std::shared_ptr<Asset>> requested = asset->requestedAssets();
@@ -111,8 +111,8 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
         asset->ownSynchronizations();
 
     if (requested.empty() && required.empty() && resourceSyncs.empty()) {
-        ImGui::Text(assetText.c_str());
-    } else if (ImGui::TreeNode(assetPath.c_str(), assetText.c_str())) {
+        ImGui::Text("%s", assetText.c_str());
+    } else if (ImGui::TreeNode(assetPath.c_str(), "%s", assetText.c_str())) {
 
         for (const auto& child : required) {
             renderTree(child, assetDirectory);
@@ -133,9 +133,9 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
                 if (sync->state() == ResourceSynchronization::State::Syncing) {
                     resourceText += " (" + std::to_string(
                         static_cast<int>(sync->progress() * 100)
-                        ) + "%%)";
+                        ) + "%)";
                 }
-                ImGui::Text(resourceText.c_str());
+                ImGui::Text("%s", resourceText.c_str());
             }
             ImGui::TreePop();
         }

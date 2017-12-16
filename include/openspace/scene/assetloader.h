@@ -58,9 +58,13 @@ int exportAsset(lua_State* state);
 
 class AssetListener {
 public:
+    virtual ~AssetListener() = default;
     virtual void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) = 0;
-    virtual void assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) = 0;
-    virtual void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) = 0;
+    virtual void assetRequested(std::shared_ptr<Asset> parent,
+                                std::shared_ptr<Asset> child) = 0;
+
+    virtual void assetUnrequested(std::shared_ptr<Asset> parent,
+                                  std::shared_ptr<Asset> child) = 0;
 };
 
 class SynchronizationWatcher;
