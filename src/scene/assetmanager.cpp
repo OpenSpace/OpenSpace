@@ -33,7 +33,7 @@
 #include "assetmanager_lua.inl"
 
 namespace {
-    const char* _loggerCat = "AssetManager";
+    // const char* _loggerCat = "AssetManager";
 }
 
 namespace openspace {
@@ -82,15 +82,18 @@ bool AssetManager::update() {
     return false;
 }
 
-void AssetManager::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
+void AssetManager::assetStateChanged(std::shared_ptr<Asset>, Asset::State) {
+    // Potential todo: notify user about asset stage change
     //LINFO(asset->id() << " changed state to " << static_cast<int>(state));
 }
 
-void AssetManager::assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
+void AssetManager::assetRequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) {
+    // Potential todo: notify user about asset request
     //LINFO(parent->id() << " requested " << child->id());
 }
 
-void AssetManager::assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
+void AssetManager::assetUnrequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) {
+    // Potential todo: notify user about asset unrequest
     //LINFO(parent->id() << " unrequested " << child->id());
 }
 

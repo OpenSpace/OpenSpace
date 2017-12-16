@@ -75,10 +75,10 @@ AssetLoader::AssetLoader(
     SynchronizationWatcher* syncWatcher,
     std::string assetRootDirectory
 )
-    : _luaState(&luaState)
-    , _rootAsset(std::make_shared<Asset>(this, syncWatcher))
+    : _rootAsset(std::make_shared<Asset>(this, syncWatcher))
     , _synchronizationWatcher(syncWatcher)
     , _assetRootDirectory(assetRootDirectory)
+    , _luaState(&luaState)
 {
     setCurrentAsset(_rootAsset);
 
@@ -219,7 +219,8 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     });
     
     if (!FileSys.fileExists(asset->assetFilePath())) {
-        LERROR("Could not load asset '" << asset->assetFilePath() << "': File does not exist.");
+        LERROR("Could not load asset '" << asset->assetFilePath() <<
+               "': File does not exist.");
         return false;
     }
 
@@ -244,14 +245,14 @@ void AssetLoader::unloadAsset(std::shared_ptr<Asset> asset) {
     }
     _onDeinitializationFunctionRefs.clear();
 
-    for (const auto it : _onDependencyInitializationFunctionRefs[asset.get()]) {
+    for (const auto& it : _onDependencyInitializationFunctionRefs[asset.get()]) {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
     }
     _onDependencyInitializationFunctionRefs[asset.get()].clear();
 
-    for (const auto it : _onDependencyDeinitializationFunctionRefs[asset.get()]) {
+    for (const auto& it : _onDependencyDeinitializationFunctionRefs[asset.get()]) {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
@@ -312,7 +313,9 @@ int AssetLoader::onInitializeDependencyLua(Asset* dependant, Asset* dependency) 
     int nArguments = lua_gettop(*_luaState);
     SCRIPT_CHECK_ARGUMENTS("onInitialize", *_luaState, 1, nArguments);
     int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
-    _onDependencyInitializationFunctionRefs[dependant][dependency].push_back(referenceIndex);
+    _onDependencyInitializationFunctionRefs[dependant][dependency]
+        .push_back(referenceIndex);
+
     return 0;
 }
 
@@ -320,7 +323,9 @@ int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency
     int nArguments = lua_gettop(*_luaState);
     SCRIPT_CHECK_ARGUMENTS("onDeinitialize", *_luaState, 1, nArguments);
     int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
-    _onDependencyDeinitializationFunctionRefs[dependant][dependency].push_back(referenceIndex);
+    _onDependencyDeinitializationFunctionRefs[dependant][dependency]
+        .push_back(referenceIndex);
+
     return 0;
 }
 
@@ -421,6 +426,8 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
             );
         }
     }
+    // Potential Todo:
+    // Call dependency->onInitialize with The asset table exported by the child asset as argument
 }
 
 void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
@@ -555,11 +562,9 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
     const std::string dependantId = dependant->id();
     const std::string dependencyId = dependency->id();
 
+    // Extract the imported asset's dependants table
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     lua_getfield(*_luaState, -1, dependencyId.c_str());
-    const int dependencyIndex = lua_gettop(*_luaState);
-
-    // Extract the imported asset's dependants table
     lua_getfield(*_luaState, -1, DependantsTableName);
     const int dependantsTableIndex = lua_gettop(*_luaState);
 
@@ -581,7 +586,7 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
     lua_pushcclosure(*_luaState, &assetloader::onDeinitializeDependency, 2);
     lua_setfield(*_luaState, currentDependantTableIndex, OnDeinitializeFunctionName);
 
-    // duplicate the table reference on the stack, so it remains after assignment.
+    // Duplicate the table reference on the stack, so it remains after assignment.
     lua_pushvalue(*_luaState, -1);
 
     // Register the dependant table on the imported asset's dependants table.

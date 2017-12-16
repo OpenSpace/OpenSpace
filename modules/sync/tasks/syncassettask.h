@@ -41,18 +41,19 @@ class SyncAssetTask : public Task {
 public:
     class RequestListener : public AssetListener {
     public:
-
+        virtual ~RequestListener() = default;
         void assetStateChanged(std::shared_ptr<Asset> asset,
                                Asset::State state) override;
 
-        void assetRequested(std::shared_ptr<Asset> parent,
-                            std::shared_ptr<Asset> child) {};
+        void assetRequested(std::shared_ptr<Asset>,
+                            std::shared_ptr<Asset>) override {};
 
-        void assetUnrequested(std::shared_ptr<Asset> parent,
-                              std::shared_ptr<Asset> child) {};
+        void assetUnrequested(std::shared_ptr<Asset>,
+                              std::shared_ptr<Asset>) override {};
     };
 
     SyncAssetTask(const ghoul::Dictionary& dictionary);
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();

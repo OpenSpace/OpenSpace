@@ -82,8 +82,7 @@ public:
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     std::vector<std::shared_ptr<ResourceSynchronization>> ownSynchronizations() const;
 
-    void syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
-                          ResourceSynchronization::State s);
+    void syncStateChanged(ResourceSynchronization::State s);
 
     bool hasLoadedParent() const;
     void load();
@@ -136,7 +135,7 @@ public:
 private:
     void setState(State state);
 
-    void requiredAssetChangedState(std::shared_ptr<Asset> a, Asset::State state);
+    void requiredAssetChangedState(Asset::State state);
     void requestedAssetChangedState(std::shared_ptr<Asset> a, Asset::State state);
 
     bool isSyncResolveReady();

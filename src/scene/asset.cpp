@@ -109,7 +109,7 @@ void Asset::setState(Asset::State state) {
 
     for (auto& requiringAsset : _requiringAssets) {
         if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
-            a->requiredAssetChangedState(thisAsset, state);
+            a->requiredAssetChangedState(state);
         }
     }
 
@@ -120,7 +120,7 @@ void Asset::setState(Asset::State state) {
     }
 }
 
-void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child, Asset::State childState) {
+void Asset::requiredAssetChangedState(Asset::State childState) {
     ghoul_assert(!isInitialized(),
         "Required asset changing state while parent asset is initialized");
     if (childState == State::SyncResolved) {
@@ -132,7 +132,9 @@ void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child, Asset::State
     }
 }
 
-void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child, Asset::State childState) {
+void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child,
+                                       Asset::State childState)
+{
     if (child->hasInitializedParent()) {
         if (childState == State::Loaded) {
             child->startSynchronizations();
@@ -147,18 +149,20 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
     _synchronizations.push_back(synchronization);    
    
     // Set up callback for synchronization state change
-    // The synchronization watcher will make sure that callbacks are invoked in the main thread.
-    SynchronizationWatcher::WatchHandle watch = _synchronizationWatcher->watchSynchronization(
-        synchronization,
-        [this, synchronization](ResourceSynchronization::State state) {
-            syncStateChanged(synchronization, state);
-        }
-    );
+    // The synchronization watcher will make sure that callbacks
+    // are invoked in the main thread.
+
+    SynchronizationWatcher::WatchHandle watch =
+        _synchronizationWatcher->watchSynchronization(
+            synchronization,
+            [this](ResourceSynchronization::State state) {
+                syncStateChanged(state);
+            }
+        );
     _syncWatches.push_back(watch);
 }
     
-void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> synchronization,
-                             ResourceSynchronization::State state)
+void Asset::syncStateChanged(ResourceSynchronization::State state)
 {
     if (state == ResourceSynchronization::State::Resolved) {
         if (!isSynchronized() && isSyncResolveReady()) {
@@ -429,20 +433,13 @@ void Asset::load() {
     setState(loaded ? State::Loaded : State::LoadingFailed);
 }
 
-void Asset::unloadIfUnwanted() {
-    if (hasLoadedParent()) {
-        return;
-    }
-    unload();
-}
-
 void Asset::unload() {
     if (!isLoaded()) {
         return;
     }
 
-    loader()->unloadAsset(shared_from_this());
     setState(State::Unloaded);
+    loader()->unloadAsset(shared_from_this());
 
     for (std::shared_ptr<Asset> child : requiredAssets()) {
         unrequire(child);
@@ -450,6 +447,13 @@ void Asset::unload() {
     for (std::shared_ptr<Asset> child : requestedAssets()) {
         unrequest(child);
     }
+}
+
+void Asset::unloadIfUnwanted() {
+    if (hasLoadedParent()) {
+        return;
+    }
+    unload();
 }
 
 void Asset::initialize() {
@@ -462,12 +466,19 @@ void Asset::initialize() {
     }
     LDEBUG("Initializing asset " << id());
 
-    // 1. Initialize required children
+    // 1. Initialize requirements
     for (auto& child : _requiredAssets) {
         child->initialize();
     }
 
-    // 2. Call onInitialize in Lua
+    // 2. Initialize requests
+    for (auto& child : _requestedAssets) {
+        if (child->isSynchronized()) {
+            child->initialize();
+        }
+    }
+
+    // 3. Call lua onInitialize
     try {
         loader()->callOnInitialize(this);
     } catch (const ghoul::lua::LuaRuntimeException& e) {
@@ -477,11 +488,10 @@ void Asset::initialize() {
         return;
     }
 
-    // 3. Update the internal state
+    // 4. Update state
     setState(Asset::State::Initialized);
 
-    // 4. Call dependency initialization functions
-    // Now that both this and all children are initialized.
+    // 5. Call dependency lua onInitialize of this and requirements
     for (auto& child : _requiredAssets) {
         try {
             loader()->callOnDependencyInitialize(child.get(), this);
@@ -493,8 +503,7 @@ void Asset::initialize() {
         }
     }
 
-    // 5. Call dependency initialization function of the child and this
-    // if the requested child was initialized before this.
+    // 6. Call dependency lua onInitialize of this and initialized requests
     for (auto& child : _requestedAssets) {
         if (child->isInitialized()) {
             try {
@@ -508,18 +517,10 @@ void Asset::initialize() {
         }
     }
 
-    // 6. Ask requested children to initialize if they are not already initialized.
-    for (auto& child : _requestedAssets) {
-        if (child->isSynchronized()) {
-            child->initialize();
-        }
-    }
-
-    // 7. Call dependency initialization function of this and the parent
-    // if the requesting parent was initialized before this.
+    // 7. Call dependency lua onInitialize of initialized requesting assets and this
     for (auto& parent : _requestingAssets) {
         std::shared_ptr<Asset> p = parent.lock();
-        if (p && p->state() == State::Initialized) {
+        if (p && p->isInitialized()) {
             try {
                 loader()->callOnDependencyInitialize(this, p.get());
             } catch (const ghoul::lua::LuaRuntimeException& e) {
@@ -541,53 +542,68 @@ void Asset::deinitializeIfUnwanted() {
 }
 
 void Asset::deinitialize() {
-    if (state() != Asset::State::Initialized) {
+    if (!isInitialized()) {
         return;
     }
-
     LDEBUG("Denitializing asset " << id());
 
-    // Notify children
-    for (auto& dependency : _requiredAssets) {
-        try {
-            loader()->callOnDependencyDeinitialize(dependency.get(), this);
-        }
-        catch (const ghoul::lua::LuaRuntimeException& e) {
-            LERROR("Failed to deinitialize requested asset " <<
-                dependency->id() << " of " << id() << ". " <<
-                e.component << ": " << e.message);
-            // TODO: rollback?
-        }
-    }
-    for (auto& dependency : _requestedAssets) {
-        if (dependency->state() == State::Initialized) {
+    // Perform inverse actions as in initialize, in reverse order (7 - 1)
+
+    // 7. Call dependency lua onDeinitialize of initialized requesting assets and this
+    for (auto& parent : _requestingAssets) {
+        std::shared_ptr<Asset> p = parent.lock();
+        if (p && p->isInitialized()) {
             try {
-                loader()->callOnDependencyDeinitialize(dependency.get(), this);
+                loader()->callOnDependencyDeinitialize(this, p.get());
             }
             catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR("Failed to deinitialize requested asset " <<
-                    dependency->id() << " of " << id() << ". " <<
-                    e.component << ": " << e.message);
-                // TODO: rollback?
+                       id() << " of " << p->id() << ". " <<
+                       e.component << ": " << e.message);
             }
         }
     }
 
+    // 6. Call dependency lua onDeinitialize of this and initialized requests
+    for (auto& child : _requestedAssets) {
+        if (child->isInitialized()) {
+            try {
+                loader()->callOnDependencyDeinitialize(child.get(), this);
+            }
+            catch (const ghoul::lua::LuaRuntimeException& e) {
+                LERROR("Failed to deinitialize requested asset " <<
+                       child->id() << " of " << id() << ". " <<
+                       e.component << ": " << e.message);
+            }
+        }
+    }
 
+    // 5. Call dependency lua onInitialize of this and requirements
+    for (auto& child : _requiredAssets) {
+        try {
+            loader()->callOnDependencyDeinitialize(child.get(), this);
+        }
+        catch (const ghoul::lua::LuaRuntimeException& e) {
+            LERROR("Failed to deinitialize required asset " <<
+                child->id() << " of " << id() << ". " <<
+                e.component << ": " << e.message);
+        }
+    }
+
+    // 4. Update state
+    setState(Asset::State::SyncResolved);
+
+    // 3. Call lua onInitialize
     try {
         loader()->callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR("Failed to deinitialize asset " << id() << ". " <<
             e.component << ": " << e.message);
-        // TODO: rollback?
         return;
     }
-    // Call onDeinitialize in Lua
 
-    setState(Asset::State::Loaded);
-
-    // Make sure no dependencies are left dangling
+    // 2 and 1. Deinitialize unwanted requirements and requests
     for (auto& dependency : childAssets()) {
         dependency->deinitializeIfUnwanted();
     }
@@ -840,7 +856,6 @@ bool Asset::shouldBeInitialized() const {
             return a->state() == State::Initialized;
         }
     );
-
     return initializedAsset != parents.end();
 }
 
