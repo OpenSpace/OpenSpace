@@ -139,6 +139,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenelicense.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
@@ -310,6 +311,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneinitializer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicense.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h

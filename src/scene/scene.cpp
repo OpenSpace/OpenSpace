@@ -76,7 +76,7 @@ namespace {
 
 namespace openspace {
 
-Scene::Scene()
+Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : DocumentationGenerator(
         "Documented",
         "propertyOwners",
@@ -96,6 +96,7 @@ Scene::Scene()
         },
         "${OPENSPACE_DATA}/web/properties/script.js"
     )
+    , _initializer(std::move(initializer))
     , _dirtyNodeRegistry(false)
 {   
     _rootDummy.setName(SceneGraphNode::RootNodeName);
@@ -228,6 +229,10 @@ void Scene::sortTopologically() {
     _topologicallySortedNodes = nodes;
 }
 
+void Scene::initializeNode(SceneGraphNode* node) {
+    _initializer->initializeNode(node);
+}
+
 /*
 
 void Scene::initialize() {
@@ -299,6 +304,12 @@ void Scene::initializeGL() {
 */
 
 void Scene::update(const UpdateData& data) {
+    std::vector<SceneGraphNode*> initializedNodes =
+        _initializer->getInitializedNodes();
+
+    for (SceneGraphNode* node : initializedNodes) {
+        node->initializeGL();
+    }
     if (_dirtyNodeRegistry) {
         updateNodeRegistry();
     }

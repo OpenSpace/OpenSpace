@@ -22,62 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
-#define __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
+#ifndef __OPENSPACE_CORE___SCENEINITIALIZER___H__
+#define __OPENSPACE_CORE___SCENEINITIALIZER___H__
 
-#include <atomic>
-#include <string>
-#include <memory>
-#include <thread>
+#include <openspace/scene/scenegraphnode.h>
+
+#include <ghoul/misc/threadpool.h>
+
 #include <mutex>
-#include <unordered_map>
-
-#include "libtorrent/torrent_handle.hpp"
-
-namespace libtorrent {
-    class session;
-}
 
 namespace openspace {
 
-
-
-class TorrentClient {
+class SceneInitializer {
 public:
-    struct TorrentProgress {
-        bool finished = false;
-        bool nTotalBytesKnown = false;
-        size_t nTotalBytes = 0;
-        size_t nDownloadedBytes = 0;
-    };
-
-    using TorrentProgressCallback = std::function<void(TorrentProgress)>;
-
-    using TorrentId = int32_t;
-
-    struct Torrent {
-        TorrentId id;
-        libtorrent::torrent_handle handle;
-        TorrentProgressCallback callback;
-    };
-
-    TorrentClient();
-    ~TorrentClient();
-    void initialize();
-    TorrentId addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb);
-    TorrentId addMagnetLink(std::string magnetLink, std::string destination, TorrentProgressCallback cb);
-    void removeTorrent(TorrentId id);
-    void pollAlerts();
+    virtual ~SceneInitializer() = default;
+    virtual void initializeNode(SceneGraphNode* node) = 0;
+    virtual std::vector<SceneGraphNode*> getInitializedNodes() = 0;
+};
+    
+class SingleThreadedSceneInitializer : public SceneInitializer {
+public:
+    void initializeNode(SceneGraphNode* node) override;
+    std::vector<SceneGraphNode*> getInitializedNodes() override;
 private:
-    void notify(TorrentId id);
-
-    std::unordered_map<TorrentId, Torrent> _torrents;
-    std::unique_ptr<libtorrent::session> _session;
-    std::thread _torrentThread;
+    std::vector<SceneGraphNode*> _initializedNodes;
+};
+    
+class MultiThreadedSceneInitializer : public SceneInitializer {
+public:
+    MultiThreadedSceneInitializer(unsigned int nThreads);
+    void initializeNode(SceneGraphNode* node) override;
+    std::vector<SceneGraphNode*> getInitializedNodes() override;
+private:
+    std::vector<SceneGraphNode*> _initializedNodes;
+    ghoul::ThreadPool _threadPool;
     std::mutex _mutex;
-    std::atomic_bool _keepRunning = true;
+    
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
+#endif // __OPENSPACE_CORE___SCENEINITIALIZER___H__

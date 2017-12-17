@@ -363,8 +363,7 @@ int addSceneGraphNode(lua_State* L) {
             return luaL_error(L, "Error loading scene graph node");
         }
 
-        node->initialize();
-        node->initializeGL();
+        OsEng.renderEngine().scene()->initializeNode(node);
     } catch (const ghoul::RuntimeError& e) {
         return luaL_error(L, "Error loading scene graph node: %s", e.what());
     }

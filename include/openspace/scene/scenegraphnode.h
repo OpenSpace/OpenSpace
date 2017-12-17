@@ -54,6 +54,12 @@ namespace documentation { struct Documentation; }
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:
+    enum class State : int {
+        Loaded,
+        Initialized,
+        GLInitialized
+    };
+
     using UpdateScene = ghoul::Boolean;
 
     struct PerformanceRecord {
@@ -138,6 +144,7 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
 
+    std::atomic<State> _state;
     std::vector<std::unique_ptr<SceneGraphNode>> _children;
     SceneGraphNode* _parent;
     std::vector<SceneGraphNode*> _dependencies;

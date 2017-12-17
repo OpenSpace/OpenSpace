@@ -113,7 +113,7 @@ void TorrentClient::pollAlerts() {
     }
 }
 
-size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb) {
+TorrentClient::TorrentId TorrentClient::addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb) {
     std::lock_guard<std::mutex> guard(_mutex);
 
     if (!_session) {
@@ -136,7 +136,9 @@ size_t TorrentClient::addTorrentFile(std::string torrentFile, std::string destin
     return id;
 }
 
-size_t TorrentClient::addMagnetLink(std::string magnetLink, std::string destination, TorrentProgressCallback cb) {
+TorrentClient::TorrentId TorrentClient::addMagnetLink(std::string magnetLink,
+                                                      std::string destination,
+                                                      TorrentProgressCallback cb) {
     std::lock_guard<std::mutex> guard(_mutex);
 
     // TODO: register callback!

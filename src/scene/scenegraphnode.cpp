@@ -173,6 +173,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
+    , _state(State::Loaded)
     , _parent(nullptr)
     , _scene(nullptr)
     , _performanceRecord({0, 0, 0, 0, 0})
@@ -195,19 +196,20 @@ void SceneGraphNode::initialize() {
     if (_transform.translation) {
         _transform.translation->initialize();
     }
-
     if (_transform.rotation) {
         _transform.rotation->initialize();
     }
     if (_transform.scale) {
         _transform.scale->initialize();
     }
+    _state = State::Initialized;
 }
 
 void SceneGraphNode::initializeGL() {
     if (_renderable) {
         _renderable->initializeGL();
     }
+    _state = State::GLInitialized;
 }
 
 void SceneGraphNode::deinitialize() {
@@ -243,6 +245,10 @@ void SceneGraphNode::traversePostOrder(std::function<void(SceneGraphNode*)> fn) 
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
+    State s = _state;
+    if (s != State::Initialized && _state != State::GLInitialized) {
+        return;
+    }
     if (_transform.translation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
@@ -328,6 +334,10 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
+    State s = _state;
+    if (_state != State::GLInitialized) {
+        return;
+    }
     const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(
         _worldPositionCached.x,
         _worldPositionCached.y,

@@ -33,13 +33,14 @@
 #include <mutex>
 
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/scenelicense.h>
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/programobject.h>
 
+#include <ghoul/opengl/programobject.h>
 
 namespace ghoul { class Dictionary; }
 
@@ -65,7 +66,7 @@ public:
     };
 
     // constructors & destructor
-    Scene();
+    Scene(std::unique_ptr<SceneInitializer> initializer);
     ~Scene();
 
     /**
@@ -161,6 +162,11 @@ public:
     SceneGraphNode* loadNode(const ghoul::Dictionary& nodeDictionary);
 
     /**
+     * Initialize a scene graph node.
+     */
+    void initializeNode(SceneGraphNode* node);
+
+    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
      * - openspace::luascriptfunctions::property_setValue
@@ -188,6 +194,7 @@ private:
     std::unordered_map<std::string, SceneGraphNode*> _nodesByName;
     bool _dirtyNodeRegistry;
     SceneGraphNode _rootDummy;
+    std::unique_ptr<SceneInitializer> _initializer;
 
     std::vector<SceneLicense> _licenses;
 

@@ -22,62 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
-#define __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
+#include <openspace/scene/sceneinitializer.h>
 
-#include <atomic>
-#include <string>
-#include <memory>
-#include <thread>
-#include <mutex>
-#include <unordered_map>
+#include <ghoul/logging/logmanager.h>
 
-#include "libtorrent/torrent_handle.hpp"
-
-namespace libtorrent {
-    class session;
+namespace {
+    const char* _loggerCat = "SceneInitializer";
 }
 
 namespace openspace {
 
+void SingleThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
+    node->initialize();
+}
+    
+std::vector<SceneGraphNode*> SingleThreadedSceneInitializer::getInitializedNodes() {
+    std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
+    return nodes;
+}
 
+MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThreads)
+    : _threadPool(nThreads)
+{}
+    
+void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
+     auto initFunction = [this](SceneGraphNode* node) {
+         node->initialize();
+         std::lock_guard<std::mutex> g(_mutex);
+         LDEBUG("Thread Initialized " << node->name());
+         _initializedNodes.push_back(node);
+     };
 
-class TorrentClient {
-public:
-    struct TorrentProgress {
-        bool finished = false;
-        bool nTotalBytesKnown = false;
-        size_t nTotalBytes = 0;
-        size_t nDownloadedBytes = 0;
-    };
+    std::lock_guard<std::mutex> g(_mutex);
+    _threadPool.queue(initFunction, node);
+    node->initialize();
+}
 
-    using TorrentProgressCallback = std::function<void(TorrentProgress)>;
-
-    using TorrentId = int32_t;
-
-    struct Torrent {
-        TorrentId id;
-        libtorrent::torrent_handle handle;
-        TorrentProgressCallback callback;
-    };
-
-    TorrentClient();
-    ~TorrentClient();
-    void initialize();
-    TorrentId addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb);
-    TorrentId addMagnetLink(std::string magnetLink, std::string destination, TorrentProgressCallback cb);
-    void removeTorrent(TorrentId id);
-    void pollAlerts();
-private:
-    void notify(TorrentId id);
-
-    std::unordered_map<TorrentId, Torrent> _torrents;
-    std::unique_ptr<libtorrent::session> _session;
-    std::thread _torrentThread;
-    std::mutex _mutex;
-    std::atomic_bool _keepRunning = true;
-};
-
+std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::getInitializedNodes() {
+    std::lock_guard<std::mutex> g(_mutex);
+    std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
+    if (!nodes.empty()) {
+        LDEBUG("Returning nodes...");
+    }
+    return nodes;
+}
+    
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__

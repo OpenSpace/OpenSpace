@@ -607,7 +607,22 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         _scene->clear();
     }
 
-    _scene = std::make_unique<Scene>();
+    bool multiThreadedInitialization = configurationManager().hasKeyAndValue<bool>(
+        ConfigurationManager::KeyUseMultithreadedInitialization
+    ) && configurationManager().value<bool>(
+        ConfigurationManager::KeyUseMultithreadedInitialization
+    );
+
+    std::unique_ptr<SceneInitializer> sceneInitializer;
+    if (multiThreadedInitialization) {
+        unsigned int nAvailableThreads = std::thread::hardware_concurrency();
+        unsigned int nThreads = nAvailableThreads == 0 ? 2 : nAvailableThreads - 1;
+        sceneInitializer = std::make_unique<MultiThreadedSceneInitializer>(nThreads);
+    } else {
+        sceneInitializer = std::make_unique<SingleThreadedSceneInitializer>();
+    }
+
+    _scene = std::make_unique<Scene>(std::move(sceneInitializer));
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
     camera->setParent(_scene->root());
