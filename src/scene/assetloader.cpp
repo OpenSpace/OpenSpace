@@ -267,11 +267,11 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         baseDirectory :
         _assetRootDirectory;
    
-    return ghoul::filesystem::File(directory.path() +
+    return ghoul::filesystem::File(FileSys.absPath(directory.path() +
         ghoul::filesystem::FileSystem::PathSeparator +
         assetPath +
         "." +
-        AssetFileSuffix);
+        AssetFileSuffix));
 }
 
 std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {

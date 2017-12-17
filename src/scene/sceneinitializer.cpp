@@ -34,6 +34,7 @@ namespace openspace {
 
 void SingleThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     node->initialize();
+    _initializedNodes.push_back(node);
 }
     
 std::vector<SceneGraphNode*> SingleThreadedSceneInitializer::getInitializedNodes() {

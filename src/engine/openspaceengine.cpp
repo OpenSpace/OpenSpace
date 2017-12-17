@@ -433,7 +433,11 @@ void OpenSpaceEngine::create(int argc, char** argv,
     SynchronizationWatcher* rawWatcher = w.get();
 
     _engine->_assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(*OsEng.scriptEngine().luaState(), rawWatcher, "${ASSETS}"),
+        std::make_unique<AssetLoader>(
+            *OsEng.scriptEngine().luaState(),
+            rawWatcher,
+            FileSys.absPath("${ASSETS}")
+        ),
         std::move(w)
     );
     //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
