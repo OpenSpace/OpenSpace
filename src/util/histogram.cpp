@@ -30,7 +30,7 @@
 #include <cassert>
 
 namespace {
-    const char* _loggerCat = "Histogram";
+    constexpr const char* _loggerCat = "Histogram";
 } // namespace
 
 namespace openspace {

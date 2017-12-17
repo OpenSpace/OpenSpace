@@ -34,7 +34,7 @@
 #endif
 
 namespace {
-    const char* _loggerCat = "DataSphere";
+    constexpr const char* _loggerCat = "DataSphere";
 } // namespace
 
 namespace openspace {

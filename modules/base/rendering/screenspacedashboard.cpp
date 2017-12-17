@@ -32,20 +32,101 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/distanceconversion.h>>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
+
+#include <openspace/rendering/dashboard.h>
 
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
     const char* KeyName = "Name";
-    const char* KeyFontMono = "Mono";
 
+    static const openspace::properties::Property::PropertyInfo UseMainInfo = {
+        "UseMainDashboard",
+        "Use main dashboard",
+        "If this value is set to 'true', this ScreenSpaceDashboard will use the "
+        "main dashboard instead of creating an independent one."
+    };
 } // namespace
 
 namespace openspace {
+
+namespace luascriptfunctions {
+
+/**
+* \ingroup LuaScripts
+* addDashboardItemToScreenSpace(string, table):
+*/
+int addDashboardItemToScreenSpace(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 2) {
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    }
+
+    std::string name = luaL_checkstring(L, -2);
+    int type = lua_type(L, -1);
+    if (type != LUA_TTABLE) {
+        return luaL_error(L, "Expected argument of type 'table'");
+    }
+    else {
+        ghoul::Dictionary d;
+        try {
+            ghoul::lua::luaDictionaryFromState(L, d);
+        }
+        catch (const ghoul::lua::LuaFormatException& e) {
+            LERRORC("addDashboardItem", e.what());
+            return 0;
+        }
+
+        std::shared_ptr<ScreenSpaceRenderable> ssr =
+            OsEng.renderEngine().screenSpaceRenderable(name);
+
+        if (!ssr) {
+            return luaL_error(L, "Provided name is not a ScreenSpace item");
+        }
+
+        ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr.get());
+        if (!dash) {
+            return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
+        }
+
+        dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+        return 0;
+    }
+}
+
+/**
+* \ingroup LuaScripts
+* removeDashboardItemsFromScreenSpace(string):
+*/
+int removeDashboardItemsFromScreenSpace(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    std::string name = luaL_checkstring(L, -1);
+    std::shared_ptr<ScreenSpaceRenderable> ssr =
+        OsEng.renderEngine().screenSpaceRenderable(name);
+
+    if (!ssr) {
+        return luaL_error(L, "Provided name is not a ScreenSpace item");
+    }
+
+    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr.get());
+    if (!dash) {
+        return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
+    }
+
+    dash->dashboard().removeDashboardItems();
+    return 0;
+}
+
+} // namespace luascriptfunctions
+
 
 documentation::Documentation ScreenSpaceDashboard::Documentation() {
     using namespace openspace::documentation;
@@ -58,6 +139,12 @@ documentation::Documentation ScreenSpaceDashboard::Documentation() {
                 new StringVerifier,
                 Optional::Yes,
                 "Specifies the GUI name of the ScreenSpaceDashboard"
+            },
+            {
+                UseMainInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                UseMainInfo.description
             }
         }
     };
@@ -65,9 +152,7 @@ documentation::Documentation ScreenSpaceDashboard::Documentation() {
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     : ScreenSpaceFramebuffer(dictionary)
-    , _fontRenderer(nullptr)
-    , _fontDate(nullptr)
-    , _fontInfo(nullptr)
+    , _useMainDashboard(UseMainInfo, false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -89,12 +174,13 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
         ++id;
     }
 
+    if (dictionary.hasKey(UseMainInfo.identifier)) {
+        _useMainDashboard = dictionary.value<bool>(UseMainInfo.identifier);
+    }
+    addProperty(_useMainDashboard);
+
     _scale = 1.f;
     _scale.setMaxValue(15.f);
-
-    _size.onChange([this]() {
-        _fontRenderer->setFramebufferSize({ _size.value().z, _size.value().w });
-    });
 }
 
 ScreenSpaceDashboard::~ScreenSpaceDashboard() {}
@@ -102,71 +188,32 @@ ScreenSpaceDashboard::~ScreenSpaceDashboard() {}
 bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
-    _fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
-    _fontRenderer->setFramebufferSize({ _size.value().z, _size.value().w });
-
-
-    _fontDate = OsEng.fontManager().font(
-        KeyFontMono,
-        48
-    );
-    _fontInfo = OsEng.fontManager().font(
-        KeyFontMono,
-        32
-    );
-
     addRenderFunction([this]() {
-
         glm::vec2 penPosition = glm::vec2(
             10.f,
             _size.value().w
         );
 
-        penPosition.y -= _fontDate->height();
-        RenderFontCr(
-            *_fontDate,
-            penPosition,
-            "Date: %s",
-            OsEng.timeManager().time().UTC().c_str()
-        );
-
-        std::pair<double, std::string> deltaTime = simplifyTime(
-            OsEng.timeManager().time().deltaTime()
-        );
-        RenderFontCr(
-            *_fontInfo,
-            penPosition,
-            "Simulation increment: %.1f %s / second",
-            deltaTime.first,
-            deltaTime.second.c_str()
-        );
-
-        double distance = glm::length(
-            OsEng.renderEngine().camera()->positionVec3() -
-            OsEng.navigationHandler().focusNode()->worldPosition()
-        );
-        std::pair<double, std::string> dist = simplifyDistance(distance);
-        RenderFontCr(
-            *_fontInfo,
-            penPosition,
-            "Distance from focus: %f %s",
-            dist.first,
-            dist.second.c_str()
-        );
+        if (_useMainDashboard) {
+            OsEng.dashboard().render(penPosition);
+        }
+        else {
+            _dashboard.render(penPosition);
+        }
     });
 
     return true;
 }
 
 bool ScreenSpaceDashboard::deinitializeGL() {
-    _fontRenderer = nullptr;
+    //_fontRenderer = nullptr;
     return ScreenSpaceFramebuffer::deinitializeGL();
 }
 
 bool ScreenSpaceDashboard::isReady() const {
-    return (_fontRenderer != nullptr) &&
+    return /*(_fontRenderer != nullptr) &&
            (_fontDate != nullptr) &&
-           (_fontInfo != nullptr) &&
+           (_fontInfo != nullptr) &&*/
            ScreenSpaceFramebuffer::isReady();
 }
 
@@ -179,4 +226,33 @@ void ScreenSpaceDashboard::update() {
     }
 }
 
+Dashboard& ScreenSpaceDashboard::dashboard() {
+    return _dashboard;
+}
+
+const Dashboard& ScreenSpaceDashboard::dashboard() const {
+    return _dashboard;
+}
+
+scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
+    return {
+        "dashboard",
+        {
+            {
+                "addDashboardItemToScreenSpace",
+                &luascriptfunctions::addDashboardItemToScreenSpace,
+                {},
+                "string, table",
+                "Adds a new dashboard item to an existing SceenSpaceDashboard."
+            },
+            {
+                "removeDashboardItemsFromScreenSpace",
+                &luascriptfunctions::removeDashboardItemsFromScreenSpace,
+                {},
+                "string",
+                "Removes all dashboard items from an existing ScreenSpaceDashboard."
+            }
+        }
+    };
+}
 } // namespace openspace

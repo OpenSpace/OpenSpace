@@ -35,6 +35,7 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -43,13 +44,14 @@
 #include <vector>
 
 namespace {
-    const char* _loggerCat = "FramebufferRenderer";
-    const char* ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
-    const char* RaycastFragmentShaderPath =
+    constexpr const char* _loggerCat = "FramebufferRenderer";
+    constexpr const char* ExitFragmentShaderPath =
+        "${SHADERS}/framebuffer/exitframebuffer.frag";
+    constexpr const char* RaycastFragmentShaderPath =
         "${SHADERS}/framebuffer/raycastframebuffer.frag";
-    const char* GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
-    const char* GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
-    const char* RenderFragmentShaderPath =
+    constexpr const char* GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
+    constexpr const char* GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
+    constexpr const char* RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 } // namespace
 
@@ -153,8 +155,8 @@ void FramebufferRenderer::initialize() {
     try {
         _resolveProgram = ghoul::opengl::ProgramObject::Build(
             "Framebuffer Resolve",
-            "${SHADERS}/framebuffer/resolveframebuffer.vert",
-            "${SHADERS}/framebuffer/resolveframebuffer.frag"
+            absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
+            absPath("${SHADERS}/framebuffer/resolveframebuffer.frag")
         );
     } catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);

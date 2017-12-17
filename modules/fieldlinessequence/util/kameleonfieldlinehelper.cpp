@@ -28,9 +28,21 @@
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-    #include <ccmc/Kameleon.h>
-    #include <ccmc/KameleonInterpolator.h>
-    #include <modules/kameleon/include/kameleonhelper.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+ // Boost throws #pragma warning: there is no warning number '4675'
+#pragma warning (disable : 4619)
+#endif // _MSC_VER
+
+#include <ccmc/Kameleon.h>
+#include <ccmc/KameleonInterpolator.h>
+#include <modules/kameleon/include/kameleonhelper.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 #include <ghoul/logging/logmanager.h>

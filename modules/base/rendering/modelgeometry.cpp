@@ -36,11 +36,11 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "ModelGeometry";
+    constexpr const char* _loggerCat = "ModelGeometry";
 
-    const char* KeyType = "Type";
-    const char* KeyGeomModelFile = "GeometryFile";
-    const int8_t CurrentCacheVersion = 3;
+    constexpr const char* KeyType = "Type";
+    constexpr const char* KeyGeomModelFile = "GeometryFile";
+    constexpr const int8_t CurrentCacheVersion = 3;
 } // namespace
 
 namespace openspace::modelgeometry {

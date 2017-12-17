@@ -82,8 +82,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
         _texturePath = absPath(_texturePath);
         _textureFile = new ghoul::filesystem::File(_texturePath);
     }
-
-    loadTexture();
 }
 
 RenderablePlaneProjection::~RenderablePlaneProjection() {
@@ -102,8 +100,8 @@ void RenderablePlaneProjection::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
         "Image Plane",
-        "${MODULE_BASE}/shaders/imageplane_vs.glsl",
-        "${MODULE_BASE}/shaders/imageplane_fs.glsl"
+        absPath("${MODULE_BASE}/shaders/imageplane_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/imageplane_fs.glsl")
     );
 
     setTarget(_defaultTarget);

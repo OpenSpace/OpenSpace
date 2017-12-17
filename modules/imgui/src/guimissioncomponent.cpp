@@ -102,7 +102,7 @@ void GuiMissionComponent::render() {
     bool v = _isEnabled;
     ImGui::Begin(name().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
-    
+
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     ghoul_assert(

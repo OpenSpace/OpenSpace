@@ -253,6 +253,12 @@ static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
     "explaining what impact they have on the visuals."
 };
 
+static const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+    "HelpTextDelay",
+    "Tooltip Delay (in s)",
+    "This value determines the delay in seconds after which the tooltip is shown."
+};
+
 static const openspace::properties::Property::PropertyInfo HiddenInfo = {
     "IsHidden",
     "Is Hidden",
@@ -282,6 +288,7 @@ GUI::GUI()
     , _featuredProperties("Featured Properties", GuiPropertyComponent::UseTreeLayout::No)
     , _showInternals(false)
     , _showHelpText(ShowHelpInfo, true)
+    , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
     , _currentVisibility(properties::Property::Visibility::Developer)
     , _allHidden(HiddenInfo, true)
 {
@@ -305,13 +312,55 @@ GUI::GUI()
     addPropertySubOwner(_iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
 
-    addProperty(_showHelpText);
-    _showHelpText.onChange([this](){
-        _globalProperty.setShowHelpTooltip(_showHelpText);
-        _property.setShowHelpTooltip(_showHelpText);
-        _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
-        _virtualProperty.setShowHelpTooltip(_showHelpText);
-    });
+    {
+        auto showHelpTextFunc = [this](){
+            _help.setShowHelpTooltip(_showHelpText);
+            _filePath.setShowHelpTooltip(_showHelpText);
+#ifdef GLOBEBROWSING_USE_GDAL
+            _globeBrowsing.setShowHelpTooltip(_showHelpText);
+#endif // GLOBEBROWSING_USE_GDAL
+            _performance.setShowHelpTooltip(_showHelpText);
+            _globalProperty.setShowHelpTooltip(_showHelpText);
+            _property.setShowHelpTooltip(_showHelpText);
+            _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
+            _virtualProperty.setShowHelpTooltip(_showHelpText);
+            _spaceTime.setShowHelpTooltip(_showHelpText);
+            _mission.setShowHelpTooltip(_showHelpText);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+            _iswa.setShowHelpTooltip(_showHelpText);
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+            _parallel.setShowHelpTooltip(_showHelpText);
+            _featuredProperties.setShowHelpTooltip(_showHelpText);
+        };
+        showHelpTextFunc();
+        _showHelpText.onChange(std::move(showHelpTextFunc));
+        addProperty(_showHelpText);
+    }
+
+    {
+        auto helpTextDelayFunc = [this](){
+            _help.setShowHelpTooltipDelay(_helpTextDelay);
+            _filePath.setShowHelpTooltipDelay(_helpTextDelay);
+#ifdef GLOBEBROWSING_USE_GDAL
+            _globeBrowsing.setShowHelpTooltipDelay(_helpTextDelay);
+#endif // GLOBEBROWSING_USE_GDAL
+            _performance.setShowHelpTooltipDelay(_helpTextDelay);
+            _globalProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _property.setShowHelpTooltipDelay(_helpTextDelay);
+            _screenSpaceProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _virtualProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _spaceTime.setShowHelpTooltipDelay(_helpTextDelay);
+            _mission.setShowHelpTooltipDelay(_helpTextDelay);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+            _iswa.setShowHelpTooltipDelay(_helpTextDelay);
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+            _parallel.setShowHelpTooltipDelay(_helpTextDelay);
+            _featuredProperties.setShowHelpTooltipDelay(_helpTextDelay);
+        };
+        helpTextDelayFunc();
+        _helpTextDelay.onChange(std::move(helpTextDelayFunc));
+        addProperty(_helpTextDelay);
+    }
 
     addProperty(_allHidden);
 }
@@ -483,8 +532,8 @@ void GUI::deinitialize() {
 void GUI::initializeGL() {
     _program = ghoul::opengl::ProgramObject::Build(
         "GUI",
-        "${MODULE_IMGUI}/shaders/gui_vs.glsl",
-        "${MODULE_IMGUI}/shaders/gui_fs.glsl"
+        absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
+        absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
     if (!_program) {
         return;
@@ -771,7 +820,7 @@ void GUI::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     ImGui::Begin("OpenSpace GUI", nullptr);
-    
+
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     bool property = _property.isEnabled();
@@ -856,10 +905,20 @@ void GUI::render() {
         addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
 
-    bool addDashboard = ImGui::Button("Add Dashboard");
+    bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
         OsEng.scriptEngine().queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
+    if (addDashboardCopy) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.addScreenSpaceRenderable({ "
+                "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
+            "});",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }

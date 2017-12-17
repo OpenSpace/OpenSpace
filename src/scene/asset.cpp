@@ -31,7 +31,7 @@
 #include <unordered_set>
 
 namespace {
-    const char* _loggerCat = "Asset";
+    const constexpr char* _loggerCat = "Asset";
 
     float syncProgress(std::vector<std::shared_ptr<openspace::Asset>> assets) {
         size_t nTotalBytes = 0;

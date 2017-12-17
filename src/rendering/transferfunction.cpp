@@ -38,7 +38,7 @@
 #include <iostream>
 
 namespace {
-    const char* _loggerCat = "TransferFunction";
+    constexpr const char* _loggerCat = "TransferFunction";
 
     // @TODO Replace with Filesystem::File extension
     bool hasExtension(const std::string& filepath, const std::string& extension) {
@@ -76,7 +76,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     }
     _filepath = f;
     _file = std::make_unique<ghoul::filesystem::File>(
-        filepath,
+        _filepath,
         ghoul::filesystem::File::RawPath::Yes
     );
     _needsUpdate = true;

@@ -34,7 +34,7 @@
 #include <queue>
 
 namespace {
-    const char* _loggerCat = "TSP";
+    constexpr const char* _loggerCat = "TSP";
 } // namespace
 
 namespace openspace {

@@ -31,6 +31,15 @@
 
 #include <ghoul/misc/assert.h>
 
+#include <modules/base/dashboard/dashboarditemangle.h>
+#include <modules/base/dashboard/dashboarditemdate.h>
+#include <modules/base/dashboard/dashboarditemdistance.h>
+#include <modules/base/dashboard/dashboarditemframerate.h>
+#include <modules/base/dashboard/dashboarditemmission.h>
+#include <modules/base/dashboard/dashboarditemparallelconnection.h>
+#include <modules/base/dashboard/dashboarditemsimulationincrement.h>
+#include <modules/base/dashboard/dashboarditemspacing.h>
+
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
@@ -78,6 +87,22 @@ void BaseModule::internalInitialize() {
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
     fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
 
+    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul_assert(fDashboard, "Dashboard factory was not created");
+
+    fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
+    fDashboard->registerClass<DashboardItemDate>("DashboardItemDate");
+    fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
+    fDashboard->registerClass<DashboardItemFramerate>("DashboardItemFramerate");
+    fDashboard->registerClass<DashboardItemMission>("DashboardItemMission");
+    fDashboard->registerClass<DashboardItemParallelConnection>(
+        "DashboardItemParallelConnection"
+    );
+    fDashboard->registerClass<DashboardItemSimulationIncrement>(
+        "DashboardItemSimulationIncrement"
+    );
+    fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
+
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
@@ -114,23 +139,42 @@ void BaseModule::internalInitialize() {
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
+        DashboardItemDate::Documentation(),
+        DashboardItemDistance::Documentation(),
+        DashboardItemFramerate::Documentation(),
+        DashboardItemMission::Documentation(),
+        DashboardItemParallelConnection::Documentation(),
+        DashboardItemSimulationIncrement::Documentation(),
+        DashboardItemSpacing::Documentation(),
+
         RenderableModel::Documentation(),
         RenderablePlane::Documentation(),
         RenderableSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
+
         ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
+
         FixedRotation::Documentation(),
         LuaRotation::Documentation(),
         StaticRotation::Documentation(),
+
         LuaScale::Documentation(),
         StaticScale::Documentation(),
+
         LuaTranslation::Documentation(),
         StaticTranslation::Documentation(),
+
         modelgeometry::ModelGeometry::Documentation(),
+    };
+}
+
+std::vector<scripting::LuaLibrary> BaseModule::luaLibraries() const {
+    return {
+        ScreenSpaceDashboard::luaLibrary()
     };
 }
 

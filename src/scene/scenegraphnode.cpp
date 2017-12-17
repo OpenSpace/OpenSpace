@@ -54,13 +54,13 @@
 #include "scenegraphnode_doc.inl"
 
 namespace {
-    const char* _loggerCat = "SceneGraphNode";
-    const char* KeyRenderable = "Renderable";
-    const char* KeyGuiPath = "GuiPath";
+    constexpr const char* _loggerCat = "SceneGraphNode";
+    constexpr const char* KeyRenderable = "Renderable";
+    constexpr const char* KeyGuiPath = "GuiPath";
 
-    const char* keyTransformTranslation = "Transform.Translation";
-    const char* keyTransformRotation = "Transform.Rotation";
-    const char* keyTransformScale = "Transform.Scale";
+    constexpr const char* keyTransformTranslation = "Transform.Translation";
+    constexpr const char* keyTransformRotation = "Transform.Rotation";
+    constexpr const char* keyTransformScale = "Transform.Scale";
 } // namespace
 
 namespace openspace {
@@ -85,22 +85,6 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     std::string name = dictionary.value<std::string>(KeyName);
     result->setName(name);
-
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
-        ghoul::Dictionary renderableDictionary;
-        dictionary.getValue(KeyRenderable, renderableDictionary);
-
-        renderableDictionary.setValue(KeyName, name);
-
-        result->_renderable = Renderable::createFromDictionary(renderableDictionary);
-        if (result->_renderable == nullptr) {
-            LERROR("Failed to create renderable for SceneGraphNode '"
-                   << result->name() << "'");
-            return nullptr;
-        }
-        result->addPropertySubOwner(result->_renderable.get());
-        LDEBUG("Successfully created renderable for '" << result->name() << "'");
-    }
 
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
@@ -141,6 +125,23 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
         result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG("Successfully created scale for '" << result->name() << "'");
+    }
+
+    // We initialize the renderable last as it probably has the most dependencies
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
+        ghoul::Dictionary renderableDictionary;
+        dictionary.getValue(KeyRenderable, renderableDictionary);
+
+        renderableDictionary.setValue(KeyName, name);
+
+        result->_renderable = Renderable::createFromDictionary(renderableDictionary);
+        if (result->_renderable == nullptr) {
+            LERROR("Failed to create renderable for SceneGraphNode '"
+                << result->name() << "'");
+            return nullptr;
+        }
+        result->addPropertySubOwner(result->_renderable.get());
+        LDEBUG("Successfully created renderable for '" << result->name() << "'");
     }
 
     if (dictionary.hasKey(KeyTag)) {

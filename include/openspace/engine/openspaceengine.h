@@ -43,6 +43,7 @@ namespace openspace {
 
 class AssetManager;
 class ConfigurationManager;
+class Dashboard;
 class DownloadManager;
 class GUI;
 class LoadingScreen;
@@ -109,6 +110,7 @@ public:
     ConfigurationManager& configurationManager();
     LuaConsole& console();
     AssetManager& assetManager();
+    Dashboard& dashboard();
     DownloadManager& downloadManager();
     ModuleEngine& moduleEngine();
     LoadingScreen& loadingScreen();
@@ -177,13 +179,18 @@ private:
     void loadSingleAsset(const std::string& assetPath);
     void gatherCommandlineArguments();
     void loadFonts();
+
     void configureLogging(bool consoleLog);
     void writeDocumentations();
     
+    void runGlobalCustomizationScripts(const std::string& sceneDescription);
+    void configureLogging();
+
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
+    std::unique_ptr<Dashboard> _dashboard;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;

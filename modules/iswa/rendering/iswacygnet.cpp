@@ -31,10 +31,11 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* _loggerCat = "IswaCygnet";
+    constexpr const char* _loggerCat = "IswaCygnet";
 
     static const openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
@@ -266,9 +267,10 @@ void IswaCygnet::initializeTime() {
 bool IswaCygnet::createShader() {
     if (_shader == nullptr) {
         RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram(_programName,
-            _vsPath,
-            _fsPath
+        _shader = renderEngine.buildRenderProgram(
+            _programName,
+            absPath(_vsPath),
+            absPath(_fsPath)
         );
         if (!_shader) {
             return false;

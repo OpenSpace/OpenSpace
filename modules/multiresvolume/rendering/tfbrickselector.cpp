@@ -31,7 +31,7 @@
 #include <cassert>
 
 namespace {
-    const char* _loggerCat = "TfBrickSelector";
+    constexpr const char* _loggerCat = "TfBrickSelector";
 } // namespace
 
 namespace openspace {

@@ -62,13 +62,6 @@ public:
         Invalid
     };
 
-    enum class FrametimeType {
-        DtTimeAvg = 0,
-        FPS,
-        FPSAvg,
-        None
-    };
-
     RenderEngine();
     ~RenderEngine();
 
@@ -126,8 +119,6 @@ public:
         std::string csPath,
         const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
-    std::string progressToStr(int size, double t);
-
     void removeRenderProgram(
         const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
 
@@ -179,8 +170,6 @@ private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method) const;
 
-    void renderInformation();
-
     Camera* _camera;
     Scene* _scene;
     std::unique_ptr<RaycasterManager> _raycasterManager;
@@ -194,12 +183,6 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
-    properties::OptionProperty _frametimeType;
-
-    //FrametimeType _frametimeType;
-
-    properties::BoolProperty _showDate;
-    properties::BoolProperty _showInfo;
     properties::BoolProperty _showLog;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;

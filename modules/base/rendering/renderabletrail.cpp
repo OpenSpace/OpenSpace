@@ -31,6 +31,7 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -221,8 +222,8 @@ void RenderableTrail::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "EphemerisProgram",
-        "${MODULE_BASE}/shaders/renderabletrail_vs.glsl",
-        "${MODULE_BASE}/shaders/renderabletrail_fs.glsl"
+        absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
     );
 
     setRenderBin(Renderable::RenderBin::Overlay);

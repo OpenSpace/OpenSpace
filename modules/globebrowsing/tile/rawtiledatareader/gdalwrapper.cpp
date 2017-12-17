@@ -46,7 +46,7 @@
 #endif // WIN32
 
 namespace {
-    const char* _loggerCat = "GdalWrapper";
+    constexpr const char* _loggerCat = "GdalWrapper";
 
     static const openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",

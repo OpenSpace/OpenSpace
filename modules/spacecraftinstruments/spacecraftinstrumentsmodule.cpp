@@ -24,6 +24,8 @@
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 
+#include <modules/spacecraftinstruments/dashboard/dashboarditeminstruments.h>
+
 #include <modules/spacecraftinstruments/rendering/renderablecrawlingline.h>
 #include <modules/spacecraftinstruments/rendering/renderablefov.h>
 #include <modules/spacecraftinstruments/rendering/renderablemodelprojection.h>
@@ -52,6 +54,11 @@ void SpacecraftInstrumentsModule::internalInitialize() {
         std::make_unique<ghoul::TemplateFactory<Decoder>>(),
         "Decoder"
     );
+
+    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul_assert(fDashboard, "Dashboard factory was not created");
+
+    fDashboard->registerClass<DashboardItemInstruments>("DashboardItemInstruments");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");

@@ -27,7 +27,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "TriangleSoup";
+    constexpr const char* _loggerCat = "TriangleSoup";
 }
 
 namespace openspace::globebrowsing {

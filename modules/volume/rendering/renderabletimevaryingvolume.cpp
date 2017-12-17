@@ -44,8 +44,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace {
-    const char* _loggerCat = "RenderableTimeVaryingVolume";
-}
+    constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
+} // namespace
 
 namespace {
     const char* KeyDimensions = "Dimensions";

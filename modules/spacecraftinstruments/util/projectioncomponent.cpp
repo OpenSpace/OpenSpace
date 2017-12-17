@@ -43,34 +43,34 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
-    const char* keyPotentialTargets = "PotentialTargets";
+    constexpr const char* keyPotentialTargets = "PotentialTargets";
 
-    const char* keyInstrument = "Instrument.Name";
-    const char* keyInstrumentFovy = "Instrument.Fovy";
-    const char* keyInstrumentAspect = "Instrument.Aspect";
+    constexpr const char* keyInstrument = "Instrument.Name";
+    constexpr const char* keyInstrumentFovy = "Instrument.Fovy";
+    constexpr const char* keyInstrumentAspect = "Instrument.Aspect";
 
-    const char* keyTranslation = "DataInputTranslation";
+    constexpr const char* keyTranslation = "DataInputTranslation";
 
-    const char* keyProjObserver = "Observer";
-    const char* keyProjTarget = "Target";
-    const char* keyProjAberration = "Aberration";
+    constexpr const char* keyProjObserver = "Observer";
+    constexpr const char* keyProjTarget = "Target";
+    constexpr const char* keyProjAberration = "Aberration";
 
-    const char* keySequenceDir = "Sequence";
-    const char* keySequenceType = "SequenceType";
+    constexpr const char* keySequenceDir = "Sequence";
+    constexpr const char* keySequenceType = "SequenceType";
 
-    const char* keyNeedsTextureMapDilation = "TextureMap";
-    const char* keyNeedsShadowing = "ShadowMap";
-    const char* keyTextureMapAspectRatio = "AspectRatio";
+    constexpr const char* keyNeedsTextureMapDilation = "TextureMap";
+    constexpr const char* keyNeedsShadowing = "ShadowMap";
+    constexpr const char* keyTextureMapAspectRatio = "AspectRatio";
 
-    const char* sequenceTypeImage = "image-sequence";
-    const char* sequenceTypePlaybook = "playbook";
-    const char* sequenceTypeHybrid = "hybrid";
-    const char* sequenceTypeInstrumentTimes = "instrument-times";
+    constexpr const char* sequenceTypeImage = "image-sequence";
+    constexpr const char* sequenceTypePlaybook = "playbook";
+    constexpr const char* sequenceTypeHybrid = "hybrid";
+    constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
 
     const char* placeholderFile =
         "${OPENSPACE_DATA}/scene/common/textures/placeholder.png";
 
-    const char* _loggerCat = "ProjectionComponent";
+    constexpr const char* _loggerCat = "ProjectionComponent";
 
     static const openspace::properties::Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",

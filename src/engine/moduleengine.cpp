@@ -36,7 +36,7 @@
 #include "moduleengine_lua.inl"
 
 namespace {
-    const char* _loggerCat = "ModuleEngine";
+    constexpr const char* _loggerCat = "ModuleEngine";
 } // namespace
 
 namespace openspace {

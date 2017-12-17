@@ -40,14 +40,14 @@
 #include <memory>
 
 namespace {
-    const char* _loggerCat = "HttpSynchronization";
-    const char* KeyIdentifier = "Identifier";
-    const char* KeyVersion = "Version";
+    constexpr const char* _loggerCat = "HttpSynchronization";
+    constexpr const char* KeyIdentifier = "Identifier";
+    constexpr const char* KeyVersion = "Version";
 
-    const char* QueryKeyIdentifier = "identifier";
-    const char* QueryKeyFileVersion = "file_version";
-    const char* QueryKeyApplicationVersion = "application_version";
-    const int ApplicationVersion = 1;
+    constexpr const char* QueryKeyIdentifier = "identifier";
+    constexpr const char* QueryKeyFileVersion = "file_version";
+    constexpr const char* QueryKeyApplicationVersion = "application_version";
+    constexpr const int ApplicationVersion = 1;
 }
 
 namespace openspace {

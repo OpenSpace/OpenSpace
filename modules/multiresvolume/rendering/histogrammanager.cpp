@@ -31,7 +31,7 @@
 #include <openspace/util/histogram.h>
 
 namespace {
-    const char* _loggerCat = "HistogramManager";
+    constexpr const char* _loggerCat = "HistogramManager";
 } // namespace
 
 namespace openspace {

@@ -35,8 +35,8 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "OpenSpaceModule";
-    const char* ModuleBaseToken = "MODULE_";
+    constexpr const char* _loggerCat = "OpenSpaceModule";
+    constexpr const char* ModuleBaseToken = "MODULE_";
 } // namespace
 
 namespace openspace {
@@ -58,7 +58,7 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
 
     std::string moduleToken =
         ghoul::filesystem::FileSystem::TokenOpeningBraces +
-        ModuleBaseToken +
+        std::string(ModuleBaseToken) +
         upperName +
         ghoul::filesystem::FileSystem::TokenClosingBraces;
 
@@ -82,6 +82,10 @@ scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
+std::vector<scripting::LuaLibrary> OpenSpaceModule::luaLibraries() const {
+    return {};
+}
+
 ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
     return { 3, 3, 0 };
 }
@@ -96,7 +100,7 @@ std::string OpenSpaceModule::modulePath() const {
     );
 
     // First try the internal module directory
-    if (FileSys.directoryExists("${MODULES}/" + moduleName)) {
+    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleName))) {
         return absPath("${MODULES}/" + moduleName);
     }
     else { // Otherwise, it might be one of the external directories

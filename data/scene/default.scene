@@ -18,8 +18,6 @@ local vrt_folders = {
     }
 }
 
-dofile(openspace.absPath('${SCRIPTS}/scene_helper.lua'))
-
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -27,9 +25,10 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
+    openspace.set_default_dashboard()
 
-    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
-    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/naif0012.tls"))
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/pck00010.tpc"))
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
@@ -74,7 +73,7 @@ function preInitialization()
 end
 
 function postInitialization()
-    set_default_gui_sorting()
+    openspace.set_default_gui_sorting()
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -105,7 +104,7 @@ function postInitialization()
 
     -- Defined in scene_helper.lua
     -- Used to create focus buttons for a subset of scenegraph nodes
-    mark_interesting_nodes({
+    openspace.mark_interesting_nodes({
         "Earth", "Mars", "Moon"
     })
 end
@@ -133,7 +132,7 @@ return {
         -- "satellites",
         
         "grids",
-        "digitaluniverse",
+        -- "digitaluniverse",
         "stars/digitaluniverse",
         "milkyway/digitaluniverse"
     }

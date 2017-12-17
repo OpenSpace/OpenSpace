@@ -43,13 +43,13 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const char* _loggerCat = "RenderableModelProjection";
+    constexpr const char* _loggerCat = "RenderableModelProjection";
 
-    const char* keyGeometry = "Geometry";
-    const char* keyProjection = "Projection";
-    const char* keyBoundingSphereRadius = "BoundingSphereRadius";
+    constexpr const char* keyGeometry = "Geometry";
+    constexpr const char* keyProjection = "Projection";
+    constexpr const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
-    const char* DestinationFrame = "GALACTIC";
+    constexpr const char* DestinationFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
@@ -182,21 +182,31 @@ bool RenderableModelProjection::isReady() const {
 
 void RenderableModelProjection::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram("ModelShader",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl");
+    _programObject = renderEngine.buildRenderProgram(
+        "ModelShader",
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
+    );
 
 
-    _fboProgramObject = ghoul::opengl::ProgramObject::Build("ProjectionPass",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_fs.glsl");
+    _fboProgramObject = ghoul::opengl::ProgramObject::Build(
+        "ProjectionPass",
+        absPath(
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_vs.glsl"
+        ),
+        absPath(
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_fs.glsl"
+        )
+    );
     _fboProgramObject->setIgnoreUniformLocationError(
         ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
-    _depthFboProgramObject = ghoul::opengl::ProgramObject::Build("DepthPass",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_fs.glsl");
+    _depthFboProgramObject = ghoul::opengl::ProgramObject::Build(
+        "DepthPass",
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_fs.glsl")
+    );
 
 
     loadTextures();

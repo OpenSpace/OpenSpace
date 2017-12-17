@@ -91,9 +91,9 @@ using SocketResultType = size_t;
 #include "parallelconnection_lua.inl"
 
 namespace {
-    const uint32_t ProtocolVersion = 2;
-    const size_t MaxLatencyDiffs = 64;
-    const char* _loggerCat = "ParallelConnection";
+    constexpr const uint32_t ProtocolVersion = 2;
+    constexpr const size_t MaxLatencyDiffs = 64;
+    constexpr const char* _loggerCat = "ParallelConnection";
 
     static const openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",

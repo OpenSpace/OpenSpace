@@ -42,11 +42,11 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "NavigationHandler";
+    constexpr const char* _loggerCat = "NavigationHandler";
 
-    const char* KeyFocus = "Focus";
-    const char* KeyPosition = "Position";
-    const char* KeyRotation = "Rotation";
+    constexpr const char* KeyFocus = "Focus";
+    constexpr const char* KeyPosition = "Position";
+    constexpr const char* KeyRotation = "Rotation";
 
     static const openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",

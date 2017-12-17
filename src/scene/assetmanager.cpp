@@ -33,7 +33,7 @@
 #include "assetmanager_lua.inl"
 
 namespace {
-    // const char* _loggerCat = "AssetManager";
+    // constexpr const char* _loggerCat = "AssetManager";
 }
 
 namespace openspace {

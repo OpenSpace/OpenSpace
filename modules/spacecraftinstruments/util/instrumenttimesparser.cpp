@@ -45,13 +45,13 @@
 #include <vector>
 
 namespace {
-    const char* _loggerCat = "InstrumentTimesParser";
+    constexpr const char* _loggerCat = "InstrumentTimesParser";
 
-    const char* PlaybookIdentifierName = "InstrumentTimesParser";
-    const char* KeyTargetBody = "Target.Body";
-    const char* KeyInstruments = "Instruments";
-    const char* KeyInstrument = "Instrument";
-    const char* KeyInstrumentFiles = "Files";
+    constexpr const char* PlaybookIdentifierName = "InstrumentTimesParser";
+    constexpr const char* KeyTargetBody = "Target.Body";
+    constexpr const char* KeyInstruments = "Instruments";
+    constexpr const char* KeyInstrument = "Instrument";
+    constexpr const char* KeyInstrumentFiles = "Files";
 } // namespace
 
 namespace openspace {

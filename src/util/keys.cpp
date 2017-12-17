@@ -31,7 +31,7 @@
 #include <vector>
 
 namespace {
-    const char* _loggerCat = "Keys";
+    constexpr const char* _loggerCat = "Keys";
 } // namespace
 
 namespace openspace {
@@ -118,6 +118,11 @@ bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
         return lhs.modifier < rhs.modifier;
     }
 }
+
+bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
+    return (lhs.key == rhs.key) && (lhs.modifier == rhs.modifier);
+}
+
 
 } // namespace openspace
 

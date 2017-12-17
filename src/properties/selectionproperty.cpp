@@ -27,7 +27,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace {
-    const char* _loggerCat = "SelectionProperty";
+    constexpr const char* _loggerCat = "SelectionProperty";
 
     const char Delimiter = ',';
 } // namespace

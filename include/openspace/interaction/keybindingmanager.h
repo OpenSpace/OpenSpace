@@ -40,6 +40,15 @@ namespace openspace::interaction {
 
 class KeyBindingManager : public DocumentationGenerator {
 public:
+    using IsLocalBind = ghoul::Boolean;
+    using IsSynchronized = ghoul::Boolean;
+
+    struct KeyInformation {
+        std::string command;
+        IsSynchronized synchronization;
+        std::string documentation;
+    };
+
     KeyBindingManager();
     ~KeyBindingManager() = default;
 
@@ -59,19 +68,17 @@ public:
         std::string documentation = ""
     );
 
+    void removeKeyBinding(const std::string& key);
+
+    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
+        const std::string& key) const;
+
     static scripting::LuaLibrary luaLibrary();
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
 private:
-    using Synchronized = ghoul::Boolean;
-
-    struct KeyInformation {
-        std::string command;
-        Synchronized synchronization;
-        std::string documentation;
-    };
 
     std::string generateJson() const override;
 

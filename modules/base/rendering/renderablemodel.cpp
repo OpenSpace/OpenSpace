@@ -159,8 +159,8 @@ bool RenderableModel::isReady() const {
 void RenderableModel::initializeGL() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "ModelProgram",
-        "${MODULE_BASE}/shaders/model_vs.glsl",
-        "${MODULE_BASE}/shaders/model_fs.glsl"
+        absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/model_fs.glsl")
     );
 
     loadTexture();

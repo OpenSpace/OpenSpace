@@ -63,15 +63,9 @@
 #include "scene_lua.inl"
 
 namespace {
-    const char* _loggerCat = "Scene";
-
-    const std::string KeyName = "Name";
-    const std::string KeyParentName = "Parent";
-
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
-    const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
-    const char* PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
+    constexpr const char* _loggerCat = "Scene";
+    constexpr const char* KeyName = "Name";
+    constexpr const char* KeyParentName = "Parent";
 } // namespace
 
 namespace openspace {
@@ -599,6 +593,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Checks whether the specifies SceneGraphNode is present in the current "
                 "scene"
             }
+        },
+        {
+            absPath("${SCRIPTS}/scene_helper.lua")
         }
     };
 }

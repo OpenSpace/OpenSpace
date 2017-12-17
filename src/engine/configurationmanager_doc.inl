@@ -53,6 +53,14 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "the Scene documentation."
         },
         {
+            ConfigurationManager::KeyGlobalCustomizationScripts,
+            new StringListVerifier,
+            Optional::Yes,
+            "This value names a list of scripts that get executed after initialization "
+            "of any scene. These scripts can be used for user-specific customization, "
+            "such as a global rebinding of keys from the default."
+        },
+        {
             ConfigurationManager::KeyConfigTasksRoot,
             new StringAnnotationVerifier(
                 "A valid task file as described in the Task documentation"

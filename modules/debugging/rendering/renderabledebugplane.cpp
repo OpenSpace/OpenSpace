@@ -198,9 +198,9 @@ void RenderableDebugPlane::initializeGL() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("PlaneProgram",
-            "${MODULE_BASE}/shaders/plane_vs.glsl",
-            "${MODULE_BASE}/shaders/plane_fs.glsl"
-            );
+            absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
+            absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
+        );
     }
 }
 

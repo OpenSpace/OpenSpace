@@ -86,7 +86,7 @@ void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
         { key, modifier },
         {
             std::move(luaCommand),
-            Synchronized::No,
+            IsSynchronized::No,
             std::move(documentation)
         }
     });
@@ -99,10 +99,53 @@ void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
         { key, modifier },
         {
             std::move(luaCommand),
-            Synchronized::Yes,
+            IsSynchronized::Yes,
             std::move(documentation)
         }
     });
+}
+
+void KeyBindingManager::removeKeyBinding(const std::string& key) {
+    // Erase-remove idiom does not work for std::multimap so we have to do this on foot
+
+    KeyWithModifier k = stringToKey(key);
+
+    for (auto it = _keyLua.begin(); it != _keyLua.end(); ) {
+        // If the current iterator is the key that we are looking for, delete it
+        // (std::multimap::erase will return the iterator to the next element for us)
+        if (it->first == k) {
+            it = _keyLua.erase(it);
+        }
+        else {
+            // We if it is not, we continue iteration
+            ++it;
+        }
+    }
+
+    // _keyLua.erase(
+    //     std::remove_if(
+    //         _keyLua.begin(),
+    //         _keyLua.end(),
+    //         [key](const std::pair<KeyWithModifier, KeyInformation>& val) {
+    //             KeyWithModifier k = stringToKey(key);
+    //             return val.first == k;
+    //         }
+    //     ),
+    //     _keyLua.end()
+    // );
+}
+
+std::vector<std::pair<KeyWithModifier, KeyBindingManager::KeyInformation>>
+KeyBindingManager::keyBinding(const std::string& key) const
+{
+    std::vector<std::pair<KeyWithModifier, KeyInformation>> result;
+
+    KeyWithModifier k = stringToKey(key);
+    auto itRange = _keyLua.equal_range(k);
+    for (auto it = itRange.first; it != itRange.second; ++it) {
+        result.push_back({ it->first, it->second });
+    }
+    return result;
 }
 
 std::string KeyBindingManager::generateJson() const {
@@ -148,6 +191,13 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
                 "Clear all key bindings"
             },
             {
+                "clearKey",
+                &luascriptfunctions::clearKey,
+                {},
+                "string",
+                "Unbinds all of the scripts that are bound to the provided key + modifier"
+            },
+            {
                 "bindKey",
                 &luascriptfunctions::bindKey,
                 {},
@@ -168,6 +218,16 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
                 "that is to be executed, and the optional third argument is a human "
                 "readable description of the command for documentation purposes."
             },
+            {
+                "getKeyBinding",
+                &luascriptfunctions::getKeyBindings,
+                {},
+                "string",
+                "Returns a list of information about the keybindings for the provided "
+                "key. Each element in the list is a table describing the 'Command' that "
+                "was bound and whether it was a 'Remote' script or not."
+
+            }
         }
     };
 }
