@@ -133,7 +133,7 @@ return {
         -- "satellites",
         
         "grids",
-        -- "digitaluniverse",
+        "digitaluniverse",
         "stars/digitaluniverse",
         "milkyway/digitaluniverse"
     }
