@@ -461,8 +461,8 @@ void FramebufferRenderer::updateRaycastData() {
             outsideDict.setValue("getEntryPath", GetEntryOutsidePath);
             _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " raycast",
-                vsPath,
-                RaycastFragmentShaderPath,
+                absPath(vsPath),
+                absPath(RaycastFragmentShaderPath),
                 outsideDict
             );
         } catch (ghoul::RuntimeError e) {
@@ -473,8 +473,8 @@ void FramebufferRenderer::updateRaycastData() {
             insideDict.setValue("getEntryPath", GetEntryInsidePath);
             _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " inside raycast",
-                "${SHADERS}/framebuffer/resolveframebuffer.vert",
-                RaycastFragmentShaderPath,
+                absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
+                absPath(RaycastFragmentShaderPath),
                 insideDict
             );
         }
@@ -519,8 +519,8 @@ void FramebufferRenderer::updateDeferredcastData() {
             //deferredDict.setValue("getEntryPath", GetEntryOutsidePath);
             _deferredcastPrograms[deferredcaster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
-                vsPath,
-                deferredShaderPath,
+                absPath(vsPath),
+                absPath(deferredShaderPath),
                 deferredDict);
             using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
             _deferredcastPrograms[deferredcaster]->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
@@ -538,8 +538,8 @@ void FramebufferRenderer::updateHDRData() {
     try {
         _hdrBackGroundProgram = ghoul::opengl::ProgramObject::Build(
             "HDR Background Control",
-            "${SHADERS}/framebuffer/hdrBackground.vert",
-            "${SHADERS}/framebuffer/hdrBackground.frag"
+            absPath("${SHADERS}/framebuffer/hdrBackground.vert"),
+            absPath("${SHADERS}/framebuffer/hdrBackground.frag")
         );
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _hdrBackGroundProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
@@ -666,8 +666,8 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     try {
         pixelSizeProgram = ghoul::opengl::ProgramObject::Build(
             "OnePixel MSAA",
-            "${SHADERS}/framebuffer/pixelSizeMSAA.vert",
-            "${SHADERS}/framebuffer/pixelSizeMSAA.frag"
+            absPath("${SHADERS}/framebuffer/pixelSizeMSAA.vert"),
+            absPath("${SHADERS}/framebuffer/pixelSizeMSAA.frag")
         );
     }
     catch (const ghoul::RuntimeError& e) {
@@ -814,8 +814,8 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     try {
         nOneStripProgram = ghoul::opengl::ProgramObject::Build(
             "OneStrip MSAA",
-            "${SHADERS}/framebuffer/nOneStripMSAA.vert",
-            "${SHADERS}/framebuffer/nOneStripMSAA.frag"
+            absPath("${SHADERS}/framebuffer/nOneStripMSAA.vert"),
+            absPath("${SHADERS}/framebuffer/nOneStripMSAA.frag")
         );
     }
     catch (const ghoul::RuntimeError& e) {

@@ -66,6 +66,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
@@ -491,8 +492,8 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_transmittanceProgramObject) {
         _transmittanceProgramObject = ghoul::opengl::ProgramObject::Build(
             "transmittanceCalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/transmittance_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl"));
     }
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _transmittanceProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
@@ -502,8 +503,8 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_irradianceProgramObject) {
         _irradianceProgramObject = ghoul::opengl::ProgramObject::Build(
             "irradianceCalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/irradiance_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/irradiance_calc_fs.glsl");        
+            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_calc_fs.glsl"));
     }
     _irradianceProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _irradianceProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -511,8 +512,8 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_irradianceSupTermsProgramObject) {
         _irradianceSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
             "irradianceSupTermsCalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_fs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_fs.glsl"));
     }
     _irradianceSupTermsProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _irradianceSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -521,9 +522,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_inScatteringProgramObject) {
         _inScatteringProgramObject = ghoul::opengl::ProgramObject::Build(
             "inScatteringCalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/inScattering_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/inScattering_calc_fs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/inScattering_calc_gs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_fs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_gs.glsl"));
     }
     _inScatteringProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _inScatteringProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -531,9 +532,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_inScatteringSupTermsProgramObject) {
         _inScatteringSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
             "inScatteringSupTermsCalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_fs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_gs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_fs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_gs.glsl"));
     }
     _inScatteringSupTermsProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _inScatteringSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -542,8 +543,8 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_deltaEProgramObject) {
         _deltaEProgramObject = ghoul::opengl::ProgramObject::Build(
             "deltaECalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/deltaE_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/deltaE_calc_fs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaE_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaE_calc_fs.glsl"));
     }
     _deltaEProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _deltaEProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -552,8 +553,8 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_irradianceFinalProgramObject) {
         _irradianceFinalProgramObject = ghoul::opengl::ProgramObject::Build(
             "irradianceEFinalProgram",
-            "${MODULE_ATMOSPHERE}/shaders/irradiance_final_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/irradiance_final_fs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_final_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_final_fs.glsl"));
     }
     _irradianceFinalProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _irradianceFinalProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -562,9 +563,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_deltaSProgramObject) {
         _deltaSProgramObject = ghoul::opengl::ProgramObject::Build(
             "deltaSCalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/deltaS_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/deltaS_calc_fs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/deltaS_calc_gs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_calc_fs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_calc_gs.glsl"));
     }
     _deltaSProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _deltaSProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -572,9 +573,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_deltaSSupTermsProgramObject) {
         _deltaSSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
             "deltaSSUPTermsCalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_fs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_gs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_fs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_gs.glsl"));
     }
     _deltaSSupTermsProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _deltaSSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -583,9 +584,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_deltaJProgramObject) {
         _deltaJProgramObject = ghoul::opengl::ProgramObject::Build(
             "deltaJCalcProgram",
-            "${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_fs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_gs.glsl");
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_fs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_gs.glsl"));
     }
     _deltaJProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _deltaJProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
