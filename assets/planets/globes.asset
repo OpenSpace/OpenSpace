@@ -1,8 +1,0 @@
--- asset.request('./mercury/globe')
--- asset.request('./venus/globe')
-asset.request('./earth/globe')
--- asset.request('./mars/globe')
--- asset.request('./jupiter/globe')
--- asset.request('./saturn/globe')
--- asset.request('./uranus/globe')
--- asset.request('./neptune/globe')

@@ -1,0 +1,4 @@
+asset.request("../sun/sun")
+asset.request('./trails')
+asset.request('./planets')
+asset.request('./moons')

@@ -1,0 +1,50 @@
+local assetHelper = asset.require('util/assethelper')
+
+local kernelsBasePath = asset.syncedResource({
+    Name = "New Horizons Spice Kernels",
+    Type = "TorrentSynchronization",
+    Identifier = "new_horizons",
+    --Magnet = "magnet:?xt=urn:btih:4af38bdd42c5b29a0ef1ce4ab274cd91c017b8cc&dn=new_horizons"
+    Magnet = "magnet:?xt=urn:btih:dc0da619990155d8ac9c7a50fe6255f60f29fb21&dn=new_horizons"
+})
+
+
+local kernelsRelative = {
+    "spk/nh_pred_20141201_20190301_od122.bsp",
+    "spk/NavSE_plu047_od122.bsp",
+    "spk/NavPE_de433_od122.bsp",
+
+    --"${SPICE}/jup260.bsp",
+
+    --[["ck/nh_scispi_2015_pred.bc",
+    "ck/nh_scispi_2015_recon.bc",
+    "ck/nh_lorri_wcs.bc",
+
+    "smithed_pc_and_sp/PLU_LORRI_ALL_161216.bc",
+
+    "sclk/new-horizons_1121.tsc",
+
+    "pck/nh_targets_v001.tpc",
+    "pck/nh_pcnh_005.tpc",
+
+    "fk/nh_v220.tf",
+    "ik/nh_allinstruments_v002.ti",
+    "ik/nh_alice_v200.ti",
+    "ik/nh_lorri_v201.ti",
+    "ik/nh_pepssi_v110.ti",
+    "ik/nh_ralph_v100.ti",
+    "ik/nh_rex_v100.ti",
+    "ik/nh_sdc_v101.ti",
+    "ik/nh_swap_v100.ti",
+    "ik/nh_astr_v000.ti",
+    "ik/nh_fss_v000.ti",
+    "fk/nh_soc_misc_v001.tf",
+    "spk/nh_stars.bsp"]]--
+}
+
+local kernelPaths = {};
+for i, relativePath in ipairs(kernelsRelative) do
+    kernelPaths[i] = kernelsBasePath .. "/new_horizons/" .. relativePath
+end
+
+assetHelper.registerSpiceKernels(asset, kernelPaths)
