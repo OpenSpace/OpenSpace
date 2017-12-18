@@ -55,10 +55,10 @@ public:
     virtual void setCamera(Camera* camera) = 0;
     virtual void setScene(Scene* scene) = 0;
     virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setNAaSamples(const int nAaSamples) = 0;
-    virtual void setHDRExposure(const float hdrExposure) = 0;
-    virtual void setHDRBackground(const float hdrBackground) = 0;
-    virtual void setGamma(const float gamma) = 0;
+    virtual void setNAaSamples(int nAaSamples) = 0;
+    virtual void setHDRExposure(float hdrExposure) = 0;
+    virtual void setHDRBackground(float hdrBackground) = 0;
+    virtual void setGamma(float gamma) = 0;
 
     virtual float hdrBackground() const = 0;
     virtual int nAaSamples() const = 0;

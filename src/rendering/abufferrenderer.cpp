@@ -730,7 +730,7 @@ void ABufferRenderer::setResolution(glm::ivec2 res) {
     }
 }
 
-void ABufferRenderer::setNAaSamples(const int nAaSamples) {
+void ABufferRenderer::setNAaSamples(int nAaSamples) {
     _nAaSamples = nAaSamples;
     if (_nAaSamples == 0) {
         _nAaSamples = 1;
@@ -742,7 +742,7 @@ void ABufferRenderer::setNAaSamples(const int nAaSamples) {
     _dirtyResolution = true;
 }
 
-void ABufferRenderer::setHDRExposure(const float hdrExposure) {
+void ABufferRenderer::setHDRExposure(float hdrExposure) {
     _hdrExposure = hdrExposure;
     if (_hdrExposure < 0.0) {
         LERROR("HDR Exposure constant must be greater than zero.");
@@ -750,7 +750,7 @@ void ABufferRenderer::setHDRExposure(const float hdrExposure) {
     }
 }
 
-void ABufferRenderer::setHDRBackground(const float hdrBackground) {
+void ABufferRenderer::setHDRBackground(float hdrBackground) {
     _hdrBackground = hdrBackground;
     if (_hdrBackground < 0.0) {
         LERROR("HDR Background constant must be greater than zero.");
@@ -759,7 +759,7 @@ void ABufferRenderer::setHDRBackground(const float hdrBackground) {
 }
 
 
-void ABufferRenderer::setGamma(const float gamma) {
+void ABufferRenderer::setGamma(float gamma) {
     _gamma = gamma;
     if (_gamma < 0.0) {
         LERROR("Gamma value must be greater than zero.");

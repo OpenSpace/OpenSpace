@@ -92,7 +92,9 @@ public:
     glm::dvec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;
     glm::dvec3 cartesianPosition(const Geodetic3& geodetic3) const;
 
-    void setShadowConfigurationArray(const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray);
+    void setShadowConfigurationArray(
+        const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray
+    );
     std::vector<Ellipsoid::ShadowConfiguration> shadowConfigurationArray() const;
     bool hasEclipseShadows() const;
 

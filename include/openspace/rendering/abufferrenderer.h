@@ -69,10 +69,10 @@ public:
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
-    void setNAaSamples(const int nAaSamples) override;
-    void setHDRExposure(const float hdrExposure) override;
-    void setHDRBackground(const float hdrBackground) override;
-    void setGamma(const float gamma) override;
+    void setNAaSamples(int nAaSamples) override;
+    void setHDRExposure(float hdrExposure) override;
+    void setHDRBackground(float hdrBackground) override;
+    void setGamma(float gamma) override;
 
     float hdrBackground() const override;
     int nAaSamples() const override;

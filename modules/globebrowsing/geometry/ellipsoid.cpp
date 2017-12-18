@@ -167,7 +167,8 @@ glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const {
 }
 
 void Ellipsoid::setShadowConfigurationArray(
-    const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray) {
+                       const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray)
+{
     _shadowConfArray = shadowConfArray;
 }
 

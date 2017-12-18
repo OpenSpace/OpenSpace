@@ -161,11 +161,47 @@ namespace {
         "astronomical objects."
     };
 
+    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo =
+    {
+        "TransformationMatrix",
+        "Transformation Matrix",
+        "Transformation matrix to be applied to each astronomical object."
+    };
+
     static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOptionInfo",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
+
+    static const openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+        "FadeInDistances",
+        "Fade-In Start and End Distances",
+        "These values determine the initial and final distances from the center of "
+        "our galaxy from which the astronomical object will start and end "
+        "fading-in."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+        "DisableFadeIn",
+        "Disable Fade-in effect",
+        "Enables/Disables the Fade-in effect."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BillboardMaxSizeInfo = {
+        "BillboardMaxSize",
+        "Billboard Max Size in Pixels",
+        "The max size (in pixels) for the billboard representing the astronomical "
+        "object."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BillboardMinSizeInfo = {
+        "BillboardMinSize",
+        "Billboard Min Size in Pixels",
+        "The min size (in pixels) for the billboard representing the astronomical "
+        "object."
+    };
+
 }  // namespace
 
 namespace openspace {
@@ -271,6 +307,36 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new Vector2ListVerifier<float>,
                 Optional::Yes,
                 ColorRangeInfo.description
+            },
+            {
+                TransformationMatrixInfo.identifier,
+                new Matrix4x4Verifier<double>,
+                Optional::Yes,
+                TransformationMatrixInfo.description
+            },
+            {
+                FadeInDistancesInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FadeInDistancesInfo.description
+            },
+            {
+                DisableFadeInInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInInfo.description
+            },
+            {
+                BillboardMaxSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                BillboardMaxSizeInfo.description
+            },
+            {
+                BillboardMinSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                BillboardMinSizeInfo.description
             }
         }
     };
@@ -306,6 +372,10 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fadeInDistance(FadeInDistancesInfo, glm::vec2(0.0f), glm::vec2(0.0), glm::vec2(100.0))
+    , _disableFadeInDistance(DisableFadeInInfo, true)
+    , _billboardMaxSize(BillboardMaxSizeInfo, 400.0, 0.0, 1000.0)
+    , _billboardMinSize(BillboardMinSizeInfo, 0.0, 0.0, 100.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _polygonTexture(nullptr)
     , _spriteTexture(nullptr)
@@ -317,6 +387,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _labelFile("")
     , _colorOptionString("")
     , _unit(Parsec)
+    , _transformationMatrix(glm::dmat4(1.0))
     , _nValuesPerAstronomicalObject(0)
     , _vao(0)
     , _vbo(0)
@@ -486,6 +557,36 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
         }
         addProperty(_textMaxSize);
+
+        if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
+            _transformationMatrix = dictionary.value<glm::dmat4>(
+                TransformationMatrixInfo.identifier
+            );
+        }
+
+        if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+            glm::vec2 fadeInValue = dictionary.value<glm::vec2>(
+                FadeInDistancesInfo.identifier
+            );
+            _fadeInDistance.set(fadeInValue);
+            _disableFadeInDistance.set(false);
+            addProperty(_fadeInDistance);
+            addProperty(_disableFadeInDistance);
+        }
+
+        if (dictionary.hasKey(BillboardMaxSizeInfo.identifier)) {
+            _billboardMaxSize = static_cast<float>(
+                dictionary.value<double>(BillboardMaxSizeInfo.identifier)
+            );
+            addProperty(_billboardMaxSize);
+        }
+
+        if (dictionary.hasKey(BillboardMinSizeInfo.identifier)) {
+            _billboardMinSize = static_cast<float>(
+                dictionary.value<double>(BillboardMinSizeInfo.identifier)
+            );
+            addProperty(_billboardMinSize);
+        }
     }
 }
 
@@ -554,8 +655,13 @@ void RenderableBillboardsCloud::deinitializeGL() {
     }
 }
 
-void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-    const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
+                                                 const glm::dmat4& modelViewMatrix,
+                                                 const glm::dmat4& worldToModelTransform,
+                                                 const glm::dvec3& orthoRight,
+                                                 const glm::dvec3& orthoUp,
+                                                 float fadeInVariable)
+{
     glDepthMask(false);
 
     // Saving current OpenGL state
@@ -583,18 +689,28 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
+    glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
     _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
-    _program->setUniform("projection", projectionMatrix);
+    _program->setUniform("projection", projMatrix);
     _program->setUniform("modelViewTransform", modelViewMatrix);
-    _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
+    _program->setUniform("modelViewProjectionTransform", projMatrix * modelViewMatrix);
+    _program->setUniform("cameraPosition", glm::dvec3(worldToModelTransform *
+        glm::dvec4(data.camera.positionVec3(), 1.0)));
+    _program->setUniform("cameraLookUp", glm::dvec3(worldToModelTransform *
+        glm::dvec4(data.camera.lookUpVectorWorldSpace(), 1.0)));
 
-    _program->setUniform("cameraPosition", data.camera.positionVec3());
-    _program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
+    //_program->setUniform("cameraPosition", data.camera.positionVec3());
+    //_program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
+
+
     _program->setUniform("renderOption", _renderOption.value());
-    glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0);
+    glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) * 
+        glm::dvec4(0.0, 0.0, 0.0, 1.0);
+
     _program->setUniform("centerScreenInWorldPosition", centerScreenWorld);
         
-    _program->setUniform("minBillboardSize", 1.f); // in pixels
+    _program->setUniform("minBillboardSize", _billboardMinSize); // in pixels
+    _program->setUniform("maxBillboardSize", _billboardMaxSize); // in pixels
     _program->setUniform("color", _pointColor);
     _program->setUniform("sides", 4);
     _program->setUniform("alphaValue", _alphaValue);
@@ -602,6 +718,13 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
 
     _program->setUniform("up", orthoUp);
     _program->setUniform("right", orthoRight);
+
+    _program->setUniform("fadeInValue", fadeInVariable);
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    _program->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
+
 
     ghoul::opengl::TextureUnit spriteTextureUnit;
     if (_hasSpriteTexture) {
@@ -647,8 +770,12 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data, const g
 
 }
 
-void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-    const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+void RenderableBillboardsCloud::renderLabels(const RenderData& data,
+                                             const glm::dmat4& modelViewProjectionMatrix,
+                                             const glm::dvec3& orthoRight,
+                                             const glm::dvec3& orthoUp,
+                                             float fadeInVariable)
+{
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
@@ -678,6 +805,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
         break;
     }
 
+    glm::vec4 textColor = _textColor;
+    textColor.a *= fadeInVariable;
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
@@ -685,7 +814,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
         _fontRenderer->render(
             *_font,
             scaledPos,
-            _textColor,
+            textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
             _textMaxSize,
@@ -701,6 +830,58 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
 }
 
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
+
+    float scale = 0.0;
+    switch (_unit) {
+    case Meter:
+        scale = 1.0;
+        break;
+    case Kilometer:
+        scale = 1e3;
+        break;
+    case Parsec:
+        scale = PARSEC;
+        break;
+    case Kiloparsec:
+        scale = 1e3 * PARSEC;
+        break;
+    case Megaparsec:
+        scale = 1e6 * PARSEC;
+        break;
+    case Gigaparsec:
+        scale = 1e9 * PARSEC;
+        break;
+    case GigalightYears:
+        scale = 306391534.73091 * PARSEC;
+        break;
+    }
+
+    float fadeInVariable = 1.0f;
+    if (!_disableFadeInDistance) {
+        float distCamera = glm::length(data.camera.positionVec3());
+
+        /*
+        // Linear Fading
+        float funcValue = static_cast<float>((1.0 / double(_fadeInDistance*scale))*(distCamera));
+        fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
+
+        if (funcValue < 0.01) {
+        return;
+        }
+        */
+
+        glm::vec2 fadeRange = _fadeInDistance;
+        float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
+        float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        float funcValue = a * distCamera + b;
+        fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
+
+        if (funcValue < 0.01) {
+            return;
+        }
+    }
+
+
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -709,24 +890,59 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     glm::mat4 viewMatrix = data.camera.viewMatrix();
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
-    glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-    glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) *
+        modelViewMatrix;
+
+    glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+
+    /*glm::dmat4 internalCameraMatrix = data.camera.viewRotationMatrix() *
+    glm::inverse(glm::translate(glm::dmat4(1.0), data.camera.positionVec3()));
+    glm::dmat4 invInternalCameraMatrix = glm::inverse(internalCameraMatrix);
+    glm::vec3 lookup = worldToModelTransform * invInternalCameraMatrix * glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
+    glm::vec3 viewDirection = worldToModelTransform * invInternalCameraMatrix * glm::dvec4(data.camera.viewDirectionWorldSpace(), 0.0);
+
+
     glm::vec3 right = glm::cross(viewDirection, lookup);
     glm::vec3 up = glm::cross(right, viewDirection);
 
-    glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-    glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
-    glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
 
+    glm::vec3 orthoRight = glm::normalize(right);
+    glm::vec3 orthoUp = glm::normalize(up);*/
+
+    /*
+    glm::dmat4 internalCameraMatrix = data.camera.viewRotationMatrix() *
+    glm::inverse(glm::translate(glm::dmat4(1.0), data.camera.positionVec3()));
+    glm::dmat4 invInternalCameraMatrix = glm::inverse(internalCameraMatrix);
+    glm::dvec4 lookup = worldToModelTransform * glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
+    glm::dvec4 viewDirection = worldToModelTransform * glm::dvec4(data.camera.viewDirectionWorldSpace(), 0.0);
+    glm::vec3 right = glm::cross(glm::vec3(viewDirection), glm::vec3(lookup));
+    glm::vec3 up = glm::cross(right, glm::vec3(viewDirection));
+
+    glm::vec3 orthoRight = glm::normalize(right);
+    glm::vec3 orthoUp = glm::normalize(up);
+    */
+
+
+    // Almost Working
+    glm::dmat4 invMVPParts = worldToModelTransform * glm::inverse(data.camera.combinedViewMatrix()) *
+        glm::inverse(glm::dmat4(projectionMatrix));
+    glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
+    glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
       
     if (_hasSpeckFile) {
-        renderBillboards(data, modelViewMatrix, projectionMatrix, orthoRight, orthoUp);
+        renderBillboards(
+            data,
+            modelViewMatrix,
+            worldToModelTransform,
+            orthoRight,
+            orthoUp,
+            fadeInVariable
+        );
     }
         
     if (_drawLabels && _hasLabel) {
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
     }                
 }
 
@@ -1119,12 +1335,18 @@ bool RenderableBillboardsCloud::readLabelFile() {
         dummy.clear();
 
         while (str >> dummy) {
+            if (dummy == "#") {
+                break;
+            }
+
             label += " " + dummy;
             dummy.clear();
         }
 
-        _labelData.push_back(std::make_pair(position, label));
-            
+        glm::vec3 transformedPos = glm::vec3(
+            _transformationMatrix * glm::dvec4(position, 1.0)
+        );
+        _labelData.push_back(std::make_pair(transformedPos, label));
     } while (!file.eof());
 
     return true;
@@ -1247,13 +1469,20 @@ void RenderableBillboardsCloud::createDataSlice() {
         }
     }        
 
-    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) { 
-        glm::dvec4 transformedPos = glm::dvec4(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2], 1.0);
+    float biggestCoord = -1.0f;
+    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
+        glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(
+            _fullData[i + 0],
+            _fullData[i + 1],
+            _fullData[i + 2],
+            1.0
+        );
         glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
             
         if (_hasColorMapFile) {
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(position[j]);
+                biggestCoord = biggestCoord < position[j] ? position[j] : biggestCoord;
             }
             // Finds from which bin to get the color.
             // Note: the first color in the colormap file
@@ -1279,6 +1508,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             }
         }            
     }
+    _fadeInDistance.setMaxValue(glm::vec2(10.0f * biggestCoord));
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {
@@ -1363,7 +1593,8 @@ void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
         ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl"));
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
+    );
 
     program->activate();
     static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };

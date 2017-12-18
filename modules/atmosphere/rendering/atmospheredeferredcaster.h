@@ -36,8 +36,7 @@
 namespace ghoul::opengl {
     class Texture;        
     class ProgramObject;
-    
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -65,27 +64,27 @@ public:
     void preCalculateAtmosphereParam();
 
     void setModelTransform(const glm::dmat4 &transform);
-    void setTime(const double time);
-    void setAtmosphereRadius(const float atmRadius);
-    void setPlanetRadius(const float planetRadius);
-    void setPlanetAverageGroundReflectance(const float averageGReflectance);
-    void setPlanetGroundRadianceEmittion(const float groundRadianceEmittion);
-    void setRayleighHeightScale(const float rayleighHeightScale);
-    void enableOzone(const bool enable);
-    void setOzoneHeightScale(const float ozoneHeightScale);
-    void setMieHeightScale(const float mieHeightScale);
-    void setMiePhaseConstant(const float miePhaseConstant);
-    void setSunRadianceIntensity(const float sunRadiance);
-    void setRayleighScatteringCoefficients(const glm::vec3 & rayScattCoeff);
-    void setOzoneExtinctionCoefficients(const glm::vec3 & ozoneExtCoeff);
-    void setMieScatteringCoefficients(const glm::vec3 & mieScattCoeff);
-    void setMieExtinctionCoefficients(const glm::vec3 & mieExtCoeff);
-    void setEllipsoidRadii(const glm::dvec3 & radii);
+    void setTime(double time);
+    void setAtmosphereRadius(float atmRadius);
+    void setPlanetRadius(float planetRadius);
+    void setPlanetAverageGroundReflectance(float averageGReflectance);
+    void setPlanetGroundRadianceEmittion(float groundRadianceEmittion);
+    void setRayleighHeightScale(float rayleighHeightScale);
+    void enableOzone(bool enable);
+    void setOzoneHeightScale(float ozoneHeightScale);
+    void setMieHeightScale(float mieHeightScale);
+    void setMiePhaseConstant(float miePhaseConstant);
+    void setSunRadianceIntensity(float sunRadiance);
+    void setRayleighScatteringCoefficients(const glm::vec3& rayScattCoeff);
+    void setOzoneExtinctionCoefficients(const glm::vec3& ozoneExtCoeff);
+    void setMieScatteringCoefficients(const glm::vec3& mieScattCoeff);
+    void setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff);
+    void setEllipsoidRadii(const glm::dvec3& radii);
     void setShadowConfigArray(const std::vector<ShadowConfiguration>& shadowConfigArray);
-    void setHardShadows(const bool enabled);
-    void enableSunFollowing(const bool enable);
+    void setHardShadows(bool enabled);
+    void enableSunFollowing(bool enable);
 
-    void setPrecalculationTextureScale(const float _preCalculatedTexturesScale);
+    void setPrecalculationTextureScale(float preCalculatedTexturesScale);
     void enablePrecalculationTexturesSaving();
 
 private:
@@ -94,21 +93,21 @@ private:
     void createComputationTextures();
     void deleteComputationTextures();
     void deleteUnusedComputationTextures();
-    void executeCalculations(const GLuint quadCalcVAO,
-                             const GLenum drawBuffers[1],
-                             const GLsizei vertexSize);
+    void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
+        GLsizei vertexSize);
     void resetAtmosphereTextures();
-    void createRenderQuad(GLuint * vao, GLuint * vbo,
-                          const GLfloat size);
-    void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg,
-                       const int layer, const bool doCalc = true);
-    void checkFrameBufferState(const std::string & codePosition) const;
-    void loadAtmosphereDataIntoShaderProgram(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg);
-    void renderQuadForCalc(const GLuint vao, const GLsizei numberOfVertices);
-    void saveTextureToPPMFile(const GLenum color_buffer_attachment,
-                              const std::string & fileName,
-                              const int width, const int height) const;    
-    bool isAtmosphereInFrustum(const double * MVMatrix, const glm::dvec3 position, const double radius) const;
+    void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size);
+    void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
+        int layer, bool doCalc = true);
+    void checkFrameBufferState(const std::string& codePosition) const;
+    void loadAtmosphereDataIntoShaderProgram(
+        std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg
+    );
+    void renderQuadForCalc(GLuint vao, GLsizei numberOfVertices);
+    void saveTextureToPPMFile(GLenum color_buffer_attachment, const std::string& fileName,
+        int width, int height) const;    
+    bool isAtmosphereInFrustum(const double* MVMatrix, const glm::dvec3& position,
+        double radius) const;
 
 
     const double DISTANCE_CULLING = 1e10;

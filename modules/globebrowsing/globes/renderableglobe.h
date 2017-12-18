@@ -82,7 +82,7 @@ public:
         properties::BoolProperty eclipseShadowsEnabled;
         properties::BoolProperty eclipseHardShadows;
         properties::FloatProperty lodScaleFactor;
-        properties::FloatProperty cameraMinHeight;        
+        properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
     };
 
@@ -149,7 +149,6 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
-    
 };
 
 } // namespace openspace::globebrowsing

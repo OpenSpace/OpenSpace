@@ -127,7 +127,8 @@ namespace {
         "Determines whether labels should be drawn or hidden."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo =
+    {
         "TransformationMatrix",
         "Transformation Matrix",
         "Transformation matrix to be applied to each astronomical object."
@@ -163,8 +164,8 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 KeyFile,
                 new StringVerifier,
                 Optional::No,
-                "The path to the SPECK file that contains information about the astronomical "
-                "object being rendered."
+                "The path to the SPECK file that contains information about the "
+                "astronomical object being rendered."
             },
             { 
                 keyColor,
@@ -248,7 +249,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _textMaxSize(200)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-    //, _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -361,22 +361,28 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
+            _textMinSize = static_cast<int>(
+                dictionary.value<float>(LabelMinSizeInfo.identifier)
+            );
         }
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+            _textMaxSize = static_cast<int>(
+                dictionary.value<float>(LabelMaxSizeInfo.identifier)
+            );
         }
     }
 
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-        _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
+        _transformationMatrix = dictionary.value<glm::dmat4>(
+            TransformationMatrixInfo.identifier
+        );
     }
 
     if (dictionary.hasKey(MeshColorInfo.identifier)) {
         ghoul::Dictionary colorDic = dictionary.value<ghoul::Dictionary>(
             MeshColorInfo.identifier
-            );
+        );
         for (int i = 0; i < static_cast<int>(colorDic.size()); ++i) {
             _meshColorMap.insert({ i + 1,
                 colorDic.value<glm::vec3>(std::to_string(i + 1)) });
@@ -386,7 +392,8 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableDUMeshes::isReady() const {
-    return (_program != nullptr) && (!_renderingMeshesMap.empty() || (!_labelData.empty()));
+    return (_program != nullptr) &&
+           (!_renderingMeshesMap.empty() || (!_labelData.empty()));
 }
 
 void RenderableDUMeshes::initializeGL() {
@@ -410,8 +417,12 @@ void RenderableDUMeshes::initializeGL() {
                 ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 30;
-            _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
+            _font = OsEng.fontManager().font(
+                "Mono",
+                static_cast<float>(_fontSize),
+                ghoul::fontrendering::FontManager::Outline::Yes,
+                ghoul::fontrendering::FontManager::LoadGlyphs::No
+            );
         }
     }
 }
@@ -508,8 +519,11 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     }
 }
 
-void RenderableDUMeshes::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-    const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+void RenderableDUMeshes::renderLabels(const RenderData& data,
+                                      const glm::dmat4& modelViewProjectionMatrix,
+                                      const glm::vec3& orthoRight,
+                                      const glm::vec3& orthoUp)
+{
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
@@ -577,8 +591,12 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
     glm::vec3 up = glm::cross(right, viewDirection);
 
     glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-    glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
-    glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
+    glm::vec3 orthoRight = glm::normalize(
+        glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+    );
+    glm::vec3 orthoUp = glm::normalize(
+        glm::vec3(worldToModelTransform * glm::vec4(up, 0.0))
+    );
 
     if (_hasSpeckFile) {
         renderMeshes(data, modelViewMatrix, projectionMatrix);
@@ -864,7 +882,9 @@ bool RenderableDUMeshes::readLabelFile() {
             dummy.clear();
         }
 
-        glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::dvec4(position, 1.0));
+        glm::vec3 transformedPos = glm::vec3(
+            _transformationMatrix * glm::dvec4(position, 1.0)
+        );
         _labelData.push_back(std::make_pair(transformedPos, label));
 
     } while (!file.eof());
@@ -886,7 +906,10 @@ bool RenderableDUMeshes::loadCachedFile(const std::string& file) {
 
         int32_t nValues = 0;
         fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));
+        fileStream.read(
+            reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
+            sizeof(int32_t)
+        );
 
         _fullData.resize(nValues);
         fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
@@ -914,8 +937,13 @@ bool RenderableDUMeshes::saveCachedFile(const std::string& file) const {
         }
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-        int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(_nValuesPerAstronomicalObject);
-        fileStream.write(reinterpret_cast<const char*>(&nValuesPerAstronomicalObject), sizeof(int32_t));
+        int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
+            _nValuesPerAstronomicalObject
+        );
+        fileStream.write(
+            reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
+            sizeof(int32_t)
+        );
 
         size_t nBytes = nValues * sizeof(_fullData[0]);
         fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
@@ -933,34 +961,34 @@ void RenderableDUMeshes::createMeshes() {
     if (_dataIsDirty && _hasSpeckFile) {
         LDEBUG("Creating planes");
 
-
         std::unordered_map<int, RenderingMesh>::iterator it = _renderingMeshesMap.begin();
-        std::unordered_map<int, RenderingMesh>::iterator itEnd = _renderingMeshesMap.end();
+        std::unordered_map<int, RenderingMesh>::iterator itEnd =
+            _renderingMeshesMap.end();
 
         for (; it != itEnd; ++it) {                
             float scale = 0.0;
             switch (_unit) {
-            case Meter:
-                scale = 1.0;
-                break;
-            case Kilometer:
-                scale = 1e3;
-                break;
-            case Parsec:
-                scale = PARSEC;
-                break;
-            case Kiloparsec:
-                scale = 1e3 * PARSEC;
-                break;
-            case Megaparsec:
-                scale = 1e6 * PARSEC;
-                break;
-            case Gigaparsec:
-                scale = 1e9 * PARSEC;
-                break;
-            case GigalightYears:
-                scale = 306391534.73091 * PARSEC;
-                break;
+                case Meter:
+                    scale = 1.0;
+                    break;
+                case Kilometer:
+                    scale = 1e3;
+                    break;
+                case Parsec:
+                    scale = PARSEC;
+                    break;
+                case Kiloparsec:
+                    scale = 1e3 * PARSEC;
+                    break;
+                case Megaparsec:
+                    scale = 1e6 * PARSEC;
+                    break;
+                case Gigaparsec:
+                    scale = 1e9 * PARSEC;
+                    break;
+                case GigalightYears:
+                    scale = 306391534.73091 * PARSEC;
+                    break;
             }
 
             for (int v = 0; v < static_cast<int>(it->second.vertices.size()); ++v) {
@@ -977,12 +1005,17 @@ void RenderableDUMeshes::createMeshes() {
                 glBindVertexArray(vao);
                 glBindBuffer(GL_ARRAY_BUFFER, vbo);
                 //glBufferData(GL_ARRAY_BUFFER, it->second.numV * sizeof(GLfloat),
-                glBufferData(GL_ARRAY_BUFFER, it->second.vertices.size() * sizeof(GLfloat),
-                    &it->second.vertices[0], GL_STATIC_DRAW);
+                glBufferData(
+                    GL_ARRAY_BUFFER,
+                    it->second.vertices.size() * sizeof(GLfloat),
+                    &it->second.vertices[0],
+                    GL_STATIC_DRAW
+                );
                 // in_position
                 glEnableVertexAttribArray(0);
                 // U and V may not be given by the user
-                if (it->second.vertices.size() / (it->second.numU * it->second.numV) > 3) {
+                if (it->second.vertices.size() / (it->second.numU * it->second.numV) > 3)
+                {
                     glVertexAttribPointer(
                         0,
                         3,
@@ -1000,7 +1033,9 @@ void RenderableDUMeshes::createMeshes() {
                         GL_FLOAT,
                         GL_FALSE,
                         sizeof(GLfloat) * 7,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * it->second.numV)
+                        reinterpret_cast<GLvoid*>(
+                            sizeof(GLfloat) * 3 * i * it->second.numV
+                        )
                     );
                 }
                 else { // no U and V:
@@ -1010,7 +1045,9 @@ void RenderableDUMeshes::createMeshes() {
                         GL_FLOAT,
                         GL_FALSE,
                         0,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * it->second.numV)
+                        reinterpret_cast<GLvoid*>(
+                            sizeof(GLfloat) * 3 * i * it->second.numV
+                        )
                     );
                 }                    
             }    
@@ -1026,12 +1063,18 @@ void RenderableDUMeshes::createMeshes() {
 
                     glBindVertexArray(cvao);
                     glBindBuffer(GL_ARRAY_BUFFER, cvbo);
-                    glBufferData(GL_ARRAY_BUFFER, it->second.vertices.size() * sizeof(GLfloat),
-                        &it->second.vertices[0], GL_STATIC_DRAW);
+                    glBufferData(
+                        GL_ARRAY_BUFFER, 
+                       it->second.vertices.size() * sizeof(GLfloat),
+                        &it->second.vertices[0],
+                        GL_STATIC_DRAW
+                    );
                     // in_position
                     glEnableVertexAttribArray(0);
                     // U and V may not be given by the user
-                    if (it->second.vertices.size() / (it->second.numU * it->second.numV) > 3) {
+                    if (it->second.vertices.size() /
+                        (it->second.numU * it->second.numV) > 3)
+                    {
                         glVertexAttribPointer(
                             0,
                             3,
@@ -1073,7 +1116,7 @@ void RenderableDUMeshes::createMeshes() {
 
     if (_hasLabel && _labelDataIsDirty) {
         _labelDataIsDirty = false;
-    }        
+    }
 }
 
 } // namespace openspace

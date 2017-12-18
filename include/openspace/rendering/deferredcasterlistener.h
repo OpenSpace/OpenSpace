@@ -33,7 +33,10 @@ class Deferredcaster;
 
 class DeferredcasterListener {
 public:
-    virtual void deferredcastersChanged(Deferredcaster& deferredcaster, ghoul::Boolean isAttached) = 0;
+    using isAttached = ghoul::Boolean;
+
+    virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
+        isAttached isAttached) = 0;
 };
 
 } // openspace

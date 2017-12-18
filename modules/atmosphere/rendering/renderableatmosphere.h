@@ -80,7 +80,6 @@ public:
 
     RenderableAtmosphere(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
     void deinitialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
@@ -148,8 +147,6 @@ private:
     glm::dmat3 _stateMatrix;
 
     std::vector<ShadowConfiguration> _shadowConfArray;
-
-    
 };
 
 } // namespace openspace

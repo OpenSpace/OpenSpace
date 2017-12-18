@@ -5,7 +5,7 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
-            Enabled = true,
+            Enabled = false,
             Color = { 1.0, 0.4, 0.2 },
             Transparency = 1.0,
             File = "speck/quasars.speck",

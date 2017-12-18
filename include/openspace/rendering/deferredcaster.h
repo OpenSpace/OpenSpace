@@ -29,12 +29,10 @@
 #include <vector>
 #include <openspace/util/updatestructures.h>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-        class ProgramObject;
-    }
-}
+namespace ghoul::opengl {
+    class Texture;
+    class ProgramObject;
+} // ghoul::opengl
 
 namespace openspace {
 
@@ -48,11 +46,11 @@ public:
      */
     virtual ~Deferredcaster() {};
 
-    virtual void preRaycast(const RenderData & renderData, const DeferredcastData& deferredData, 
-                            ghoul::opengl::ProgramObject& program) {};
+    virtual void preRaycast(const RenderData& renderData,
+        const DeferredcastData& deferredData, ghoul::opengl::ProgramObject& program) {};
 
-    virtual void postRaycast(const RenderData & renderData, const DeferredcastData& deferredData, 
-                             ghoul::opengl::ProgramObject& program) {};
+    virtual void postRaycast(const RenderData & renderData,
+        const DeferredcastData& deferredData, ghoul::opengl::ProgramObject& program) {};
 
     virtual std::string deferredcastPath() const = 0;
 

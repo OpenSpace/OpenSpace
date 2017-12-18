@@ -1124,7 +1124,7 @@ void FramebufferRenderer::setResolution(glm::ivec2 res) {
     _dirtyResolution = true;
 }
 
-void FramebufferRenderer::setNAaSamples(const int nAaSamples) {
+void FramebufferRenderer::setNAaSamples(int nAaSamples) {
     _nAaSamples = nAaSamples;
     if (_nAaSamples == 0) {
         _nAaSamples = 1;
@@ -1136,7 +1136,7 @@ void FramebufferRenderer::setNAaSamples(const int nAaSamples) {
     _dirtyResolution = true;
 }
 
-void FramebufferRenderer::setHDRExposure(const float hdrExposure) {
+void FramebufferRenderer::setHDRExposure(float hdrExposure) {
     _hdrExposure = hdrExposure;
     if (_hdrExposure < 0.0f) {
         LERROR("HDR Exposure constant must be greater than zero.");
@@ -1144,7 +1144,7 @@ void FramebufferRenderer::setHDRExposure(const float hdrExposure) {
     }
 }
 
-void FramebufferRenderer::setHDRBackground(const float hdrBackground) {
+void FramebufferRenderer::setHDRBackground(float hdrBackground) {
     _hdrBackground = hdrBackground;
     if (_hdrBackground < 0.0f) {
         LERROR("HDR Background constant must be greater than zero.");
@@ -1152,7 +1152,7 @@ void FramebufferRenderer::setHDRBackground(const float hdrBackground) {
     }
 }
 
-void FramebufferRenderer::setGamma(const float gamma) {
+void FramebufferRenderer::setGamma(float gamma) {
     _gamma = gamma;
     if (_gamma < 0.0f) {
         LERROR("Gamma value must be greater than zero.");
