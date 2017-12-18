@@ -46,7 +46,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
-
 class AssetLoaderTest;
 
 namespace {

@@ -59,22 +59,26 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES}
 )
 
+
 #####
 # Libtorrent
 #####
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-SET(LIBTORRENT_encryption OFF CACHE BOOL "Use OpenSSL Encryption" FORCE)
-SET(LIBTORRENT_shared OFF CACHE BOOL "Use Libtorrent as shared library" FORCE)
+option(OPENSPACE_MODULE_SYNC_USE_LIBTORRENT "Use libtorrent" ON)
 
-include_external_library(
-    ${sync_module}
-    torrent-rasterbar
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent
-)
-target_include_directories(
-    ${sync_module}
-    SYSTEM PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent/include
-)
+if (OPENSPACE_MODULE_SYNC_USE_LIBTORRENT)
+    set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_USE_MULTITHREADED ON)
+    SET(LIBTORRENT_encryption OFF CACHE BOOL "Use OpenSSL Encryption" FORCE)
+    SET(LIBTORRENT_shared OFF CACHE BOOL "Use Libtorrent as shared library" FORCE)
 
+    include_external_library(
+        ${sync_module}
+        torrent-rasterbar
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent
+    )
+    target_include_directories(
+        ${sync_module}
+        SYSTEM PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent/include
+    )
+endif () # OPENSPACE_MODULE_SYNC_USE_LIBTORRENT

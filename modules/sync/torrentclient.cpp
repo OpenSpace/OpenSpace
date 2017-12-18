@@ -24,13 +24,6 @@
 
 #include "torrentclient.h"
 
-#include <libtorrent/entry.hpp>
-#include <libtorrent/bencode.hpp>
-#include <libtorrent/session.hpp>
-#include <libtorrent/alert_types.hpp>
-#include <libtorrent/torrent_info.hpp>
-#include <libtorrent/magnet_uri.hpp>
-
 #include <openspace/openspace.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -39,6 +32,22 @@ namespace {
     const char* _loggerCat = "TorrentClient";
     std::chrono::milliseconds PollInterval(200);
 }
+
+namespace openspace {
+TorrentError::TorrentError(std::string component) 
+: RuntimeError("TorrentClient", component)
+{}
+
+}
+
+#ifdef OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
+
+#include <libtorrent/entry.hpp>
+#include <libtorrent/bencode.hpp>
+#include <libtorrent/session.hpp>
+#include <libtorrent/alert_types.hpp>
+#include <libtorrent/torrent_info.hpp>
+#include <libtorrent/magnet_uri.hpp>
 
 namespace openspace {
 
@@ -200,5 +209,37 @@ void TorrentClient::notify(TorrentId id) {
 
 }
 
+}
+
+#else // OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
+
+namespace openspace {
+
+TorrentClient::TorrentClient() {}
+
+TorrentClient::~TorrentClient() {}
+
+void TorrentClient::initialize() {}
+
+void TorrentClient::pollAlerts() {}
+
+TorrentClient::TorrentId TorrentClient::addTorrentFile(
+    std::string,
+    std::string,
+    TorrentProgressCallback)
+{
+    throw TorrentError("SyncModule is not compiled with libtorrent");
+}
+
+TorrentClient::TorrentId TorrentClient::addMagnetLink(std::string,
+                                                      std::string,
+                                                      TorrentProgressCallback) 
+{
+    throw TorrentError("SyncModule is not compiled with libtorrent");
+}
+
+void TorrentClient::removeTorrent(TorrentId id) {}
 
 }
+
+#endif // OPENSPACE_MODULE_SYNC_USE_LIBTORRENT

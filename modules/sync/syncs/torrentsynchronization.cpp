@@ -124,13 +124,21 @@ void TorrentSynchronization::start() {
     }
 
     _enabled = true;
-    _torrentId = _torrentClient->addMagnetLink(
-        _magnetLink,
-        directory(),
-        [this](TorrentClient::TorrentProgress p) {
-            updateTorrentProgress(p);
+    try {
+        _torrentId = _torrentClient->addMagnetLink(
+            _magnetLink,
+            directory(),
+            [this](TorrentClient::TorrentProgress p) {
+                updateTorrentProgress(p);
+            }
+        );
+    } catch (const TorrentError& e) {
+        LERROR("Failed to synchronize '" << name() <<
+            "'.\nOpenSpace needs to be linked with libtorrent.");
+        if (!isResolved()) {
+            reject();
         }
-    );
+    }
 }
 
 void TorrentSynchronization::cancel() {

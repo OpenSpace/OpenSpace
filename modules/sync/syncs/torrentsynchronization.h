@@ -32,11 +32,6 @@
 
 #include <ghoul/misc/dictionary.h>
 
-namespace libtorrent {
-    class session;
-    struct torrent_handle;
-}
-
 namespace openspace {
 
 class TorrentSynchronizationJob;
