@@ -30,6 +30,8 @@
 #include <openspace/util/threadpool.h>
 
 #include <mutex>
+#include <vector>
+#include <unordered_set>
 
 namespace openspace {
 
@@ -38,12 +40,14 @@ public:
     virtual ~SceneInitializer() = default;
     virtual void initializeNode(SceneGraphNode* node) = 0;
     virtual std::vector<SceneGraphNode*> getInitializedNodes() = 0;
+    virtual bool isInitializing() const = 0;
 };
     
 class SingleThreadedSceneInitializer : public SceneInitializer {
 public:
     void initializeNode(SceneGraphNode* node) override;
     std::vector<SceneGraphNode*> getInitializedNodes() override;
+    bool isInitializing() const override;
 private:
     std::vector<SceneGraphNode*> _initializedNodes;
 };
@@ -53,10 +57,12 @@ public:
     MultiThreadedSceneInitializer(unsigned int nThreads);
     void initializeNode(SceneGraphNode* node) override;
     std::vector<SceneGraphNode*> getInitializedNodes() override;
+    bool isInitializing() const override;
 private:
     std::vector<SceneGraphNode*> _initializedNodes;
+    std::unordered_set<SceneGraphNode*> _initializingNodes;
     ThreadPool _threadPool;
-    std::mutex _mutex;
+    mutable std::mutex _mutex;
     
 };
 

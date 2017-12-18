@@ -227,6 +227,10 @@ void Scene::initializeNode(SceneGraphNode* node) {
     _initializer->initializeNode(node);
 }
 
+bool Scene::isInitializing() const {
+    return _initializer->isInitializing();
+}
+
 /*
 
 void Scene::initialize() {

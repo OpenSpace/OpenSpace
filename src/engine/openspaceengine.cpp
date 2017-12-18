@@ -581,6 +581,8 @@ void OpenSpaceEngine::initialize() {
 
 
     _renderEngine->initialize();
+    _loadingScreen = _engine->createLoadingScreen();
+    _loadingScreen->render();
 
     for (const auto& func : _moduleCallbacks.initialize) {
         func();
@@ -597,6 +599,39 @@ void OpenSpaceEngine::initialize() {
 void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
     _hasScheduledAssetLoading = true;
     _scheduledAssetPathToLoad = assetPath;
+}
+
+std::unique_ptr<LoadingScreen> OpenSpaceEngine::createLoadingScreen() {
+    bool showMessage = true;
+    std::string kMessage =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowMessage;
+    if (configurationManager().hasKey(kMessage)) {
+        showMessage = configurationManager().value<bool>(kMessage);
+    }
+
+    bool showNodeNames = true;
+    std::string kNames =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowNodeNames;
+
+    if (configurationManager().hasKey(kNames)) {
+        showNodeNames = configurationManager().value<bool>(kNames);
+    }
+
+    bool showProgressbar = true;
+    std::string kProgress =
+        ConfigurationManager::KeyLoadingScreen + "." +
+        ConfigurationManager::PartShowProgressbar;
+
+    if (configurationManager().hasKey(kProgress)) {
+        showProgressbar = configurationManager().value<bool>(kProgress);
+    }
+    return std::make_unique<LoadingScreen>(
+        LoadingScreen::ShowMessage(showMessage),
+        LoadingScreen::ShowNodeNames(showNodeNames),
+        LoadingScreen::ShowProgressbar(showProgressbar)
+    );
 }
 
 void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
@@ -652,39 +687,27 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _assetManager->removeAll();
     _assetManager->add(assetPath);
 
-    bool showMessage = true;
-    std::string kMessage =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowMessage;
-    if (configurationManager().hasKey(kMessage)) {
-        showMessage = configurationManager().value<bool>(kMessage);
+    _assetManager->update();
+
+    _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
+
+    bool loading = true;
+    while (loading) {
+        _loadingScreen->render();
+        std::vector<std::shared_ptr<Asset>> assets =
+            _assetManager->rootAsset()->subTreeAssets();
+        loading = false;
+        for (std::shared_ptr<Asset>& asset : assets) {
+            if (asset->state() == Asset::State::Synchronizing) {
+                loading = true;
+            }
+        }
+        loading |= _scene->isInitializing();
     }
 
-    bool showNodeNames = true;
-    std::string kNames =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowNodeNames;
-
-    if (configurationManager().hasKey(kNames)) {
-        showNodeNames = configurationManager().value<bool>(kNames);
-    }
-
-    bool showProgressbar = true;
-    std::string kProgress =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowProgressbar;
-
-    if (configurationManager().hasKey(kProgress)) {
-        showProgressbar = configurationManager().value<bool>(kProgress);
-    }
- 
-/*
-    _loadingScreen = std::make_unique<LoadingScreen>(
-        LoadingScreen::ShowMessage(showMessage),
-        LoadingScreen::ShowNodeNames(showNodeNames),
-        LoadingScreen::ShowProgressbar(showProgressbar)
-    );
-*/
+    _loadingScreen->postMessage("Initializing OpenGL");
+    _loadingScreen->finalize();
+    _renderEngine->updateScene();
 
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
@@ -695,6 +718,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 #ifdef __APPLE__
     showTouchbar();
 #endif // APPLE
+
+    writeDocumentations();
 
     LTRACE("OpenSpaceEngine::loadScene(end)");
 }
@@ -1261,10 +1286,6 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         LTRACE("OpenSpaceEngine::render(end)");
     });
 
-    if (_loadingScreen) {
-        return;
-    }
-
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
     if (isGuiWindow) {
@@ -1285,10 +1306,6 @@ void OpenSpaceEngine::drawOverlays() {
     OnExit([] {
         LTRACE("OpenSpaceEngine::drawOverlays(end)");
     });
-    if (_loadingScreen) {
-        _loadingScreen->render();
-        return;
-    }
 
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;

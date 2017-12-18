@@ -167,6 +167,11 @@ public:
     void initializeNode(SceneGraphNode* node);
 
     /**
+     * Return true if the scene is initializing
+     */
+    bool isInitializing() const;
+
+    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
      * - openspace::luascriptfunctions::property_setValue

@@ -176,6 +176,7 @@ private:
     OpenSpaceEngine(std::string programName,
         std::unique_ptr<WindowWrapper> windowWrapper);
 
+    std::unique_ptr<LoadingScreen> createLoadingScreen();
     void loadSingleAsset(const std::string& assetPath);
     void gatherCommandlineArguments();
     void loadFonts();

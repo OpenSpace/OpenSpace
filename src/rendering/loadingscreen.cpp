@@ -71,6 +71,8 @@ namespace {
 
     const std::chrono::milliseconds TTL(5000);
 
+    const std::chrono::milliseconds RefreshRate(16);
+
     bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
     {
         lhsLl -= glm::vec2(ItemStandoffDistance / 2.f);
@@ -614,6 +616,9 @@ void LoadingScreen::render() {
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
+
+    std::this_thread::sleep_for(RefreshRate);
+    OsEng.windowWrapper().swapBuffer();
 }
 
 void LoadingScreen::postMessage(std::string message) {

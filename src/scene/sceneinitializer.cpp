@@ -42,6 +42,10 @@ std::vector<SceneGraphNode*> SingleThreadedSceneInitializer::getInitializedNodes
     return nodes;
 }
 
+bool SingleThreadedSceneInitializer::isInitializing() const {
+    return false;
+}
+
 MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThreads)
     : _threadPool(nThreads)
 {}
@@ -52,11 +56,12 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
          std::lock_guard<std::mutex> g(_mutex);
          LDEBUG("Thread Initialized " << node->name());
          _initializedNodes.push_back(node);
+         _initializingNodes.erase(node);
      };
 
     std::lock_guard<std::mutex> g(_mutex);
+    _initializingNodes.insert(node);
     _threadPool.enqueue(initFunction);
-    node->initialize();
 }
 
 std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::getInitializedNodes() {
@@ -67,5 +72,11 @@ std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::getInitializedNodes(
     }
     return nodes;
 }
+
+bool MultiThreadedSceneInitializer::isInitializing() const {
+    std::lock_guard<std::mutex> g(_mutex);
+    return !_initializingNodes.empty();
+}
+
     
 } // namespace openspace
