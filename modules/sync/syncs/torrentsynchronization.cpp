@@ -132,7 +132,7 @@ void TorrentSynchronization::start() {
                 updateTorrentProgress(p);
             }
         );
-    } catch (const TorrentError& e) {
+    } catch (const TorrentError&) {
         LERROR("Failed to synchronize '" << name() <<
             "'.\nOpenSpace needs to be linked with libtorrent.");
         if (!isResolved()) {

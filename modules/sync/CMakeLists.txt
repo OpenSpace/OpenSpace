@@ -81,4 +81,6 @@ if (OPENSPACE_MODULE_SYNC_USE_LIBTORRENT)
         SYSTEM PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent/include
     )
+
+    target_compile_definitions(openspace-module-sync PUBLIC SYNC_USE_LIBTORRENT)
 endif () # OPENSPACE_MODULE_SYNC_USE_LIBTORRENT

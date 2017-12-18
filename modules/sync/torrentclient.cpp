@@ -40,7 +40,7 @@ TorrentError::TorrentError(std::string component)
 
 }
 
-#ifdef OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
+#ifdef SYNC_USE_LIBTORRENT
 
 #include <libtorrent/entry.hpp>
 #include <libtorrent/bencode.hpp>
@@ -211,7 +211,7 @@ void TorrentClient::notify(TorrentId id) {
 
 }
 
-#else // OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
+#else // SYNC_USE_LIBTORRENT
 
 namespace openspace {
 
@@ -242,4 +242,4 @@ void TorrentClient::removeTorrent(TorrentId id) {}
 
 }
 
-#endif // OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
+#endif // SYNC_USE_LIBTORRENT

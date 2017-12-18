@@ -70,7 +70,7 @@ public:
 
 } // namespace openspace
 
-#ifdef OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
+#ifdef SYNC_USE_LIBTORRENT
 
 #include <atomic>
 #include <string>
@@ -121,7 +121,7 @@ private:
 
 } // namespace openspace
 
-#else // OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
+#else // SYNC_USE_LIBTORRENT
 
 namespace openspace {
 
@@ -146,5 +146,5 @@ public:
 } // namespace openspace
 
 
-#endif // OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
+#endif // SYNC_USE_LIBTORRENT
 #endif // __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
