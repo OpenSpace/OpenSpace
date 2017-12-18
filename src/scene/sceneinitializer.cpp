@@ -47,7 +47,7 @@ MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThrea
 {}
     
 void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
-     auto initFunction = [this](SceneGraphNode* node) {
+     auto initFunction = [this, node]() {
          node->initialize();
          std::lock_guard<std::mutex> g(_mutex);
          LDEBUG("Thread Initialized " << node->name());
@@ -55,7 +55,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
      };
 
     std::lock_guard<std::mutex> g(_mutex);
-    _threadPool.queue(initFunction, node);
+    _threadPool.enqueue(initFunction);
     node->initialize();
 }
 

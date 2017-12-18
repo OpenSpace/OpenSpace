@@ -30,6 +30,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <string>

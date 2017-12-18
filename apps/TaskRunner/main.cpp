@@ -40,6 +40,7 @@
 
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/dashboarditem.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
@@ -150,6 +151,10 @@ int main(int argc, char** argv) {
         std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
         "ResourceSynchronization"
     );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
+        "DashboardItem"
+    );
 
 
     openspace::ConfigurationManager configuration;
@@ -181,7 +186,7 @@ int main(int argc, char** argv) {
     std::string tasksPath = "";
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-            &tasksPath,
+            tasksPath,
             "--task",
             "-t",
             "Provides the path to a task file to execute"

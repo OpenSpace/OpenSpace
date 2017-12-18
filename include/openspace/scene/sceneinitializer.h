@@ -27,7 +27,7 @@
 
 #include <openspace/scene/scenegraphnode.h>
 
-#include <ghoul/misc/threadpool.h>
+#include <openspace/util/threadpool.h>
 
 #include <mutex>
 
@@ -55,7 +55,7 @@ public:
     std::vector<SceneGraphNode*> getInitializedNodes() override;
 private:
     std::vector<SceneGraphNode*> _initializedNodes;
-    ghoul::ThreadPool _threadPool;
+    ThreadPool _threadPool;
     std::mutex _mutex;
     
 };
