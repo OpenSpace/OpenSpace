@@ -943,8 +943,7 @@ void OpenSpaceEngine::loadFonts() {
     _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(FontAtlasSize);
 
     for (const std::string& key : fonts.keys()) {
-        std::string font = fonts.value<std::string>(key);
-        font = absPath(font);
+        std::string font = absPath(fonts.value<std::string>(key));
 
         if (!FileSys.fileExists(font)) {
             LERROR("Could not find font '" << font << "'");

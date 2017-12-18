@@ -48,6 +48,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
@@ -298,7 +299,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
 #endif  // GLOBEBROWSING_USE_GDAL
         },
         {
-            "${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"
+            absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
         },
         {
             // Documentation
