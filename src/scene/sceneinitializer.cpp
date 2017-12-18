@@ -24,6 +24,9 @@
 
 #include <openspace/scene/sceneinitializer.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/loadingscreen.h>
+
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -49,15 +52,34 @@ bool SingleThreadedSceneInitializer::isInitializing() const {
 MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThreads)
     : _threadPool(nThreads)
 {}
-    
+
 void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
-     auto initFunction = [this, node]() {
-         node->initialize();
-         std::lock_guard<std::mutex> g(_mutex);
-         LDEBUG("Thread Initialized " << node->name());
-         _initializedNodes.push_back(node);
-         _initializingNodes.erase(node);
-     };
+    auto initFunction = [this, node]() {
+        LoadingScreen& loadingScreen = OsEng.loadingScreen();
+
+        loadingScreen.updateItem(
+            node->name(),
+            LoadingScreen::ItemStatus::Initializing
+        );
+
+        node->initialize();
+        std::lock_guard<std::mutex> g(_mutex);
+        LDEBUG("Thread Initialized " << node->name());
+        _initializedNodes.push_back(node);
+        _initializingNodes.erase(node);
+
+        loadingScreen.updateItem(
+            node->name(),
+            LoadingScreen::ItemStatus::Finished
+        );
+    };
+
+    LoadingScreen& loadingScreen = OsEng.loadingScreen();
+    loadingScreen.setItemNumber(loadingScreen.itemNumber() + 1);
+    loadingScreen.updateItem(
+         node->name(),
+         LoadingScreen::ItemStatus::Started
+    );
 
     std::lock_guard<std::mutex> g(_mutex);
     _initializingNodes.insert(node);
@@ -78,5 +100,4 @@ bool MultiThreadedSceneInitializer::isInitializing() const {
     return !_initializingNodes.empty();
 }
 
-    
 } // namespace openspace

@@ -2,6 +2,7 @@ local AssetHelper = asset.require("assethelper")
 
 local syncedDirectory = asset.syncedResource({
     Type = "HttpSynchronization",
+    Name = "General SPK Kernels",
     Identifier = "general_spk",
     Version = 1
 })

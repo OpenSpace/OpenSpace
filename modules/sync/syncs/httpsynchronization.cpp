@@ -57,7 +57,7 @@ HttpSynchronization::HttpSynchronization(
     const std::string& synchronizationRoot,
     const std::vector<std::string>& synchronizationRepositories
 )
-    : openspace::ResourceSynchronization()
+    : openspace::ResourceSynchronization(dict)
     , _synchronizationRoot(synchronizationRoot)
     , _synchronizationRepositories(synchronizationRepositories)
 {

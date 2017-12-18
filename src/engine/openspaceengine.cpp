@@ -687,22 +687,61 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _assetManager->removeAll();
     _assetManager->add(assetPath);
 
+    _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
+    _loadingScreen->postMessage("Loading assets");
+
     _assetManager->update();
 
-    _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
+    _loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
+    _loadingScreen->postMessage("Synchronizing assets");
+
+    std::vector<std::shared_ptr<Asset>> allAssets =
+        _assetManager->rootAsset()->subTreeAssets();
+
+    std::unordered_set<std::shared_ptr<ResourceSynchronization>> resourceSyncs;
+    for (const auto& a : allAssets) {
+        std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
+            a->ownSynchronizations();
+
+        for (const auto& s : syncs) {
+            if (s->state() == ResourceSynchronization::State::Syncing) {
+                resourceSyncs.insert(s);
+                _loadingScreen->updateItem(
+                    s->name(),
+                    LoadingScreen::ItemStatus::Started
+                );
+            }
+        }
+    }
+    _loadingScreen->setItemNumber(resourceSyncs.size());
 
     bool loading = true;
     while (loading) {
         _loadingScreen->render();
-        std::vector<std::shared_ptr<Asset>> assets =
-            _assetManager->rootAsset()->subTreeAssets();
+        _assetManager->update();
+
         loading = false;
-        for (std::shared_ptr<Asset>& asset : assets) {
-            if (asset->state() == Asset::State::Synchronizing) {
+        auto it = resourceSyncs.begin();
+        while (it != resourceSyncs.end()) {
+            if ((*it)->state() == ResourceSynchronization::State::Syncing) {
+                ++it;
                 loading = true;
+            } else {
+                _loadingScreen->tickItem();
+                _loadingScreen->updateItem(
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Finished
+                );
+                it = resourceSyncs.erase(it);
             }
         }
-        loading |= _scene->isInitializing();
+    }
+
+    _loadingScreen->setPhase(LoadingScreen::Phase::Initialization);
+
+    _loadingScreen->postMessage("Initializing scene");
+    while (_scene->isInitializing()) {
+        _loadingScreen->render();
     }
 
     _loadingScreen->postMessage("Initializing OpenGL");

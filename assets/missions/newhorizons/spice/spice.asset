@@ -1,6 +1,7 @@
 local assetHelper = asset.require('assethelper')
 
 local kernelsBasePath = asset.syncedResource({
+    Name = "New Horizons Spice Kernels",
     Type = "TorrentSynchronization",
     Identifier = "new_horizons",
     --Magnet = "magnet:?xt=urn:btih:4af38bdd42c5b29a0ef1ce4ab274cd91c017b8cc&dn=new_horizons"
@@ -9,7 +10,7 @@ local kernelsBasePath = asset.syncedResource({
 
 
 local kernelsRelative = {
-	"spk/nh_pred_20141201_20190301_od122.bsp",
+    "spk/nh_pred_20141201_20190301_od122.bsp",
     "spk/NavSE_plu047_od122.bsp",
     "spk/NavPE_de433_od122.bsp",
 
@@ -18,7 +19,7 @@ local kernelsRelative = {
     --[["ck/nh_scispi_2015_pred.bc",
     "ck/nh_scispi_2015_recon.bc",
     "ck/nh_lorri_wcs.bc",
-    
+
     "smithed_pc_and_sp/PLU_LORRI_ALL_161216.bc",
 
     "sclk/new-horizons_1121.tsc",
@@ -43,7 +44,7 @@ local kernelsRelative = {
 
 local kernelPaths = {};
 for i, relativePath in ipairs(kernelsRelative) do
-	kernelPaths[i] = kernelsBasePath .. "/new_horizons/" .. relativePath
+    kernelPaths[i] = kernelsBasePath .. "/new_horizons/" .. relativePath
 end
 
 assetHelper.registerSpiceKernels(asset, kernelPaths)

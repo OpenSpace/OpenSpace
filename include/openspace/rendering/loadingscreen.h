@@ -65,10 +65,12 @@ public:
     void finalize();
 
     void setItemNumber(int nItems);
+    int itemNumber();
     void tickItem();
 
     enum class Phase {
         Construction,
+        Synchronization,
         Initialization
     };
     void setPhase(Phase phase);

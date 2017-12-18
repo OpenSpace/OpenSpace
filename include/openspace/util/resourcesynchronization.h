@@ -60,7 +60,7 @@ public:
     static std::unique_ptr<ResourceSynchronization> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    ResourceSynchronization();
+    ResourceSynchronization(const ghoul::Dictionary& dictionary);
     void configure(std::shared_ptr<SynchronizationConfiguration> config);
     virtual ~ResourceSynchronization();
     virtual std::string directory() = 0;
@@ -73,8 +73,8 @@ public:
     virtual bool nTotalBytesIsKnown() = 0;
     virtual float progress();
 
-    State state();
-    void wait();
+    State state() const;
+    std::string name() const;
     bool isResolved();
     bool isRejected();
     bool isSyncing();
@@ -90,6 +90,7 @@ protected:
 private:
     void setState(State state);
 
+    std::string _name;
     std::atomic<State> _state = State::Unsynced;
     std::mutex _callbackMutex;
     CallbackHandle _nextCallbackId = 0;

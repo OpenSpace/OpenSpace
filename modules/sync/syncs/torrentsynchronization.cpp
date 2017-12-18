@@ -38,9 +38,9 @@
 
 
 namespace {
-    const char* _loggerCat = "TorrentSynchronization";
-    const char* KeyIdentifier = "Identifier";
-    const char* KeyMagnet = "Magnet";
+    constexpr const char* _loggerCat = "TorrentSynchronization";
+    constexpr const char* KeyIdentifier = "Identifier";
+    constexpr const char* KeyMagnet = "Magnet";
 }
 
 namespace openspace {
@@ -48,7 +48,7 @@ namespace openspace {
 TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict,
                                                const std::string& synchronizationRoot,
                                                TorrentClient* torrentClient)
-    : openspace::ResourceSynchronization()
+    : openspace::ResourceSynchronization(dict)
     , _synchronizationRoot(synchronizationRoot)
     , _torrentClient(torrentClient)
 {

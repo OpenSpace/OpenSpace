@@ -5,6 +5,7 @@ local sunParentName = transforms.SunIau.Name;
 
 local texturesPath = asset.syncedResource({
     Type = "HttpSynchronization",
+    Name = "Sun textures",
     Identifier = "sun_textures",
     Version = 3
 })

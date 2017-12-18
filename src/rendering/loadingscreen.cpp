@@ -650,6 +650,10 @@ void LoadingScreen::setItemNumber(int nItems) {
     _nItems = nItems;
 }
 
+int LoadingScreen::itemNumber() {
+    return _nItems;
+}
+
 void LoadingScreen::tickItem() {
     ++_iProgress;
 }

@@ -1,4 +1,4 @@
-local imports, dep = asset.import('export')
+local imports, dep = asset.require('export')
 
 assert(type(dep.localResource) == "function", "localResource should be function")
 assert(type(dep.syncedResource) == "function", "syncedResource should be function")

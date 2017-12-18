@@ -1,2 +1,0 @@
-local exports, dep = asset.import('export');
-assert (exports.data == 'foo')

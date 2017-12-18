@@ -26,7 +26,10 @@
 #include <openspace/scene/assetloader.h>
 #include <openspace/scene/asset.h>
 
+#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/sceneinitializer.h>
+#include <openspace/util/synchronizationwatcher.h>
 #include <openspace/documentation/documentation.h>
 
 #include <openspace/scene/scene.h>
@@ -38,9 +41,11 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <exception>
+#include <memory>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+
 
 class AssetLoaderTest;
 
@@ -60,12 +65,17 @@ public:
 
 protected:
     virtual void SetUp() {
+        _scene = std::make_unique<openspace::Scene>(
+            std::make_unique<openspace::SingleThreadedSceneInitializer>()
+        );
         ghoul::lua::LuaState* state = OsEng.scriptEngine().luaState();
         OsEng.scriptEngine().initialize();
+        _syncWatcher = std::make_unique<openspace::SynchronizationWatcher>();
         _assetLoader = std::make_unique<openspace::AssetLoader>(
             *state,
-            "${TESTDIR}/AssetLoaderTest/",
-            "${TEMPORARY}/resources/");
+            _syncWatcher.get(),
+            FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
+        );
 
         _passedTest = false;
         lua_pushlightuserdata(*state, this);
@@ -77,8 +87,9 @@ protected:
         OsEng.scriptEngine().deinitialize();
     }
 
-    openspace::Scene _scene;
+    std::unique_ptr<openspace::Scene> _scene;
     std::unique_ptr<openspace::AssetLoader> _assetLoader;
+    std::unique_ptr<openspace::SynchronizationWatcher> _syncWatcher;
     bool _passedTest;
 };
 
@@ -90,7 +101,6 @@ int passTest(lua_State* state) {
     return 0;
 }
 }
-
 
 TEST_F(AssetLoaderTest, Assertions) {
     try {
@@ -104,7 +114,7 @@ TEST_F(AssetLoaderTest, Assertions) {
 
 TEST_F(AssetLoaderTest, BasicExportImport) {
     try {
-        _assetLoader->add("import");
+        _assetLoader->add("require");
     }
     catch (const std::exception& e) {
         EXPECT_TRUE(false) << e.what();

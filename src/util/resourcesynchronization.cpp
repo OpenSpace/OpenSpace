@@ -37,6 +37,7 @@
 
 namespace {
     constexpr char* KeyType = "Type";
+    constexpr char* KeyName = "Name";
     constexpr char* _loggerCat = "ResourceSynchronization";
 }
 
@@ -60,12 +61,20 @@ documentation::Documentation ResourceSynchronization::Documentation() {
                 "for creation (see the FactoryDocumentation for a list of possible "
                 "ResourceSyncrhonizations), which depends on the configration of the "
                 " application"
-            }
+            },
+            {
+                KeyName,
+                new StringVerifier,
+                Optional::No,
+                "A user readable name of this synchronization"
+            },
         }
     };
 }
 
-ResourceSynchronization::ResourceSynchronization() {}
+ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dict) {
+    _name = dict.value<std::string>(KeyName);
+}
 
 ResourceSynchronization::~ResourceSynchronization() {}
 
@@ -91,10 +100,7 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
     return result;
 }
 
-void ResourceSynchronization::wait() {
-}
-
-ResourceSynchronization::State ResourceSynchronization::state() {
+ResourceSynchronization::State ResourceSynchronization::state() const {
     return _state;
 }
 
@@ -162,6 +168,10 @@ float ResourceSynchronization::progress() {
         return 1.f;
     }
     return static_cast<float>(nSynchronizedBytes()) / static_cast<float>(nTotalBytes());
+}
+
+std::string ResourceSynchronization::name() const {
+    return _name;
 }
 
 }
