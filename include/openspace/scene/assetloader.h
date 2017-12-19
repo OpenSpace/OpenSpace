@@ -155,7 +155,8 @@ public:
     void callOnDependencyDeinitialize(Asset* dependency, Asset* asset);
 
     /**
-     * Generate the absolute path for an asset specified as `path` relative to `baseDirectory`
+     * Generate the absolute path for an asset specified as `path`
+     * relative to `baseDirectory`
      */
     std::string generateAssetPath(const std::string& baseDirectory,
                                   const std::string& path) const;

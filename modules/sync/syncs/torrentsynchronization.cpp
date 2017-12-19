@@ -91,7 +91,9 @@ documentation::Documentation TorrentSynchronization::Documentation() {
 std::string TorrentSynchronization::uniformResourceName() const {
     size_t begin = _magnetLink.find("=urn") + 1;
     size_t end = _magnetLink.find('&', begin);
-    std::string xs = _magnetLink.substr(begin, end == std::string::npos ? end : (end - begin));
+    std::string xs = _magnetLink.substr(begin, end == std::string::npos ?
+        end : (end - begin));
+
     std::transform(xs.begin(), xs.end(), xs.begin(), [](char x) {
         if (x == ':') return '.';
         return x;
@@ -150,8 +152,8 @@ void TorrentSynchronization::cancel() {
 }
 
 void TorrentSynchronization::clear() {
-    // Todo: remove directory!
     cancel();
+    // TODO: Remove all files from directory.
 }
 
 bool TorrentSynchronization::hasSyncFile() {

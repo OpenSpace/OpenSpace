@@ -57,7 +57,7 @@ namespace {
 
     const char* AssetFileSuffix = "asset";
 
-    bool isRelative(std::string path) {
+    bool isRelative(const std::string& path) {
         if (path.size() > 2) {
             if (path[0] == '.' && path[1] == '/') return true;
         }
@@ -108,7 +108,7 @@ void AssetLoader::untrackAsset(Asset* asset) {
 void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     /*
     Set up lua table:
-    AssetMeta
+    AssetInfo
     |- Exports (table<name, exported data>)
     |- Asset
     |  |- localResource
@@ -126,21 +126,21 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     |- onDeinitialize
     */
 
-    // Push the global assets table to the lua stack.
+    // Push the global table of AssetInfos to the lua stack.
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     int globalTableIndex = lua_gettop(*_luaState);
 
-
-    // Create meta table for the current asset.
+    // Create a AssetInfo table for the current asset.
     lua_newtable(*_luaState);
-    int assetMetaTableIndex = lua_gettop(*_luaState);
+    int assetInfoTableIndex = lua_gettop(*_luaState);
 
-    // Register empty exports table on current asset.
+    // Register empty Exports table for the current asset.
     // (string => exported object)
     lua_newtable(*_luaState);
-    lua_setfield(*_luaState, assetMetaTableIndex, ExportsTableName);
+    lua_setfield(*_luaState, assetInfoTableIndex, ExportsTableName);
 
-    // Create asset table
+    // Create Asset table
+    // (string => lua functions)
     lua_newtable(*_luaState);
     int assetTableIndex = lua_gettop(*_luaState);
 
@@ -168,7 +168,6 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(*_luaState, &assetloader::request, 1);
     lua_setfield(*_luaState, assetTableIndex, RequestFunctionName);
 
-
     // Register export-dependency function
     // export(string key, any value)
     lua_pushlightuserdata(*_luaState, asset);
@@ -187,20 +186,21 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(*_luaState, &assetloader::onDeinitialize, 1);
     lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
 
-    // Attach asset table to asset meta table
-    lua_setfield(*_luaState, assetMetaTableIndex, AssetTableName);
+    // Attach Asset table to AssetInfo table
+    lua_setfield(*_luaState, assetInfoTableIndex, AssetTableName);
 
-    // Register empty dependant table on asset metatable.
+    // Register empty dependant table on AssetInfo table.
     // (importer => dependant object)
     lua_newtable(*_luaState);
-    lua_setfield(*_luaState, assetMetaTableIndex, DependantsTableName);
+    lua_setfield(*_luaState, assetInfoTableIndex, DependantsTableName);
 
-    // Extend global asset table (pushed to the lua stack earlier) with this asset meta table 
+    // Extend global asset info table (pushed to the lua stack earlier)
+    // with this AssetInfo table
     lua_setfield(*_luaState, globalTableIndex, asset->id().c_str());
 }
 
 void AssetLoader::tearDownAssetLuaTable(Asset* asset) {
-    // Push the global assets table to the lua stack.
+    // Push the global table of AssetInfos to the lua stack.
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     int globalTableIndex = lua_gettop(*_luaState);
 
@@ -288,9 +288,14 @@ std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
         }
     }
 
-    std::shared_ptr<Asset> a = std::make_shared<Asset>(this, _synchronizationWatcher, path);
-    trackAsset(a);
-    return a;
+    std::shared_ptr<Asset> asset = std::make_shared<Asset>(
+        this,
+       _synchronizationWatcher,
+        path
+    );
+
+    trackAsset(asset);
+    return asset;
 }
 
 int AssetLoader::onInitializeLua(Asset* asset) {
@@ -398,7 +403,8 @@ void AssetLoader::callOnInitialize(Asset* asset) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
-                "When initializing " + asset->assetFilePath() + ": " + luaL_checkstring(*_luaState, -1)
+                "When initializing " + asset->assetFilePath() + ": " +
+                luaL_checkstring(*_luaState, -1)
             );
         }
     }
@@ -410,7 +416,8 @@ void AssetLoader::callOnDeinitialize(Asset * asset) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
-                "When deinitializing " + asset->assetFilePath() + ": " + luaL_checkstring(*_luaState, -1)
+                "When deinitializing " + asset->assetFilePath() + ": " +
+                luaL_checkstring(*_luaState, -1)
             );
         }
     }
@@ -427,7 +434,8 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
         }
     }
     // Potential Todo:
-    // Call dependency->onInitialize with The asset table exported by the child asset as argument
+    // Call dependency->onInitialize with the asset table
+    // exported by the child asset as argument
 }
 
 void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
@@ -619,17 +627,20 @@ void AssetLoader::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State s
     }
 }
 
-void AssetLoader::assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
+void AssetLoader::assetRequested(std::shared_ptr<Asset> parent,
+                                 std::shared_ptr<Asset> child)
+{
     for (auto& listener : _assetListeners) {
         listener->assetRequested(parent, child);
     }
 }
 
-void AssetLoader::assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) {
+void AssetLoader::assetUnrequested(std::shared_ptr<Asset> parent,
+                                   std::shared_ptr<Asset> child)
+{
     for (auto& listener : _assetListeners) {
         listener->assetUnrequested(parent, child);
     }
 }
-
 
 }
