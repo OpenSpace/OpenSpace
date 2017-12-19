@@ -531,7 +531,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         _labelFile = absPath(dictionary.value<std::string>(
             LabelFileInfo.identifier
-        ));                
+            ));
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
@@ -550,44 +550,45 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
-        }         
+        }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
             _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
         }
         addProperty(_textMaxSize);
-
-        if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-            _transformationMatrix = dictionary.value<glm::dmat4>(
-                TransformationMatrixInfo.identifier
-            );
-        }
-
-        if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-            glm::vec2 fadeInValue = dictionary.value<glm::vec2>(
-                FadeInDistancesInfo.identifier
-            );
-            _fadeInDistance.set(fadeInValue);
-            _disableFadeInDistance.set(false);
-            addProperty(_fadeInDistance);
-            addProperty(_disableFadeInDistance);
-        }
-
-        if (dictionary.hasKey(BillboardMaxSizeInfo.identifier)) {
-            _billboardMaxSize = static_cast<float>(
-                dictionary.value<double>(BillboardMaxSizeInfo.identifier)
-            );
-            addProperty(_billboardMaxSize);
-        }
-
-        if (dictionary.hasKey(BillboardMinSizeInfo.identifier)) {
-            _billboardMinSize = static_cast<float>(
-                dictionary.value<double>(BillboardMinSizeInfo.identifier)
-            );
-            addProperty(_billboardMinSize);
-        }
     }
+
+    if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
+        _transformationMatrix = dictionary.value<glm::dmat4>(
+            TransformationMatrixInfo.identifier
+        );
+    }
+
+    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+        glm::vec2 fadeInValue = dictionary.value<glm::vec2>(
+            FadeInDistancesInfo.identifier
+        );
+        _fadeInDistance.set(fadeInValue);
+        _disableFadeInDistance.set(false);
+        addProperty(_fadeInDistance);
+        addProperty(_disableFadeInDistance);
+    }
+
+    if (dictionary.hasKey(BillboardMaxSizeInfo.identifier)) {
+        _billboardMaxSize = static_cast<float>(
+            dictionary.value<double>(BillboardMaxSizeInfo.identifier)
+        );
+        addProperty(_billboardMaxSize);
+    }
+
+    if (dictionary.hasKey(BillboardMinSizeInfo.identifier)) {
+        _billboardMinSize = static_cast<float>(
+            dictionary.value<double>(BillboardMinSizeInfo.identifier)
+        );
+        addProperty(_billboardMinSize);
+    }
+    
 }
 
 bool RenderableBillboardsCloud::isReady() const {
