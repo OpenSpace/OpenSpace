@@ -82,139 +82,139 @@ namespace {
     static const openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "atmmosphereHeight",
         "Atmosphere Height (KM)",
-        "" // @TODO Missing documentation
+        "The thickness of the atmosphere in Km"
     };
         
     static const openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo = {
         "AverageGroundReflectance", 
         "Average Ground Reflectance (%)",
-        "" // @TODO Missing documentation
+        "Average percentage of light reflected by the ground during the pre-calculation phase"
     };
     
     static const openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
         "GroundRadianceEmittion",
         "Percentage of initial radiance emitted from ground",
-        "" // @TODO Missing documentation
+        "Multiplier of the ground radiance color during the rendering phase"
     };
 
     static const openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale", 
-        "Rayleigh Height Scale (KM)",
-        "" // @TODO Missing documentation
+        "Rayleigh Scale Height (KM)",
+        "It is the vertical distance over which the density and pressure fall by a constant factor" 
     };
 
     static const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffXInfo = {
         "RayleighScatteringCoeffX", 
         "Rayleigh Scattering Coeff X (x10e-3)",
-        "" // @TODO Missing documentation
+        "Rayleigh sea-level scattering coefficients in meters"
     };
 
     static const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffYInfo = {
         "RayleighScatteringCoeffY",
         "Rayleigh Scattering Coeff Y (x10e-3)",
-        "" // @TODO Missing documentation
+        "Rayleigh sea-level scattering coefficients in meters"
     };
 
     static const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffZInfo = {
         "RayleighScatteringCoeffZ",
         "Rayleigh Scattering Coeff Z (x10e-3)",
-        "" // @TODO Missing documentation
+        "Rayleigh sea-level scattering coefficients in meters"
     };
 
     static const openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
         "Ozone", 
         "Ozone Layer Enabled",
-        "" // @TODO Missing documentation
+        "Enables/Disable Ozone Layer during pre-calculation phase"
     };
 
     static const openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
         "OzoneLayerHeightScale", 
-        "Ozone Height Scale (KM)",
-        "" // @TODO Missing documentation
+        "Ozone Scale Height (KM)",
+        "It is the vertical distance over which the density and pressure fall by a constant factor"
     };
 
     static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffXInfo = {
         "OzoneLayerCoeffX", 
         "Ozone Layer Extinction Coeff X (x10e-5)",
-        "" // @TODO Missing documentation
+        "Ozone scattering coefficients in meters"
     };
 
     static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffYInfo = {
         "OzoneLayerCoeffY",
         "Ozone Layer Extinction Coeff Y (x10e-5)",
-        "" // @TODO Missing documentation
+        "Ozone scattering coefficients in meters"
     };
 
     static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffZInfo = {
         "OzoneLayerCoeffZ",
         "Ozone Layer Extinction Coeff Z (x10e-5)",
-        "" // @TODO Missing documentation
+        "Ozone scattering coefficients in meters"
     };
 
     static const openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
         "MieHeightScale", 
-        "Mie Height Scale (KM)",
-        "" // @TODO Missing documentation
+        "Mie Scale Height (KM)",
+        "It is the vertical distance over which the density and pressure fall by a constant factor"
     };
 
     static const openspace::properties::Property::PropertyInfo MieScatteringCoeffXInfo = {
         "MieScatteringCoeffX",
         "Mie Scattering Coeff X (x10e-3)",
-        "" // @TODO Missing documentation
+        "Mie sea-level scattering coefficients in meters"
     };
 
     static const openspace::properties::Property::PropertyInfo MieScatteringCoeffYInfo = {
         "MieScatteringCoeffY",
         "Mie Scattering Coeff Y (x10e-3)",
-        "" // @TODO Missing documentation
+        "Mie sea-level scattering coefficients in meters"
     };
     
     static const openspace::properties::Property::PropertyInfo MieScatteringCoeffZInfo = {
         "MieScatteringCoeffZ",
         "Mie Scattering Coeff Z (x10e-3)",
-        "" // @TODO Missing documentation
+        "Mie sea-level scattering coefficients in meters"
     };
 
     static const openspace::properties::Property::PropertyInfo MieScatteringExtinctionPropCoeffInfo = {
         "MieScatteringExtinctionPropCoefficient",
         "Mie Scattering/Extinction Proportion Coefficient (%)",
-        "" // @TODO Missing documentation
+        "Mie Scattering/Extinction Proportion Coefficient (%)"
     };
 
     static const openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG", 
         "Mie Asymmetric Factor G",
-        "" // @TODO Missing documentation
+        "Averaging of the scattering angle over a high number of scattering events"
     };
 
     static const openspace::properties::Property::PropertyInfo SunIntensityInfo = {
         "SunIntensity", 
         "Sun Intensity",
-        "" // @TODO Missing documentation
+        "Unitless for now"
     };
 
     static const openspace::properties::Property::PropertyInfo AtmosphereExposureInfo = {
         "HdrExposure", 
         "Atmosphere Exposure",
-        "" // @TODO Missing documentation
+        "Constant to controls the exposure of the radiance range"
     };
 
     static const openspace::properties::Property::PropertyInfo AtmosphereGammaInfo = {
         "Gamma", 
         "Gamma Correction",
-        "" // @TODO Missing documentation
+        "Gamma Correction"
     };
 
     static const openspace::properties::Property::PropertyInfo EnableSunOnCameraPositionInfo = {
         "SunFollowingCamera", 
         "Enable Sun On Camera Position",
-        "" // @TODO Missing documentation
+        "When selected the Sun is artificially positioned behind the observer all times"
     };
 
     static const openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadowsInfo",
         "Enable Hard Shadows for Eclipses",
-        "" // @TODO Missing documentation
+        "Enable/Disables hard shadows through the atmosphere"
     };
 } // namespace
 
@@ -289,8 +289,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _preCalculatedTexturesScale(1.0)
     , _shadowEnabled(false)
     , _hardShadows(false)
-    , _time(0.f)
-{
+ {
     ghoul_precondition(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
         "RenderableAtmosphere needs the name to be specified"
@@ -685,8 +684,7 @@ void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderT
 
 void RenderableAtmosphere::update(const UpdateData& data) {
     _stateMatrix = data.modelTransform.rotation;
-    _time = data.time.j2000Seconds();
-
+ 
     if (_deferredcaster) {
         _deferredcaster->setTime(data.time.j2000Seconds());
         glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);

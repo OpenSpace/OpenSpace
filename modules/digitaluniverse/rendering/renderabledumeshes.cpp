@@ -244,9 +244,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _dataIsDirty(true)
     , _textColorIsDirty(true)
     , _hasLabel(false)
-    , _labelDataIsDirty(true)
-    , _textMinSize(0)
-    , _textMaxSize(200)
+    , _labelDataIsDirty(true)    
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     , _textColor(
@@ -258,6 +256,8 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
+    , _textMinSize(LabelMinSizeInfo, 8.0, 0.5, 24.0)
+    , _textMaxSize(LabelMaxSizeInfo, 500.0, 0.0, 1000.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
     , _fontRenderer(nullptr)
@@ -365,12 +365,14 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
                 dictionary.value<float>(LabelMinSizeInfo.identifier)
             );
         }
+        addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
             _textMaxSize = static_cast<int>(
                 dictionary.value<float>(LabelMaxSizeInfo.identifier)
             );
         }
+        addProperty(_textMaxSize);
     }
 
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
@@ -416,7 +418,7 @@ void RenderableDUMeshes::initializeGL() {
             _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
                 ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
-            size_t _fontSize = 30;
+            size_t _fontSize = 50;
             _font = OsEng.fontManager().font(
                 "Mono",
                 static_cast<float>(_fontSize),

@@ -142,7 +142,6 @@ private:
 
     bool _shadowEnabled;
     bool _hardShadows;
-    double _time;
 
     glm::dmat3 _stateMatrix;
 

@@ -166,6 +166,10 @@ void ABufferRenderer::initialize() {
     }
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
+
+    if (_mSAAPattern != nullptr) {
+        delete[] _mSAAPattern;
+    }
 }
 
 void ABufferRenderer::deinitialize() {
