@@ -27,7 +27,6 @@
 #include <ghoul/glm.h>
 
 #include <chrono>
-#include <cmath>
 
 namespace {
     constexpr double SecondsPerYear = 31556952; // seconds in average Gregorian year
@@ -46,7 +45,7 @@ namespace {
 namespace openspace {
 
 std::pair<double, std::string> simplifyTime(double seconds) {
-    double secondsVal = std::abs(seconds);
+    double secondsVal = glm::abs(seconds);
 
     if (secondsVal > 1e-3 && secondsVal < SecondsPerMinute) {
         return { seconds, seconds == 1.0 ? "second" : "seconds" };

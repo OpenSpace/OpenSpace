@@ -115,7 +115,6 @@ int main(int argc, char** argv) {
     bool close;
     bool consoleLog = false;
 
-
     // Workaround for Visual Studio Google Test Adapter:
     // Do not try to initialize osengine if gtest is just listing tests
     bool skipOsEng = false;

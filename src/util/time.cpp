@@ -111,11 +111,7 @@ void Time::setTime(std::string time, bool requireJump) {
 }
 
 std::string Time::UTC() const {
-    try {
-        return SpiceManager::ref().dateFromEphemerisTime(_time);
-    } catch (const SpiceManager::SpiceException& c) {
-        return "0000 JAN 00 T00:00:00.00";
-    }
+    return SpiceManager::ref().dateFromEphemerisTime(_time);
 }
 
 std::string Time::ISO8601() const {
