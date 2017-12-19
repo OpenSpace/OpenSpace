@@ -290,7 +290,7 @@ function generateSettings(arg)
 
     local refresh = ""
     if arg["refreshRate"] then
-        refresh = "refreshRate=" .. arg["refreshRate"] .. " "
+        refresh = "refreshRate=\"" .. arg["refreshRate"] .. "\" "
     end
 
 

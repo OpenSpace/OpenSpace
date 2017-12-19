@@ -1361,9 +1361,9 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
 void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
     std::unique_ptr<ghoul::opengl::ProgramObject> program = 
         ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl");
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl"));
 
     program->activate();
     static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };

@@ -106,7 +106,7 @@ std::string OpenSpaceModule::modulePath() const {
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
             const std::string path = std::string(dir) + '/' + moduleName;
-            if (FileSys.directoryExists(path)) {
+            if (FileSys.directoryExists(absPath(path))) {
                 return absPath(path);
             }
         }
