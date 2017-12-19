@@ -554,7 +554,7 @@ void OpenSpaceEngine::initialize() {
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
     scriptEngine().initialize();
 
-    writeDocumentation();
+    writeStaticDocumentation();
 
     if (configurationManager().hasKey(ConfigurationManager::KeyShutdownCountdown)) {
         _shutdown.waitTime = static_cast<float>(configurationManager().value<double>(
@@ -758,7 +758,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     showTouchbar();
 #endif // APPLE
 
-    writeDocumentations();
+    writeSceneDocumentation();
 
     LTRACE("OpenSpaceEngine::loadScene(end)");
 }
@@ -775,12 +775,12 @@ void OpenSpaceEngine::deinitialize() {
     }
 
     _navigationHandler->deinitialize();
-    _renderEngine->deinitialize(); 
+    _renderEngine->deinitialize();
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
 }
 
-void OpenSpaceEngine::writeDocumentation() {
+void OpenSpaceEngine::writeStaticDocumentation() {
     // If a LuaDocumentationFile was specified, generate it now
     if (configurationManager().hasKey(ConfigurationManager::KeyLuaDocumentation)) {
         _scriptEngine->writeDocumentation(
@@ -968,7 +968,7 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
 #endif // GHOUL_LOGGING_ENABLE_TRACE
 }
 
-void OpenSpaceEngine::writeDocumentations() {
+void OpenSpaceEngine::writeSceneDocumentation() {
     // Write keyboard documentation.
     if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
         keyBindingManager().writeDocumentation(
@@ -1277,7 +1277,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     const bool updated = _assetManager->update();
     if (updated) {
-        writeDocumentations();
+        writeSceneDocumentation();
     }
 
     _renderEngine->updateScene();

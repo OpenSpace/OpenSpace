@@ -42,23 +42,11 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
-# # Libtorrent
-# target_include_directories(
-#     openspace-module-sync
-#     SYSTEM PUBLIC
-#     ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent/include
-# )
-# target_link_libraries(
-#     openspace-module-sync
-#      ${CMAKE_CURRENT_SOURCE_DIR}/ext/libtorrent
-# )
-
 create_new_module(
     "Sync"
     sync_module
     ${HEADER_FILES} ${SOURCE_FILES}
 )
-
 
 #####
 # Libtorrent

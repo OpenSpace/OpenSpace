@@ -58,7 +58,6 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
     engine.addDocumentation(Scale::Documentation());
-    engine.addDocumentation(Scene::Documentation());
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
     engine.addDocumentation(TimeRange::Documentation());

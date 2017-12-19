@@ -181,8 +181,6 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    static documentation::Documentation Documentation();
-
 private:
     std::string generateJson() const override;
 

@@ -55,7 +55,8 @@ int writeDocumentation(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OsEng.writeDocumentation();
+    OsEng.writeStaticDocumentation();
+    OsEng.writeSceneDocumentation();
 
     return 0;
 }

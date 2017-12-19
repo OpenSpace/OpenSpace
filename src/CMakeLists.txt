@@ -140,7 +140,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
-    ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenelicense.cpp

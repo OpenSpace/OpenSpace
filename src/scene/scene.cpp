@@ -59,7 +59,6 @@
 #include <stack>
 #include <unordered_map>
 
-#include "scene_doc.inl"
 #include "scene_lua.inl"
 
 namespace {

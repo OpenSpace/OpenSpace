@@ -102,8 +102,6 @@ public:
 
 
     void scheduleLoadSingleAsset(std::string assetPath);
-  
-    void writeDocumentation();
     void toggleShutdownMode();
 
     // Guaranteed to return a valid pointer
@@ -166,6 +164,10 @@ public:
         std::function<bool (double, double)> function
     );
 
+    void writeSceneDocumentation();
+    void writeStaticDocumentation();
+
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.
@@ -182,8 +184,7 @@ private:
     void loadFonts();
 
     void configureLogging(bool consoleLog);
-    void writeDocumentations();
-    
+
     void runGlobalCustomizationScripts(const std::string& sceneDescription);
     void configureLogging();
 

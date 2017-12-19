@@ -122,7 +122,10 @@ void TorrentClient::pollAlerts() {
     }
 }
 
-TorrentClient::TorrentId TorrentClient::addTorrentFile(std::string torrentFile, std::string destination, TorrentProgressCallback cb) {
+TorrentClient::TorrentId TorrentClient::addTorrentFile(std::string torrentFile,
+                                                       std::string destination,
+                                                       TorrentProgressCallback cb)
+{
     std::lock_guard<std::mutex> guard(_mutex);
 
     if (!_session) {
