@@ -1,5 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "digitaluniverse_constellations_speck", Destination = "speck", Version = 1 },
-    },
-}

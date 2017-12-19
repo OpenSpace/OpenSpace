@@ -1,8 +1,0 @@
-<OpenSpaceTemporalGDALDataset>
-  <OpenSpaceTimeStart>2016-11-28T05:00:00</OpenSpaceTimeStart>
-  <OpenSpaceTimeEnd>2016-12-06T04:30:00</OpenSpaceTimeEnd>
-  <OpenSpaceTimeResolution>30m</OpenSpaceTimeResolution>
-  <OpenSpaceTimeIdFormat>YYYY-MM-DDThh_mm_ssZ</OpenSpaceTimeIdFormat>
-
-  <FilePath>D:/NOAA/rt/imergert_composite.${OpenSpaceTimeId}.png</FilePath>
-</OpenSpaceTemporalGDALDataset>

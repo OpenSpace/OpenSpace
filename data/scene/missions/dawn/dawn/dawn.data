@@ -1,9 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "dawn_model", Destination = "obj", Version = 1 },
-        { Identifier = "dawn_textures", Destination = "textures", Version = 1 }
-    },
-    TorrentFiles = {
-        { File = "DawnKernels.torrent", Destination = "${SPICE}" }
-    }
-}
