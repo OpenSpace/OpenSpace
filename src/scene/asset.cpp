@@ -102,6 +102,12 @@ void Asset::setState(Asset::State state) {
     if (_state == state) {
         return;
     }
+    for (auto& requiringAsset : _requiringAssets) {
+        if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
+            ghoul_assert(!a->isInitialized(),
+                "Required asset changing state while parent asset is initialized");
+        }
+    }
     _state = state;
 
     std::shared_ptr<Asset> thisAsset = shared_from_this();
@@ -109,7 +115,7 @@ void Asset::setState(Asset::State state) {
 
     for (auto& requiringAsset : _requiringAssets) {
         if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
-            a->requiredAssetChangedState(state);
+            a->requiredAssetChangedState(thisAsset, state);
         }
     }
 
@@ -120,9 +126,13 @@ void Asset::setState(Asset::State state) {
     }
 }
 
-void Asset::requiredAssetChangedState(Asset::State childState) {
-    ghoul_assert(!isInitialized(),
-        "Required asset changing state while parent asset is initialized");
+void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child,
+    Asset::State childState)
+{
+    if (child->isInitialized()) {
+        // Do not do anything if the child was already initialized.
+        return;
+    }
     if (childState == State::SyncResolved) {
         if (isSyncResolveReady()) {
             setState(State::SyncResolved);
