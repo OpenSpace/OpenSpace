@@ -69,8 +69,7 @@ ABufferRenderer::ABufferRenderer()
     , _resolveProgram(nullptr)
     , _hdrExposure(0.4)
     , _hdrBackground(2.8)
-    , _gamma(2.2)
-    , _mSAAPattern(nullptr)
+    , _gamma(2.2)    
 {}
 
 ABufferRenderer::~ABufferRenderer() {}
@@ -166,10 +165,7 @@ void ABufferRenderer::initialize() {
     }
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
-
-    if (_mSAAPattern != nullptr) {
-        delete[] _mSAAPattern;
-    }
+    
 }
 
 void ABufferRenderer::deinitialize() {
@@ -544,7 +540,7 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(0);
 
-    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, &_mSAAPattern);
+    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, _mSAAPattern);
     // Convert back to [-1, 1] range and then scales to the current viewport size:
     for (int d = 0; d < _nAaSamples; ++d) {
         _mSAAPattern[d * 3] = (2.0 * _mSAAPattern[d * 3] - 1.0) / static_cast<double>(viewport[2]);
@@ -765,9 +761,9 @@ void ABufferRenderer::setHDRBackground(float hdrBackground) {
 
 void ABufferRenderer::setGamma(float gamma) {
     _gamma = gamma;
-    if (_gamma < 0.0) {
+    if (_gamma < 0.0f) {
         LERROR("Gamma value must be greater than zero.");
-        _gamma = 2.2;
+        _gamma = 2.2f;
     }
 }
 
@@ -779,7 +775,7 @@ int ABufferRenderer::nAaSamples() const {
     return _nAaSamples;
 }
 
-const double * ABufferRenderer::mSSAPattern() const {
+std::vector<double> ABufferRenderer::mSSAPattern() const {
     return _mSAAPattern;
 }
 
@@ -1011,23 +1007,29 @@ void ABufferRenderer::updateRendererData() {
 }
 
 void ABufferRenderer::saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, double ** memory) const {
+    const int width, const int height, std::vector<double> & memory) const {
 
-    if (*memory != nullptr) {
-        delete[] * memory;
+    if (!memory.empty()) {
+        memory.clear();
     }
 
-    *memory = new double[width*height * 3];
+    memory.reserve(width * height * 3);
+    float * tempMemory = new float[width * height * 3];
 
     if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
         glReadBuffer(color_buffer_attachment);
-        glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, *memory);
+        glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tempMemory);
 
     }
     else {
-        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, *memory);
+        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory);
     }
 
+    for (auto i = 0; i < width*height * 3; ++i) {
+        memory[i] = static_cast<double>(tempMemory[i]);
+    }
+
+    delete[] tempMemory;
 }
 
 }

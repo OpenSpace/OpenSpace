@@ -69,8 +69,10 @@ namespace openspace {
 void saveTextureToPPMFile(const GLenum color_buffer_attachment,
     const std::string & fileName,
     const int width, const int height);
-void saveTextureToMemory(const GLenum color_buffer_attachment, 
-    const int width, const int height, double ** memory);
+
+void saveTextureToMemory(const GLenum color_buffer_attachment,
+    const int width, const int height, std::vector<double> & memory);
+
 
 FramebufferRenderer::FramebufferRenderer()
     : _camera(nullptr)
@@ -78,8 +80,7 @@ FramebufferRenderer::FramebufferRenderer()
     , _resolution(glm::vec2(0))
     , _hdrExposure(0.4f)
     , _hdrBackground(2.8f)
-    , _gamma(2.2f)
-    , _mSAAPattern(nullptr)
+    , _gamma(2.2f)    
 {}
 
 FramebufferRenderer::~FramebufferRenderer() {}
@@ -227,10 +228,6 @@ void FramebufferRenderer::deinitialize() {
 
     OsEng.renderEngine().raycasterManager().removeListener(*this);
     OsEng.renderEngine().deferredcasterManager().removeListener(*this);
-
-    if (_mSAAPattern != nullptr) {
-        delete[] _mSAAPattern;
-    }
 }
 
 void FramebufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
@@ -845,7 +842,7 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(0);
 
-    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, &_mSAAPattern);
+    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, _mSAAPattern);
     // Convert back to [-1, 1] range and then scale for the current viewport size:
     for (int d = 0; d < _nAaSamples; ++d) {        
         _mSAAPattern[d * 3]       = (2.0 * _mSAAPattern[d * 3] - 1.0) / static_cast<double>(viewport[2]);
@@ -1043,7 +1040,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
                 deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
                 // 48 = 16 samples * 3 coords
-                deferredcastProgram->setUniform("msaaSamplePatter", _mSAAPattern, 48);
+                deferredcastProgram->setUniform("msaaSamplePatter", &_mSAAPattern[0], 48);
 
                 deferredcastProgram->setUniform("firstPaint", firstPaint);
                 deferredcastProgram->setUniform("atmExposure", _hdrExposure);
@@ -1168,7 +1165,7 @@ int FramebufferRenderer::nAaSamples() const {
     return _nAaSamples;
 }
 
-const double * FramebufferRenderer::mSSAPattern() const {
+std::vector<double> FramebufferRenderer::mSSAPattern() const {
     return _mSAAPattern;
 }
 
@@ -1221,13 +1218,13 @@ void saveTextureToPPMFile(const GLenum color_buffer_attachment,
 }
 
 void saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, double ** memory) {
-    
-    if (*memory != nullptr) {
-        delete[] *memory;
-    }
+    const int width, const int height, std::vector<double> & memory) {
 
-    *memory = new double[width*height * 3];
+    if (!memory.empty()) {
+        memory.clear();
+    }
+    memory.reserve(width * height * 3);
+
     float *tempMemory = new float[width*height * 3];
 
     if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
@@ -1240,8 +1237,10 @@ void saveTextureToMemory(const GLenum color_buffer_attachment,
     }
 
     for (auto i = 0; i < width*height * 3; ++i) {
-        (*memory)[i] = static_cast<double>(tempMemory[i]);
+        memory[i] = static_cast<double>(tempMemory[i]);
     }
+
+    delete[] tempMemory;
 }
 
 

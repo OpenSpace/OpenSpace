@@ -76,7 +76,7 @@ public:
 
     float hdrBackground() const override;
     int nAaSamples() const override;
-    const double * mSSAPattern() const override;
+    std::vector<double> mSSAPattern() const override;
 
     using Renderer::preRaycast;
     void preRaycast(const RaycasterTask& raycasterTask);
@@ -100,7 +100,7 @@ private:
     void updateResolveDictionary();
     void updateMSAASamplingPattern();
     void saveTextureToMemory(const GLenum color_buffer_attachment,
-        const int width, const int height, double ** memory) const;
+        const int width, const int height, std::vector<double> & memory) const;
     
     Camera* _camera;
     Scene* _scene;
@@ -148,7 +148,7 @@ private:
     float _gamma;
     float _blackoutFactor;
 
-    double * _mSAAPattern;
+    std::vector<double> _mSAAPattern;
 
     ghoul::Dictionary _rendererData;
 };
