@@ -104,14 +104,13 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     if (!dictionary.getValue("RootPath", rootPath)) {
         throw ghoul::RuntimeError("RootPath has to be specified");
     }
-
-    float imagePlaneOffset;
-    if (dictionary.getValue("imagePlaneOffset", imagePlaneOffset)) {
-        _imagePlaneOffset = imagePlaneOffset;
+    
+    std::string transferfunctionPath;
+    if (dictionary.getValue("TransferfunctionPath", transferfunctionPath)) {
+        SpacecraftImageryManager::ref().loadTransferFunctions(transferfunctionPath, _tfMap);
     }
 
     SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap);
-    SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap);
 
     // Add GUI names
     unsigned int guiNameCount = 0;
@@ -428,7 +427,8 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
           = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
     _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
                                    _contrastValue, _gammaValue, _enableBorder,
-                                   _enableFrustum, _currentCenterPixel, _currentScale, _imagePlaneOffset, _isCoronaGraph);
+                                   _enableFrustum, _currentCenterPixel, _currentScale,
+                                   _imagePlaneOffset, _isCoronaGraph);
 }
 
 } // namespace openspace
