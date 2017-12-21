@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -115,14 +115,19 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
 
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::No);
 
-    LDEBUG("Begin reading from files");
     for (auto& seqPath : sequencePaths) {
         if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
                 ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "txt") {
-                    LDEBUG("Loading instrument: " << currentFile.baseName());
+                const std::string extension = currentFile.fileExtension();
+                const std::string base = currentFile.baseName();
+                const std::size_t foundCachedImageData = base.find("_cached");
+                if (foundCachedImageData != std::string::npos && extension == "txt") {
+                    
+                    const std::string::size_type separator = base.rfind("_");
+                    const std::string instrument = base.substr(0, separator);
+                    LDEBUG("Loading instrument: " << instrument);
+
                     metadataLoaded = true;
                     std::ifstream myfile(currentFile.path());
                     if (!myfile.is_open()) {
@@ -154,7 +159,7 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
                         std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
                         TimedependentState<ImageMetadata> timeState(
                                       std::move(data), timeObserved, im.filename);
-                        _imageMetadataMap[currentFile.baseName()].addState(std::move(timeState));
+                        _imageMetadataMap[instrument].addState(std::move(timeState));
                     }
                     myfile.close();
                 }
@@ -166,7 +171,7 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
 
 void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath, std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap) {
     for (auto& instrument : _imageMetadataMap) {
-        std::ofstream ofs(rootPath + instrument.first + ".txt");
+        std::ofstream ofs(rootPath + instrument.first + "_cached" + ".txt");
         if (!ofs.is_open()) {
             LERROR("Failed to open file");
         }
@@ -299,7 +304,7 @@ void SpacecraftImageryManager::loadImageMetadata(
       const std::string& path,
       std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap)
 {
-    LDEBUG("Begin loading imagery metadata");
+    LDEBUG("Begin loading spacecraft imagery metadata");
 
     // Pre-processed data
     if (loadMetadataFromDisk(path, _imageMetadataMap)) {
