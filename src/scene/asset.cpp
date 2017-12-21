@@ -129,8 +129,11 @@ void Asset::setState(Asset::State state) {
 void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child,
     Asset::State childState)
 {
-    if (child->isInitialized()) {
-        // Do not do anything if the child was already initialized.
+    if (isInitialized()) {
+        // Do not do anything if this asset was already initialized.
+        // This may happen if there are multiple requirement paths from
+        // this asset to the same child, which causes this method to be
+        // called more than once.
         return;
     }
     if (childState == State::SyncResolved) {
@@ -340,6 +343,9 @@ bool Asset::isInitialized() const {
 }
 
 bool Asset::startSynchronizations() {
+    if (!isLoaded()) {
+        LERROR("Cannot start synchronizations of unloaded asset " << id());
+    }
     for (auto& child : requestedAssets()) {
         child->startSynchronizations();
     }
