@@ -129,6 +129,11 @@ void Asset::setState(Asset::State state) {
 void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child,
     Asset::State childState)
 {
+    if (!isLoaded()) {
+        // Prohibit state change to SyncResolved if additional requirements
+        // may still be added.
+        return;
+    }
     if (isInitialized()) {
         // Do not do anything if this asset was already initialized.
         // This may happen if there are multiple requirement paths from
@@ -344,7 +349,8 @@ bool Asset::isInitialized() const {
 
 bool Asset::startSynchronizations() {
     if (!isLoaded()) {
-        LERROR("Cannot start synchronizations of unloaded asset " << id());
+        LWARNING("Cannot start synchronizations of unloaded asset " << id());
+        return false;
     }
     for (auto& child : requestedAssets()) {
         child->startSynchronizations();
@@ -357,27 +363,26 @@ bool Asset::startSynchronizations() {
 
     setState(State::Synchronizing);
 
-    bool foundUnresolved = false;
+    bool childFailed = false;
 
     // Start synchronization of all children first.
     for (auto& child : requiredAssets()) {
-        if (child->startSynchronizations()) {
-            foundUnresolved = true;
+        if (!child->startSynchronizations()) {
+            childFailed = true;
         }
     }
 
     // Now synchronize its own synchronizations.
     for (const auto& s : ownSynchronizations()) {
         if (!s->isResolved()) {
-            foundUnresolved = true;
             s->start();
         }
     }
     // If all syncs are resolved (or no syncs exist), mark as resolved.
-    if (!isInitialized() && !foundUnresolved) {
+    if (!isInitialized() && isSyncResolveReady()) {
         setState(State::SyncResolved);
     }
-    return foundUnresolved;
+    return !childFailed;
 }
 
 bool Asset::cancelAllSynchronizations() {
@@ -440,13 +445,14 @@ float Asset::requestedSynchronizationProgress() {
     return syncProgress(assets);
 }
 
-void Asset::load() {
+bool Asset::load() {
     if (isLoaded()) {
-        return;
+        return true;
     }
 
     bool loaded = loader()->loadAsset(shared_from_this());
     setState(loaded ? State::Loaded : State::LoadingFailed);
+    return loaded;
 }
 
 void Asset::unload() {
@@ -472,13 +478,13 @@ void Asset::unloadIfUnwanted() {
     unload();
 }
 
-void Asset::initialize() {
+bool Asset::initialize() {
     if (isInitialized()) {
-        return;
+        return true;
     }
     if (!isSynchronized()) {
         LERROR("Cannot initialize unsynchronized asset " << id());
-        return;
+        return false;
     }
     LDEBUG("Initializing asset " << id());
 
@@ -501,7 +507,7 @@ void Asset::initialize() {
         LERROR("Failed to initialize asset " << id() << ". " <<
             e.component << ": " << e.message);
         // TODO: rollback;
-        return;
+        return false;
     }
 
     // 4. Update state
@@ -516,6 +522,7 @@ void Asset::initialize() {
                 child->id() << " of " << id() << ". " <<
                 e.component << ": " << e.message);
             // TODO: rollback;
+            return false;
         }
     }
 
@@ -547,7 +554,7 @@ void Asset::initialize() {
             }
         }
     }
-
+    return true;
 }
 
 void Asset::deinitializeIfUnwanted() {

@@ -84,27 +84,37 @@ public:
 
     void syncStateChanged(ResourceSynchronization::State s);
 
+    /**
+     * Load this asset and return true if successful,
+     * i.e. if this and all required assets loaded without errors.
+     */
+    bool load();
     bool hasLoadedParent() const;
-    void load();
     bool isLoaded() const;
     void unload();
     void unloadIfUnwanted();
 
-    // Sync
+    /**
+     * Start synchronizations of this asset and return true if all
+     * its own synchronizations and required assets' synchronizations could start.
+     */
+    bool startSynchronizations();
     bool hasSyncingOrResolvedParent() const;
     bool isSynchronized() const;
     bool isSyncingOrResolved() const;
-    bool startSynchronizations();
     bool cancelAllSynchronizations();
     bool cancelUnwantedSynchronizations();
     bool restartAllSynchronizations();
     float requestedSynchronizationProgress();
     float requiredSynchronizationProgress();
 
-    // Init
+    /**
+     * Initialize this asset and return true if successful,
+     * i.e. if this and all required assets initialized without errors.
+     */
+    bool initialize();
     bool hasInitializedParent() const;
     bool isInitialized() const;
-    void initialize();
     void deinitialize();
     void deinitializeIfUnwanted();
 
