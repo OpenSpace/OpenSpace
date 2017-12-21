@@ -32,16 +32,16 @@
 namespace openspace::globebrowsing {
 
 namespace {
-    const char* _loggerCat = "Layer";
+    constexpr const char* _loggerCat = "Layer";
 
-    const char* keyName = "Name";
-    const char* keyDescription = "Description";
-    const char* keyEnabled = "Enabled";
-    const char* keyLayerGroupID = "LayerGroupID";
-    const char* keySettings = "Settings";
-    const char* keyAdjustment = "Adjustment";
-    const char* KeyBlendMode = "BlendMode";
-    const char* KeyPadTiles = "PadTiles";
+    constexpr const char* keyName = "Name";
+    constexpr const char* keyDescription = "Description";
+    constexpr const char* keyEnabled = "Enabled";
+    constexpr const char* keyLayerGroupID = "LayerGroupID";
+    constexpr const char* keySettings = "Settings";
+    constexpr const char* keyAdjustment = "Adjustment";
+    constexpr const char* KeyBlendMode = "BlendMode";
+    constexpr const char* KeyPadTiles = "PadTiles";
 
     static const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",

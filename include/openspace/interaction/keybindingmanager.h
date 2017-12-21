@@ -71,7 +71,7 @@ public:
     void removeKeyBinding(const std::string& key);
 
     std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
-        const std::string& key) const; 
+        const std::string& key) const;
 
     static scripting::LuaLibrary luaLibrary();
 

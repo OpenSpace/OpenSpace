@@ -49,20 +49,20 @@
 #include <string>
 
 namespace {
-    const char* _loggerCat        = "RenderableBillboardsCloud";
-    const char* KeyFile           = "File";
-    const char* keyColor          = "Color";
-    const char* keyUnit           = "Unit";
-    const char* MeterUnit         = "m";
-    const char* KilometerUnit     = "Km";
-    const char* ParsecUnit        = "pc";
-    const char* KiloparsecUnit    = "Kpc";
-    const char* MegaparsecUnit    = "Mpc";
-    const char* GigaparsecUnit    = "Gpc";
-    const char* GigalightyearUnit = "Gly";
+    constexpr const char* _loggerCat        = "RenderableBillboardsCloud";
+    constexpr const char* KeyFile           = "File";
+    constexpr const char* keyColor          = "Color";
+    constexpr const char* keyUnit           = "Unit";
+    constexpr const char* MeterUnit         = "m";
+    constexpr const char* KilometerUnit     = "Km";
+    constexpr const char* ParsecUnit        = "pc";
+    constexpr const char* KiloparsecUnit    = "Kpc";
+    constexpr const char* MegaparsecUnit    = "Mpc";
+    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const char* GigalightyearUnit = "Gly";
 
-    const int8_t CurrentCacheVersion = 1;
-    const double PARSEC = 0.308567756E17;
+    constexpr int8_t CurrentCacheVersion = 1;
+    constexpr double PARSEC = 0.308567756E17;
 
     static const openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
@@ -125,6 +125,13 @@ namespace {
         "TextMinSize",
         "Text Min Size",
         "The minimal size (in pixels) of the text for the labels for the astronomical "
+        "objects being rendered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+        "TextMaxSize",
+        "Text Max Size",
+        "The maximum size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
@@ -248,6 +255,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 LabelMinSizeInfo.description
             },
             {
+                LabelMaxSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelMaxSizeInfo.description
+            },
+            {
                 ColorOptionInfo.identifier,
                 new StringListVerifier,
                 Optional::Yes,
@@ -289,6 +302,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     )
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _textMinSize(LabelMinSizeInfo, 8.0, 0.5, 24.0)
+    , _textMaxSize(LabelMaxSizeInfo, 500.0, 0.0, 1000.0)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -467,6 +481,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
         }         
         addProperty(_textMinSize);
+
+        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
+            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+        }
+        addProperty(_textMaxSize);
     }
 }
 
@@ -490,10 +509,12 @@ void RenderableBillboardsCloud::initialize() {
 void RenderableBillboardsCloud::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
         
-    _program = renderEngine.buildRenderProgram("RenderableBillboardsCloud",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl");
+    _program = renderEngine.buildRenderProgram(
+        "RenderableBillboardsCloud",
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl")
+    );
 
     if (_hasPolygon) {
         createPolygonTexture();
@@ -504,7 +525,7 @@ void RenderableBillboardsCloud::initializeGL() {
             _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
                 ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
-            size_t _fontSize = 30;
+            size_t _fontSize = 50;
             _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
         }
@@ -667,6 +688,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data, const glm::
             _textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
+            _textMaxSize,
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,
@@ -1339,9 +1361,9 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
 void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
     std::unique_ptr<ghoul::opengl::ProgramObject> program = 
         ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl");
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl"));
 
     program->activate();
     static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };

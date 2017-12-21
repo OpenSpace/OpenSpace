@@ -49,19 +49,19 @@
 #include <string>
 
 namespace {
-    const char* _loggerCat        = "RenderablePlanesCloud";
-    const char* KeyFile           = "File";
-    const char* keyUnit           = "Unit";
-    const char* MeterUnit         = "m";
-    const char* KilometerUnit     = "Km";
-    const char* ParsecUnit        = "pc";
-    const char* KiloparsecUnit    = "Kpc";
-    const char* MegaparsecUnit    = "Mpc";
-    const char* GigaparsecUnit    = "Gpc";
-    const char* GigalightyearUnit = "Gly";
+    constexpr const char* _loggerCat        = "RenderablePlanesCloud";
+    constexpr const char* KeyFile           = "File";
+    constexpr const char* keyUnit           = "Unit";
+    constexpr const char* MeterUnit         = "m";
+    constexpr const char* KilometerUnit     = "Km";
+    constexpr const char* ParsecUnit        = "pc";
+    constexpr const char* KiloparsecUnit    = "Kpc";
+    constexpr const char* MegaparsecUnit    = "Mpc";
+    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const char* GigalightyearUnit = "Gly";
 
-    const int8_t CurrentCacheVersion = 2;
-    const float PARSEC = 0.308567756E17f;
+    constexpr int8_t CurrentCacheVersion = 2;
+    constexpr float PARSEC = 0.308567756E17f;
 
     enum BlendMode {
         BlendModeNormal = 0,
@@ -105,6 +105,13 @@ namespace {
         "TextMinSize",
         "Text Min Size",
         "The minimal size (in pixels) of the text for the labels for the astronomical "
+        "objects being rendered."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+        "TextMaxSize",
+        "Text Max Size",
+        "The maximum size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
@@ -208,7 +215,13 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 new IntVerifier,
                 Optional::Yes,
                 LabelMinSizeInfo.description
-            },                
+            },
+            {
+                LabelMaxSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                LabelMaxSizeInfo.description
+            },
             {
                 TransformationMatrixInfo.identifier,
                 new Matrix4x4Verifier<double>,
@@ -252,6 +265,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _hasLabel(false)
     , _labelDataIsDirty(true)
     , _textMinSize(0)
+    , _textMaxSize(200)
     , _planeStartingIndexPos(0)
     , _textureVariableIndex(0)        
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
@@ -370,7 +384,11 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
-        }         
+        }
+
+        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
+            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+        }
     }
 
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
@@ -429,9 +447,11 @@ void RenderablePlanesCloud::initialize() {
 void RenderablePlanesCloud::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     
-    _program = renderEngine.buildRenderProgram("RenderablePlanesCloud",
-        "${MODULE_DIGITALUNIVERSE}/shaders/plane2_vs.glsl",
-        "${MODULE_DIGITALUNIVERSE}/shaders/plane2_fs.glsl");
+    _program = renderEngine.buildRenderProgram(
+        "RenderablePlanesCloud",
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane2_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane2_fs.glsl")
+    );
             
     createPlanes();
 
@@ -591,6 +611,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
             _textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
+            _textMaxSize,
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,

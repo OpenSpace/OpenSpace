@@ -51,7 +51,7 @@ return {
             Size = 1.3*10^10.5,
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/sun-glare.png",
+            Texture = "textures/halo.png",
             BlendMode = "Additive"
         },
         Transform = {

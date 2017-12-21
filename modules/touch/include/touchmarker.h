@@ -65,9 +65,9 @@ class TouchMarker : public properties::PropertyOwner {
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-        GLuint _quad;
-        GLuint _vertexPositionBuffer;
-        int _numFingers;
+        GLuint _quad = 0;
+        GLuint _vertexPositionBuffer = 0;
+        int _numFingers = 0;
 };
 
 } // openspace namespace

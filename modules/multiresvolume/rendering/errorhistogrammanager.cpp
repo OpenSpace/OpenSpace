@@ -35,7 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "ErrorHistogramManager";
+    constexpr const char* _loggerCat = "ErrorHistogramManager";
 } // namespace
 
 namespace openspace {

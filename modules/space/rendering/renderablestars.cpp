@@ -42,11 +42,11 @@
 #include <stdint.h>
 
 namespace {
-    const char* _loggerCat = "RenderableStars";
+    constexpr const char* _loggerCat = "RenderableStars";
 
-    const char* KeyFile = "File";
+    constexpr const char* KeyFile = "File";
 
-    const int8_t CurrentCacheVersion = 1;
+    constexpr int8_t CurrentCacheVersion = 1;
 
     struct ColorVBOLayout {
         std::array<float, 4> position; // (x,y,z,e)
@@ -289,9 +289,10 @@ bool RenderableStars::isReady() const {
 void RenderableStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("Star",
-        "${MODULE_SPACE}/shaders/star_vs.glsl",
-        "${MODULE_SPACE}/shaders/star_fs.glsl",
-        "${MODULE_SPACE}/shaders/star_ge.glsl");
+        absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
+    );
 
     bool success = loadData();
     if (!success) {

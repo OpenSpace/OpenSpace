@@ -24,9 +24,6 @@
 
 #include <openspace/rendering/renderengine.h>
 
-#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
-#include <modules/spacecraftinstruments/util/imagesequencer.h>
-#endif
 #include <openspace/util/syncdata.h>
 
 #include <openspace/openspace.h>
@@ -37,7 +34,10 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
+#include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
+#include <openspace/rendering/dashboard.h>
+#include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderer.h>
@@ -46,14 +46,12 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/distanceconversion.h>
 #include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
-#include <openspace/util/spicemanager.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -81,15 +79,15 @@
 #include "renderengine_lua.inl"
 
 namespace {
-    const char* _loggerCat = "RenderEngine";
+    constexpr const char* _loggerCat = "RenderEngine";
 
-    const char* KeyRenderingMethod = "RenderingMethod";
-    const std::chrono::seconds ScreenLogTimeToLive(15);
-    const char* DefaultRenderingMethod = "ABuffer";
-    const char* RenderFsPath = "${SHADERS}/render.frag";
+    constexpr const char* KeyRenderingMethod = "RenderingMethod";
+    constexpr const std::chrono::seconds ScreenLogTimeToLive(15);
+    constexpr const char* DefaultRenderingMethod = "ABuffer";
+    constexpr const char* RenderFsPath = "${SHADERS}/render.frag";
 
-    const char* KeyFontMono = "Mono";
-    const char* KeyFontLight = "Light";
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const char* KeyFontLight = "Light";
 
     static const openspace::properties::Property::PropertyInfo PerformanceInfo = {
         "PerformanceMeasurements",
@@ -98,12 +96,6 @@ namespace {
         "and rendering of the scene graph nodes are collected each frame. These values "
         "provide some information about the impact of individual nodes on the overall "
         "performance."
-    };
-
-    static const openspace::properties::Property::PropertyInfo FrametimeInfo = {
-        "FrametimeType",
-        "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed."
     };
 
     static const openspace::properties::Property::PropertyInfo ShowDateInfo = {
@@ -211,9 +203,6 @@ RenderEngine::RenderEngine()
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _log(nullptr)
-    , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _showDate(ShowDateInfo, true)
-    , _showInfo(ShowInfoInfo, true)
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
@@ -261,16 +250,6 @@ RenderEngine::RenderEngine()
     });
     addProperty(_doPerformanceMeasurements);
 
-    _frametimeType.addOptions({
-        { static_cast<int>(FrametimeType::DtTimeAvg), "Average Deltatime" },
-        { static_cast<int>(FrametimeType::FPS), "Frames per second" },
-        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
-        { static_cast<int>(FrametimeType::None), "None" }
-    });
-    addProperty(_frametimeType);
-
-    addProperty(_showDate);
-    addProperty(_showInfo);
     addProperty(_showLog);
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
@@ -554,7 +533,21 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     // Print some useful information on the master viewport
     if (wrapper.isMaster() && wrapper.isSimpleRendering()) {
-        renderInformation();
+        std::unique_ptr<performance::PerformanceMeasurement> perf;
+        if (_performanceManager) {
+            perf = std::make_unique<performance::PerformanceMeasurement>(
+                "Main Dashboard::render",
+                OsEng.renderEngine().performanceManager()
+            );
+    }
+        glm::vec2 penPosition = glm::vec2(
+            10.f,
+            fontResolution().y
+        );
+        
+        penPosition.y -= OsEng.console().currentHeight();
+
+        OsEng.dashboard().render(penPosition);
     }
 
     if (_showFrameNumber) {
@@ -696,7 +689,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        absPath(RenderFsPath),
         dict
     );
 
@@ -726,7 +719,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        absPath(RenderFsPath),
         csPath,
         dict
     );
@@ -936,421 +929,6 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(
     }
     else {
         return RendererImplementation::Invalid;
-    }
-}
-
-std::string RenderEngine::progressToStr(int size, double t) {
-    std::string progress = "|";
-    int g = static_cast<int>((t * (size - 1)) + 1);
-    g = std::max(g, 0);
-    for (int i = 0; i < g; i++) {
-        progress.append("-");
-    }
-    progress.append(">");
-    for (int i = 0; i < size - g; i++) {
-        progress.append(" ");
-    }
-    progress.append("|");
-    return progress;
-}
-
-void RenderEngine::renderInformation() {
-    using ghoul::fontrendering::RenderFont;
-
-    glm::vec2 penPosition = glm::vec2(
-        10.f,
-        fontResolution().y
-    );
-
-    // If the console is opened, move all text downwards
-    penPosition.y -= OsEng.console().currentHeight();
-
-    if (_showDate && _fontDate) {
-        penPosition.y -= _fontDate->height();
-        RenderFontCr(
-            *_fontDate,
-            penPosition,
-            "Date: %s",
-            OsEng.timeManager().time().UTC().c_str()
-        );
-    }
-    else {
-        penPosition.y -= _fontInfo->height();
-    }
-
-    if (_showInfo && _fontInfo) {
-        std::pair<double, std::string> deltaTime = simplifyTime(
-            OsEng.timeManager().time().deltaTime()
-        );
-        RenderFontCr(
-            *_fontInfo,
-            penPosition,
-            "Simulation increment: %.1f %s / second",
-            deltaTime.first,
-            deltaTime.second.c_str()
-        );
-
-        double distance = glm::length(
-            _camera->positionVec3() -
-            OsEng.navigationHandler().focusNode()->worldPosition()
-        );
-        std::pair<double, std::string> dist = simplifyDistance(distance);
-        RenderFontCr(
-            *_fontInfo,
-            penPosition,
-            "Distance from focus: %f %s",
-            dist.first,
-            dist.second.c_str()
-        );
-
-        FrametimeType frametimeType = FrametimeType(_frametimeType.value());
-        switch (frametimeType) {
-            case FrametimeType::DtTimeAvg:
-                RenderFontCr(
-                    *_fontInfo,
-                    penPosition,
-                    "Avg. Frametime: %.5f",
-                    OsEng.windowWrapper().averageDeltaTime()
-                );
-                break;
-            case FrametimeType::FPS:
-                RenderFontCr(
-                    *_fontInfo,
-                    penPosition,
-                    "FPS: %3.2f",
-                    1.0 / OsEng.windowWrapper().deltaTime()
-                );
-                break;
-            case FrametimeType::FPSAvg:
-                RenderFontCr(
-                    *_fontInfo,
-                    penPosition,
-                    "Avg. FPS: %3.2f",
-                    1.0 / OsEng.windowWrapper().averageDeltaTime()
-                );
-                break;
-            case FrametimeType::None:
-                break;
-        }
-
-        ParallelConnection::Status status = OsEng.parallelConnection().status();
-        size_t nConnections = OsEng.parallelConnection().nConnections();
-        const std::string& hostName = OsEng.parallelConnection().hostName();
-
-        std::string connectionInfo = "";
-        int nClients = static_cast<int>(nConnections);
-        if (status == ParallelConnection::Status::Host) {
-            nClients--;
-            if (nClients == 1) {
-                connectionInfo = "Hosting session with 1 client";
-            } else {
-                connectionInfo =
-                    "Hosting session with " + std::to_string(nClients) + " clients";
-            }
-        } else if (status == ParallelConnection::Status::ClientWithHost) {
-            nClients--;
-            connectionInfo = "Session hosted by '" + hostName + "'";
-        } else if (status == ParallelConnection::Status::ClientWithoutHost) {
-            connectionInfo = "Host is disconnected";
-        }
-
-        if (status == ParallelConnection::Status::ClientWithHost ||
-            status == ParallelConnection::Status::ClientWithoutHost) {
-            connectionInfo += "\n";
-            if (nClients > 2) {
-                std::string c = std::to_string(nClients - 1);
-                connectionInfo += "You and " + c + " more clients are tuned in";
-            } else if (nClients == 2) {
-                std::string c = std::to_string(nClients - 1);
-                connectionInfo += "You and " + c + " more client are tuned in";
-            } else if (nClients == 1) {
-                connectionInfo += "You are the only client";
-            }
-        }
-
-        if (!connectionInfo.empty()) {
-            RenderFontCr(
-                *_fontInfo,
-                penPosition,
-                connectionInfo.c_str()
-            );
-        }
-
-
-#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
-    bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
-    double currentTime = OsEng.timeManager().time().j2000Seconds();
-
-    //if (MissionManager::ref().hasCurrentMission()) {
-
-    //    const Mission& mission = MissionManager::ref().currentMission();
-
-    //        if (mission.phases().size() > 0) {
-    //            static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
-    //            //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
-    //            static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
-    //            static const glm::vec4 missionProgressColor = currentMissionColor;
-    //           // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
-    //            static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
-
-    //            // Add spacing
-    //            RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
-
-    //            auto phaseTrace = mission.phaseTrace(currentTime);
-
-    //            if (phaseTrace.size()) {
-    //                const MissionPhase& phase = phaseTrace.back().get();
-    //                std::string title = "Current Mission Phase: " + phase.name();
-    //                RenderFontCr(
-    //                    *_fontInfo,
-    //                    penPosition,
-    //                    missionProgressColor,
-    //                    title.c_str()
-    //                );
-    //                double remaining = phase.timeRange().end - currentTime;
-    //                float t = static_cast<float>(
-    //                    1.0 - remaining / phase.timeRange().duration()
-    //                );
-    //                std::string progress = progressToStr(25, t);
-    //                //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
-    //                //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
-    //            }
-    //            else {
-    //                RenderFontCr(
-    //                    *_fontInfo,
-    //                    penPosition,
-    //                    nextMissionColor,
-    //                    "Next Mission:"
-    //                );
-    //                double remaining = mission.timeRange().start - currentTime;
-    //                RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
-    //                    "%.0f s", remaining);
-    //            }
-
-    //            bool showAllPhases = false;
-
-    //            typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
-    //            std::stack<PhaseWithDepth> S;
-    //            int pixelIndentation = 20;
-    //            S.push({ &mission, 0 });
-    //            while (!S.empty()) {
-    //                const MissionPhase* phase = S.top().first;
-    //                int depth = S.top().second;
-    //                S.pop();
-
-    //                bool isCurrentPhase = phase->timeRange().includes(currentTime);
-
-    //                penPosition.x += depth * pixelIndentation;
-    //                if (isCurrentPhase) {
-    //                    double remaining = phase->timeRange().end - currentTime;
-    //                    float t = static_cast<float>(
-    //                        1.0 - remaining / phase->timeRange().duration()
-    //                    );
-    //                    std::string progress = progressToStr(25, t);
-    //                    RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
-    //                        "%s  %s %.1f %%",
-    //                        phase->name().c_str(),
-    //                        progress.c_str(),
-    //                        t * 100
-    //                        );
-    //                }
-    //                else {
-    //                    RenderFontCr(
-    //                        *_fontInfo,
-    //                        penPosition,
-    //                        nonCurrentMissionColor,
-    //                        phase->name().c_str()
-    //                    );
-    //                }
-    //                penPosition.x -= depth * pixelIndentation;
-
-    //                if (isCurrentPhase || showAllPhases) {
-    //                    // phases are sorted increasingly by start time, and will be
-    //                    // popped last-in-first-out from the stack, so add them in
-    //                    // reversed order.
-    //                    int indexLastPhase = static_cast<int>(
-    //                        phase->phases().size()
-    //                    ) - 1;
-    //                    for (int i = indexLastPhase; 0 <= i; --i) {
-    //                        S.push({ &phase->phases()[i], depth + 1 });
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-
-
-
-        if (openspace::ImageSequencer::ref().isReady()) {
-            penPosition.y -= 25.f;
-
-            glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
-
-            if (hasNewHorizons) {
-                try {
-                    double lt;
-                    glm::dvec3 p = SpiceManager::ref().targetPosition(
-                        "PLUTO",
-                        "NEW HORIZONS",
-                        "GALACTIC",
-                        {},
-                        currentTime,
-                        lt
-                    );
-                    psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-                        p.x,
-                        p.y,
-                        p.z
-                    );
-                    float a, b;
-                    glm::dvec3 radii;
-                    SpiceManager::ref().getValue("PLUTO", "RADII", radii);
-                    a = static_cast<float>(radii.x);
-                    b = static_cast<float>(radii.y);
-                    float radius = (a + b) / 2.f;
-                    float distToSurf = glm::length(nhPos.vec3()) - radius;
-
-                    RenderFont(*_fontInfo,
-                               penPosition,
-                               "Distance to Pluto: % .1f (KM)",
-                               distToSurf
-                    );
-                    penPosition.y -= _fontInfo->height();
-                }
-                catch (...) {
-                    // @CLEANUP:  This is bad as it will discard all exceptions
-                    // without telling us about it! ---abock
-                }
-            }
-
-            double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() -
-                               currentTime;
-            float t = static_cast<float>(
-                1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength()
-            );
-
-            std::string str = SpiceManager::ref().dateFromEphemerisTime(
-                ImageSequencer::ref().getNextCaptureTime(),
-                "YYYY MON DD HR:MN:SC"
-            );
-
-            glm::vec4 active(0.6, 1, 0.00, 1);
-            glm::vec4 brigther_active(0.9, 1, 0.75, 1);
-
-            if (remaining > 0) {
-                std::string progress = progressToStr(25, t);
-                brigther_active *= (1 - t);
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    active * t + brigther_active,
-                    "Next instrument activity:"
-                    );
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    active * t + brigther_active,
-                    "%.0f s %s %.1f %%",
-                    remaining, progress.c_str(), t * 100
-                    );
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    active,
-                    "Data acquisition time: %s",
-                    str.c_str()
-                    );
-            }
-            std::pair<double, std::string> nextTarget =
-                ImageSequencer::ref().getNextTarget();
-            std::pair<double, std::string> currentTarget =
-                ImageSequencer::ref().getCurrentTarget();
-
-            if (currentTarget.first > 0.0) {
-                int timeleft = static_cast<int>(nextTarget.first - currentTime);
-
-                int hour = timeleft / 3600;
-                int second = timeleft % 3600;
-                int minute = second / 60;
-                second = second % 60;
-
-                std::string hh, mm, ss;
-
-                if (hour   < 10)
-                    hh.append("0");
-                if (minute < 10)
-                    mm.append("0");
-                if (second < 10)
-                    ss.append("0");
-
-                hh.append(std::to_string(hour));
-                mm.append(std::to_string(minute));
-                ss.append(std::to_string(second));
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    targetColor,
-                    "Data acquisition adjacency: [%s:%s:%s]",
-                    hh.c_str(), mm.c_str(), ss.c_str()
-                    );
-
-                penPosition.y -= _fontInfo->height();
-
-                std::map<std::string, bool> activeMap =
-                    ImageSequencer::ref().getActiveInstruments();
-                glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
-                glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    active,
-                    "Active Instruments:"
-                    );
-
-                for (auto m : activeMap) {
-                    if (m.second == false) {
-                        RenderFont(*_fontInfo,
-                            penPosition,
-                            glm::vec4(0.3, 0.3, 0.3, 1),
-                            "| |"
-                        );
-                        RenderFontCr(*_fontInfo,
-                            penPosition,
-                            glm::vec4(0.3, 0.3, 0.3, 1),
-                            "    %5s",
-                            m.first.c_str()
-                        );
-
-                    }
-                    else {
-                        RenderFont(*_fontInfo,
-                            penPosition,
-                            glm::vec4(0.3, 0.3, 0.3, 1),
-                            "|"
-                        );
-                        if (m.first == "NH_LORRI") {
-                            RenderFont(*_fontInfo,
-                                penPosition,
-                                firing,
-                                " + "
-                            );
-                        }
-                        RenderFont(*_fontInfo,
-                            penPosition,
-                            glm::vec4(0.3, 0.3, 0.3, 1),
-                            "  |"
-                        );
-                        RenderFontCr(*_fontInfo,
-                            penPosition,
-                            active,
-                            "    %5s",
-                            m.first.c_str()
-                        );
-                    }
-                }
-            }
-        }
-#endif
     }
 }
 

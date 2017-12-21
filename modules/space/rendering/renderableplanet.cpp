@@ -47,14 +47,14 @@
 #include <fstream>
 
 namespace {
-    const char* KeyGeometry = "Geometry";
-    const char* KeyRadius = "Radius";
+    constexpr const char* KeyGeometry = "Geometry";
+    constexpr const char* KeyRadius = "Radius";
 
-    static const char* _loggerCat = "RenderablePlanet";
+    constexpr const char* _loggerCat = "RenderablePlanet";
 
-    const char* keyShadowGroup                   = "Shadow_Group";
-    const char* keyShadowSource                  = "Source";
-    const char* keyShadowCaster                  = "Caster";
+    constexpr const char* keyShadowGroup                   = "Shadow_Group";
+    constexpr const char* keyShadowSource                  = "Source";
+    constexpr const char* keyShadowCaster                  = "Caster";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
@@ -342,29 +342,33 @@ void RenderablePlanet::initializeGL() {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowNightProgram",
-            "${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl",
-            "${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl");
+            absPath("${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl")
+        );
     }
     else if (_programObject == nullptr && _shadowEnabled) {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowProgram",
-            "${MODULE_SPACE}/shaders/shadow_vs.glsl",
-            "${MODULE_SPACE}/shaders/shadow_fs.glsl");
+            absPath("${MODULE_SPACE}/shaders/shadow_vs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/shadow_fs.glsl")
+        );
     }
     else if (_programObject == nullptr && _hasNightTexture) {
         // Night texture program
         _programObject = renderEngine.buildRenderProgram(
             "nightTextureProgram",
-            "${MODULE_SPACE}/shaders/nighttexture_vs.glsl",
-            "${MODULE_SPACE}/shaders/nighttexture_fs.glsl");
+            absPath("${MODULE_SPACE}/shaders/nighttexture_vs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/nighttexture_fs.glsl")
+        );
     }
     else if (_programObject == nullptr) {
         // pscstandard
         _programObject = renderEngine.buildRenderProgram(
             "pscstandard",
-            "${MODULE_SPACE}/shaders/renderableplanet_vs.glsl",
-            "${MODULE_SPACE}/shaders/renderableplanet_fs.glsl");
+            absPath("${MODULE_SPACE}/shaders/renderableplanet_vs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/renderableplanet_fs.glsl")
+        );
     }
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);

@@ -48,19 +48,32 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 
 #ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+// CPL throws warning about missing DLL interface
+#pragma warning (disable : 4251)
+#endif // _MSC_VER
+
 #include <cpl_string.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
 #endif // GLOBEBROWSING_USE_GDAL
 
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
-    const char* _loggerCat = "GlobeBrowsingModule";
+    constexpr const char* _loggerCat = "GlobeBrowsingModule";
 
 #ifdef GLOBEBROWSING_USE_GDAL
     openspace::GlobeBrowsingModule::Capabilities
@@ -286,7 +299,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
 #endif  // GLOBEBROWSING_USE_GDAL
         },
         {
-            "${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"
+            absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
         },
         {
             // Documentation

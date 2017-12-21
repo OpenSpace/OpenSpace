@@ -83,6 +83,15 @@ public:
     virtual scripting::LuaLibrary luaLibrary() const;
 
     /**
+     * Returns the Lua libraries that are defined by objects contained in this
+     * OpenSpaceModule. Note that the #luaLibrary library is *not* contained in this list
+     * as this is solely the list of libraries as defined by, for example Renderables,
+     * defined in the OpenSpaceModule.
+     * \return A list of libraries defined by items contained in this OpenSpaceModule
+     */
+    virtual std::vector<scripting::LuaLibrary> luaLibraries() const;
+
+    /**
      * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless
      * overwritten, it returns an OpenGL version of <code>3.3</code>.
      * \return The minimum required OpenGL version of this OpenSpaceModule

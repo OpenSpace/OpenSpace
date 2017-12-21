@@ -43,6 +43,7 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class ConfigurationManager;
+class Dashboard;
 class DownloadManager;
 class GUI;
 class LoadingScreen;
@@ -107,6 +108,7 @@ public:
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
     LuaConsole& console();
+    Dashboard& dashboard();
     DownloadManager& downloadManager();
     ModuleEngine& moduleEngine();
     LoadingScreen& loadingScreen();
@@ -183,6 +185,7 @@ private:
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<SceneManager> _sceneManager;
+    std::unique_ptr<Dashboard> _dashboard;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;

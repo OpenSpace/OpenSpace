@@ -52,14 +52,14 @@
 #endif
 
 namespace {
-    const char* _loggerCat = "RenderablePlanetProjection";
+    constexpr const char* _loggerCat = "RenderablePlanetProjection";
 
-    const char* KeyGeometry = "Geometry";
-    const char* KeyProjection = "Projection";
+    constexpr const char* KeyGeometry = "Geometry";
+    constexpr const char* KeyProjection = "Projection";
 
-    const char* KeyRadius = "Geometry.Radius";
+    constexpr const char* KeyRadius = "Geometry.Radius";
 //    const char* keyShading = "PerformShading";
-    const char* _mainFrame = "GALACTIC";
+    constexpr const char* _mainFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
@@ -226,14 +226,18 @@ RenderablePlanetProjection::~RenderablePlanetProjection() {}
 void RenderablePlanetProjection::initializeGL() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "projectiveProgram",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl"
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl")
     );
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build(
         "fboPassProgram",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_fs.glsl"
+        absPath(
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_vs.glsl"
+        ),
+        absPath(
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_fs.glsl"
+        )
     );
 
     loadTextures();

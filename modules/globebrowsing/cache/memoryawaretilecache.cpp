@@ -36,7 +36,7 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "MemoryAwareTileCache";
+    constexpr const char* _loggerCat = "MemoryAwareTileCache";
 
     static const openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
         "CpuAllocatedTileData",
@@ -267,7 +267,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
             ghoul_assert(texture->dataOwnership(),
                 "Texture must have ownership of old data to avoid leaks");
             texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
-            size_t expectedDataSize = texture->expectedPixelDataSize();
+            [[ maybe_unused ]] size_t expectedDataSize = texture->expectedPixelDataSize();
             size_t numBytes = rawTile->textureInitData->totalNumBytes();
             ghoul_assert(expectedDataSize == numBytes, "Pixel data size is incorrect");
             _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;

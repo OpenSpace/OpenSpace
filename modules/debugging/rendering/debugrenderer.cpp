@@ -31,11 +31,12 @@
 #include <memory>
 #include <ostream>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <iostream>
 
 namespace {
-    const char* _loggerCat = "DebugRenderer";
+    constexpr const char* _loggerCat = "DebugRenderer";
 } // namespace
 
 namespace openspace {
@@ -45,9 +46,9 @@ DebugRenderer* DebugRenderer::_reference = nullptr;
 DebugRenderer::DebugRenderer()  {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "BasicDebugShader",
-        "${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl",
-        "${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl"
-        );
+        absPath("${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl"),
+        absPath("${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl")
+    );
 }
 
 DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject)

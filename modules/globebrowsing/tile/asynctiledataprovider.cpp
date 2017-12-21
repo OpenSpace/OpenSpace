@@ -40,7 +40,7 @@
 namespace openspace::globebrowsing {
 
 namespace {
-    const char* _loggerCat = "AsyncTileDataProvider";
+    constexpr const char* _loggerCat = "AsyncTileDataProvider";
 } // namespace
 
 AsyncTileDataProvider::AsyncTileDataProvider(const std::string& name,

@@ -41,9 +41,9 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const char* _loggerCat = "ScriptEngine";
+    constexpr const char* _loggerCat = "ScriptEngine";
 
-    const int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
+    constexpr int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
 } // namespace
 
 namespace openspace::scripting {
@@ -271,7 +271,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
     for (const std::string& script : library.scripts) {
         // First we run the script to set its values in the current state
-        ghoul::lua::runScriptFile(state, absPath(script));
+        ghoul::lua::runScriptFile(state, script);
 
         library.documentations.clear();
 

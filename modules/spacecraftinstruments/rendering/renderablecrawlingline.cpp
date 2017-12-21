@@ -32,6 +32,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 #include <ghoul/glm.h>
@@ -139,8 +140,8 @@ void RenderableCrawlingLine::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram(
         "RenderableCrawlingLine",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl"
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl")
     );
 
     glGenVertexArrays(1, &_vao);

@@ -5,9 +5,10 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
+    openspace.set_default_dashboard()
 
-    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
-    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/naif0012.tls"))
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/pck00010.tpc"))
 
     openspace.time.setTime("2011 AUG 06 00:00:00")
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))

@@ -242,9 +242,9 @@ void RenderableFieldlines::initializeGL() {
 
     _program = OsEng.renderEngine().buildRenderProgram(
         "Fieldline",
-        "${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl",
-        "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
-        "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
+        absPath("${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl"),
+        absPath("${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl"),
+        absPath("${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl")
     );
 }
 

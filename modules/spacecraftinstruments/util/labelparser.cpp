@@ -47,11 +47,11 @@
 #include <vector>
 
 namespace {
-    const char* _loggerCat = "LabelParser";
-    const char* keySpecs   = "Read";
-    const char* keyConvert = "Convert";
+    constexpr const char* _loggerCat = "LabelParser";
+    constexpr const char* keySpecs   = "Read";
+    constexpr const char* keyConvert = "Convert";
 
-    const char* PlaybookIdentifierName = "LabelParser";
+    constexpr const char* PlaybookIdentifierName = "LabelParser";
 } // namespace
 
 namespace openspace {

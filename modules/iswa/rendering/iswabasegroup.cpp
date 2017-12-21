@@ -36,7 +36,7 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
-    const char* _loggerCat = "IswaBaseGroup";
+    constexpr const char* _loggerCat = "IswaBaseGroup";
     using json = nlohmann::json;
 
     static const openspace::properties::Property::PropertyInfo EnabledInfo = {

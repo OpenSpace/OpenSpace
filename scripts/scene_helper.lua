@@ -12,6 +12,14 @@ openspace.documentation = {
         Documentation = "This function sets the default GUI sorting for the space " ..
         "environment to increasing size, from solar system, through Milky Way, " ..
         "Universe and finishing with other elements"
+    },
+    {
+        Name = "set_default_dashboard",
+        Arguments = "",
+        Documentation = "This function sets the default values for the dashboard " ..
+        "consisting of 'DashboardItemDate', 'DashboardItemSimulationIncrement', " ..
+        "'DashboardItemDistance', 'DashboardItemFramerate', and " ..
+        "'DashboardItemParallelConnection'."
     }
 }
 
@@ -21,6 +29,28 @@ openspace.mark_interesting_nodes = function(nodes)
             openspace.addTag(n, "GUI.Interesting")
         end
     end
+end
+
+openspace.set_default_dashboard = function()
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDate"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSimulationIncrement"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemFramerate"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemParallelConnection"
+    })
 end
 
 openspace.set_default_gui_sorting = function()

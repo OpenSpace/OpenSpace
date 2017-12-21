@@ -56,7 +56,8 @@ function (set_openspace_compile_settings project)
         "/w44548"   # expression before comma has no effect; expected expression with side-effect
         "/w44549"   # 'operator': operator before comma has no effect; did you intend 'operator'?
         "/w44555"   # expression has no effect; expected expression with side-effect
-        "/w44574"   # 'identifier' is defined to be '0': did you mean to use '#if identifier'?
+        # This is disabled until GLM is updated to version 0.9.9 that removes occurrance of this warning
+        # "/w44574"   # 'identifier' is defined to be '0': did you mean to use '#if identifier'?
         "/w44608"   # 'symbol1' has already been initialized by another union member in the initializer list, 'symbol2'
         "/w44619"   # #pragma warning: there is no warning number 'number'
         "/w44628"   # digraphs not supported with -Ze. Character sequence 'digraph' not interpreted as alternate token for 'char'

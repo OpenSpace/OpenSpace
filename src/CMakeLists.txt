@@ -120,6 +120,9 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/properties/vector/vec4property.cpp
     ${OPENSPACE_BASE_DIR}/src/query/query.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/dashboard.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
@@ -286,6 +289,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec4property.h
     ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h

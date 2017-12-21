@@ -44,20 +44,20 @@
 #include <string>
 
 namespace {
-    const char* _loggerCat        = "RenderablePoints";
-    const char* KeyFile           = "File";
-    const char* keyColor          = "Color";
-    const char* keyUnit           = "Unit";
-    const char* MeterUnit         = "m";
-    const char* KilometerUnit     = "Km";
-    const char* ParsecUnit        = "pc";
-    const char* KiloparsecUnit    = "Kpc";
-    const char* MegaparsecUnit    = "Mpc";
-    const char* GigaparsecUnit    = "Gpc";
-    const char* GigalightyearUnit = "Gly";
+    constexpr const char* _loggerCat        = "RenderablePoints";
+    constexpr const char* KeyFile           = "File";
+    constexpr const char* keyColor          = "Color";
+    constexpr const char* keyUnit           = "Unit";
+    constexpr const char* MeterUnit         = "m";
+    constexpr const char* KilometerUnit     = "Km";
+    constexpr const char* ParsecUnit        = "pc";
+    constexpr const char* KiloparsecUnit    = "Kpc";
+    constexpr const char* MegaparsecUnit    = "Mpc";
+    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const char* GigalightyearUnit = "Gly";
 
-    const int8_t CurrentCacheVersion = 1;
-    const double PARSEC = 0.308567756E17;
+    constexpr int8_t CurrentCacheVersion = 1;
+    constexpr double PARSEC = 0.308567756E17;
 
     static const openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
@@ -263,15 +263,18 @@ namespace openspace {
     void RenderablePoints::initializeGL() {
         RenderEngine& renderEngine = OsEng.renderEngine();
         if (_hasSpriteTexture) {
-            _program = renderEngine.buildRenderProgram("RenderablePoints",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl");
+            _program = renderEngine.buildRenderProgram(
+                "RenderablePoints",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
+            );
         }
         else {
-            _program = renderEngine.buildRenderProgram("RenderablePoints",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl",
-                "${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl");// ,
-                //"${MODULE_DIGITALUNIVERSE}/shaders/points_gs.glsl");
+            _program = renderEngine.buildRenderProgram(
+                "RenderablePoints",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl")
+            );
         }
     }
 

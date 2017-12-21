@@ -26,7 +26,18 @@
 
 #include <openspace/util/time.h>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+// Boost throws #pragma warning: there is no warning number '4675'
+#pragma warning (disable : 4619)
+#endif // _MSC_VER
+
 #include <ccmc/Kameleon.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
 #include <ghoul/logging/logmanager.h>
 
 

@@ -26,10 +26,27 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
-    openspace.set_default_gui_sorting()
+    openspace.set_default_dashboard()
 
-    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
-    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSpacing",
+        Spacing = 50
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Node",
+        SourceNodeName = "NewHorizons",
+        DestinationType = "Node Surface",
+        DestinationNodeName = "Pluto"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemInstruments"
+    })
+
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/naif0012.tls"))
+    openspace.spice.loadKernel(openspace.absPath("${SPICE}/pck00010.tpc"))
 
     openspace.time.setTime("2015-07-14T08:00:00.00")
 
@@ -194,6 +211,9 @@ function postInitialization()
     openspace.mark_interesting_nodes({
         "Pluto", "NewHorizons", "Charon"
     })
+
+    openspace.printInfo("Receiving four errors about SCLK_DATA_TYPE_98 are expected.")
+
 end
 
 return {

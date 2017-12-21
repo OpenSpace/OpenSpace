@@ -32,6 +32,7 @@
 #include <openspace/documentation/verifier.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -179,9 +180,9 @@ bool RenderableSphericalGrid::isReady() const {
 
 void RenderableSphericalGrid::initializeGL() {
     _gridProgram = OsEng.renderEngine().buildRenderProgram(
-            "GridProgram",
-            "${MODULE_BASE}/shaders/grid_vs.glsl",
-            "${MODULE_BASE}/shaders/grid_fs.glsl"
+        "GridProgram",
+        absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
     );
 
     glGenVertexArrays(1, &_vaoID);

@@ -223,8 +223,8 @@ void LuaConsole::initialize() {
 
     _program = ghoul::opengl::ProgramObject::Build(
         "Console",
-        "${SHADERS}/luaconsole.vert",
-        "${SHADERS}/luaconsole.frag"
+        absPath("${SHADERS}/luaconsole.vert"),
+        absPath("${SHADERS}/luaconsole.frag")
     );
 
     GLfloat data[] = {

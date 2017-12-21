@@ -65,7 +65,7 @@
 #include <openspace/interaction/navigationhandler.h>
 
 namespace {
-    const char* _loggerCat = "TouchInteraction";
+    constexpr const char* _loggerCat = "TouchInteraction";
 
     static const openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
@@ -1034,11 +1034,11 @@ void TouchInteraction::step(double dt) {
             directionToCenter = normalize(-centerToCam);
             dvec3 lookUpWhenFacingCenter = globalCamRot *
                                            dvec3(_camera->lookUpVectorCameraSpace());
-            dmat4 lookAtMat = lookAt(
+            dmat4 lookAtMatrix = lookAt(
                 dvec3(0, 0, 0),
                 directionToCenter,
                 lookUpWhenFacingCenter);
-            globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
+            globalCamRot = normalize(quat_cast(inverse(lookAtMatrix)));
         }
         { // Zooming
             centerToBoundingSphere = -directionToCenter * boundingSphere;
