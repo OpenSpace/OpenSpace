@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/filesystem>
 
 #include <memory>
 #include <fstream>
@@ -59,8 +60,8 @@ void RenderableSolarImageryProjection::initializeGL() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("SpacecraftImageSphereProgram",
-            "${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_vs.glsl",
-            "${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_fs.glsl"
+            absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_vs.glsl"),
+            absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_fs.glsl")
             );
         if (!_shader) {
             return;

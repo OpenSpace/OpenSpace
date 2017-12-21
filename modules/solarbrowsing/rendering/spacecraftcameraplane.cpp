@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,6 +28,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/filesystem>
 
 namespace {
   const double SUN_RADIUS = (1391600000.0 * 0.50);
@@ -96,8 +97,8 @@ bool SpacecraftCameraPlane::initialize() {
   if (!_planeShader) {
       RenderEngine& renderEngine = OsEng.renderEngine();
       _planeShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
-          "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl",
-          "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl"
+          absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl"),
+          absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl")
           );
       if (!_planeShader) {
           return false;
@@ -107,8 +108,8 @@ bool SpacecraftCameraPlane::initialize() {
   if (!_frustumShader) {
       RenderEngine& renderEngine = OsEng.renderEngine();
       _frustumShader = renderEngine.buildRenderProgram("SpacecraftFrustumProgram",
-          "${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl",
-          "${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl"
+          absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl"),
+          absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl")
           );
       if (!_frustumShader) {
           return false;
