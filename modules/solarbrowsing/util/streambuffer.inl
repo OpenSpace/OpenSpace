@@ -26,7 +26,7 @@ namespace openspace {
 
 template<typename T>
 StreamBuffer<T>::StreamBuffer()
-    : _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(4))
+    : _concurrentJobManager(ThreadPool(4))
 {}
 
 template<typename T>
@@ -54,7 +54,7 @@ void StreamBuffer<T>::enqueueJob(std::shared_ptr<StreamJob<T>> job) {
 template<typename T>
 std::shared_ptr<T> StreamBuffer<T>::popFinishedJob() {
     while (_concurrentJobManager.numFinishedJobs() > 0) {
-        std::shared_ptr<globebrowsing::Job<T>> job = _concurrentJobManager.popFinishedJob();
+        std::shared_ptr<Job<T>> job = _concurrentJobManager.popFinishedJob();
         std::shared_ptr<StreamJob<T>> streamJob = std::dynamic_pointer_cast<StreamJob<T>>(job);
 
         // If id is not enqueued simply remove it

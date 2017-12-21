@@ -52,11 +52,15 @@ class RenderableSolarImageryProjection : public Renderable {
 public:
     RenderableSolarImageryProjection(const ghoul::Dictionary& dictionary);
 
-    bool initialize() override;
-    bool deinitialize() override;
+    void initialize() override;
+    void deinitialize() override;
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

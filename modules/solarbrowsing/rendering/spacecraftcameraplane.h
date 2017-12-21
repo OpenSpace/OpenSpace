@@ -44,7 +44,7 @@ public:
     void update();
     void createPlaneAndFrustum(const double& moveDistance);
     // TODO(mnoven) : Pre process image, no need to set uniforms
-    void setUniforms();
+    //void setUniforms();
     bool isReady();
     bool destroy();
 

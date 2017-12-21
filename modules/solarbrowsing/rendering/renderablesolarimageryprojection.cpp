@@ -55,19 +55,7 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
     }
 }
 
-bool RenderableSolarImageryProjection::initialize() {
-    const std::vector<SceneGraphNode*>& allNodes
-          = OsEng.renderEngine().scene()->allSceneGraphNodes();
-    for (auto node : allNodes) {
-        if (dynamic_cast<RenderableSolarImagery*>(node->renderable())) {
-            auto thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
-            thisNode->addDependency(*node);
-        }
-
-    }
-    _solarImageryDependencies
-         = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
-
+void RenderableSolarImageryProjection::initializeGL() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("SpacecraftImageSphereProgram",
@@ -75,7 +63,7 @@ bool RenderableSolarImageryProjection::initialize() {
             "${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_fs.glsl"
             );
         if (!_shader) {
-            return false;
+            return;
         }
     }
 
@@ -83,17 +71,34 @@ bool RenderableSolarImageryProjection::initialize() {
     PowerScaledScalar planetSize(glm::vec2(6.96701f, 8.f));
     _sphere = std::make_unique<PowerScaledSphere>(PowerScaledSphere(planetSize, 100));
     _sphere->initialize();
-
-    return isReady();
 }
 
-bool RenderableSolarImageryProjection::deinitialize() {
+void RenderableSolarImageryProjection::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-    return true;
+}
+
+void RenderableSolarImageryProjection::initialize() {
+    const std::vector<SceneGraphNode*>& allNodes
+          = OsEng.renderEngine().scene()->allSceneGraphNodes();
+    for (const auto node : allNodes) {
+        auto renderable = dynamic_cast<RenderableSolarImagery*>(node->renderable());
+        if (renderable) {
+            //_renderableSolarImageries.push_back(renderable);
+            auto thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
+            thisNode->addDependency(*node, ghoul::Boolean::No);
+        }
+
+    }
+    _solarImageryDependencies
+         = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
+}
+
+void RenderableSolarImageryProjection::deinitialize() {
+    return;
 }
 
 bool RenderableSolarImageryProjection::isReady() const {
@@ -106,7 +111,7 @@ void RenderableSolarImageryProjection::update(const UpdateData& data) {
     }
 }
 
-void RenderableSolarImageryProjection::render(const RenderData& data) {
+void RenderableSolarImageryProjection::render(const RenderData& data, RendererTasks& rendererTask) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *

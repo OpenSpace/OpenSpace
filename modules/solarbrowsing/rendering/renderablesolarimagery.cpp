@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -40,26 +40,60 @@ using namespace std::chrono;
 typedef std::chrono::high_resolution_clock Clock;
 
 namespace {
-    static const std::string _loggerCat = "RenderableSolarImagery";
+    static const char* _loggerCat = "RenderableSolarImagery";
     const double EPSILON = std::numeric_limits<double>::epsilon();
     const unsigned int MAX_IMAGE_RESOLUTION = 4096;
+
+    static const openspace::properties::Property::PropertyInfo ActiveInstrumentsInfo = {
+        "activeInstrument", "Active instrument", "The active instrument of the current spacecraft imagery"
+    };
+    static const openspace::properties::Property::PropertyInfo ContrastValueInfo = {
+        "contrastValue", "Contrast", "Contrast of the current spacecraft imagery"
+    };
+    static const openspace::properties::Property::PropertyInfo EnableBorderInfo = {
+        "enableBorder", "Enable Border", "Enables border around the current spacecraft imagery"
+    };
+    static const openspace::properties::Property::PropertyInfo EnableFrustumInfo = {
+        "enableFrustum", "Enable frustum", "Enables frustum around the current spacecraft imagery"
+    };
+    static const openspace::properties::Property::PropertyInfo GammaValueInfo = {
+        "gammaValue", "Gamma", "Gamma of the current spacecraft imagery"
+    };
+    static const openspace::properties::Property::PropertyInfo MinRealTimeUpdateIntervalInfo = {
+        "minRealTimeUpdateInterval", "Min Update Interval", "@TODO"
+    };
+    static const openspace::properties::Property::PropertyInfo MoveFactorInfo = {
+        "moveFactor", "Move Factor", "@TODO"
+    };
+    static const openspace::properties::Property::PropertyInfo PlaneOpacityInfo = {
+        "planeOpacity", "Plane Opacity", "@TODO"
+    };
+    static const openspace::properties::Property::PropertyInfo ResolutionLevelInfo = {
+        "resolutionLevel", "Resolution Level", "@TODO"
+    };
+    static const openspace::properties::Property::PropertyInfo UsePBOInfo = {
+        "usePBO", "Use PBO", "@TODO"
+    };
+    static const openspace::properties::Property::PropertyInfo VerboseModeInfo = {
+        "verboseMode", "Verbose Mode", "@TODO"
+    };
 }
 
 namespace openspace {
 
 RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
-    , _enableBorder("enableBorder", "Enable Border", false)
-    , _enableFrustum("enableFrustum", "Enable Frustum", false)
-    , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 65, 0, 300)
-    , _moveFactor("moveFactor", "Move Factor" , 1.0, 0.0, 1.0)
-    , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
-    , _resolutionLevel("resolutionlevel", "Level of detail", 2, 0, 5)
-    , _usePBO("usePBO", "Use PBO", true)
-    , _verboseMode("verboseMode", "Verbose Mode", false)
+    , _activeInstruments(ActiveInstrumentsInfo)
+    , _contrastValue(ContrastValueInfo, 0.0, -15.0, 15.0)
+    , _enableBorder(EnableBorderInfo, false)
+    , _enableFrustum(EnableFrustumInfo, false)
+    , _gammaValue(GammaValueInfo, 0.9, 0.1, 10.0)
+    , _minRealTimeUpdateInterval(MinRealTimeUpdateIntervalInfo, 65, 0, 300)
+    , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
+    , _planeOpacity(PlaneOpacityInfo, 1.0, 0.0, 1.0)
+    , _resolutionLevel(ResolutionLevelInfo, 2, 0, 5)
+    , _usePBO(UsePBOInfo, true)
+    , _verboseMode(VerboseModeInfo, false)
 {
 
     if (!dictionary.getValue("Name", _nodeName)) {
@@ -80,9 +114,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap);
 
     // Add GUI names
-    unsigned int i = 0;
+    unsigned int guiNameCount = 0;
     for (auto& el : _imageMetadataMap) {
-        _activeInstruments.addOption(i++, el.first);
+        _activeInstruments.addOption(guiNameCount++, el.first);
     }
 
     _currentActiveInstrument
@@ -92,37 +126,6 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     if (_imageMetadataMap.size() == 0) {
         LERROR("Images map is empty! Check your path");
     }
-
-    // Initialize PBO's
-    for (int i = 0; i < SOLAR_BUFFER_SIZE; ++i) {
-        _pbos[i] = std::make_unique<PixelBufferObject>(MAX_IMAGE_RESOLUTION * MAX_IMAGE_RESOLUTION * sizeof(IMG_PRECISION));
-    }
-
-    // Get first image size
-    auto& stateSequenceStart = _imageMetadataMap[_currentActiveInstrument];
-    auto& stateStart = stateSequenceStart.getState(OsEng.timeManager().time().j2000Seconds());
-    std::shared_ptr<ImageMetadata> imStart = stateStart.contents();
-    _imageSize = imStart->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
-
-    _texture =  std::make_unique<Texture>(
-                    nullptr,
-                    glm::size3_t(_imageSize, _imageSize, 1),
-                    ghoul::opengl::Texture::Red, // Format of the pixeldata
-                    GL_R8, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
-                    GL_UNSIGNED_BYTE, // Type of data
-                    Texture::FilterMode::Linear,
-                    Texture::WrappingMode::ClampToEdge
-                );
-
-    _texture->setDataOwnership(ghoul::Boolean::No);
-    _texture->uploadTexture();
-
-    // Initialize time
-    _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-    _lastUpdateRealTime = _realTime;
-
-    performImageTimestep(OsEng.timeManager().time().j2000Seconds());
-    listen();
 
     addProperty(_planeOpacity);
     addProperty(_enableBorder);
@@ -149,7 +152,7 @@ void RenderableSolarImagery::listen() {
     _activeInstruments.onChange([this]() {
         _pboIsDirty = false;
         _currentActiveInstrument
-               = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
+            = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
         // Update image size
         auto& stateSequence = _imageMetadataMap[_currentActiveInstrument];
         auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
@@ -185,6 +188,45 @@ void RenderableSolarImagery::listen() {
     _deltaTimeLast = 1.0;
 }
 
+void RenderableSolarImagery::initializeGL() {
+    // Initialize PBO's
+    for (size_t i = 0; i < SOLAR_BUFFER_SIZE; ++i) {
+        _pbos[i] = std::make_unique<PixelBufferObject>(MAX_IMAGE_RESOLUTION * MAX_IMAGE_RESOLUTION * sizeof(IMG_PRECISION));
+    }
+
+    // Get first image size
+    auto& stateSequenceStart = _imageMetadataMap[_currentActiveInstrument];
+    auto& stateStart = stateSequenceStart.getState(OsEng.timeManager().time().j2000Seconds());
+    std::shared_ptr<ImageMetadata> imStart = stateStart.contents();
+    _imageSize = imStart->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
+
+    _texture = std::make_unique<Texture>(
+        nullptr,
+        glm::size3_t(_imageSize, _imageSize, 1),
+        ghoul::opengl::Texture::Format::Red, // Format of the pixeldata
+        GL_R8, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+        GL_UNSIGNED_BYTE, // Type of data
+        Texture::FilterMode::Linear,
+        Texture::WrappingMode::ClampToEdge
+        );
+
+    _texture->setDataOwnership(ghoul::Boolean::No);
+    _texture->uploadTexture();
+
+    // Initialize time
+    _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+    _lastUpdateRealTime = _realTime;
+
+    performImageTimestep(OsEng.timeManager().time().j2000Seconds());
+    listen();
+
+    _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(_moveFactor);
+}
+
+void RenderableSolarImagery::deinitializeGL() {
+    _spacecraftCameraPlane->destroy();
+}
+
 void RenderableSolarImagery::clearBuffer() {
     _pboIsDirty = false;
     _streamBuffer.clear();
@@ -211,13 +253,12 @@ bool RenderableSolarImagery::isReady() const {
     return _spacecraftCameraPlane->isReady() && _texture != nullptr;
 }
 
-bool RenderableSolarImagery::initialize() {
-    _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(_moveFactor);
-    return isReady();
+void RenderableSolarImagery::initialize() {
+    return;
 }
 
-bool RenderableSolarImagery::deinitialize() {
-    return _spacecraftCameraPlane->destroy();
+void RenderableSolarImagery::deinitialize() {
+    return;
 }
 
 void RenderableSolarImagery::uploadImageDataToPBO() {
@@ -250,7 +291,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         _texture->bind();
         // Send async to GPU by coping from PBO to texture objects
         glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-                        GLint(_texture->format()), _texture->dataType(), nullptr);
+                        GL_RED, _texture->dataType(), nullptr);
         _currentPbo->deactivate();
 
         _busyPbos.erase(_currentPbo->id());
@@ -267,7 +308,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
 
         _texture->bind();
         glTexImage2D(_texture->type(), 0, _texture->internalFormat(), _imageSize,
-                     _imageSize, 0, GLint(_texture->format()), _texture->dataType(),
+                     _imageSize, 0, GL_RED, _texture->dataType(),
                      data);
         delete[] data;
     }
@@ -365,7 +406,7 @@ PixelBufferObject* RenderableSolarImagery::getAvailablePbo() {
     return nullptr;
 }
 
-void RenderableSolarImagery::render(const RenderData& data) {
+void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     if (!isReady() || !isEnabled()) {
         return;
     }

@@ -25,9 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SOLARBROWSING___STREAMBUFFER___H__
 #define __OPENSPACE_MODULE_SOLARBROWSING___STREAMBUFFER___H__
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/other/threadpool.h>
-
+#include <openspace/util/concurrentjobmanager.h>
 #include <iostream>
 
 namespace openspace {
@@ -37,7 +35,7 @@ namespace openspace {
  * been cleared. Override execute and product functions in sub class.
  */
 template<typename T>
-class StreamJob : public globebrowsing::Job<T> {
+class StreamJob : public Job<T> {
 public:
     StreamJob(const std::string& id) : _id(id) {}
     //virtual ~StreamJob() override;
@@ -67,7 +65,7 @@ public:
 
     std::shared_ptr<T> popFinishedJob();
     void clear();
-    globebrowsing::ConcurrentJobManager<T> _concurrentJobManager;
+    ConcurrentJobManager<T> _concurrentJobManager;
 private:
     std::unordered_set<std::string> _enqueuedJobIds;
     std::queue<std::string> _queue;

@@ -56,10 +56,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.h
 
-    # This should be moved to global util
-    ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/threadpool.h
-    ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.h
-    ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -73,7 +72,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.cpp
 
     # This should be moved to global util
-    ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/threadpool.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/threadpool.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

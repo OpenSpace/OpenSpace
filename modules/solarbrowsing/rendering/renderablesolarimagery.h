@@ -53,8 +53,8 @@ class RenderableSolarImagery : public Renderable {
 public:
     RenderableSolarImagery(const ghoul::Dictionary& dictionary);
 
-    void render(const RenderData& data);
-    void update(const UpdateData& data);
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
     void loadTexture();
     void performImageTimestep(const double& osTime);
     void updateTexture();
@@ -131,14 +131,19 @@ private:
     void fillBuffer(const double& dt);
     void listen();
     void loadMetadata(const std::string& rootPath);
+    bool checkBoundaries(const RenderData& data);
     PixelBufferObject* getAvailablePbo();
 
     std::string ISO8601(std::string& datetime);
     void decode(unsigned char* buffer, const std::string& fileame);
-    bool initialize() override;
-    bool deinitialize() override;
+
+    void initialize() override;
+    void deinitialize() override;
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+
     bool isReady() const override;
-    bool checkBoundaries(const RenderData& data);
 };
 
 } // namespace openspace
