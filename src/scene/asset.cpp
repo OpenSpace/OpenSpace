@@ -507,6 +507,7 @@ bool Asset::initialize() {
         LERROR("Failed to initialize asset " << id() << ". " <<
             e.component << ": " << e.message);
         // TODO: rollback;
+        setState(Asset::State::InitializationFailed);
         return false;
     }
 
@@ -522,6 +523,7 @@ bool Asset::initialize() {
                 child->id() << " of " << id() << ". " <<
                 e.component << ": " << e.message);
             // TODO: rollback;
+            setState(Asset::State::InitializationFailed);
             return false;
         }
     }

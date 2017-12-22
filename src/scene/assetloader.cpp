@@ -57,14 +57,26 @@ namespace {
 
     const char* AssetFileSuffix = "asset";
 
-    bool isRelative(const std::string& path) {
-        if (path.size() > 2) {
-            if (path[0] == '.' && path[1] == '/') return true;
+    enum class PathType : int {
+        RelativeToAsset = 0,
+        RelativeToAssetRoot,
+        Absolute
+    };
+
+    PathType classifyPath(const std::string& path) {
+        if (path.size() > 2 && path[0] == '.' && path[1] == '/') {
+            return PathType::RelativeToAsset;
         }
-        if (path.size() > 3) {
-            if (path[0] == '.' && path[1] == '.' && path[2] == '/') return true;
+        if (path.size() > 3 && path[0] == '.' && path[1] == '.' && path[2] == '/') {
+            return PathType::RelativeToAsset;
         }
-        return false;
+        if (path.size() > 3 && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) {
+            return PathType::Absolute;
+        }
+        if (path.size() > 1 && (path[0] == '\\' || path[0] == '/')) {
+            return PathType::Absolute;
+        }
+        return PathType::RelativeToAssetRoot;
     };
 }
 
@@ -263,15 +275,29 @@ void AssetLoader::unloadAsset(std::shared_ptr<Asset> asset) {
 std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
                                            const std::string& assetPath) const
 {
-    ghoul::filesystem::Directory directory = isRelative(assetPath) ?
-        baseDirectory :
-        _assetRootDirectory;
-   
-    return ghoul::filesystem::File(FileSys.absPath(directory.path() +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        assetPath +
-        "." +
-        AssetFileSuffix));
+    // Support paths that are
+    // 1) Relative to baseDirectory (./* or ../*)
+    // 3) Absolute paths (*:/* or /*)
+    // 2) Relative to the global asset root (*)
+
+    PathType pathType = classifyPath(assetPath);
+    std::string prefix = "";
+    if (pathType == PathType::RelativeToAsset) {
+        prefix = baseDirectory + ghoul::filesystem::FileSystem::PathSeparator;
+    } else if (pathType == PathType::RelativeToAssetRoot) {
+        prefix = _assetRootDirectory + ghoul::filesystem::FileSystem::PathSeparator;
+    }
+
+    // Support paths with and without ".asset" suffix.
+    std::string suffix = std::string(".") + AssetFileSuffix;
+    if (assetPath.size() > suffix.size() &&
+        assetPath.substr(assetPath.size() - suffix.size()) == suffix)
+    {
+        suffix = "";
+    }
+    return ghoul::filesystem::File(FileSys.absPath(
+        prefix + assetPath + suffix
+    ));
 }
 
 std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
