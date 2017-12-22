@@ -4,15 +4,6 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { changeColor } from './actions';
 
-let createHandlers = function(dispatch) {
-  let ChangeColor = function(data) {
-    dispatch(changeColor(data))
-  };
-  return {
-    ChangeColor,
-  };
-}
-
 class ColorPicker extends Component {
   constructor(props) {
     super(props);
@@ -20,12 +11,9 @@ class ColorPicker extends Component {
     this.state = {
       color: '#fff',
     };
-
-    this.handlers = createHandlers(this.props.dispatch);
 }
 
   handleChangeComplete(color) {
-    this.handlers.ChangeColor(color.hex);
     this.setState({color : color.hex});
     this.props.onColorChange(color.hex);
   };
@@ -43,4 +31,4 @@ class ColorPicker extends Component {
 ColorPicker.propTypes = {
   onColorChange: PropTypes.func.isRequired,
 }
-export default connect()(ColorPicker);
+export default ColorPicker;

@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Draggable from 'react-draggable'
+import DraggableCore from 'react-draggable'
 import styles from '../style/Point.scss';
 
 const Point = ({
@@ -11,14 +11,15 @@ const Point = ({
   color,
   active,
   anchor,
+  bounds,
   position
 }) => (
   <div>
-  <Draggable defaultPosition={position} onDrag={handleDrag} axis={anchor ? "x" : "both"} bounds={{top: -10, left: -10, right: width - 10, bottom: (height)}}>
-    <svg className={active ? styles.Active : styles.Point} width={20} height={20} onClick={handleClick}>
+  <DraggableCore defaultPosition={{x: position.x - 10, y: position.y - 10}} onDrag={handleDrag} axis={anchor ? "x" : "both"} bounds={{top: -10, left: anchor ? -10 : bounds.x1 -10 , right: anchor ? width - 10 : bounds.x2 -10, bottom: (height)}}>
+    <svg className={active ? styles.Active : styles.Point} width={20} height={20} onDrag={handleDrag} onClick={handleClick}>
       <circle cx={10} cy={10} r={active ? 8 : 10} fill={color} />
     </svg>
-  </Draggable>
+  </DraggableCore>
   </div>
 )
 Point.propTypes = {

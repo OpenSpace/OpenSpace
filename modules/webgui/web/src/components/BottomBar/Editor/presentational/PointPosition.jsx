@@ -16,7 +16,7 @@ const PointPosition = ({
 }) => (
     <div >
     {(points != undefined) && (
-      points.map((point, index) => 
+      points.map((point, index) =>
       <div className={styles.Line} key={index}>
       <svg width={width + 100} height={height + 100}>
       <line {...point} strokeDasharray={5, 5}  stroke={"white"} strokeWidth={2}></line>

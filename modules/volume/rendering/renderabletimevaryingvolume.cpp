@@ -243,7 +243,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
     t.minValue = dictionary.value<float>(KeyMinValue);
     t.maxValue = dictionary.value<float>(KeyMaxValue);
-    t.unit = dictionary.value<std::string>(KeyUnit);
+//    t.unit = dictionary.value<std::string>(KeyUnit);
 
     std::string timeString = dictionary.value<std::string>(KeyTime);
     t.time = Time::convertTime(timeString);

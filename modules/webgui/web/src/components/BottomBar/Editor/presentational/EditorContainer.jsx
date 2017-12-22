@@ -8,21 +8,18 @@ import Envelope from '../containers/Envelope'
 const EditorContainer = ({
   height,
   width,
-  envelopes
+  activeVolume
 }) => (
   <div >
     <div className={styles.EnvelopeContainer}>
-        {envelopes.map(envelope =>
           <Envelope
-            key={envelope.id}
-            {...envelope}
             height={height}
             width={width}
+            activeVolume={activeVolume}
           />
-        )}
     </div>
     <div className={styles.HistogramContainer}>
-      <Histogram height={height} width={width}/>
+      <Histogram height={height} width={width} activeVolume={activeVolume}/>
     </div>
   </div>
 )

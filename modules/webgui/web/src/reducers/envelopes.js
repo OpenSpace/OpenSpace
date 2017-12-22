@@ -8,6 +8,7 @@ const point = (state={}, action, value, id) => {
         id: id,
         position: value.position,
         active: false,
+        clickable: true,
         anchor: anchor,
         color: value.color,
       }
@@ -16,6 +17,7 @@ const point = (state={}, action, value, id) => {
         id: id,
         position: value.position,
         active: false,
+        clickable: true,
         anchor: false,
         color: value.color,
       }
@@ -26,7 +28,10 @@ const point = (state={}, action, value, id) => {
 
 const envelope = (state={}, action) => {  // state refers to individual envelope
   switch(action.type) {
+    case 'ADD_TRANSFER_FUNCTION':
+      return [...state];
     case 'ADD_ENVELOPE':
+      console.log(action)
       let counter = 0;
       let points = action.points.map((value) =>
           point(undefined, action, value, counter++),
@@ -45,26 +50,17 @@ const envelope = (state={}, action) => {  // state refers to individual envelope
           },
           color: action.color
         })
+      //FEL SKA FIXAS
       state.points.splice(pointId, 0, point(undefined, action, pointValue, pointId));
       return {...state, id: action.id, points: state.points.map((point, index) => ({
               ...point,
               id: index,
              }))};
     case 'SWAP_POINTS':
-      let test = state.points.map(function(element, index) {
-        if (index === action.id) 
-          return {
-            ...state.points[action.swapId],
-          };
-        else if (index === action.swapId)
-          return {
-            ...state.points[action.id],
-          };
-        else return element;
+      state.points.sort(function(a, b) {
+        return a.position.x - b.position.x;
       });
-      console.log(test);
-      return {...state, 
-        points: test};
+      return {...state};
     default:
       return state;
   }
@@ -83,7 +79,7 @@ const envelopes = (state=[], action) => {  // state refers to array of envelopes
             if(value.active === true) {
               return envelope(value, action);
             }
-            else { 
+            else {
              return value;
             }
            });
@@ -92,7 +88,7 @@ const envelopes = (state=[], action) => {  // state refers to array of envelopes
                 if(value.id === action.envelopeId) {
                   return envelope(value, action);
                 }
-                else { 
+                else {
                  return value;
                 }
               });

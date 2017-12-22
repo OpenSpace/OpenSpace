@@ -16,7 +16,7 @@ const getPointPositions = (envelopes, height) => {
     let convertedPoints = [];
     if(envelopes.length !== 0) {
       envelopes.map(envelope =>
-          envelope.points.map(point => 
+          envelope.points.map(point =>
             convertedPoints.push(
               preparePoint(point, height)
             )
@@ -28,7 +28,7 @@ const getPointPositions = (envelopes, height) => {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    points: getPointPositions(state.envelopes, ownProps.height)
+    points: getPointPositions(ownProps.envelopes, ownProps.height)
     };
 };
 

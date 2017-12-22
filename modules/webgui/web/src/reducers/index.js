@@ -1,9 +1,8 @@
 import { combineReducers } from 'redux'
-import envelopes from './envelopes'
-
+import transferfunctions from './transferfunctions'
 //Add more reducers here
 const openspaceApp = combineReducers({
-  envelopes,
+  transferfunctions,
 });
 
 export default openspaceApp;

@@ -3,80 +3,77 @@ import PropTypes from 'prop-types';
 import Draggable from 'react-draggable'
 import { connect } from 'react-redux';
 import EnvelopeCanvas from '../presentational/EnvelopeCanvas'
+import styles from '../style/Envelope.scss'
+import GraphBody from '../../../common/Graph/GraphBody'
+import Point from '../presentational/Point'
+import PointPositionGraph from './PointPositionGraph'
 import { toggleActiveEnvelope, toggleActivePoint, movePoint, swapPoints } from '../actions';
 
 class Envelope extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      clickable :Array(this.props.points.length).fill(true)
-    }
     this.handleDrag = this.handleDrag.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.checkForSwap = this.checkForSwap.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.props.points.length !== prevProps.points.length) {
-      this.setState({clickable : Array(this.props.points.length).fill(true)}); 
-    }
-  }
-
-  checkForSwap(id) {
-    const { points } = this.props;
-    if (points[id].anchor)
+  checkForSwap(position, points, index) {
+    if (points[index].anchor)
       return -1;
-    else if (points[id].position.x < points[id - 1].position.x)
-      return points[id - 1].anchor ? -1 : id - 1;
-    else if (points[id].position.x > points[id + 1].position.x)
-      return points[id + 1].anchor ? -1 : id + 1;
+
+    if (position.x < points[index - 1].position.x){
+      return points[index - 1].anchor ? -1 : points[index].id;
+    }
+    else if (position.x > points[index + 1].position.x){
+      return points[index + 1].anchor ? -1 : points[index].id;
+    }
     else
       return -1;
   }
 
-  handleDrag(e, ui, id) {
-console.log(this.props.points);
+  handleDrag(e, ui, index, envelope) {
+    var id = envelope.points[index].id;
     if(ui.deltaX !== 0 && ui.deltaY !== 0) {
-      this.state.clickable[id]= false;
+      envelope.points[index].clickable = false;
     }
-    let position = {
-        x: this.props.points[id].position.x + ui.deltaX,
-        y: this.props.points[id].position.y,
-      }
 
-    if(!this.props.points[id].anchor)
+    let position = {
+      x: envelope.points[index].position.x + ui.deltaX,
+      y: envelope.points[index].position.y,
+    }
+
+    if(!envelope.points[index].anchor)
       position.y = position.y + ui.deltaY;
 
-    this.props.MovePoint(position, id, this.props.id);
-
-    var swapMate = -1;//this.checkForSwap(id);
+    this.props.MovePoint(position, id, envelope.id);
+    var swapMate = this.checkForSwap(position, envelope.points, index);
 
     if(swapMate !== -1) {
-      console.log("SWAP");
-      this.props.SwapPoints(id, swapMate, this.props.id);
+      //console.log("swap " + id + "  " + swapMate );
+      this.props.SwapPoints(id, swapMate, envelope.id);
     }
   }
 
-  handleClick(pointId) {
-    if (this.state.clickable[pointId] === false) {
-      this.state.clickable[pointId] = true;
+  handleClick(envelope, pointId) {
+    if (envelope.points[pointId].clickable === false) {
+      envelope.points[pointId].clickable = true;
     }
     else {
-      const {active, id} = this.props;
-      if (active === true) {
-        this.props.TogglePoint(id, pointId);
+      if (envelope.active === true) {
+        this.props.TogglePoint(envelope.id, pointId);
       }
-      else if(this.hasActiveChild()) {
-        this.props.TogglePoint(id, pointId);
+      else if(this.hasActiveChild(envelope)) {
+        this.props.TogglePoint(envelope.id, pointId);
       }
       else {
-        this.props.ToggleEnvelope(id);
+        this.props.ToggleEnvelope(envelope.id);
       }
     }
   }
 
-  hasActiveChild() {
+  hasActiveChild(envelope) {
     var hasActiveChild = false;
-    this.props.points.forEach(function(point) {
+    envelope.points.forEach(function(point) {
       if (point.active)
         hasActiveChild = true;
     })
@@ -92,21 +89,65 @@ console.log(this.props.points);
     )
   }
 
+  pointsForEnvelopeGraph(data){
+    let convertedData = [];
+    data.forEach(function(point) {
+      let tmpObject = Object.assign({},
+        {x: point.position.x ,
+         y: 600 - point.position.y,
+         color: point.color}
+        )
+      convertedData.push(tmpObject);
+    })
+    return convertedData;
+  }
+
   render() {
-    const { points, height, width, active } = this.props;
+    const { height, width, active, envelopes, minValue, maxValue} = this.props;
     return (
-      <EnvelopeCanvas
-        handleClick={(pointId) => this.handleClick(pointId)}
-        handleDrag={(e, ui, pointId) => this.handleDrag(e, ui, pointId)}
-        points={this.pointsToCanvas(points)}
-        height={height}
-        width={width}
-        active={active}
-      />
+      <div className={styles.Envelope}>
+      {(envelopes != undefined) && (
+        <div>
+        <PointPositionGraph className={styles.Envelope}
+          {...this.props}
+          envelopes={envelopes}
+          minValue={minValue}
+          maxValue={maxValue}
+        />
+        {envelopes.map(envelope =>
+          <div key={envelope.id}>
+          <svg className={styles.Line} height={height} width={width + 10}>
+            <GraphBody
+             UseLinearGradient={true}
+             points={this.pointsForEnvelopeGraph(envelope.points)}
+             x={0}
+             y={600}
+             width={width}
+             fillOpacity={"0"}
+             strokeWidth={2}
+            />
+          </svg>
+         {envelope.points.map((point, index) =>
+          <Point className={styles.Envelope}
+            key={point.id}
+            handleClick={() => this.handleClick(envelope, point.id)}
+            handleDrag={(e, ui) => this.handleDrag(e, ui, index, envelope)}
+            height={height}
+            width={width}
+            {...point}
+            bounds={{x1 : envelope.points[0].position.x, x2: envelope.points[envelope.points.length -1].position.x}}
+            active={(point.active || envelope.active) ? true : false}
+          />
+          )}
+         </div>
+        )}
+        </div>
+      )}
+    </div>
     );
   }
 }
-Envelope.propTypes = {
+/*Envelope.propTypes = {
   points: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
@@ -122,27 +163,43 @@ Envelope.propTypes = {
   width: PropTypes.number.isRequired,
   id: PropTypes.number.isRequired,
   active: PropTypes.bool.isRequired,
-}
+}*/
 
-const mapDispatchToProps = (dispatch) => {
+const mapStateToProps = (state, ownProps) => {
+  var envelopes, minValue, maxValue;
+  state.transferfunctions.map(transferfunction => {
+          if(transferfunction.id === ownProps.activeVolume){
+            envelopes = transferfunction.data.TransferFunction.envelopes;
+            minValue = transferfunction.data.MinValue.value;
+            maxValue = transferfunction.data.MaxValue.value;
+          }
+        })
+    return {
+      envelopes,
+      minValue,
+      maxValue
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     ToggleEnvelope: (id) => {
-      dispatch(toggleActiveEnvelope(id));
+      dispatch(toggleActiveEnvelope(id, ownProps.activeVolume));
     },
     TogglePoint: (envelopeId, pointId) => {
-      dispatch(toggleActivePoint(envelopeId, pointId));
+      dispatch(toggleActivePoint(envelopeId, pointId, ownProps.activeVolume));
     },
     MovePoint: (position, id, envelopeId) => {
-      dispatch(movePoint(id, envelopeId, position));
+      dispatch(movePoint(id, envelopeId, position, ownProps.activeVolume));
     },
     SwapPoints: ( id, swapId, envelopeId) => {
-      dispatch(swapPoints(id, swapId, envelopeId));
+      dispatch(swapPoints(id, swapId, envelopeId, ownProps.activeVolume));
     },
   }
 }
 
 Envelope = connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps,
   )(Envelope)
 

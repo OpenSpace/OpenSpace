@@ -5,13 +5,17 @@ import GraphBody from '../../../common/Graph/GraphBody'
 import Point from './Point'
 
 const pointsForEnvelopeGraph = (data) => {
-    return data = data.map(point =>
-        Object.assign({},
+  console.log(data)
+    let convertedData = [];
+    data.forEach(function(point) {
+      let tmpObject = Object.assign({},
         {x: point.position.x + 10,
          y: 600 - point.position.y - 10,
          color: point.color}
         )
-      )
+      convertedData.push(tmpObject);
+    })
+    return convertedData;
   }
 
 const EnvelopeCanvas = ({
@@ -34,11 +38,11 @@ const EnvelopeCanvas = ({
          strokeWidth={2}
         />
       </svg>
-     {points.map((point) =>
+     {points.map((point, index) =>
       <Point className={styles.Envelope}
         key={point.id}
         handleClick={() => handleClick(point.id)}
-        handleDrag={(e, ui) => handleDrag(e, ui, point.id)}
+        handleDrag={(e, ui) => handleDrag(e, ui, index)}
         height={height}
         width={width}
         {...point}
@@ -48,7 +52,7 @@ const EnvelopeCanvas = ({
     </div>
 )
 EnvelopeCanvas.propTypes = {
-  handleDrag: PropTypes.func.isRequired,
+  HandleDrag: PropTypes.func.isRequired,
   handleClick: PropTypes.func.isRequired,
   points: PropTypes.arrayOf(
     PropTypes.shape({

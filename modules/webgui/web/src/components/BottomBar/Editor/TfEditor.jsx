@@ -3,6 +3,7 @@ import Window from '../../common/Window/Window';
 import Picker from '../Picker';
 import Editor from './containers/Editor'
 import styles from './TfEditor.scss'
+import { connect } from 'react-redux';
 import ColorPicker from './ColorPicker';
 import DataManager from '../../../api/DataManager';
 import { TransferFunctionKey, HistogramKey } from '../../../api/keys';
@@ -31,7 +32,7 @@ class TfEditor extends Component {
   }
 
   render() {
-    const {showTfEditor, showColorPicker} = this.state;
+    const {showTfEditor, showColorPicker, volumes} = this.state;
     return(
       <div className={styles.Wrapper}>
         <Picker onClick={this.toggleTfEditor} className={(showTfEditor ? styles.Active : '')}>
@@ -39,9 +40,9 @@ class TfEditor extends Component {
         </Picker>
          { showTfEditor && (
           <div>
-          <Window size={{ width: 900, height: 700 }} closeCallback={this.toggleTfEditor} title="Transfer Function Editor" className={styles.Window}>
+          <Window size={{ width: 900, height: 700 }} closeCallback={this.toggleTfEditor} title={"Transfer Function Editor"} className={styles.Window}>
               <div className={styles.Canvas}>
-                  <Editor color={this.state.currentColor}/>
+                  <Editor tfId={this.props.transferfunctions} color={this.state.currentColor}/>
               </div>
           </Window>
           { showColorPicker && (

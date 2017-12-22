@@ -6,7 +6,7 @@ import PointPositionGraph from '../containers/PointPositionGraph';
 import styles from '../style/Histogram.scss'
 
 const HistogramCanvas = ({
-  data,
+  histogram,
   height,
   width,
   unit,
@@ -18,7 +18,7 @@ const HistogramCanvas = ({
         <GraphBody
           UseLinearGradient={false}
           color={'blue'}
-          points={data}
+          points={histogram}
           x={0}
           y={600}
           fill={"blue"}
@@ -29,16 +29,10 @@ const HistogramCanvas = ({
           {unit}
         </text>
       </svg>
-        <PointPositionGraph className={styles.Envelope}
-          width={width}
-          height={height}
-          minValue={minValue}
-          maxValue={maxValue}
-        />
     </div>
 );
 HistogramCanvas.PropTypes = {
-  data: PropTypes.arrayOf(
+  histogram: PropTypes.arrayOf(
     PropTypes.shape({
       x: PropTypes.number.isRequired,
       y:PropTypes.number.isRequired,
