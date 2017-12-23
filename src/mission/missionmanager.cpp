@@ -60,7 +60,7 @@ bool MissionManager::hasCurrentMission() const {
 void MissionManager::loadMission(const std::string& filename) {
     ghoul_assert(!filename.empty(), "filename must not be empty");
     ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(FileSys.fileExists(filename), "filename must exist");
+    ghoul_assert(FileSys.fileExists(filename), "filename " + filename + " must exist");
 
     // Changing the values might invalidate the _currentMission iterator
     std::string currentMission =  hasCurrentMission() ? _currentMission->first : "";

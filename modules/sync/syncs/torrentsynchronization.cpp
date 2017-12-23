@@ -48,14 +48,20 @@ namespace openspace {
 TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict,
                                                const std::string& synchronizationRoot,
                                                TorrentClient* torrentClient)
-    : openspace::ResourceSynchronization(dict)
+    : ResourceSynchronization(dict)
     , _synchronizationRoot(synchronizationRoot)
     , _torrentClient(torrentClient)
 {
     documentation::testSpecificationAndThrow(
+        ResourceSynchronization::Documentation(),
+        dict,
+        "ResourceSynchronization::TorrentSynchronization"
+    );
+
+    documentation::testSpecificationAndThrow(
         Documentation(),
         dict,
-        "TorrentSynchroniztion"
+        "TorrentSynchronization::TorrentSynchronization"
     );
 
     _identifier = dict.value<std::string>(KeyIdentifier);

@@ -68,7 +68,7 @@ namespace {
     constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
 
     const char* placeholderFile =
-        "${OPENSPACE_DATA}/scene/common/textures/placeholder.png";
+        "${OPENSPACE_DATA}/placeholder.png";
 
     constexpr const char* _loggerCat = "ProjectionComponent";
 

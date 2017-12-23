@@ -34,6 +34,8 @@
 #include <ghoul/misc/onscopeexit.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <fmt/format.h>
+
 #include "assetloader_lua.inl"
 
 namespace {
@@ -56,6 +58,7 @@ namespace {
     const char* _loggerCat = "AssetLoader";
 
     const char* AssetFileSuffix = "asset";
+    const char* SceneFileSuffix = "scene";
 
     enum class PathType : int {
         RelativeToAsset = 0,
@@ -288,16 +291,50 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         prefix = _assetRootDirectory + ghoul::filesystem::FileSystem::PathSeparator;
     }
 
-    // Support paths with and without ".asset" suffix.
-    std::string suffix = std::string(".") + AssetFileSuffix;
-    if (assetPath.size() > suffix.size() &&
-        assetPath.substr(assetPath.size() - suffix.size()) == suffix)
-    {
-        suffix = "";
+    // Construct the full path including the .asset extension 
+    std::string assetSuffix = std::string(".") + AssetFileSuffix;
+    bool hasAssetSuffix =
+        (assetPath.size() > assetSuffix.size()) &&
+        (assetPath.substr(assetPath.size() - assetSuffix.size()) == assetSuffix);
+    std::string fullAssetPath =
+        hasAssetSuffix ?
+        prefix + assetPath :
+        prefix + assetPath + assetSuffix;
+    bool fullAssetPathExists = FileSys.fileExists(FileSys.absPath(fullAssetPath));
+
+    // Construct the full path including the .scene extension 
+    std::string sceneSuffix = std::string(".") + SceneFileSuffix;
+    bool hasSceneSuffix =
+        (assetPath.size() > sceneSuffix.size()) &&
+        (assetPath.substr(assetPath.size() - sceneSuffix.size()) == sceneSuffix);
+    std::string fullScenePath = 
+        hasSceneSuffix ?
+        prefix + assetPath :
+        prefix + assetPath + sceneSuffix;
+    bool fullScenePathExists = FileSys.fileExists(FileSys.absPath(fullScenePath));
+
+    if (fullAssetPathExists && fullScenePathExists) {
+        LWARNING(
+            fmt::format(
+                "'{}' and '{}' file found with non-specific request '{}'. Loading '{}'. "
+                "Explicitly add extension to suppress this warning.",
+                fullAssetPath,
+                fullScenePath,
+                prefix + assetPath,
+                fullAssetPath
+            )
+        );
+
+        return ghoul::filesystem::File(FileSys.absPath(fullAssetPath));
     }
-    return ghoul::filesystem::File(FileSys.absPath(
-        prefix + assetPath + suffix
-    ));
+
+    if (fullScenePathExists) {
+        return ghoul::filesystem::File(FileSys.absPath(fullScenePath));
+    }
+
+    // We don't check whether the file exists here as the error will be more
+    // comprehensively logged by Lua either way
+    return ghoul::filesystem::File(FileSys.absPath(fullAssetPath));
 }
 
 std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {

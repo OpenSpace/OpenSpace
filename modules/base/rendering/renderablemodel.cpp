@@ -220,7 +220,7 @@ void RenderableModel::update(const UpdateData&) {
         _programObject->rebuildFromFile();
     }
 
-    _sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
+    _sunPos = OsEng.renderEngine().scene()->sceneGraphNode("SolarSystemBarycenter")->worldPosition();
 }
 
 void RenderableModel::loadTexture() {
