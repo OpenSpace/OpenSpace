@@ -118,6 +118,12 @@ public:
     void setValue(int value) override;
 
     /**
+     * Returns the currently selected option.
+     * \return The currently selected option
+     */
+    const Option& option() const;
+
+    /**
     * Get the description of the option that matches <code>value</code>
     * \param value The value of the option
     */
