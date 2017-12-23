@@ -28,7 +28,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-//#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/boolean.h>
 
 #include <sgct.h>
 
@@ -584,8 +584,11 @@ int main_main(int argc, char** argv) {
         "Unknown OpenGL version. Missing statement in version mapping map"
     );
 
-    auto cleanup = [&](){
-        OsEng.deinitialize();
+    using IsInitialized = ghoul::Boolean;
+    auto cleanup = [&](IsInitialized isInitialized){
+        if (isInitialized) {
+            OsEng.deinitialize();
+        }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
         sgct::MessageHandler::instance()->setLogToCallback(false);
@@ -621,7 +624,7 @@ int main_main(int argc, char** argv) {
 
     if (!initSuccess) {
         LFATAL("Initializing failed");
-        cleanup();
+        cleanup(IsInitialized::No);
         return EXIT_FAILURE;
     }
 
@@ -629,8 +632,8 @@ int main_main(int argc, char** argv) {
     LDEBUG("Starting rendering loop");
     SgctEngine->render();
     LDEBUG("Ending rendering loop");
-
-    cleanup();
+    
+    cleanup(IsInitialized::Yes);
 
     // Exit program
     exit(EXIT_SUCCESS);
