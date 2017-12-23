@@ -411,4 +411,10 @@ configure_file(
     @ONLY IMMEDIATE
 )
 
+configure_file(
+    ${OPENSPACE_CMAKE_EXT_DIR}/commit.template
+    ${OPENSPACE_BASE_DIR}/COMMIT.md
+    @ONLY IMMEDIATE
+)
+
 set_openspace_compile_settings(libOpenSpace)
