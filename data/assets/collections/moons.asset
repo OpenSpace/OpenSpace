@@ -1,6 +1,0 @@
---asset.request('../moon/moon')
---asset.request('../mars/moons')
---asset.request('../jupiter/moons')
---asset.request('../saturn/moons')
---asset.request('../uranus/moons')
---asset.request('../neptune/moons')

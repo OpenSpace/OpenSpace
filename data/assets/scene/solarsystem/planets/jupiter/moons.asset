@@ -1,0 +1,4 @@
+asset.request('./callisto/callisto')
+asset.request('./europa/europa')
+asset.request('./ganymede/ganymede')
+asset.request('./io/io')

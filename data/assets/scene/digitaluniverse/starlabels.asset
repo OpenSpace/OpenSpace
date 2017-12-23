@@ -1,0 +1,31 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local speck = asset.syncedResource({
+    Name = "Star Labels Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_starlabels_speck",
+    Version = 2
+})
+
+local object = {
+    Name = "Stars Labels",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.65,
+        LabelFile = speck .. "/stars.label",
+        TextColor = { 0.4, 0.4, 0.4, 1.0 },
+        DrawLabels = true,
+        TextSize = 14.7,
+        TextMinSize = 6.0,
+        Unit = "pc"
+    },
+    GuiPath = "/Milky Way/Stars"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

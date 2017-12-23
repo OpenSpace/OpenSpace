@@ -1,0 +1,52 @@
+local transforms = asset.require('../transforms')
+local assetHelper = asset.require('util/asset_helper')
+asset.require("spice/base")
+asset.request('./trail')
+local kernels = asset.require('../sat375').Kernels
+
+
+
+local textures = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "Mimas textures",
+    Identifier = "mimas_textures",
+    Version = 1
+})
+
+local Mimas = {
+    Name = "Mimas",
+    Parent = transforms.SaturnBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MIMAS",
+            Observer = "SATURN BARYCENTER",
+            Kernels = kernels .. "/sat375.bsp"
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_MIMAS",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = 198000,
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Name = "Mimas Texture",
+                    FilePath = textures .. "/mimas.jpg",
+                    Enabled = true
+                }
+            }
+        }
+    },
+    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+    GuiPath = "/Solar System/Planets/Saturn/Moons"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Mimas })

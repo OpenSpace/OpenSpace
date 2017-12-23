@@ -1,0 +1,21 @@
+asset.request('./model')
+asset.request('./label')
+asset.request('./fov')
+asset.request('./trail')
+
+asset.request('./pluto')
+asset.request('./charon')
+asset.request('./hydra')
+asset.request('./nix')
+asset.request('./styx')
+
+
+local mission = asset.localResource("newhorizons.mission")
+
+asset.onInitialize(function()
+    openspace.loadMission(mission)
+end)
+
+asset.onDeinitialize(function()
+    -- openspace.unloadMission()
+end)

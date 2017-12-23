@@ -1,0 +1,27 @@
+local transforms = asset.require('../transforms')
+local assetHelper = asset.require('util/asset_helper')
+asset.require("spice/base")
+
+
+
+local IoTrail = {
+    Name = "IoTrail",
+    Parent = transforms.JupiterBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "IO",
+            Observer = "JUPITER BARYCENTER"
+        },
+        Color = { 0.4, 0.4, 0.2 },
+        Period =  42.0 / 24.0,
+        Resolution = 1000
+    },
+    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
+    GuiPath = "/Solar System/Planets/Jupiter/Moons"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { IoTrail })

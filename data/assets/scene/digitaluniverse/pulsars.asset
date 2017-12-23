@@ -1,0 +1,41 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Pulsars Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_pulsars_textures",
+    Version = 1
+})
+
+local speck = asset.syncedResource({
+    Name = "Pulsars Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_pulsars_speck",
+    Version = 1
+})
+
+local object = {
+    Name = "Pulsars",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 0.7, 0.0, 0.0 },
+        Transparency = 0.5,
+        File = speck .. "/pulsar.speck",
+        Texture = textures .. "/point4.png",
+        PolygonSides = 4,
+        LabelFile = speck .. "/pulsar.label",
+        TextColor = { 0.7, 0.0, 0.0, 1.0 },
+        ScaleFactor = 418.33,
+        TextSize = 16.68,
+        TextMinSize = 4.5,
+        Unit = "pc"
+    },
+    GuiPath = "/Milky Way/Pulsars"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

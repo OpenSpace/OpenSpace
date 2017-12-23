@@ -1,0 +1,63 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Background Radiation Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_backgroundradiation_textures",
+    Version = 1
+})
+
+local speck = asset.syncedResource({
+    Name = "Background Radiation Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_backgroundradiation_speck",
+    Version = 1
+})
+
+local wmap = {
+    Name = "Wilkinson Microwave Anisotropy Probe (WMAP)",
+    Renderable = {
+        Type = "RenderableSphere",
+        Enabled = false,
+        Size = 3975.41417036064E23,
+        Segments = 80,
+        Alpha = 0.5,
+        Texture = textures .. "/wmap_ilc_7yr_v4_200uK_RGB_sos.png",
+        Orientation = "Inside/Outside"
+    },
+    GuiPath = "/Universe/Cosmic Microwave Background"
+}
+
+local cbe = {
+    Name = "Cosmic Background Explorer",
+    Renderable = {
+        Type = "RenderableSphere",
+        Enabled = false,
+        Size = 3975.41417036064E23,
+        Segments = 80,
+        Alpha = 0.5,
+        Texture = textures .. "/COBErect.png",
+        Orientation = "Inside/Outside"
+    },
+    GuiPath = "/Universe/Cosmic Microwave Background"
+}
+
+local planck = {
+    Name = "Planck",
+    Renderable = {
+        Type = "RenderableSphere",
+        Enabled = false,
+        Size = 3975.41417036064E23,
+        Segments = 80,
+        Alpha = 0.5,
+        Texture = textures .. "/cmb4k.jpg",
+        Orientation = "Inside/Outside",
+    },
+    GuiPath = "/Universe/Cosmic Microwave Background"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { wmap, cbe, planck })

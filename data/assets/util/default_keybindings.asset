@@ -1,0 +1,110 @@
+local helper = asset.require('./scene_helper')
+
+local Keybindings = {
+    {
+        Key = "F2",
+        Command =
+[[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Properties.Enabled');
+local c = openspace.getPropertyValue('Global Properties.ImGUI.Main.IsHidden');
+openspace.setPropertyValue('Global Properties.ImGUI.*.Enabled', false);
+if b and c then
+    -- This can happen if the main properties window is enabled, the main gui is enabled
+    -- and then closed again. So the main properties window is enabled, but also all
+    -- windows are hidden
+    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', false);
+    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', true);
+    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', true);
+else
+    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', not b);
+    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', not b);
+    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);
+end]],
+        Documentation = "Shows or hides the properties window",
+        Local = true
+    },
+    {
+        Key = "F3",
+        Command = 
+[[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled');
+openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Enabled', not b);
+openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);]],
+        Documentation = "Shows or hides the entire user interface",
+        Local = true
+    },
+    {
+        Key = "F4",
+        Command = helper.property.invert("RenderEngine.PerformanceMeasurements"),
+        Documentation = "Toogles performance measurements that shows rendering time informations.",
+        Local = true
+    },
+    {
+        Key = "ESC",
+        Command = "openspace.toggleShutdown()",
+        Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period.",
+        Local = true
+    },
+    {
+        Key = "PRINT_SCREEN",
+        Command = "openspace.setPropertyValueSingle('RenderEngine.TakeScreenshot', nil)",
+        Documentation = "Saves the contents of the screen to a file in the working directory.",
+        Local = true
+    },
+    {
+        Key = "SPACE",
+        Command = "openspace.time.togglePause()",
+        Documentation = "Starts and stops the simulation time.",
+        Local = false
+    },
+    {
+        Key = "f",
+        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+        Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
+        Local = false
+    },
+    {
+        Key = "Shift+f",
+        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+        Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely.",
+        Local = false
+    },
+    {
+        Key = "Ctrl+f",
+        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+        Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely.",
+        Local = false
+    },
+    {
+        Key = "w",
+        Command = "openspace.toggleFade(3)",
+        Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
+        Local = false
+    }
+}
+
+local DeltaTimeKeys
+
+asset.onInitialize(function()
+    Keys = helper.bindKeys(Keybindings)
+
+    DeltaTimeKeys = helper.setDeltaTimeKeys({
+    --  1           2           3           4           5           6           7           8           9           0
+    --------------------------------------------------------------------------------------------------------------------------
+    --  1s          2s          5s          10s         30s         1m          2m          5m          10m         30m
+        1,          2,          5,          10,         30,         60,         120,        300,        600,        1800,
+
+    --  1h          2h          3h          6h          12h         1d          2d          4d          1w          2w
+        3600,       7200,       10800,      21600,      43200,      86400,      172800,     345600,     604800,     1209600,
+
+    --  1mo         2mo         3mo         6mo         1yr         2y          5y          10y         20y         50y
+        2592000,    5184000,    7776000,    15552000,   31536000,   63072000,   157680000,  315360000,  630720000,  1576800000
+    })
+    --  OBS: One month (1mo) is approximated by 30 days.
+end)
+
+asset.onDeinitialize(function ()
+    helper.unbindKeys(Keybindings)
+    helper.unbindKeys(DeltaTimeKeys)
+end)
+
+asset.export("DefaultKeybindings", Keybindings)
+asset.export("DefaultDeltaTimeKeys", DeltaTimeKeys)

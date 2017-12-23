@@ -7,6 +7,13 @@ openspace.documentation = {
         "featured properties."
     },
     {
+        Name = "remove_interesting_nodes",
+        Arguments = "List of nodes",
+        Documentation = "This function removes unmarks the scene graph nodes " ..
+        "identified by name as interesting, thus removing the shortcuts from the " ..
+        "features properties list."
+    },
+    {
         Name = "set_default_gui_sorting",
         Arguments = "",
         Documentation = "This function sets the default GUI sorting for the space " ..
@@ -27,6 +34,14 @@ openspace.mark_interesting_nodes = function(nodes)
     for _, n in pairs(nodes) do
         if openspace.hasSceneGraphNode(n) then
             openspace.addTag(n, "GUI.Interesting")
+        end
+    end
+end
+
+openspace.remove_interesting_nodes = function(nodes)
+    for _, n in pairs(nodes) do
+        if openspace.hasSceneGraphNode(n) then
+            openspace.removeTag(n, "GUI.Interesting")
         end
     end
 end

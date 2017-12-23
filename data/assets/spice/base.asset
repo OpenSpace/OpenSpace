@@ -1,8 +1,8 @@
-local AssetHelper = asset.require("util/assethelper")
+local assetHelper = asset.require("util/asset_helper")
 
 local syncedDirectory = asset.syncedResource({
-    Type = "HttpSynchronization",
     Name = "General SPK Kernels",
+    Type = "HttpSynchronization",
     Identifier = "general_spk",
     Version = 1
 })
@@ -14,4 +14,4 @@ local kernels = {
     syncedDirectory .. "/de430_1850-2150.bsp"
 }
 
-AssetHelper.registerSpiceKernels(asset, kernels)
+assetHelper.registerSpiceKernels(asset, kernels)

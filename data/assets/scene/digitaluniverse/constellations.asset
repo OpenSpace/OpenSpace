@@ -1,0 +1,52 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local speck = asset.syncedResource({
+    Name = "Constellation Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_constellations_speck",
+    Version = 1
+})
+
+local constellationsExtragalactic = {
+    Name = "Constellations (Extragalactic)",
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 0.4, 0.2 },
+        Transparency = 1.0,
+        ScaleFactor = 1.0,
+        File = speck .. "/constellationsEXGAL.speck",
+        LabelFile = speck .. "/constellationsEXGAL.label",
+        TextColor = { 0.8, 0.8, 0.8, 1.0 },
+        TextSize = 15.5,
+        TextMinSize = 8.0,
+        MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
+        Unit = "Mpc"
+    },
+    GuiPath = "/Milky Way/Constellations"
+}
+
+local constellations = {
+    Name = "Constellations",
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 0.4, 0.2 },
+        Transparency = 1.0,
+        ScaleFactor = 1.0,
+        File = speck .. "/constellations.speck",
+        LabelFile = speck .. "/constellations.label",
+        TextColor = { 0.8, 0.8, 0.8, 1.0 },
+        TextSize = 15.5,
+        TextMinSize = 8.0,
+        MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
+        Unit = "pc"
+    },
+    GuiPath = "/Milky Way/Constellations"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { constellationsExtragalactic, constellations })

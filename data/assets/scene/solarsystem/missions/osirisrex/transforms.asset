@@ -1,0 +1,22 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+
+
+
+local BENNU_BODY = "2101955"
+
+local BennuBarycenter = {
+    Name = "BennuBarycenter",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = BENNU_BODY,
+            Observer = "SUN"
+        }
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { BennuBarycenter })

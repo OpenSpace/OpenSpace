@@ -1,0 +1,41 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local textures = asset.syncedResource({
+    Name = "OB Associations Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_obassociations_textures",
+    Version = 1
+})
+
+local speck = asset.syncedResource({
+    Name = "OB Associations Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_obassociations_speck",
+    Version = 1
+})
+
+local object = {
+    Name = "OB Associations",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 0.0, 0.0, 1.0 },
+        Transparency = 0.5,
+        File = speck .. "/ob.speck",
+        Texture = textures .. "/point4.png",
+        PolygonSides = 7,
+        LabelFile = speck .. "/ob.label",
+        TextColor = { 0.4, 0.5, 1.0, 1.0 },
+        ScaleFactor = 428.0,
+        TextSize = 17.0,
+        TextMinSize = 5.76,
+        Unit = "pc"
+    },
+    GuiPath = "/Milky Way/OB Associations"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

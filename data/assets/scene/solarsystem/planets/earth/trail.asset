@@ -1,0 +1,27 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+asset.require("spice/base")
+
+
+
+local EarthTrail = {
+    Name = "EarthTrail",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "EARTH",
+            Observer = "SUN"
+        },
+        Color = { 0.5, 0.8, 1.0 },
+        Period = 365.242,
+        Resolution = 1000,
+        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" }
+    },
+    GuiPath = "/Solar System/Planets/Earth"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { EarthTrail })

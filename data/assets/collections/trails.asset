@@ -1,8 +1,0 @@
--- asset.request('../mercury/trail')
--- asset.request('../venus/trail')
-asset.request('../earth/trail')
--- asset.request('../mars/trail')
--- asset.request('../jupiter/trail')
--- asset.request('../saturn/trail')
--- asset.request('../uranus/trail')
--- asset.request('../neptune/trail')

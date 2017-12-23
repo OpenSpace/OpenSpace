@@ -1,8 +1,0 @@
--- asset.request('./mercury/marker')
--- asset.request('./venus/marker')
-asset.request('./earth/marker')
--- asset.request('./mars/marker')
--- asset.request('./jupiter/marker')
--- asset.request('./saturn/marker')
--- asset.request('./uranus/marker')
--- asset.request('./neptune/marker')

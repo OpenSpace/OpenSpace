@@ -1,0 +1,59 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+asset.require("spice/base")
+asset.request('./trail')
+
+
+
+local mapServiceConfigs = asset.localResource("mapServiceConfigs")
+
+local color_layers = {
+    -- Utah based servers
+    {
+        Name = "Messenger MDIS [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerMDIS.wms",
+        Enabled = true
+    },
+    {
+        Name = "Messenger Mosaic [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerMosaic.wms"
+    },
+    -- AWS based servers
+    {
+        Name = "Messenger MDIS [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/MessengerMdis.wms"
+    },
+    {
+        Name = "Messenger Mosaic [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/MessengerMosaic.wms"
+    }
+}
+
+local Mercury = {
+    Name = "Mercury",
+    Parent = transforms.MercuryBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_MERCURY",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = 2439700,
+        Frame = "IAU_MERCURY",
+        Body = "MERCURY",
+        CameraMinHeight = 300,
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = color_layers
+        }
+    },
+    Tag = { "planet_solarSystem", "planet_terrestrial" },
+    GuiPath = "/Solar System/Planets/Mercury"
+},
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury })

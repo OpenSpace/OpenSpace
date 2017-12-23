@@ -1,0 +1,125 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+
+-- Specifying which other assets should be loaded in this scene
+asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+assetHelper.requestAll(asset, 'scene/solarsystem/planets')
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
+
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+
+-- Add folders to this list that contain .info files describing HiRISE patches
+local vrt_folders = {
+    Mars = {
+        -- Add folders here whose contents will be automatically added to the Mars globe
+        -- If multiple folders are added, the results will be added sequentially, meaning that
+        -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
+        -- CTX will stomp over the HiRISE
+        --
+        -- tl;dr:  Specify CTX folders first, then HiRISE 
+        -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
+    },
+    Moon = {
+        -- Add folders here whose contents will be automatically added to the Moon globe
+        -- If multiple folders are added, the results will be added sequentially, meaning that
+        -- if areas overlap, images from the lower results will overwrite the images from former
+        -- results
+        -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
+    }
+}
+
+-- Keybindings that are specific for this scene
+local Keybindings = {
+    {
+        Key = "s",
+        Command = sceneHelper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+                  sceneHelper.property.invert('Earth.RenderableGlobe.PerformShading') ..
+                  sceneHelper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
+                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+        Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
+        Local = false
+    },
+    {
+        Key = "b",
+        Command = sceneHelper.property.invert('MilkyWay.renderable.Enabled') ..
+                  sceneHelper.property.invert('Stars.renderable.Enabled'),
+        Documentation = "Toggle background (Stars and Milkyway).",
+        Local = false
+    },
+    {
+        Key = "g",
+        Command = sceneHelper.property.invert('MilkyWay.renderable.Enabled') ..
+                  sceneHelper.property.invert('Stars.renderable.Enabled') ..
+                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+                  sceneHelper.property.invert('Earth.RenderableGlobe.PerformShading') ..
+                  sceneHelper.property.invert('Mars.RenderableGlobe.PerformShading') ..
+                  sceneHelper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
+                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+                  sceneHelper.property.invert('Moon.RenderableGlobe.Enabled') ..
+                  sceneHelper.property.invert('Sun.renderable.Enabled'),
+        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
+        Local = false
+    },
+    {
+        Key = "h",
+        Command = "openspace.setPropertyValue('*Trail.renderable.Enabled', false)",
+        Documentation = "Disables visibility of the trails",
+        Local = false
+    },
+}
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+asset.onInitialize(function ()
+    openspace.time.setTime(openspace.time.currentWallTime())
+    sceneHelper.bindKeys(Keybindings)
+
+    openspace.set_default_dashboard()
+    openspace.set_default_gui_sorting()
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${OPENSPACE_DATA}/globebrowsing_servers.lua")
+    )
+
+    openspace.mark_interesting_nodes({
+        "Earth", "Mars", "Moon"
+    })
+
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+    openspace.navigation.setCameraState({
+        Focus = earthAsset.Earth.Name,
+        Position = { 0, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+    })
+
+    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+
+    -- Add local patches described at the top of this file
+    for obj, list in pairs(vrt_folders) do
+        for _, dir in pairs(list) do
+            openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
+        end
+    end
+end)
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+
+    openspace.remove_interesting_nodes({
+        "Earth", "Mars", "Moon"
+    })
+end)

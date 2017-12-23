@@ -1,0 +1,39 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Stars Textures",
+    Type = "HttpSynchronization",
+    Identifier = "stars_textures",
+    Version = 1
+})
+
+local speck = asset.syncedResource({
+    Name = "Stars Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "stars_du",
+    Version = 1
+})
+
+local colorLUT = asset.syncedResource({
+    Name = "Stars Color Table",
+    Type = "HttpSynchronization",
+    Identifier = "stars_colormap",
+    Version = 1
+})
+
+local object = {
+    Name = "Stars",
+    Renderable = {
+        Type = "RenderableStars",
+        File = speck .. "/stars.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = colorLUT .. "/colorbv.cmap"
+    },
+    GuiPath = "/Milky Way/Stars"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

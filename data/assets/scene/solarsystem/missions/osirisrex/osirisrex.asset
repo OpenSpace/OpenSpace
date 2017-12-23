@@ -1,0 +1,18 @@
+asset.request('./bennu')
+asset.request('./model')
+asset.request('./trail')
+
+
+
+local mission = asset.localResource('osirisrex.mission')
+local scriptSchedule = asset.localResource("scheduled_scripts.lua")
+
+asset.onInitialize(function()
+    openspace.loadMission(mission)
+    openspace.scriptScheduler.loadFile(scriptSchedule)
+end)
+
+asset.onDeinitialize(function()
+    -- openspace.unloadMission()
+    -- openspace.scriptScheduler.unloadFile
+end)
