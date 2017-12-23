@@ -29,6 +29,7 @@
 
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
@@ -55,7 +56,9 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    bool loadTextures();
+    void loadColorTexture();
+    void loadHeightTexture();
+
     void attitudeParameters(double time);
 
 private:
@@ -63,8 +66,13 @@ private:
 
     ProjectionComponent _projectionComponent;
 
-    properties::StringProperty _colorTexturePath;
-    properties::StringProperty _heightMapTexturePath;
+    properties::OptionProperty _colorTexturePaths;
+    properties::StringProperty _addColorTexturePath;
+    bool _colorTextureDirty;
+
+    properties::OptionProperty _heightMapTexturePaths;
+    properties::StringProperty _addHeightMapTexturePath;
+    bool _heightMapTextureDirty;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;

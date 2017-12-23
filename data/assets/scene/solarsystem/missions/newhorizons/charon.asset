@@ -12,13 +12,6 @@ local textures = asset.syncedResource({
     Version = 3
 })
 
--- local charon_image = textures .. "/NH_Charon_mosaic_8192.png"
-local charon_image = textures .. "/NH_Charon_mosaic.png"
-
--- local charon_height = textures .. "/NH_Charon_DTM_8192.png"
-local charon_height = textures .. "/NH_Charon_DTM.png"
-
-
 local charonRadius = 6.035E5
 
 local Charon = {
@@ -43,8 +36,14 @@ local Charon = {
             Radius = charonRadius,
             Segments = 350
         },
-        ColorTexture = charon_image,
-        HeightTexture = charon_height,
+        ColorTexturePaths = {
+            textures .. "/NH_Charon_mosaic.png",
+            textures .. "/NH_Charon_mosaic_8192.png"
+        },
+        HeightTexturePaths = {
+            textures .. "/NH_Charon_DTM.png",
+            textures .. "/NH_Charon_DTM_8192.png"
+        },
         Projection = {
             Observer   = "NEW HORIZONS",
             Target     = "CHARON",

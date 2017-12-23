@@ -35,6 +35,8 @@ uniform bool _meridianShift;
 
 uniform float _projectionFading;
 
+uniform bool _hasBaseMap;
+
 uniform vec4 objpos;
 uniform vec3 sun_pos;
 
@@ -55,7 +57,10 @@ Fragment getFragment() {
 
     vec4 ambient = vec4(0.0, 0.0, 0.0, 1.0);
 
-    vec4 textureColor = texture(baseTexture, st);
+    vec4 textureColor = vec4(0.2, 0.2, 0.2, 1.0);
+    if (_hasBaseMap) {
+        textureColor = texture(baseTexture, st);
+    }
     vec4 projectionColor = texture(projectionTexture, vs_st);
     if (projectionColor.a != 0.0) {
         textureColor.rgb = mix(

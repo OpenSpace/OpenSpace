@@ -35,15 +35,6 @@ local images = asset.syncedResource({
 
 local plutoRadius = 1.173E6
 
--- local pluto_image = textures .. "/NH_Pluto_mosaic_8192.png"
--- local pluto_image = textures .. "/NH_Pluto_mosaic_16384.png"
--- local pluto_image = textures .. "/pmap_cyl_k201.jpg"
-local pluto_image = textures .. "/pmap_cyl_k201_4096.jpg"
-
-local pluto_height = textures .. "/NH_Pluto_DTM_8192.png"
--- local pluto_height = textures .. "/NH_Pluto_DTM_16384.png"
-
-
 local Pluto = {
     Name = "Pluto",
     Parent = transforms.PlutoBarycenter.Name,
@@ -68,8 +59,16 @@ local Pluto = {
             Radius = plutoRadius,
             Segments = 400
         },
-        ColorTexture = pluto_image,
-        HeightTexture = pluto_height,
+        ColorTexturePaths = {
+            textures .. "/NH_Pluto_mosaic_16384.png",
+            textures .. "/NH_Pluto_mosaic_8192.png",
+            textures .. "/pmap_cyl_k201.jpg",
+            textures .. "/pmap_cyl_k201_4096.jpg"
+        },
+        HeightTexturePaths = {
+            textures .. "/NH_Pluto_DTM_16384.png",
+            textures .. "/NH_Pluto_DTM_8192.png"
+        },
         MeridianShift = true,
         Projection = {
             Sequence       = images,

@@ -61,18 +61,34 @@ namespace {
 //    const char* keyShading = "PerformShading";
     constexpr const char* _mainFrame = "GALACTIC";
 
-    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
-        "ColorTexture",
-        "Color Base Texture",
-        "The path to the base color texture that is used on the planet prior to any "
-        "image projection."
+    static const openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
+        "ColorTexturePaths",
+        "Color Texture",
+        "The texture path selected in this property is used as the base texture that is "
+        "applied to the planet prior to any image projections. This menu always contains "
+        "an empty option for not using a color map. If this value is specified in an "
+        "asset, the last texture is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo HeightTextureInfo = {
-        "HeightTexture",
+    static const openspace::properties::Property::PropertyInfo AddColorTextureInfo = {
+        "AddColorTexture",
+        "Add Color Base Texture",
+        "Adds a new base color texture to the list of selectable base maps used prior to "
+        "any image projection."
+    };
+
+    static const openspace::properties::Property::PropertyInfo HeightTexturePathsInfo = {
+        "HeightTexturePaths",
         "Heightmap Texture",
-        "The path to the height map texture that is used for the planet. If no height "
-        "map is specified the planet does not use a height field."
+        "The texture path selected in this property is used as the height map on the "
+        "planet. This menu always contains an empty option for not using a heightmap. If "
+        "this value is specified in an asset, the last texture is used."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AddHeightTextureInfo = {
+        "AddHeightTexture",
+        "Add Heightmap Texture",
+        "Adds a new height map texture to the list of selectable height maps used."
     };
 
     static const openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
@@ -120,16 +136,16 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
                 "Contains information about projecting onto this planet.",
             },
             {
-                ColorTextureInfo.identifier,
-                new StringVerifier,
+                ColorTexturePathsInfo.identifier,
+                new StringListVerifier,
                 Optional::No,
-                ColorTextureInfo.description
+                ColorTexturePathsInfo.description
             },
             {
-                HeightTextureInfo.identifier,
-                new StringVerifier,
+                HeightTexturePathsInfo.identifier,
+                new StringListVerifier,
                 Optional::Yes,
-                HeightTextureInfo.description
+                HeightTexturePathsInfo.description
             },
             {
                 HeightExaggerationInfo.identifier,
@@ -149,8 +165,12 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dict)
     : Renderable(dict)
-    , _colorTexturePath(ColorTextureInfo)
-    , _heightMapTexturePath(HeightTextureInfo)
+    , _colorTexturePaths(ColorTexturePathsInfo)
+    , _addColorTexturePath(AddColorTextureInfo)
+    , _colorTextureDirty(false)
+    , _heightMapTexturePaths(HeightTexturePathsInfo)
+    , _addHeightMapTexturePath(AddHeightTextureInfo)
+    , _heightMapTextureDirty(false)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
@@ -179,19 +199,94 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     _projectionComponent.initialize(dict.value<ghoul::Dictionary>(KeyProjection));
 
-    // TODO: textures need to be replaced by a good system similar to the geometry as soon
-    // as the requirements are fixed (ab)
-    std::string texturePath = "";
-    success = dict.getValue(ColorTextureInfo.identifier, texturePath);
-    if (success) {
-        _colorTexturePath = absPath(texturePath);
+    _colorTexturePaths.addOption(0, "");
+    _colorTexturePaths.onChange([this](){
+        _colorTextureDirty = true;
+    });
+    addProperty(_colorTexturePaths);
+
+    if (dict.hasKey(ColorTexturePathsInfo.identifier)) {
+        ghoul::Dictionary value = dict.value<ghoul::Dictionary>(
+            ColorTexturePathsInfo.identifier
+        );
+
+        for (size_t i = 1; i <= value.size(); ++i) {
+            std::string texture = absPath(value.value<std::string>(std::to_string(i)));
+
+            _colorTexturePaths.addOption(
+                // as we started with 0, this works
+                static_cast<int>(_colorTexturePaths.options().size()),
+                texture
+            );
+
+            _colorTexturePaths = static_cast<int>(
+                _colorTexturePaths.options().size() - 1
+            );
+        }
     }
 
-    std::string heightMapPath = "";
-    success = dict.getValue(HeightTextureInfo.identifier, heightMapPath);
-    if (success) {
-        _heightMapTexturePath = absPath(heightMapPath);
+    _addColorTexturePath.onChange([this]() {
+        if (!_addColorTexturePath.value().empty()) {
+            _colorTexturePaths.addOption(
+                // as we started with 0, this works
+                static_cast<int>(_colorTexturePaths.options().size()),
+                _addColorTexturePath.value()
+            );
+
+            _colorTexturePaths = static_cast<int>(
+                _colorTexturePaths.options().size() - 1
+            );
+
+            _addColorTexturePath = "";
+        }
+    });
+    addProperty(_addColorTexturePath);
+
+
+
+    _heightMapTexturePaths.addOption(0, "");
+    _heightMapTexturePaths.onChange([this]() {
+        _heightMapTextureDirty = true;
+    });
+    addProperty(_heightMapTexturePaths);
+
+
+    if (dict.hasKey(HeightTexturePathsInfo.identifier)) {
+        ghoul::Dictionary value = dict.value<ghoul::Dictionary>(
+            HeightTexturePathsInfo.identifier
+        );
+
+        for (size_t i = 1; i <= value.size(); ++i) {
+            std::string texture = absPath(value.value<std::string>(std::to_string(i)));
+
+            _heightMapTexturePaths.addOption(
+                // as we started with 0, this works
+                static_cast<int>(_heightMapTexturePaths.options().size()),
+                texture
+            );
+
+            _heightMapTexturePaths = static_cast<int>(
+                _heightMapTexturePaths.options().size() - 1
+            );
+        }
     }
+
+    _addHeightMapTexturePath.onChange([this]() {
+        if (!_addHeightMapTexturePath.value().empty()) {
+            _heightMapTexturePaths.addOption(
+                // as we started with 0, this works
+                static_cast<int>(_heightMapTexturePaths.options().size()),
+                _addHeightMapTexturePath.value()
+            );
+            _heightMapTexturePaths = static_cast<int>(
+                _heightMapTexturePaths.options().size() - 1
+            );
+
+            _addHeightMapTexturePath = "";
+        }
+    });
+    addProperty(_addHeightMapTexturePath);
+
 
     if (dict.hasKeyAndValue<bool>(MeridianShiftInfo.identifier)) {
         _meridianShift = dict.value<bool>(MeridianShiftInfo.identifier);
@@ -204,12 +299,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
 
-    addProperty(_colorTexturePath);
-    _colorTexturePath.onChange([&]() { loadTextures(); });
-
-    addProperty(_heightMapTexturePath);
-    _heightMapTexturePath.onChange([&]() { loadTextures(); });
-
     if (dict.hasKey(HeightExaggerationInfo.identifier)) {
         _heightExaggeration = static_cast<float>(
             dict.value<double>(HeightExaggerationInfo.identifier)
@@ -217,7 +306,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
 
     addProperty(_heightExaggeration);
-
     addProperty(_meridianShift);
 }
 
@@ -240,7 +328,8 @@ void RenderablePlanetProjection::initializeGL() {
         )
     );
 
-    loadTextures();
+    loadColorTexture();
+    loadHeightTexture();
     _projectionComponent.initializeGL();
     _geometry->initialize(this);
 
@@ -292,7 +381,7 @@ void RenderablePlanetProjection::deinitializeGL() {
 }
 
 bool RenderablePlanetProjection::isReady() const {
-    return _geometry && _programObject && _baseTexture && _projectionComponent.isReady();
+    return _geometry && _programObject && _projectionComponent.isReady();
 }
 
 void RenderablePlanetProjection::imageProjectGPU(
@@ -406,8 +495,9 @@ ghoul::opengl::Texture& RenderablePlanetProjection::baseTexture() const {
 }
 
 void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) {
-    if (_projectionComponent.needsClearProjection())
+    if (_projectionComponent.needsClearProjection()) {
         _projectionComponent.clearAllProjections();
+    }
 
     _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVectorCameraSpace();
@@ -461,6 +551,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     _programObject->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
+    _programObject->setUniform("_hasBaseMap", _baseTexture != nullptr);
     _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
     _programObject->setUniform("_meridianShift", _meridianShift);
@@ -470,9 +561,11 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     );
 
     ghoul::opengl::TextureUnit unit[3];
-    unit[0].activate();
-    _baseTexture->bind();
-    _programObject->setUniform("baseTexture", unit[0]);
+    if (_baseTexture) {
+        unit[0].activate();
+        _baseTexture->bind();
+        _programObject->setUniform("baseTexture", unit[0]);
+    }
 
     unit[1].activate();
     _projectionComponent.projectionTexture().bind();
@@ -497,6 +590,16 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         _programObject->rebuildFromFile();
     }
 
+    if (_colorTextureDirty) {
+        loadColorTexture();
+        _colorTextureDirty = false;
+    }
+
+    if (_heightMapTextureDirty) {
+        loadHeightTexture();
+        _heightMapTextureDirty = false;
+    }
+
     _projectionComponent.update();
 
     _time = data.time.j2000Seconds();
@@ -516,12 +619,16 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
     _stateMatrix = data.modelTransform.rotation;
 }
 
-bool RenderablePlanetProjection::loadTextures() {
+void RenderablePlanetProjection::loadColorTexture() {
     using ghoul::opengl::Texture;
+    std::string selectedPath = _colorTexturePaths.option().description;
+
+    // We delete the texture first in order to free up the memory, which could otherwise
+    // run out in the case of two large textures
     _baseTexture = nullptr;
-    if (_colorTexturePath.value() != "") {
+    if (!selectedPath.empty()) {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_colorTexturePath)
+            absPath(selectedPath)
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
@@ -529,11 +636,18 @@ bool RenderablePlanetProjection::loadTextures() {
             _baseTexture->uploadTexture();
         }
     }
+}
 
+void RenderablePlanetProjection::loadHeightTexture() {
+    using ghoul::opengl::Texture;
+    std::string selectedPath = _heightMapTexturePaths.option().description;
+
+    // We delete the texture first in order to free up the memory, which could otherwise
+    // run out in the case of two large textures
     _heightMapTexture = nullptr;
-    if (_heightMapTexturePath.value() != "") {
+    if (!selectedPath.empty()) {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_heightMapTexturePath)
+            absPath(selectedPath)
         );
         if (_heightMapTexture) {
             ghoul::opengl::convertTextureFormat(*_heightMapTexture, Texture::Format::RGB);
@@ -541,9 +655,6 @@ bool RenderablePlanetProjection::loadTextures() {
             _heightMapTexture->setFilter(Texture::FilterMode::Linear);
         }
     }
-
-    return _baseTexture != nullptr;
-
 }
 
 }  // namespace openspace
