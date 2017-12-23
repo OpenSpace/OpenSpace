@@ -165,7 +165,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(HeightIntensityInfo, false),
         BoolProperty(FrustumCullingInfo, true),
         BoolProperty(HorizonCullingInfo, true),
-        BoolProperty(LevelProjectedAreaInfo, true),
+        BoolProperty(LevelProjectedAreaInfo, false),
         BoolProperty(ResetTileProviderInfo, false),
         BoolProperty(CollectStatsInfo, false),
         BoolProperty(LimitLevelInfo, true),

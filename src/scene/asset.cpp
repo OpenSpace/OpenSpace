@@ -576,7 +576,7 @@ void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
-    LDEBUG("Denitializing asset " << id());
+    LDEBUG("Deintializing asset " << id());
 
     // Perform inverse actions as in initialize, in reverse order (7 - 1)
 

@@ -305,7 +305,11 @@ void Scene::update(const UpdateData& data) {
         _initializer->getInitializedNodes();
 
     for (SceneGraphNode* node : initializedNodes) {
-        node->initializeGL();
+        try {
+            node->initializeGL();
+        } catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
     }
     if (_dirtyNodeRegistry) {
         updateNodeRegistry();
