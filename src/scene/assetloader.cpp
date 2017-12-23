@@ -39,26 +39,28 @@
 #include "assetloader_lua.inl"
 
 namespace {
-    const char* AssetGlobalVariableName = "asset";
+    constexpr const char* AssetGlobalVariableName = "asset";
 
-    const char* RequireFunctionName = "require";
-    const char* RequestFunctionName = "request";
-    const char* ExportFunctionName = "export";
+    constexpr const char* RequireFunctionName = "require";
+    constexpr const char* RequestFunctionName = "request";
+    constexpr const char* ExportFunctionName = "export";
 
-    const char* SyncedResourceFunctionName = "syncedResource";
-    const char* LocalResourceFunctionName = "localResource";
+    constexpr const char* SyncedResourceFunctionName = "syncedResource";
+    constexpr const char* LocalResourceFunctionName = "localResource";
 
-    const char* OnInitializeFunctionName = "onInitialize";
-    const char* OnDeinitializeFunctionName = "onDeinitialize";
+    constexpr const char* OnInitializeFunctionName = "onInitialize";
+    constexpr const char* OnDeinitializeFunctionName = "onDeinitialize";
 
-    const char* ExportsTableName = "_exports";
-    const char* AssetTableName = "_asset";
-    const char* DependantsTableName = "_dependants";
+    constexpr const char* DirectoryConstantName = "directory";
 
-    const char* _loggerCat = "AssetLoader";
+    constexpr const char* ExportsTableName = "_exports";
+    constexpr const char* AssetTableName = "_asset";
+    constexpr const char* DependantsTableName = "_dependants";
 
-    const char* AssetFileSuffix = "asset";
-    const char* SceneFileSuffix = "scene";
+    constexpr const char* _loggerCat = "AssetLoader";
+
+    constexpr const char* AssetFileSuffix = "asset";
+    constexpr const char* SceneFileSuffix = "scene";
 
     enum class PathType : int {
         RelativeToAsset = 0,
@@ -133,6 +135,7 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     |  |- export
     |  |- onInitialize
     |  |- onDeinitialize
+    |  |- directory
     |- Dependants (table<dependant, Dependency dep>)
 
     where Dependency is a table:
@@ -200,6 +203,11 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     lua_pushlightuserdata(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::onDeinitialize, 1);
     lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
+
+    // Register directory constant
+    // string directory
+    lua_pushstring(*_luaState, asset->assetDirectory().c_str());
+    lua_setfield(*_luaState, assetTableIndex, DirectoryConstantName);
 
     // Attach Asset table to AssetInfo table
     lua_setfield(*_luaState, assetInfoTableIndex, AssetTableName);
