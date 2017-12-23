@@ -141,6 +141,10 @@ void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child,
         // called more than once.
         return;
     }
+    if (state() == State::InitializationFailed) {
+        // Do not do anything if the asset failed to initialize.
+        return;
+    }
     if (childState == State::SyncResolved) {
         if (isSyncResolveReady()) {
             setState(State::SyncResolved);
@@ -154,10 +158,12 @@ void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child,
                                        Asset::State childState)
 {
     if (child->hasInitializedParent()) {
-        if (childState == State::Loaded) {
+        if (childState == State::Loaded &&
+            child->state() == State::Loaded) {
             child->startSynchronizations();
         }
-        if (childState == State::SyncResolved) {
+        if (childState == State::SyncResolved &&
+            child->state() == State::SyncResolved) {
             child->initialize();
         }
     }

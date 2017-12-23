@@ -359,7 +359,7 @@ int addSceneGraphNode(lua_State* L) {
     try {
         SceneGraphNode* node = OsEng.renderEngine().scene()->loadNode(d);
         if (!node) {
-            LERRORC("Could not load scene graph node", "scene");
+            LERRORC("Scene", "Could not load scene graph node");
             return luaL_error(L, "Error loading scene graph node");
         }
 

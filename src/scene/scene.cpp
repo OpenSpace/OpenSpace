@@ -377,6 +377,12 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     const std::string nodeName = dict.value<std::string>(KeyName);
     const bool hasParent = dict.hasKey(KeyParentName);
 
+    if (_nodesByName.find(nodeName) != _nodesByName.end()) {
+        LERROR("Cannot add scene graph node " << nodeName <<
+               ". A node with that name already exisis.");
+        return nullptr;
+    }
+
     SceneGraphNode* parent = nullptr;
     if (hasParent) {
         std::string parentName = dict.value<std::string>(KeyParentName);
