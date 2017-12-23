@@ -20,12 +20,12 @@ local PlutoBarycenter = {
 
 local NewHorizonsPosition = {
     Name = "NewHorizonsPosition",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Parent = PlutoBarycenter.Name,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "NEW HORIZONS",
-            Observer = "SUN",
+            Observer = "PLUTO BARYCENTER",
             Kernels = kernels.NewHorizonsKernels
         },
         Rotation = {
