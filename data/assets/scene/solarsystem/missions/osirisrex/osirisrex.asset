@@ -5,14 +5,16 @@ asset.request('./trail')
 
 
 local mission = asset.localResource('osirisrex.mission')
+local missionName
+
 local scriptSchedule = asset.localResource("scheduled_scripts.lua")
 
 asset.onInitialize(function()
-    openspace.loadMission(mission)
+    missionName = openspace.loadMission(mission)
     openspace.scriptScheduler.loadFile(scriptSchedule)
 end)
 
 asset.onDeinitialize(function()
-    -- openspace.unloadMission()
+    openspace.unloadMission(missionName)
     -- openspace.scriptScheduler.unloadFile
 end)

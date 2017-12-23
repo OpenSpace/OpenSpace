@@ -450,9 +450,6 @@ void OpenSpaceEngine::destroy() {
         _engine->parallelConnection().signalDisconnect();
     }
 
-    _engine->assetManager().deinitialize();
-    _engine->_scene = nullptr;
-
     _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
 
@@ -773,6 +770,9 @@ void OpenSpaceEngine::deinitialize() {
     for (const auto& func : _engine->_moduleCallbacks.deinitialize) {
         func();
     }
+    
+    _engine->assetManager().deinitialize();
+    _engine->_scene = nullptr;
 
     _navigationHandler->deinitialize();
     _renderEngine->deinitialize();

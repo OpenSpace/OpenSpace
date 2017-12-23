@@ -11,11 +11,12 @@ asset.request('./styx')
 
 
 local mission = asset.localResource("newhorizons.mission")
+local missionName
 
 asset.onInitialize(function()
-    openspace.loadMission(mission)
+    missionName = openspace.loadMission(mission)
 end)
 
 asset.onDeinitialize(function()
-    -- openspace.unloadMission()
+    openspace.unloadMission(missionName)
 end)
