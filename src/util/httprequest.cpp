@@ -49,12 +49,21 @@
 #endif
 
 namespace {
-    const char* _loggerCat = "HttpRequest";
+    constexpr const long StatusCodeOk = 200;
+    constexpr const char* _loggerCat = "HttpRequest";
 }
 
 namespace openspace {
 
 namespace curlfunctions {
+
+size_t headerCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
+    HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
+    size_t nBytes = r->_onHeader(HttpRequest::Header{ptr, size * nmemb});
+    r->setReadyState(HttpRequest::ReadyState::ReceivedHeader);
+    return nBytes;
+}
+
 int progressCallback(
     void* userData,
     int64_t nTotalBytes,
@@ -83,6 +92,7 @@ HttpRequest::HttpRequest(std::string url)
     , _onReadyStateChange([](ReadyState) {})
     , _onProgress([](Progress) { return 0; })
     , _onData([](Data d) { return d.size; })
+    , _onHeader([](Header h) { return h.size; })
 {}
 
 void HttpRequest::onReadyStateChange(ReadyStateChangeCallback cb) {
@@ -97,6 +107,10 @@ void HttpRequest::onData(DataCallback cb) {
     _onData = std::move(cb);
 }
 
+void HttpRequest::onHeader(HeaderCallback cb) {
+    _onHeader = std::move(cb);
+}
+
 void HttpRequest::perform(RequestOptions opt) {
     setReadyState(ReadyState::Loading);
 
@@ -109,18 +123,31 @@ void HttpRequest::perform(RequestOptions opt) {
     curl_easy_setopt(curl, CURLOPT_URL, _url.c_str());
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlfunctions::headerCallback);
+
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
     
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
-    
+
     if (opt.requestTimeoutSeconds > 0) {
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds);
     }
 
     CURLcode res = curl_easy_perform(curl);
-    setReadyState(res == CURLE_OK ? ReadyState::Success : ReadyState::Fail);
+    if (res == CURLE_OK) {
+        long responseCode;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+        if (responseCode == StatusCodeOk) {
+            setReadyState(ReadyState::Success);
+        } else {
+            setReadyState(ReadyState::Fail);
+        }
+    } else {
+        setReadyState(ReadyState::Fail);
+    }
     curl_easy_cleanup(curl);
 }
     
@@ -279,12 +306,15 @@ size_t HttpMemoryDownload::handleData(HttpRequest::Data d) {
     return d.size;
 }
 
-HttpFileDownload::HttpFileDownload(std::string destination) {
-    _destination = std::move(destination);
-}
+HttpFileDownload::HttpFileDownload(
+    std::string destination,
+    HttpFileDownload::Overwrite overwrite)
+    : _destination(std::move(destination))
+    , _overwrite(overwrite)
+{}
 
 bool HttpFileDownload::initDownload() {
-    if (FileSys.fileExists(_destination)) {
+    if (!_overwrite && FileSys.fileExists(_destination)) {
         LERROR("File " << _destination << " already exists!");
         return false;
     }
@@ -325,18 +355,26 @@ SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)
     , HttpMemoryDownload()
 {}
 
-SyncHttpFileDownload::SyncHttpFileDownload(std::string url, std::string destinationPath)
+SyncHttpFileDownload::SyncHttpFileDownload(
+    std::string url,
+    std::string destinationPath,
+    HttpFileDownload::Overwrite overwrite
+)
     : SyncHttpDownload(std::move(url))
-    , HttpFileDownload(std::move(destinationPath))
+    , HttpFileDownload(std::move(destinationPath), overwrite)
 {}
 
 AsyncHttpMemoryDownload::AsyncHttpMemoryDownload(std::string url)
     : AsyncHttpDownload(std::move(url))
 {}
 
-AsyncHttpFileDownload::AsyncHttpFileDownload(std::string url, std::string destinationPath)
+AsyncHttpFileDownload::AsyncHttpFileDownload(
+    std::string url,
+    std::string destinationPath,
+    HttpFileDownload::Overwrite overwrite
+)
     : AsyncHttpDownload(std::move(url))
-    , HttpFileDownload(std::move(destinationPath))
+    , HttpFileDownload(std::move(destinationPath), overwrite)
 {}
 
 
