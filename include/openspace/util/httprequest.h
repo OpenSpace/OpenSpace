@@ -212,8 +212,10 @@ private:
 
 class HttpFileDownload : public virtual HttpDownload {
 public:
+    using Overwrite = ghoul::Boolean;
+
     HttpFileDownload() = default;
-    HttpFileDownload(std::string destination);
+    HttpFileDownload(std::string destination, Overwrite = Overwrite::No);
     HttpFileDownload(HttpFileDownload&& d) = default;
     virtual ~HttpFileDownload() = default;
 protected:
@@ -224,6 +226,7 @@ protected:
     static std::mutex _directoryCreationMutex;
 private:
     std::string _destination;
+    bool _overwrite;
     std::ofstream _file;
 };
 
@@ -251,7 +254,11 @@ public:
 // Synchronous download to file
 class SyncHttpFileDownload : public SyncHttpDownload, public HttpFileDownload {
 public:
-    SyncHttpFileDownload(std::string url, std::string destinationPath);
+    SyncHttpFileDownload(
+        std::string url,
+        std::string destinationPath,
+        HttpFileDownload::Overwrite = Overwrite::No
+    );
     virtual ~SyncHttpFileDownload() = default;
 };
 
@@ -265,7 +272,11 @@ public:
 // Asynchronous download to file
 class AsyncHttpFileDownload : public AsyncHttpDownload, public HttpFileDownload {
 public:
-    AsyncHttpFileDownload(std::string url, std::string destinationPath);
+    AsyncHttpFileDownload(
+        std::string url,
+        std::string destinationPath,
+        HttpFileDownload::Overwrite = Overwrite::No
+    );
     virtual ~AsyncHttpFileDownload() = default;
 };
 

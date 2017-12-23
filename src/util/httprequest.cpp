@@ -306,12 +306,15 @@ size_t HttpMemoryDownload::handleData(HttpRequest::Data d) {
     return d.size;
 }
 
-HttpFileDownload::HttpFileDownload(std::string destination) {
-    _destination = std::move(destination);
-}
+HttpFileDownload::HttpFileDownload(
+    std::string destination,
+    HttpFileDownload::Overwrite overwrite)
+    : _destination(std::move(destination))
+    , _overwrite(overwrite)
+{}
 
 bool HttpFileDownload::initDownload() {
-    if (FileSys.fileExists(_destination)) {
+    if (!_overwrite && FileSys.fileExists(_destination)) {
         LERROR("File " << _destination << " already exists!");
         return false;
     }
@@ -352,18 +355,26 @@ SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)
     , HttpMemoryDownload()
 {}
 
-SyncHttpFileDownload::SyncHttpFileDownload(std::string url, std::string destinationPath)
+SyncHttpFileDownload::SyncHttpFileDownload(
+    std::string url,
+    std::string destinationPath,
+    HttpFileDownload::Overwrite overwrite
+)
     : SyncHttpDownload(std::move(url))
-    , HttpFileDownload(std::move(destinationPath))
+    , HttpFileDownload(std::move(destinationPath), overwrite)
 {}
 
 AsyncHttpMemoryDownload::AsyncHttpMemoryDownload(std::string url)
     : AsyncHttpDownload(std::move(url))
 {}
 
-AsyncHttpFileDownload::AsyncHttpFileDownload(std::string url, std::string destinationPath)
+AsyncHttpFileDownload::AsyncHttpFileDownload(
+    std::string url,
+    std::string destinationPath,
+    HttpFileDownload::Overwrite overwrite
+)
     : AsyncHttpDownload(std::move(url))
-    , HttpFileDownload(std::move(destinationPath))
+    , HttpFileDownload(std::move(destinationPath), overwrite)
 {}
 
 

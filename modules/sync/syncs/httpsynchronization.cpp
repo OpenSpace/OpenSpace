@@ -206,7 +206,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         ghoul::filesystem::FileSystem::PathSeparator +
         filename;
         
-        downloads.push_back(std::make_unique<AsyncHttpFileDownload>(line, fileDestination));
+        downloads.push_back(std::make_unique<AsyncHttpFileDownload>(
+            line, fileDestination, HttpFileDownload::Overwrite::Yes));
+
         auto& fileDownload = downloads.back();
         
         ++nDownloads;
