@@ -51,7 +51,7 @@
 namespace {
     constexpr const long StatusCodeOk = 200;
     constexpr const char* _loggerCat = "HttpRequest";
-}
+} // namespace
 
 namespace openspace {
 
@@ -298,9 +298,11 @@ const std::vector<char>& HttpMemoryDownload::downloadedData() {
 bool HttpMemoryDownload::initDownload() {
     return true;
 }
+
 bool HttpMemoryDownload::deinitDownload() {
     return true;
 }
+
 size_t HttpMemoryDownload::handleData(HttpRequest::Data d) {
     _downloadedData.insert(_downloadedData.end(), d.buffer, d.buffer + d.size);
     return d.size;
@@ -315,7 +317,7 @@ HttpFileDownload::HttpFileDownload(
 
 bool HttpFileDownload::initDownload() {
     if (!_overwrite && FileSys.fileExists(_destination)) {
-        LERROR("File " << _destination << " already exists!");
+        LWARNING("File " << _destination << " already exists!");
         return false;
     }
 
@@ -329,6 +331,12 @@ bool HttpFileDownload::initDownload() {
         }
     }
 
+    while (nCurrentFilehandles >= MaxFilehandles) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+
+
+    ++nCurrentFilehandles;
     _file = std::ofstream(_destination, std::ofstream::binary);
 
     if (_file.fail()) {
@@ -348,8 +356,6 @@ bool HttpFileDownload::initDownload() {
 #endif
         if (errno) {
 #if defined(__unix__)
-            // We use strerror_r because it's threadsafe.
-            // GNU's strerror_r returns a string and may ignore buffer completely.
             char buffer[255];
             LERROR(
                 "Cannot open file " << destinationFile << ": " <<
@@ -373,6 +379,7 @@ bool HttpFileDownload::initDownload() {
 
 bool HttpFileDownload::deinitDownload() {
     _file.close();
+    --nCurrentFilehandles;
     return _file.good();
 }
 
@@ -381,6 +388,7 @@ size_t HttpFileDownload::handleData(HttpRequest::Data d) {
     return d.size;
 }
 
+std::atomic_int HttpFileDownload::nCurrentFilehandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;
 
 SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)

@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/directory.h>
 
+#include <atomic>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -174,6 +175,7 @@ protected:
     void markAsStarted();
     void markAsSuccessful();
     void markAsFailed();
+
 private:
     ProgressCallback _onProgress;
     bool _started = false;
@@ -187,6 +189,7 @@ public:
     SyncHttpDownload(SyncHttpDownload&& d) = default;
     virtual ~SyncHttpDownload() = default;
     void download(HttpRequest::RequestOptions opt);
+
 protected:
     HttpRequest _httpRequest;
 };
@@ -199,8 +202,10 @@ public:
     void start(HttpRequest::RequestOptions opt);
     void cancel();
     void wait();
+
 protected:
     void download(HttpRequest::RequestOptions opt);
+
 private:
     HttpRequest _httpRequest;
     std::thread _downloadThread;
@@ -218,16 +223,21 @@ public:
     HttpFileDownload(std::string destination, Overwrite = Overwrite::No);
     HttpFileDownload(HttpFileDownload&& d) = default;
     virtual ~HttpFileDownload() = default;
+
 protected:
     bool initDownload() override;
     bool deinitDownload() override;
     size_t handleData(HttpRequest::Data d) override;
 
     static std::mutex _directoryCreationMutex;
+
 private:
     std::string _destination;
     bool _overwrite;
     std::ofstream _file;
+
+    static const int MaxFilehandles = 35;
+    static std::atomic_int nCurrentFilehandles;
 };
 
 class HttpMemoryDownload : public virtual HttpDownload {
@@ -236,10 +246,12 @@ public:
     HttpMemoryDownload(HttpMemoryDownload&& d) = default;
     virtual ~HttpMemoryDownload() = default;
     const std::vector<char>& downloadedData();
+
 protected:
     bool initDownload() override;
     bool deinitDownload() override;
     size_t handleData(HttpRequest::Data d) override;
+
 private:
     std::vector<char> _downloadedData;
 };
