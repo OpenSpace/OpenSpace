@@ -1,8 +1,22 @@
-return {{
-    Type = "SyncAssetTask",
-    Asset = "solarsystem"
-},
-{
-    Type = "SyncAssetTask",
-    Asset = "newhorizons"
-}}
+return {
+    {
+        Type = "SyncAssetTask",
+        Asset = "dawn"
+    },
+    {
+        Type = "SyncAssetTask",
+        Asset = "default"
+    },
+    {
+        Type = "SyncAssetTask",
+        Asset = "newhorizons"
+    },
+    {
+        Type = "SyncAssetTask",
+        Asset = "osirisrex"
+    },
+    {
+        Type = "SyncAssetTask",
+        Asset = "rosetta"
+    }
+}

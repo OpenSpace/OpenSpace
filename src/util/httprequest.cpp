@@ -332,6 +332,39 @@ bool HttpFileDownload::initDownload() {
     _file = std::ofstream(_destination, std::ofstream::binary);
 
     if (_file.fail()) {
+#ifdef WIN32
+        // GetLastError() gives more details than errno.
+        if (GetLastError() != 0) {
+            LERROR(
+                "Cannot open file " << destinationFile <<
+                ": " << FormatSystemMessage(GetLastError()
+            );
+            return false;
+        }
+        else {
+            LERROR("Cannot open file " << destinationFile);
+            return false;
+        }
+#endif
+        if (errno) {
+#if defined(__unix__)
+            // We use strerror_r because it's threadsafe.
+            // GNU's strerror_r returns a string and may ignore buffer completely.
+            char buffer[255];
+            LERROR(
+                "Cannot open file " << destinationFile << ": " <<
+                std::string(strerror_r(errno, buffer, sizeof(buffer)))
+            );
+            return false;
+#else
+            LERROR(
+                "Cannot open file " << destinationFile << ": " <<
+                std::string(strerror(errno))
+            );
+            return false;
+#endif
+        }
+
         LERROR("Cannot open file " << destinationFile);
         return false;
     }

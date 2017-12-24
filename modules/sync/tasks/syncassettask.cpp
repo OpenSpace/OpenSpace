@@ -24,7 +24,9 @@
 
 #include <modules/sync/tasks/syncassettask.h>
 
+#include <openspace/moduleregistration.h>
 #include <openspace/openspace.h>
+#include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/synchronizationwatcher.h>
 #include <openspace/scripting/scriptengine.h>
@@ -45,8 +47,7 @@ namespace {
 
 namespace openspace {
 
-SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary)
-{
+SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary) {
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -64,6 +65,17 @@ void SyncAssetTask::perform(const Task::ProgressCallback & progressCallback) {
     SynchronizationWatcher watcher;
 
     scripting::ScriptEngine scriptEngine;
+
+    registerCoreClasses(scriptEngine);
+
+    for (OpenSpaceModule* m : AllModules()) {
+        scriptEngine.addLibrary(m->luaLibrary());
+
+        for (scripting::LuaLibrary& l : m->luaLibraries()) {
+            scriptEngine.addLibrary(l);
+        }
+    }
+
     scriptEngine.initialize();
 
     ghoul::lua::LuaState luaState;
@@ -79,7 +91,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback & progressCallback) {
 
     std::vector<std::shared_ptr<Asset>> allAssets = loader.rootAsset()->subTreeAssets();
 
-    while (true) {      
+    while (true) {
         bool inProgress = false;
         for (const std::shared_ptr<Asset>& asset : allAssets) {
             Asset::State state = asset->state();

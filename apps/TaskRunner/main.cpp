@@ -128,25 +128,25 @@ int main(int argc, char** argv) {
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
         "Renderable"
-        );
+    );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Task>>(),
         "Task"
-        );
+    );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Translation>>(),
         "Translation"
-        );
+    );
 
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Rotation>>(),
         "Rotation"
-        );
+    );
 
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
-        );
+    );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
         "ResourceSynchronization"
