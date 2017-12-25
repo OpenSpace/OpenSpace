@@ -1,13 +1,13 @@
-asset.request('./model')
-asset.request('./label')
-asset.request('./fov')
-asset.request('./trail')
+asset.require('./model')
+asset.require('./label')
+asset.require('./fov')
+asset.require('./trail')
 
-asset.request('./pluto')
-asset.request('./charon')
-asset.request('./hydra')
-asset.request('./nix')
-asset.request('./styx')
+asset.require('./pluto')
+asset.require('./charon')
+asset.require('./hydra')
+asset.require('./nix')
+asset.require('./styx')
 
 
 local mission = asset.localResource("newhorizons.mission")

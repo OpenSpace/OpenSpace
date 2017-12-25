@@ -60,6 +60,7 @@ local Pluto = {
             Segments = 400
         },
         ColorTexturePaths = {
+            textures .. "/pluto.png",
             textures .. "/NH_Pluto_mosaic_16384.png",
             textures .. "/NH_Pluto_mosaic_8192.png",
             textures .. "/pmap_cyl_k201.jpg",
