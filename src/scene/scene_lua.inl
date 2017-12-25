@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
+
 #include <regex>
 
 namespace openspace {
@@ -364,6 +366,14 @@ int addSceneGraphNode(lua_State* L) {
         }
 
         OsEng.renderEngine().scene()->initializeNode(node);
+    }
+    catch (const documentation::SpecificationError& e) {
+        return luaL_error(
+            L,
+            "Error loading scene graph node: %s: %s",
+            e.what(),
+            std::to_string(e.result).c_str()
+        );
     } catch (const ghoul::RuntimeError& e) {
         return luaL_error(L, "Error loading scene graph node: %s", e.what());
     }

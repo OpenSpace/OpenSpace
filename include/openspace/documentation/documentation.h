@@ -294,7 +294,11 @@ void testSpecificationAndThrow(const Documentation& documentation,
 
 namespace std {
 
+std::string to_string(openspace::documentation::TestResult testResult);
+
+std::string to_string(openspace::documentation::TestResult::Offense offense);
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
+std::string to_string(openspace::documentation::TestResult::Warning warning);
 std::string to_string(openspace::documentation::TestResult::Warning::Reason reason);
 
 } // namespace std
