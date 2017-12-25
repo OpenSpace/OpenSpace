@@ -1,0 +1,197 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+
+
+local models = asset.syncedResource({
+    Name = "Voyager 1 Models",
+    Type = "HttpSynchronization",
+    Identifier = "voyager1_model",
+    Version = 1
+})
+
+local kernels = asset.syncedResource({
+    Name = "Voyager 1 Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "voyager1_spice",
+    Version = 1
+})
+
+local Kernels = {
+    kernels .. '/vg1_v02.tf',
+    kernels .. '/vg100019.tsc',
+    kernels .. '/Voyager_1.a54206u_V0.2_merged.bsp',
+    kernels .. '/voyager_1.ST+1991_a54418u.merged.bsp',
+    kernels .. '/vgr1_jup230.bsp',
+    kernels .. '/vgr1_sat337.bsp',
+    kernels .. '/vgr1_super.bc',
+    kernels .. '/vgr1_super_v2.bc'
+}
+
+local RotationMatrix = {
+    -1, 0, 0,
+    0, 0, -1,
+    0, -1, 0
+}
+
+local Voyager1 = {
+    Name = "Voyager 1",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VOYAGER 1",
+            Observer = "SUN",
+            Kernels = Kernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "VG1_SC_BUS",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    GuiPath = "/Solar System/Missions/Voyager 1"
+}
+
+local Voyager1Main = {
+    Name = "Voyager 1 Main",
+    Parent = Voyager1.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/voyager-main.obj"
+        },
+        ColorTexture = models .. "/voyager-main.jpg",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Voyager 1"
+}
+
+local Voyager1Antenna = {
+    Name = "Voyager 1 Antanna",
+    Parent = Voyager1.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/voyager-antenna.obj"
+        },
+        ColorTexture = models .. "/voyager-antenna.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Voyager 1"
+}
+
+    -- The trails are organized as follows.  The cruise phases can be resolved in relatively
+    -- low resolution since they are just straight lines
+    -- The encounter phases should be much higher resolution or otherwise artifacts would appear
+local VoyagerTrailCruiseEarthJupiter = {
+    Name = "Voyager 1 Trail Cruise Earth-Jupiter",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VOYAGER 1",
+            Observer = "SUN",
+            Kernels = Kernels
+        },
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1977 SEP 05",
+        EndTime = "1979 MAR 04",
+        SampleInterval = 545 * 2  -- 545 is the number of days between the Start and End time
+    },
+    GuiName = "/Solar System/Missions/Voyager 1"
+}
+
+local VoyagerTrailEncounterJupiter = {
+    Name = "Voyager 1 Trail Encounter Jupiter",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VOYAGER 1",
+            Observer = "SUN",
+            Kernels = Kernels
+        },
+        Color = { 0.70, 0.50, 0.20 },
+        EnableFade = false,
+        StartTime = "1979 MAR 03 23:24:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
+        EndTime = "1979 MAR 09",
+        SampleInterval = 100
+    },
+    GuiName = "/Solar System/Missions/Voyager 1"
+}
+
+local VoyagerTrailCruiseJupiterSaturn = {
+    Name = "Voyager 1 Trail Cruise Jupiter-Saturn",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VOYAGER 1",
+            Observer = "SUN",
+            Kernels = Kernels
+        },
+        EnableFade = false,
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1979 MAR 09",
+        EndTime = "1980 NOV 11",
+        SampleInterval = 618 * 2  -- 618 is the number of days between the Start and End time
+    },
+    GuiName = "/Solar System/Missions/Voyager 1"
+}
+
+local VoyagerTrailEncounterSaturn = {
+    Name = "Voyager 1 Trail Encounter Saturn",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VOYAGER 1",
+            Observer = "SUN",
+            Kernels = Kernels
+        },
+        EnableFade = false,
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1980 NOV 10 23:08:30",  -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
+        EndTime = "1980 NOV 16",
+        SampleInterval = 100
+    },
+    GuiName = "/Solar System/Missions/Voyager 1"
+}
+
+local VoyagerTrailCruiseSaturnInf = {
+    Name = "Voyager 1 Trail Cruise Saturn-Inf",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VOYAGER 1",
+            Observer = "SUN",
+            Kernels = Kernels
+        },
+        EnableFade = false,
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1980 NOV 16",
+        EndTime = "2021 JAN 01",
+        SampleInterval = 14656 * 2  -- 14656 is the number of days between the Start and End time
+    },
+    GuiName = "/Solar System/Missions/Voyager 1"
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Voyager1,
+    Voyager1Main,
+    Voyager1Antenna,
+    VoyagerTrailCruiseEarthJupiter,
+    VoyagerTrailEncounterJupiter,
+    VoyagerTrailCruiseJupiterSaturn,
+    VoyagerTrailEncounterSaturn,
+    VoyagerTrailCruiseSaturnInf
+})

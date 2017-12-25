@@ -123,6 +123,17 @@ documentation::Documentation ProjectionComponent::Documentation() {
         "newhorizons_projectioncomponent",
         {
             {
+                keySequenceDir,
+                new OrVerifier(
+                    new StringVerifier,
+                    new StringListVerifier
+                ),
+                Optional::Yes,
+                "This value specifies one or more directories from which images are "
+                "being used for image projections. If the sequence type is set to "
+                "'playbook', this value is ignored"
+            },
+            {
                 keyInstrument,
                 new StringAnnotationVerifier("A SPICE name of an instrument"),
                 Optional::No,
@@ -273,61 +284,79 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
 
     std::vector<SequenceParser*> parsers;
 
-    std::string sequenceSource;
-    std::string sequenceType;
-    bool foundSequence = dictionary.getValue(keySequenceDir, sequenceSource);
-    if (foundSequence) {
-        sequenceSource = absPath(sequenceSource);
+    if (dictionary.hasKey(keySequenceDir)) {
+        std::vector<std::string> sequenceSources;
+        // Due to the documentation check above it must either be one or the other
+        if (dictionary.hasValue<std::string>(keySequenceDir)) {
+            sequenceSources.push_back(
+                // Remove the absPath? ---abock
+                absPath(dictionary.value<std::string>(keySequenceDir))
+            );
+        }
+        else {
+            ghoul::Dictionary sourcesDict = dictionary.value<ghoul::Dictionary>(
+                keySequenceDir
+            );
+            for (int i = 1; i <= sourcesDict.size(); ++i) {
+                // Remove the absPath? ---abock
+                sequenceSources.push_back(
+                    absPath(sourcesDict.value<std::string>(std::to_string(i)))
+                );
+            }
+        }
 
-        dictionary.getValue(keySequenceType, sequenceType);
+        std::string sequenceType = dictionary.value<std::string>(keySequenceType);
         //Important: client must define translation-list in mod file IFF playbook
         if (dictionary.hasKey(keyTranslation)) {
             ghoul::Dictionary translationDictionary;
             //get translation dictionary
             dictionary.getValue(keyTranslation, translationDictionary);
 
-            if (sequenceType == sequenceTypePlaybook) {
-                parsers.push_back(new HongKangParser(
-                    name,
-                    sequenceSource,
-                    _projectorID,
-                    translationDictionary,
-                    _potentialTargets));
-            }
-            else if (sequenceType == sequenceTypeImage) {
-                parsers.push_back(new LabelParser(
-                    name,
-                    sequenceSource,
-                    translationDictionary));
-            }
-            else if (sequenceType == sequenceTypeHybrid) {
-                //first read labels
-                parsers.push_back(new LabelParser(
-                    name,
-                    sequenceSource,
-                    translationDictionary));
-
-                std::string _eventFile;
-                bool foundEventFile = dictionary.getValue("EventFile", _eventFile);
-                if (foundEventFile) {
-                    //then read playbook
-                    _eventFile = absPath(_eventFile);
+            for (std::string& sequenceSource : sequenceSources) {
+                if (sequenceType == sequenceTypePlaybook) {
                     parsers.push_back(new HongKangParser(
                         name,
-                        _eventFile,
+                        std::move(sequenceSource),
                         _projectorID,
                         translationDictionary,
                         _potentialTargets));
                 }
-                else {
-                    LWARNING("No eventfile has been provided, please check modfiles");
+                else if (sequenceType == sequenceTypeImage) {
+                    parsers.push_back(new LabelParser(
+                        name,
+                        std::move(sequenceSource),
+                        translationDictionary));
                 }
-            }
-            else if (sequenceType == sequenceTypeInstrumentTimes) {
-                parsers.push_back(new InstrumentTimesParser(
-                    name,
-                    sequenceSource,
-                    translationDictionary));
+                else if (sequenceType == sequenceTypeHybrid) {
+                    //first read labels
+                    parsers.push_back(new LabelParser(
+                        name,
+                        std::move(sequenceSource),
+                        translationDictionary));
+
+                    std::string _eventFile;
+                    bool foundEventFile = dictionary.getValue("EventFile", _eventFile);
+                    if (foundEventFile) {
+                        //then read playbook
+                        _eventFile = absPath(_eventFile);
+                        parsers.push_back(new HongKangParser(
+                            name,
+                            _eventFile,
+                            _projectorID,
+                            translationDictionary,
+                            _potentialTargets));
+                    }
+                    else {
+                        LWARNING("No eventfile has been provided, please check modfiles");
+                    }
+                }
+                else if (sequenceType == sequenceTypeInstrumentTimes) {
+                    parsers.push_back(new InstrumentTimesParser(
+                        name,
+                        std::move(sequenceSource),
+                        translationDictionary)
+                    );
+                }
             }
 
             for (SequenceParser* parser : parsers) {
@@ -387,8 +416,8 @@ bool ProjectionComponent::initializeGL() {
     if (_dilation.isEnabled) {
         _dilation.program = ghoul::opengl::ProgramObject::Build(
             "Dilation",
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_vs.glsl",
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_fs.glsl"
+            absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_vs.glsl"),
+            absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_fs.glsl")
         );
 
         const GLfloat plane[] = {

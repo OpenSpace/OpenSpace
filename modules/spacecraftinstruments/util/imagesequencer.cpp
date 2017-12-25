@@ -182,7 +182,7 @@ double ImageSequencer::getIntervalLength() {
     return _intervalLength;
 }
 
-double ImageSequencer::getNextCaptureTime(){
+double ImageSequencer::getNextCaptureTime() {
     auto compareTime = [](const double &a, const double &b) -> bool {
         return a < b;
     };
@@ -405,7 +405,9 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
 
         // check for sanity
         if (imageData.empty() || instrumentTimes.empty() || captureProgression.empty()) {
-            LERROR("Missing sequence data");
+            LINFO(
+                "Parser did not contain images, instrument times or capture progression"
+            );
             return;
         }
 

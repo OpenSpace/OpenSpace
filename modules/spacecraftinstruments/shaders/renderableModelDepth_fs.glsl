@@ -24,8 +24,9 @@
 
 #version __CONTEXT__
 
+out vec4 fragColor;
 
 void main() {
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
     //gl_FragDepth = gl_FragCoord.z;
 }

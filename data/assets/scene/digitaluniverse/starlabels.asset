@@ -21,6 +21,7 @@ local object = {
         DrawLabels = true,
         TextSize = 14.7,
         TextMinSize = 6.0,
+        TextMaxSize = 50.0,
         Unit = "pc"
     },
     GuiPath = "/Milky Way/Stars"

@@ -26,53 +26,53 @@ local kernels = asset.syncedResource({
 })
 
 local RosettaKernels = {
-    kernels .. "/SCLK/ROS_160718_STEP.TSC",
-    kernels .. "/SCLK/ros_triv.tsc",
+    kernels .. "/Rosetta/SCLK/ROS_160718_STEP.TSC",
+    kernels .. "/Rosetta/SCLK/ros_triv.tsc",
 
-    kernels .. "/SPK/CORB_DV_243_01___T19_00325.BSP",
-    kernels .. "/SPK/CORB_DV_223_01___T19_00302.BSP",
-    kernels .. "/SPK/CORB_DV_145_01___T19_00216.BSP",
+    kernels .. "/Rosetta/SPK/CORB_DV_243_01___T19_00325.BSP",
+    kernels .. "/Rosetta/SPK/CORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/Rosetta/SPK/CORB_DV_145_01___T19_00216.BSP",
 
-    kernels .. "/SPK/LORB_DV_236_01___T19_00318.BSP",
-    kernels .. "/SPK/LORB_DV_223_01___T19_00302.BSP",
-    kernels .. "/SPK/LORB_DV_145_01___T19_00216.BSP",
+    kernels .. "/Rosetta/SPK/LORB_DV_236_01___T19_00318.BSP",
+    kernels .. "/Rosetta/SPK/LORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/Rosetta/SPK/LORB_DV_145_01___T19_00216.BSP",
     
-    kernels .. "/SPK/RORB_DV_243_01___T19_00325.BSP",
-    kernels .. "/SPK/RORB_DV_223_01___T19_00302.BSP",
-    kernels .. "/SPK/RORB_DV_145_01___T19_00216.BSP",
+    kernels .. "/Rosetta/SPK/RORB_DV_243_01___T19_00325.BSP",
+    kernels .. "/Rosetta/SPK/RORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/Rosetta/SPK/RORB_DV_145_01___T19_00216.BSP",
 
-    kernels .. "/CK/ATNR_P040302093352_00127.BC",
+    kernels .. "/Rosetta/CK/ATNR_P040302093352_00127.BC",
 
-    kernels .. "/SPK/ROS_STRUCT_V5.BSP",
+    kernels .. "/Rosetta/SPK/ROS_STRUCT_V5.BSP",
 
-    kernels .. "/IK/ROS_NAVCAM_V01.TI",
+    kernels .. "/Rosetta/IK/ROS_NAVCAM_V01.TI",
     
-    kernels .. "/FK/ROS_CHURYUMOV_V01.TF",
-    kernels .. "/FK/ROS_V26.TF",
+    kernels .. "/Rosetta/FK/ROS_CHURYUMOV_V01.TF",
+    kernels .. "/Rosetta/FK/ROS_V26.TF",
 
     -- CK
     -- Rosetta attitude
-    kernels .. "/CK/RATT_DV_243_01_01____00325.BC",
-    kernels .. "/CK/RATT_DV_223_01_01____00302.BC",
-    kernels .. "/CK/RATT_DV_145_01_01____00216.BC",
+    kernels .. "/Rosetta/CK/RATT_DV_243_01_01____00325.BC",
+    kernels .. "/Rosetta/CK/RATT_DV_223_01_01____00302.BC",
+    kernels .. "/Rosetta/CK/RATT_DV_145_01_01____00216.BC",
 
     -- Comet attitude
-    kernels .. "/CK/CATT_DV_243_01_______00325.BC",
-    kernels .. "/CK/CATT_DV_223_01_______00302.BC",
-    kernels .. "/CK/CATT_DV_145_01_______00216.BC",
+    kernels .. "/Rosetta/CK/CATT_DV_243_01_______00325.BC",
+    kernels .. "/Rosetta/CK/CATT_DV_223_01_______00302.BC",
+    kernels .. "/Rosetta/CK/CATT_DV_145_01_______00216.BC",
 
     -- High gain antenna
-    kernels .. "/CK/ROS_HGA_2016_V0035.BC",
-    kernels .. "/CK/ROS_HGA_2015_V0053.BC",
-    kernels .. "/CK/ROS_HGA_2014_V0044.BC",
+    kernels .. "/Rosetta/CK/ROS_HGA_2016_V0035.BC",
+    kernels .. "/Rosetta/CK/ROS_HGA_2015_V0053.BC",
+    kernels .. "/Rosetta/CK/ROS_HGA_2014_V0044.BC",
 
     -- Solar arrays
-    kernels .. "/CK/ROS_SA_2016_V0034.BC",
-    kernels .. "/CK/ROS_SA_2015_V0042.BC",
-    kernels .. "/CK/ROS_SA_2014_V0047.BC",
+    kernels .. "/Rosetta/CK/ROS_SA_2016_V0034.BC",
+    kernels .. "/Rosetta/CK/ROS_SA_2015_V0042.BC",
+    kernels .. "/Rosetta/CK/ROS_SA_2014_V0047.BC",
 
 
-    kernels .. "/PCK/ROS_CGS_RSOC_V03.TPC"
+    kernels .. "/Rosetta/PCK/ROS_CGS_RSOC_V03.TPC"
 }
 
 local RotationMatrix = {
