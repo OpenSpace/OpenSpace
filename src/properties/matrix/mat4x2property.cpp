@@ -34,10 +34,15 @@ namespace {
 
 glm::mat4x2 fromLuaConversion(lua_State* state, bool& success) {
     glm::mat4x2 result;
+    lua_pushnil(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat4x2>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat4x2>::value; ++j) {
-            lua_getfield(state, -1, std::to_string(number).c_str());
+            int hasNext = lua_next(state, -2);
+            if (hasNext != 1) {
+                success = false;
+                return glm::mat4x2(0);
+            }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
                 return glm::mat4x2(0);
