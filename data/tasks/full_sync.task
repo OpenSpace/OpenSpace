@@ -9,6 +9,10 @@ return {
     },
     {
         Type = "SyncAssetTask",
+        Asset = "juno"
+    },
+    {
+        Type = "SyncAssetTask",
         Asset = "newhorizons"
     },
     {
@@ -18,5 +22,9 @@ return {
     {
         Type = "SyncAssetTask",
         Asset = "rosetta"
+    },
+    {
+        Type = "SyncAssetTask",
+        Asset = "voyager"
     }
 }

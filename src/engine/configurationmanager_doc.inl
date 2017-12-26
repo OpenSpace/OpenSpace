@@ -61,14 +61,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "such as a global rebinding of keys from the default."
         },
         {
-            ConfigurationManager::KeyConfigTasksRoot,
-            new StringAnnotationVerifier(
-                "A valid task file as described in the Task documentation"
-            ),
-            Optional::Yes,
-            "The root task to be performed when launching the task runner application."
-        },
-        {
             ConfigurationManager::KeyPaths,
             new StringListVerifier,
             Optional::No,

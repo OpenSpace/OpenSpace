@@ -22,85 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <iostream>
-#include <string>
-#include <ghoul/glm.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/singlecommand.h>
-
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/dashboarditem.h>
-#include <openspace/util/progressbar.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/taskloader.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/task.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/progressbar.h>
+#include <openspace/util/resourcesynchronization.h>
+#include <openspace/util/taskloader.h>
+
+#include <ghoul/ghoul.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
+
+// #include <iostream>
+// #include <string>
+// #include <ghoul/glm.h>
+
+// #include <ghoul/opengl/ghoul_gl.h>
+// #include <ghoul/io/texture/texturereader.h>
+// #include <ghoul/io/texture/texturereaderdevil.h>
+// #include <ghoul/io/texture/texturereaderfreeimage.h>
+// #include <ghoul/filesystem/directory.h>
+// #include <ghoul/cmdparser/commandlineparser.h>
+// #include <ghoul/cmdparser/singlecommand.h>
+
+// #include <openspace/scripting/scriptengine.h>
+// #include <openspace/engine/openspaceengine.h>
+// #include <openspace/engine/configurationmanager.h>
+// #include <openspace/util/task.h>
 
 namespace {
-    const std::string ConfigurationFile = "openspace.cfg";
-    const std::string _loggerCat = "TaskRunner Main";
+    constexpr const char* ConfigurationFile = "openspace.cfg";
+    constexpr const char* _loggerCat = "Sync";
 }
 
-void initTextureReaders() {
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_shared<ghoul::io::TextureReaderDevIL>()
-        );
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(
-            std::make_shared<ghoul::io::TextureReaderFreeImage>()
-        );
-    #endif // GHOUL_USE_FREEIMAGE
-}
-
-void performTasks(const std::string& path) {
-    using namespace openspace;
-
-    TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(path);
-
-    size_t nTasks = tasks.size();
-    if (nTasks == 1) {
-        LINFO("Task queue has 1 item");
-    }
-    else {
-        LINFO("Task queue has " << tasks.size() << " items");
-    }
-
-    for (size_t i = 0; i < tasks.size(); i++) {
-        Task& task = *tasks[i].get();
-        LINFO(
-            "Performing task " << (i + 1) << " out of " <<
-            tasks.size() << ": " << task.description()
-        );
-        ProgressBar progressBar(100);
-        auto onProgress = [&progressBar](float progress) {
-            progressBar.print(static_cast<int>(progress * 100.f));
-        };
-        task.perform(onProgress);
-    }
-    std::cout << "Done performing tasks." << std::endl;
-}
-
-int main(int argc, char** argv) {
+int main(int, char** argv) {
     using namespace openspace;
 
     ghoul::initialize();
@@ -109,7 +70,7 @@ int main(int argc, char** argv) {
         ghoul::logging::LogLevel::Debug,
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
-    LogMgr.addLog(std::make_unique< ghoul::logging::ConsoleLog>());
+    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
 
     LDEBUG("Initialize FileSystem");
 
@@ -122,7 +83,7 @@ int main(int argc, char** argv) {
     FileSys.setCurrentDirectory(dirName);
 #endif
 
-    initTextureReaders();
+    // initTextureReaders();
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -147,6 +108,7 @@ int main(int argc, char** argv) {
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
     );
+
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
         "ResourceSynchronization"
@@ -175,44 +137,24 @@ int main(int argc, char** argv) {
     moduleEngine.initialize(moduleConfigurations);
     LINFO("Initialization done.");
 
-    // Parse commandline arguments
-    std::vector<std::string> args(argv, argv + argc);
-
-    ghoul::cmdparser::CommandlineParser commandlineParser(
-        "OpenSpace TaskRunner",
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    TaskLoader taskLoader;
+    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(
+        absPath("${TASKS}/full_sync.task")
     );
 
-    std::string tasksPath = "";
-    commandlineParser.addCommand(
-        std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-            tasksPath,
-            "--task",
-            "-t",
-            "Provides the path to a task file to execute"
-            )
-    );
-
-    commandlineParser.setCommandLine(args);
-    commandlineParser.execute();
-
-    FileSys.setCurrentDirectory(launchDirectory);
-
-    if (tasksPath != "") {
-        performTasks(tasksPath);
-        return 0;
+    for (size_t i = 0; i < tasks.size(); i++) {
+        Task& task = *tasks[i].get();
+        LINFO(
+            "Synchronizing scene " << (i + 1) << " out of " <<
+            tasks.size() << ": " << task.description()
+        );
+        ProgressBar progressBar(100);
+        auto onProgress = [&progressBar](float progress) {
+            progressBar.print(static_cast<int>(progress * 100.f));
+        };
+        task.perform(onProgress);
     }
-
-    // If no task file was specified in as argument, run in CLI mode.
-
-    LINFO("Task root: " << absPath("${TASKS}"));
-    FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath("${TASKS}")));
-
-    std::cout << "TASK > ";
-    while (std::cin >> tasksPath) {
-        performTasks(tasksPath);
-        std::cout << "TASK > ";
-    }
+    std::cout << "Done synchronizing." << std::endl;
 
     return 0;
 };

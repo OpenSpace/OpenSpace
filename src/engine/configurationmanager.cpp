@@ -63,7 +63,6 @@ const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentati
 
 const string ConfigurationManager::KeyConfigAsset = "Asset";
 const string ConfigurationManager::KeySceneLicenseDocumentation = "LicenseDocumentation";
-const string ConfigurationManager::KeyConfigTasksRoot = "TasksRoot";
 
 const string ConfigurationManager::KeyLogging = "Logging";
 const string ConfigurationManager::PartLogDir = "LogDir";
