@@ -87,10 +87,18 @@ if (OPENSPACE_SPOUT_SUPPORT)
     add_external_library_dependencies(${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll)
 endif ()
 
+set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
+
 create_new_application(OpenSpace
     ${SGCT_OPENVR_FILES}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
+    ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
+)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
+    PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
 )
 
 target_include_directories(
