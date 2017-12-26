@@ -26,7 +26,14 @@ local Earth = {
                             TileProvider = {
                                 Name = "Temporal VIIRS SNPP",
                                 Type = "TemporalTileLayer",
-                                FilePath = mapServiceConfigsPath .. "/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
+                                FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                                    "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+                                    "2015-11-24",
+                                    "Yesterday",
+                                    "1d",
+                                    "250m",
+                                    "jpg"
+                                ),
                                 PadTiles = false
                             }
                         },
@@ -56,21 +63,59 @@ local Earth = {
                     FilePath = mapServiceConfigsPath .. "/ESRI/ESRI_Imagery_World_2D.wms"
                 },
                 {
-                    Name = "Temporal VIIRS SNPP",
+                    Name = "VIIRS SNPP (Temporal)",
                     Type = "TemporalTileLayer",
-                    FilePath = mapServiceConfigsPath .. "/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+                        "2015-11-24",
+                        "Yesterday",
+                        "1d",
+                        "250m",
+                        "jpg"
+                    )
+                },
+                {
+                    Name = "Aqua Modis (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "MODIS_Aqua_CorrectedReflectance_TrueColor",
+                        "2012-05-08",
+                        "Yesterday",
+                        "1d",
+                        "250m",
+                        "jpg"
+                    )
+                },
+                {
+                    Name = "Terra Modis (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "MODIS_Terra_CorrectedReflectance_TrueColor",
+                        "2012-05-08",
+                        "Yesterday",
+                        "1d",
+                        "250m",
+                        "jpg"
+                    )
                 },
                 {
                     Name = "BMNG",
                     FilePath = mapServiceConfigsPath .. "/Utah/Bmng.wms"
                 },
                 {
-                    Name = "Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration",
+                    Name = "AMSR2_GCOM_W1_Sea_Ice_Concentration (Temporal)",
                     Type = "TemporalTileLayer",
-                    FilePath = mapServiceConfigsPath .. "/GIBS/Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration.xml"
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "AMSR2_Sea_Ice_Concentration_12km",
+                        "2012-05-08",
+                        "Yesterday",
+                        "1d",
+                        "2km",
+                        "png"
+                    )
                 },
                 {
-                    Name = "MODIS_Terra_Chlorophyll_A",
+                    Name = "MODIS_Terra_Chlorophyll_A (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                         "MODIS_Terra_Chlorophyll_A",
@@ -82,7 +127,7 @@ local Earth = {
                     )
                 },
                 {
-                    Name = "GHRSST_L4_G1SST_Sea_Surface_Temperature",
+                    Name = "GHRSST_L4_G1SST_Sea_Surface_Temperature (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                         "GHRSST_L4_G1SST_Sea_Surface_Temperature",
@@ -92,12 +137,12 @@ local Earth = {
                         "1km",
                         "png"
                     )
-                },
+                }
             },
             NightLayers = {
                 {
                     Name = "Earth at Night 2012",
-                    FilePath = mapServiceConfigsPath .. "/GIBS/VIIRS_CityLights_2012.xml",
+                    FilePath = mapServiceConfigsPath .. "/GIBS/night/VIIRS_CityLights_2012.wms",
                     Enabled = true,
                     Settings = {
                         Opacity = 1.0,
@@ -116,15 +161,22 @@ local Earth = {
                     }
                 },
                 {
-                    Name = "Temporal Earth at Night",
+                    Name = "Earth at Night (Temporal)",
                     Type = "TemporalTileLayer",
-                    FilePath = mapServiceConfigsPath .. "/GIBS/Temporal_VIIRS_SNPP_DayNightBand_ENCC.xml"
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "VIIRS_SNPP_DayNightBand_ENCC",
+                        "2012-05-08",
+                        "Yesterday",
+                        "1d",
+                        "500m",
+                        "png"
+                    )
                 }
             },
             WaterMasks = {
                 {
                     Name = "MODIS_Water_Mask",
-                    FilePath = mapServiceConfigsPath .. "/GIBS/MODIS_Water_Mask.xml",
+                    FilePath = mapServiceConfigsPath .. "/GIBS/water/MODIS_Water_Mask.wms",
                     Enabled = true
                 },
                 {
@@ -135,15 +187,15 @@ local Earth = {
             Overlays = {
                 {
                     Name = "Coastlines",
-                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Coastlines.xml"
+                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Coastlines.wms"
                 },
                 {
                     Name = "Reference_Features",
-                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Features.xml"
+                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Features.wms"
                 },
                 {
                     Name = "Reference_Labels",
-                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.xml"
+                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
                 },
                 {
                     Name = "Tile Indices",

@@ -41,6 +41,11 @@ local Moon = {
                     Name = "WAC Utah",
                     FilePath = mapServiceConfigs .. "/Utah/Wac.wms",
                     Enabled = true
+                },
+                -- LMMP based servers
+                {
+                    Name = "OnMoon",
+                    FilePath = mapServiceConfigs .. "/OnMoonColor.wms"
                 }
             },
             HeightLayers = {
