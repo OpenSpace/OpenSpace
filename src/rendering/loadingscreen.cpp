@@ -55,6 +55,7 @@ namespace {
     const glm::vec4 ProgressbarOutlineColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
 
     const glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    const glm::vec4 PhaseColorSynchronization = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
     const glm::vec4 PhaseColorInitialization = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
 
     const glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
@@ -108,9 +109,9 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _loadingFont(nullptr)
     , _messageFont(nullptr)
     , _itemFont(nullptr)
-    , _hasCatastrophicErrorOccurred(false)
     , _logo{ 0, 0 }
     , _progressbar{ 0, 0, 0, 0 }
+    , _hasCatastrophicErrorOccurred(false)
     , _randomEngine(_randomDevice())
 {
     _program = ghoul::opengl::ProgramObject::Build(
@@ -345,6 +346,9 @@ void LoadingScreen::render() {
             case Phase::Construction:
                 _program->setUniform("color", PhaseColorConstruction);
                 break;
+            case Phase::Synchronization:
+                _program->setUniform("color", PhaseColorSynchronization);
+                break;
             case Phase::Initialization:
                 _program->setUniform("color", PhaseColorInitialization);
                 break;
@@ -528,6 +532,11 @@ void LoadingScreen::render() {
                         false;
 
                     if (logoOverlap || loadingOverlap || messageOverlap || barOverlap) {
+                        // We never want to have an overlap with these, so this try didn't
+                        // count against the maximum, thus ensuring that (if there has to
+                        // be an overlap, it's over other text that might disappear before
+                        // this one)
+                        --i;
                         continue;
                     }
 
