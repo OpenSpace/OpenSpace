@@ -24,10 +24,19 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 
+set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
+    PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
+)
+
+set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
+
 create_new_application(
     Sync
     MACOSX_BUNDLE
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
+    ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
 )
 
 target_link_libraries(
