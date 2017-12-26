@@ -68,7 +68,7 @@ void SettingsEngine::initialize() {
         const std::size_t found = scenes[i].find_last_of("/\\");
         _scenes.addOption(static_cast<int>(i), scenes[i].substr(found + 1));
     }
-    _scenes.addOption(scenes.size(), "None");
+    _scenes.addOption(static_cast<int>(scenes.size()), "None");
 
     // Set interaction to change ConfigurationManager and schedule the load
     _scenes.onChange([this, nScenes, sceneDir]() {

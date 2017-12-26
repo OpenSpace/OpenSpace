@@ -849,7 +849,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts(const std::string& sceneDesc
     std::string k = ConfigurationManager::KeyGlobalCustomizationScripts;
     if (_configurationManager->hasKey(k)) {
         ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(k);
-        for (int i = 1; i <= dict.size(); ++i) {
+        for (int i = 1; i <= static_cast<int>(dict.size()); ++i) {
             std::string script = absPath(dict.value<std::string>(std::to_string(i)));
 
             if (FileSys.fileExists(script)) {

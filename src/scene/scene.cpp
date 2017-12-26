@@ -58,6 +58,7 @@
 #include <string>
 #include <stack>
 #include <unordered_map>
+#include <vector>
 
 #include "scene_lua.inl"
 
@@ -89,8 +90,8 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
         },
         "${WEB}/properties/script.js"
     )
-    , _initializer(std::move(initializer))
     , _dirtyNodeRegistry(false)
+    , _initializer(std::move(initializer))
 {   
     _rootDummy.setName(SceneGraphNode::RootNodeName);
     _rootDummy.setScene(this);

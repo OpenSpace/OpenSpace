@@ -36,9 +36,9 @@
 #include <memory>
 
 namespace {
-    constexpr char* KeyType = "Type";
-    constexpr char* KeyName = "Name";
-    constexpr char* _loggerCat = "ResourceSynchronization";
+    constexpr const char* KeyType = "Type";
+    constexpr const char* KeyName = "Name";
+    constexpr const char* _loggerCat = "ResourceSynchronization";
 }
 
 namespace openspace {

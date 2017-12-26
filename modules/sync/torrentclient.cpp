@@ -31,7 +31,7 @@
 namespace {
     const char* _loggerCat = "TorrentClient";
     std::chrono::milliseconds PollInterval(200);
-}
+} // namespace
 
 namespace openspace {
 TorrentError::TorrentError(std::string component) 
@@ -69,7 +69,7 @@ void TorrentClient::initialize() {
         std::to_string(openspace::OPENSPACE_VERSION_PATCH));
 
     settings.set_bool(libtorrent::settings_pack::allow_multiple_connections_per_ip, true);
-    settings.set_bool(libtorrent::settings_pack::ignore_limits_on_local_network, true);
+    //settings.set_bool(libtorrent::settings_pack::ignore_limits_on_local_network, true);
     settings.set_int(libtorrent::settings_pack::connection_speed, 20);
     settings.set_int(libtorrent::settings_pack::active_downloads, -1);
     settings.set_int(libtorrent::settings_pack::active_seeds, -1);

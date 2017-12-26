@@ -29,10 +29,6 @@
 
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    const char* _loggerCat = "SceneInitializer";
-}
-
 namespace openspace {
 
 void SingleThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {

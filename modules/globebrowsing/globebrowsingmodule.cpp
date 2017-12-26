@@ -53,6 +53,8 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 
+#include <vector>
+
 #ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
 
@@ -308,9 +310,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         },
         {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
-        },
-        {
-            // Documentation
         }
     };
 }

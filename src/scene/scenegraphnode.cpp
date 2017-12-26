@@ -335,7 +335,6 @@ void SceneGraphNode::update(const UpdateData& data) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    State s = _state;
     if (_state != State::GLInitialized) {
         return;
     }

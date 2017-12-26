@@ -295,7 +295,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             ghoul::Dictionary sourcesDict = dictionary.value<ghoul::Dictionary>(
                 keySequenceDir
             );
-            for (int i = 1; i <= sourcesDict.size(); ++i) {
+            for (int i = 1; i <= static_cast<int>(sourcesDict.size()); ++i) {
                 sequenceSources.push_back(
                     absPath(sourcesDict.value<std::string>(std::to_string(i)))
                 );

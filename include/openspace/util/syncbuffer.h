@@ -48,7 +48,7 @@ public:
     ~SyncBuffer();
 
     void encode(const std::string& s) {
-        const size_t size = sizeof(char) * s.size() + sizeof(int32_t);
+        [[ maybe_unused ]] size_t size = sizeof(char) * s.size() + sizeof(int32_t);
         ghoul_assert(_encodeOffset + size < _n, "");
 
         int32_t length = static_cast<int32_t>(s.length());

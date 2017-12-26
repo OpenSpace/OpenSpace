@@ -40,7 +40,6 @@
 #include <memory>
 
 namespace {
-    constexpr const char* _loggerCat = "HttpSynchronization";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyVersion = "Version";
 
