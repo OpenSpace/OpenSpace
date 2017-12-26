@@ -2,7 +2,7 @@ local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
-local kernels = asset.require('../jup260').Kernels
+local kernels = asset.require('../jup310').Kernels
 
 
 
@@ -21,13 +21,13 @@ local Europa = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_EUROPA",
             DestinationFrame = "GALACTIC",
-            Kernels = kernels .. "/jup260.bsp"
+            Kernels = kernels .. "/jup310.bsp"
         },
         Translation = {
             Type = "SpiceTranslation",
             Target = "EUROPA",
             Observer = "JUPITER BARYCENTER",
-            Kernels = kernels .. "/jup260.bsp"
+            Kernels = kernels .. "/jup310.bsp"
         }
     },
     Renderable = {

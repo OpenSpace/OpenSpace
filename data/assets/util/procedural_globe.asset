@@ -1,0 +1,64 @@
+asset.require('spice/base')
+
+local createGlobe = function(name, parent, parentSpiceName, spiceName, radii, tags, guiPath, trailColor, orbitPeriod, kernels)
+    return {
+        Name = name,
+        Parent = parent,
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Target = spiceName,
+                Observer = parentSpiceName,
+                Kernels = kernels
+            }
+        },
+        Renderable = {
+            Type = "RenderableGlobe",
+            Radii = radii,
+            SegmentsPerPatch = 64,
+            Layers = {},
+            Tag = tags
+        },
+        GuiPath = guiPath
+    },
+    {
+        Name = name .. "Trail",
+        Parent = parent,
+        Renderable = {
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Target = spiceName,
+                Observer = parentSpiceName
+            },
+            Color = trailColor,
+            Period = orbitPeriod,
+            Resolution = 1000
+        },
+        GuiPath = guiPath
+    }
+end
+asset.export("createGlobe", createGlobe)
+
+local createGlobes = function(t)
+    result = {}
+    for i, v in ipairs(t) do
+        globe, trail = createGlobe(
+            v.Name,
+            v.Parent.Name,
+            v.Parent.Spice,
+            v.Spice,
+            v.Radii,
+            v.Tags,
+            v.GuiPath,
+            v.TrailColor,
+            v.OrbitPeriod,
+            v.Kernels
+        )
+
+        table.insert(result, globe)
+        table.insert(result, trail)
+    end
+    return result
+end
+asset.export("createGlobes", createGlobes)

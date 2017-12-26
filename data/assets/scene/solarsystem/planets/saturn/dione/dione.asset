@@ -7,8 +7,8 @@ local kernels = asset.require('../sat375').Kernels
 
 
 local textures = asset.syncedResource({
-    Type = "HttpSynchronization",
     Name = "Dione textures",
+    Type = "HttpSynchronization",
     Identifier = "dione_textures",
     Version = 1
 })
