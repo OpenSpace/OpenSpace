@@ -289,7 +289,6 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
         // Due to the documentation check above it must either be one or the other
         if (dictionary.hasValue<std::string>(keySequenceDir)) {
             sequenceSources.push_back(
-                // Remove the absPath? ---abock
                 absPath(dictionary.value<std::string>(keySequenceDir))
             );
         }
@@ -298,7 +297,6 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                 keySequenceDir
             );
             for (int i = 1; i <= sourcesDict.size(); ++i) {
-                // Remove the absPath? ---abock
                 sequenceSources.push_back(
                     absPath(sourcesDict.value<std::string>(std::to_string(i)))
                 );
