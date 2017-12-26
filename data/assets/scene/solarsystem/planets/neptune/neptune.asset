@@ -38,8 +38,7 @@ local Neptune = {
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GuiPath = "/Solar System/Planets/Neptune"
-
-},
+}
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune })

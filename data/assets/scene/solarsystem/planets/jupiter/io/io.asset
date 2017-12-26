@@ -21,13 +21,13 @@ local Io = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_IO",
             DestinationFrame = "GALACTIC",
-            Kernels = kernels .. "/jup310.bsp"
+            Kernels = kernels
         },
         Translation = {
             Type = "SpiceTranslation",
             Target = "IO",
             Observer = "JUPITER BARYCENTER",
-            Kernels = kernels .. "/jup310.bsp"
+            Kernels = kernels
         },
     },
     Renderable = {

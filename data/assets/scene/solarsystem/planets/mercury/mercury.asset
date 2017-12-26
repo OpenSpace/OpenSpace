@@ -5,7 +5,7 @@ asset.request('./trail')
 
 
 
-local mapServiceConfigs = asset.localResource("mapServiceConfigs")
+local mapServiceConfigs = asset.localResource("map_service_configs")
 
 local color_layers = {
     -- Utah based servers
@@ -52,7 +52,7 @@ local Mercury = {
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
     GuiPath = "/Solar System/Planets/Mercury"
-},
+}
 
 
 

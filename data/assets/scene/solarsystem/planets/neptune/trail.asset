@@ -14,7 +14,7 @@ local NeptuneTrail = {
             Target = "NEPTUNE BARYCENTER",
             Observer = "SUN"
         },
-        Color = {0.2, 0.5, 1.0 },
+        Color = { 0.2, 0.5, 1.0 },
         -- Period  = 60200,
         -- Yes, this period is wrong, but the SPICE kernel we load by default only
         -- goes back to 1850.  Neptunes orbit is 164 years, which would mean that we

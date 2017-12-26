@@ -1,5 +1,7 @@
 local assetHelper = asset.require("util/asset_helper")
 
+
+
 local syncedDirectory = asset.syncedResource({
     Name = "General SPK Kernels",
     Type = "HttpSynchronization",
@@ -13,5 +15,7 @@ local kernels = {
     asset.localResource("pck00010.tpc"),
     syncedDirectory .. "/de430_1850-2150.bsp"
 }
+
+
 
 assetHelper.registerSpiceKernels(asset, kernels)

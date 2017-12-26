@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('../transforms')
-local kernels = asset.require('../jup341').Kernels
+local kernels341 = asset.require('../jup341').Kernels
 
 
 
@@ -23,7 +23,7 @@ local himaliaGroup = {
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
         TrailColor = trailColor,
         OrbitPeriod = 240.82,
-        Kernels = kernels .. '/jup341.bsp'
+        Kernels = kernels341
     },
     {
         Name = "Himalia",
@@ -37,7 +37,7 @@ local himaliaGroup = {
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
         TrailColor = trailColor,
         OrbitPeriod = 250.23,
-        Kernels = kernels .. '/jup341.bsp'
+        Kernels = kernels341
     },
     {
         Name = "Lysithea",
@@ -51,7 +51,7 @@ local himaliaGroup = {
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
         TrailColor = trailColor,
         OrbitPeriod = 259.89,
-        Kernels = kernels .. '/jup341.bsp'
+        Kernels = kernels341
     },
     {
         Name = "Elara",
@@ -65,7 +65,7 @@ local himaliaGroup = {
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
         TrailColor = trailColor,
         OrbitPeriod = 257.62,
-        Kernels = kernels .. '/jup341.bsp'
+        Kernels = kernels341
     },
     {
         Name = "Dia",
@@ -73,15 +73,20 @@ local himaliaGroup = {
             Name = parentName,
             Spice = parentSpice
         },
-        -- Spice = "DIA",
+        -- Spice = "DIA", -- The name is not correctly registered in the Spice kernel
         Spice = "553",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
         TrailColor = trailColor,
         OrbitPeriod = 287.93,
-        Kernels = kernels .. '/jup341.bsp'
+        Kernels = kernels341
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, proceduralGlobes.createGlobes(himaliaGroup))
+
+
+assetHelper.registerSceneGraphNodesAndExport(
+    asset,
+    proceduralGlobes.createGlobes(himaliaGroup)
+)

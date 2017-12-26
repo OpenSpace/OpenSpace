@@ -1,6 +1,7 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
+local kernels = asset.require('../jup310').Kernels
 
 
 
@@ -12,7 +13,8 @@ local GanymedeTrail = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "GANYMEDE",
-            Observer = "JUPITER BARYCENTER"
+            Observer = "JUPITER BARYCENTER",
+            Kernels = kernels
         },
         Color = { 0.4, 0.3, 0.3 },
         Period =  172.0 / 24.0,

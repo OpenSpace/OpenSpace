@@ -1,8 +1,7 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
-asset.require("spice/base")
+local kernels375 = asset.require('../sat375').Kernels
 asset.request('./trail')
-local kernels = asset.require('../sat375').Kernels
 
 
 
@@ -21,7 +20,7 @@ local Dione = {
             Type = "SpiceTranslation",
             Target = "DIONE",
             Observer = "SATURN BARYCENTER",
-            Kernels = kernels .. "/sat375.bsp"
+            Kernels = kernels375
         },
         Rotation = {
             Type = "SpiceRotation",

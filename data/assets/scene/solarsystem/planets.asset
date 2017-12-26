@@ -9,11 +9,13 @@ asset.request('./planets/earth/moon/moon')
 asset.request('./planets/mars/mars')
 
 asset.request('./planets/jupiter/jupiter')
-asset.request('./planets/jupiter/moons')
+asset.request('./planets/jupiter/major_moons')
 
 asset.request('./planets/saturn/saturn')
-asset.request('./planets/saturn/moons')
+asset.request('./planets/saturn/major_moons')
 
 asset.request('./planets/uranus/uranus')
+asset.request('./planets/uranus/major_moons')
 
 asset.request('./planets/neptune/neptune')
+asset.request('./planets/neptune/major_moons')

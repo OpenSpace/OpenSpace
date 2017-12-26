@@ -21,13 +21,13 @@ local Europa = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_EUROPA",
             DestinationFrame = "GALACTIC",
-            Kernels = kernels .. "/jup310.bsp"
+            Kernels = kernels
         },
         Translation = {
             Type = "SpiceTranslation",
             Target = "EUROPA",
             Observer = "JUPITER BARYCENTER",
-            Kernels = kernels .. "/jup310.bsp"
+            Kernels = kernels
         }
     },
     Renderable = {

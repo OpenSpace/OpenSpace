@@ -1,6 +1,7 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
+local kernels = asset.require('../jup310').Kernels
 
 
 
@@ -12,7 +13,8 @@ local IoTrail = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "IO",
-            Observer = "JUPITER BARYCENTER"
+            Observer = "JUPITER BARYCENTER",
+            Kernels = kernels
         },
         Color = { 0.4, 0.4, 0.2 },
         Period =  42.0 / 24.0,

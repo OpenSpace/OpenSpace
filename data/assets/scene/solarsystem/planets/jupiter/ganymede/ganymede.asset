@@ -21,13 +21,13 @@ local Ganymede = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_GANYMEDE",
             DestinationFrame = "GALACTIC",
-            Kernels = kernels .. "/jup310.bsp"
+            Kernels = kernels
         },
         Translation = {
             Type = "SpiceTranslation",
             Target = "GANYMEDE",
             Observer = "JUPITER BARYCENTER",
-            Kernels = kernels .. "/jup310.bsp"
+            Kernels = kernels
         }
     },
     Renderable = {

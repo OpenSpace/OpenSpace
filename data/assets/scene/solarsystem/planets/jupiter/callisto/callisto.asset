@@ -21,13 +21,13 @@ local Callisto = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_CALLISTO",
             DestinationFrame = "GALACTIC",
-            Kernels = kernels .. "/jup310.bsp"
+            Kernels = kernels
         },
         Translation = {
             Type = "SpiceTranslation",
             Target = "CALLISTO",
             Observer = "JUPITER BARYCENTER",
-            Kernels = kernels .. "/jup310.bsp"
+            Kernels = kernels
         }
     },
     Renderable = {

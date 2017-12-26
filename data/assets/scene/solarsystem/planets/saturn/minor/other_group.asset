@@ -1,9 +1,10 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('../transforms')
+local kernels393 = asset.require('../sat393').Kernels
+local kernels375 = asset.require('../sat375').Kernels
 
-local kernel393 = asset.require('../sat393').Kernels .. '/sat393.bsp'
-local kernel375 = asset.require('../sat375').Kernels .. '/sat375.bsp'
+
 
 local parentName = transforms.SaturnBarycenter.Name
 local parentSpice = "SATURN BARYCENTER"
@@ -23,7 +24,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 0.60169,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Prometheus",
@@ -37,7 +38,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 0.61299,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Pandora",
@@ -51,7 +52,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 0.62850,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Epimetheus",
@@ -65,7 +66,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 0.69433,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Janus",
@@ -79,7 +80,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 0.69466,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Aegaeon",
@@ -93,7 +94,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 0.80812,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Methone",
@@ -107,7 +108,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 1.00957,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Anthe",
@@ -121,7 +122,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 1.05089,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Pallene",
@@ -135,7 +136,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 1.370218,
-        Kernels = kernel393
+        Kernels = kernels393
     },
     {
         Name = "Telesto",
@@ -149,7 +150,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 1.887802,
-        Kernels = kernel375
+        Kernels = kernels375
     },
     {
         Name = "Calypso",
@@ -163,7 +164,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 1.887802,
-        Kernels = kernel375
+        Kernels = kernels375
     },
     {
         Name = "Helene",
@@ -177,7 +178,7 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 2.736915,
-        Kernels = kernel375
+        Kernels = kernels375
     },
     {
         Name = "Polydeuces",
@@ -191,8 +192,13 @@ local otherGroup = {
         GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
         TrailColor = trailColor,
         OrbitPeriod = 2.736915,
-        Kernels = kernel393
+        Kernels = kernels393
     },
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, proceduralGlobes.createGlobes(otherGroup))
+
+
+assetHelper.registerSceneGraphNodesAndExport(
+    asset,
+    proceduralGlobes.createGlobes(otherGroup)
+)

@@ -7,6 +7,10 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets')
 -- asset.require('scene/solarsystem/planets/jupiter/minor_moons')
 -- asset.require('scene/solarsystem/planets/saturn/minor_moons')
+-- asset.require('scene/solarsystem/planets/uranus/minor_moons')
+-- asset.require('scene/solarsystem/planets/neptune/inner_moons')
+-- asset.require('scene/solarsystem/planets/neptune/irregular_prograde_moons')
+-- asset.require('scene/solarsystem/planets/neptune/irregular_retrograde_moons')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
