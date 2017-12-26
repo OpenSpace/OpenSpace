@@ -4,7 +4,9 @@ local sceneHelper = asset.require('util/scene_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-assetHelper.requestAll(asset, 'scene/solarsystem/planets')
+asset.require('scene/solarsystem/planets')
+-- asset.require('scene/solarsystem/planets/jupiter/minor_moons')
+-- asset.require('scene/solarsystem/planets/saturn/minor_moons')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes

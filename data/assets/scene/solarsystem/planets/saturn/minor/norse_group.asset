@@ -1,11 +1,13 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('../transforms')
-local kernels = asset.require('../sat375').Kernels
+
+local kernel368 = asset.require('../sat368').Kernels .. "/sat368.bsp"
+local kernel375 = asset.require('../sat375').Kernels .. "/sat375.bsp"
 
 local parentName = transforms.SaturnBarycenter.Name
 local parentSpice = "SATURN BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_inner" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_norse" }
 local trailColor = { 0.5, 0.3, 0.3 }
 
 local norseGroup = {
@@ -18,11 +20,404 @@ local norseGroup = {
         Spice = "PHOEBE",
         Radii = { 218800, 217000, 203600 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons",
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 545.09,
-        Kernels = kernels .. '/sat375.bsp'
-    }
+        Kernels = kernel375
+    },
+    {
+        Name = "Skathi",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "SKATHI",
+        Radii = { 8000, 8000, 8000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 732.52,
+        Kernels = kernel368
+    },
+    {
+        Name = "S/2007 S 2",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "65055",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 792.96,
+        Kernels = kernel368
+    },
+    {
+        Name = "Skoll",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "SKOLL",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 862.37,
+        Kernels = kernel368
+    },
+    {
+        Name = "S/2004 S 13",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "65041",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 905.85,
+        Kernels = kernel368
+    },
+    {
+        Name = "Greip",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "GREIP",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 906.56,
+        Kernels = kernel368
+    },
+    {
+        Name = "Hyrrokkin",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "HYRROKKIN",
+        Radii = { 8000, 8000, 8000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 914.29,
+        Kernels = kernel368
+    },
+    {
+        Name = "Jarnsaxa",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "JARNSAXA",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 943.78,
+        Kernels = kernel368
+    },
+    {
+        Name = "Mundilfari",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "MUNDILFARI",
+        Radii = { 7000, 7000, 7000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 956.70,
+        Kernels = kernel368
+    },
+    {
+        Name = "S/2006 S 1",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "65048",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 972.41,
+        Kernels = kernel368
+    },
+    {
+        Name = "S/2004 S 17",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "65045",
+        Radii = { 4000, 4000, 4000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 985.45,
+        Kernels = kernel368
+    },
+    {
+        Name = "Bergelmir",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "BERGELMIR",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 985.83,
+        Kernels = kernel368
+    },
+    {
+        Name = "Narvi",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "NARVI",
+        Radii = { 7000, 7000, 7000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1008.45,
+        Kernels = kernel368
+    },
+    {
+        Name = "Suttungr",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "SUTTUNGR",
+        Radii = { 7000, 7000, 7000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1022.82,
+        Kernels = kernel368
+    },
+    {
+        Name = "Hati",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "HATI",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1033.05,
+        Kernels = kernel368
+    },
+    {
+        Name = "S/2004 S 12",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "65040",
+        Radii = { 5000, 5000, 5000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1048.54,
+        Kernels = kernel368
+    },
+    {
+        Name = "Farbauti",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "FARBAUTI",
+        Radii = { 5000, 5000, 5000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1054.78,
+        Kernels = kernel368
+    },
+    {
+        Name = "Thrymr",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "THRYMR",
+        Radii = { 7000, 7000, 7000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1078.09,
+        Kernels = kernel368
+    },
+    {
+        Name = "Aegir",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "AEGIR",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1094.46,
+        Kernels = kernel368
+    },
+    {
+        Name = "S/2007 S 3",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "65056",
+        Radii = { 5000, 5000, 5000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1100,
+        Kernels = kernel368
+    },
+    {
+        Name = "Bestla",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "BESTLA",
+        Radii = { 7000, 7000, 7000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1101.45,
+        Kernels = kernel368
+    },
+    {
+        Name = "S/2004 S 7",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "65035",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1101.99,
+        Kernels = kernel368
+    },
+    {
+        Name = "S/2006 S 3",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "65050",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1142.37,
+        Kernels = kernel368
+    },
+    {
+        Name = "FENRIR",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "FENRIR",
+        Radii = { 4000, 4000, 4000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1212.53,
+        Kernels = kernel368
+    },
+    -- Not yet in the Spice kernels
+    -- {
+    --     Name = "Sutur", -- Rising
+    --     Parent = {
+    --         Name = parentName,
+    --         Spice = parentSpice
+    --     },
+    --     Spice = "SUTUR",
+    --     Radii = { 6000, 6000, 6000 },
+    --     Tags = tags,
+    --     GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+    --     TrailColor = trailColor,
+    --     OrbitPeriod = 1242.36,
+    --     Kernels = kernel368
+    -- },
+    {
+        Name = "Kari",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "KARI",
+        Radii = { 7000, 7000, 7000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1245.06,
+        Kernels = kernel368
+    },
+    {
+        Name = "Ymir",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "YMIR",
+        Radii = { 18000, 18000, 18000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1254.15,
+        Kernels = kernel368
+    },
+    {
+        Name = "Loge",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "LOGE",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1300.95,
+        Kernels = kernel368
+    },
+    {
+        Name = "Fornjot",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "FORNJOT",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 1432.16,
+        Kernels = kernel368
+    },
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, proceduralGlobes.createGlobes(norseGroup))
