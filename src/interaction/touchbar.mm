@@ -166,8 +166,17 @@ NSArray* focusIdentifiers;
     - (void)guiButtonAction:(id)sender {
         (void)sender;
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Global Properties.ImGUI.Main.Enabled', \
-            not openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled'));",
+            "local b = openspace.getPropertyValue(\
+                'Global Properties.ImGUI.Main.Enabled'\
+            );\
+            openspace.setPropertyValueSingle(\
+                'Global Properties.ImGUI.Main.Enabled',\
+                not b\
+            );\
+            openspace.setPropertyValueSingle(\
+                'Global Properties.ImGUI.Main.IsHidden',\
+                b\
+            );",
             openspace::scripting::ScriptEngine::RemoteScripting::No
         );
     }
