@@ -27,10 +27,9 @@
 #include <sstream>
 
 namespace {
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/scenelicense/main.hbs";
-    const char* SceneLicenseTemplateFilename =
-        "${OPENSPACE_DATA}/web/scenelicense/scenelicense.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/scenelicense/script.js";
+    const char* MainTemplateFilename = "${WEB}/scenelicense/main.hbs";
+    const char* SceneLicenseTemplateFilename = "${WEB}/scenelicense/scenelicense.hbs";
+    const char* JsFilename = "${WEB}/scenelicense/script.js";
 } // namespace
 
 namespace openspace {

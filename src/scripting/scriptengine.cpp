@@ -57,14 +57,14 @@ ScriptEngine::ScriptEngine()
         {
             {
                 "mainTemplate",
-                "${OPENSPACE_DATA}/web/luascripting/main.hbs"
+                "${WEB}/luascripting/main.hbs"
             },
             {
                 "scriptingTemplate",
-                "${OPENSPACE_DATA}/web/luascripting/scripting.hbs"
+                "${WEB}/luascripting/scripting.hbs"
             }
         },
-        "${OPENSPACE_DATA}/web/luascripting/script.js"
+        "${WEB}/luascripting/script.js"
     )
 {}
 

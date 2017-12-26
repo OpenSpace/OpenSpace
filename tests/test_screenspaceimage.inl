@@ -39,7 +39,7 @@
 // 	ScreenSpaceRenderableTest()
 // 		// _ssr(texturePath) 
 // 	{
-// 		// _sharedSsr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg");
+// 		// _sharedSsr = std::make_shared<ScreenSpaceImage>("${DATA}/test3.jpg");
 // 	}
 
 // 	~ScreenSpaceRenderableTest(){}
@@ -48,7 +48,7 @@
 // 	void reset() {}
 
 // 	// These variables are shared by all tests
-// 	std::string texturePath = "${OPENSPACE_DATA}/test2.jpg";
+// 	std::string texturePath = "${DATA}/test2.jpg";
 // 	ScreenSpaceImage _ssr;
 // 	std::shared_ptr<ScreenSpaceRenderable> _sharedSsr;
 // };

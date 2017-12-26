@@ -39,10 +39,9 @@
 #include <fmt/format.h>
 
 namespace {
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/documentation/main.hbs";
-    const char* DocumentationTemplateFilename =
-        "${OPENSPACE_DATA}/web/documentation/documentation.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/documentation/script.js";
+    const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";
+    const char* DocumentationTemplateFilename = "${WEB}/documentation/documentation.hbs";
+    const char* JsFilename = "${WEB}/documentation/script.js";
 } // namespace
 
 namespace openspace::documentation {

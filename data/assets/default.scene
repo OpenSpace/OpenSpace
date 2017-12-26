@@ -5,8 +5,8 @@ local sceneHelper = asset.require('util/scene_helper')
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets')
--- asset.require('scene/solarsystem/planets/mars/moons/phobos')
--- asset.require('scene/solarsystem/planets/mars/moons/deimos')
+asset.require('scene/solarsystem/planets/mars/moons/phobos')
+asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/planets/jupiter/minor_moons')
 -- asset.require('scene/solarsystem/planets/saturn/minor_moons')
 -- asset.require('scene/solarsystem/planets/uranus/minor_moons')
@@ -88,7 +88,7 @@ asset.onInitialize(function ()
     openspace.set_default_gui_sorting()
 
     openspace.globebrowsing.loadWMSServersFromFile(
-        openspace.absPath("${OPENSPACE_DATA}/globebrowsing_servers.lua")
+        openspace.absPath("${DATA}/globebrowsing_servers.lua")
     )
 
     openspace.mark_interesting_nodes({

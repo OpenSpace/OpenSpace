@@ -76,18 +76,18 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
         {
             {
                 "mainTemplate",
-                "${OPENSPACE_DATA}/web/properties/main.hbs"
+                "${WEB}/properties/main.hbs"
             },
             {
                 "propertyOwnerTemplate",
-                "${OPENSPACE_DATA}/web/properties/propertyowner.hbs"
+                "${WEB}/properties/propertyowner.hbs"
             },
             {
                 "propertyTemplate",
-                "${OPENSPACE_DATA}/web/properties/property.hbs"
+                "${WEB}/properties/property.hbs"
             }
         },
-        "${OPENSPACE_DATA}/web/properties/script.js"
+        "${WEB}/properties/script.js"
     )
     , _initializer(std::move(initializer))
     , _dirtyNodeRegistry(false)

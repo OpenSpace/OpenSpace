@@ -38,8 +38,9 @@ using std::string;
 
 namespace {
     const char* _configurationFile = "openspace.cfg";
-    const char* _keyBasePath = "BASE_PATH";
-    const char* _initialConfigHelper = "${BASE_PATH}/scripts/configuration_helper.lua";
+    const char* _keyBasePath = "BASE";
+    // We can't use ${SCRIPTS} here as that hasn't been defined by this point
+    const char* _initialConfigHelper = "${BASE}/scripts/configuration_helper.lua";
 } // namespace
 
 namespace openspace {
@@ -153,7 +154,7 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     ghoul_assert(!filename.empty(), "Filename must not be empty");
     ghoul_assert(FileSys.fileExists(filename), "File must exist");
 
-    // ${BASE_PATH}
+    // ${BASE}
     string basePathToken = FileSystem::TokenOpeningBraces + string(_keyBasePath) +
         FileSystem::TokenClosingBraces;
 

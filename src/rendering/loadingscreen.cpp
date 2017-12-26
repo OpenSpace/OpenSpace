@@ -148,7 +148,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     {
         // Logo stuff
         _logoTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath("${OPENSPACE_DATA}/openspace-logo.png")
+            absPath("${DATA}/openspace-logo.png")
         );
         _logoTexture->uploadTexture();
 

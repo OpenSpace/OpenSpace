@@ -222,7 +222,7 @@ RenderEngine::RenderEngine()
     _doPerformanceMeasurements.onChange([this](){
         if (_doPerformanceMeasurements) {
             if (!_performanceManager) {
-                std::string loggingDir = "${BASE_PATH}";
+                std::string loggingDir = "${BASE}";
 
                 const std::string KeyDir = ConfigurationManager::KeyLogging + "." +
                                            ConfigurationManager::PartLogDir;

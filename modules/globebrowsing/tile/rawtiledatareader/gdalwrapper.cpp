@@ -128,7 +128,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     );
     CPLSetConfigOption(
         "CPL_TMPDIR",
-        absPath("${BASE_PATH}").c_str()
+        absPath("${BASE}").c_str()
     );
     CPLSetConfigOption(
         "GDAL_HTTP_UNSAFESSL",

@@ -47,10 +47,10 @@ KeyBindingManager::KeyBindingManager()
         "Documentation",
         "keybindings",
         {
-            { "keybindingTemplate", "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs" },
-            { "mainTemplate", "${OPENSPACE_DATA}/web/keybindings/main.hbs" }
+            { "keybindingTemplate", "${WEB}/keybindings/keybinding.hbs" },
+            { "mainTemplate", "${WEB}/keybindings/main.hbs" }
         },
-        "${OPENSPACE_DATA}/web/keybindings/script.js"
+        "${WEB}/keybindings/script.js"
     )
 { }
 

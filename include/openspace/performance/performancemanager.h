@@ -44,7 +44,7 @@ public:
     static void createGlobalSharedMemory();
     static void destroyGlobalSharedMemory();
 
-    PerformanceManager(std::string loggingDirectory = "${BASE_PATH}",
+    PerformanceManager(std::string loggingDirectory = "${BASE}",
         std::string prefix = "PM-");
 
     ~PerformanceManager();

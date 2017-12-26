@@ -73,7 +73,7 @@ void ImageSequencer::initialize() {
     ghoul_assert(_instance == nullptr, "Instance already has been initialized");
     _instance = new ImageSequencer;
     _instance->_defaultCaptureImage =
-        absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png");
+        absPath("${DATA}/placeholder.png");
 }
 
 void ImageSequencer::deinitialize() {

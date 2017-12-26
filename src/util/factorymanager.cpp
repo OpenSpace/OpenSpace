@@ -33,9 +33,9 @@
 #include <sstream>
 
 namespace {
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/factories/main.hbs";
-    const char* FactoryTemplateFilename = "${OPENSPACE_DATA}/web/factories/factory.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/factories/script.js";
+    const char* MainTemplateFilename = "${WEB}/factories/main.hbs";
+    const char* FactoryTemplateFilename = "${WEB}/factories/factory.hbs";
+    const char* JsFilename = "${WEB}/factories/script.js";
 } // namespace
 
 namespace openspace {

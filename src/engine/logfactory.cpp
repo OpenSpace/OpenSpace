@@ -47,9 +47,9 @@ namespace {
     const char* valueHtmlLog = "html";
     const char* valueTextLog = "Text";
 
-    const char* BootstrapPath = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const char* CssPath = "${OPENSPACE_DATA}/web/log/style.css";
-    const char* JsPath = "${OPENSPACE_DATA}/web/log/script.js";
+    const char* BootstrapPath = "${WEB}/common/bootstrap.min.css";
+    const char* CssPath = "${WEB}/log/style.css";
+    const char* JsPath = "${WEB}/log/script.js";
 } // namespace
 
 namespace openspace {

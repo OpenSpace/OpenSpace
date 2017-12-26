@@ -67,8 +67,7 @@ namespace {
     constexpr const char* sequenceTypeHybrid = "hybrid";
     constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
 
-    const char* placeholderFile =
-        "${OPENSPACE_DATA}/placeholder.png";
+    const char* placeholderFile = "${DATA}/placeholder.png";
 
     constexpr const char* _loggerCat = "ProjectionComponent";
 

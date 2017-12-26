@@ -46,7 +46,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                                ghoul::Dictionary translationDictionary,
                                std::vector<std::string> potentialTargets)
     : _defaultCaptureImage(
-        absPath("${OPENSPACE_DATA}/placeholder.png")
+        absPath("${DATA}/placeholder.png")
     )
     , _name(std::move(name))
     , _fileName(std::move(fileName))
