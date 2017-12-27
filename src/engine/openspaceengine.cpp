@@ -268,13 +268,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
         LogMgr.addLog(std::make_unique<ConsoleLog>());
     }
 
-#ifdef __APPLE__
-    ghoul::filesystem::File app(argv[0]);
-    std::string dirName = app.directoryName();
-    LINFO("Setting starting directory to '" << dirName << "'");
-    FileSys.setCurrentDirectory(dirName);
-#endif
-
     // Sanity check of values
     if (argc < 1 || argv == nullptr) {
         throw ghoul::RuntimeError(
