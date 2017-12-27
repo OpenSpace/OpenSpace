@@ -34,6 +34,12 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+namespace openspace {
+    class AtmosphereDeferredcaster;
+}
+#endif
+
 namespace openspace::globebrowsing {
 
 class ChunkedLodGlobe;
@@ -73,11 +79,24 @@ public:
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty useAccurateNormals;
+        properties::BoolProperty eclipseShadowsEnabled;
+        properties::BoolProperty eclipseHardShadows;
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
     };
 
+    // Shadow structure
+    struct ShadowRenderingStruct {
+        double xu, 
+               xp;
+        double rs, 
+               rc;
+        glm::dvec3 sourceCasterVec;
+        glm::dvec3 casterPositionVec;
+        bool isShadowing;
+    };
+    
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 

@@ -35,7 +35,7 @@
  */
 float normalizeFloat(float inpt) {
     if (inpt > 1.0) {
-        return inpt / pow(10, 27);
+        return inpt / pow(10, 30);
     } else {
         return inpt - 1.0;
     }
@@ -45,7 +45,7 @@ float denormalizeFloat(float inpt) {
     if (inpt < 0.0) {
         return inpt + 1.0;
     } else {
-        return inpt * pow(10, 27);
+        return inpt * pow(10, 30);
     }
 }
 

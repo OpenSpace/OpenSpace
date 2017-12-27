@@ -37,8 +37,10 @@
 #include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <glm/ext.hpp>
 #include <ghoul/misc/misc.h>
 
+#include <glm/ext.hpp>
 #include <imgui_internal.h>
 
 namespace openspace {

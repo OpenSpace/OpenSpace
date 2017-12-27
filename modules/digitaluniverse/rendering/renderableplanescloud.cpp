@@ -40,7 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 
 #include <glm/gtx/string_cast.hpp>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <array>
 #include <fstream>
@@ -121,7 +121,8 @@ namespace {
         "Enables/Disables the drawing of the astronomical objects."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo =
+    {
         "TransformationMatrix",
         "Transformation Matrix",
         "Transformation matrix to be applied to each astronomical object."
@@ -157,6 +158,26 @@ namespace {
         "Debug option for rendering of billboards and texts."
     };
 
+    static const openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+        "FadeInDistances",
+        "Fade-In Start and End Distances",
+        "These values determine the initial and final distances from the center of "
+        "our galaxy from which the astronomical object will start and end "
+        "fading-in."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+        "DisableFadeIn",
+        "Disable Fade-in effect",
+        "Enables/Disables the Fade-in effect."
+    };
+
+    static const openspace::properties::Property::PropertyInfo PlaneMinSizeInfo = {
+        "PlaneMinSize",
+        "Plane Min Size in Pixels",
+        "The min size (in pixels) for the plane representing the astronomical "
+        "object."
+    };
 
 }  // namespace
 
@@ -177,8 +198,8 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 KeyFile,
                 new StringVerifier,
                 Optional::Yes,
-                "The path to the SPECK file that contains information about the astronomical "
-                "object being rendered."
+                "The path to the SPECK file that contains information about the "
+                "astronomical object being rendered."
             },
             {
                 TransparencyInfo.identifier,
@@ -252,6 +273,24 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
                 Optional::Yes,
                 ScaleFactorInfo.description,
             },
+            {
+                FadeInDistancesInfo.identifier,
+                new Vector2Verifier<float>,
+                Optional::Yes,
+                FadeInDistancesInfo.description
+            },
+            {
+                DisableFadeInInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInInfo.description
+            },
+            {
+                PlaneMinSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                PlaneMinSizeInfo.description
+            },
         }
     };
 }
@@ -279,6 +318,14 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)        
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fadeInDistance(
+        FadeInDistancesInfo,
+        glm::vec2(0.f),
+        glm::vec2(0.f),
+        glm::vec2(200000.f)
+    )
+    , _disableFadeInDistance(DisableFadeInInfo, true)
+    , _planeMinSize(PlaneMinSizeInfo, 0.5, 0.0, 500.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
     , _fontRenderer(nullptr)
@@ -311,6 +358,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.addOption(2, "Screen center Position Normal");
     addProperty(_renderOption);
+    //_renderOption.set(1);
 
     if (dictionary.hasKey(keyUnit)) {
         std::string unit = dictionary.value<std::string>(keyUnit);
@@ -383,16 +431,22 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
-        }
+            _textMinSize = static_cast<int>(
+                dictionary.value<float>(LabelMinSizeInfo.identifier)
+            );
+        }    
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+            _textMaxSize = static_cast<int>(
+                dictionary.value<float>(LabelMaxSizeInfo.identifier)
+            );
         }
     }
 
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-        _transformationMatrix = dictionary.value<glm::dmat4>(TransformationMatrixInfo.identifier);
+        _transformationMatrix = dictionary.value<glm::dmat4>(
+            TransformationMatrixInfo.identifier
+        );
     }
 
     _blendMode.addOptions({
@@ -429,7 +483,26 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     }
 
     if (dictionary.hasKey(ScaleLuminosityInfo.identifier)) {
-        _sluminosity = static_cast<float>(dictionary.value<double>(ScaleLuminosityInfo.identifier));
+        _sluminosity = static_cast<float>(
+            dictionary.value<double>(ScaleLuminosityInfo.identifier)
+        );
+    }
+
+    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+        glm::vec2 fadeInValue = dictionary.value<glm::vec2>(
+            FadeInDistancesInfo.identifier
+        );
+        _fadeInDistance.set(fadeInValue);
+        _disableFadeInDistance.set(false);
+        addProperty(_fadeInDistance);
+        addProperty(_disableFadeInDistance);
+    }
+
+    if (dictionary.hasKey(PlaneMinSizeInfo.identifier)) {
+        _planeMinSize = static_cast<float>(
+            dictionary.value<double>(PlaneMinSizeInfo.identifier)
+        );
+        addProperty(_planeMinSize);
     }
 }
 
@@ -463,17 +536,21 @@ void RenderablePlanesCloud::initializeGL() {
                 ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 30;
-            _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
+            _font = OsEng.fontManager().font(
+                "Mono",
+                static_cast<float>(_fontSize),
+                ghoul::fontrendering::FontManager::Outline::Yes,
+                ghoul::fontrendering::FontManager::LoadGlyphs::No
+            );
         }
     }
 }
 
 
 void RenderablePlanesCloud::deleteDataGPU() {
-    for (auto pair : _renderingPlanesMap) {
-        glDeleteVertexArrays(1, &pair.second.vao);
-        glDeleteBuffers(1, &pair.second.vbo);
+    for (auto renderingPlane : _renderingPlanesArray) {
+        glDeleteVertexArrays(1, &renderingPlane.vao);
+        glDeleteBuffers(1, &renderingPlane.vbo);
     }
 }
 
@@ -489,7 +566,8 @@ void RenderablePlanesCloud::deinitializeGL() {
 
 void RenderablePlanesCloud::renderPlanes(const RenderData&,
                                          const glm::dmat4& modelViewMatrix,
-                                         const glm::dmat4& projectionMatrix)
+                                         const glm::dmat4& projectionMatrix,
+                                         const float fadeInVariable)
 {
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabled(GL_BLEND);
@@ -517,34 +595,56 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    _program->setUniform("modelViewProjectionTransform", glm::dmat4(projectionMatrix) * modelViewMatrix);
+    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    _program->setUniform("modelViewProjectionTransform", modelViewProjectionMatrix);
     _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);
-    //_program->setUniform("minPlaneSize", 1.f); // in pixels
+    _program->setUniform("fadeInValue", fadeInVariable);
     
-    //bool usingFramebufferRenderer =
-    //    OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
-
-    //bool usingABufferRenderer =
-    //    OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
-
-    //if (usingABufferRenderer) {
-    //    _program->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
-    //}
-
-    //bool additiveBlending = _blendMode == BlendModeAdditive && usingFramebufferRenderer;
-    //if (additiveBlending) {
-    //    //glDepthMask(false);
-    //    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //}
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
     
-    for (auto pair : _renderingPlanesMap) {
-        ghoul::opengl::TextureUnit unit;
-        unit.activate();
-        _textureMap[pair.second.planeIndex]->bind();
-        _program->setUniform("galaxyTexture", unit);
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _program->setUniform("galaxyTexture", unit);
+    int currentTextureIndex = -1;
+    for (auto renderingPlane : _renderingPlanesArray) {
+        // For planes with undefined textures references
+        if (renderingPlane.planeIndex == -1) {
+            continue;
+        }
 
-        glBindVertexArray(pair.second.vao);
+        glm::dvec4 vertex0(renderingPlane.vertexData[0], renderingPlane.vertexData[1], 
+            renderingPlane.vertexData[2], renderingPlane.vertexData[3]);
+        glm::dvec4 vertex1(renderingPlane.vertexData[6], renderingPlane.vertexData[7],
+            renderingPlane.vertexData[8], renderingPlane.vertexData[9]);
+        
+        vertex0 = modelViewProjectionMatrix * vertex0;
+        vertex1 = modelViewProjectionMatrix * vertex1;
+        
+        // Testing size:
+        glm::vec4 topRight = vertex1 / vertex1.w;
+        topRight = ((topRight + glm::vec4(1.0)) / glm::vec4(2.0)) *
+                   glm::vec4(viewport[2], viewport[3], 1.0, 1.0);
+        glm::vec4 bottomLeft = vertex0 / vertex0.w;
+        bottomLeft = ((bottomLeft + glm::vec4(1.0)) / glm::vec4(2.0)) *
+                   glm::vec4(viewport[2], viewport[3], 1.0, 1.0);
+
+        float lengthY  = std::fabs(topRight.y - bottomLeft.y);
+        float lengthX  = std::fabs(topRight.x - bottomLeft.x);
+        float lengthXY = glm::length(glm::vec2(topRight) - glm::vec2(bottomLeft));
+        float biggestAxis =
+            lengthY > lengthX ? (lengthY > lengthXY ? lengthY : lengthXY) : 
+            (lengthX > lengthXY ? lengthX : lengthXY);
+        if (biggestAxis < _planeMinSize ) {
+            continue;
+        }
+
+        if (currentTextureIndex != renderingPlane.planeIndex) {
+            _textureMap[renderingPlane.planeIndex]->bind();
+            currentTextureIndex = renderingPlane.planeIndex;
+        }                
+        glBindVertexArray(renderingPlane.vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);                  
     }               
     
@@ -570,37 +670,42 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     }        
 }
 
-void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-    const glm::vec3& orthoRight, const glm::vec3& orthoUp) {
+void RenderablePlanesCloud::renderLabels(const RenderData& data,
+                                         const glm::dmat4& modelViewProjectionMatrix,
+                                         const glm::dvec3& orthoRight,
+                                         const glm::dvec3& orthoUp, float fadeInVariable)
+{
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
             
     float scale = 0.0;
     switch (_unit) {
-    case Meter:
-        scale = 1.0;
-        break;
-    case Kilometer:
-        scale = 1e3;
-        break;
-    case Parsec:
-        scale = PARSEC;
-        break;
-    case Kiloparsec:
-        scale = 1e3 * PARSEC;
-        break;
-    case Megaparsec:
-        scale = 1e6 * PARSEC;
-        break;
-    case Gigaparsec:
-        scale = 1e9 * PARSEC;
-        break;
-    case GigalightYears:
-        scale = 306391534.73091 * PARSEC;
-        break;
+        case Meter:
+            scale = 1.0;
+            break;
+        case Kilometer:
+            scale = 1e3;
+            break;
+        case Parsec:
+            scale = PARSEC;
+            break;
+        case Kiloparsec:
+            scale = 1e3 * PARSEC;
+            break;
+        case Megaparsec:
+            scale = 1e6 * PARSEC;
+            break;
+        case Gigaparsec:
+            scale = 1e9 * PARSEC;
+            break;
+        case GigalightYears:
+            scale = 306391534.73091 * PARSEC;
+            break;
     }
     
+    glm::vec4 textColor = _textColor;
+    textColor.a *= fadeInVariable;
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
@@ -608,7 +713,8 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
         _fontRenderer->render(
             *_font,
             scaledPos,                
-            _textColor,
+            //_textColor,
+            textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
             _textMaxSize,
@@ -625,6 +731,56 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data, const glm::dmat
 }
 
 void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
+    double scale = 0.0;
+    switch (_unit) {
+        case Meter:
+            scale = 1.0;
+            break;
+        case Kilometer:
+            scale = 1e3;
+            break;
+        case Parsec:
+            scale = PARSEC;
+            break;
+        case Kiloparsec:
+            scale = 1e3 * PARSEC;
+            break;
+        case Megaparsec:
+            scale = 1e6 * PARSEC;
+            break;
+        case Gigaparsec:
+            scale = 1e9 * PARSEC;
+            break;
+        case GigalightYears:
+            scale = 306391534.73091 * PARSEC;
+            break;
+    }
+
+    float fadeInVariable = 1.0f;
+    if (!_disableFadeInDistance) {
+        double distCamera = glm::length(data.camera.positionVec3());
+        //float funcValue = static_cast<float>(
+            //(1.0 / double(_fadeInDistance))*(distCamera / scale)
+        //);
+        //
+        //// Let's not waste performance
+        //if (funcValue < 0.01) {
+        //    return;
+        //}
+
+        //fadeInVariable = funcValue > 1.0 ? 1.0 : funcValue;
+
+        glm::vec2 fadeRange = _fadeInDistance;
+        float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
+        float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        float funcValue = a * distCamera + b;
+        fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
+
+        if (funcValue < 0.01) {
+            return;
+        }
+    }
+
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -634,22 +790,36 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
-    glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-    glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-    glm::vec3 right = glm::cross(viewDirection, lookup);
-    glm::vec3 up = glm::cross(right, viewDirection);
+    //glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+    //glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+    //glm::vec3 right = glm::cross(viewDirection, lookup);
+    //glm::vec3 up = glm::cross(right, viewDirection);
 
-    glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-    glm::vec3 orthoRight = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(right, 0.0)));
-    glm::vec3 orthoUp = glm::normalize(glm::vec3(worldToModelTransform * glm::vec4(up, 0.0)));
+    //glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+    //glm::vec3 orthoRight = glm::normalize(
+    //    glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+    //);
+    //glm::vec3 orthoUp = glm::normalize(
+    //    glm::vec3(worldToModelTransform * glm::vec4(up, 0.0))
+    //);
 
-  
+    //glm::dmat4 invMVP = glm::inverse(modelViewProjectionMatrix);
+    glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
+                             glm::inverse(data.camera.combinedViewMatrix()) *
+                             glm::inverse(glm::dmat4(projectionMatrix));
+    glm::dvec3 orthoRight = glm::dvec3(
+        glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0)))
+    );
+    glm::dvec3 orthoUp = glm::dvec3(
+        glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0)))
+    );
+
     if (_hasSpeckFile) {
-        renderPlanes(data, modelViewMatrix, projectionMatrix);            
+        renderPlanes(data, modelViewMatrix, projectionMatrix, fadeInVariable);            
     }
     
     if (_hasLabel) {
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
     }                
 }
 
@@ -810,11 +980,13 @@ bool RenderablePlanesCloud::readSpeckFile() {
             // +3 because of the x, y and z at the begining of each line.
             _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject + 3});                
 
-            if (dummy == "orientation") { // 3d vectors u and v
-                _nValuesPerAstronomicalObject += 6; // We want the number, but the index is 0 based
+            if ((dummy == "orientation") || (dummy == "ori")) { // 3d vectors u and v
+                // We want the number, but the index is 0 based
+                _nValuesPerAstronomicalObject += 6;
             }
             else {
-                _nValuesPerAstronomicalObject += 1; // We want the number, but the index is 0 based
+                // We want the number, but the index is 0 based
+                _nValuesPerAstronomicalObject += 1;
             }                
         }
 
@@ -841,10 +1013,18 @@ bool RenderablePlanesCloud::readSpeckFile() {
         if (line.substr(0, 8) == "texture ") {
             std::stringstream str(line);
             
+            std::size_t found = line.find("-");
+            
             int textureIndex = 0;
             
             std::string dummy;
             str >> dummy; // command
+            
+            if (found != std::string::npos) {
+                std::string option; // Not being used right now.
+                str >> option;
+            }
+            
             str >> textureIndex;
             str >> dummy; // texture file name
 
@@ -879,7 +1059,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
         for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
             str >> values[i];
             if ((i >= _planeStartingIndexPos) &&
-                (i <= _planeStartingIndexPos+6)) { // vectors u and v
+                (i <= _planeStartingIndexPos + 6)) { // vectors u and v
                 int index = i - _planeStartingIndexPos;
                 switch (index) {
                 case 0:
@@ -993,7 +1173,9 @@ bool RenderablePlanesCloud::readLabelFile() {
 dummy.clear();
         }
 
-        glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::dvec4(position, 1.0));
+        glm::vec3 transformedPos = glm::vec3(
+            _transformationMatrix * glm::dvec4(position, 1.0)
+        );
         _labelData.push_back(std::make_pair(transformedPos, label));
 
     } while (!file.eof());
@@ -1015,7 +1197,10 @@ bool RenderablePlanesCloud::loadCachedFile(const std::string& file) {
 
         int32_t nValues = 0;
         fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));
+        fileStream.read(reinterpret_cast<char*>(
+            &_nValuesPerAstronomicalObject),
+            sizeof(int32_t)
+        );
 
         _fullData.resize(nValues);
         fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
@@ -1043,8 +1228,13 @@ bool RenderablePlanesCloud::saveCachedFile(const std::string& file) const {
         }
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-        int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(_nValuesPerAstronomicalObject);
-        fileStream.write(reinterpret_cast<const char*>(&nValuesPerAstronomicalObject), sizeof(int32_t));
+        int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
+            _nValuesPerAstronomicalObject
+        );
+        fileStream.write(reinterpret_cast<const char*>(
+            &nValuesPerAstronomicalObject),
+            sizeof(int32_t)
+        );
 
         size_t nBytes = nValues * sizeof(_fullData[0]);
         fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
@@ -1061,7 +1251,7 @@ bool RenderablePlanesCloud::saveCachedFile(const std::string& file) const {
 void RenderablePlanesCloud::createPlanes() {
     if (_dataIsDirty && _hasSpeckFile) {
         LDEBUG("Creating planes");
-
+        float maxSize = 0.0f;
         int planeNumber = 0;
         for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
             glm::vec4 transformedPos = glm::vec4(_transformationMatrix * 
@@ -1086,7 +1276,8 @@ void RenderablePlanesCloud::createPlanes() {
             v.w = 0.0;
 
             if (!_luminosityVar.empty()) {
-                float lumS = _fullData[p + _variableDataPositionMap[_luminosityVar]] * _sluminosity;
+                float lumS = _fullData[p + _variableDataPositionMap[_luminosityVar]] *
+                             _sluminosity;
                 u *= lumS;
                 v *= lumS;
             }
@@ -1099,8 +1290,7 @@ void RenderablePlanesCloud::createPlanes() {
             
             // JCC: Ask Abbott about these points refeering to a non-existing texture.
             if (plane.planeIndex == 30) {
-                //std::cout << "--- Creating planes - index: " << plane.planeIndex << std::endl;
-                plane.planeIndex = 0;
+                plane.planeIndex = -1;
             }
                 
             glGenVertexArrays(1, &plane.vao);
@@ -1136,11 +1326,18 @@ void RenderablePlanesCloud::createPlanes() {
                 break;
             }
 
+            for (int i = 0; i < 3; ++i) {
+                maxSize = maxSize > vertex0[i] ? maxSize : vertex0[i];
+                maxSize = maxSize > vertex1[i] ? maxSize : vertex1[i];
+                maxSize = maxSize > vertex2[i] ? maxSize : vertex2[i];
+                maxSize = maxSize > vertex4[i] ? maxSize : vertex4[i];
+            }
+
             vertex0 *= static_cast<float>(scale);
             vertex1 *= static_cast<float>(scale);
             vertex2 *= static_cast<float>(scale);
-            vertex4 *= static_cast<float>(scale);
-
+            vertex4 *= static_cast<float>(scale);            
+            
             GLfloat vertexData[] = {
                 //      x      y     z     w           s    t
                 vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
@@ -1155,7 +1352,12 @@ void RenderablePlanesCloud::createPlanes() {
 
             glBindVertexArray(plane.vao);
             glBindBuffer(GL_ARRAY_BUFFER, plane.vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(plane.vertexData), plane.vertexData, GL_STATIC_DRAW);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                sizeof(plane.vertexData),
+                plane.vertexData,
+                GL_STATIC_DRAW
+            );
             // in_position
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(
@@ -1178,18 +1380,29 @@ void RenderablePlanesCloud::createPlanes() {
                 reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
             );                                
 
-            _renderingPlanesMap.insert({planeNumber++, plane});
+            _renderingPlanesArray.push_back(plane);
         }
 
         glBindVertexArray(0);
 
         _dataIsDirty = false;
+
+        _fadeInDistance.setMaxValue(glm::vec2(10.0f * maxSize));
     }
 
     if (_hasLabel && _labelDataIsDirty) {
 
         _labelDataIsDirty = false;
     }
+
+    // Sort planes by texture index
+    if (!_renderingPlanesArray.empty()) {
+        std::sort(_renderingPlanesArray.begin(), _renderingPlanesArray.end(), 
+            [](const RenderingPlane& planeA, const RenderingPlane& planeB) {
+            return planeA.planeIndex < planeB.planeIndex;
+        });
+
+    }    
 }
 
 } // namespace openspace

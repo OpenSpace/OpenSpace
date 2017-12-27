@@ -25,6 +25,7 @@
 #include "fragment.glsl"
 
 in vec4 vs_positionScreenSpace;
+in vec4 vs_gPosition;
 in float fade;
 
 uniform vec3 color;
@@ -49,6 +50,13 @@ Fragment getFragment() {
         vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
         frag.color.a *= 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
     }
+
+    // G-Buffer
+    frag.gOtherData = vec4(frag.color.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
+    // There is no normal here
+    // TODO: Add the correct normal if necessary (JCC)
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
     return frag;
 }

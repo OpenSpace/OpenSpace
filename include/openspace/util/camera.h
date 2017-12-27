@@ -133,9 +133,11 @@ public:
     class SgctInternal {
         friend class Camera;
     public:
+        void setSceneMatrix(glm::mat4 sceneMatrix);
         void setViewMatrix(glm::mat4 viewMatrix);
         void setProjectionMatrix(glm::mat4 projectionMatrix);
 
+        const glm::mat4& sceneMatrix() const;
         const glm::mat4& viewMatrix() const;
         const glm::mat4& projectionMatrix() const;
         const glm::mat4& viewProjectionMatrix() const;
@@ -148,6 +150,7 @@ public:
         {}
 
         // State
+        glm::mat4 _sceneMatrix;
         glm::mat4 _viewMatrix;
         glm::mat4 _projectionMatrix;
 

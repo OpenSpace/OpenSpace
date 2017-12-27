@@ -70,6 +70,13 @@ public:
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
+    void setHDRExposure(float hdrExposure) override;
+    void setHDRBackground(float hdrBackground) override;
+    void setGamma(float gamma) override;
+
+    float hdrBackground() const override;
+    int nAaSamples() const override;
+    std::vector<double> mSSAPattern() const override;
 
     using Renderer::preRaycast;
     void preRaycast(const RaycasterTask& raycasterTask);
@@ -91,7 +98,10 @@ private:
     void updateResolution();
     void updateRaycastData();
     void updateResolveDictionary();
-
+    void updateMSAASamplingPattern();
+    void saveTextureToMemory(const GLenum color_buffer_attachment,
+        const int width, const int height, std::vector<double> & memory) const;
+    
     Camera* _camera;
     Scene* _scene;
     glm::ivec2 _resolution;
@@ -133,7 +143,12 @@ private:
     GLuint _vertexPositionBuffer;
     int _nAaSamples;
 
+    float _hdrExposure;
+    float _hdrBackground;
+    float _gamma;
     float _blackoutFactor;
+
+    std::vector<double> _mSAAPattern;
 
     ghoul::Dictionary _rendererData;
 };

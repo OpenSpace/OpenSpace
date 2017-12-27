@@ -1,6 +1,6 @@
 return {
     {
-        Name = "Ecliptic Grid Labels",
+        Name = "Ecliptic Sphere Labels",
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
@@ -12,22 +12,18 @@ return {
             TextColor = {0.5, 0.5, 0.5, 1.0},
             TextSize = 15.4,
             TextMinSize = 5.0,
+            TransformationMatrix = {
+                    -0.05487554,  0.4941095, -0.8676661   , 0.0,
+                    -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+                    -0.09647644,  0.8622859,  0.4971472   , 0.0,
+                     0.0       ,  0.0      ,  0.0         , 1.0
+            },
             Unit = "pc",
-        },
-        Transform = {
-            Rotation = {
-                Type = "StaticRotation",
-                Rotation = {
-                    -0.05487554,  0.4941095, -0.8676661,
-                    -0.9938214 , -0.1109906, -0.0003515167,
-                    -0.09647644,  0.8622859,  0.4971472
-                }
-            }
         },
         GuiPath = "/Other/Grids"
     },
     {
-        Name = "Equatorial Grid Labels",
+        Name = "Equatorial Sphere Labels",
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",
@@ -39,13 +35,19 @@ return {
             TextColor = {0.5, 0.5, 0.5, 1.0},
             TextSize = 15.3,
             TextMinSize = 5.0,
+            TransformationMatrix = { 
+                    -0.05487554,  0.4941095, -0.8676661, 0.0,
+                    -0.8734371 , -0.4448296, -0.1980764, 0.0,
+                    -0.483835  ,  0.7469823,  0.4559838, 0.0,
+                     0.0       ,  0.0      ,  0.0      , 1.0 
+            },
             Unit = "pc",
         },
         GuiPath = "/Other/Grids"
     },
-    -- Galactic Grid Labels
+    -- Galactic Sphere Labels
     {   
-        Name = "Galactic Grid Labels",
+        Name = "Galactic Sphere Labels",
         Parent = "Root",
         Renderable = {
             Type = "RenderableBillboardsCloud",

@@ -29,6 +29,7 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
 // Below are all the tiles that are used for contributing the actual fragment color
 
@@ -46,6 +47,7 @@ uniform Layer Overlays[NUMLAYERS_OVERLAY];
 
 #if USE_WATERMASK
 uniform Layer WaterMasks[NUMLAYERS_WATERMASK];
+float waterReflectance = 0.0;
 #endif // USE_WATERMASK
 
 #if SHOW_HEIGHT_RESOLUTION
@@ -64,7 +66,77 @@ uniform vec3 lightDirectionCameraSpace;
 uniform float orenNayarRoughness;
 #endif
 
+#if USE_ECLIPSE_SHADOWS
+in vec3 positionWorldSpace;
+
+/*******************************************************************************
+ ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
+ *******************************************************************************/
+// JCC: Remove and use dictionary to 
+// decides the number of shadows
+const uint numberOfShadows = 1;
+
+struct ShadowRenderingStruct {
+        double xu, xp;
+        double rs, rc;
+        dvec3 sourceCasterVec;
+        dvec3 casterPositionVec;
+        bool isShadowing;
+};
+
+// Eclipse shadow data
+// JCC: Remove and use dictionary to 
+// decides the number of shadows
+uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
+uniform int shadows;
+uniform bool hardShadows;
+
+vec4 butterworthFunc(const float d, const float r, const float n) {
+    return vec4(vec3(sqrt(r/(r + pow(d, 2*n)))), 1.0);    
+}
+
+vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], const dvec3 position,
+                const bool ground) {
+    if (shadowInfoArray[0].isShadowing) {
+        dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
+        dvec3 sc_norm = shadowInfoArray[0].sourceCasterVec;
+        dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
+        dvec3 d = pc - pc_proj;
+        
+        float length_d = float(length(d));
+        double length_pc_proj = length(pc_proj);
+        
+        float r_p_pi = float(shadowInfoArray[0].rc * (length_pc_proj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
+        float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu);
+        
+        if ( length_d < r_u_pi ) { // umbra            
+            if (ground) {
+#if USE_ECLIPSE_HARD_SHADOWS                
+                return vec4(0.2, 0.2, 0.2, 1.0);
+#endif
+                return butterworthFunc(length_d, r_u_pi, 4.0);        
+            }
+            else {
+#if USE_ECLIPSE_HARD_SHADOWS                 
+                return vec4(0.5, 0.5, 0.5, 1.0);
+#endif              
+                return vec4(vec3(length_d/r_p_pi), 1.0);       
+            }
+        }
+        else if ( length_d < r_p_pi ) {// penumbra
+#if USE_ECLIPSE_HARD_SHADOWS         
+                return vec4(0.5, 0.5, 0.5, 1.0); 
+#endif                
+                return vec4(vec3(length_d/r_p_pi), 1.0);
+        }
+    }
+     
+    return vec4(1.0);
+}
+#endif
+
 in vec4 fs_position;
+in vec3 fs_normal;
 in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
 in vec3 positionCameraSpace;
@@ -72,6 +144,10 @@ in vec3 positionCameraSpace;
 #if USE_ACCURATE_NORMALS
 in vec3 ellipsoidTangentThetaCameraSpace;
 in vec3 ellipsoidTangentPhiCameraSpace;
+
+// Once deferred light calculations are done in view space this can be removed
+// so that we only need one normal; in view space.
+uniform mat4 invViewModelTransform;
 #endif // USE_ACCURATE_NORMALS
 
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
@@ -83,10 +159,12 @@ in LevelWeights levelWeights;
  * the local and global chunk rendering. 
  *
  */
-vec4 getTileFragColor() {
-    vec4 color = vec4(0.3, 0.3, 0.3, 1.0);
+Fragment getTileFragment() {
+    Fragment frag;
+    frag.color = vec4(0.3, 0.3, 0.3, 1.0);
 
     vec3 normal = normalize(ellipsoidNormalCameraSpace);
+    vec3 normalModelSpace = normalize(fs_normal);
 #if USE_ACCURATE_NORMALS
     normal = getTileNormal(
         fs_uv,
@@ -95,11 +173,14 @@ vec4 getTileFragColor() {
         normalize(ellipsoidTangentThetaCameraSpace),
         normalize(ellipsoidTangentPhiCameraSpace)
     );
+    // Once deferred light calculations are done in view space this can be removed
+    // so that we only need one normal; in view space.
+    normalModelSpace = mat3(invViewModelTransform) * normal;
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
-    color = calculateColor(
-        color,
+    frag.color = calculateColor(
+        frag.color,
         fs_uv,
         levelWeights,
         ColorLayers
@@ -107,21 +188,22 @@ vec4 getTileFragColor() {
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
-    color = calculateWater(
-        color,
+    frag.color = calculateWater(
+        frag.color,
         fs_uv,
         levelWeights,
         WaterMasks,
         normal,
         lightDirectionCameraSpace, // Should already be normalized
-        positionCameraSpace
+        positionCameraSpace,
+        waterReflectance
     );
 
 #endif // USE_WATERMASK
 
 #if USE_NIGHTTEXTURE
-    color = calculateNight(
-        color,
+    frag.color = calculateNight(
+        frag.color,
         fs_uv,
         levelWeights,
         NightLayers,
@@ -132,8 +214,8 @@ vec4 getTileFragColor() {
 #endif // USE_NIGHTTEXTURE
 
 #if PERFORM_SHADING
-    color = calculateShadedColor(
-        color,
+    frag.color = calculateShadedColor(
+        frag.color,
         normal,
         lightDirectionCameraSpace,
         normalize(positionCameraSpace),
@@ -143,10 +225,10 @@ vec4 getTileFragColor() {
 
 #if USE_ATMOSPHERE
     // Temporary until the real atmosphere code is here
-    //color = color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
-    vec3 n = normalize(ellipsoidNormalCameraSpace);
-    vec3 l = lightDirectionCameraSpace;
-    vec3 c = normalize(positionCameraSpace);
+    //frag.color = frag.color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
+    const vec3 n = normalize(ellipsoidNormalCameraSpace);
+    const vec3 l = lightDirectionCameraSpace;
+    const vec3 c = normalize(positionCameraSpace);
     float cosFactor = 1 - clamp(dot(-n * 0.9, c), 0, 1);
     cosFactor *= 1.1;
     cosFactor -= 0.1;
@@ -159,13 +241,17 @@ vec4 getTileFragColor() {
     //float cosFactorLight = max(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)), 0);
     //vec3 r = reflect(l, n);
     //float scatteredLight = pow(clamp(dot(-r,c), 0, 1), 20);
-    vec3 atmosphereColor = vec3(0.5, 0.5, 1.0) * 2.0;
-    color += vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
+    const vec3 atmosphereColor = vec3(0.5, 0.5, 1.0) * 2.0;
+    frag.color += vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
 #endif // USE_ATMOSPHERE
 
+#if USE_ECLIPSE_SHADOWS
+    frag.color *= calcShadow(shadowDataArray, dvec3(positionWorldSpace), true);
+#endif
+
 #if USE_OVERLAY
-    color = calculateOverlay(
-        color,
+    frag.color = calculateOverlay(
+        frag.color,
         fs_uv,
         levelWeights,
         Overlays
@@ -173,25 +259,40 @@ vec4 getTileFragColor() {
 #endif // USE_OVERLAY
 
 #if SHOW_HEIGHT_INTENSITIES
-    color.r *= 0.1;
-    color.g *= 0.1;
-    color.b *= 0.1;
+    frag.color.r *= 0.1;
+    frag.color.g *= 0.1;
+    frag.color.b *= 0.1;
 
     float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
     float contourLine = fract(10.0 * untransformedHeight) > 0.98 ? 1.0 : 0.0;
-    color.r += untransformedHeight;
-    color.b = contourLine;
+    frag.color.r += untransformedHeight;
+    frag.color.b = contourLine;
 #endif
 
 #if SHOW_HEIGHT_RESOLUTION
-    color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
+    frag.color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
     #if USE_HEIGHTMAP
-        color.r = min(color.r, 0.8);
-        color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
+        frag.color.r = min(frag.color.r, 0.8);
+        frag.color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
     #endif
 #endif
 
-    return color;
+    // Other data
+#if USE_WATERMASK
+    // Water reflectance is added to the G-Buffer.
+    frag.gOtherData = vec4(waterReflectance, waterReflectance, waterReflectance, 1.0);
+#else
+    frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
+#endif
+    // Normal is written Object Space.
+    // Right now the only renderable using this info is the atm and,
+    // because all calculation for light interactions are done in Object
+    // Space, we avoid a new computation saving the normals in Object Space.
+    frag.gNormal    = vec4(normalModelSpace, 1.0); 
+    frag.gPosition  = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
+
+    frag.depth = fs_position.w;
+    return frag;
 }
 
 #endif ///TILE_FRAG_COLOR_HGLSL

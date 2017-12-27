@@ -645,8 +645,17 @@ bool RenderableStars::readSpeckFile() {
         for (int i = 0; i < _nValuesPerStar; ++i) {
             str >> values[i];
         }
-
-        _fullData.insert(_fullData.end(), values.begin(), values.end());
+        bool nullArray = true;
+        for (int i = 0; i < values.size(); ++i) {
+            if (values[i] != 0.0) {
+                nullArray = false;
+                break;
+            }
+        }
+        if (!nullArray) {
+            _fullData.insert(_fullData.end(), values.begin(), values.end());
+        }
+        
     } while (!file.eof());
 
     return true;

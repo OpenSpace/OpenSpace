@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
@@ -90,9 +91,10 @@ private:
     void loadPolygonGeometryForRendering();
     void renderPolygonGeometry(GLuint vao);
     void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-        const glm::dmat4& projectionMatrix, const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+        const glm::dmat4& worldToModelTransform, const glm::dvec3& orthoRight,
+        const glm::dvec3& orthoUp, float fadeInVariable);
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix, 
-        const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     bool loadData();
     bool readSpeckFile();
@@ -126,6 +128,10 @@ private:
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
     properties::OptionProperty _colorOption;
+    properties::Vec2Property _fadeInDistance;
+    properties::BoolProperty _disableFadeInDistance;
+    properties::FloatProperty _billboardMaxSize;
+    properties::FloatProperty _billboardMinSize;
 
     // DEBUG:
     properties::OptionProperty _renderOption;
@@ -152,8 +158,10 @@ private:
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::vector<glm::vec2> _colorRangeData;
-
+    
     int _nValuesPerAstronomicalObject;
+
+    glm::dmat4 _transformationMatrix;
 
     GLuint _vao;
     GLuint _vbo;

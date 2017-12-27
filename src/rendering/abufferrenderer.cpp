@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/volumeraycaster.h>
+#include <openspace/rendering/deferredcaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
@@ -66,6 +67,9 @@ ABufferRenderer::ABufferRenderer()
     , _dirtyRaycastData(true)
     , _dirtyResolveDictionary(true)
     , _resolveProgram(nullptr)
+    , _hdrExposure(0.4)
+    , _hdrBackground(2.8)
+    , _gamma(2.2)    
 {}
 
 ABufferRenderer::~ABufferRenderer() {}
@@ -120,6 +124,7 @@ void ABufferRenderer::initialize() {
     updateRendererData();
     updateRaycastData();
     updateResolveDictionary();
+    updateMSAASamplingPattern();
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glFramebufferTexture2D(
@@ -160,6 +165,7 @@ void ABufferRenderer::initialize() {
     }
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
+    
 }
 
 void ABufferRenderer::deinitialize() {
@@ -188,6 +194,7 @@ void ABufferRenderer::update() {
     // according to the output render buffer size
     if (_dirtyResolution) {
         updateResolution();
+        updateMSAASamplingPattern();
     }
 
     // Make sure that the renderengine gets the correct render data
@@ -236,6 +243,329 @@ void ABufferRenderer::update() {
     }
 }
 
+void ABufferRenderer::updateMSAASamplingPattern() {
+    LINFO("Updating MSAA Sampling Pattern");
+
+    const int GRIDSIZE = 32;
+    GLfloat step = 2.0f / static_cast<GLfloat>(GRIDSIZE);
+    GLfloat sizeX = -1.0f,
+        sizeY = 1.0f;
+
+    const int NVERTEX = 4 * 6;
+    GLfloat openPixelSizeVertexData[GRIDSIZE * GRIDSIZE * NVERTEX];
+
+    for (int y = 0; y < GRIDSIZE; ++y) {
+        for (int x = 0; x < GRIDSIZE; ++x) {
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX] = sizeX;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 1] = sizeY - step;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 2] = 0.0f;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 3] = 1.0f;
+
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 4] = sizeX + step;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 5] = sizeY;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 6] = 0.0f;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 7] = 1.0f;
+
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 8] = sizeX;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 9] = sizeY;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 10] = 0.0f;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 11] = 1.0f;
+
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 12] = sizeX;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 13] = sizeY - step;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 14] = 0.0f;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 15] = 1.0f;
+
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 16] = sizeX + step;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 17] = sizeY - step;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 18] = 0.0f;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 19] = 1.0f;
+
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 20] = sizeX + step;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 21] = sizeY;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 22] = 0.0f;
+            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 23] = 1.0f;
+
+            sizeX += step;
+        }
+        sizeX = -1.0f;
+        sizeY -= step;
+    }
+
+    GLuint pixelSizeQuadVAO = 0,
+        pixelSizeQuadVBO = 0;
+
+    glGenVertexArrays(1, &pixelSizeQuadVAO);
+    glBindVertexArray(pixelSizeQuadVAO);
+
+    glGenBuffers(1, &pixelSizeQuadVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, pixelSizeQuadVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * GRIDSIZE * GRIDSIZE * NVERTEX, openPixelSizeVertexData, GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        nullptr
+    );
+    glEnableVertexAttribArray(0);
+
+    // Saves current state
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // Main framebuffer
+    GLuint pixelSizeTexture = 0;
+    GLuint pixelSizeFramebuffer = 0;
+
+    glGenTextures(1, &pixelSizeTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture);
+
+    const GLsizei ONEPIXEL = 1;
+    glTexImage2DMultisample(
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _nAaSamples,
+        GL_RGBA32F,
+        ONEPIXEL,
+        ONEPIXEL,
+        true
+    );
+
+    glViewport(0, 0, ONEPIXEL, ONEPIXEL);
+
+    glGenFramebuffers(1, &pixelSizeFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, pixelSizeFramebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture, 0);
+
+    GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, textureBuffers);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("MSAA Sampling pattern framebuffer is not complete");
+        return;
+    }
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> pixelSizeProgram = nullptr;
+    try {
+        pixelSizeProgram = ghoul::opengl::ProgramObject::Build(
+            "OnePixel MSAA",
+            "${SHADERS}/framebuffer/pixelSizeMSAA.vert",
+            "${SHADERS}/framebuffer/pixelSizeMSAA.frag"
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
+
+    pixelSizeProgram->activate();
+
+    // Draw sub-pixel grid
+    glEnable(GL_SAMPLE_SHADING);
+    glBindVertexArray(pixelSizeQuadVAO);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(false);
+    glDrawArrays(GL_TRIANGLES, 0, GRIDSIZE * GRIDSIZE * 6);
+    glBindVertexArray(0);
+    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_SAMPLE_SHADING);
+
+    pixelSizeProgram->deactivate();
+
+    // Now we render the Nx1 quad strip
+    GLuint nOneStripFramebuffer = 0,
+        nOneStripVAO = 0,
+        nOneStripVBO = 0,
+        nOneStripTexture = 0;
+
+    sizeX = -1.0f;
+    step = 2.0f / static_cast<GLfloat>(_nAaSamples);
+
+    GLfloat * nOneStripVertexData = new GLfloat[_nAaSamples * (NVERTEX + 12)];
+
+    for (int x = 0; x < _nAaSamples; ++x) {
+        nOneStripVertexData[x * (NVERTEX + 12)] = sizeX;
+        nOneStripVertexData[x * (NVERTEX + 12) + 1] = -1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 2] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 3] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 4] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 5] = 0.0f;
+
+        nOneStripVertexData[x * (NVERTEX + 12) + 6] = sizeX + step;
+        nOneStripVertexData[x * (NVERTEX + 12) + 7] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 8] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 9] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 10] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 11] = 1.0f;
+
+        nOneStripVertexData[x * (NVERTEX + 12) + 12] = sizeX;
+        nOneStripVertexData[x * (NVERTEX + 12) + 13] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 14] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 15] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 16] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 17] = 0.0f;
+
+        nOneStripVertexData[x * (NVERTEX + 12) + 18] = sizeX;
+        nOneStripVertexData[x * (NVERTEX + 12) + 19] = -1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 20] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 21] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 22] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 23] = 0.0f;
+
+        nOneStripVertexData[x * (NVERTEX + 12) + 24] = sizeX + step;
+        nOneStripVertexData[x * (NVERTEX + 12) + 25] = -1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 26] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 27] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 28] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 29] = 1.0f;
+
+        nOneStripVertexData[x * (NVERTEX + 12) + 30] = sizeX + step;
+        nOneStripVertexData[x * (NVERTEX + 12) + 31] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 32] = 0.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 33] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 34] = 1.0f;
+        nOneStripVertexData[x * (NVERTEX + 12) + 35] = 1.0f;
+
+        sizeX += step;
+    }
+
+    glGenVertexArrays(1, &nOneStripVAO);
+    glBindVertexArray(nOneStripVAO);
+    glGenBuffers(1, &nOneStripVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, nOneStripVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * _nAaSamples * (NVERTEX + 12), nOneStripVertexData, GL_STATIC_DRAW);
+
+    // position
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        nullptr
+    );
+    glEnableVertexAttribArray(0);
+
+    // texture coords
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
+    );
+    glEnableVertexAttribArray(1);
+    delete[] nOneStripVertexData;
+
+    // fbo texture buffer
+    glGenTextures(1, &nOneStripTexture);
+    glBindTexture(GL_TEXTURE_2D, nOneStripTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        _nAaSamples,
+        ONEPIXEL,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glGenFramebuffers(1, &nOneStripFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, nOneStripFramebuffer);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        nOneStripTexture,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("nOneStrip framebuffer is not complete");
+    }
+
+    glViewport(0, 0, _nAaSamples, ONEPIXEL);
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> nOneStripProgram = nullptr;
+    try {
+        nOneStripProgram = ghoul::opengl::ProgramObject::Build(
+            "OneStrip MSAA",
+            "${SHADERS}/framebuffer/nOneStripMSAA.vert",
+            "${SHADERS}/framebuffer/nOneStripMSAA.frag"
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
+
+    nOneStripProgram->activate();
+
+    ghoul::opengl::TextureUnit pixelSizeTextureUnit;
+    pixelSizeTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture);
+    nOneStripProgram->setUniform("pixelSizeTexture", pixelSizeTextureUnit);
+
+    // render strip
+    glDrawBuffers(1, textureBuffers);
+
+    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindVertexArray(nOneStripVAO);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(false);
+    for (int sample = 0; sample < _nAaSamples; ++sample) {
+        nOneStripProgram->setUniform("currentSample", sample);
+        glDrawArrays(GL_TRIANGLES, sample * 6, 6);
+    }
+    /*nOneStripProgram->setUniform("currentSample", 0);
+    glDrawArrays(GL_TRIANGLES, 0, 6 * _nAaSamples);*/
+    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
+    glBindVertexArray(0);
+
+    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, _mSAAPattern);
+    // Convert back to [-1, 1] range and then scales to the current viewport size:
+    for (int d = 0; d < _nAaSamples; ++d) {
+        _mSAAPattern[d * 3] = (2.0 * _mSAAPattern[d * 3] - 1.0) / static_cast<double>(viewport[2]);
+        _mSAAPattern[(d * 3) + 1] = (2.0 * _mSAAPattern[(d * 3) + 1] - 1.0) / static_cast<double>(viewport[3]);
+        _mSAAPattern[(d * 3) + 2] = 0.0;
+    }
+    
+    nOneStripProgram->deactivate();
+
+    // Restores default state
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+    // Deletes unused buffers
+    glDeleteFramebuffers(1, &pixelSizeFramebuffer);
+    glDeleteTextures(1, &pixelSizeTexture);
+    glDeleteBuffers(1, &pixelSizeQuadVBO);
+    glDeleteVertexArrays(1, &pixelSizeQuadVAO);
+
+    glDeleteFramebuffers(1, &nOneStripFramebuffer);
+    glDeleteTextures(1, &nOneStripTexture);
+    glDeleteBuffers(1, &nOneStripVBO);
+    glDeleteVertexArrays(1, &nOneStripVAO);
+}
+    
 void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
     PerfMeasure("ABufferRenderer::render");
 
@@ -410,6 +740,43 @@ void ABufferRenderer::setNAaSamples(int nAaSamples) {
         _nAaSamples = 8;
     }
     _dirtyResolution = true;
+}
+
+void ABufferRenderer::setHDRExposure(float hdrExposure) {
+    _hdrExposure = hdrExposure;
+    if (_hdrExposure < 0.0) {
+        LERROR("HDR Exposure constant must be greater than zero.");
+        _hdrExposure = 1.0;
+    }
+}
+
+void ABufferRenderer::setHDRBackground(float hdrBackground) {
+    _hdrBackground = hdrBackground;
+    if (_hdrBackground < 0.0) {
+        LERROR("HDR Background constant must be greater than zero.");
+        _hdrBackground = 1.0;
+    }
+}
+
+
+void ABufferRenderer::setGamma(float gamma) {
+    _gamma = gamma;
+    if (_gamma < 0.0f) {
+        LERROR("Gamma value must be greater than zero.");
+        _gamma = 2.2f;
+    }
+}
+
+float ABufferRenderer::hdrBackground() const {
+    return _hdrBackground;
+}
+
+int ABufferRenderer::nAaSamples() const {
+    return _nAaSamples;
+}
+
+std::vector<double> ABufferRenderer::mSSAPattern() const {
+    return _mSAAPattern;
 }
 
 void ABufferRenderer::clear() {
@@ -637,6 +1004,32 @@ void ABufferRenderer::updateRendererData() {
 
     OsEng.renderEngine().setRendererData(dict);
     _dirtyRendererData = false;
+}
+
+void ABufferRenderer::saveTextureToMemory(const GLenum color_buffer_attachment,
+    const int width, const int height, std::vector<double> & memory) const {
+
+    if (!memory.empty()) {
+        memory.clear();
+    }
+
+    memory.reserve(width * height * 3);
+    float * tempMemory = new float[width * height * 3];
+
+    if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
+        glReadBuffer(color_buffer_attachment);
+        glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tempMemory);
+
+    }
+    else {
+        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory);
+    }
+
+    for (auto i = 0; i < width*height * 3; ++i) {
+        memory[i] = static_cast<double>(tempMemory[i]);
+    }
+
+    delete[] tempMemory;
 }
 
 }
