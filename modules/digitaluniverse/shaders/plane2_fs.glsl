@@ -30,6 +30,7 @@ in vec2 vs_st;
 uniform sampler2D galaxyTexture;
 //uniform bool additiveBlending;
 uniform float alphaValue;
+uniform float fadeInValue;
 
 
 Fragment getFragment() {
@@ -44,6 +45,8 @@ Fragment getFragment() {
     frag.color = texture(galaxyTexture, vs_st);
     frag.color *= alphaValue;
 
+    frag.color *= fadeInValue;
+
     if (frag.color.a == 0.0) {
         discard;
     }
@@ -52,8 +55,11 @@ Fragment getFragment() {
     //     frag.blend = BLEND_MODE_ADDITIVE;
     // }
 
-    frag.color = texture(galaxyTexture, vs_st);
+    //frag.color = texture(galaxyTexture, vs_st);
     frag.depth = vs_screenSpaceDepth;
+    frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
+    frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
 
     return frag;
 }

@@ -122,10 +122,7 @@ private:
     bool _textColorIsDirty;
     bool _hasLabel;
     bool _labelDataIsDirty;
-
-    int _textMinSize;
-    int _textMaxSize;
-
+    
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     //properties::Vec3Property _pointColor;
@@ -134,6 +131,8 @@ private:
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
     //properties::OptionProperty _blendMode;
+    properties::FloatProperty _textMinSize;
+    properties::FloatProperty _textMaxSize;
 
     // DEBUG:
     properties::OptionProperty _renderOption;

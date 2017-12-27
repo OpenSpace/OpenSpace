@@ -26,7 +26,11 @@ local object = {
         File = speck .. "/quasars.speck",
         Texture = textures .. "/point3.png",
         Unit = "Mpc",
-        ScaleFactor = 537.31
+        ScaleFactor = 537.31,
+        -- Fade in value in the same unit as "Unit"
+        FadeInDistances = { 300.0, 1000.0 },
+        BillboardMaxSize = 50.0,
+        BillboardMinSize = 0.0,
     },
     GuiPath = "/Universe/Quasars"
 }

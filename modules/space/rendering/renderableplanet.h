@@ -46,26 +46,33 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+struct TransformData;
+
+namespace planetgeometry {
+class PlanetGeometry;
+}
+
 namespace documentation { struct Documentation; }
 namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanet : public Renderable {
 public:
     // Shadow structure
-    typedef struct {
+    struct ShadowConfiguration {
         std::pair<std::string, float> source;
         std::pair<std::string, float> caster;
-    } ShadowConf;
+    };
 
     struct ShadowRenderingStruct {
-        float xu, xp;
-        float rs, rc;
+        float xu, 
+              xp;
+        float rs, 
+              rc;
         glm::vec3 sourceCasterVec;
         glm::vec3 casterPositionVec;
         bool isShadowing;
     };
 
-public:
     RenderablePlanet(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
@@ -80,7 +87,9 @@ public:
 protected:
     void loadTexture();
 
-private:
+private: 
+    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData & transformData);
+
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _nightTexturePath;
     properties::StringProperty _heightMapTexturePath;
@@ -95,15 +104,17 @@ private:
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     properties::BoolProperty _performShading;
-    float _alpha;
-    std::vector< ShadowConf > _shadowConfArray;
-    float _planetRadius;
 
-    glm::dmat3 _stateMatrix;
+    float _alpha;
+    float _planetRadius;
     bool _hasNightTexture;
     bool _hasHeightTexture;
     bool _shadowEnabled;
     double _time;
+
+    glm::dmat3 _stateMatrix;
+
+    std::vector<ShadowConfiguration> _shadowConfArray;    
 };
 
 } // namespace openspace

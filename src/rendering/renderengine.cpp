@@ -1,26 +1,26 @@
 /*****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
+*                                                                                       *
+* OpenSpace                                                                             *
+*                                                                                       *
+* Copyright (c) 2014-2017                                                               *
+*                                                                                       *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+* software and associated documentation files (the "Software"), to deal in the Software *
+* without restriction, including without limitation the rights to use, copy, modify,    *
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+* permit persons to whom the Software is furnished to do so, subject to the following   *
+* conditions:                                                                           *
+*                                                                                       *
+* The above copyright notice and this permission notice shall be included in all copies *
+* or substantial portions of the Software.                                              *
+*                                                                                       *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+****************************************************************************************/
 
 #include <openspace/rendering/renderengine.h>
 
@@ -39,6 +39,7 @@
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -188,6 +189,26 @@ namespace {
         "This value determines the number of anti-aliasing samples to be used in the "
         "rendering for the MSAA method."
     };
+
+    static const openspace::properties::Property::PropertyInfo HDRExposureInfo = {
+        "HDRExposure",
+        "HDR Exposure",
+        "This value determines the amount of light per unit area reaching the "
+        "equivalent of an electronic image sensor."
+    };
+
+    static const openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
+        "Background Exposure",
+        "BackgroundExposure",
+        "This value determines the amount of light per unit area reaching the "
+        "equivalent of an electronic image sensor for the background image."
+    };
+
+    static const openspace::properties::Property::PropertyInfo GammaInfo = {
+        "Gamma",
+        "Gamma Correction",
+        "Gamma, is the nonlinear operation used to encode and decode luminance or tristimulus values in the image."        
+    };
 } // namespace
 
 
@@ -198,6 +219,7 @@ RenderEngine::RenderEngine()
     , _camera(nullptr)
     , _scene(nullptr)
     , _raycasterManager(nullptr)
+    , _deferredcasterManager(nullptr)
     , _doPerformanceMeasurements(PerformanceInfo)
     , _performanceManager(nullptr)
     , _renderer(nullptr)
@@ -216,7 +238,10 @@ RenderEngine::RenderEngine()
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
-    , _nAaSamples(AaSamplesInfo, 8, 1, 16)
+    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
+    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
+    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _nAaSamples(AaSamplesInfo, 4, 1, 16)
     , _frameNumber(0)
 {
     _doPerformanceMeasurements.onChange([this](){
@@ -259,7 +284,26 @@ RenderEngine::RenderEngine()
             _renderer->setNAaSamples(_nAaSamples);
         }
     });
+    _hdrExposure.onChange([this]() {
+        if (_renderer) {
+            _renderer->setHDRExposure(_hdrExposure);
+        }
+    });
+    _hdrBackground.onChange([this]() {
+        if (_renderer) {
+            _renderer->setHDRBackground(_hdrBackground);
+        }
+    });
+    _gamma.onChange([this]() {
+        if (_renderer) {
+            _renderer->setGamma(_gamma);
+        }
+    });
+
     addProperty(_nAaSamples);
+    addProperty(_hdrExposure);
+    addProperty(_hdrBackground);
+    addProperty(_gamma);
     addProperty(_applyWarping);
 
     _takeScreenshot.onChange([this](){
@@ -302,7 +346,8 @@ void RenderEngine::initialize() {
     ConfigurationManager& confManager = OsEng.configurationManager();
     if (confManager.hasKeyAndValue<std::string>(KeyRenderingMethod)) {
         renderingMethod = confManager.value<std::string>(KeyRenderingMethod);
-    } else {
+    }
+    else {
         using Version = ghoul::systemcapabilities::Version;
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
@@ -316,16 +361,17 @@ void RenderEngine::initialize() {
     if (confManager.hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
         _disableMasterRendering = confManager.value<bool>(
             ConfigurationManager::KeyDisableMasterRendering
-        );
+            );
     }
 
     if (confManager.hasKey(ConfigurationManager::KeyDisableSceneOnMaster)) {
         _disableSceneTranslationOnMaster = confManager.value<bool>(
             ConfigurationManager::KeyDisableSceneOnMaster
-        );
+            );
     }
 
     _raycasterManager = std::make_unique<RaycasterManager>();
+    _deferredcasterManager = std::make_unique<DeferredcasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
     LINFO("Setting renderer from string: " << renderingMethod);
@@ -392,7 +438,7 @@ void RenderEngine::initializeGL() {
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
 }
-
+    
 void RenderEngine::deinitialize() {
     for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
         ssr->deinitialize();
@@ -500,7 +546,8 @@ void RenderEngine::updateFade() {
                     0.f,
                     _currentFadeTime / _fadeDuration
                 );
-            } else {
+            }
+            else {
                 _globalBlackOutFactor = glm::smoothstep(
                     0.f,
                     1.f,
@@ -509,13 +556,13 @@ void RenderEngine::updateFade() {
             }
             _currentFadeTime += static_cast<float>(
                 OsEng.windowWrapper().averageDeltaTime()
-            );
+                );
         }
     }
 }
 
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
-                          const glm::mat4& projectionMatrix)
+    const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
     WindowWrapper& wrapper = OsEng.windowWrapper();
@@ -525,6 +572,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         }
         else {
             _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
+            _camera->sgctInternal.setSceneMatrix(sceneMatrix);
         }
     }
     _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
@@ -631,6 +679,10 @@ RaycasterManager& RenderEngine::raycasterManager() {
     return *_raycasterManager;
 }
 
+DeferredcasterManager& RenderEngine::deferredcasterManager() {
+    return *_deferredcasterManager;
+}
+
 void RenderEngine::setScene(Scene* scene) {
     _scene = scene;
     if (_renderer) {
@@ -672,11 +724,11 @@ void RenderEngine::startFading(int direction, float fadeDuration) {
 }
 
 /**
- * Build a program object for rendering with the used renderer
- */
+* Build a program object for rendering with the used renderer
+*/
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
-                                                     std::string name, std::string vsPath,
-                                        std::string fsPath, const ghoul::Dictionary& data)
+    std::string name, std::string vsPath,
+    std::string fsPath, const ghoul::Dictionary& data)
 {
 
     ghoul::Dictionary dict = data;
@@ -703,12 +755,12 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 /**
- * Build a program object for rendering with the used renderer
- */
+* Build a program object for rendering with the used renderer
+*/
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
-                                                     std::string name, std::string vsPath,
-                                                   std::string fsPath, std::string csPath,
-                                                            const ghoul::Dictionary& data)
+    std::string name, std::string vsPath,
+    std::string fsPath, std::string csPath,
+    const ghoul::Dictionary& data)
 {
     ghoul::Dictionary dict = data;
     dict.setValue("rendererData", _rendererData);
@@ -734,7 +786,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 void RenderEngine::removeRenderProgram(
-                             const std::unique_ptr<ghoul::opengl::ProgramObject>& program)
+    const std::unique_ptr<ghoul::opengl::ProgramObject>& program)
 {
     if (!program) {
         return;
@@ -752,10 +804,10 @@ void RenderEngine::removeRenderProgram(
 }
 
 /**
- * Set renderer data
- * Called from the renderer, whenever it needs to update
- * the dictionary of all rendering programs.
- */
+* Set renderer data
+* Called from the renderer, whenever it needs to update
+* the dictionary of all rendering programs.
+*/
 void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
     _rendererData = data;
     for (ghoul::opengl::ProgramObject* program : _programs) {
@@ -794,8 +846,8 @@ void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
 }
 
 /**
- * Set renderer
- */
+* Set renderer
+*/
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     if (_renderer) {
         _renderer->deinitialize();
@@ -804,13 +856,14 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     _renderer = std::move(renderer);
     _renderer->setResolution(renderingResolution());
     _renderer->setNAaSamples(_nAaSamples);
+    _renderer->setHDRExposure(_hdrExposure);
     _renderer->initialize();
     _renderer->setCamera(_camera);
     _renderer->setScene(_scene);
 }
 
 scripting::LuaLibrary RenderEngine::luaLibrary() {
-    return {
+    return{
         "",
         {
             {
@@ -940,7 +993,432 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(
         return RendererImplementation::Invalid;
     }
 }
+/*
+<<<<<<< HEAD
+std::string RenderEngine::progressToStr(int size, double t) {
+    std::string progress = "|";
+    int g = static_cast<int>((t * (size - 1)) + 1);
+    g = std::max(g, 0);
+    for (int i = 0; i < g; i++) {
+        progress.append("-");
+    }
+    progress.append(">");
+    for (int i = 0; i < size - g; i++) {
+        progress.append(" ");
+    }
+    progress.append("|");
+    return progress;
+}
 
+void RenderEngine::renderInformation() {
+    using ghoul::fontrendering::RenderFont;
+
+    glm::vec2 penPosition = glm::vec2(
+        10.f,
+        fontResolution().y
+    );
+
+    // If the console is opened, move all text downwards
+    penPosition.y -= OsEng.console().currentHeight();
+
+    if (_showDate && _fontDate) {
+        penPosition.y -= _fontDate->height();
+        RenderFontCr(
+            *_fontDate,
+            penPosition,
+            "Date: %s",
+            OsEng.timeManager().time().UTC().c_str()
+        );
+    }
+    else {
+        penPosition.y -= _fontInfo->height();
+    }
+
+    if (_showInfo && _fontInfo) {
+        std::pair<double, std::string> deltaTime = simplifyTime(
+            OsEng.timeManager().time().deltaTime()
+        );
+        RenderFontCr(
+            *_fontInfo,
+            penPosition,
+            "Simulation increment: %.1f %s / second",
+            deltaTime.first,
+            deltaTime.second.c_str()
+        );
+
+        double distance = glm::length(
+            _camera->positionVec3() -
+            OsEng.navigationHandler().focusNode()->worldPosition()
+        );
+        std::pair<double, std::string> dist = simplifyDistance(distance);
+        RenderFontCr(
+            *_fontInfo,
+            penPosition,
+            "Distance from focus: %f %s",
+            dist.first,
+            dist.second.c_str()
+        );
+
+        FrametimeType frametimeType = FrametimeType(_frametimeType.value());
+        switch (frametimeType) {
+            case FrametimeType::DtTimeAvg:
+                RenderFontCr(
+                    *_fontInfo,
+                    penPosition,
+                    "Avg. Frametime: %.5f",
+                    OsEng.windowWrapper().averageDeltaTime()
+                );
+                break;
+            case FrametimeType::FPS:
+                RenderFontCr(
+                    *_fontInfo,
+                    penPosition,
+                    "FPS: %3.2f",
+                    1.0 / OsEng.windowWrapper().deltaTime()
+                );
+                break;
+            case FrametimeType::FPSAvg:
+                RenderFontCr(
+                    *_fontInfo,
+                    penPosition,
+                    "Avg. FPS: %3.2f",
+                    1.0 / OsEng.windowWrapper().averageDeltaTime()
+                );
+                break;
+            case FrametimeType::None:
+                break;
+        }
+
+            ParallelConnection::Status status = OsEng.parallelConnection().status();
+            size_t nConnections = OsEng.parallelConnection().nConnections();
+            const std::string& hostName = OsEng.parallelConnection().hostName();
+
+            std::string connectionInfo = "";
+            int nClients = static_cast<int>(nConnections);
+            if (status == ParallelConnection::Status::Host) {
+                nClients--;
+                if (nClients == 1) {
+                    connectionInfo = "Hosting session with 1 client";
+                }
+                else {
+                    connectionInfo =
+                        "Hosting session with " + std::to_string(nClients) + " clients";
+                }
+            }
+            else if (status == ParallelConnection::Status::ClientWithHost) {
+                nClients--;
+                connectionInfo = "Session hosted by '" + hostName + "'";
+            }
+            else if (status == ParallelConnection::Status::ClientWithoutHost) {
+                connectionInfo = "Host is disconnected";
+            }
+
+            if (status == ParallelConnection::Status::ClientWithHost ||
+                status == ParallelConnection::Status::ClientWithoutHost) {
+                connectionInfo += "\n";
+                if (nClients > 2) {
+                    std::string c = std::to_string(nClients - 1);
+                    connectionInfo += "You and " + c + " more clients are tuned in";
+                }
+                else if (nClients == 2) {
+                    std::string c = std::to_string(nClients - 1);
+                    connectionInfo += "You and " + c + " more client are tuned in";
+                }
+                else if (nClients == 1) {
+                    connectionInfo += "You are the only client";
+                }
+            }
+
+
+        if (!connectionInfo.empty()) {
+            RenderFontCr(
+                *_fontInfo,
+                penPosition,
+                connectionInfo.c_str()
+            );
+        }
+
+
+#ifdef OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS_ENABLED
+    bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+    double currentTime = OsEng.timeManager().time().j2000Seconds();
+
+    //if (MissionManager::ref().hasCurrentMission()) {
+
+    //    const Mission& mission = MissionManager::ref().currentMission();
+
+    //        if (mission.phases().size() > 0) {
+    //            static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
+    //            //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
+    //            static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
+    //            static const glm::vec4 missionProgressColor = currentMissionColor;
+    //           // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+    //            static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
+
+    //            // Add spacing
+    //            RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
+
+    //            auto phaseTrace = mission.phaseTrace(currentTime);
+
+    //            if (phaseTrace.size()) {
+    //                const MissionPhase& phase = phaseTrace.back().get();
+    //                std::string title = "Current Mission Phase: " + phase.name();
+    //                RenderFontCr(
+    //                    *_fontInfo,
+    //                    penPosition,
+    //                    missionProgressColor,
+    //                    title.c_str()
+    //                );
+    //                double remaining = phase.timeRange().end - currentTime;
+    //                float t = static_cast<float>(
+    //                    1.0 - remaining / phase.timeRange().duration()
+    //                );
+    //                std::string progress = progressToStr(25, t);
+    //                //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
+    //                //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
+    //            }
+    //            else {
+    //                RenderFontCr(
+    //                    *_fontInfo,
+    //                    penPosition,
+    //                    nextMissionColor,
+    //                    "Next Mission:"
+    //                );
+    //                double remaining = mission.timeRange().start - currentTime;
+    //                RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
+    //                    "%.0f s", remaining);
+    //            }
+
+    //            bool showAllPhases = false;
+
+    //            typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
+    //            std::stack<PhaseWithDepth> S;
+    //            int pixelIndentation = 20;
+    //            S.push({ &mission, 0 });
+    //            while (!S.empty()) {
+    //                const MissionPhase* phase = S.top().first;
+    //                int depth = S.top().second;
+    //                S.pop();
+
+    //                bool isCurrentPhase = phase->timeRange().includes(currentTime);
+
+    //                penPosition.x += depth * pixelIndentation;
+    //                if (isCurrentPhase) {
+    //                    double remaining = phase->timeRange().end - currentTime;
+    //                    float t = static_cast<float>(
+    //                        1.0 - remaining / phase->timeRange().duration()
+    //                    );
+    //                    std::string progress = progressToStr(25, t);
+    //                    RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
+    //                        "%s  %s %.1f %%",
+    //                        phase->name().c_str(),
+    //                        progress.c_str(),
+    //                        t * 100
+    //                        );
+    //                }
+    //                else {
+    //                    RenderFontCr(
+    //                        *_fontInfo,
+    //                        penPosition,
+    //                        nonCurrentMissionColor,
+    //                        phase->name().c_str()
+    //                    );
+    //                }
+    //                penPosition.x -= depth * pixelIndentation;
+
+    //                if (isCurrentPhase || showAllPhases) {
+    //                    // phases are sorted increasingly by start time, and will be
+    //                    // popped last-in-first-out from the stack, so add them in
+    //                    // reversed order.
+    //                    int indexLastPhase = static_cast<int>(
+    //                        phase->phases().size()
+    //                    ) - 1;
+    //                    for (int i = indexLastPhase; 0 <= i; --i) {
+    //                        S.push({ &phase->phases()[i], depth + 1 });
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+
+
+
+        if (openspace::ImageSequencer::ref().isReady()) {
+            penPosition.y -= 25.f;
+
+            glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
+
+            if (hasNewHorizons) {
+                try {
+                    double lt;
+                    glm::dvec3 p = SpiceManager::ref().targetPosition(
+                        "PLUTO",
+                        "NEW HORIZONS",
+                        "GALACTIC",
+                        {},
+                        currentTime,
+                        lt
+                    );
+                    psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+                        p.x,
+                        p.y,
+                        p.z
+                    );
+                    float a, b;
+                    glm::dvec3 radii;
+                    SpiceManager::ref().getValue("PLUTO", "RADII", radii);
+                    a = static_cast<float>(radii.x);
+                    b = static_cast<float>(radii.y);
+                    float radius = (a + b) / 2.f;
+                    float distToSurf = glm::length(nhPos.vec3()) - radius;
+
+                    RenderFont(*_fontInfo,
+                               penPosition,
+                               "Distance to Pluto: % .1f (KM)",
+                               distToSurf
+                    );
+                    penPosition.y -= _fontInfo->height();
+                }
+                catch (...) {
+                    // @CLEANUP:  This is bad as it will discard all exceptions
+                    // without telling us about it! ---abock
+                }
+            }
+
+            double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() -
+                               currentTime;
+            float t = static_cast<float>(
+                1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength()
+            );
+
+            std::string str = SpiceManager::ref().dateFromEphemerisTime(
+                ImageSequencer::ref().getNextCaptureTime(),
+                "YYYY MON DD HR:MN:SC"
+            );
+
+            glm::vec4 active(0.6, 1, 0.00, 1);
+            glm::vec4 brigther_active(0.9, 1, 0.75, 1);
+
+            if (remaining > 0) {
+                std::string progress = progressToStr(25, t);
+                brigther_active *= (1 - t);
+
+                RenderFontCr(*_fontInfo,
+                    penPosition,
+                    active * t + brigther_active,
+                    "Next instrument activity:"
+                    );
+
+                RenderFontCr(*_fontInfo,
+                    penPosition,
+                    active * t + brigther_active,
+                    "%.0f s %s %.1f %%",
+                    remaining, progress.c_str(), t * 100
+                    );
+
+                RenderFontCr(*_fontInfo,
+                    penPosition,
+                    active,
+                    "Data acquisition time: %s",
+                    str.c_str()
+                    );
+            }
+            std::pair<double, std::string> nextTarget =
+                ImageSequencer::ref().getNextTarget();
+            std::pair<double, std::string> currentTarget =
+                ImageSequencer::ref().getCurrentTarget();
+
+            if (currentTarget.first > 0.0) {
+                int timeleft = static_cast<int>(nextTarget.first - currentTime);
+
+                int hour = timeleft / 3600;
+                int second = timeleft % 3600;
+                int minute = second / 60;
+                second = second % 60;
+
+                std::string hh, mm, ss;
+
+                if (hour   < 10)
+                    hh.append("0");
+                if (minute < 10)
+                    mm.append("0");
+                if (second < 10)
+                    ss.append("0");
+
+                hh.append(std::to_string(hour));
+                mm.append(std::to_string(minute));
+                ss.append(std::to_string(second));
+
+                RenderFontCr(*_fontInfo,
+                    penPosition,
+                    targetColor,
+                    "Data acquisition adjacency: [%s:%s:%s]",
+                    hh.c_str(), mm.c_str(), ss.c_str()
+                    );
+
+                penPosition.y -= _fontInfo->height();
+
+                std::map<std::string, bool> activeMap =
+                    ImageSequencer::ref().getActiveInstruments();
+                glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
+                glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+
+                RenderFontCr(*_fontInfo,
+                    penPosition,
+                    active,
+                    "Active Instruments:"
+                    );
+
+                for (auto m : activeMap) {
+                    if (m.second == false) {
+                        RenderFont(*_fontInfo,
+                            penPosition,
+                            glm::vec4(0.3, 0.3, 0.3, 1),
+                            "| |"
+                        );
+                        RenderFontCr(*_fontInfo,
+                            penPosition,
+                            glm::vec4(0.3, 0.3, 0.3, 1),
+                            "    %5s",
+                            m.first.c_str()
+                        );
+
+                    }
+                    else {
+                        RenderFont(*_fontInfo,
+                            penPosition,
+                            glm::vec4(0.3, 0.3, 0.3, 1),
+                            "|"
+                        );
+                        if (m.first == "NH_LORRI") {
+                            RenderFont(*_fontInfo,
+                                penPosition,
+                                firing,
+                                " + "
+                            );
+                        }
+                        RenderFont(*_fontInfo,
+                            penPosition,
+                            glm::vec4(0.3, 0.3, 0.3, 1),
+                            "  |"
+                        );
+                        RenderFontCr(*_fontInfo,
+                            penPosition,
+                            active,
+                            "    %5s",
+                            m.first.c_str()
+                        );
+                    }
+                }
+            }
+        }
+#endif
+    }
+}
+
+=======
+>>>>>>> master
+*/
 void RenderEngine::renderCameraInformation() {
     if (!_showCameraInfo) {
         return;
@@ -1068,8 +1546,8 @@ void RenderEngine::renderScreenLog() {
     const std::vector<ScreenLog::LogEntry> entries = _log->entries();
     auto lastEntries =
         entries.size() > max ?
-            std::make_pair(entries.rbegin(), entries.rbegin() + max) :
-            std::make_pair(entries.rbegin(), entries.rend());
+        std::make_pair(entries.rbegin(), entries.rbegin() + max) :
+        std::make_pair(entries.rbegin(), entries.rend());
 
     size_t nr = 1;
     auto now = std::chrono::steady_clock::now();

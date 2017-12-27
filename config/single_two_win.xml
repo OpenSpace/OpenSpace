@@ -13,7 +13,7 @@
                 </PlanarProjection>
             </Viewport>
         </Window>
-        <Window fullScreen="false" numberOfSamples="8" border="false">
+        <Window fullScreen="false" numberOfSamples="8" border="true">
             <Pos x="340" y="100" />
             <Size x="1280" y="720" />
             <Viewport>

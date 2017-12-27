@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
@@ -93,9 +94,9 @@ namespace openspace {
         void deleteDataGPU();
         void createPlanes();
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
-            const glm::dmat4& projectionMatrix);
+            const glm::dmat4& projectionMatrix, float fadeInVariable);
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVarible);
 
         bool loadData();
         bool loadTextures();
@@ -121,6 +122,9 @@ namespace openspace {
         properties::FloatProperty _textSize;
         properties::BoolProperty _drawElements;
         properties::OptionProperty _blendMode;
+        properties::Vec2Property _fadeInDistance;
+        properties::BoolProperty _disableFadeInDistance;
+        properties::FloatProperty _planeMinSize;
 
         // DEBUG:
         properties::OptionProperty _renderOption;
@@ -145,10 +149,10 @@ namespace openspace {
         int _nValuesPerAstronomicalObject;
 
         float _sluminosity;
-
+        
         glm::dmat4 _transformationMatrix;
 
-        std::unordered_map<int, RenderingPlane> _renderingPlanesMap;       
+        std::vector<RenderingPlane> _renderingPlanesArray;       
     };
 
 

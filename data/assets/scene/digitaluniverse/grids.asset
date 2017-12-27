@@ -10,7 +10,7 @@ local speck = asset.syncedResource({
 })
 
 local ecliptic = {
-    Name = "Ecliptic Grid Labels",
+    Name = "Ecliptic Sphere Labels",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -20,23 +20,19 @@ local ecliptic = {
         TextColor = { 0.5, 0.5, 0.5, 1.0 },
         TextSize = 15.4,
         TextMinSize = 5.0,
-        Unit = "pc"
-    },
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = {
-                -0.05487554,  0.4941095, -0.8676661,
-                -0.9938214 , -0.1109906, -0.0003515167,
-                -0.09647644,  0.8622859,  0.4971472
-            }
+        Unit = "pc",
+        TransformationMatrix = {
+            -0.05487554,  0.4941095, -0.8676661,    0.0,
+            -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+            -0.09647644,  0.8622859,  0.4971472,    0.0,
+            0.0,          0.0,        0.0,          1.0
         }
     },
     GuiPath = "/Other/Grids"
 }
 
 local equatorial = {
-    Name = "Equatorial Grid Labels",
+    Name = "Equatorial Sphere Labels",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -46,13 +42,19 @@ local equatorial = {
         TextColor = { 0.5, 0.5, 0.5, 1.0 },
         TextSize = 15.3,
         TextMinSize = 5.0,
-        Unit = "pc"
+        Unit = "pc",
+        TransformationMatrix = {
+            -0.05487554,  0.4941095, -0.8676661,    0.0,
+            -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+            -0.09647644,  0.8622859,  0.4971472,    0.0,
+            0.0,          0.0,        0.0,          1.0
+        }
     },
     GuiPath = "/Other/Grids"
 }
 
 local galactic = {
-    Name = "Galactic Grid Labels",
+    Name = "Galactic Sphere Labels",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,

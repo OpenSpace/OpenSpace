@@ -57,6 +57,9 @@ Fragment getFragment() {
     Fragment frag;
     frag.color = fullColor;
     frag.depth = gs_screenSpaceDepth;
-
+    frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
+    frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+    
     return frag;
 }

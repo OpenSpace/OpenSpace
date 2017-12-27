@@ -124,6 +124,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
     ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
@@ -298,6 +299,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
@@ -306,6 +309,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h

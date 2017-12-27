@@ -83,6 +83,9 @@ private:
         std::shared_ptr<GPULayerManager> gpuLayerManager,
         const Chunk& chunk);
 
+    void calculateEclipseShadows(const Chunk& chunk, ghoul::opengl::ProgramObject* programObject,
+                                 const RenderData& data);
+
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
                            const Chunk& chunk, const RenderData& data);
 

@@ -61,6 +61,8 @@
 #define USE_ATMOSPHERE #{useAtmosphere}
 #define USE_ACCURATE_NORMALS #{useAccurateNormals}
 #define PERFORM_SHADING #{performShading}
+#define USE_ECLIPSE_SHADOWS #{useEclipseShadows}
+#define USE_ECLIPSE_HARD_SHADOWS #{useEclipseHardShadows}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
@@ -321,7 +323,7 @@ vec4 calculateNight(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
 
     vec3 n = normalize(ellipsoidNormalCameraSpace);
     vec3 l = lightDirectionCameraSpace;
-    float cosineFactor = clamp(dot(l, normalize(n + 0.15 * l)) * 3 , 0, 1);
+    float cosineFactor = clamp(dot(l, normalize(n + 0.20 * l)) * 3 , 0, 1);
     
     #for i in 0..#{lastLayerIndexNightLayers}
     {
@@ -390,7 +392,8 @@ vec4 calculateOverlay(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
 vec4 calculateWater(vec4 currentColor, vec2 uv, LevelWeights levelWeights, 
                     Layer WaterMasks[NUMLAYERS_WATERMASK],
                     vec3 ellipsoidNormalCameraSpace,
-                    vec3 lightDirectionCameraSpace, vec3 positionCameraSpace)
+                    vec3 lightDirectionCameraSpace, vec3 positionCameraSpace,
+                    out float reflectance)
 {
     vec4 waterColor = vec4(0.0);
 
@@ -422,8 +425,10 @@ vec4 calculateWater(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
 
     vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
 
+    reflectance = waterColor.a;
     //return blendNormal(currentColor, waterColor);
-    return currentColor + vec4(specularTotal, 1);
+    //return currentColor + vec4(specularTotal, 1);
+    return currentColor;
 }
 
 #endif // TEXTURETILEMAPPING_HGLSL
