@@ -72,7 +72,9 @@ documentation::Documentation ResourceSynchronization::Documentation() {
     };
 }
 
-ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dict) {
+ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dict)
+    : _state(State::Unsynced)
+{
     _name = dict.value<std::string>(KeyName);
 }
 

@@ -116,7 +116,7 @@ private:
     std::unique_ptr<libtorrent::session> _session;
     std::thread _torrentThread;
     std::mutex _mutex;
-    std::atomic_bool _keepRunning = true;
+    std::atomic_bool _keepRunning;
 };
 
 } // namespace openspace

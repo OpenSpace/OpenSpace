@@ -49,6 +49,7 @@ TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict,
                                                const std::string& synchronizationRoot,
                                                TorrentClient* torrentClient)
     : ResourceSynchronization(dict)
+    , _enabled(false)
     , _synchronizationRoot(synchronizationRoot)
     , _torrentClient(torrentClient)
 {

@@ -90,7 +90,7 @@ private:
     void setState(State state);
 
     std::string _name;
-    std::atomic<State> _state = State::Unsynced;
+    std::atomic<State> _state;
     std::mutex _callbackMutex;
     CallbackHandle _nextCallbackId = 0;
     std::unordered_map<CallbackHandle, StateChangeCallback> _stateChangeCallbacks;

@@ -51,7 +51,9 @@ TorrentError::TorrentError(std::string component)
 
 namespace openspace {
 
-TorrentClient::TorrentClient() {}
+TorrentClient::TorrentClient()
+    : _keepRunning(true)
+{}
 
 TorrentClient::~TorrentClient() {
     _keepRunning = false;
