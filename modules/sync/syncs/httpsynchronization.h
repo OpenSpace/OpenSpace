@@ -59,11 +59,11 @@ private:
     bool hasSyncFile();
     void createSyncFile();
 
-    std::atomic_bool _nTotalBytesKnown = false;
-    std::atomic_size_t _nTotalBytes = 0;
-    std::atomic_size_t _nSynchronizedBytes = 0;
+    std::atomic_bool _nTotalBytesKnown;
+    std::atomic_size_t _nTotalBytes;
+    std::atomic_size_t _nSynchronizedBytes;
 
-    std::atomic_bool _shouldCancel = false;
+    std::atomic_bool _shouldCancel;
     std::string _identifier;
     int _version;
     std::string _synchronizationRoot;
