@@ -81,6 +81,8 @@ public:
     static OpenSpaceEngine& ref();
     static bool isCreated();
 
+    ~OpenSpaceEngine();
+
     // callbacks
     void initialize();
     void initializeGL();

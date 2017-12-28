@@ -185,7 +185,9 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _globalPropertyNamespace->addPropertySubOwner(_navigationHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
-    _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
+    if (_windowWrapper) {
+        _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
+    }
     _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
     _globalPropertyNamespace->addPropertySubOwner(_console.get());
     _globalPropertyNamespace->addPropertySubOwner(_dashboard.get());
@@ -237,6 +239,8 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
+OpenSpaceEngine::~OpenSpaceEngine() {}
+
 bool OpenSpaceEngine::isCreated() {
     return _engine != nullptr;
 }
@@ -247,7 +251,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
                              bool& requestClose, bool consoleLog)
 {
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
-    ghoul_assert(windowWrapper != nullptr, "No Window Wrapper was provided");
+    //ghoul_assert(windowWrapper != nullptr, "No Window Wrapper was provided");
 
     requestClose = false;
 

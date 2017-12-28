@@ -24,10 +24,11 @@
 
 #include <modules/sync/tasks/syncassettask.h>
 
-#include <openspace/moduleregistration.h>
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/util/synchronizationwatcher.h>
 #include <openspace/scripting/scriptengine.h>
 
@@ -67,8 +68,8 @@ void SyncAssetTask::perform(const Task::ProgressCallback & progressCallback) {
     scripting::ScriptEngine scriptEngine;
 
     registerCoreClasses(scriptEngine);
-
-    for (OpenSpaceModule* m : AllModules()) {
+    ;
+    for (OpenSpaceModule* m : OsEng.moduleEngine().modules()) {
         scriptEngine.addLibrary(m->luaLibrary());
 
         for (scripting::LuaLibrary& l : m->luaLibraries()) {

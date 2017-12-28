@@ -342,11 +342,24 @@ bool HttpFileDownload::initDownload() {
     if (_file.fail()) {
 #ifdef WIN32
         // GetLastError() gives more details than errno.
-        if (GetLastError() != 0) {
-            LERROR(
-                "Cannot open file " << destinationFile <<
-                ": " << FormatSystemMessage(GetLastError()
+        DWORD errorId = GetLastError();
+        if (errorId != 0) {
+            char Buffer[256];
+            size_t size = FormatMessageA(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+                    FORMAT_MESSAGE_IGNORE_INSERTS,
+                nullptr,
+                errorId,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                Buffer,
+                256,
+                nullptr
             );
+
+            std::string message(Buffer, size);
+
+            LERROR("Cannot open file " << destinationFile << ": " << message);
+
             return false;
         }
         else {

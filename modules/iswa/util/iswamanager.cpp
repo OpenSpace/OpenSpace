@@ -740,18 +740,21 @@ scripting::LuaLibrary IswaManager::luaLibrary() {
             {
                 "addCygnet",
                 &luascriptfunctions::iswa_addCygnet,
+                {},
                 "int, string, string",
                 "Adds a IswaCygnet",
             },
             {
                 "addScreenSpaceCygnet",
                 &luascriptfunctions::iswa_addScreenSpaceCygnet,
+                {},
                 "int, string, string",
                 "Adds a Screen Space Cygnets",
             },
             {
                 "addKameleonPlanes",
                 &luascriptfunctions::iswa_addKameleonPlanes,
+                {},
                 "string, int",
                 "Adds KameleonPlanes from cdf file.",
             },
@@ -765,30 +768,35 @@ scripting::LuaLibrary IswaManager::luaLibrary() {
             {
                 "addCdfFiles",
                 &luascriptfunctions::iswa_addCdfFiles,
+                {},
                 "string",
                 "Adds a cdf files to choose from.",
             },
             {
                 "removeCygnet",
                 &luascriptfunctions::iswa_removeCygnet,
+                {},
                 "string",
                 "Remove a Cygnets",
             },
             {
                 "removeScreenSpaceCygnet",
                 &luascriptfunctions::iswa_removeScrenSpaceCygnet,
+                {},
                 "int",
                 "Remove a Screen Space Cygnets",
             },
             {
                 "removeGroup",
                 &luascriptfunctions::iswa_removeGroup,
+                {},
                 "int",
                 "Remove a group of Cygnets",
             },
             {
                 "setBaseUrl",
                 &luascriptfunctions::iswa_setBaseUrl,
+                {},
                 "string",
                 "sets the base url",
             }

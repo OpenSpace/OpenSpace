@@ -22,13 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/scene/translation.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/resourcesynchronization.h>
@@ -61,65 +58,35 @@ namespace {
     constexpr const char* _loggerCat = "Sync";
 }
 
-int main(int, char** argv) {
+int main(int argc, char** argv) {
     using namespace openspace;
 
-    ghoul::initialize();
-
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
-    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
-
-    LDEBUG("Initialize FileSystem");
-
-    ghoul::filesystem::Directory launchDirectory = FileSys.currentDirectory();
-
-#ifdef __APPLE__
-    ghoul::filesystem::File app(argv[0]);
-    std::string dirName = app.directoryName();
-    LINFO("Setting starting directory to '" << dirName << "'");
-    FileSys.setCurrentDirectory(dirName);
-#endif
+//    ghoul::initialize();
+//
+//    ghoul::logging::LogManager::initialize(
+//        ghoul::logging::LogLevel::Debug,
+//        ghoul::logging::LogManager::ImmediateFlush::Yes
+//    );
+//    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
+//
+//    LDEBUG("Initialize FileSystem");
+//
+//    ghoul::filesystem::Directory launchDirectory = FileSys.currentDirectory();
+//
+//#ifdef __APPLE__
+//    ghoul::filesystem::File app(argv[0]);
+//    std::string dirName = app.directoryName();
+//    LINFO("Setting starting directory to '" << dirName << "'");
+//    FileSys.setCurrentDirectory(dirName);
+//#endif
 
     // initTextureReaders();
 
-    FactoryManager::initialize();
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
-        "Renderable"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Task>>(),
-        "Task"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Translation>>(),
-        "Translation"
-    );
+    std::vector<std::string> unusedStringlist;
+    bool unusedBool;
+    OpenSpaceEngine::create(argc, argv, nullptr, unusedStringlist, unusedBool);
 
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
-        "Rotation"
-    );
-
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Scale>>(),
-        "Scale"
-    );
-
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
-        "ResourceSynchronization"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
-        "DashboardItem"
-    );
-
-
-    openspace::ConfigurationManager configuration;
+    /*openspace::ConfigurationManager configuration;
     std::string configurationFile = configuration.findConfiguration(ConfigurationFile);
     configuration.loadFromFile(configurationFile);
 
@@ -131,11 +98,11 @@ int main(int, char** argv) {
             ConfigurationManager::KeyModuleConfigurations,
             moduleConfigurations
         );
-    }
+    }*/
 
-    ModuleEngine moduleEngine;
-    moduleEngine.initialize(moduleConfigurations);
-    LINFO("Initialization done.");
+    //ModuleEngine moduleEngine;
+    //moduleEngine.initialize(moduleConfigurations);
+    //LINFO("Initialization done.");
 
     TaskLoader taskLoader;
     std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(
