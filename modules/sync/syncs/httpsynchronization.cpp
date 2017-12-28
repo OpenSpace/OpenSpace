@@ -196,8 +196,8 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
     std::unordered_map<std::string, size_t> fileSizes;
     std::mutex fileSizeMutex;
-    std::atomic_bool startedAllDownloads = false;
-    std::atomic_size_t nDownloads = 0;
+    std::atomic_bool startedAllDownloads(false);
+    std::atomic_size_t nDownloads(0);
     
     std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
     
