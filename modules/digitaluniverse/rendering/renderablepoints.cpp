@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -380,7 +380,7 @@ namespace openspace {
 
                 const size_t nAstronomicalObjects = _fullData.size() /
                                                             _nValuesPerAstronomicalObject;
-                const size_t nValues = _slicedData.size() / nAstronomicalObjects;
+                // const size_t nValues = _slicedData.size() / nAstronomicalObjects;
                 // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
 
                 glEnableVertexAttribArray(positionAttrib);
@@ -596,7 +596,7 @@ namespace openspace {
             std::stringstream str(line);
 
             glm::vec4 color;
-            for (size_t j = 0; j < 4; ++j) {
+            for (int j = 0; j < 4; ++j) {
                 str >> color[j];
             }
 
