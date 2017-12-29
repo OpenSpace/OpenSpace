@@ -41,7 +41,7 @@ local tullyPoints = {
         },
         Unit = "Mpc",
         -- Fade in value in the same unit as "Unit"
-        FadeInDistances = {0.05, 1.0},
+        FadeInDistances = { 0.05, 1.0 },
         -- Max size in pixels
         BillboardMaxSize = 50.0,
         BillboardMinSize = 0.0,
