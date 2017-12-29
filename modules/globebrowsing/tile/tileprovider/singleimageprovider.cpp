@@ -29,7 +29,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    const char* KeyFilePath = "FilePath";
+    constexpr const char* KeyFilePath = "FilePath";
 
     static const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
@@ -45,11 +45,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : _tile(nullptr, nullptr, Tile::Status::Unavailable)
     , _filePath(FilePathInfo)
 {
-    // Required input
-    std::string filePath;
-    dictionary.getValue<std::string>(KeyFilePath, filePath);
-    _filePath.setValue(filePath);
-
+    _filePath = dictionary.value<std::string>(KeyFilePath);
     addProperty(_filePath);
 
     reset();

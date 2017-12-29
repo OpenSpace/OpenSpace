@@ -82,10 +82,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     std::string _loggerCat = "DefaultTileProvider : " + _name;
 
     // 1. Get required Keys
-    std::string filePath;
-    dictionary.getValue<std::string>(KeyFilePath, filePath);
-    //filePath = absPath(filePath);
-    _filePath.setValue(filePath);
+    _filePath = dictionary.value<std::string>(KeyFilePath);
 
     if (!dictionary.getValue<layergroupid::GroupID>("LayerGroupID", _layerGroupID)) {
         ghoul_assert(false, "Unknown layer group id");
@@ -116,8 +113,6 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
         _preCacheLevel = static_cast<int>(dictionary.value<double>(KeyPreCacheLevel));
     }
-
-    dictionary.getValue(KeyBasePath, _basePath);
 
     initAsyncTileDataReader(initData);
 
@@ -230,7 +225,6 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
     auto tileDataset = std::make_shared<GdalRawTileDataReader>(
         _filePath,
         initData,
-        _basePath,
         preprocess
     );
 #else // GLOBEBROWSING_USE_GDAL

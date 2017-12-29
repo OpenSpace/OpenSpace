@@ -63,10 +63,9 @@ public:
     * \param baseDirectory, the base directory to use in future loading operations
     */
     GdalRawTileDataReader(const std::string& filePath,
-                          const TileTextureInitData& initData,
-                          const std::string& baseDirectory = "",
-                          RawTileDataReader::PerformPreprocessing preprocess =
-                            RawTileDataReader::PerformPreprocessing::No);
+        const TileTextureInitData& initData,
+        RawTileDataReader::PerformPreprocessing preprocess =
+            RawTileDataReader::PerformPreprocessing::No);
 
 
     virtual ~GdalRawTileDataReader() override;
@@ -107,8 +106,6 @@ private:
      */
     int calculateTileLevelDifference(int minimumPixelSize) const;
 
-    // Member variables
-    std::string _initDirectory;
     std::string _datasetFilePath;
 
     GDALDataset* _dataset;

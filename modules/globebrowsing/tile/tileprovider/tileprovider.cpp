@@ -39,8 +39,8 @@ namespace openspace::globebrowsing::tileprovider {
 unsigned int TileProvider::_numTileProviders = 0;
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
-    layergroupid::TypeID layerTypeID,
-    const ghoul::Dictionary& dictionary)
+                                                         layergroupid::TypeID layerTypeID,
+                                                      const ghoul::Dictionary& dictionary)
 {
     std::string type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();

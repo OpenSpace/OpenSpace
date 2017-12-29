@@ -83,7 +83,6 @@ private:
     properties::StringProperty _filePath;
     properties::IntProperty _tilePixelSize;
     layergroupid::GroupID _layerGroupID;
-    std::string _basePath;
     int _preCacheLevel;
     bool _performPreProcessing;
     bool _padTiles;
