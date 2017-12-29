@@ -51,10 +51,6 @@
 namespace {
     constexpr const char* _loggerCat = "DownloadManager";
 
-    constexpr const char* RequestIdentifier = "identifier";
-    constexpr const char* RequestFileVersion = "file_version";
-    constexpr const char* RequestApplicationVersion = "application_version";
-
     struct ProgressInformation {
         std::shared_ptr<openspace::DownloadManager::FileFuture> future;
         std::chrono::system_clock::time_point startTime;

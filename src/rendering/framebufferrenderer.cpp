@@ -1266,9 +1266,10 @@ void saveTextureToPPMFile(const GLenum color_buffer_attachment,
 
     ppmFile.open(fileName.c_str(), std::fstream::out);
     if (ppmFile.is_open()) {
-        unsigned char * pixels = new unsigned char[width*height * 3];
-        for (int t = 0; t < width*height * 3; ++t)
+        unsigned char* pixels = new unsigned char[width*height * 3];
+        for (int t = 0; t < width*height * 3; ++t) {
             pixels[t] = 255;
+        }
 
         if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
             glReadBuffer(color_buffer_attachment);
@@ -1295,9 +1296,9 @@ void saveTextureToPPMFile(const GLenum color_buffer_attachment,
         int k = 0;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                ppmFile << (unsigned int)pixels[k] << " "
-                        << (unsigned int)pixels[k + 1] << " "
-                        << (unsigned int)pixels[k + 2] << " ";
+                ppmFile << static_cast<unsigned int>(pixels[k]) << " "
+                        << static_cast<unsigned int>(pixels[k + 1]) << " "
+                        << static_cast<unsigned int>(pixels[k + 2]) << " ";
                 k += 3;
             }
             ppmFile << std::endl;

@@ -36,73 +36,12 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 
-// #include <iostream>
-// #include <string>
-// #include <ghoul/glm.h>
-
-// #include <ghoul/opengl/ghoul_gl.h>
-// #include <ghoul/io/texture/texturereader.h>
-// #include <ghoul/io/texture/texturereaderdevil.h>
-// #include <ghoul/io/texture/texturereaderfreeimage.h>
-// #include <ghoul/filesystem/directory.h>
-// #include <ghoul/cmdparser/commandlineparser.h>
-// #include <ghoul/cmdparser/singlecommand.h>
-
-// #include <openspace/scripting/scriptengine.h>
-// #include <openspace/engine/openspaceengine.h>
-// #include <openspace/engine/configurationmanager.h>
-// #include <openspace/util/task.h>
-
-namespace {
-    constexpr const char* ConfigurationFile = "openspace.cfg";
-    constexpr const char* _loggerCat = "Sync";
-}
-
 int main(int argc, char** argv) {
     using namespace openspace;
-
-//    ghoul::initialize();
-//
-//    ghoul::logging::LogManager::initialize(
-//        ghoul::logging::LogLevel::Debug,
-//        ghoul::logging::LogManager::ImmediateFlush::Yes
-//    );
-//    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
-//
-//    LDEBUG("Initialize FileSystem");
-//
-//    ghoul::filesystem::Directory launchDirectory = FileSys.currentDirectory();
-//
-//#ifdef __APPLE__
-//    ghoul::filesystem::File app(argv[0]);
-//    std::string dirName = app.directoryName();
-//    LINFO("Setting starting directory to '" << dirName << "'");
-//    FileSys.setCurrentDirectory(dirName);
-//#endif
-
-    // initTextureReaders();
 
     std::vector<std::string> unusedStringlist;
     bool unusedBool;
     OpenSpaceEngine::create(argc, argv, nullptr, unusedStringlist, unusedBool);
-
-    /*openspace::ConfigurationManager configuration;
-    std::string configurationFile = configuration.findConfiguration(ConfigurationFile);
-    configuration.loadFromFile(configurationFile);
-
-    ghoul::Dictionary moduleConfigurations;
-    if (configuration.hasKeyAndValue<ghoul::Dictionary>(
-        ConfigurationManager::KeyModuleConfigurations))
-    {
-        configuration.getValue<ghoul::Dictionary>(
-            ConfigurationManager::KeyModuleConfigurations,
-            moduleConfigurations
-        );
-    }*/
-
-    //ModuleEngine moduleEngine;
-    //moduleEngine.initialize(moduleConfigurations);
-    //LINFO("Initialization done.");
 
     TaskLoader taskLoader;
     std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(
@@ -111,15 +50,15 @@ int main(int argc, char** argv) {
 
     for (size_t i = 0; i < tasks.size(); i++) {
         Task& task = *tasks[i].get();
-        LINFO(
+        LINFOC(
+            "Sync",
             "Synchronizing scene " << (i + 1) << " out of " <<
-            tasks.size() << ": " << task.description()
+                tasks.size() << ": " << task.description()
         );
         ProgressBar progressBar(100);
-        auto onProgress = [&progressBar](float progress) {
+        task.perform([&progressBar](float progress) {
             progressBar.print(static_cast<int>(progress * 100.f));
-        };
-        task.perform(onProgress);
+        });
     }
     std::cout << "Done synchronizing." << std::endl;
 

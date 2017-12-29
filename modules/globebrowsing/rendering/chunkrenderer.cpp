@@ -149,11 +149,11 @@ void ChunkRenderer::calculateEclipseShadows(const Chunk& chunk,
                 lt
             );
             casterPos *= KM_TO_M; // converting to meters
-            psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-                casterPos.x,
-                casterPos.y,
-                casterPos.z
-            );
+            // psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+            //     casterPos.x,
+            //     casterPos.y,
+            //     casterPos.z
+            // );
 
 
             // First we determine if the caster is shadowing the current planet (all

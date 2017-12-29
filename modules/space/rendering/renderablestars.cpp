@@ -646,7 +646,7 @@ bool RenderableStars::readSpeckFile() {
             str >> values[i];
         }
         bool nullArray = true;
-        for (int i = 0; i < values.size(); ++i) {
+        for (size_t i = 0; i < values.size(); ++i) {
             if (values[i] != 0.0) {
                 nullArray = false;
                 break;

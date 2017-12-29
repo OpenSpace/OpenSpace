@@ -34,6 +34,7 @@ class Deferredcaster;
 class DeferredcasterListener {
 public:
     using isAttached = ghoul::Boolean;
+    virtual ~DeferredcasterListener() = default;
 
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         isAttached isAttached) = 0;

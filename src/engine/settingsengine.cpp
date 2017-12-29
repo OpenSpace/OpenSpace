@@ -73,7 +73,7 @@ void SettingsEngine::initialize() {
 
     // Set interaction to change ConfigurationManager and schedule the load
     _scenes.onChange([this, nScenes, sceneDir]() {
-        if (_scenes == nScenes) {
+        if (_scenes == static_cast<int>(nScenes)) {
             OsEng.scheduleLoadSingleAsset("");
         } else {
             std::string sceneFile = _scenes.getDescriptionByValue(_scenes);

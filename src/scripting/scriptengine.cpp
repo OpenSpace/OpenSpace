@@ -274,7 +274,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         for (void* d : p.userdata) {
             lua_pushlightuserdata(state, d);
         }
-        lua_pushcclosure(state, p.function, p.userdata.size());
+        lua_pushcclosure(state, p.function, static_cast<int>(p.userdata.size()));
         lua_settable(state, TableOffset);
     }
 

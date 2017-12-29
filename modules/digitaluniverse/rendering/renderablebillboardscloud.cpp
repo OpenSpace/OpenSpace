@@ -397,8 +397,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _labelFile("")
     , _colorOptionString("")
     , _unit(Parsec)
-    , _transformationMatrix(glm::dmat4(1.0))
     , _nValuesPerAstronomicalObject(0)
+    , _transformationMatrix(glm::dmat4(1.0))
     , _vao(0)
     , _vbo(0)
     , _polygonVao(0)
@@ -483,7 +483,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             ghoul::Dictionary colorOptionDataDic = dictionary.value<ghoul::Dictionary>(
                 ColorOptionInfo.identifier
                 );
-            for (int i = 0; i < colorOptionDataDic.size(); ++i) {
+            for (int i = 0; i < static_cast<int>(colorOptionDataDic.size()); ++i) {
                 std::string colorMapInUseName(
                     colorOptionDataDic.value<std::string>(std::to_string(i + 1)));
                 _colorOption.addOption(i, colorMapInUseName);
@@ -499,12 +499,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addProperty(_colorOption);
 
         if (dictionary.hasKey(ColorRangeInfo.identifier)) {
-            ghoul::Dictionary rangeDataDic = dictionary.value<ghoul::Dictionary>(
+            ghoul::Dictionary rangeDataDict = dictionary.value<ghoul::Dictionary>(
                 ColorRangeInfo.identifier
-                );
-            for (int i = 0; i < rangeDataDic.size(); ++i) {
+            );
+            for (size_t i = 0; i < rangeDataDict.size(); ++i) {
                 _colorRangeData.push_back(
-                    rangeDataDic.value<glm::vec2>(std::to_string(i+1)));
+                    rangeDataDict.value<glm::vec2>(std::to_string(i + 1)));
             }
         }
 
@@ -618,7 +618,7 @@ void RenderableBillboardsCloud::initialize() {
     if (!_colorOptionString.empty()) {
         // Following DU behavior here. The last colormap variable
         // entry is the one selected by default.
-        _colorOption.setValue(_colorRangeData.size() - 1);
+        _colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
     }
 }
 
@@ -913,7 +913,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 viewMatrix = data.camera.viewMatrix();
+    // glm::mat4 viewMatrix = data.camera.viewMatrix();
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) *
@@ -1268,7 +1268,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line = "";
     while (true) {
-        std::streampos position = file.tellg();
+        // std::streampos position = file.tellg();
         std::getline(file, line);
 
         if (line[0] == '#' || line.empty()) {
@@ -1287,12 +1287,12 @@ bool RenderableBillboardsCloud::readColorMapFile() {
         }
     }
 
-    for (auto i = 0; i < numberOfColors; ++i) {
+    for (size_t i = 0; i < numberOfColors; ++i) {
         std::getline(file, line);
         std::stringstream str(line);
 
         glm::vec4 color;
-        for (auto j = 0; j < 4; ++j) {
+        for (int j = 0; j < 4; ++j) {
             str >> color[j];
         }
 
@@ -1481,7 +1481,7 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
                     reinterpret_cast<const char*>(&keySize),
                     sizeof(int32_t)
                 );
-                for (int c = 0; c < pair.first.size(); ++c) {
+                for (size_t c = 0; c < pair.first.size(); ++c) {
                     int32_t keyChar = static_cast<int32_t>(pair.first[c]);
                     fileStream.write(
                         reinterpret_cast<const char*>(&keyChar),
@@ -1520,7 +1520,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         float colorMapBinSize = (currentColorRange.y - currentColorRange.x) /
                                 static_cast<float>(_colorMapData.size());
         float bin = colorMapBinSize;
-        for (int i = 0; i < _colorMapData.size(); ++i) {
+        for (size_t i = 0; i < _colorMapData.size(); ++i) {
             colorBins.push_back(bin);
             bin += colorMapBinSize;
         }
@@ -1546,14 +1546,17 @@ void RenderableBillboardsCloud::createDataSlice() {
             // is the outliers color.
             glm::vec4 itemColor;
             float variableColor = _fullData[i + 3 + colorMapInUse];
-            int c = colorBins.size()-1;
+            int c = static_cast<int>(colorBins.size() - 1);
             while (variableColor < colorBins[c]) {
                 --c;
                 if (c == 0)
                     break;
             }
 
-            int colorIndex = c == colorBins.size() - 1 ? 0 : c + 1;
+            int colorIndex =
+                c == static_cast<int>(colorBins.size() - 1) ?
+                0 :
+                c + 1;
 
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(_colorMapData[colorIndex][j]);

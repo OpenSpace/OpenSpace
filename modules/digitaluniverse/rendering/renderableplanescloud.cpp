@@ -1264,8 +1264,7 @@ void RenderablePlanesCloud::createPlanes() {
     if (_dataIsDirty && _hasSpeckFile) {
         LDEBUG("Creating planes");
         float maxSize = 0.0f;
-        int planeNumber = 0;
-        for (int p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
+        for (size_t p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
             glm::vec4 transformedPos = glm::vec4(_transformationMatrix *
                 glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0));
 

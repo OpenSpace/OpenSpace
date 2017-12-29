@@ -45,7 +45,9 @@
 #include <memory>
 #include <fstream>
 
+#ifdef WIN32
 #define _USE_MATH_DEFINES
+#endif // WIN32
 #include <math.h>
 
 namespace {
@@ -438,7 +440,7 @@ glm::dmat4 RenderablePlanet::computeModelTransformMatrix(
     return modelTransform = modelTransform * rot * roty /** rotProp*/;
 }
 
-void RenderablePlanet::render(const RenderData& data, RendererTasks& renderTask) {
+void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     // activate shader
     _programObject->activate();
 

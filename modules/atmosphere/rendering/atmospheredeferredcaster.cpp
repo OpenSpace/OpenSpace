@@ -83,7 +83,9 @@
 #include <sstream>
 #include <fstream>
 
+#ifdef WIN32
 #define _USE_MATH_DEFINES
+#endif // WIN32
 #include <math.h>
 
 
@@ -182,7 +184,7 @@ void AtmosphereDeferredcaster::deinitialize() {
 }
 
 void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
-                                          const DeferredcastData& deferredData,
+                                          const DeferredcastData&,
                                           ghoul::opengl::ProgramObject& program)
 {
     // Atmosphere Frustum Culling
@@ -418,9 +420,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
     program.setUniform("inscatterTexture", _inScatteringTableTextureUnit);
 }
 
-void AtmosphereDeferredcaster::postRaycast(const RenderData& renderData,
-                                           const DeferredcastData& deferredData,
-                                           ghoul::opengl::ProgramObject& program)
+void AtmosphereDeferredcaster::postRaycast(const RenderData&,
+                                           const DeferredcastData&,
+                                           ghoul::opengl::ProgramObject&)
 {
     // Deactivate the texture units
     _transmittanceTableTextureUnit.deactivate();

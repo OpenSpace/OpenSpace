@@ -111,10 +111,8 @@ namespace {
     constexpr const char* SgctConfigArgumentCommand = "-config";
 
     constexpr const int CacheVersion = 1;
-    constexpr const int DownloadVersion = 1;
 
     const glm::ivec3 FontAtlasSize{ 1536, 1536, 1 };
-
 
     struct {
         std::string configurationName;
@@ -707,7 +705,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
             }
         }
     }
-    _loadingScreen->setItemNumber(resourceSyncs.size());
+    _loadingScreen->setItemNumber(static_cast<int>(resourceSyncs.size()));
 
     bool loading = true;
     while (loading) {

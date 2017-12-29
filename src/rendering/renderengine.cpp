@@ -239,10 +239,10 @@ RenderEngine::RenderEngine()
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
+    , _nAaSamples(AaSamplesInfo, 4, 1, 16)
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
-    , _nAaSamples(AaSamplesInfo, 4, 1, 16)
     , _frameNumber(0)
 {
     _doPerformanceMeasurements.onChange([this](){

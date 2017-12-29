@@ -381,7 +381,7 @@ namespace openspace {
                 const size_t nAstronomicalObjects = _fullData.size() /
                                                             _nValuesPerAstronomicalObject;
                 const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-                GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
+                // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
 
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribLPointer(
@@ -572,7 +572,7 @@ namespace openspace {
         // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
         std::string line = "";
         while (true) {
-            std::streampos position = file.tellg();
+            // std::streampos position = file.tellg();
             std::getline(file, line);
 
             if (line[0] == '#' || line.empty()) {
@@ -591,12 +591,12 @@ namespace openspace {
             }
         }
 
-        for (auto i = 0; i < numberOfColors; ++i) {
+        for (size_t i = 0; i < numberOfColors; ++i) {
             std::getline(file, line);
             std::stringstream str(line);
 
             glm::vec4 color;
-            for (auto j = 0; j < 4; ++j) {
+            for (size_t j = 0; j < 4; ++j) {
                 str >> color[j];
             }
 
@@ -724,7 +724,10 @@ namespace openspace {
                 }
             }
 
-            colorIndex = (colorIndex == (_colorMapData.size() - 1)) ? 0 : colorIndex + 1;
+            colorIndex =
+                (colorIndex == static_cast<int>(_colorMapData.size() - 1)) ?
+                0 :
+                colorIndex + 1;
         }
     }
 
