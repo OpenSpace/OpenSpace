@@ -189,7 +189,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     _nSynchronizedBytes = 0;
     _nTotalBytes = 0;
     _nTotalBytesKnown = false;
-    
+
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
 
     std::string line = "";
@@ -198,24 +198,24 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     std::mutex fileSizeMutex;
     std::atomic_bool startedAllDownloads(false);
     std::atomic_size_t nDownloads(0);
-    
+
     std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
-    
+
     while (fileList >> line) {
         size_t lastSlash = line.find_last_of('/');
         std::string filename = line.substr(lastSlash + 1);
-        
+
         std::string fileDestination = directory() +
         ghoul::filesystem::FileSystem::PathSeparator +
         filename;
-        
+
         downloads.push_back(std::make_unique<AsyncHttpFileDownload>(
             line, fileDestination, HttpFileDownload::Overwrite::Yes));
 
         auto& fileDownload = downloads.back();
-        
+
         ++nDownloads;
-        
+
         fileDownload->onProgress(
             [this, line, &fileSizes, &fileSizeMutex,
              &startedAllDownloads, &nDownloads](HttpRequest::Progress p)
@@ -223,13 +223,19 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             if (p.totalBytesKnown) {
                 std::lock_guard<std::mutex> guard(fileSizeMutex);
                 fileSizes[line] = p.totalBytes;
-                
-                if (!_nTotalBytesKnown && startedAllDownloads && fileSizes.size() == nDownloads) {
+
+                if (!_nTotalBytesKnown && startedAllDownloads &&
+                    fileSizes.size() == nDownloads)
+                {
                     _nTotalBytesKnown = true;
-                    _nTotalBytes = std::accumulate(fileSizes.begin(), fileSizes.end(), size_t(0),
+                    _nTotalBytes = std::accumulate(
+                        fileSizes.begin(),
+                        fileSizes.end(),
+                        size_t(0),
                         [](size_t a, auto b) {
-                        return a + b.second;
-                    });
+                            return a + b.second;
+                        }
+                    );
                 }
             }
             return !_shouldCancel;
@@ -238,7 +244,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         fileDownload->start(opt);
     }
     startedAllDownloads = true;
-    
+
     bool failed = false;
     for (auto& d : downloads) {
         d->wait();

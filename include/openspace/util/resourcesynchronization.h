@@ -25,22 +25,15 @@
 #ifndef __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
 #define __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/concurrentjobmanager.h>
 
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/misc/dictionary.h>
 
-#include <openspace/documentation/documentation.h>
-
 #include <unordered_map>
 
 namespace openspace {
-
-struct SynchronizationConfiguration {
-    std::string syncRoot;
-    std::vector<std::string> httpRepositories;
-    bool allowSynchronization;
-};
 
 class ResourceSynchronization
     : public std::enable_shared_from_this<ResourceSynchronization>

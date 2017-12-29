@@ -96,7 +96,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback & progressCallback) {
         bool inProgress = false;
         for (const std::shared_ptr<Asset>& asset : allAssets) {
             Asset::State state = asset->state();
-            if (state == Asset::State::Unloaded || 
+            if (state == Asset::State::Unloaded ||
                 state == Asset::State::Loaded ||
                 state == Asset::State::Synchronizing) {
                 inProgress = true;

@@ -47,7 +47,7 @@ class RenderableTimeVaryingVolume : public Renderable {
 public:
     RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
     ~RenderableTimeVaryingVolume();
-    
+
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;

@@ -46,7 +46,6 @@ public:
         unsigned int xNumBricks_;
         unsigned int yNumBricks_;
         unsigned int zNumBricks_;
-
     };
 
     enum NodeData {
@@ -60,7 +59,7 @@ public:
     TSP(const std::string& filename);
     ~TSP();
 
-    // load performs readHeader, readCache, writeCache and construct 
+    // load performs readHeader, readCache, writeCache and construct
     // in the correct sequence
     bool load();
 
@@ -98,7 +97,7 @@ public:
     bool isOctreeLeaf(unsigned int _brickIndex);
 
 private:
-    // Returns a list of the octree leaf nodes that a given input 
+    // Returns a list of the octree leaf nodes that a given input
     // brick covers. If the input is already a leaf, the list will
     // only contain that one index.
     std::list<unsigned int> CoveredLeafBricks(unsigned int _brickIndex);

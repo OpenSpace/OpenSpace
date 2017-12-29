@@ -39,8 +39,8 @@
 
 #include <unordered_map>
 
-namespace ghoul::filesystem { 
-    class File; 
+namespace ghoul::filesystem {
+    class File;
 }
 
 namespace ghoul::opengl {
@@ -49,6 +49,7 @@ namespace ghoul::opengl {
 } // namespace ghoul::opengl
 
 namespace openspace {
+
 namespace documentation { struct Documentation; }
 
 class RenderableDUMeshes : public Renderable {
@@ -91,12 +92,12 @@ private:
         int colorIndex;
         int textureIndex;
         // From: Partiview User’s Guide
-        // Brian Abbott 
+        // Brian Abbott
         // Hayden Planetarium American Museum of Natural History New York, USA
-        // "Speciﬁes the dimensions of the mesh."
-        // "If you wish to draw a line between points, then numU will be 1 while 
+        // "Specifies the dimensions of the mesh."
+        // "If you wish to draw a line between points, then numU will be 1 while
         // numV will equal the number of points to connect.
-        // If you want a square, 4000×4000 grid with lines every 200 units, 
+        // If you want a square, 4000×4000 grid with lines every 200 units,
         // then numU numU will both equal 21
         int numU, numV;
         MeshType style;
@@ -122,7 +123,7 @@ private:
     bool _textColorIsDirty;
     bool _hasLabel;
     bool _labelDataIsDirty;
-    
+
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     //properties::Vec3Property _pointColor;

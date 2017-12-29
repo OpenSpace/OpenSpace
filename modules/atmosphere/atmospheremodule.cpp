@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-AtmosphereModule::AtmosphereModule() : 
+AtmosphereModule::AtmosphereModule() :
     OpenSpaceModule("Atmosphere")
 {}
 

@@ -92,7 +92,7 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     )
     , _dirtyNodeRegistry(false)
     , _initializer(std::move(initializer))
-{   
+{
     _rootDummy.setName(SceneGraphNode::RootNodeName);
     _rootDummy.setScene(this);
 }
@@ -120,7 +120,9 @@ Camera* Scene::camera() const {
 
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByName.count(node->name())){
-        throw Scene::InvalidSceneError("Node with name " + node->name() + " already exits.");
+        throw Scene::InvalidSceneError(
+            "Node with name " + node->name() + " already exits."
+        );
     }
 
     _topologicallySortedNodes.push_back(node);
@@ -130,7 +132,11 @@ void Scene::registerNode(SceneGraphNode* node) {
 
 void Scene::unregisterNode(SceneGraphNode* node) {
     _topologicallySortedNodes.erase(
-        std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), node),
+        std::remove(
+            _topologicallySortedNodes.begin(),
+            _topologicallySortedNodes.end(),
+            node
+        ),
         _topologicallySortedNodes.end()
     );
     _nodesByName.erase(node->name());

@@ -41,9 +41,7 @@
 #include <functional>
 #include <unordered_map>
 
-namespace ghoul::filesystem { 
-    class File; 
-}
+namespace ghoul::filesystem { class File; }
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -93,7 +91,7 @@ private:
     void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
         const glm::dmat4& worldToModelTransform, const glm::dvec3& orthoRight,
         const glm::dvec3& orthoUp, float fadeInVariable);
-    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix, 
+    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     bool loadData();
@@ -141,7 +139,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;        
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;
@@ -158,7 +156,7 @@ private:
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::vector<glm::vec2> _colorRangeData;
-    
+
     int _nValuesPerAstronomicalObject;
 
     glm::dmat4 _transformationMatrix;

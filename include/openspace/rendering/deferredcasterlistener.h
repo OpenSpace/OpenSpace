@@ -41,5 +41,4 @@ public:
 
 } // openspace
 
-
 #endif // __OPENSPACE_CORE___DEFERREDCASTERLISTENER___H__

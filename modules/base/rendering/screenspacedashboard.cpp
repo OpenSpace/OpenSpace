@@ -90,7 +90,10 @@ int addDashboardItemToScreenSpace(lua_State* L) {
 
         ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr.get());
         if (!dash) {
-            return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
+            return luaL_error(
+                L,
+                "Provided name is a ScreenSpace item but not a dashboard"
+            );
         }
 
         dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));

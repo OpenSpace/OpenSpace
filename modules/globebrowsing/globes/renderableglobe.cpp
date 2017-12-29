@@ -145,7 +145,7 @@ namespace {
         "EclipseHardShadows",
         "Eclipse Hard Shadows",
         "Enables the rendering of eclipse shadows using hard shadows"
-    };    
+    };
 
     static const openspace::properties::Property::PropertyInfo LodScaleFactorInfo = {
         "LodScaleFactor",

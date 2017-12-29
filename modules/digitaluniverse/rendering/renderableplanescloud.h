@@ -41,9 +41,7 @@
 #include <functional>
 #include <unordered_map>
 
-namespace ghoul::filesystem { 
-    class File; 
-}
+namespace ghoul::filesystem { class File; }
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -95,8 +93,9 @@ namespace openspace {
         void createPlanes();
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix, float fadeInVariable);
-        void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVarible);
+        void renderLabels(const RenderData& data,
+            const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
+            const glm::dvec3& orthoUp, float fadeInVarible);
 
         bool loadData();
         bool loadTextures();
@@ -130,7 +129,7 @@ namespace openspace {
         properties::OptionProperty _renderOption;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;        
+        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
         std::shared_ptr<ghoul::fontrendering::Font> _font;
         std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
         std::unordered_map<int, std::string> _textureFileMap;
@@ -149,10 +148,10 @@ namespace openspace {
         int _nValuesPerAstronomicalObject;
 
         float _sluminosity;
-        
+
         glm::dmat4 _transformationMatrix;
 
-        std::vector<RenderingPlane> _renderingPlanesArray;       
+        std::vector<RenderingPlane> _renderingPlanesArray;
     };
 
 

@@ -38,7 +38,7 @@
 #include <condition_variable>
 
 namespace openspace {
-    
+
 namespace curlfunctions {
     size_t writeCallback(
         char *ptr,
@@ -91,7 +91,7 @@ public:
     };
 
     using ReadyStateChangeCallback = std::function<void(ReadyState)>;
-    
+
     // ProgressCallback: Return non-zero value to cancel download.
     using ProgressCallback = std::function<int(Progress)>;
 
@@ -131,7 +131,7 @@ private:
     ReadyState _readyState;
     Progress _progress;
     RequestOptions _options;
-    
+
     friend size_t curlfunctions::writeCallback(
         char *ptr,
         size_t size,

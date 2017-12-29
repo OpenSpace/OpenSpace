@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -627,7 +627,6 @@ void SceneGraphNode::setScene(Scene* scene) {
             scene->registerNode(node);
         }
     });
-    
 }
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {

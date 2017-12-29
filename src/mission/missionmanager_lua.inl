@@ -49,7 +49,7 @@ int unloadMission(lua_State* L) {
     if (missionName.empty()) {
         return luaL_error(L, "Missing name is empty");
     }
-    
+
     if (!MissionManager::ref().hasMission(missionName)) {
         return luaL_error(L, "Mission was not previously loaded");
     }

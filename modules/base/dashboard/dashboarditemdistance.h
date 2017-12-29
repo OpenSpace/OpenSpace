@@ -59,7 +59,7 @@ private:
         Focus,
         Camera
     };
-    
+
     struct Component {
         properties::OptionProperty type;
         properties::StringProperty nodeName;

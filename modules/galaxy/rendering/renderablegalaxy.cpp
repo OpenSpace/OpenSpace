@@ -148,9 +148,8 @@ namespace openspace {
     } else {
         LERROR("No points dictionary specified.");
     }
-
 }
-    
+
 RenderableGalaxy::~RenderableGalaxy() {}
 
 void RenderableGalaxy::initializeGL() {
@@ -163,7 +162,7 @@ void RenderableGalaxy::initializeGL() {
         _volumeDimensions
     );
     _volume = reader.read();
-    
+
     _texture = std::make_unique<ghoul::opengl::Texture>(
         _volumeDimensions,
         ghoul::opengl::Texture::Format::RGBA,
@@ -201,7 +200,7 @@ void RenderableGalaxy::initializeGL() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_enabledPointsRatio);
-    
+
     // initialize points.
     std::ifstream pointFile(_pointsFilename, std::ios::in | std::ios::binary);
 
@@ -222,7 +221,7 @@ void RenderableGalaxy::initializeGL() {
     pointFile.close();
 
     float maxdist = 0;
-    
+
     for (size_t i = 0; i < _nPoints; ++i) {
         float x = pointData[i * 7 + 0];
         float y = pointData[i * 7 + 1];
@@ -232,9 +231,9 @@ void RenderableGalaxy::initializeGL() {
         float b = pointData[i * 7 + 5];
         maxdist = std::max(maxdist, glm::length(glm::vec3(x, y, z)));
         //float a = pointData[i * 7 + 6];  alpha is not used.
-                               
+
         pointPositions.push_back(glm::vec3(x, y, z));
-        pointColors.push_back(glm::vec3(r, g, b));        
+        pointColors.push_back(glm::vec3(r, g, b));
     }
 
     std::cout << maxdist << std::endl;
@@ -250,14 +249,15 @@ void RenderableGalaxy::initializeGL() {
     glBufferData(GL_ARRAY_BUFFER,
         pointPositions.size()*sizeof(glm::vec3),
         pointPositions.data(),
-        GL_STATIC_DRAW);
+        GL_STATIC_DRAW
+    );
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
     glBufferData(GL_ARRAY_BUFFER,
         pointColors.size()*sizeof(glm::vec3),
         pointColors.data(),
-        GL_STATIC_DRAW);
-
+        GL_STATIC_DRAW
+    );
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     _pointsProgram = renderEngine.buildRenderProgram(
@@ -281,25 +281,24 @@ void RenderableGalaxy::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
     glEnableVertexAttribArray(colorAttrib);
     glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-    
+
 void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
-    
+
 bool RenderableGalaxy::isReady() const {
     return true;
 }
-    
+
 void RenderableGalaxy::update(const UpdateData& data) {
     if (_raycaster) {
-
         //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
         glm::mat4 transform = glm::rotate(
@@ -315,14 +314,13 @@ void RenderableGalaxy::update(const UpdateData& data) {
             static_cast<glm::vec3>(_volumeSize)
         );
         _pointTransform = glm::scale(transform, static_cast<glm::vec3>(_pointScaling));
-       
+
         glm::vec4 translation = glm::vec4(static_cast<glm::vec3>(_translation), 0.0);
 
         // Todo: handle floating point overflow, to actually support translation.
 
         volumeTransform[3] += translation;
         _pointTransform[3] += translation;
-
 
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
@@ -340,7 +338,6 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     glm::vec3 galaxySize = static_cast<glm::vec3>(_volumeSize);
 
     float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
-    
 
     float lowerRampStart = maxDim * 0.02f;
     float lowerRampEnd = maxDim * 0.5f;
@@ -413,5 +410,5 @@ float RenderableGalaxy::safeLength(const glm::vec3& vector) {
 
     OsEng.ref().renderEngine().postRaycast(*_pointsProgram);
 }*/
-       
-}
+
+} // namespace openspace

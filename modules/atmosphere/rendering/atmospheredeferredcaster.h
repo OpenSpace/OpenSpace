@@ -25,16 +25,16 @@
 #ifndef __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHEREDEFERREDCASTER___H__
 #define __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHEREDEFERREDCASTER___H__
 
-#include <ghoul/glm.h>
-#include <string>
-#include <vector>
 #include <openspace/rendering/deferredcaster.h>
+
+#include <ghoul/glm.h>
 #include <ghoul/opengl/textureunit.h>
 
-//#include <modules/atmosphere/rendering/renderableatmosphere.h>
+#include <string>
+#include <vector>
 
 namespace ghoul::opengl {
-    class Texture;        
+    class Texture;
     class ProgramObject;
 } // namespace ghoul::opengl
 
@@ -45,7 +45,7 @@ struct DeferredcastData;
 struct ShadowConfiguration;
 
 class AtmosphereDeferredcaster : public Deferredcaster {
-public:    
+public:
     AtmosphereDeferredcaster();
     virtual ~AtmosphereDeferredcaster() = default;
 
@@ -55,7 +55,7 @@ public:
                     ghoul::opengl::ProgramObject& program) override;
     void postRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
                      ghoul::opengl::ProgramObject& program) override;
-    
+
     std::string deferredcastPath() const override;
     std::string deferredcastVSPath() const override;
     std::string deferredcastFSPath() const override;
@@ -105,13 +105,12 @@ private:
     );
     void renderQuadForCalc(GLuint vao, GLsizei numberOfVertices);
     void saveTextureToPPMFile(GLenum color_buffer_attachment, const std::string& fileName,
-        int width, int height) const;    
+        int width, int height) const;
     bool isAtmosphereInFrustum(const double* MVMatrix, const glm::dvec3& position,
         double radius) const;
 
-
     const double DISTANCE_CULLING = 1e10;
-    
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceSupTermsProgramObject;
@@ -133,7 +132,7 @@ private:
     GLuint _deltaSMieTableTexture;
     GLuint _deltaJTableTexture;
     GLuint _atmosphereTexture;
-    
+
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
@@ -151,7 +150,7 @@ private:
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
-    
+
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _ozoneExtinctionCoeff;
     glm::vec3 _mieScatteringCoeff;
@@ -179,7 +178,7 @@ private:
 
     // Atmosphere Debugging
     float _calculationTextureScale;
-    bool _saveCalculationTextures;   
+    bool _saveCalculationTextures;
 };
 
 } // openspace

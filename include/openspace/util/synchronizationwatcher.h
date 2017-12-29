@@ -27,16 +27,15 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
-#include <mutex>
-#include <vector>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
-
+#include <vector>
 
 namespace openspace {
 
 /**
- * Delays callbacks of synchronization state changes to 
+ * Delays callbacks of synchronization state changes to
  * when notify is called.
  */
 class SynchronizationWatcher {

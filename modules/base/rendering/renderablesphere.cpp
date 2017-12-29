@@ -238,13 +238,13 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(FadeOutThreshouldInfo.identifier)) {
         _fadeOutThreshold = static_cast<float>(
             dictionary.value<double>(FadeOutThreshouldInfo.identifier)
-            );        
+        );
     }
 
     if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
         _fadeInThreshold = static_cast<float>(
             dictionary.value<double>(FadeInThreshouldInfo.identifier)
-            );
+        );
     }
 
     if (dictionary.hasKey(FadeOutThreshouldInfo.identifier) ||
@@ -305,7 +305,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         float distCamera = glm::length(data.camera.positionVec3());
         float funcValue = static_cast<float>(
             (1.0 / double(_fadeInThreshold/1E24))*(distCamera / 1E24)
-        );        
+        );
 
         adjustedTransparency *= funcValue > 1.0 ? 1.0 : funcValue;
     }
@@ -318,10 +318,10 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         double term = std::exp(
             (-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold)
         );
-        
+
         adjustedTransparency *= static_cast<float>(term / (term + 1.0));
     }
-    
+
     // Performance wise
     if (adjustedTransparency < 0.01) {
         return;

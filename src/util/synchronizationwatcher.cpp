@@ -35,7 +35,9 @@ SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization
     WatchHandle watchHandle = generateWatchHandle();
 
     ResourceSynchronization::CallbackHandle cbh = synchronization->addStateChangeCallback(
-        [this, synchronization, watchHandle, callback](ResourceSynchronization::State state) {
+        [this, synchronization, watchHandle, callback]
+        (ResourceSynchronization::State state)
+        {
             std::lock_guard<std::mutex> g(_mutex);
             _pendingNotifications.push_back({
                 synchronization,
@@ -72,7 +74,7 @@ void SynchronizationWatcher::unwatchSynchronization(
 
     // Remove from the list of watches
     _watchedSyncs.erase(it);
-    
+
     // Remove notifications that are pending
     _pendingNotifications.erase(std::remove_if(
         _pendingNotifications.begin(),

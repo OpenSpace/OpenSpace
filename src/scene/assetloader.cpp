@@ -240,7 +240,7 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     ghoul::OnScopeExit e([this, parentAsset] {
         setCurrentAsset(parentAsset);
     });
-    
+
     if (!FileSys.fileExists(asset->assetFilePath())) {
         LERROR("Could not load asset '" << asset->assetFilePath() <<
                "': File does not exist.");
@@ -299,7 +299,7 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         prefix = _assetRootDirectory + ghoul::filesystem::FileSystem::PathSeparator;
     }
 
-    // Construct the full path including the .asset extension 
+    // Construct the full path including the .asset extension
     std::string assetSuffix = std::string(".") + AssetFileSuffix;
     bool hasAssetSuffix =
         (assetPath.size() > assetSuffix.size()) &&
@@ -310,12 +310,12 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         prefix + assetPath + assetSuffix;
     bool fullAssetPathExists = FileSys.fileExists(FileSys.absPath(fullAssetPath));
 
-    // Construct the full path including the .scene extension 
+    // Construct the full path including the .scene extension
     std::string sceneSuffix = std::string(".") + SceneFileSuffix;
     bool hasSceneSuffix =
         (assetPath.size() > sceneSuffix.size()) &&
         (assetPath.substr(assetPath.size() - sceneSuffix.size()) == sceneSuffix);
-    std::string fullScenePath = 
+    std::string fullScenePath =
         hasSceneSuffix ?
         prefix + assetPath :
         prefix + assetPath + sceneSuffix;
@@ -499,7 +499,7 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
-                "When initializing dependency " + dependant->assetFilePath() + " -> " + 
+                "When initializing dependency " + dependant->assetFilePath() + " -> " +
                 asset->assetFilePath() + ": " + luaL_checkstring(*_luaState, -1)
             );
         }
@@ -602,13 +602,13 @@ int AssetLoader::requireLua(Asset* dependant) {
 int AssetLoader::requestLua(Asset* parent) {
     int nArguments = lua_gettop(*_luaState);
     SCRIPT_CHECK_ARGUMENTS("request", *_luaState, 1, nArguments);
-    
+
     std::string assetName = luaL_checkstring(*_luaState, 1);
-    
+
     std::shared_ptr<Asset> child = request(assetName);
 
     addLuaDependencyTable(parent, child.get());
-        
+
     // Get the dependency table
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     lua_getfield(*_luaState, -1, child->id().c_str());

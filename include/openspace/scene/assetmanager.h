@@ -26,16 +26,14 @@
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
 #include <openspace/scene/asset.h>
-
 #include <openspace/scene/assetloader.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/synchronizationwatcher.h>
 
-#include <openspace/scripting/lualibrary.h>
-
-#include <vector>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 namespace openspace {
 
@@ -66,8 +64,10 @@ public:
     std::shared_ptr<Asset> rootAsset();
 
     void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override;
-    void assetRequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) override;
-    void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child) override;
+    void assetRequested(std::shared_ptr<Asset> parent,
+        std::shared_ptr<Asset> child) override;
+    void assetUnrequested(std::shared_ptr<Asset> parent,
+        std::shared_ptr<Asset> child) override;
 
     bool update();
     scripting::LuaLibrary luaLibrary();

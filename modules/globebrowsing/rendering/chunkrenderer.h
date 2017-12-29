@@ -83,11 +83,11 @@ private:
         std::shared_ptr<GPULayerManager> gpuLayerManager,
         const Chunk& chunk);
 
-    void calculateEclipseShadows(const Chunk& chunk, ghoul::opengl::ProgramObject* programObject,
-                                 const RenderData& data);
+    void calculateEclipseShadows(const Chunk& chunk,
+        ghoul::opengl::ProgramObject* programObject, const RenderData& data);
 
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
-                           const Chunk& chunk, const RenderData& data);
+        const Chunk& chunk, const RenderData& data);
 
     // shared pointer to a grid which can be the same for all rendered chunks.
     std::shared_ptr<Grid> _grid;

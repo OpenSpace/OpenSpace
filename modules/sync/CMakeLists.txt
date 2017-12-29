@@ -34,8 +34,8 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/syncmodule.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/syncmodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/syncassettask.cpp

@@ -104,7 +104,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         _stepSize = stepSize;
     }
 }
-    
+
 RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
@@ -131,19 +131,19 @@ void RenderableToyVolume::initializeGL() {
     addProperty(_rotation);
     addProperty(_color);
 }
-    
+
 void RenderableToyVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
-    
+
 bool RenderableToyVolume::isReady() const {
     // @TODO isReady function needs to be filled
     return true;
 }
-    
+
 void RenderableToyVolume::update(const UpdateData& data) {
     if (_raycaster) {
         glm::mat4 transform = glm::translate(
@@ -162,7 +162,6 @@ void RenderableToyVolume::update(const UpdateData& data) {
                 std::pow(10.0f, static_cast<float>(_scalingExponent))
         );
 
-
         _raycaster->setColor(_color);
         _raycaster->setStepSize(_stepSize);
         _raycaster->setModelTransform(transform);
@@ -174,5 +173,5 @@ void RenderableToyVolume::render(const RenderData& data, RendererTasks& tasks) {
     RaycasterTask task{ _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);
 }
-       
+
 } // namespace openspace

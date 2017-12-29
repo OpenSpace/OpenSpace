@@ -25,17 +25,17 @@
 #ifndef __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 #define __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
-
-#include <string>
-#include <vector>
-#include <map>
-
 #include <openspace/rendering/deferredcasterlistener.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/util/updatestructures.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
+
+#include <map>
+#include <string>
+#include <vector>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::filesystem { class File; }
@@ -49,7 +49,7 @@ namespace openspace {
 
 class Camera;
 class Scene;
-    
+
 class FramebufferRenderer : public Renderer, public RaycasterListener,
                             public DeferredcasterListener
 {
@@ -89,7 +89,8 @@ public:
     virtual void updateRendererData() override;
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
-    virtual void deferredcastersChanged(Deferredcaster& deferredcaster, ghoul::Boolean isAttached) override;
+    virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
+        ghoul::Boolean isAttached) override;
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
@@ -104,7 +105,10 @@ private:
     > _insideRaycastPrograms;
 
     std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
-    std::map<Deferredcaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _deferredcastPrograms;
+    std::map<
+        Deferredcaster*,
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    > _deferredcastPrograms;
     std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;

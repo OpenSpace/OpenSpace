@@ -85,9 +85,10 @@ size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
     HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
     return r->_onData(HttpRequest::Data{ptr, size * nmemb});
 }
-}
-    
-HttpRequest::HttpRequest(std::string url) 
+
+} // namespace curlfunctions
+
+HttpRequest::HttpRequest(std::string url)
     : _url(std::move(url))
     , _onReadyStateChange([](ReadyState) {})
     , _onProgress([](Progress) { return 0; })
@@ -128,7 +129,7 @@ void HttpRequest::perform(RequestOptions opt) {
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
-    
+
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
 
@@ -150,13 +151,13 @@ void HttpRequest::perform(RequestOptions opt) {
     }
     curl_easy_cleanup(curl);
 }
-    
+
 void HttpRequest::setReadyState(openspace::HttpRequest::ReadyState state) {
     _readyState = state;
     _onReadyStateChange(state);
 }
 
-HttpDownload::HttpDownload() 
+HttpDownload::HttpDownload()
     : _onProgress([] (HttpRequest::Progress) { return true; })
 {}
 
@@ -171,6 +172,7 @@ bool HttpDownload::hasStarted() {
 bool HttpDownload::hasFailed() {
     return _failed;
 }
+
 bool HttpDownload::hasSucceeded() {
     return _successful;
 }
@@ -182,6 +184,7 @@ void HttpDownload::markAsStarted() {
 void HttpDownload::markAsFailed() {
     _failed = true;
 }
+
 void HttpDownload::markAsSuccessful() {
     _successful = true;
 }

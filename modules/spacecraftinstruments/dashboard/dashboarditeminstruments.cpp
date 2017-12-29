@@ -60,8 +60,8 @@ namespace {
         "ActiveColor",
         "Active Color",
         "This value determines the color that the active instrument is rendered in. "
-        "Shortly after activation, the used color is mixture of this and the flash color. "
-        "The default value is (0.6, 1.0, 0.0)."
+        "Shortly after activation, the used color is mixture of this and the flash "
+        "color. The default value is (0.6, 1.0, 0.0)."
     };
 
     static const openspace::properties::Property::PropertyInfo FlashColorInfo = {
@@ -423,7 +423,7 @@ glm::vec2 DashboardItemInstruments::size() const {
             ss.append(std::to_string(second));
 
             size = addToBoundingbox(
-                size, 
+                size,
                 ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                     *_font,
                     "Data acquisition adjacency: [%s:%s:%s]",

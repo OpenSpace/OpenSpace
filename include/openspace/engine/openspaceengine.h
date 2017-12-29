@@ -223,7 +223,7 @@ private:
         properties::StringProperty versionString;
         properties::StringProperty sourceControlInformation;
     } _versionInformation;
-    
+
     bool _hasScheduledAssetLoading;
     std::string _scheduledAssetPathToLoad;
 

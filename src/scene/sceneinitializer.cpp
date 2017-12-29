@@ -35,7 +35,7 @@ void SingleThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     node->initialize();
     _initializedNodes.push_back(node);
 }
-    
+
 std::vector<SceneGraphNode*> SingleThreadedSceneInitializer::getInitializedNodes() {
     std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
     return nodes;

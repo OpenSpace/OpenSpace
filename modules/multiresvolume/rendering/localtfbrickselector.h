@@ -43,7 +43,8 @@ public:
         float temporal;
     };
 
-    LocalTfBrickSelector(TSP* tsp, LocalErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    LocalTfBrickSelector(TSP* tsp, LocalErrorHistogramManager* hm, TransferFunction* tf,
+        int memoryBudget, int streamingBudget);
     ~LocalTfBrickSelector();
 
     virtual bool initialize();

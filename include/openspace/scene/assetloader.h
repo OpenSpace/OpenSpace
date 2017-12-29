@@ -26,15 +26,13 @@
 #define __OPENSPACE_CORE___ASSETLOADER___H__
 
 #include <openspace/scene/asset.h>
-
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/resourcesynchronization.h>
 
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/luastate.h>
-
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/filesystem/directory.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/luastate.h>
 
 #include <memory>
 #include <string>
@@ -42,8 +40,8 @@
 
 namespace openspace {
 
-
 namespace assetloader {
+
 int onInitialize(lua_State* state);
 int onDeinitialize(lua_State* state);
 int onInitializeDependency(lua_State* state);
@@ -54,33 +52,27 @@ int localResource(lua_State* state);
 int syncedResource(lua_State* state);
 int noOperation(lua_State* state);
 int exportAsset(lua_State* state);
+
 } // namespace assetloader
+
+class SynchronizationWatcher;
 
 class AssetListener {
 public:
     virtual ~AssetListener() = default;
     virtual void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) = 0;
     virtual void assetRequested(std::shared_ptr<Asset> parent,
-                                std::shared_ptr<Asset> child) = 0;
+        std::shared_ptr<Asset> child) = 0;
 
     virtual void assetUnrequested(std::shared_ptr<Asset> parent,
-                                  std::shared_ptr<Asset> child) = 0;
+        std::shared_ptr<Asset> child) = 0;
 };
 
-class SynchronizationWatcher;
-
 class AssetLoader {
-public:  
-    /**
-     * Constructor
-     */
-    AssetLoader(ghoul::lua::LuaState& luaState,
-        SynchronizationWatcher* syncWatcher,
+public:
+    AssetLoader(ghoul::lua::LuaState& luaState, SynchronizationWatcher* syncWatcher,
         std::string assetRoot);
 
-    /**
-     * Destructor
-     */
     ~AssetLoader();
 
     /**
@@ -159,7 +151,7 @@ public:
      * relative to `baseDirectory`
      */
     std::string generateAssetPath(const std::string& baseDirectory,
-                                  const std::string& path) const;
+        const std::string& path) const;
 
     /**
      * Add listener to asset state changes
@@ -185,7 +177,7 @@ public:
      * Notify listeners about removed requests
      */
     void assetUnrequested(std::shared_ptr<Asset> parent, std::shared_ptr<Asset> child);
-    
+
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
     std::shared_ptr<Asset> request(const std::string& path);
@@ -242,9 +234,6 @@ private:
         _onDependencyDeinitializationFunctionRefs;
     int _assetsTableRef;
 };
-
-
-
 
 } // namespace openspace
 

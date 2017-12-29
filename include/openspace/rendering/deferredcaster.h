@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_CORE___DEFERREDCASTER___H
 #define __OPENSPACE_CORE___DEFERREDCASTER___H
 
+#include <openspace/util/updatestructures.h>
+
 #include <string>
 #include <vector>
-#include <openspace/util/updatestructures.h>
 
 namespace ghoul::opengl {
     class Texture;
@@ -41,16 +42,15 @@ struct DeferredcastData;
 
 class Deferredcaster {
 public:
-    /**
-     * Destructor
-     */
-    virtual ~Deferredcaster() {};
+    virtual ~Deferredcaster() = default;
 
     virtual void preRaycast(const RenderData& /*renderData*/,
-        const DeferredcastData& /*deferredData*/, ghoul::opengl::ProgramObject& /*program*/) {};
+        const DeferredcastData& /*deferredData*/,
+        ghoul::opengl::ProgramObject& /*program*/) {};
 
     virtual void postRaycast(const RenderData & /*renderData*/,
-        const DeferredcastData& /*deferredData*/, ghoul::opengl::ProgramObject& /*program*/) {};
+        const DeferredcastData& /*deferredData*/,
+        ghoul::opengl::ProgramObject& /*program*/) {};
 
     virtual std::string deferredcastPath() const = 0;
 
@@ -65,8 +65,8 @@ public:
      * regardless of how many volumes say they require the file.
      * Ideal to avoid redefinitions of helper functions.
      *
-     * The shader preprocessor will have access to the #{namespace} variable (unique per helper file)
-     * which should be a prefix to all symbols defined by the helper
+     * The shader preprocessor will have access to the #{namespace} variable (unique per
+     * helper file) which should be a prefix to all symbols defined by the helper
      */
     virtual std::string helperPath() const = 0;
 };

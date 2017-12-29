@@ -38,12 +38,12 @@ namespace openspace {
 
 class ToyVolumeRaycaster;
 struct RenderData;
-    
+
 class RenderableToyVolume : public Renderable {
 public:
     RenderableToyVolume(const ghoul::Dictionary& dictionary);
     ~RenderableToyVolume();
-    
+
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;
@@ -57,7 +57,7 @@ private:
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
     properties::Vec4Property _color;
-    
+
     std::unique_ptr<ToyVolumeRaycaster> _raycaster;
 };
 

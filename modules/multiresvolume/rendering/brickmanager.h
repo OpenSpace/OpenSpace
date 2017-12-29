@@ -43,7 +43,7 @@ public:
 
     bool readHeader();
 
-    bool initialize(); 
+    bool initialize();
 
     bool BuildBrickList(BUFFER_INDEX _bufIdx, std::vector<int> &_brickRequest);
 

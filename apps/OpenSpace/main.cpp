@@ -632,7 +632,7 @@ int main_main(int argc, char** argv) {
     LDEBUG("Starting rendering loop");
     SgctEngine->render();
     LDEBUG("Ending rendering loop");
-    
+
     cleanup(IsInitialized::Yes);
 
     // Exit program

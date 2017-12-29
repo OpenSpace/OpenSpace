@@ -64,7 +64,7 @@ namespace {
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
@@ -109,8 +109,8 @@ namespace openspace {
                     KeyFile,
                     new StringVerifier,
                     Optional::No,
-                    "The path to the SPECK file that contains information about the astronomical "
-                    "object being rendered."
+                    "The path to the SPECK file that contains information about the "
+                    "astronomical object being rendered."
                 },
                 {
                     keyColor,
@@ -156,7 +156,12 @@ namespace openspace {
         , _hasColorMapFile(false)
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-        , _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
+        , _pointColor(
+            ColorInfo,
+            glm::vec3(1.f, 0.4f, 0.2f),
+            glm::vec3(0.f, 0.f, 0.f),
+            glm::vec3(1.0f, 1.0f, 1.0f)
+        )
         , _spriteTexturePath(SpriteTextureInfo)
         , _spriteTexture(nullptr)
         , _program(nullptr)
@@ -174,9 +179,9 @@ namespace openspace {
             dictionary,
             "RenderablePoints"
         );
-        
+
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-        
+
         if (dictionary.hasKey(keyUnit)) {
             std::string unit = dictionary.value<std::string>(keyUnit);
             if (unit == MeterUnit) {
@@ -300,17 +305,20 @@ namespace openspace {
         _program->activate();
 
         glm::dmat4 modelMatrix = glm::dmat4(1.0);
-        
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _program->setUniform("modelViewProjectionTransform", glm::dmat4(data.camera.projectionMatrix()) *
-            data.camera.combinedViewMatrix() * modelMatrix);
+        _program->setUniform(
+            "modelViewProjectionTransform",
+            glm::dmat4(data.camera.projectionMatrix()) *
+                data.camera.combinedViewMatrix() * modelMatrix
+        );
 
         _program->setUniform("color", _pointColor);
         _program->setUniform("sides", 4);
         _program->setUniform("alphaValue", _alphaValue);
         _program->setUniform("scaleFactor", _scaleFactor);
-        
+
         if (_hasSpriteTexture) {
             ghoul::opengl::TextureUnit spriteTextureUnit;
             spriteTextureUnit.activate();
@@ -324,12 +332,14 @@ namespace openspace {
         else {
             _program->setUniform("hasColorMap", false);
         }
-     
+
         glEnable(GL_PROGRAM_POINT_SIZE);
         glBindVertexArray(_vao);
-        const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() / _nValuesPerAstronomicalObject);
+        const GLsizei nAstronomicalObjects = static_cast<GLsizei>(
+            _fullData.size() / _nValuesPerAstronomicalObject
+        );
         glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
-        
+
         glDisable(GL_PROGRAM_POINT_SIZE);
         glBindVertexArray(0);
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
@@ -367,11 +377,12 @@ namespace openspace {
             GLint positionAttrib = _program->attributeLocation("in_position");
 
             if (_hasColorMapFile) {
-                
-                const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
+
+                const size_t nAstronomicalObjects = _fullData.size() /
+                                                            _nValuesPerAstronomicalObject;
                 const size_t nValues = _slicedData.size() / nAstronomicalObjects;
                 GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
-                
+
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribLPointer(
                     positionAttrib,
@@ -391,7 +402,7 @@ namespace openspace {
                     reinterpret_cast<void*>(sizeof(double)*4)
                 );
             }
-            else {                                                
+            else {
                 glEnableVertexAttribArray(positionAttrib);
                 glVertexAttribLPointer(
                     positionAttrib,
@@ -411,20 +422,24 @@ namespace openspace {
             LDEBUG("Reloading Sprite Texture");
             _spriteTexture = nullptr;
             if (_spriteTexturePath.value() != "") {
-                _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_spriteTexturePath));
+                _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
+                    absPath(_spriteTexturePath)
+                );
                 if (_spriteTexture) {
                     LDEBUG("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
                     _spriteTexture->uploadTexture();
                 }
-                _spriteTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                _spriteTexture->setFilter(
+                    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+                );
 
                 _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
                     _spriteTexturePath);
                 _spriteTextureFile->setCallback(
                     [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
-                    );
+                );
             }
-            _spriteTextureIsDirty = false;            
+            _spriteTextureIsDirty = false;
         }
     }
 
@@ -437,7 +452,9 @@ namespace openspace {
 
         bool hasCachedFile = FileSys.fileExists(cachedFile);
         if (hasCachedFile) {
-            LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+            LINFO(
+                "Cached file '" << cachedFile << "' used for Speck file '" << _file << "'"
+            );
 
             bool success = loadCachedFile(cachedFile);
             if (success) {
@@ -448,8 +465,8 @@ namespace openspace {
             }
             else {
                 FileSys.cacheManager()->removeCacheFile(_file);
-                // Intentional fall-through to the 'else' computation to generate the cache
-                // file for the next run
+                // Intentional fall-through to the 'else' to generate the cache file for
+                // the next run
             }
         }
         else {
@@ -489,7 +506,7 @@ namespace openspace {
         while (true) {
             std::streampos position = file.tellg();
             std::getline(file, line);
-            
+
             if (line[0] == '#' || line.empty()) {
                 continue;
             }
@@ -498,8 +515,8 @@ namespace openspace {
                 line.substr(0, 10) != "texturevar" &&
                 line.substr(0, 7) != "texture")
             {
-                // we read a line that doesn't belong to the header, so we have to jump back
-                // before the beginning of the current line
+                // we read a line that doesn't belong to the header, so we have to jump
+                // back before the beginning of the current line
                 file.seekg(position);
                 break;
             }
@@ -507,19 +524,22 @@ namespace openspace {
             if (line.substr(0, 7) == "datavar") {
                 // datavar lines are structured as follows:
                 // datavar # description
-                // where # is the index of the data variable; so if we repeatedly overwrite
-                // the 'nValues' variable with the latest index, we will end up with the total
-                // number of values (+3 since X Y Z are not counted in the Speck file index)
+                // where # is the index of the data variable; so if we repeatedly
+                // overwrite the 'nValues' variable with the latest index, we will end up
+                // with the total number of values (+3 since X Y Z are not counted in the
+                // Speck file index)
                 std::stringstream str(line);
 
                 std::string dummy;
                 str >> dummy;
                 str >> _nValuesPerAstronomicalObject;
-                _nValuesPerAstronomicalObject += 1; // We want the number, but the index is 0 based
+                // We want the number, but the index is 0 based
+                _nValuesPerAstronomicalObject += 1;
             }
         }
 
-        _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
+        // X Y Z are not counted in the Speck file indices
+        _nValuesPerAstronomicalObject += 3;
 
         do {
             std::vector<float> values(_nValuesPerAstronomicalObject);
@@ -544,7 +564,7 @@ namespace openspace {
             LERROR("Failed to open Color Map file '" << _file << "'");
             return false;
         }
- 
+
         std::size_t numberOfColors = 0;
 
         // The beginning of the speck file has a header that either contains comments
@@ -568,13 +588,13 @@ namespace openspace {
             }
             else if (file.eof()) {
                 return false;
-            }            
+            }
         }
-        
+
         for (auto i = 0; i < numberOfColors; ++i) {
             std::getline(file, line);
             std::stringstream str(line);
-            
+
             glm::vec4 color;
             for (auto j = 0; j < 4; ++j) {
                 str >> color[j];
@@ -582,7 +602,7 @@ namespace openspace {
 
             _colorMapData.push_back(color);
         }
-        
+
         return true;
     }
 
@@ -600,7 +620,10 @@ namespace openspace {
 
             int32_t nValues = 0;
             fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-            fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));
+            fileStream.read(
+                reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
+                sizeof(int32_t)
+            );
 
             _fullData.resize(nValues);
             fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
@@ -628,8 +651,13 @@ namespace openspace {
             }
             fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-            int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(_nValuesPerAstronomicalObject);
-            fileStream.write(reinterpret_cast<const char*>(&nValuesPerAstronomicalObject), sizeof(int32_t));
+            int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
+                _nValuesPerAstronomicalObject
+            );
+            fileStream.write(
+                reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
+                sizeof(int32_t)
+            );
 
             size_t nBytes = nValues * sizeof(_fullData[0]);
             fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
@@ -642,7 +670,7 @@ namespace openspace {
             return false;
         }
     }
-    
+
     void RenderablePoints::createDataSlice() {
         _slicedData.clear();
         if (_hasColorMapFile) {
@@ -654,7 +682,11 @@ namespace openspace {
 
         int colorIndex = 0;
         for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-            glm::dvec3 p = glm::dvec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
+            glm::dvec3 p = glm::dvec3(
+                _fullData[i + 0],
+                _fullData[i + 1],
+                _fullData[i + 2]
+            );
 
             // Converting untis
             if (_unit == Kilometer) {
@@ -691,10 +723,9 @@ namespace openspace {
                     _slicedData.push_back(position[j]);
                 }
             }
-            
+
             colorIndex = (colorIndex == (_colorMapData.size() - 1)) ? 0 : colorIndex + 1;
         }
     }
-    
 
 } // namespace openspace

@@ -407,8 +407,10 @@ bool RenderablePlanet::isReady() const {
     return ready;
 }
 
-glm::dmat4 RenderablePlanet::computeModelTransformMatrix(const openspace::TransformData & transformData) {
-    // scale the planet to appropriate size since the planet is a unit sphere    
+glm::dmat4 RenderablePlanet::computeModelTransformMatrix(
+                                            const openspace::TransformData& transformData)
+{
+    // scale the planet to appropriate size since the planet is a unit sphere
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
         glm::dmat4(transformData.rotation) *  // Spice rotation
@@ -432,21 +434,21 @@ glm::dmat4 RenderablePlanet::computeModelTransformMatrix(const openspace::Transf
     //    glm::dmat4(1.0),
     //    glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0)
     //);
-    
+
     return modelTransform = modelTransform * rot * roty /** rotProp*/;
 }
 
 void RenderablePlanet::render(const RenderData& data, RendererTasks& renderTask) {
     // activate shader
     _programObject->activate();
-    
+
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    
+
     _programObject->setUniform("transparency", _alpha);
     _programObject->setUniform("modelViewTransform", modelViewTransform);
-    _programObject->setUniform("modelViewProjectionTransform", 
+    _programObject->setUniform("modelViewProjectionTransform",
         data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));

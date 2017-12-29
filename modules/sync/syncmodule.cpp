@@ -26,42 +26,38 @@
 
 #include <modules/sync/syncs/httpsynchronization.h>
 #include <modules/sync/syncs/torrentsynchronization.h>
-
 #include <modules/sync/tasks/syncassettask.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
 
-#include <ghoul/misc/assert.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* KeyHttpSynchronizationRepositories = "HttpSynchronizationRepositories";
-    const char* KeySynchronizationRoot = "SynchronizationRoot";
+    constexpr const char* KeyHttpSynchronizationRepositories =
+        "HttpSynchronizationRepositories";
+    constexpr const char* KeySynchronizationRoot = "SynchronizationRoot";
 
     const char* _loggerCat = "SyncModule";
 }
 
 namespace openspace {
 
-SyncModule::SyncModule()
-    : OpenSpaceModule(Name)
-{}
+SyncModule::SyncModule() : OpenSpaceModule(Name) {}
 
 void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
-
-    if (configuration.hasKey(KeyHttpSynchronizationRepositories))
-    {
+    if (configuration.hasKey(KeyHttpSynchronizationRepositories)) {
         ghoul::Dictionary dictionary = configuration.value<ghoul::Dictionary>(
             KeyHttpSynchronizationRepositories);
 
-        for (std::string key : dictionary.keys()) {
+        for (const std::string& key : dictionary.keys()) {
             _httpSynchronizationRepositories.push_back(
                 dictionary.value<std::string>(key)
             );
@@ -71,7 +67,10 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     if (configuration.hasKey(KeySynchronizationRoot)) {
         _synchronizationRoot = configuration.value<std::string>(KeySynchronizationRoot);
     } else {
-        LWARNING("No synchronization root specified. Resource synchronization will be disabled.");
+        LWARNING(
+            "No synchronization root specified."
+            "Resource synchronization will be disabled."
+        );
         //_synchronizationEnabled = false;
         // TODO: Make it possible to disable synchronization manyally.
         // Group root and enabled into a sync config object that can be passed to syncs.
@@ -80,16 +79,15 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     auto fSynchronization = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(fSynchronization, "ResourceSynchronization factory was not created");
 
-
     fSynchronization->registerClass(
         "HttpSynchronization",
         [this](bool, const ghoul::Dictionary& dictionary) {
-        return new HttpSynchronization(
-            dictionary,
-            _synchronizationRoot,
-            _httpSynchronizationRepositories
-        );
-    }
+            return new HttpSynchronization(
+                dictionary,
+                _synchronizationRoot,
+                _httpSynchronizationRepositories
+            );
+        }
     );
 
     fSynchronization->registerClass(
@@ -117,8 +115,7 @@ std::vector<documentation::Documentation> SyncModule::documentations() const {
     };
 }
 
-std::string SyncModule::synchronizationRoot() const
-{
+std::string SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;
 }
 
@@ -130,7 +127,7 @@ std::vector<std::string> SyncModule::httpSynchronizationRepositories() const {
     return _httpSynchronizationRepositories;
 }
 
-TorrentClient* SyncModule::torrentClient() { 
+TorrentClient* SyncModule::torrentClient() {
     return &_torrentClient;
 }
 

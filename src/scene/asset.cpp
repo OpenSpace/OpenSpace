@@ -170,8 +170,8 @@ void Asset::requestedAssetChangedState(std::shared_ptr<Asset> child,
 }
 
 void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization) {
-    _synchronizations.push_back(synchronization);    
-   
+    _synchronizations.push_back(synchronization);
+
     // Set up callback for synchronization state change
     // The synchronization watcher will make sure that callbacks
     // are invoked in the main thread.
@@ -185,7 +185,7 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
         );
     _syncWatches.push_back(watch);
 }
-    
+
 void Asset::syncStateChanged(ResourceSynchronization::State state)
 {
     if (state == ResourceSynchronization::State::Resolved) {
@@ -786,7 +786,7 @@ void Asset::unrequest(std::shared_ptr<Asset> child) {
         // Do nothing if the request node not exist.
         return;
     }
-  
+
     _requestedAssets.erase(childIt);
 
     auto parentIt = std::find_if(

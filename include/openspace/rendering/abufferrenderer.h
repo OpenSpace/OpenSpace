@@ -25,32 +25,27 @@
 #ifndef __OPENSPACE_CORE___ABUFFERRENDERER___H__
 #define __OPENSPACE_CORE___ABUFFERRENDERER___H__
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
-
-#include <memory>
-#include <string>
-#include <vector>
-#include <map>
-
-
-#include <ghoul/opengl/textureunit.h>
 #include <openspace/rendering/volume.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/util/updatestructures.h>
 
-namespace ghoul {
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 
-namespace filesystem { class File; }
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-namespace opengl {
+namespace ghoul::filesystem { class File; }
+
+namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} // namepsace opengl
-
-} // namespace ghoul
+} // namespace opengl
 
 namespace openspace {
 
@@ -101,7 +96,7 @@ private:
     void updateMSAASamplingPattern();
     void saveTextureToMemory(const GLenum color_buffer_attachment,
         const int width, const int height, std::vector<double> & memory) const;
-    
+
     Camera* _camera;
     Scene* _scene;
     glm::ivec2 _resolution;

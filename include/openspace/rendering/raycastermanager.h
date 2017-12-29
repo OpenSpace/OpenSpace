@@ -41,6 +41,7 @@ public:
 
     void addListener(RaycasterListener& listener);
     void removeListener(RaycasterListener& listener);
+
 private:
     std::vector<VolumeRaycaster*> _raycasters;
     std::vector<RaycasterListener*> _listeners;

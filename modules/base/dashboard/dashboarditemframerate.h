@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DASHBOARDFRAMERATE___H__
-#define __OPENSPACE_CORE___DASHBOARDFRAMERATE___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMFRAMERATE___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMFRAMERATE___H__
 
 #include <openspace/rendering/dashboarditem.h>
 
@@ -66,4 +66,4 @@ private:
 
 } // openspace
 
-#endif // __OPENSPACE_CORE___DASHBOARDFRAMERATE___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMFRAMERATE___H__

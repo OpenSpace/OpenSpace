@@ -30,12 +30,12 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
-#include <string>
-#include <vector>
 
-#include <memory>
-#include <unordered_map>
 #include <iterator>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace openspace {
 
@@ -53,7 +53,7 @@ public:
         Initialized,
         InitializationFailed
     };
-    
+
     using StateChangeCallback = std::function<void(State)>;
     using CallbackHandle = size_t;
 
@@ -68,7 +68,7 @@ public:
     Asset(AssetLoader* loader,
         SynchronizationWatcher* watcher,
         ghoul::filesystem::File assetPath);
-    
+
     ~Asset();
 
     std::string id() const;
@@ -78,7 +78,7 @@ public:
     std::string assetName() const;
     AssetLoader* loader() const;
     State state() const;
-    
+
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     std::vector<std::shared_ptr<ResourceSynchronization>> ownSynchronizations() const;
 
@@ -142,6 +142,7 @@ public:
     bool shouldBeInitialized() const;
 
     std::string resolveLocalResource(std::string resourceName);
+
 private:
     void setState(State state);
 
@@ -174,11 +175,11 @@ private:
 
     // Assets that refers to this asset as a requested asset
     std::vector<std::weak_ptr<Asset>> _requestingAssets;
-    
+
     // Synchronization watches
     std::vector<SynchronizationWatcher::WatchHandle> _syncWatches;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___ASSET__H__
+#endif // __OPENSPACE_CORE___ASSET___H__

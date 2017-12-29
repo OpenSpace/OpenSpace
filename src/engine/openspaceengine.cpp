@@ -426,7 +426,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
     sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
 
     // Set up asset loader
-    std::unique_ptr<SynchronizationWatcher> w = std::make_unique<SynchronizationWatcher>();
+    std::unique_ptr<SynchronizationWatcher> w =
+        std::make_unique<SynchronizationWatcher>();
     SynchronizationWatcher* rawWatcher = w.get();
 
     _engine->_assetManager = std::make_unique<AssetManager>(
@@ -437,7 +438,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
         ),
         std::move(w)
     );
-    //_engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
 
 void OpenSpaceEngine::destroy() {
@@ -767,7 +767,7 @@ void OpenSpaceEngine::deinitialize() {
     for (const auto& func : _engine->_moduleCallbacks.deinitialize) {
         func();
     }
-    
+
     _engine->assetManager().deinitialize();
     _engine->_scene = nullptr;
 
@@ -901,7 +901,6 @@ void OpenSpaceEngine::loadFonts() {
     }
 }
 
-    
 void OpenSpaceEngine::configureLogging(bool consoleLog) {
     const std::string KeyLogLevel =
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogLevel;

@@ -761,7 +761,14 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
         "%.5f",
         p->exponent()
     );
-    changed |= ImGui::SliderFloat2("[1]", glm::value_ptr(value[1]), min, max, "%.5f", p->exponent());
+    changed |= ImGui::SliderFloat2(
+        "[1]",
+        glm::value_ptr(value[1]),
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
 
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);

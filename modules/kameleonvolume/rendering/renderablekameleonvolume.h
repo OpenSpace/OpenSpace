@@ -48,7 +48,7 @@ class RenderableKameleonVolume : public Renderable {
 public:
     RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
     ~RenderableKameleonVolume();
-    
+
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;

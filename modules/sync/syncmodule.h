@@ -34,6 +34,7 @@ namespace openspace {
 class SyncModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "Sync";
+
     SyncModule();
     virtual ~SyncModule() = default;
     std::vector<documentation::Documentation> documentations() const override;
@@ -41,8 +42,10 @@ public:
     void addHttpSynchronizationRepository(const std::string& repository);
     std::vector<std::string> httpSynchronizationRepositories() const;
     TorrentClient* torrentClient();
+
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
+
 private:
     TorrentClient _torrentClient;
     std::vector<std::string> _httpSynchronizationRepositories;

@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 
-#include <functional>
 #include <ghoul/misc/exception.h>
+
+#include <functional>
 
 namespace openspace {
 
@@ -57,8 +58,8 @@ public:
 
     virtual void initialize() = 0;
     virtual TorrentId addTorrentFile(std::string torrentFile,
-        std::string destination, 
-       TorrentProgressCallback cb) = 0;
+        std::string destination,
+        TorrentProgressCallback cb) = 0;
 
     virtual TorrentId addMagnetLink(std::string magnetLink,
         std::string destination,
@@ -81,9 +82,7 @@ public:
 
 #include "libtorrent/torrent_handle.hpp"
 
-namespace libtorrent {
-    class session;
-}
+namespace libtorrent { class session; }
 
 namespace openspace {
 
@@ -103,6 +102,7 @@ public:
 
     void removeTorrent(TorrentId id) override;
     void pollAlerts() override;
+
 private:
     struct Torrent {
         TorrentId id;
@@ -145,6 +145,6 @@ public:
 
 } // namespace openspace
 
-
 #endif // SYNC_USE_LIBTORRENT
+
 #endif // __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__

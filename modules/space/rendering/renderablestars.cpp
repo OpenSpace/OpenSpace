@@ -655,7 +655,6 @@ bool RenderableStars::readSpeckFile() {
         if (!nullArray) {
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         }
-        
     } while (!file.eof());
 
     return true;

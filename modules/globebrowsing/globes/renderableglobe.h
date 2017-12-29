@@ -88,15 +88,15 @@ public:
 
     // Shadow structure
     struct ShadowRenderingStruct {
-        double xu, 
-               xp;
-        double rs, 
-               rc;
+        double xu;
+        double xp;
+        double rs;
+        double rc;
         glm::dvec3 sourceCasterVec;
         glm::dvec3 casterPositionVec;
         bool isShadowing;
     };
-    
+
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 

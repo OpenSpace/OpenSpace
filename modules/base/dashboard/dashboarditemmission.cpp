@@ -127,7 +127,7 @@ DashboardItemMission::DashboardItemMission(ghoul::Dictionary dictionary)
         _font = OsEng.fontManager().font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
-    
+
     _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 

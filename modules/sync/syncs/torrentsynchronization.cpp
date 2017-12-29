@@ -192,7 +192,9 @@ bool TorrentSynchronization::nTotalBytesIsKnown() {
     return _progress.nTotalBytesKnown;
 }
 
-void TorrentSynchronization::updateTorrentProgress(TorrentClient::TorrentProgress progress) {
+void TorrentSynchronization::updateTorrentProgress(
+                                                  TorrentClient::TorrentProgress progress)
+{
     std::lock_guard<std::mutex> g(_progressMutex);
     _progress = progress;
     if (progress.finished && state() == State::Syncing) {

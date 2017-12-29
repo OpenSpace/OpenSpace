@@ -297,19 +297,6 @@ def check_empty_only_line(lines):
 
 
 
-def check_line_length(lines):
-    # Disable this check in non-strict mode
-    if not is_strict_mode:
-        return ''
-
-    index = [i + 1 for i, s in enumerate(lines) if len(s) > (90 + 1)]
-    if len(index) > 0:
-        return index
-    else:
-        return ''
-
-
-
 def check_assert_usage(lines):
     # _assert checks for both ghoul_assert and static_assert, which are both reasonable
     index = [i + 1 for i,s in enumerate(lines) if ('assert(' in s and not '_assert(' in s) and s.strip()[0:2] != '//']
