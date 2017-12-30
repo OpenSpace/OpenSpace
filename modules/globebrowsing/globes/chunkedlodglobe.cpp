@@ -325,8 +325,7 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
     if (_owner.debugProperties().showChunkBounds ||
         _owner.debugProperties().showChunkAABB)
     {
-        const std::vector<glm::dvec4> modelSpaceCorners =
-            chunk.getBoundingPolyhedronCorners();
+        std::vector<glm::dvec4> modelSpaceCorners = chunk.boundingPolyhedronCorners();
         std::vector<glm::vec4> clippingSpaceCorners(8);
         AABB3 screenSpaceBounds;
 

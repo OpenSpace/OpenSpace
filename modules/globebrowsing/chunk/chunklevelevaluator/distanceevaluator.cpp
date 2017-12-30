@@ -50,7 +50,7 @@ int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const 
     glm::dvec3 patchNormal = ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
 
-    Chunk::BoundingHeights heights = chunk.getBoundingHeights();
+    Chunk::BoundingHeights heights = chunk.boundingHeights();
     double heightToChunk = heights.min;
 
     // Offset position according to height

@@ -84,49 +84,42 @@ namespace openspace::globebrowsing::cache {
 MemoryAwareTileCache::MemoryAwareTileCache()
     : PropertyOwner({ "TileCache" })
     , _numTextureBytesAllocatedOnCPU(0)
-    , _cpuAllocatedTileData(CpuAllocatedDataInfo, 1024, 128, 2048, 1)
-    , _gpuAllocatedTileData(GpuAllocatedDataInfo, 1024, 128, 2048, 1)
-    , _tileCacheSize(TileCacheSizeInfo, 1024, 128, 2048, 1)
+    , _cpuAllocatedTileData(CpuAllocatedDataInfo, 1024, 128, 16384, 1)
+    , _gpuAllocatedTileData(GpuAllocatedDataInfo, 1024, 128, 16384, 1)
+    , _tileCacheSize(TileCacheSizeInfo, 1024, 128, 16384, 1)
     , _applyTileCacheSize(ApplyTileCacheInfo)
     , _clearTileCache(ClearTileCacheInfo)
     , _usePbo(UsePboInfo, false)
 {
     createDefaultTextureContainers();
 
-    // Properties
-    _clearTileCache.onChange(
-    [&]{
-        clear();
-    });
-    _applyTileCacheSize.onChange(
-    [&]{
-        setSizeEstimated(_tileCacheSize * 1024 * 1024);
-    });
+    _clearTileCache.onChange([&]{ clear(); });
+    addProperty(_clearTileCache);
+
+    _applyTileCacheSize.onChange([&]{ setSizeEstimated(_tileCacheSize * 1024 * 1024); });
+    addProperty(_applyTileCacheSize);
+
     _cpuAllocatedTileData.setMaxValue(
-        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+        static_cast<int>(CpuCap.installedMainMemory() * 0.95)
     );
+    _cpuAllocatedTileData.setReadOnly(true);
+    addProperty(_cpuAllocatedTileData);
+
     _gpuAllocatedTileData.setMaxValue(
-        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+        static_cast<int>(CpuCap.installedMainMemory() * 0.95)
     );
+    _gpuAllocatedTileData.setReadOnly(true);
+    addProperty(_gpuAllocatedTileData);
+
     _tileCacheSize.setMaxValue(
-        static_cast<int>(CpuCap.installedMainMemory() * 0.25)
+        static_cast<int>(CpuCap.installedMainMemory() * 0.95)
     );
+    addProperty(_tileCacheSize);
+
+    addProperty(_usePbo);
 
     setSizeEstimated(_tileCacheSize * 1024 * 1024);
-
-    _cpuAllocatedTileData.setReadOnly(true);
-    _gpuAllocatedTileData.setReadOnly(true);
-
-    addProperty(_clearTileCache);
-    addProperty(_applyTileCacheSize);
-    addProperty(_cpuAllocatedTileData);
-    addProperty(_gpuAllocatedTileData);
-    addProperty(_tileCacheSize);
-    addProperty(_usePbo);
 }
-
-MemoryAwareTileCache::~MemoryAwareTileCache()
-{ }
 
 void MemoryAwareTileCache::clear() {
     LINFO("Clearing tile cache");
@@ -142,8 +135,10 @@ void MemoryAwareTileCache::clear() {
 
 void MemoryAwareTileCache::createDefaultTextureContainers() {
     for (int id = 0; id < layergroupid::NUM_LAYER_GROUPS; id++) {
-        TileTextureInitData initData =
-            LayerManager::getTileTextureInitData(layergroupid::GroupID(id), true);
+        TileTextureInitData initData = LayerManager::getTileTextureInitData(
+            layergroupid::GroupID(id),
+            true
+        );
         assureTextureContainerExists(initData);
     }
 }
@@ -172,7 +167,7 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
         _textureContainerMap.cend(),
         size_t(0),
         [](size_t s, const std::pair<const TileTextureInitData::HashKey,
-        TextureContainerTileCache>& p)
+                                     TextureContainerTileCache>& p)
         {
             return s + p.second.first->tileTextureInitData().totalNumBytes();
         }
@@ -194,22 +189,28 @@ void MemoryAwareTileCache::resetTextureContainerSize(size_t numTexturesPerTextur
 }
 
 bool MemoryAwareTileCache::exist(ProviderTileKey key) const {
-    TextureContainerMap::const_iterator result =
-        std::find_if(_textureContainerMap.cbegin(), _textureContainerMap.cend(),
-            [&](const std::pair<const TileTextureInitData::HashKey,
-                    TextureContainerTileCache>& p){
-                return p.second.second->exist(key);
-            });
+    TextureContainerMap::const_iterator result = std::find_if(
+        _textureContainerMap.cbegin(),
+        _textureContainerMap.cend(),
+        [&](const std::pair<const TileTextureInitData::HashKey,
+                            TextureContainerTileCache>& p)
+        {
+            return p.second.second->exist(key);
+        }
+    );
     return result != _textureContainerMap.cend();
 }
 
 Tile MemoryAwareTileCache::get(ProviderTileKey key) {
-    TextureContainerMap::const_iterator it =
-        std::find_if(_textureContainerMap.cbegin(), _textureContainerMap.cend(),
-            [&](const std::pair<const TileTextureInitData::HashKey,
-                    TextureContainerTileCache>& p){
-                return p.second.second->exist(key);
-            });
+    TextureContainerMap::const_iterator it = std::find_if(
+        _textureContainerMap.cbegin(),
+        _textureContainerMap.cend(),
+        [&](const std::pair<const TileTextureInitData::HashKey,
+                            TextureContainerTileCache>& p)
+        {
+            return p.second.second->exist(key);
+        }
+    );
     if (it != _textureContainerMap.cend()) {
         return it->second.second->get(key);
     }
@@ -219,16 +220,16 @@ Tile MemoryAwareTileCache::get(ProviderTileKey key) {
 }
 
 ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(
-    const TileTextureInitData& initData)
+                                                      const TileTextureInitData& initData)
 {
-    ghoul::opengl::Texture* texture;
     // if this texture type does not exist among the texture containers
     // it needs to be created
     TileTextureInitData::HashKey initDataKey = initData.hashKey();
     assureTextureContainerExists(initData);
     // Now we know that the texture container exists,
     // check if there are any unused textures
-    texture = _textureContainerMap[initDataKey].first->getTextureIfFree();
+    ghoul::opengl::Texture* texture =
+        _textureContainerMap[initDataKey].first->getTextureIfFree();
     // Second option. No more textures available. Pop from the LRU cache
     if (!texture) {
         Tile oldTile = _textureContainerMap[initDataKey].second->popLRU().second;
@@ -239,7 +240,7 @@ ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(
 }
 
 void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
-    std::shared_ptr<RawTile> rawTile)
+                                            std::shared_ptr<RawTile> rawTile)
 {
     ghoul_precondition(rawTile, "RawTile can not be null");
     using ghoul::opengl::Texture;
@@ -282,7 +283,8 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
 }
 
 void MemoryAwareTileCache::put(const ProviderTileKey& key,
-        const TileTextureInitData::HashKey& initDataKey, Tile tile)
+                               const TileTextureInitData::HashKey& initDataKey,
+                               Tile tile)
 {
     _textureContainerMap[initDataKey].second->put(key, tile);
     return;
