@@ -38,6 +38,7 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -103,80 +104,9 @@ void performTasks(const std::string& path) {
 int main(int argc, char** argv) {
     using namespace openspace;
 
-    ghoul::initialize();
-
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
-    LogMgr.addLog(std::make_unique< ghoul::logging::ConsoleLog>());
-
-    LDEBUG("Initialize FileSystem");
-
-    ghoul::filesystem::Directory launchDirectory = FileSys.currentDirectory();
-
-#ifdef __APPLE__
-    ghoul::filesystem::File app(argv[0]);
-    std::string dirName = app.directoryName();
-    LINFO("Setting starting directory to '" << dirName << "'");
-    FileSys.setCurrentDirectory(dirName);
-#endif
-
-    initTextureReaders();
-
-    FactoryManager::initialize();
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
-        "Renderable"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Task>>(),
-        "Task"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Translation>>(),
-        "Translation"
-    );
-
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
-        "Rotation"
-    );
-
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Scale>>(),
-        "Scale"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
-        "ResourceSynchronization"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
-        "DashboardItem"
-    );
-
-
-    openspace::ConfigurationManager configuration;
-    std::string configurationFile = configuration.findConfiguration(ConfigurationFile);
-    configuration.loadFromFile(configurationFile);
-
-    ghoul::Dictionary moduleConfigurations;
-    if (configuration.hasKeyAndValue<ghoul::Dictionary>(
-        ConfigurationManager::KeyModuleConfigurations))
-    {
-        configuration.getValue<ghoul::Dictionary>(
-            ConfigurationManager::KeyModuleConfigurations,
-            moduleConfigurations
-        );
-    }
-
-    ModuleEngine moduleEngine;
-    moduleEngine.initialize(moduleConfigurations);
-    LINFO("Initialization done.");
-
-    // Parse commandline arguments
-    std::vector<std::string> args(argv, argv + argc);
+    std::vector<std::string> remainingArguments;
+    bool unusedBool;
+    OpenSpaceEngine::create(argc, argv, nullptr, remainingArguments, unusedBool);
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
@@ -193,10 +123,10 @@ int main(int argc, char** argv) {
             )
     );
 
-    commandlineParser.setCommandLine(args);
+    commandlineParser.setCommandLine(remainingArguments);
     commandlineParser.execute();
 
-    FileSys.setCurrentDirectory(launchDirectory);
+    //FileSys.setCurrentDirectory(launchDirectory);
 
     if (tasksPath != "") {
         performTasks(tasksPath);
