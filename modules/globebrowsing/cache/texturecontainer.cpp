@@ -38,10 +38,6 @@ TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextu
 void TextureContainer::reset() {
     _textures.clear();
     _freeTexture = 0;
-    ghoul::opengl::Texture::AllocateData allocate =
-        _initData.shouldAllocateDataOnCPU() ?
-        ghoul::opengl::Texture::AllocateData::Yes :
-        ghoul::opengl::Texture::AllocateData::No;
     for (size_t i = 0; i < _numTextures; ++i) {
         auto tex = std::make_unique<ghoul::opengl::Texture>(
             _initData.dimensions(),
@@ -50,7 +46,7 @@ void TextureContainer::reset() {
             _initData.glType(),
             ghoul::opengl::Texture::FilterMode::Linear,
             ghoul::opengl::Texture::WrappingMode::ClampToEdge,
-            allocate
+            ghoul::opengl::Texture::AllocateData(_initData.shouldAllocateDataOnCPU())
         );
 
         tex->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
@@ -67,17 +63,17 @@ void TextureContainer::reset(size_t numTextures) {
 }
 
 ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
-    ghoul::opengl::Texture* texture = nullptr;
     if (_freeTexture < _textures.size()) {
-        texture = _textures[_freeTexture].get();
+        ghoul::opengl::Texture* texture = _textures[_freeTexture].get();
         _freeTexture++;
+        return texture;
     }
-    return texture;
+    else {
+        return nullptr;
+    }
 }
 
-const openspace::globebrowsing::TileTextureInitData&
-TextureContainer::tileTextureInitData() const
-{
+const TileTextureInitData& TextureContainer::tileTextureInitData() const {
     return _initData;
 }
 

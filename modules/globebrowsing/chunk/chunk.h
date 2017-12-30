@@ -41,7 +41,7 @@ struct TileIndex;
 
 class Chunk {
 public:
-    const static float DEFAULT_HEIGHT;
+    constexpr static float DEFAULT_HEIGHT = 0.f;
 
     struct BoundingHeights {
         float min, max;
@@ -51,7 +51,7 @@ public:
     enum class Status {
         DoNothing,
         WantMerge,
-        WantSplit,
+        WantSplit
     };
 
     Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex,
@@ -74,7 +74,7 @@ public:
      * Returns a convex polyhedron of eight vertices tightly bounding the volume of
      * the Chunk.
     */
-    std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
+    std::vector<glm::dvec4> boundingPolyhedronCorners() const;
 
     const GeodeticPatch& surfacePatch() const;
     const RenderableGlobe& owner() const;
@@ -90,7 +90,7 @@ public:
      * This means that high level Chunks can have BoundingHeights that are not
     * tightly fitting.
     */
-    BoundingHeights getBoundingHeights() const;
+    BoundingHeights boundingHeights() const;
 
 private:
     const RenderableGlobe& _owner;

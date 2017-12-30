@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKCULLER___H__
 
 namespace openspace { struct RenderData; }
+
 namespace openspace::globebrowsing { class Chunk; }
 
 namespace openspace::globebrowsing::culling {

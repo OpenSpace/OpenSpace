@@ -37,7 +37,7 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
 
     const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
     const GeodeticPatch& patch = chunk.surfacePatch();
-    float maxHeight = chunk.getBoundingHeights().max;
+    float maxHeight = chunk.boundingHeights().max;
     glm::dvec3 globePosition = glm::dvec3(0,0,0); // In model space it is 0
     double minimumGlobeRadius = ellipsoid.minimumRadius();
 

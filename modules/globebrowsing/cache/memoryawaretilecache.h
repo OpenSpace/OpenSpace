@@ -86,7 +86,6 @@ struct ProviderTileHasher {
 class MemoryAwareTileCache : public properties::PropertyOwner {
 public:
     MemoryAwareTileCache();
-    ~MemoryAwareTileCache();
 
     void clear();
     void setSizeEstimated(size_t estimatedSize);
