@@ -32,6 +32,8 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/opengl/uniformcache.h>
+
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
@@ -67,6 +69,8 @@ private:
     properties::FloatProperty _transparency;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    UniformCache(modelViewProjection, textureOffset, transparency, nightFactor,
+        sunPosition, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 

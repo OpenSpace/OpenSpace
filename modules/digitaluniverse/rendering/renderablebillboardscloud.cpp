@@ -632,6 +632,32 @@ void RenderableBillboardsCloud::initializeGL() {
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl")
     );
 
+    //_uniformCache.projection = _program->uniformLocation("projection");
+    //_uniformCache.modelView = _program->uniformLocation("modelViewTransform");
+    _uniformCache.modelViewProjection = _program->uniformLocation(
+        "modelViewProjectionTransform"
+    );
+    _uniformCache.cameraPos = _program->uniformLocation("cameraPosition");
+    _uniformCache.cameraLookup = _program->uniformLocation("cameraLookUp");
+    _uniformCache.renderOption = _program->uniformLocation("renderOption");
+    _uniformCache.centerSceenInWorldPos = _program->uniformLocation(
+        "centerScreenInWorldPosition"
+    );
+    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+    _uniformCache.maxBillboardSize = _program->uniformLocation("maxBillboardSize");
+    _uniformCache.color = _program->uniformLocation("color");
+    //_uniformCache.sides = _program->uniformLocation("sides");
+    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+    _uniformCache.up = _program->uniformLocation("up");
+    _uniformCache.right = _program->uniformLocation("right");
+    _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
+    _uniformCache.screenSize = _program->uniformLocation("screenSize");
+    _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
+    _uniformCache.polygonTexture = _program->uniformLocation("polygonTexture");
+    _uniformCache.hasPolygon = _program->uniformLocation("hasPolygon");
+    _uniformCache.hasColormap = _program->uniformLocation("hasColorMap");
+
     if (_hasPolygon) {
         createPolygonTexture();
     }
@@ -705,71 +731,68 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     _program->activate();
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-
     glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
     _program->setUniform(
         "screenSize",
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
-    _program->setUniform("projection", projMatrix);
-    _program->setUniform("modelViewTransform", modelViewMatrix);
-    _program->setUniform("modelViewProjectionTransform", projMatrix * modelViewMatrix);
-    _program->setUniform("cameraPosition", glm::dvec3(worldToModelTransform *
-        glm::dvec4(data.camera.positionVec3(), 1.0)));
-    _program->setUniform("cameraLookUp", glm::dvec3(worldToModelTransform *
-        glm::dvec4(data.camera.lookUpVectorWorldSpace(), 1.0)));
+    //_program->setUniform(_uniformCache.projection, projMatrix);
+    //_program->setUniform(_uniformCache.modelView, modelViewMatrix);
+    _program->setUniform(_uniformCache.modelViewProjection, projMatrix * modelViewMatrix);
+    _program->setUniform(
+        _uniformCache.cameraPos,
+        glm::dvec3(worldToModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0))
+    );
+    _program->setUniform(
+        _uniformCache.cameraLookup,
+        glm::dvec3(worldToModelTransform *
+                   glm::dvec4(data.camera.lookUpVectorWorldSpace(), 1.0)
+        )
+    );
 
     //_program->setUniform("cameraPosition", data.camera.positionVec3());
     //_program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
 
 
-    _program->setUniform("renderOption", _renderOption.value());
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
     glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) *
                                    glm::dvec4(0.0, 0.0, 0.0, 1.0);
 
-    _program->setUniform("centerScreenInWorldPosition", centerScreenWorld);
+    _program->setUniform(_uniformCache.centerSceenInWorldPos, centerScreenWorld);
 
-    _program->setUniform("minBillboardSize", _billboardMinSize); // in pixels
-    _program->setUniform("maxBillboardSize", _billboardMaxSize); // in pixels
-    _program->setUniform("color", _pointColor);
-    _program->setUniform("sides", 4);
-    _program->setUniform("alphaValue", _alphaValue);
-    _program->setUniform("scaleFactor", _scaleFactor);
+    _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
+    _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
+    _program->setUniform(_uniformCache.color, _pointColor);
+    //_program->setUniform(_uniformCache.sides, 4);
+    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
-    _program->setUniform("up", orthoUp);
-    _program->setUniform("right", orthoRight);
+    _program->setUniform(_uniformCache.up, orthoUp);
+    _program->setUniform(_uniformCache.right, orthoRight);
 
-    _program->setUniform("fadeInValue", fadeInVariable);
+    _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    _program->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
+    _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
 
     ghoul::opengl::TextureUnit spriteTextureUnit;
     if (_hasSpriteTexture) {
         spriteTextureUnit.activate();
         _spriteTexture->bind();
-        _program->setUniform("spriteTexture", spriteTextureUnit);
+        _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
     }
 
     ghoul::opengl::TextureUnit polygonTextureUnit;
     if (_hasPolygon) {
         polygonTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _pTexture);
-        _program->setUniform("polygonTexture", polygonTextureUnit);
-        _program->setUniform("hasPolygon", _hasPolygon);
+        _program->setUniform(_uniformCache.polygonTexture, polygonTextureUnit);
+        _program->setUniform(_uniformCache.hasPolygon, _hasPolygon);
     }
 
-
-    if (_hasColorMapFile) {
-        _program->setUniform("hasColorMap", true);
-    }
-    else {
-        _program->setUniform("hasColorMap", false);
-    }
+    _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
 
     glBindVertexArray(_vao);
     const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() /
@@ -777,8 +800,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
 
     glBindVertexArray(0);
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::No);
     _program->deactivate();
 
     // Restores blending state

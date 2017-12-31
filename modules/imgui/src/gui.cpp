@@ -38,6 +38,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <modules/imgui/include/imgui_include.h>
 
@@ -59,6 +60,7 @@ GLuint vao = 0;
 GLuint vbo = 0;
 GLuint vboElements = 0;
 std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+UniformCache(tex, ortho) _uniformCache;
 std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 char* iniFileBuffer = nullptr;
 
@@ -104,8 +106,8 @@ static void RenderDrawLists(ImDrawData* drawData) {
     );
     _program->activate();
 
-    _program->setUniform("tex", unit);
-    _program->setUniform("ortho", ortho);
+    _program->setUniform(_uniformCache.tex, unit);
+    _program->setUniform(_uniformCache.ortho, ortho);
 
     glBindVertexArray(vao);
 
@@ -535,6 +537,10 @@ void GUI::initializeGL() {
         absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
+
+    _uniformCache.tex = _program->uniformLocation("tex");
+    _uniformCache.ortho = _program->uniformLocation("ortho");
+
     if (!_program) {
         return;
     }
@@ -682,6 +688,9 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 void GUI::endFrame() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
+
+        _uniformCache.tex = _program->uniformLocation("tex");
+        _uniformCache.ortho = _program->uniformLocation("ortho");
     }
 
     bool perf = OsEng.renderEngine().doesPerformanceMeasurements();

@@ -445,6 +445,12 @@ void ScreenSpaceRenderable::createShaders() {
             "${SHADERS}/render.frag",
             dict
         );
+
+        _uniformCache.occlusionDepth = _shader->uniformLocation("OcclusionDepth");
+        _uniformCache.alpha = _shader->uniformLocation("Alpha");
+        _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
+        _uniformCache.viewProj = _shader->uniformLocation("ViewProjectionMatrix");
+        _uniformCache.texture = _shader->uniformLocation("texture1");
     }
 }
 
@@ -503,19 +509,19 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
-    _shader->setUniform("OcclusionDepth", 1.f - _depth);
-    _shader->setUniform("Alpha", _alpha);
-    _shader->setUniform("ModelTransform", modelTransform);
+    _shader->setUniform(_uniformCache.occlusionDepth, 1.f - _depth);
+    _shader->setUniform(_uniformCache.alpha, _alpha);
+    _shader->setUniform(_uniformCache.modelTransform, modelTransform);
 
     _shader->setUniform(
-        "ViewProjectionMatrix",
+        _uniformCache.viewProj,
         OsEng.renderEngine().camera()->viewProjectionMatrix()
     );
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform("texture1", unit);
+    _shader->setUniform(_uniformCache.texture, unit);
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);

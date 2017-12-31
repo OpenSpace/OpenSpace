@@ -32,6 +32,8 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 
+#include <ghoul/opengl/uniformcache.h>
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -76,6 +78,12 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
+        hasHeightMap, heightExaggeration, meridianShift, projectionFading,
+        baseTexture, projectionTexture, heightTexture) _mainUniformCache;
+
+    UniformCache(projectionTexture, projectorMatrix, modelTransform, scaling, boresight,
+        radius, segments) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;

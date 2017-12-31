@@ -324,14 +324,14 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(TransparencyInfo.identifier)) {
         _alphaValue = static_cast<float>(
             dictionary.value<double>(TransparencyInfo.identifier)
-            );
+        );
     }
     addProperty(_alphaValue);
 
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
             dictionary.value<double>(ScaleFactorInfo.identifier)
-            );
+        );
     }
     addProperty(_scaleFactor);
 
@@ -343,7 +343,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(LabelFileInfo.identifier)) {
         _labelFile = absPath(dictionary.value<std::string>(
             LabelFileInfo.identifier
-            ));
+        ));
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
@@ -405,6 +405,12 @@ void RenderableDUMeshes::initializeGL() {
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
     );
+
+    _uniformCache.modelViewTransform = _program->uniformLocation("modelViewTransform");
+    _uniformCache.projectionTransform = _program->uniformLocation("projectionTransform");
+    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+    //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+    _uniformCache.color = _program->uniformLocation("color");
 
     bool success = loadData();
     if (!success) {
@@ -474,40 +480,33 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     _program->activate();
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-
-    _program->setUniform("modelViewTransform", modelViewMatrix);
-    _program->setUniform("projectionTransform", projectionMatrix);
-    _program->setUniform("alphaValue", _alphaValue);
-    _program->setUniform("scaleFactor", _scaleFactor);
+    _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
+    _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
+    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    //_program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
     for (auto pair : _renderingMeshesMap) {
-        _program->setUniform("color", _meshColorMap[pair.second.colorIndex]);
+        _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
         for (int i = 0; i < static_cast<int>(pair.second.vaoArray.size()); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);
-            switch (pair.second.style)
-            {
-            case Solid:
-                break;
-            case Wire:
-                glLineWidth(2.0);
-                glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-                glLineWidth(lineWidth);
-                break;
-            case Point:
-                glDrawArrays(GL_POINTS, 0, pair.second.numV);
-                break;
-            default:
-                break;
+            switch (pair.second.style) {
+                case Solid:
+                    break;
+                case Wire:
+                    glLineWidth(2.0);
+                    glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
+                    glLineWidth(lineWidth);
+                    break;
+                case Point:
+                    glDrawArrays(GL_POINTS, 0, pair.second.numV);
+                    break;
+                default:
+                    break;
             }
         }
     }
 
     glBindVertexArray(0);
-
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::No);
     _program->deactivate();
 
     // Restores blending state
@@ -609,7 +608,21 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
     }
 }
 
-void RenderableDUMeshes::update(const UpdateData&) {}
+void RenderableDUMeshes::update(const UpdateData&) {
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+
+        _uniformCache.modelViewTransform = _program->uniformLocation(
+            "modelViewTransform"
+        );
+        _uniformCache.projectionTransform = _program->uniformLocation(
+            "projectionTransform"
+        );
+        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+        //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+        _uniformCache.color = _program->uniformLocation("color");
+    }
+}
 
 bool RenderableDUMeshes::loadData() {
     bool success = false;

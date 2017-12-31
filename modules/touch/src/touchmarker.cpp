@@ -89,24 +89,23 @@ TouchMarker::TouchMarker()
     addProperty(_color);
 }
 
-bool TouchMarker::initialize() {
+void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
-    try {
-        _shader = OsEng.renderEngine().buildRenderProgram(
-            "MarkerProgram",
-            absPath("${MODULE_TOUCH}/shaders/marker_vs.glsl"),
-            absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
-        );
-    }
-    catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
-        LERRORC(e.component, e.what());
-    }
-    return (_shader != nullptr);
+    _shader = OsEng.renderEngine().buildRenderProgram(
+        "MarkerProgram",
+        absPath("${MODULE_TOUCH}/shaders/marker_vs.glsl"),
+        absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
+    );
+
+    _uniformCache.radius = _shader->uniformLocation("radius");
+    _uniformCache.transparency = _shader->uniformLocation("transparency");
+    _uniformCache.thickness = _shader->uniformLocation("thickness");
+    _uniformCache.color = _shader->uniformLocation("color");
 }
 
-bool TouchMarker::deinitialize() {
+void TouchMarker::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -118,7 +117,6 @@ bool TouchMarker::deinitialize() {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-    return true;
 }
 
 void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
@@ -126,10 +124,10 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
         createVertexList(list);
         _shader->activate();
 
-        _shader->setUniform("radius", _radiusSize);
-        _shader->setUniform("transparency", _transparency);
-        _shader->setUniform("thickness", _thickness);
-        _shader->setUniform("color", _color.value());
+        _shader->setUniform(_uniformCache.radius, _radiusSize);
+        _shader->setUniform(_uniformCache.transparency, _transparency);
+        _shader->setUniform(_uniformCache.thickness, _thickness);
+        _shader->setUniform(_uniformCache.color, _color.value());
 
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);

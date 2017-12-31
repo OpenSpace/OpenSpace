@@ -163,6 +163,19 @@ void RenderableModel::initializeGL() {
         absPath("${MODULE_BASE}/shaders/model_fs.glsl")
     );
 
+    _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
+        "directionToSunViewSpace"
+    );
+    _uniformCache.modelViewTransform = _programObject->uniformLocation(
+        "modelViewTransform"
+    );
+    _uniformCache.projectionTransform = _programObject->uniformLocation(
+        "projectionTransform"
+    );
+    _uniformCache.performShading = _programObject->uniformLocation(
+        "performShading"
+    );
+    _uniformCache.texture = _programObject->uniformLocation("texture1");
     loadTexture();
 
     _geometry->initialize(this);
@@ -197,10 +210,22 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     glm::vec3 directionToSunViewSpace =
         glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
-    _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
-    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _programObject->setUniform("performShading", _performShading);
+    _programObject->setUniform(
+        _uniformCache.directionToSunViewSpace,
+        directionToSunViewSpace
+    );
+    _programObject->setUniform(
+        _uniformCache.modelViewTransform,
+        glm::mat4(modelViewTransform)
+    );
+    _programObject->setUniform(
+        _uniformCache.projectionTransform,
+        data.camera.projectionMatrix()
+    );
+    _programObject->setUniform(
+        _uniformCache.performShading,
+        _performShading
+    );
 
     _geometry->setUniforms(*_programObject);
 
@@ -208,7 +233,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _programObject->setUniform("texture1", unit);
+    _programObject->setUniform(_uniformCache.texture, unit);
 
     _geometry->render();
 
@@ -218,6 +243,20 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 void RenderableModel::update(const UpdateData&) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
+
+        _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
+            "directionToSunViewSpace"
+        );
+        _uniformCache.modelViewTransform = _programObject->uniformLocation(
+            "modelViewTransform"
+        );
+        _uniformCache.projectionTransform = _programObject->uniformLocation(
+            "projectionTransform"
+        );
+        _uniformCache.performShading = _programObject->uniformLocation(
+            "performShading"
+        );
+        _uniformCache.texture = _programObject->uniformLocation("texture1");
     }
 
     _sunPos = OsEng.renderEngine().scene()->sceneGraphNode(

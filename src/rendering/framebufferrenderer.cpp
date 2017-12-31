@@ -225,15 +225,15 @@ void FramebufferRenderer::initialize() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
-    try {
-        _resolveProgram = ghoul::opengl::ProgramObject::Build(
-            "Framebuffer Resolve",
-            absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
-            absPath("${SHADERS}/framebuffer/resolveframebuffer.frag")
-        );
-    } catch (const ghoul::RuntimeError& e) {
-        LERRORC(e.component, e.message);
-    }
+    _resolveProgram = ghoul::opengl::ProgramObject::Build(
+        "Framebuffer Resolve",
+        absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
+        absPath("${SHADERS}/framebuffer/resolveframebuffer.frag")
+    );
+
+    _uniformCache.mainColorTexture = _resolveProgram->uniformLocation("mainColorTexture");
+    _uniformCache.blackoutFactor = _resolveProgram->uniformLocation("blackoutFactor");
+    _uniformCache.nAaSamples = _resolveProgram->uniformLocation("nAaSamples");
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
     OsEng.renderEngine().deferredcasterManager().addListener(*this);
@@ -298,12 +298,13 @@ void FramebufferRenderer::update() {
     }
 
     if (_resolveProgram->isDirty()) {
-        try {
-            _resolveProgram->rebuildFromFile();
-        }
-        catch (const ghoul::RuntimeError& error) {
-            LERRORC(error.component, error.message);
-        }
+        _resolveProgram->rebuildFromFile();
+
+        _uniformCache.mainColorTexture = _resolveProgram->uniformLocation(
+            "mainColorTexture"
+        );
+        _uniformCache.blackoutFactor = _resolveProgram->uniformLocation("blackoutFactor");
+        _uniformCache.nAaSamples = _resolveProgram->uniformLocation("nAaSamples");
     }
 
     for (auto& program : _exitPrograms) {
@@ -1178,9 +1179,9 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         mainColorTextureUnit.activate();
 
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
-        _resolveProgram->setUniform("mainColorTexture", mainColorTextureUnit);
-        _resolveProgram->setUniform("blackoutFactor", blackoutFactor);
-        _resolveProgram->setUniform("nAaSamples", _nAaSamples);
+        _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
+        _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
+        _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
         glBindVertexArray(_screenQuad);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);

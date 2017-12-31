@@ -29,6 +29,7 @@
 #include <openspace/properties/scalarproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -50,6 +51,7 @@ public:
 private:
     const RenderableGlobe& _owner;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    UniformCache(lightIntensityClamped, modelView, projection) _uniformCache;
 
     GLuint _vertexBufferID;
     GLuint _vaoID;

@@ -32,6 +32,8 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
+#include <ghoul/opengl/uniformcache.h>
+
 #include <memory>
 
 namespace ghoul::opengl {
@@ -72,6 +74,9 @@ private:
     properties::Mat3Property _modelTransform;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    UniformCache(directionToSunViewSpace, modelViewTransform, projectionTransform,
+        performShading, texture) _uniformCache;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     glm::dvec3 _sunPos;

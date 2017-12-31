@@ -34,6 +34,7 @@
 #include <openspace/properties/vector/vec3property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem {
     class File;
@@ -98,6 +99,8 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
         std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+        UniformCache(modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
+            spriteTexture, hasColorMap) _uniformCache;
 
         std::string _speckFile;
         std::string _colorMapFile;

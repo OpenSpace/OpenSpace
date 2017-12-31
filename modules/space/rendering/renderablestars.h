@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -90,6 +91,8 @@ private:
     properties::FloatProperty _minBillboardSize;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    UniformCache(view, projection, colorOption, alphaValue, scaleFactor,
+        minBillboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
 
     std::string _speckFile;
 

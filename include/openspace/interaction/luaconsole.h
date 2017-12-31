@@ -32,6 +32,8 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/opengl/uniformcache.h>
+
 #include <string>
 #include <vector>
 
@@ -90,6 +92,8 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     GLuint _vao;
     GLuint _vbo;
+
+    UniformCache(res, color, height, ortho) _uniformCache;
 };
 
 } // namespace openspace

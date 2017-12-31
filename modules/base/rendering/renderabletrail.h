@@ -35,6 +35,7 @@
 #include <openspace/properties/vector/vec3property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -158,6 +159,9 @@ private:
 
     /// Program object used to render the data stored in RenderInformation
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+
+    UniformCache(modelView, projection, color, useLineFade, lineFade, vertexSorting,
+        idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;
 };
 
 } // namespace openspace

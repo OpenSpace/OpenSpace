@@ -31,6 +31,7 @@
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 #include <ghoul/glm.h>
 
 #include <map>
@@ -112,6 +113,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
+    UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
 
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;

@@ -318,6 +318,26 @@ void RenderablePlanetProjection::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl")
     );
 
+    _mainUniformCache.sunPos = _programObject->uniformLocation("sun_pos");
+    _mainUniformCache.modelTransform = _programObject->uniformLocation("modelTransform");
+    _mainUniformCache.modelViewProjectionTransform = _programObject->uniformLocation(
+        "modelViewProjectionTransform"
+    );
+    _mainUniformCache.hasBaseMap = _programObject->uniformLocation("_hasBaseMap");
+    _mainUniformCache.hasHeightMap = _programObject->uniformLocation("_hasHeightMap");
+    _mainUniformCache.heightExaggeration = _programObject->uniformLocation(
+        "_heightExaggeration"
+    );
+    _mainUniformCache.meridianShift = _programObject->uniformLocation("_meridianShift");
+    _mainUniformCache.projectionFading = _programObject->uniformLocation(
+        "_projectionFading"
+    );
+    _mainUniformCache.baseTexture = _programObject->uniformLocation("baseTexture");
+    _mainUniformCache.projectionTexture = _programObject->uniformLocation(
+        "projectionTexture"
+    );
+    _mainUniformCache.heightTexture = _programObject->uniformLocation("heightTexture");
+
     _fboProgramObject = ghoul::opengl::ProgramObject::Build(
         "fboPassProgram",
         absPath(
@@ -327,6 +347,20 @@ void RenderablePlanetProjection::initializeGL() {
             "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_fs.glsl"
         )
     );
+
+    _fboUniformCache.projectionTexture = _fboProgramObject->uniformLocation(
+        "projectionTexture"
+    );
+    _fboUniformCache.projectorMatrix = _fboProgramObject->uniformLocation(
+        "ProjectorMatrix"
+    );
+    _fboUniformCache.modelTransform = _fboProgramObject->uniformLocation(
+        "ModelTransform"
+    );
+    _fboUniformCache.scaling = _fboProgramObject->uniformLocation("_scaling");
+    _fboUniformCache.boresight = _fboProgramObject->uniformLocation("boresight");
+    _fboUniformCache.radius = _fboProgramObject->uniformLocation("_radius");
+    _fboUniformCache.segments = _fboProgramObject->uniformLocation("_segments");
 
     loadColorTexture();
     loadHeightTexture();
@@ -394,17 +428,17 @@ void RenderablePlanetProjection::imageProjectGPU(
     ghoul::opengl::TextureUnit unitFbo;
     unitFbo.activate();
     projectionTexture->bind();
-    _fboProgramObject->setUniform("projectionTexture", unitFbo);
+    _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
-    _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
-    _fboProgramObject->setUniform("ModelTransform" , _transform);
-    _fboProgramObject->setUniform("_scaling"       , _camScaling);
-    _fboProgramObject->setUniform("boresight"      , _boresight);
+    _fboProgramObject->setUniform(_fboUniformCache.projectorMatrix, _projectorMatrix);
+    _fboProgramObject->setUniform(_fboUniformCache.modelTransform, _transform);
+    _fboProgramObject->setUniform(_fboUniformCache.scaling, _camScaling);
+    _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
 
     if (_geometry->hasProperty("Radius")) {
         ghoul::any r = _geometry->property("Radius")->get();
         if (glm::vec3* radius = ghoul::any_cast<glm::vec3>(&r)){
-            _fboProgramObject->setUniform("_radius", radius);
+            _fboProgramObject->setUniform(_fboUniformCache.radius, radius);
         }
     } else {
         LERROR("Geometry object needs to provide radius");
@@ -412,7 +446,7 @@ void RenderablePlanetProjection::imageProjectGPU(
     if (_geometry->hasProperty("Segments")) {
         ghoul::any s = _geometry->property("Segments")->get();
         if (int* segments = ghoul::any_cast<int>(&s)) {
-            _fboProgramObject->setUniform("_segments", segments[0]);
+            _fboProgramObject->setUniform(_fboUniformCache.segments, segments[0]);
         }
     }else{
         LERROR("Geometry object needs to provide segment count");
@@ -525,7 +559,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     // Main renderpass
     _programObject->activate();
-    _programObject->setUniform("sun_pos", sun_pos.vec3());
+    _programObject->setUniform(_mainUniformCache.sunPos, sun_pos.vec3());
     //_programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
     //_programObject->setUniform("ModelTransform" , _transform);
 
@@ -547,16 +581,21 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _programObject->setUniform("modelTransform", glm::mat4(modelTransform));
-    _programObject->setUniform("modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(modelTransform));
+    _programObject->setUniform(_mainUniformCache
+        .modelViewProjectionTransform,
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    );
 
-    _programObject->setUniform("_hasBaseMap", _baseTexture != nullptr);
-    _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
-    _programObject->setUniform("_heightExaggeration", _heightExaggeration);
-    _programObject->setUniform("_meridianShift", _meridianShift);
+    _programObject->setUniform(_mainUniformCache.hasBaseMap, _baseTexture != nullptr);
     _programObject->setUniform(
-        "_projectionFading",
+        _mainUniformCache.hasHeightMap,
+        _heightMapTexture != nullptr
+    );
+    _programObject->setUniform(_mainUniformCache.heightExaggeration, _heightExaggeration);
+    _programObject->setUniform(_mainUniformCache.meridianShift, _meridianShift);
+    _programObject->setUniform(
+        _mainUniformCache.projectionFading,
         _projectionComponent.projectionFading()
     );
 
@@ -564,17 +603,17 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     if (_baseTexture) {
         unit[0].activate();
         _baseTexture->bind();
-        _programObject->setUniform("baseTexture", unit[0]);
+        _programObject->setUniform(_mainUniformCache.baseTexture, unit[0]);
     }
 
     unit[1].activate();
     _projectionComponent.projectionTexture().bind();
-    _programObject->setUniform("projectionTexture", unit[1]);
+    _programObject->setUniform(_mainUniformCache.projectionTexture, unit[1]);
 
     if (_heightMapTexture) {
         unit[2].activate();
         _heightMapTexture->bind();
-        _programObject->setUniform("heightTexture", unit[2]);
+        _programObject->setUniform(_mainUniformCache.heightTexture, unit[2]);
     }
 
     _geometry->render();
@@ -582,12 +621,52 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data) {
-    if (_fboProgramObject->isDirty()) {
-        _fboProgramObject->rebuildFromFile();
-    }
-
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
+
+        _mainUniformCache.sunPos = _programObject->uniformLocation("sun_pos");
+        _mainUniformCache.modelTransform = _programObject->uniformLocation(
+            "modelTransform"
+        );
+        _mainUniformCache.modelViewProjectionTransform = _programObject->uniformLocation(
+            "modelViewProjectionTransform"
+        );
+        _mainUniformCache.hasBaseMap = _programObject->uniformLocation("_hasBaseMap");
+        _mainUniformCache.hasHeightMap = _programObject->uniformLocation("_hasHeightMap");
+        _mainUniformCache.heightExaggeration = _programObject->uniformLocation(
+            "_heightExaggeration"
+        );
+        _mainUniformCache.meridianShift = _programObject->uniformLocation(
+            "_meridianShift"
+        );
+        _mainUniformCache.projectionFading = _programObject->uniformLocation(
+            "_projectionFading"
+        );
+        _mainUniformCache.baseTexture = _programObject->uniformLocation("baseTexture");
+        _mainUniformCache.projectionTexture = _programObject->uniformLocation(
+            "projectionTexture"
+        );
+        _mainUniformCache.heightTexture = _programObject->uniformLocation(
+            "heightTexture"
+        );
+    }
+
+    if (_fboProgramObject->isDirty()) {
+        _fboProgramObject->rebuildFromFile();
+
+        _fboUniformCache.projectionTexture = _fboProgramObject->uniformLocation(
+            "projectionTexture"
+        );
+        _fboUniformCache.projectorMatrix = _fboProgramObject->uniformLocation(
+            "ProjectorMatrix"
+        );
+        _fboUniformCache.modelTransform = _fboProgramObject->uniformLocation(
+            "ModelTransform"
+        );
+        _fboUniformCache.scaling = _fboProgramObject->uniformLocation("_scaling");
+        _fboUniformCache.boresight = _fboProgramObject->uniformLocation("boresight");
+        _fboUniformCache.radius = _fboProgramObject->uniformLocation("_radius");
+        _fboUniformCache.segments = _fboProgramObject->uniformLocation("_segments");
     }
 
     if (_colorTextureDirty) {

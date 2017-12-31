@@ -522,9 +522,17 @@ void RenderablePlanesCloud::initializeGL() {
 
     _program = renderEngine.buildRenderProgram(
         "RenderablePlanesCloud",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane2_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane2_fs.glsl")
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_fs.glsl")
     );
+
+    _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
+        "modelViewProjectionTransform"
+    );
+    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+    //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+    _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
+    _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
 
     createPlanes();
 
@@ -548,7 +556,7 @@ void RenderablePlanesCloud::initializeGL() {
 
 
 void RenderablePlanesCloud::deleteDataGPU() {
-    for (auto renderingPlane : _renderingPlanesArray) {
+    for (RenderingPlane& renderingPlane : _renderingPlanesArray) {
         glDeleteVertexArrays(1, &renderingPlane.vao);
         glDeleteBuffers(1, &renderingPlane.vbo);
     }
@@ -592,23 +600,23 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
 
     _program->activate();
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
-    _program->setUniform("modelViewProjectionTransform", modelViewProjectionMatrix);
-    _program->setUniform("alphaValue", _alphaValue);
-    _program->setUniform("scaleFactor", _scaleFactor);
-    _program->setUniform("fadeInValue", fadeInVariable);
+    _program->setUniform(
+        _uniformCache.modelViewProjectionTransform,
+        modelViewProjectionMatrix
+    );
+    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
+    _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _program->setUniform("galaxyTexture", unit);
+    _program->setUniform(_uniformCache.galaxyTexture, unit);
     int currentTextureIndex = -1;
-    for (auto renderingPlane : _renderingPlanesArray) {
+    for (const RenderingPlane& renderingPlane : _renderingPlanesArray) {
         // For planes with undefined textures references
         if (renderingPlane.planeIndex == -1) {
             continue;
@@ -654,9 +662,6 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     //}
 
     glBindVertexArray(0);
-
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::No);
     _program->deactivate();
 
     // Restores blending state
@@ -833,6 +838,18 @@ void RenderablePlanesCloud::update(const UpdateData&) {
         deleteDataGPU();
         createPlanes();
         _dataIsDirty = false;
+    }
+
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+
+        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
+            "modelViewProjectionTransform"
+        );
+        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+        _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
+        _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
     }
 }
 

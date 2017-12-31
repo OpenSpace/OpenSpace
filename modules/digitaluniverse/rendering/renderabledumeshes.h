@@ -34,8 +34,9 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <unordered_map>
 
@@ -139,6 +140,8 @@ private:
     properties::OptionProperty _renderOption;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    UniformCache(modelViewTransform, projectionTransform, alphaValue,
+        scaleFactor, color) _uniformCache;
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 

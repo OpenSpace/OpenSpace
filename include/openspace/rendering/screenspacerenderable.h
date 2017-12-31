@@ -35,6 +35,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <memory>
 
@@ -112,6 +113,7 @@ protected:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
     std::unique_ptr<ghoul::opengl::Texture>  _texture;
+    UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
     bool _useEuclideanCoordinates;

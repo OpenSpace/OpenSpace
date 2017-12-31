@@ -120,6 +120,10 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         absPath("${SHADERS}/loadingscreen.frag")
     );
 
+    _uniformCache.logoTexture = _program->uniformLocation("logoTexture");
+    _uniformCache.useTexture = _program->uniformLocation("useTexture");
+    _uniformCache.color = _program->uniformLocation("color");
+
     _loadingFont = OsEng.fontManager().font(
         "Loading",
         LoadingFontSize,
@@ -287,15 +291,8 @@ void LoadingScreen::render() {
     unit.activate();
     _logoTexture->bind();
 
-    _program->setUniform(
-        "logoTexture",
-        unit
-    );
-
-    _program->setUniform(
-        "useTexture",
-        true
-    );
+    _program->setUniform(_uniformCache.logoTexture, unit);
+    _program->setUniform(_uniformCache.useTexture, true);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -341,16 +338,16 @@ void LoadingScreen::render() {
         glBindBuffer(GL_ARRAY_BUFFER, _progressbar.vboFill);
         glBufferData(GL_ARRAY_BUFFER, sizeof(dataFill), dataFill, GL_STATIC_DRAW);
 
-        _program->setUniform("useTexture", false);
+        _program->setUniform(_uniformCache.useTexture, false);
         switch (_phase) {
             case Phase::Construction:
-                _program->setUniform("color", PhaseColorConstruction);
+                _program->setUniform(_uniformCache.color, PhaseColorConstruction);
                 break;
             case Phase::Synchronization:
-                _program->setUniform("color", PhaseColorSynchronization);
+                _program->setUniform(_uniformCache.color, PhaseColorSynchronization);
                 break;
             case Phase::Initialization:
-                _program->setUniform("color", PhaseColorInitialization);
+                _program->setUniform(_uniformCache.color, PhaseColorInitialization);
                 break;
         }
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -402,8 +399,8 @@ void LoadingScreen::render() {
         glBindBuffer(GL_ARRAY_BUFFER, _progressbar.vboBox);
         glBufferData(GL_ARRAY_BUFFER, sizeof(dataBox), dataBox, GL_STATIC_DRAW);
 
-        _program->setUniform("useTexture", false);
-        _program->setUniform("color", ProgressbarOutlineColor);
+        _program->setUniform(_uniformCache.useTexture, false);
+        _program->setUniform(_uniformCache.color, ProgressbarOutlineColor);
         glDrawArrays(GL_TRIANGLES, 0, 24);
     }
 

@@ -306,6 +306,26 @@ void RenderableFov::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
     );
 
+    _uniformCache.modelViewProjection = _programObject->uniformLocation(
+        "modelViewProjectionTransform"
+    );
+    _uniformCache.defaultColorStart = _programObject->uniformLocation(
+        "defaultColorStart"
+    );
+    _uniformCache.defaultColorEnd = _programObject->uniformLocation("defaultColorEnd");
+    _uniformCache.activeColor = _programObject->uniformLocation("activeColor");
+    _uniformCache.targetInFieldOfViewColor = _programObject->uniformLocation(
+        "targetInFieldOfViewColor"
+    );
+    _uniformCache.intersectionStartColor = _programObject->uniformLocation(
+        "intersectionStartColor"
+    );
+    _uniformCache.intersectionEndColor = _programObject->uniformLocation(
+        "intersectionEndColor"
+    );
+    _uniformCache.squareColor = _programObject->uniformLocation("squareColor");
+    _uniformCache.interpolation = _programObject->uniformLocation("interpolation");
+
     // Fetch information about the specific instrument
     SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
         _instrument.name
@@ -1201,21 +1221,27 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
             modelTransform);
 
         _programObject->setUniform(
-            "modelViewProjectionTransform",
+            _uniformCache.modelViewProjection,
             modelViewProjectionTransform
         );
 
-        _programObject->setUniform("defaultColorStart", _colors.defaultStart);
-        _programObject->setUniform("defaultColorEnd", _colors.defaultEnd);
-        _programObject->setUniform("activeColor", _colors.active);
+        _programObject->setUniform(_uniformCache.defaultColorStart, _colors.defaultStart);
+        _programObject->setUniform(_uniformCache.defaultColorEnd, _colors.defaultEnd);
+        _programObject->setUniform(_uniformCache.activeColor, _colors.active);
         _programObject->setUniform(
-            "targetInFieldOfViewColor",
+            _uniformCache.targetInFieldOfViewColor,
             _colors.targetInFieldOfView
         );
-        _programObject->setUniform("intersectionStartColor", _colors.intersectionStart);
-        _programObject->setUniform("intersectionEndColor", _colors.intersectionEnd);
-        _programObject->setUniform("squareColor", _colors.square);
-        _programObject->setUniform("interpolation", _interpolationTime);
+        _programObject->setUniform(
+            _uniformCache.intersectionStartColor,
+            _colors.intersectionStart
+        );
+        _programObject->setUniform(
+            _uniformCache.intersectionEndColor,
+            _colors.intersectionEnd
+        );
+        _programObject->setUniform(_uniformCache.squareColor, _colors.square);
+        _programObject->setUniform(_uniformCache.interpolation, _interpolationTime);
 
         GLenum mode = _drawSolid ? GL_TRIANGLE_STRIP : GL_LINES;
 
@@ -1258,6 +1284,33 @@ void RenderableFov::update(const UpdateData& data) {
         if (diff < 0.0) {
             _interpolationTime = 0.f;
         }
+    }
+
+    if (_programObject->isDirty()) {
+        _programObject->rebuildFromFile();
+
+
+        _uniformCache.modelViewProjection = _programObject->uniformLocation(
+            "modelViewProjectionTransform"
+        );
+        _uniformCache.defaultColorStart = _programObject->uniformLocation(
+            "defaultColorStart"
+        );
+        _uniformCache.defaultColorEnd = _programObject->uniformLocation(
+            "defaultColorEnd"
+        );
+        _uniformCache.activeColor = _programObject->uniformLocation("activeColor");
+        _uniformCache.targetInFieldOfViewColor = _programObject->uniformLocation(
+            "targetInFieldOfViewColor"
+        );
+        _uniformCache.intersectionStartColor = _programObject->uniformLocation(
+            "intersectionStartColor"
+        );
+        _uniformCache.intersectionEndColor = _programObject->uniformLocation(
+            "intersectionEndColor"
+        );
+        _uniformCache.squareColor = _programObject->uniformLocation("squareColor");
+        _uniformCache.interpolation = _programObject->uniformLocation("interpolation");
     }
 }
 

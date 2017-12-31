@@ -184,20 +184,24 @@ bool RenderableRings::isReady() const {
 }
 
 void RenderableRings::initializeGL() {
-    if (!_shader) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram(
-            "RingProgram",
-            absPath("${MODULE_SPACE}/shaders/rings_vs.glsl"),
-            absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
-        );
-        _shader->setIgnoreUniformLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
-        );
-    }
+    _shader = OsEng.renderEngine().buildRenderProgram(
+        "RingProgram",
+        absPath("${MODULE_SPACE}/shaders/rings_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
+    );
+
+    _uniformCache.modelViewProjection = _shader->uniformLocation(
+        "modelViewProjectionTransform"
+    );
+    _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
+    _uniformCache.transparency = _shader->uniformLocation("transparency");
+    _uniformCache.nightFactor = _shader->uniformLocation("_nightFactor");
+    _uniformCache.sunPosition = _shader->uniformLocation("sunPosition");
+    _uniformCache.texture = _shader->uniformLocation("texture1");
 
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
+
     createPlane();
     loadTexture();
 }
@@ -227,15 +231,15 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->setUniform(
-        "modelViewProjectionTransform",
+        _uniformCache.modelViewProjection,
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
-    _shader->setUniform("textureOffset", _offset);
-    _shader->setUniform("transparency", _transparency);
+    _shader->setUniform(_uniformCache.textureOffset, _offset);
+    _shader->setUniform(_uniformCache.transparency, _transparency);
 
-    _shader->setUniform("_nightFactor", _nightFactor);
+    _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
     _shader->setUniform(
-        "sunPosition",
+        _uniformCache.sunPosition,
         _sunPosition
     );
 
@@ -244,7 +248,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform("texture1", unit);
+    _shader->setUniform(_uniformCache.texture, unit);
 
     glDisable(GL_CULL_FACE);
 
@@ -258,6 +262,15 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
 void RenderableRings::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+
+        _uniformCache.modelViewProjection = _shader->uniformLocation(
+            "modelViewProjectionTransform"
+        );
+        _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
+        _uniformCache.transparency = _shader->uniformLocation("transparency");
+        _uniformCache.nightFactor = _shader->uniformLocation("_nightFactor");
+        _uniformCache.sunPosition = _shader->uniformLocation("sunPosition");
+        _uniformCache.texture = _shader->uniformLocation("texture1");
     }
 
     if (_planeIsDirty) {

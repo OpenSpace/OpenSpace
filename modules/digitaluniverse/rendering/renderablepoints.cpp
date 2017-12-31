@@ -94,641 +94,651 @@ namespace {
 
 namespace openspace {
 
-    documentation::Documentation RenderablePoints::Documentation() {
-        using namespace documentation;
-        return {
-            "RenderablePoints",
-            "digitaluniverse_renderablepoints",
+documentation::Documentation RenderablePoints::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderablePoints",
+        "digitaluniverse_renderablepoints",
+        {
             {
-                {
-                    "Type",
-                    new StringEqualVerifier("RenderablePoints"),
-                    Optional::No
-                },
-                {
-                    KeyFile,
-                    new StringVerifier,
-                    Optional::No,
-                    "The path to the SPECK file that contains information about the "
-                    "astronomical object being rendered."
-                },
-                {
-                    keyColor,
-                    new Vector3Verifier<float>,
-                    Optional::No,
-                    "Astronomical Object Color (r,g,b)."
-                },
-                {
-                    SpriteTextureInfo.identifier,
-                    new StringVerifier,
-                    Optional::Yes,
-                    SpriteTextureInfo.description
-                },
-                {
-                    TransparencyInfo.identifier,
-                    new DoubleVerifier,
-                    Optional::No,
-                    TransparencyInfo.description
-                },
-                {
-                    ScaleFactorInfo.identifier,
-                    new DoubleVerifier,
-                    Optional::Yes,
-                    ScaleFactorInfo.description
-                },
-                {
-                    ColorMapInfo.identifier,
-                    new StringVerifier,
-                    Optional::Yes,
-                    ColorMapInfo.description
-                },
+                "Type",
+                new StringEqualVerifier("RenderablePoints"),
+                Optional::No
+            },
+            {
+                KeyFile,
+                new StringVerifier,
+                Optional::No,
+                "The path to the SPECK file that contains information about the "
+                "astronomical object being rendered."
+            },
+            {
+                keyColor,
+                new Vector3Verifier<float>,
+                Optional::No,
+                "Astronomical Object Color (r,g,b)."
+            },
+            {
+                SpriteTextureInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                SpriteTextureInfo.description
+            },
+            {
+                TransparencyInfo.identifier,
+                new DoubleVerifier,
+                Optional::No,
+                TransparencyInfo.description
+            },
+            {
+                ScaleFactorInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                ScaleFactorInfo.description
+            },
+            {
+                ColorMapInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                ColorMapInfo.description
+            },
 
-            }
-        };
-    }
-
-
-    RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary)
-        , _dataIsDirty(true)
-        , _hasSpriteTexture(false)
-        , _spriteTextureIsDirty(true)
-        , _hasColorMapFile(false)
-        , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
-        , _pointColor(
-            ColorInfo,
-            glm::vec3(1.f, 0.4f, 0.2f),
-            glm::vec3(0.f, 0.f, 0.f),
-            glm::vec3(1.0f, 1.0f, 1.0f)
-        )
-        , _spriteTexturePath(SpriteTextureInfo)
-        , _spriteTexture(nullptr)
-        , _program(nullptr)
-        , _speckFile("")
-        , _colorMapFile("")
-        , _unit(Parsec)
-        , _nValuesPerAstronomicalObject(0)
-        , _vao(0)
-        , _vbo(0)
-    {
-        using File = ghoul::filesystem::File;
-
-        documentation::testSpecificationAndThrow(
-            Documentation(),
-            dictionary,
-            "RenderablePoints"
-        );
-
-        _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-
-        if (dictionary.hasKey(keyUnit)) {
-            std::string unit = dictionary.value<std::string>(keyUnit);
-            if (unit == MeterUnit) {
-                _unit = Meter;
-            }
-            else if (unit == KilometerUnit) {
-                _unit = Kilometer;
-            }
-            else if (unit == ParsecUnit) {
-                _unit = Parsec;
-            }
-            else if (unit == KiloparsecUnit) {
-                _unit = Kiloparsec;
-            }
-            else if (unit == MegaparsecUnit) {
-                _unit = Megaparsec;
-            }
-            else if (unit == GigaparsecUnit) {
-                _unit = Gigaparsec;
-            }
-            else if (unit == GigalightyearUnit) {
-                _unit = GigalightYears;
-            }
-            else {
-                LWARNING("No unit given for RenderablePoints. Using meters as units.");
-                _unit = Meter;
-            }
         }
+    };
+}
 
-        if (dictionary.hasKey(keyColor)) {
-            _pointColor = dictionary.value<glm::vec3>(keyColor);
+
+RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _dataIsDirty(true)
+    , _hasSpriteTexture(false)
+    , _spriteTextureIsDirty(true)
+    , _hasColorMapFile(false)
+    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
+    , _pointColor(
+        ColorInfo,
+        glm::vec3(1.f, 0.4f, 0.2f),
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(1.0f, 1.0f, 1.0f)
+    )
+    , _spriteTexturePath(SpriteTextureInfo)
+    , _spriteTexture(nullptr)
+    , _program(nullptr)
+    , _speckFile("")
+    , _colorMapFile("")
+    , _unit(Parsec)
+    , _nValuesPerAstronomicalObject(0)
+    , _vao(0)
+    , _vbo(0)
+{
+    using File = ghoul::filesystem::File;
+
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderablePoints"
+    );
+
+    _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+
+    if (dictionary.hasKey(keyUnit)) {
+        std::string unit = dictionary.value<std::string>(keyUnit);
+        if (unit == MeterUnit) {
+            _unit = Meter;
         }
-        addProperty(_pointColor);
-
-        if (dictionary.hasKey(SpriteTextureInfo.identifier)) {
-            _spriteTexturePath = absPath(dictionary.value<std::string>(
-                SpriteTextureInfo.identifier
-                ));
-            _spriteTextureFile = std::make_unique<File>(_spriteTexturePath);
-
-            _spriteTexturePath.onChange([&] { _spriteTextureIsDirty = true; });
-            _spriteTextureFile->setCallback(
-                [&](const File&) { _spriteTextureIsDirty = true; }
-            );
-            addProperty(_spriteTexturePath);
-
-            _hasSpriteTexture = true;
+        else if (unit == KilometerUnit) {
+            _unit = Kilometer;
         }
-
-        if (dictionary.hasKey(ColorMapInfo.identifier)) {
-            _colorMapFile = absPath(dictionary.value<std::string>(
-                ColorMapInfo.identifier
-                ));
-            _hasColorMapFile = true;
+        else if (unit == ParsecUnit) {
+            _unit = Parsec;
         }
-
-        if (dictionary.hasKey(TransparencyInfo.identifier)) {
-            _alphaValue = static_cast<float>(
-                dictionary.value<double>(TransparencyInfo.identifier)
-                );
+        else if (unit == KiloparsecUnit) {
+            _unit = Kiloparsec;
         }
-        addProperty(_alphaValue);
-
-        if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-            _scaleFactor = static_cast<float>(
-                dictionary.value<double>(ScaleFactorInfo.identifier)
-                );
+        else if (unit == MegaparsecUnit) {
+            _unit = Megaparsec;
         }
-        addProperty(_scaleFactor);
-
-    }
-
-    bool RenderablePoints::isReady() const {
-        return (_program != nullptr) && (!_fullData.empty());
-    }
-
-    void RenderablePoints::initialize() {
-        bool success = loadData();
-        if (!success) {
-            throw ghoul::RuntimeError("Error loading data");
+        else if (unit == GigaparsecUnit) {
+            _unit = Gigaparsec;
         }
-    }
-
-    void RenderablePoints::initializeGL() {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        if (_hasSpriteTexture) {
-            _program = renderEngine.buildRenderProgram(
-                "RenderablePoints",
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
-            );
+        else if (unit == GigalightyearUnit) {
+            _unit = GigalightYears;
         }
         else {
-            _program = renderEngine.buildRenderProgram(
-                "RenderablePoints",
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
-                absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl")
+            LWARNING("No unit given for RenderablePoints. Using meters as units.");
+            _unit = Meter;
+        }
+    }
+
+    if (dictionary.hasKey(keyColor)) {
+        _pointColor = dictionary.value<glm::vec3>(keyColor);
+    }
+    addProperty(_pointColor);
+
+    if (dictionary.hasKey(SpriteTextureInfo.identifier)) {
+        _spriteTexturePath = absPath(dictionary.value<std::string>(
+            SpriteTextureInfo.identifier
+            ));
+        _spriteTextureFile = std::make_unique<File>(_spriteTexturePath);
+
+        _spriteTexturePath.onChange([&] { _spriteTextureIsDirty = true; });
+        _spriteTextureFile->setCallback(
+            [&](const File&) { _spriteTextureIsDirty = true; }
+        );
+        addProperty(_spriteTexturePath);
+
+        _hasSpriteTexture = true;
+    }
+
+    if (dictionary.hasKey(ColorMapInfo.identifier)) {
+        _colorMapFile = absPath(dictionary.value<std::string>(
+            ColorMapInfo.identifier
+            ));
+        _hasColorMapFile = true;
+    }
+
+    if (dictionary.hasKey(TransparencyInfo.identifier)) {
+        _alphaValue = static_cast<float>(
+            dictionary.value<double>(TransparencyInfo.identifier)
             );
-        }
     }
+    addProperty(_alphaValue);
 
-    void RenderablePoints::deinitializeGL() {
-        glDeleteBuffers(1, &_vbo);
-        _vbo = 0;
-        glDeleteVertexArrays(1, &_vao);
-        _vao = 0;
-
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        if (_program) {
-            renderEngine.removeRenderProgram(_program);
-            _program = nullptr;
-        }
-
-        if (_hasSpriteTexture) {
-            _spriteTexture = nullptr;
-        }
+    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
+        _scaleFactor = static_cast<float>(
+            dictionary.value<double>(ScaleFactorInfo.identifier)
+            );
     }
+    addProperty(_scaleFactor);
 
-    void RenderablePoints::render(const RenderData& data, RendererTasks&) {
-        glDepthMask(false);
-        _program->activate();
+}
 
-        glm::dmat4 modelMatrix = glm::dmat4(1.0);
+bool RenderablePoints::isReady() const {
+    return (_program != nullptr) && (!_fullData.empty());
+}
 
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _program->setUniform(
-            "modelViewProjectionTransform",
-            glm::dmat4(data.camera.projectionMatrix()) *
-                data.camera.combinedViewMatrix() * modelMatrix
+void RenderablePoints::initialize() {
+    bool success = loadData();
+    if (!success) {
+        throw ghoul::RuntimeError("Error loading data");
+    }
+}
+
+void RenderablePoints::initializeGL() {
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_hasSpriteTexture) {
+        _program = renderEngine.buildRenderProgram(
+            "RenderablePoints",
+            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
         );
 
-        _program->setUniform("color", _pointColor);
-        _program->setUniform("sides", 4);
-        _program->setUniform("alphaValue", _alphaValue);
-        _program->setUniform("scaleFactor", _scaleFactor);
+        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
+            "modelViewProjectionTransform"
+        );
+        _uniformCache.color = _program->uniformLocation("color");
+        _uniformCache.sides = _program->uniformLocation("sides");
+        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+        _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
+        _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
+    }
+    else {
+        _program = renderEngine.buildRenderProgram(
+            "RenderablePoints",
+            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl")
+        );
 
-        if (_hasSpriteTexture) {
-            ghoul::opengl::TextureUnit spriteTextureUnit;
-            spriteTextureUnit.activate();
-            _spriteTexture->bind();
-            _program->setUniform("spriteTexture", spriteTextureUnit);
+        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
+            "modelViewProjectionTransform"
+        );
+        _uniformCache.color = _program->uniformLocation("color");
+        _uniformCache.sides = _program->uniformLocation("sides");
+        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+        _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
+    }
+}
+
+void RenderablePoints::deinitializeGL() {
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine.removeRenderProgram(_program);
+        _program = nullptr;
+    }
+
+    if (_hasSpriteTexture) {
+        _spriteTexture = nullptr;
+    }
+}
+
+void RenderablePoints::render(const RenderData& data, RendererTasks&) {
+    glDepthMask(false);
+    _program->activate();
+
+    glm::dmat4 modelMatrix = glm::dmat4(1.0);
+
+    _program->setUniform(
+        _uniformCache.modelViewProjectionTransform,
+        glm::dmat4(data.camera.projectionMatrix()) *
+            data.camera.combinedViewMatrix() * modelMatrix
+    );
+
+    _program->setUniform(_uniformCache.color, _pointColor);
+    _program->setUniform(_uniformCache.sides, 4);
+    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
+
+    if (_hasSpriteTexture) {
+        ghoul::opengl::TextureUnit spriteTextureUnit;
+        spriteTextureUnit.activate();
+        _spriteTexture->bind();
+        _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
+    }
+
+    _program->setUniform(_uniformCache.hasColorMap, _hasColorMapFile);
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glBindVertexArray(_vao);
+    const GLsizei nAstronomicalObjects = static_cast<GLsizei>(
+        _fullData.size() / _nValuesPerAstronomicalObject
+    );
+    glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
+
+    glDisable(GL_PROGRAM_POINT_SIZE);
+    glBindVertexArray(0);
+    _program->deactivate();
+
+    glDepthMask(true);
+}
+
+void RenderablePoints::update(const UpdateData&) {
+    if (_dataIsDirty) {
+        LDEBUG("Regenerating data");
+
+        createDataSlice();
+
+        int size = static_cast<int>(_slicedData.size());
+
+        if (_vao == 0) {
+            glGenVertexArrays(1, &_vao);
+            LDEBUG("Generating Vertex Array id '" << _vao << "'");
         }
+        if (_vbo == 0) {
+            glGenBuffers(1, &_vbo);
+            LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
+        }
+
+        glBindVertexArray(_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            size * sizeof(double),
+            &_slicedData[0],
+            GL_STATIC_DRAW
+        );
+        GLint positionAttrib = _program->attributeLocation("in_position");
 
         if (_hasColorMapFile) {
-            _program->setUniform("hasColorMap", true);
+
+            const size_t nAstronomicalObjects = _fullData.size() /
+                                                        _nValuesPerAstronomicalObject;
+            // const size_t nValues = _slicedData.size() / nAstronomicalObjects;
+            // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
+
+            glEnableVertexAttribArray(positionAttrib);
+            glVertexAttribLPointer(
+                positionAttrib,
+                4,
+                GL_DOUBLE,
+                sizeof(double)*8,
+                nullptr
+            );
+
+            GLint colorMapAttrib = _program->attributeLocation("in_colormap");
+            glEnableVertexAttribArray(colorMapAttrib);
+            glVertexAttribLPointer(
+                colorMapAttrib,
+                4,
+                GL_DOUBLE,
+                sizeof(double) * 8,
+                reinterpret_cast<void*>(sizeof(double)*4)
+            );
         }
         else {
-            _program->setUniform("hasColorMap", false);
+            glEnableVertexAttribArray(positionAttrib);
+            glVertexAttribLPointer(
+                positionAttrib,
+                4,
+                GL_DOUBLE,
+                0,
+                nullptr
+            );
         }
 
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        glBindVertexArray(_vao);
-        const GLsizei nAstronomicalObjects = static_cast<GLsizei>(
-            _fullData.size() / _nValuesPerAstronomicalObject
-        );
-        glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
-
-        glDisable(GL_PROGRAM_POINT_SIZE);
         glBindVertexArray(0);
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _program->setIgnoreUniformLocationError(IgnoreError::No);
-        _program->deactivate();
 
-        glDepthMask(true);
+        _dataIsDirty = false;
     }
 
-    void RenderablePoints::update(const UpdateData&) {
-        if (_dataIsDirty) {
-            LDEBUG("Regenerating data");
-
-            createDataSlice();
-
-            int size = static_cast<int>(_slicedData.size());
-
-            if (_vao == 0) {
-                glGenVertexArrays(1, &_vao);
-                LDEBUG("Generating Vertex Array id '" << _vao << "'");
-            }
-            if (_vbo == 0) {
-                glGenBuffers(1, &_vbo);
-                LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
-            }
-
-            glBindVertexArray(_vao);
-            glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                size * sizeof(double),
-                &_slicedData[0],
-                GL_STATIC_DRAW
+    if (_hasSpriteTexture && _spriteTextureIsDirty) {
+        LDEBUG("Reloading Sprite Texture");
+        _spriteTexture = nullptr;
+        if (_spriteTexturePath.value() != "") {
+            _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_spriteTexturePath)
             );
-            GLint positionAttrib = _program->attributeLocation("in_position");
-
-            if (_hasColorMapFile) {
-
-                const size_t nAstronomicalObjects = _fullData.size() /
-                                                            _nValuesPerAstronomicalObject;
-                // const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-                // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
-
-                glEnableVertexAttribArray(positionAttrib);
-                glVertexAttribLPointer(
-                    positionAttrib,
-                    4,
-                    GL_DOUBLE,
-                    sizeof(double)*8,
-                    nullptr
-                );
-
-                GLint colorMapAttrib = _program->attributeLocation("in_colormap");
-                glEnableVertexAttribArray(colorMapAttrib);
-                glVertexAttribLPointer(
-                    colorMapAttrib,
-                    4,
-                    GL_DOUBLE,
-                    sizeof(double) * 8,
-                    reinterpret_cast<void*>(sizeof(double)*4)
-                );
+            if (_spriteTexture) {
+                LDEBUG("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
+                _spriteTexture->uploadTexture();
             }
-            else {
-                glEnableVertexAttribArray(positionAttrib);
-                glVertexAttribLPointer(
-                    positionAttrib,
-                    4,
-                    GL_DOUBLE,
-                    0,
-                    nullptr
-                );
-            }
+            _spriteTexture->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            );
 
-            glBindVertexArray(0);
-
-            _dataIsDirty = false;
+            _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
+                _spriteTexturePath);
+            _spriteTextureFile->setCallback(
+                [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
+            );
         }
-
-        if (_hasSpriteTexture && _spriteTextureIsDirty) {
-            LDEBUG("Reloading Sprite Texture");
-            _spriteTexture = nullptr;
-            if (_spriteTexturePath.value() != "") {
-                _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
-                    absPath(_spriteTexturePath)
-                );
-                if (_spriteTexture) {
-                    LDEBUG("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
-                    _spriteTexture->uploadTexture();
-                }
-                _spriteTexture->setFilter(
-                    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-                );
-
-                _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
-                    _spriteTexturePath);
-                _spriteTextureFile->setCallback(
-                    [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
-                );
-            }
-            _spriteTextureIsDirty = false;
-        }
+        _spriteTextureIsDirty = false;
     }
+}
 
-    bool RenderablePoints::loadData() {
-        std::string _file = _speckFile;
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _file,
-            ghoul::filesystem::CacheManager::Persistent::Yes
+bool RenderablePoints::loadData() {
+    std::string _file = _speckFile;
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        _file,
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+
+    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    if (hasCachedFile) {
+        LINFO(
+            "Cached file '" << cachedFile << "' used for Speck file '" << _file << "'"
         );
 
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO(
-                "Cached file '" << cachedFile << "' used for Speck file '" << _file << "'"
-            );
-
-            bool success = loadCachedFile(cachedFile);
-            if (success) {
-                if (_hasColorMapFile) {
-                    success &= readColorMapFile();
-                }
-                return success;
+        bool success = loadCachedFile(cachedFile);
+        if (success) {
+            if (_hasColorMapFile) {
+                success &= readColorMapFile();
             }
-            else {
-                FileSys.cacheManager()->removeCacheFile(_file);
-                // Intentional fall-through to the 'else' to generate the cache file for
-                // the next run
-            }
+            return success;
         }
         else {
-            LINFO("Cache for Speck file '" << _file << "' not found");
+            FileSys.cacheManager()->removeCacheFile(_file);
+            // Intentional fall-through to the 'else' to generate the cache file for
+            // the next run
         }
-        LINFO("Loading Speck file '" << _file << "'");
+    }
+    else {
+        LINFO("Cache for Speck file '" << _file << "' not found");
+    }
+    LINFO("Loading Speck file '" << _file << "'");
 
-        bool success = readSpeckFile();
-        if (!success) {
+    bool success = readSpeckFile();
+    if (!success) {
+        return false;
+    }
+
+    LINFO("Saving cache");
+    success = saveCachedFile(cachedFile);
+
+    if (_hasColorMapFile) {
+        success &= readColorMapFile();
+    }
+
+    return success;
+}
+
+bool RenderablePoints::readSpeckFile() {
+    std::string _file = _speckFile;
+    std::ifstream file(_file);
+    if (!file.good()) {
+        LERROR("Failed to open Speck file '" << _file << "'");
+        return false;
+    }
+
+    _nValuesPerAstronomicalObject = 0;
+
+    // The beginning of the speck file has a header that either contains comments
+    // (signaled by a preceding '#') or information about the structure of the file
+    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
+    std::string line = "";
+    while (true) {
+        std::streampos position = file.tellg();
+        std::getline(file, line);
+
+        if (line[0] == '#' || line.empty()) {
+            continue;
+        }
+
+        if (line.substr(0, 7) != "datavar" &&
+            line.substr(0, 10) != "texturevar" &&
+            line.substr(0, 7) != "texture")
+        {
+            // we read a line that doesn't belong to the header, so we have to jump
+            // back before the beginning of the current line
+            file.seekg(position);
+            break;
+        }
+
+        if (line.substr(0, 7) == "datavar") {
+            // datavar lines are structured as follows:
+            // datavar # description
+            // where # is the index of the data variable; so if we repeatedly
+            // overwrite the 'nValues' variable with the latest index, we will end up
+            // with the total number of values (+3 since X Y Z are not counted in the
+            // Speck file index)
+            std::stringstream str(line);
+
+            std::string dummy;
+            str >> dummy;
+            str >> _nValuesPerAstronomicalObject;
+            // We want the number, but the index is 0 based
+            _nValuesPerAstronomicalObject += 1;
+        }
+    }
+
+    // X Y Z are not counted in the Speck file indices
+    _nValuesPerAstronomicalObject += 3;
+
+    do {
+        std::vector<float> values(_nValuesPerAstronomicalObject);
+
+        std::getline(file, line);
+        std::stringstream str(line);
+
+        for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
+            str >> values[i];
+        }
+
+        _fullData.insert(_fullData.end(), values.begin(), values.end());
+    } while (!file.eof());
+
+    return true;
+}
+
+bool RenderablePoints::readColorMapFile() {
+    std::string _file = _colorMapFile;
+    std::ifstream file(_file);
+    if (!file.good()) {
+        LERROR("Failed to open Color Map file '" << _file << "'");
+        return false;
+    }
+
+    std::size_t numberOfColors = 0;
+
+    // The beginning of the speck file has a header that either contains comments
+    // (signaled by a preceding '#') or information about the structure of the file
+    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
+    std::string line = "";
+    while (true) {
+        // std::streampos position = file.tellg();
+        std::getline(file, line);
+
+        if (line[0] == '#' || line.empty()) {
+            continue;
+        }
+
+        // Initial number of colors
+        std::locale loc;
+        if (std::isdigit(line[0], loc)) {
+            std::string::size_type sz;
+            numberOfColors = std::stoi(line, &sz);
+            break;
+        }
+        else if (file.eof()) {
+            return false;
+        }
+    }
+
+    for (size_t i = 0; i < numberOfColors; ++i) {
+        std::getline(file, line);
+        std::stringstream str(line);
+
+        glm::vec4 color;
+        for (int j = 0; j < 4; ++j) {
+            str >> color[j];
+        }
+
+        _colorMapData.push_back(color);
+    }
+
+    return true;
+}
+
+bool RenderablePoints::loadCachedFile(const std::string& file) {
+    std::ifstream fileStream(file, std::ifstream::binary);
+    if (fileStream.good()) {
+        int8_t version = 0;
+        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+        if (version != CurrentCacheVersion) {
+            LINFO("The format of the cached file has changed: deleting old cache");
+            fileStream.close();
+            FileSys.deleteFile(file);
             return false;
         }
 
-        LINFO("Saving cache");
-        success = saveCachedFile(cachedFile);
+        int32_t nValues = 0;
+        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+        fileStream.read(
+            reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
+            sizeof(int32_t)
+        );
 
-        if (_hasColorMapFile) {
-            success &= readColorMapFile();
-        }
+        _fullData.resize(nValues);
+        fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
+            nValues * sizeof(_fullData[0]));
 
+        bool success = fileStream.good();
         return success;
     }
+    else {
+        LERROR("Error opening file '" << file << "' for loading cache file");
+        return false;
+    }
+}
 
-    bool RenderablePoints::readSpeckFile() {
-        std::string _file = _speckFile;
-        std::ifstream file(_file);
-        if (!file.good()) {
-            LERROR("Failed to open Speck file '" << _file << "'");
+bool RenderablePoints::saveCachedFile(const std::string& file) const {
+    std::ofstream fileStream(file, std::ofstream::binary);
+    if (fileStream.good()) {
+        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t));
+
+        int32_t nValues = static_cast<int32_t>(_fullData.size());
+        if (nValues == 0) {
+            LERROR("Error writing cache: No values were loaded");
             return false;
         }
+        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-        _nValuesPerAstronomicalObject = 0;
+        int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
+            _nValuesPerAstronomicalObject
+        );
+        fileStream.write(
+            reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
+            sizeof(int32_t)
+        );
 
-        // The beginning of the speck file has a header that either contains comments
-        // (signaled by a preceding '#') or information about the structure of the file
-        // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-        std::string line = "";
-        while (true) {
-            std::streampos position = file.tellg();
-            std::getline(file, line);
+        size_t nBytes = nValues * sizeof(_fullData[0]);
+        fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
 
-            if (line[0] == '#' || line.empty()) {
-                continue;
-            }
+        bool success = fileStream.good();
+        return success;
+    }
+    else {
+        LERROR("Error opening file '" << file << "' for save cache file");
+        return false;
+    }
+}
 
-            if (line.substr(0, 7) != "datavar" &&
-                line.substr(0, 10) != "texturevar" &&
-                line.substr(0, 7) != "texture")
-            {
-                // we read a line that doesn't belong to the header, so we have to jump
-                // back before the beginning of the current line
-                file.seekg(position);
-                break;
-            }
-
-            if (line.substr(0, 7) == "datavar") {
-                // datavar lines are structured as follows:
-                // datavar # description
-                // where # is the index of the data variable; so if we repeatedly
-                // overwrite the 'nValues' variable with the latest index, we will end up
-                // with the total number of values (+3 since X Y Z are not counted in the
-                // Speck file index)
-                std::stringstream str(line);
-
-                std::string dummy;
-                str >> dummy;
-                str >> _nValuesPerAstronomicalObject;
-                // We want the number, but the index is 0 based
-                _nValuesPerAstronomicalObject += 1;
-            }
-        }
-
-        // X Y Z are not counted in the Speck file indices
-        _nValuesPerAstronomicalObject += 3;
-
-        do {
-            std::vector<float> values(_nValuesPerAstronomicalObject);
-
-            std::getline(file, line);
-            std::stringstream str(line);
-
-            for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-                str >> values[i];
-            }
-
-            _fullData.insert(_fullData.end(), values.begin(), values.end());
-        } while (!file.eof());
-
-        return true;
+void RenderablePoints::createDataSlice() {
+    _slicedData.clear();
+    if (_hasColorMapFile) {
+        _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
+    }
+    else {
+        _slicedData.reserve(4 * (_fullData.size()/_nValuesPerAstronomicalObject));
     }
 
-    bool RenderablePoints::readColorMapFile() {
-        std::string _file = _colorMapFile;
-        std::ifstream file(_file);
-        if (!file.good()) {
-            LERROR("Failed to open Color Map file '" << _file << "'");
-            return false;
+    int colorIndex = 0;
+    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
+        glm::dvec3 p = glm::dvec3(
+            _fullData[i + 0],
+            _fullData[i + 1],
+            _fullData[i + 2]
+        );
+
+        // Converting untis
+        if (_unit == Kilometer) {
+            p *= 1E3;
+        }
+        else if (_unit == Parsec) {
+            p *= PARSEC;
+        }
+        else if (_unit == Kiloparsec) {
+            p *= 1E3 * PARSEC;
+        }
+        else if (_unit == Megaparsec) {
+            p *= 1E6 * PARSEC;
+        }
+        else if (_unit == Gigaparsec) {
+            p *= 1E9 * PARSEC;
+        }
+        else if (_unit == GigalightYears) {
+            p *= 306391534.73091 * PARSEC;
         }
 
-        std::size_t numberOfColors = 0;
+        glm::dvec4 position(p, 1.0);
 
-        // The beginning of the speck file has a header that either contains comments
-        // (signaled by a preceding '#') or information about the structure of the file
-        // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-        std::string line = "";
-        while (true) {
-            // std::streampos position = file.tellg();
-            std::getline(file, line);
-
-            if (line[0] == '#' || line.empty()) {
-                continue;
-            }
-
-            // Initial number of colors
-            std::locale loc;
-            if (std::isdigit(line[0], loc)) {
-                std::string::size_type sz;
-                numberOfColors = std::stoi(line, &sz);
-                break;
-            }
-            else if (file.eof()) {
-                return false;
-            }
-        }
-
-        for (size_t i = 0; i < numberOfColors; ++i) {
-            std::getline(file, line);
-            std::stringstream str(line);
-
-            glm::vec4 color;
-            for (int j = 0; j < 4; ++j) {
-                str >> color[j];
-            }
-
-            _colorMapData.push_back(color);
-        }
-
-        return true;
-    }
-
-    bool RenderablePoints::loadCachedFile(const std::string& file) {
-        std::ifstream fileStream(file, std::ifstream::binary);
-        if (fileStream.good()) {
-            int8_t version = 0;
-            fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-            if (version != CurrentCacheVersion) {
-                LINFO("The format of the cached file has changed: deleting old cache");
-                fileStream.close();
-                FileSys.deleteFile(file);
-                return false;
-            }
-
-            int32_t nValues = 0;
-            fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-            fileStream.read(
-                reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
-                sizeof(int32_t)
-            );
-
-            _fullData.resize(nValues);
-            fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
-                nValues * sizeof(_fullData[0]));
-
-            bool success = fileStream.good();
-            return success;
-        }
-        else {
-            LERROR("Error opening file '" << file << "' for loading cache file");
-            return false;
-        }
-    }
-
-    bool RenderablePoints::saveCachedFile(const std::string& file) const {
-        std::ofstream fileStream(file, std::ofstream::binary);
-        if (fileStream.good()) {
-            fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-                sizeof(int8_t));
-
-            int32_t nValues = static_cast<int32_t>(_fullData.size());
-            if (nValues == 0) {
-                LERROR("Error writing cache: No values were loaded");
-                return false;
-            }
-            fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-            int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
-                _nValuesPerAstronomicalObject
-            );
-            fileStream.write(
-                reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
-                sizeof(int32_t)
-            );
-
-            size_t nBytes = nValues * sizeof(_fullData[0]);
-            fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
-
-            bool success = fileStream.good();
-            return success;
-        }
-        else {
-            LERROR("Error opening file '" << file << "' for save cache file");
-            return false;
-        }
-    }
-
-    void RenderablePoints::createDataSlice() {
-        _slicedData.clear();
         if (_hasColorMapFile) {
-            _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
+            for (auto j = 0; j < 4; ++j) {
+                _slicedData.push_back(position[j]);
+            }
+            for (auto j = 0; j < 4; ++j) {
+                _slicedData.push_back(_colorMapData[colorIndex][j]);
+            }
         }
         else {
-            _slicedData.reserve(4 * (_fullData.size()/_nValuesPerAstronomicalObject));
+            for (auto j = 0; j < 4; ++j) {
+                _slicedData.push_back(position[j]);
+            }
         }
 
-        int colorIndex = 0;
-        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-            glm::dvec3 p = glm::dvec3(
-                _fullData[i + 0],
-                _fullData[i + 1],
-                _fullData[i + 2]
-            );
-
-            // Converting untis
-            if (_unit == Kilometer) {
-                p *= 1E3;
-            }
-            else if (_unit == Parsec) {
-                p *= PARSEC;
-            }
-            else if (_unit == Kiloparsec) {
-                p *= 1E3 * PARSEC;
-            }
-            else if (_unit == Megaparsec) {
-                p *= 1E6 * PARSEC;
-            }
-            else if (_unit == Gigaparsec) {
-                p *= 1E9 * PARSEC;
-            }
-            else if (_unit == GigalightYears) {
-                p *= 306391534.73091 * PARSEC;
-            }
-
-            glm::dvec4 position(p, 1.0);
-
-            if (_hasColorMapFile) {
-                for (auto j = 0; j < 4; ++j) {
-                    _slicedData.push_back(position[j]);
-                }
-                for (auto j = 0; j < 4; ++j) {
-                    _slicedData.push_back(_colorMapData[colorIndex][j]);
-                }
-            }
-            else {
-                for (auto j = 0; j < 4; ++j) {
-                    _slicedData.push_back(position[j]);
-                }
-            }
-
-            colorIndex =
-                (colorIndex == static_cast<int>(_colorMapData.size() - 1)) ?
-                0 :
-                colorIndex + 1;
-        }
+        colorIndex =
+            (colorIndex == static_cast<int>(_colorMapData.size() - 1)) ?
+            0 :
+            colorIndex + 1;
     }
+}
 
 } // namespace openspace

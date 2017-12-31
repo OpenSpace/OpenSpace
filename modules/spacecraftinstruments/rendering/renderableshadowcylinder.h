@@ -36,6 +36,7 @@
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -78,6 +79,7 @@ private:
     properties::OptionProperty _aberration;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    UniformCache(modelViewProjectionTransform, shadowColor) _uniformCache;
 
     glm::dmat3 _stateMatrix;
 

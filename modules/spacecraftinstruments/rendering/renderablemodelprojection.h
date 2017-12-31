@@ -27,14 +27,14 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/spacecraftinstruments/util/projectioncomponent.h>
-
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <modules/spacecraftinstruments/util/projectioncomponent.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-
 #include <openspace/util/powerscaledcoordinate.h>
+
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -79,8 +79,14 @@ private:
     properties::StringProperty _colorTexturePath;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    UniformCache(performShading, directionToSunViewSpace, modelViewTransform,
+        projectionTransform, projectionFading, baseTexture,
+        projectionTexture) _mainUniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    UniformCache(projectionTexture, needShadowMap, ProjectorMatrix, ModelTransform,
+        boresight) _fboUniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
+    UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
 

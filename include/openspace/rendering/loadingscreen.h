@@ -28,6 +28,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <memory>
 #include <mutex>
@@ -95,6 +96,8 @@ private:
     int _nItems;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    UniformCache(logoTexture, useTexture, color) _uniformCache;
+
     std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 
     std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
