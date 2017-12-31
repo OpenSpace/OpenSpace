@@ -34,7 +34,7 @@ namespace openspace {
 
 GalaxyModule::GalaxyModule() : OpenSpaceModule(Name) {}
 
-void GalaxyModule::internalInitialize() {
+void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableGalaxy>("RenderableGalaxy");

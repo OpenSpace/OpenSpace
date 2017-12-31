@@ -47,7 +47,7 @@ namespace openspace {
 
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
-void SpacecraftInstrumentsModule::internalInitialize() {
+void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
     ImageSequencer::initialize();
 
     FactoryManager::ref().addFactory(

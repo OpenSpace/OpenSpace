@@ -106,14 +106,10 @@ public:
 protected:
     /**
      * Customization point for each derived class. The internalInitialize method is called
-     * by the initiailze method.
+     * by the initialize method.
+     * \param configuration The configuration options that were read from the
+     * configuration file
      */
-    virtual void internalInitialize();
-
-    /**
-    * Customization point for each derived class. The internalInitialize method is called
-    * by the initiailze method.
-    */
     virtual void internalInitialize(const ghoul::Dictionary& configuration);
 
     /**

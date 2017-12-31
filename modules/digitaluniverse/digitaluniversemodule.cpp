@@ -44,7 +44,7 @@ DigitalUniverseModule::DigitalUniverseModule()
     : OpenSpaceModule(DigitalUniverseModule::Name)
 {}
 
-void DigitalUniverseModule::internalInitialize() {
+void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 

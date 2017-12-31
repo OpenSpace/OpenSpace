@@ -37,8 +37,8 @@ public:
     virtual ~SpaceModule() = default;
     std::vector<documentation::Documentation> documentations() const override;
 
-protected:
-    void internalInitialize() override;
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

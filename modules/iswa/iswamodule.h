@@ -38,7 +38,7 @@ public:
     scripting::LuaLibrary luaLibrary() const override;
 
 protected:
-    void internalInitialize() override;
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

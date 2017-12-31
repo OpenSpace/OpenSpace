@@ -41,7 +41,7 @@ using namespace kameleonvolume;
 
 KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule(Name) {}
 
-void KameleonVolumeModule::internalInitialize() {
+void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableKameleonVolume>("RenderableKameleonVolume");

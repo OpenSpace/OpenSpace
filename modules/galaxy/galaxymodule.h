@@ -34,7 +34,9 @@ public:
     constexpr static const char* Name = "Galaxy";
 
     GalaxyModule();
-    void internalInitialize() override;
+
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

@@ -35,9 +35,10 @@
 namespace openspace {
 
 FieldlinesSequenceModule::FieldlinesSequenceModule()
-    : OpenSpaceModule("FieldlinesSequence") {}
+    : OpenSpaceModule("FieldlinesSequence")
+{}
 
-void FieldlinesSequenceModule::internalInitialize() {
+void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "No renderable factory existed");
 

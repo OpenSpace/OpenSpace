@@ -40,7 +40,7 @@ public:
     std::vector<scripting::LuaLibrary> luaLibraries() const override;
 
 protected:
-    void internalInitialize() override;
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

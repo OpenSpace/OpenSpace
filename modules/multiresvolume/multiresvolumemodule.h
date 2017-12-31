@@ -34,7 +34,9 @@ public:
     constexpr static const char* Name = "MultiresVolume";
 
     MultiresVolumeModule();
-    void internalInitialize() override;
+
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

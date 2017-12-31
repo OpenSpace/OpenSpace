@@ -69,7 +69,7 @@ namespace openspace {
 
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
-void BaseModule::internalInitialize() {
+void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>(),
         "ModelGeometry"

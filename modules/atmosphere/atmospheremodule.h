@@ -33,7 +33,9 @@ namespace openspace {
 class AtmosphereModule : public OpenSpaceModule {
 public:
     AtmosphereModule();
-    void internalInitialize() override;
+
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

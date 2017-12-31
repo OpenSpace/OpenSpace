@@ -119,16 +119,11 @@ std::string OpenSpaceModule::modulePath() const {
     );
 }
 
-const ModuleEngine* OpenSpaceModule::moduleEngine() const
-{
+const ModuleEngine* OpenSpaceModule::moduleEngine() const {
     return _moduleEngine;
 }
 
-void OpenSpaceModule::internalInitialize() {}
-
-void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {
-    internalInitialize();
-}
+void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}
 
 void OpenSpaceModule::internalDeinitialize() {}
 

@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 
 #include <ghoul/font/fontmanager.h>
@@ -206,13 +207,21 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 "Next instrument activity:"
             );
 
+            std::pair<double, std::string> remainingConv = simplifyTime(remaining);
+
+            // If the remaining time is below 5 minutes, we switch over to seconds display
+            if (remaining < 5 * 60) {
+                remainingConv = { remaining, "seconds" };
+            }
+
             const int Size = 25;
             int p = std::max(static_cast<int>((t * (Size - 1)) + 1), 0);
             RenderFontCr(*_font,
                 penPosition,
                 glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
-                "%4.0f s |%s>%s| %.1f %%",
-                remaining,
+                "%4.0f %s |%s>%s| %.1f %%",
+                remainingConv.first,
+                remainingConv.second.c_str(),
                 std::string(p, '-').c_str(),
                 std::string(Size - p, ' ').c_str(),
                 t * 100

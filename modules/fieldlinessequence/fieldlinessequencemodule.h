@@ -33,8 +33,8 @@ class FieldlinesSequenceModule : public OpenSpaceModule {
 public:
     FieldlinesSequenceModule();
 
-protected:
-    void internalInitialize() override;
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

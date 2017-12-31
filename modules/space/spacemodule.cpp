@@ -47,7 +47,7 @@ namespace openspace {
 
 SpaceModule::SpaceModule() : OpenSpaceModule(Name) {}
 
-void SpaceModule::internalInitialize() {
+void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>(),
         "PlanetGeometry"

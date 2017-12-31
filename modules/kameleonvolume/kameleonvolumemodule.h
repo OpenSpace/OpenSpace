@@ -36,8 +36,11 @@ public:
 
     KameleonVolumeModule();
     virtual ~KameleonVolumeModule() = default;
-    void internalInitialize() override;
+
     std::vector<documentation::Documentation> documentations() const override;
+
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

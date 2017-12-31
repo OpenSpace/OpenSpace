@@ -82,7 +82,7 @@ public:
 #endif // GLOBEBROWSING_USE_GDAL
 
 protected:
-    void internalInitialize() override;
+    void internalInitialize(const ghoul::Dictionary&) override;
 
 private:
     void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,

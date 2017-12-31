@@ -36,7 +36,7 @@ using namespace volume;
 
 VolumeModule::VolumeModule()  : OpenSpaceModule(Name) {}
 
-void VolumeModule::internalInitialize() {
+void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "No renderable factory existed");
     factory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");

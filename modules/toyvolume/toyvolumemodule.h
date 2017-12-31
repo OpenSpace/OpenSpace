@@ -34,7 +34,8 @@ public:
     constexpr static const char* Name = "ToyVolume";
 
     ToyVolumeModule();
-    void internalInitialize() override;
+
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace
