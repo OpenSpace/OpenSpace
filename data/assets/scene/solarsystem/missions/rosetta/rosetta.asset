@@ -8,14 +8,14 @@ local textures = asset.syncedResource({
     Name = "Rosetta Textures",
     Type = "HttpSynchronization",
     Identifier = "rosetta_textures",
-    Version = 1
+    Version = 2
 })
 
 local models = asset.syncedResource({
     Name = "Rosetta Models",
     Type = "HttpSynchronization",
     Identifier = "rosetta_model",
-    Version = 1
+    Version = 3
 })
 
 local kernels = asset.syncedResource({
@@ -325,7 +325,7 @@ local PhilaeParts = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/lander_parts.obj"
         },
-        ColorTexture = models .. "/foil_silver_ramp.png",
+        ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
     GuiPath = "/Solar System/Missions/Rosetta"
@@ -427,7 +427,7 @@ local PhilaeTrail = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Rosetta,
-    RosettsModel,
+    RosettaModel,
     RosettaBlackFoil,
     RosettaBlackParts,
     RosettaDish,
@@ -449,5 +449,5 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     PhilaeSolarPanels,
 
     RosettaCometTrail,
-    PhilaeTrail,
+    PhilaeTrail
 })

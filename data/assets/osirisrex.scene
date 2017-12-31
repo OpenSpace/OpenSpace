@@ -84,6 +84,23 @@ asset.onInitialize(function ()
     sceneHelper.bindKeys(Keybindings)
 
     openspace.set_default_dashboard()
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSpacing",
+        Spacing = 25
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Node",
+        SourceNodeName = "OsirisRex",
+        DestinationType = "Node",
+        DestinationNodeName = "BennuBarycenter"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemInstruments"
+    })
+
     openspace.set_default_gui_sorting()
 
     sceneHelper.setDeltaTimeKeys({

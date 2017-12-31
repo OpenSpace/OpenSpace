@@ -32,7 +32,7 @@ local imagesTorrent = asset.syncedResource({
 }) .. "/rosettaimages"
 
 local Barycenter = {
-    Name = "Barycenter",
+    Name = "67PBarycenter",
     Parent = transforms.SolarSystemBarycenter.Name, 
     Transform = {
         Translation = {

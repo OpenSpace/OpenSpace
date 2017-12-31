@@ -1,0 +1,10 @@
+-- Please note that this scene/asset is not meant to be included anywhere directly.
+-- Rather it is used in the Sync application to synchronize the entire asset folder
+-- without needing manual adaption
+
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+
+assetHelper.requestAll(asset, 'scene')
+assetHelper.requestAll(asset, 'spice')
+assetHelper.requestAll(asset, 'util')

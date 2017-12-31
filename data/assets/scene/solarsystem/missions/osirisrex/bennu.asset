@@ -24,8 +24,8 @@ local BENNU_BODY = "2101955"
 local Bennu = {
     Name = "Bennu",
     Parent = transforms.BennuBarycenter.Name,
-    Transform = {
-        Rotation = {
+    Transform = 
+{        Rotation = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_BENNU",
             DestinationFrame = "GALACTIC"
@@ -40,8 +40,8 @@ local Bennu = {
         }, 
         ColorTexture = textures .. "/gray.png",
         Projection = {
-            Sequence   = "InstrumentTimes",
-            SequenceType = asset.localResource('instrumentTimes'),
+            Sequence   = asset.localResource('InstrumentTimes'),
+            SequenceType = "instrument-times",
             Observer   = "OSIRIS-REX",
             Target     = BENNU_BODY,
             Aberration = "NONE",
@@ -107,4 +107,4 @@ local BennuTrail = {
 }
 
 
--- assetHelper.registerSceneGraphNodesAndExport(asset, { Bennu, BennuTrail })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Bennu, BennuTrail })

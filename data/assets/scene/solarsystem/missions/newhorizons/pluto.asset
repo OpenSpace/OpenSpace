@@ -250,6 +250,7 @@ local PlutoTrail = {
     Parent = sunTransforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableTrailOrbit",
+        Enabled = false,
         Translation = {
             Type = "SpiceTranslation",
             Target = "PLUTO BARYCENTER",

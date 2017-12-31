@@ -1,15 +1,7 @@
 return {
     {
         Type = "SyncAssetTask",
-        Asset = "dawn"
-    },
-    {
-        Type = "SyncAssetTask",
         Asset = "default"
-    },
-    {
-        Type = "SyncAssetTask",
-        Asset = "juno"
     },
     {
         Type = "SyncAssetTask",
@@ -17,14 +9,26 @@ return {
     },
     {
         Type = "SyncAssetTask",
-        Asset = "osirisrex"
-    },
-    {
-        Type = "SyncAssetTask",
         Asset = "rosetta"
     },
     {
         Type = "SyncAssetTask",
+        Asset = "dawn"
+    },
+    {
+        Type = "SyncAssetTask",
+        Asset = "juno"
+    },
+    {
+        Type = "SyncAssetTask",
+        Asset = "osirisrex"
+    },
+    {
+        Type = "SyncAssetTask",
         Asset = "voyager"
+    },
+    {
+        Type = "SyncAssetTask",
+        Asset = "everything"
     }
 }

@@ -136,7 +136,7 @@ asset.onInitialize(function ()
     openspace.set_default_dashboard()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemSpacing",
-        Spacing = 50
+        Spacing = 25
     })
 
     openspace.dashboard.addDashboardItem({
