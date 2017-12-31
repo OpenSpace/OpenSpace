@@ -629,9 +629,9 @@ int main_main(int argc, char** argv) {
     }
 
     // Main loop
-    LDEBUG("Starting rendering loop");
+    LINFO("Starting rendering loop");
     SgctEngine->render();
-    LDEBUG("Ending rendering loop");
+    LINFO("Ending rendering loop");
 
     cleanup(IsInitialized::Yes);
 

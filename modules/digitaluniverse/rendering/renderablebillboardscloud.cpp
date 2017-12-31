@@ -1056,7 +1056,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 absPath(_spriteTexturePath)
             );
             if (_spriteTexture) {
-                LDEBUG("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
+                LINFO("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
                 _spriteTexture->uploadTexture();
             }
             _spriteTexture->setFilter(

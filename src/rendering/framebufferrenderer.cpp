@@ -86,7 +86,7 @@ FramebufferRenderer::FramebufferRenderer()
 FramebufferRenderer::~FramebufferRenderer() {}
 
 void FramebufferRenderer::initialize() {
-    LINFO("Initializing FramebufferRenderer");
+    LDEBUG("Initializing FramebufferRenderer");
 
     const GLfloat size = 1.0f;
     const GLfloat vertex_data[] = {
@@ -590,7 +590,7 @@ void FramebufferRenderer::updateHDRData() {
 }
 
 void FramebufferRenderer::updateMSAASamplingPattern() {
-    LINFO("Updating MSAA Sampling Pattern");
+    LDEBUG("Updating MSAA Sampling Pattern");
 
     const int GRIDSIZE = 32;
     GLfloat step = 2.0f / static_cast<GLfloat>(GRIDSIZE);
@@ -1315,7 +1315,7 @@ void saveTextureToMemory(const GLenum color_buffer_attachment,
     if (!memory.empty()) {
         memory.clear();
     }
-    memory.reserve(width * height * 3);
+    memory.resize(width * height * 3);
 
     float *tempMemory = new float[width*height * 3];
 

@@ -43,7 +43,7 @@
 namespace {
     const float LoadingFontSize = 25.f;
     const float MessageFontSize = 22.f;
-    const float ItemFontSize = 8.f;
+    const float ItemFontSize = 10.f;
 
     const glm::vec2 LogoCenter = { 0.f, 0.525f };  // in NDC
     const glm::vec2 LogoSize = { 0.275f, 0.275 };  // in NDC

@@ -920,7 +920,7 @@ bool RenderablePlanesCloud::loadTextures() {
                 ghoul::io::TextureReader::ref().loadTexture(pair.second)
             ));
             if (p.second) {
-                LDEBUGC(
+                LINFOC(
                     "RenderablePlanesCloud",
                     "Loaded texture from '" << pair.second << "'"
                 );

@@ -876,7 +876,7 @@ void OpenSpaceEngine::loadFonts() {
             continue;
         }
 
-        LINFO("Registering font '" << font << "' with key '" << key << "'");
+        LDEBUG("Registering font '" << font << "' with key '" << key << "'");
         bool success = _fontManager->registerFontPath(key, font);
 
         if (!success) {
@@ -1194,7 +1194,7 @@ void OpenSpaceEngine::initializeGL() {
         }
     }
 
-    LINFO("Initializing Rendering Engine");
+    LDEBUG("Initializing Rendering Engine");
     _renderEngine->initializeGL();
 
     for (const auto& func : _moduleCallbacks.initializeGL) {

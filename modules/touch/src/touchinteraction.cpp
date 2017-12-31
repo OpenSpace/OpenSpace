@@ -715,8 +715,6 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         LINFOC("Picking", "Picked node: " + _pickingSelected->name());
     }
 
-    LINFOC("Picking", "============");
-
     _selected = std::move(newSelected);
 }
 
