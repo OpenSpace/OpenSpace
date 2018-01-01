@@ -371,12 +371,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Initialize the requested logs from the configuration file
     _engine->configureLogging(consoleLog);
 
-    LINFOC("OpenSpace Version",
-        OPENSPACE_VERSION_MAJOR << "." <<
-        OPENSPACE_VERSION_MINOR << "." <<
-        OPENSPACE_VERSION_PATCH <<
-        " (" << OPENSPACE_VERSION_STRING << ")"
-    );
+    LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION_STRING_FULL));
+    LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
 
     ghoul::Dictionary moduleConfigurations;
     if (_engine->configurationManager().hasKeyAndValue<ghoul::Dictionary>(
