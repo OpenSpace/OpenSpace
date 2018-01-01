@@ -58,8 +58,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane2_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane2_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
