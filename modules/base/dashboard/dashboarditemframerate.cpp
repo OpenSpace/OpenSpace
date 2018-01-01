@@ -147,7 +147,7 @@ DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
         }
     }
     else {
-        _frametimeType = static_cast<int>(FrametimeType::FPS);
+        _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
     }
     addProperty(_frametimeType);
 
