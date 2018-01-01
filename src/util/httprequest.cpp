@@ -404,7 +404,7 @@ size_t HttpFileDownload::handleData(HttpRequest::Data d) {
     return d.size;
 }
 
-std::atomic_int HttpFileDownload::nCurrentFilehandles = 0;
+std::atomic_int HttpFileDownload::nCurrentFilehandles(0);
 std::mutex HttpFileDownload::_directoryCreationMutex;
 
 SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)
