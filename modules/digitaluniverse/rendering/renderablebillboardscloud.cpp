@@ -1105,28 +1105,28 @@ bool RenderableBillboardsCloud::loadData() {
         std::string _file = _speckFile;
         // I disabled the cache as it didn't work on Mac --- abock
 
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     _file,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
+        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+            ghoul::filesystem::File(_file),
+            "RenderableDUMeshes",
+            ghoul::filesystem::CacheManager::Persistent::Yes
+        );
 
-        // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // if (hasCachedFile) {
-        //     LINFO(
-        //         "Cached file '" << cachedFile << "' used for Speck file '" <<
-        //         _file << "'"
-        //     );
+        bool hasCachedFile = FileSys.fileExists(cachedFile);
+        if (hasCachedFile) {
+            LINFO(
+                "Cached file '" << cachedFile << "' used for Speck file '" <<
+                _file << "'"
+            );
 
-        //     success = loadCachedFile(cachedFile);
-        //     if (!success) {
-        //         FileSys.cacheManager()->removeCacheFile(_file);
-        //         // Intentional fall-through to the 'else' to generate the cache
-        //         // file for the next run
-        //     }
-        // }
-        // else
-        // {
-        //     LINFO("Cache for Speck file '" << _file << "' not found");
+            success = loadCachedFile(cachedFile);
+            if (!success) {
+                FileSys.cacheManager()->removeCacheFile(_file);
+                // Intentional fall-through to the 'else' to generate the cache
+                // file for the next run
+            }
+        }
+        else {
+            LINFO("Cache for Speck file '" << _file << "' not found");
             LINFO("Loading Speck file '" << _file << "'");
 
             success = readSpeckFile();
@@ -1134,9 +1134,8 @@ bool RenderableBillboardsCloud::loadData() {
                 return false;
             }
 
-            // LINFO("Saving cache");
-            // success &= saveCachedFile(cachedFile);
-        // }
+            success &= saveCachedFile(cachedFile);
+        }
     }
 
     if (_hasColorMapFile) {
@@ -1148,37 +1147,36 @@ bool RenderableBillboardsCloud::loadData() {
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
         // I disabled the cache as it didn't work on Mac --- abock
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     labelFile,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
-        if (!_hasSpeckFile && !_hasColorMapFile)
+        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+            ghoul::filesystem::File(labelFile),
+            ghoul::filesystem::CacheManager::Persistent::Yes
+        );
+        if (!_hasSpeckFile && !_hasColorMapFile) {
             success = true;
-        //bool hasCachedFile = FileSys.fileExists(cachedFile);
-        //if (hasCachedFile) {
-        //    LINFO(
-        //        "Cached file '" << cachedFile << "' used for Label file '" <<
-        //        labelFile << "'"
-        //    );
-        //
-        //    success &= loadCachedFile(cachedFile);
-        //    if (!success) {
-        //        FileSys.cacheManager()->removeCacheFile(labelFile);
-        //        // Intentional fall-through to the 'else' to generate the cache
-        //        // file for the next run
-        //    }
-        //}
-        //else
-        // {
-            // LINFO("Cache for Label file '" << labelFile << "' not found");
+        }
+        bool hasCachedFile = FileSys.fileExists(cachedFile);
+        if (hasCachedFile) {
+            LINFO(
+                "Cached file '" << cachedFile << "' used for Label file '" <<
+                labelFile << "'"
+            );
+        
+            success &= loadCachedFile(cachedFile);
+            if (!success) {
+                FileSys.cacheManager()->removeCacheFile(labelFile);
+                // Intentional fall-through to the 'else' to generate the cache
+                // file for the next run
+            }
+        }
+        else {
+            LINFO("Cache for Label file '" << labelFile << "' not found");
             LINFO("Loading Label file '" << labelFile << "'");
 
             success &= readLabelFile();
             if (!success) {
                 return false;
             }
-
-        // }
+        }
     }
 
     return success;
