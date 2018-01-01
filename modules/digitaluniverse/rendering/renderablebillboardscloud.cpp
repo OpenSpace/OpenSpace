@@ -1100,14 +1100,31 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 }
 
 bool RenderableBillboardsCloud::loadData() {
-    bool success = false;
+    bool success = true;
+
+    success &= loadSpeckData();
+
+    if (_hasColorMapFile) {
+        if (!_hasSpeckFile) {
+            success = true;
+        }
+        success &= readColorMapFile();
+    }
+
+    success &= loadLabelData();
+
+    return success;
+}
+
+bool RenderableBillboardsCloud::loadSpeckData() {
+    bool success = true;
     if (_hasSpeckFile) {
         std::string _file = _speckFile;
         // I disabled the cache as it didn't work on Mac --- abock
 
         std::string cachedFile = FileSys.cacheManager()->cachedFilename(
             ghoul::filesystem::File(_file),
-            "RenderableDUMeshes",
+            "RenderableDUMeshes|" + name(),
             ghoul::filesystem::CacheManager::Persistent::Yes
         );
 
@@ -1119,7 +1136,10 @@ bool RenderableBillboardsCloud::loadData() {
             );
 
             success = loadCachedFile(cachedFile);
-            if (!success) {
+            if (success) {
+                return true;
+            }
+            else {
                 FileSys.cacheManager()->removeCacheFile(_file);
                 // Intentional fall-through to the 'else' to generate the cache
                 // file for the next run
@@ -1127,23 +1147,21 @@ bool RenderableBillboardsCloud::loadData() {
         }
         else {
             LINFO("Cache for Speck file '" << _file << "' not found");
-            LINFO("Loading Speck file '" << _file << "'");
-
-            success = readSpeckFile();
-            if (!success) {
-                return false;
-            }
-
-            success &= saveCachedFile(cachedFile);
         }
-    }
+        LINFO("Loading Speck file '" << _file << "'");
 
-    if (_hasColorMapFile) {
-        if (!_hasSpeckFile)
-            success = true;
-        success &= readColorMapFile();
-    }
+        success = readSpeckFile();
+        if (!success) {
+            return false;
+        }
 
+        success &= saveCachedFile(cachedFile);
+    }
+    return success;
+}
+
+bool RenderableBillboardsCloud::loadLabelData() {
+    bool success = true;
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
         // I disabled the cache as it didn't work on Mac --- abock
@@ -1160,7 +1178,7 @@ bool RenderableBillboardsCloud::loadData() {
                 "Cached file '" << cachedFile << "' used for Label file '" <<
                 labelFile << "'"
             );
-        
+
             success &= loadCachedFile(cachedFile);
             if (!success) {
                 FileSys.cacheManager()->removeCacheFile(labelFile);
@@ -1181,6 +1199,7 @@ bool RenderableBillboardsCloud::loadData() {
 
     return success;
 }
+
 
 bool RenderableBillboardsCloud::readSpeckFile() {
     std::string _file = _speckFile;
@@ -1445,10 +1464,9 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
                 fileStream.read(reinterpret_cast<char*>(&keySize), sizeof(int32_t));
                 std::string key;
                 for (int c = 0; c < keySize; ++c) {
-                    char t[2];
-                    t[1] = '\0';
-                    fileStream.read(reinterpret_cast<char*>(&t), sizeof(int32_t));
-                    key.append(t);
+                    char t;
+                    fileStream.read(&t, sizeof(char));
+                    key.append(1, t);
                 }
                 int32_t value = 0;
                 fileStream.read(reinterpret_cast<char*>(&value), sizeof(int32_t));
@@ -1501,11 +1519,8 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
                     sizeof(int32_t)
                 );
                 for (size_t c = 0; c < pair.first.size(); ++c) {
-                    int32_t keyChar = static_cast<int32_t>(pair.first[c]);
-                    fileStream.write(
-                        reinterpret_cast<const char*>(&keyChar),
-                        sizeof(int32_t)
-                    );
+                    char keyChar = static_cast<int32_t>(pair.first[c]);
+                    fileStream.write(&keyChar, sizeof(char));
                 }
                 int32_t value = static_cast<int32_t>(pair.second);
                 fileStream.write(reinterpret_cast<const char*>(&value), sizeof(int32_t));
