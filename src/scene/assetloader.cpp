@@ -88,11 +88,9 @@ namespace {
 
 namespace openspace {
 
-AssetLoader::AssetLoader(
-    ghoul::lua::LuaState& luaState,
-    SynchronizationWatcher* syncWatcher,
-    std::string assetRootDirectory
-)
+AssetLoader::AssetLoader(ghoul::lua::LuaState& luaState,
+                         SynchronizationWatcher* syncWatcher,
+                         std::string assetRootDirectory)
     : _rootAsset(std::make_shared<Asset>(this, syncWatcher))
     , _synchronizationWatcher(syncWatcher)
     , _assetRootDirectory(assetRootDirectory)
@@ -694,7 +692,7 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
 }
 
 void AssetLoader::addAssetListener(AssetListener* listener) {
-    const auto it = std::find(
+    auto it = std::find(
         _assetListeners.begin(),
         _assetListeners.end(),
         listener
@@ -714,7 +712,7 @@ void AssetLoader::removeAssetListener(AssetListener* listener) {
 }
 
 void AssetLoader::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
-    for (auto& listener : _assetListeners) {
+    for (AssetListener* listener : _assetListeners) {
         listener->assetStateChanged(asset, state);
     }
 }
@@ -722,7 +720,7 @@ void AssetLoader::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State s
 void AssetLoader::assetRequested(std::shared_ptr<Asset> parent,
                                  std::shared_ptr<Asset> child)
 {
-    for (auto& listener : _assetListeners) {
+    for (AssetListener* listener : _assetListeners) {
         listener->assetRequested(parent, child);
     }
 }
@@ -730,9 +728,9 @@ void AssetLoader::assetRequested(std::shared_ptr<Asset> parent,
 void AssetLoader::assetUnrequested(std::shared_ptr<Asset> parent,
                                    std::shared_ptr<Asset> child)
 {
-    for (auto& listener : _assetListeners) {
+    for (AssetListener* listener : _assetListeners) {
         listener->assetUnrequested(parent, child);
     }
 }
 
-}
+} // namespace openspace
