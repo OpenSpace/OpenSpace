@@ -12,25 +12,7 @@ assetHelper.requestAll(asset, 'scene/digitaluniverse')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 
--- Add folders to this list that contain .info files describing HiRISE patches
-local vrt_folders = {
-    Mars = {
-        -- Add folders here whose contents will be automatically added to the Mars globe
-        -- If multiple folders are added, the results will be added sequentially, meaning that
-        -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
-        -- CTX will stomp over the HiRISE
-        --
-        -- tl;dr:  Specify CTX folders first, then HiRISE 
-        -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
-    },
-    Moon = {
-        -- Add folders here whose contents will be automatically added to the Moon globe
-        -- If multiple folders are added, the results will be added sequentially, meaning that
-        -- if areas overlap, images from the lower results will overwrite the images from former
-        -- results
-        -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
-    }
-}
+asset.request('customization/globebrowsing')
 
 -- Keybindings that are specific for this scene
 local Keybindings = {
@@ -107,13 +89,6 @@ asset.onInitialize(function ()
     })
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
-
-    -- Add local patches described at the top of this file
-    for obj, list in pairs(vrt_folders) do
-        for _, dir in pairs(list) do
-            openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
-        end
-    end
 end)
 
 asset.onDeinitialize(function ()

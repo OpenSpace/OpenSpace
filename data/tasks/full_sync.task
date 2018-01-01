@@ -29,6 +29,6 @@ return {
     },
     {
         Type = "SyncAssetTask",
-        Asset = "everything"
+        Asset = "sync/everything"
     }
 }

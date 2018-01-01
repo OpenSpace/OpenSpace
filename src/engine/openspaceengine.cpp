@@ -627,7 +627,7 @@ std::unique_ptr<LoadingScreen> OpenSpaceEngine::createLoadingScreen() {
 }
 
 void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
-    LTRACE("OpenSpaceEngine::loadScene(begin)");
+    LTRACE("OpenSpaceEngine::loadSingleAsset(begin)");
 
     windowWrapper().setBarrier(false);
     windowWrapper().setSynchronization(false);
@@ -750,9 +750,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     showTouchbar();
 #endif // APPLE
 
+    runGlobalCustomizationScripts();
+
     writeSceneDocumentation();
 
-    LTRACE("OpenSpaceEngine::loadScene(end)");
+    LTRACE("OpenSpaceEngine::loadSingleAsset(end)");
 }
 
 void OpenSpaceEngine::deinitialize() {
@@ -832,14 +834,11 @@ void OpenSpaceEngine::gatherCommandlineArguments() {
     ));
 }
 
-void OpenSpaceEngine::runGlobalCustomizationScripts(const std::string& sceneDescription) {
+void OpenSpaceEngine::runGlobalCustomizationScripts() {
     // @CLEANUP:  Move this into the scene loading?  ---abock
     LINFO("Running Global initialization scripts");
     ghoul::lua::LuaState state;
     OsEng.scriptEngine().initializeLuaState(state);
-
-    // First execute the script to get all global variables
-    ghoul::lua::runScriptFile(state, absPath(sceneDescription));
 
     std::string k = ConfigurationManager::KeyGlobalCustomizationScripts;
     if (_configurationManager->hasKey(k)) {

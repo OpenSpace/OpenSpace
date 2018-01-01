@@ -37,6 +37,11 @@
 #include <thread>
 #include <condition_variable>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4250)
+#endif
+
 namespace openspace {
 
 namespace curlfunctions {
@@ -293,5 +298,10 @@ public:
 };
 
 } // namespace openspace
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 #endif // __OPENSPACE_CORE___HTTPREQUEST___H__

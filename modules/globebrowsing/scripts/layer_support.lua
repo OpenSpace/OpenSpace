@@ -189,7 +189,7 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
     local files = openspace.walkDirectoryFiles(dir, true, true)
 
     for _, file in pairs(files) do
-        if file:find('.info') then
+        if file and file:find('.info') then
             c, h = openspace.globebrowsing.parseInfoFile(file)
 
             if c then

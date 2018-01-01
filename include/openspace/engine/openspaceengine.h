@@ -187,7 +187,7 @@ private:
 
     void configureLogging(bool consoleLog);
 
-    void runGlobalCustomizationScripts(const std::string& sceneDescription);
+    void runGlobalCustomizationScripts();
     void configureLogging();
 
     // Components
