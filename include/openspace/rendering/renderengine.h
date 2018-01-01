@@ -94,6 +94,7 @@ public:
     void renderVersionInformation();
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
+    void renderDashboard();
     void postDraw();
 
     // Performance measurements

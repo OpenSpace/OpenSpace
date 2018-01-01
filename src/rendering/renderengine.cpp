@@ -583,25 +583,6 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
     }
 
-    // Print some useful information on the master viewport
-    if (wrapper.isMaster() && wrapper.isSimpleRendering()) {
-        std::unique_ptr<performance::PerformanceMeasurement> perf;
-        if (_performanceManager) {
-            perf = std::make_unique<performance::PerformanceMeasurement>(
-                "Main Dashboard::render",
-                OsEng.renderEngine().performanceManager()
-            );
-    }
-        glm::vec2 penPosition = glm::vec2(
-            10.f,
-            fontResolution().y
-        );
-
-        penPosition.y -= OsEng.console().currentHeight();
-
-        OsEng.dashboard().render(penPosition);
-    }
-
     if (_showFrameNumber) {
         const glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,
@@ -652,6 +633,24 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         // to make them align
         "Press ESC again to abort"
     );
+}
+
+void RenderEngine::renderDashboard() {
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+    if (_performanceManager) {
+        perf = std::make_unique<performance::PerformanceMeasurement>(
+            "Main Dashboard::render",
+            OsEng.renderEngine().performanceManager()
+            );
+    }
+    glm::vec2 penPosition = glm::vec2(
+        10.f,
+        fontResolution().y
+    );
+
+    penPosition.y -= OsEng.console().currentHeight();
+
+    OsEng.dashboard().render(penPosition);
 }
 
 void RenderEngine::postDraw() {

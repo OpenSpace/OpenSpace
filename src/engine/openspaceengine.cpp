@@ -1340,6 +1340,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         _renderEngine->renderScreenLog();
         _renderEngine->renderVersionInformation();
+        _renderEngine->renderDashboard();
 
         if (!_shutdown.inShutdown) {
             // We render the camera information in the same location as the shutdown info
