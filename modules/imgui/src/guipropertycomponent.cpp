@@ -316,9 +316,14 @@ void GuiPropertyComponent::render() {
                     auto rhsIt = std::find(ordering.begin(), ordering.end(), rhsToken[1]);
 
                     if (lhsIt != ordering.end() && rhsIt != ordering.end()) {
-                        // If both top-level groups are in the ordering list, the order
-                        // of the iterators gives us the order of the groups
-                        return lhsIt < rhsIt;
+                        if (lhsToken[1] != rhsToken[1]) {
+                            // If both top-level groups are in the ordering list, the order
+                            // of the iterators gives us the order of the groups
+                            return lhsIt < rhsIt;
+                        }
+                        else {
+                            return lhsGroup < rhsGroup;
+                        }
                     }
                     else if (lhsIt != ordering.end() && rhsIt == ordering.end()) {
                         // If only one of them is in the list, we have a sorting
