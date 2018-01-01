@@ -1,0 +1,27 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+asset.require("spice/base")
+
+
+
+local MarsTrail = {
+    Name = "MarsTrail",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MARS BARYCENTER",
+            Observer = "SUN"
+        },
+        Color = { 0.814, 0.305, 0.220 },
+        Period = 686.973,
+        Resolution = 1000
+    },
+    Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+    GuiPath = "/Solar System/Planets/Mars"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { MarsTrail })

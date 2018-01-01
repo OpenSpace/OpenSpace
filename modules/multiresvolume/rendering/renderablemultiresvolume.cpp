@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -174,7 +174,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _errorHistogramManager(nullptr)
     , _histogramManager(nullptr)
     , _localErrorHistogramManager(nullptr)
-    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f) 
+    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
     , _currentTime(CurrentTimeInfo, 0, 0, 0)
     , _memoryBudget(MemoryBudgetInfo, 0, 0, 0)
     , _streamingBudget(StreamingBudgetInfo, 0, 0, 0)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,10 +63,9 @@ public:
     * \param baseDirectory, the base directory to use in future loading operations
     */
     GdalRawTileDataReader(const std::string& filePath,
-                          const TileTextureInitData& initData,
-                          const std::string& baseDirectory = "",
-                          RawTileDataReader::PerformPreprocessing preprocess =
-                            RawTileDataReader::PerformPreprocessing::No);
+        const TileTextureInitData& initData,
+        RawTileDataReader::PerformPreprocessing preprocess =
+            RawTileDataReader::PerformPreprocessing::No);
 
 
     virtual ~GdalRawTileDataReader() override;
@@ -107,8 +106,6 @@ private:
      */
     int calculateTileLevelDifference(int minimumPixelSize) const;
 
-    // Member variables
-    std::string _initDirectory;
     std::string _datasetFilePath;
 
     GDALDataset* _dataset;

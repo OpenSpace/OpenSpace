@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,6 +70,16 @@ void PointGlobe::initialize() {
         "PointGlobe",
         absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_fs.glsl")
+    );
+
+    _uniformCache.lightIntensityClamped = _programObject->uniformLocation(
+        "lightIntensityClamped"
+    );
+    _uniformCache.modelView = _programObject->uniformLocation(
+        "modelViewTransform"
+    );
+    _uniformCache.projection = _programObject->uniformLocation(
+        "projectionTransform"
     );
 
     glGenVertexArrays(1, &_vaoID);
@@ -145,12 +155,18 @@ void PointGlobe::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
 
-    _programObject->setUniform("lightIntensityClamped", lightIntensityClamped);
+    _programObject->setUniform(
+        _uniformCache.lightIntensityClamped,
+        lightIntensityClamped
+    );
     //_programObject->setUniform("lightOverflow", lightOverflow);
     //_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
-    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _programObject->setUniform(
-        "projectionTransform",
+        _uniformCache.modelView,
+        glm::mat4(modelViewTransform)
+    );
+    _programObject->setUniform(
+        _uniformCache.projection,
         data.camera.sgctInternal.projectionMatrix()
     );
 

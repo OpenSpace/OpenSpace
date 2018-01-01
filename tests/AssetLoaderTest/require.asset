@@ -1,0 +1,2 @@
+local exports, dep = asset.require('export');
+assert (exports.data == 'foo')

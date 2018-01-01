@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,6 +68,32 @@ std::string to_string(std::string value) {
     return value;
 }
 
+std::string to_string(openspace::documentation::TestResult testResult) {
+    using namespace openspace::documentation;
+
+    if (testResult.success) {
+        return "Success";
+    }
+    else {
+        std::stringstream stream;
+        stream << "Failure." << '\n';
+
+        for (const TestResult::Offense& offense : testResult.offenses) {
+            stream << "  " << std::to_string(offense) << '\n';
+        }
+
+        for (const TestResult::Warning& warning : testResult.warnings) {
+            stream << "  " << std::to_string(warning) << '\n';
+        }
+
+        return stream.str();
+    }
+}
+
+std::string to_string(openspace::documentation::TestResult::Offense offense) {
+    return offense.offender + ": " + std::to_string(offense.reason);
+}
+
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason) {
     switch (reason) {
         case openspace::documentation::TestResult::Offense::Reason::ExtraKey:
@@ -83,6 +109,10 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
         default:
             throw ghoul::MissingCaseException();
     }
+}
+
+std::string to_string(openspace::documentation::TestResult::Warning warning) {
+    return warning.offender + ": " + std::to_string(warning.reason);
 }
 
 std::string to_string(openspace::documentation::TestResult::Warning::Reason reason) {

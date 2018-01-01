@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-
 #include <ghoul/glm.h>
 
 #include <functional>
@@ -42,6 +41,7 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
+class AssetManager;
 class ConfigurationManager;
 class Dashboard;
 class DownloadManager;
@@ -52,12 +52,11 @@ class ModuleEngine;
 class NetworkEngine;
 class ParallelConnection;
 class RenderEngine;
-class SettingsEngine;
-class SceneManager;
-class VirtualPropertyManager;
-
+class Scene;
 class SyncEngine;
+class SettingsEngine;
 class TimeManager;
+class VirtualPropertyManager;
 class WindowWrapper;
 
 namespace interaction {
@@ -76,10 +75,13 @@ class OpenSpaceEngine {
 public:
     static void create(int argc, char** argv,
         std::unique_ptr<WindowWrapper> windowWrapper,
-        std::vector<std::string>& sgctArguments, bool& requestClose);
+        std::vector<std::string>& sgctArguments,
+        bool& requestClose, bool consoleLog = true);
     static void destroy();
     static OpenSpaceEngine& ref();
     static bool isCreated();
+
+    ~OpenSpaceEngine();
 
     // callbacks
     void initialize();
@@ -100,14 +102,14 @@ public:
     void encode();
     void decode();
 
-    void scheduleLoadScene(std::string scenePath);
 
-    void writeDocumentation();
+    void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
     LuaConsole& console();
+    AssetManager& assetManager();
     Dashboard& dashboard();
     DownloadManager& downloadManager();
     ModuleEngine& moduleEngine();
@@ -164,6 +166,10 @@ public:
         std::function<bool (double, double)> function
     );
 
+    void writeSceneDocumentation();
+    void writeStaticDocumentation();
+
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.
@@ -174,17 +180,20 @@ private:
     OpenSpaceEngine(std::string programName,
         std::unique_ptr<WindowWrapper> windowWrapper);
 
-    void loadScene(const std::string& scenePath);
+    std::unique_ptr<LoadingScreen> createLoadingScreen();
+    void loadSingleAsset(const std::string& assetPath);
     void gatherCommandlineArguments();
     void loadFonts();
-    void runPreInitializationScripts(const std::string& sceneDescription);
-    void runPostInitializationScripts(const std::string& sceneDescription);
-    void runGlobalCustomizationScripts(const std::string& sceneDescription);
+
+    void configureLogging(bool consoleLog);
+
+    void runGlobalCustomizationScripts();
     void configureLogging();
 
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
-    std::unique_ptr<SceneManager> _sceneManager;
+    std::unique_ptr<Scene> _scene;
+    std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<Dashboard> _dashboard;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
@@ -200,6 +209,7 @@ private:
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
     std::unique_ptr<interaction::NavigationHandler> _navigationHandler;
     std::unique_ptr<interaction::KeyBindingManager> _keyBindingManager;
+
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
@@ -214,8 +224,8 @@ private:
         properties::StringProperty sourceControlInformation;
     } _versionInformation;
 
-    bool _scheduledSceneSwitch;
-    std::string _scenePath;
+    bool _hasScheduledAssetLoading;
+    std::string _scheduledAssetPathToLoad;
 
     struct {
         std::vector<std::function<void()>> initialize;

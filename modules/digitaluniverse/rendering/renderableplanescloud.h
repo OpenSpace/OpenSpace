@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,15 +35,14 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <functional>
 #include <unordered_map>
 
-namespace ghoul::filesystem { 
-    class File; 
-}
+namespace ghoul::filesystem { class File; }
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -95,8 +94,9 @@ namespace openspace {
         void createPlanes();
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
             const glm::dmat4& projectionMatrix, float fadeInVariable);
-        void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVarible);
+        void renderLabels(const RenderData& data,
+            const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
+            const glm::dvec3& orthoUp, float fadeInVarible);
 
         bool loadData();
         bool loadTextures();
@@ -130,7 +130,9 @@ namespace openspace {
         properties::OptionProperty _renderOption;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;        
+        UniformCache(modelViewProjectionTransform, alphaValue, scaleFactor, fadeInValue,
+            galaxyTexture) _uniformCache;
+        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
         std::shared_ptr<ghoul::fontrendering::Font> _font;
         std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
         std::unordered_map<int, std::string> _textureFileMap;
@@ -149,10 +151,10 @@ namespace openspace {
         int _nValuesPerAstronomicalObject;
 
         float _sluminosity;
-        
+
         glm::dmat4 _transformationMatrix;
 
-        std::vector<RenderingPlane> _renderingPlanesArray;       
+        std::vector<RenderingPlane> _renderingPlanesArray;
     };
 
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                                ghoul::Dictionary translationDictionary,
                                std::vector<std::string> potentialTargets)
     : _defaultCaptureImage(
-        absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png")
+        absPath("${DATA}/placeholder.png")
     )
     , _name(std::move(name))
     , _fileName(std::move(fileName))

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,14 +57,14 @@ ScriptEngine::ScriptEngine()
         {
             {
                 "mainTemplate",
-                "${OPENSPACE_DATA}/web/luascripting/main.hbs"
+                "${WEB}/luascripting/main.hbs"
             },
             {
                 "scriptingTemplate",
-                "${OPENSPACE_DATA}/web/luascripting/scripting.hbs"
+                "${WEB}/luascripting/scripting.hbs"
             }
         },
-        "${OPENSPACE_DATA}/web/luascripting/script.js"
+        "${WEB}/luascripting/script.js"
     )
 {}
 
@@ -75,7 +75,9 @@ void ScriptEngine::initialize() {
     initializeLuaState(_state);
 }
 
-void ScriptEngine::deinitialize() {}
+void ScriptEngine::deinitialize() {
+    _registeredLibraries.clear();
+}
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
     LDEBUG("Create openspace base library");
@@ -86,6 +88,10 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     for (LuaLibrary& lib : _registeredLibraries) {
         registerLuaLibrary(state, lib);
     }
+}
+
+ghoul::lua::LuaState * ScriptEngine::luaState() {
+    return &_state;
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {
@@ -265,7 +271,10 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             lua_pop(state, 1);
         }
         lua_pushstring(state, p.name.c_str());
-        lua_pushcfunction(state, p.function);
+        for (void* d : p.userdata) {
+            lua_pushlightuserdata(state, d);
+        }
+        lua_pushcclosure(state, p.function, static_cast<int>(p.userdata.size()));
         lua_settable(state, TableOffset);
     }
 
@@ -317,6 +326,7 @@ LuaLibrary lib = {
         {
             "printTrace",
             &luascriptfunctions::printTrace,
+            {},
             "*",
             "Logs the passed value to the installed LogManager with a LogLevel of "
             "'Trace'"
@@ -324,6 +334,7 @@ LuaLibrary lib = {
         {
             "printDebug",
             &luascriptfunctions::printDebug,
+            {},
             "*",
             "Logs the passed value to the installed LogManager with a LogLevel of "
             "'Debug'"
@@ -331,6 +342,7 @@ LuaLibrary lib = {
         {
             "printInfo",
             &luascriptfunctions::printInfo,
+            {},
             "*",
             "Logs the passed value to the installed LogManager with a LogLevel of "
             "'Info'"
@@ -338,6 +350,7 @@ LuaLibrary lib = {
         {
             "printWarning",
             &luascriptfunctions::printWarning,
+            {},
             "*",
             "Logs the passed value to the installed LogManager with a LogLevel of "
             "'Warning'"
@@ -345,6 +358,7 @@ LuaLibrary lib = {
         {
             "printError",
             &luascriptfunctions::printError,
+            {},
             "*",
             "Logs the passed value to the installed LogManager with a LogLevel of "
             "'Error'"
@@ -352,6 +366,7 @@ LuaLibrary lib = {
         {
             "printFatal",
             &luascriptfunctions::printFatal,
+            {},
             "*",
             "Logs the passed value to the installed LogManager with a LogLevel of "
             "'Fatal'"
@@ -359,6 +374,7 @@ LuaLibrary lib = {
         {
             "absPath",
             &luascriptfunctions::absolutePath,
+            {},
             "string",
             "Returns the absolute path to the passed path, resolving path tokens as "
             "well as resolving relative paths"
@@ -366,18 +382,21 @@ LuaLibrary lib = {
         {
             "fileExists",
             &luascriptfunctions::fileExists,
+            {},
             "string",
             "Checks whether the provided file exists."
         },
         {
             "directoryExists",
             &luascriptfunctions::directoryExists,
+            {},
             "string",
             "Chckes whether the provided directory exists."
         },
         {
             "setPathToken",
             &luascriptfunctions::setPathToken,
+            {},
             "string, string",
             "Registers a new path token provided by the first argument to the path "
             "provided in the second argument"
@@ -385,6 +404,7 @@ LuaLibrary lib = {
         {
             "walkDirectory",
             &luascriptfunctions::walkDirectory,
+            {},
             "string [bool, bool]",
             "Walks a directory and returns all contents (files and directories) of "
             "the directory as absolute paths. The first argument is the path of the "
@@ -395,6 +415,7 @@ LuaLibrary lib = {
         {
             "walkDirectoryFiles",
             &luascriptfunctions::walkDirectoryFiles,
+            {},
             "string [bool, bool]",
             "Walks a directory and returns the files of the directory as absolute "
             "paths. The first argument is the path of the directory that should be "
@@ -405,6 +426,7 @@ LuaLibrary lib = {
         {
             "walkDirectoryFolder",
             &luascriptfunctions::walkDirectoryFolder,
+            {},
             "string [bool, bool]",
             "Walks a directory and returns the subfolders of the directory as "
             "absolute paths. The first argument is the path of the directory that "
@@ -415,6 +437,7 @@ LuaLibrary lib = {
         {
             "directoryForPath",
             &luascriptfunctions::directoryForPath,
+            {},
             "string",
             "This function extracts the directory part of the passed path. For example, "
             "if the parameter is 'C:/OpenSpace/foobar/foo.txt', this function returns "

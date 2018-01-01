@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,7 +80,7 @@ namespace {
         "Color",
         "Color",
         "This value is used to define the color of the astronomical object."
-    }; 
+    };
 
     static const openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
@@ -167,7 +167,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 "The path to the SPECK file that contains information about the "
                 "astronomical object being rendered."
             },
-            { 
+            {
                 keyColor,
                 new Vector3Verifier<float>,
                 Optional::No,
@@ -244,7 +244,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _dataIsDirty(true)
     , _textColorIsDirty(true)
     , _hasLabel(false)
-    , _labelDataIsDirty(true)    
+    , _labelDataIsDirty(true)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     , _textColor(
@@ -294,7 +294,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         }
         else if (unit == KilometerUnit) {
             _unit = Kilometer;
-        } 
+        }
         else if (unit == ParsecUnit) {
             _unit = Parsec;
         }
@@ -324,14 +324,14 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(TransparencyInfo.identifier)) {
         _alphaValue = static_cast<float>(
             dictionary.value<double>(TransparencyInfo.identifier)
-            );
+        );
     }
     addProperty(_alphaValue);
 
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
             dictionary.value<double>(ScaleFactorInfo.identifier)
-            );
+        );
     }
     addProperty(_scaleFactor);
 
@@ -343,7 +343,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(LabelFileInfo.identifier)) {
         _labelFile = absPath(dictionary.value<std::string>(
             LabelFileInfo.identifier
-            ));
+        ));
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
@@ -406,6 +406,12 @@ void RenderableDUMeshes::initializeGL() {
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
     );
 
+    _uniformCache.modelViewTransform = _program->uniformLocation("modelViewTransform");
+    _uniformCache.projectionTransform = _program->uniformLocation("projectionTransform");
+    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+    //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+    _uniformCache.color = _program->uniformLocation("color");
+
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -434,7 +440,7 @@ void RenderableDUMeshes::deinitializeGL() {
         for (int i = 0; i < pair.second.numU; ++i) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
             glDeleteBuffers(1, &pair.second.vboArray[i]);
-        }            
+        }
     }
 
     RenderEngine& renderEngine = OsEng.renderEngine();
@@ -474,40 +480,33 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     _program->activate();
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-
-    _program->setUniform("modelViewTransform", modelViewMatrix);
-    _program->setUniform("projectionTransform", projectionMatrix);
-    _program->setUniform("alphaValue", _alphaValue);
-    _program->setUniform("scaleFactor", _scaleFactor);                
+    _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
+    _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
+    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    //_program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
     for (auto pair : _renderingMeshesMap) {
-        _program->setUniform("color", _meshColorMap[pair.second.colorIndex]);
+        _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
         for (int i = 0; i < static_cast<int>(pair.second.vaoArray.size()); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);
-            switch (pair.second.style)
-            {
-            case Solid:
-                break;
-            case Wire:
-                glLineWidth(2.0);
-                glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-                glLineWidth(lineWidth);
-                break;
-            case Point:
-                glDrawArrays(GL_POINTS, 0, pair.second.numV);
-                break;
-            default:
-                break;
+            switch (pair.second.style) {
+                case Solid:
+                    break;
+                case Wire:
+                    glLineWidth(2.0);
+                    glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
+                    glLineWidth(lineWidth);
+                    break;
+                case Point:
+                    glDrawArrays(GL_POINTS, 0, pair.second.numV);
+                    break;
+                default:
+                    break;
             }
         }
     }
 
     glBindVertexArray(0);
-
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::No);
     _program->deactivate();
 
     // Restores blending state
@@ -609,7 +608,21 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
     }
 }
 
-void RenderableDUMeshes::update(const UpdateData&) {}
+void RenderableDUMeshes::update(const UpdateData&) {
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+
+        _uniformCache.modelViewTransform = _program->uniformLocation(
+            "modelViewTransform"
+        );
+        _uniformCache.projectionTransform = _program->uniformLocation(
+            "projectionTransform"
+        );
+        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+        //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+        _uniformCache.color = _program->uniformLocation("color");
+    }
+}
 
 bool RenderableDUMeshes::loadData() {
     bool success = false;
@@ -622,17 +635,20 @@ bool RenderableDUMeshes::loadData() {
         // );
 
         // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // //if (hasCachedFile) {
-        // //    LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+        // if (hasCachedFile) {
+        //     LINFO(
+        //         "Cached file '" << cachedFile <<
+        //         "' used for Speck file '" << _file << "'"
+        //     );
 
-        // //    success = loadCachedFile(cachedFile);
-        // //    if (!success) {
-        // //        FileSys.cacheManager()->removeCacheFile(_file);
-        // //        // Intentional fall-through to the 'else' computation to generate the cache
-        // //        // file for the next run
-        // //    }
-        // //}
-        // //else 
+        //     success = loadCachedFile(cachedFile);
+        //     if (!success) {
+        //         FileSys.cacheManager()->removeCacheFile(_file);
+        //         // Intentional fall-through to the 'else' to generate the cache
+        //         // file for the next run
+        //     }
+        // }
+        // else
         // {
         //     LINFO("Cache for Speck file '" << _file << "' not found");
             LINFO("Loading Speck file '" << _file << "'");
@@ -656,12 +672,15 @@ bool RenderableDUMeshes::loadData() {
         // );
         // bool hasCachedFile = FileSys.fileExists(cachedFile);
         // if (hasCachedFile) {
-        //     LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
+        //     LINFO(
+        //         "Cached file '" << cachedFile << "' used for Label file '" <<
+        //         labelFile << "'"
+        //     );
 
         //     success &= loadCachedFile(cachedFile);
         //     if (!success) {
         //         FileSys.cacheManager()->removeCacheFile(labelFile);
-        //         // Intentional fall-through to the 'else' computation to generate the cache
+        //         // Intentional fall-through to the 'else' to generate the cache
         //         // file for the next run
         //     }
         // }
@@ -703,7 +722,7 @@ bool RenderableDUMeshes::readSpeckFile() {
         }
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r 
+        // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() -1);
         }
@@ -721,8 +740,8 @@ bool RenderableDUMeshes::readSpeckFile() {
 
         if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
-            // mesh -t texnum -c colorindex -s style { 
-            // where textnum is the index of the texture; 
+            // mesh -t texnum -c colorindex -s style {
+            // where textnum is the index of the texture;
             // colorindex is the index of the color for the mesh
             // and style is solid, wire or point (for now we support only wire)
             std::stringstream str(line);
@@ -737,7 +756,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             do {
                 if (dummy == "-t") {
                     dummy.clear();
-                    str >> mesh.textureIndex; // texture index 
+                    str >> mesh.textureIndex; // texture index
                 }
                 else if (dummy == "-c") {
                     dummy.clear();
@@ -821,7 +840,7 @@ bool RenderableDUMeshes::readLabelFile() {
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r 
+        // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() -1);
         }
@@ -856,7 +875,7 @@ bool RenderableDUMeshes::readLabelFile() {
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r 
+        // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() -1);
         }
@@ -967,7 +986,7 @@ void RenderableDUMeshes::createMeshes() {
         std::unordered_map<int, RenderingMesh>::iterator itEnd =
             _renderingMeshesMap.end();
 
-        for (; it != itEnd; ++it) {                
+        for (; it != itEnd; ++it) {
             float scale = 0.0;
             switch (_unit) {
                 case Meter:
@@ -1051,8 +1070,8 @@ void RenderableDUMeshes::createMeshes() {
                             sizeof(GLfloat) * 3 * i * it->second.numV
                         )
                     );
-                }                    
-            }    
+                }
+            }
 
             // Grid: we need columns
             if (it->second.numU > 1) {
@@ -1066,7 +1085,7 @@ void RenderableDUMeshes::createMeshes() {
                     glBindVertexArray(cvao);
                     glBindBuffer(GL_ARRAY_BUFFER, cvbo);
                     glBufferData(
-                        GL_ARRAY_BUFFER, 
+                        GL_ARRAY_BUFFER,
                        it->second.vertices.size() * sizeof(GLfloat),
                         &it->second.vertices[0],
                         GL_STATIC_DRAW
@@ -1107,9 +1126,9 @@ void RenderableDUMeshes::createMeshes() {
                             reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
                         );
                     }
-                }                    
+                }
             }
-        }                
+        }
 
         glBindVertexArray(0);
 

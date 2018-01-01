@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,7 @@ namespace openspace {
 
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
-void SpacecraftInstrumentsModule::internalInitialize() {
+void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
     ImageSequencer::initialize();
 
     FactoryManager::ref().addFactory(
@@ -73,6 +73,10 @@ void SpacecraftInstrumentsModule::internalInitialize() {
     auto fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
+}
+
+void SpacecraftInstrumentsModule::internalDeinitialize() {
+    ImageSequencer::deinitialize();
 }
 
 std::vector<documentation::Documentation>

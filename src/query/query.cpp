@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -120,15 +120,17 @@ std::vector<properties::Property*> allProperties() {
     );
 
     const Scene* graph = sceneGraph();
-    std::vector<SceneGraphNode*> nodes = graph->allSceneGraphNodes();
+    if (graph) {
+        std::vector<SceneGraphNode*> nodes = graph->allSceneGraphNodes();
 
-    for (SceneGraphNode* n : nodes) {
-        std::vector<properties::Property*> props = n->propertiesRecursive();
-        properties.insert(
-            properties.end(),
-            props.begin(),
-            props.end()
-        );
+        for (SceneGraphNode* n : nodes) {
+            std::vector<properties::Property*> props = n->propertiesRecursive();
+            properties.insert(
+                properties.end(),
+                props.begin(),
+                props.end()
+            );
+        }
     }
 
     return properties;

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2017                                                                #
+# Copyright (c) 2014-2018                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,6 +28,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/gui.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/guiassetcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guicomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guifilepathcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiglobebrowsingcomponent.h
@@ -45,6 +46,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gui.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/guiassetcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guicomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guifilepathcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiglobebrowsingcomponent.cpp

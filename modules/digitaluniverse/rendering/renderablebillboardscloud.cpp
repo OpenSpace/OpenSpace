@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 
 #include <glm/gtx/string_cast.hpp>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <array>
 #include <fstream>
@@ -67,9 +67,9 @@ namespace {
     static const openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
-        "The path to the texture that should be used as the point sprite."        
+        "The path to the texture that should be used as the point sprite."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
@@ -221,10 +221,10 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 KeyFile,
                 new StringVerifier,
                 Optional::Yes,
-                "The path to the SPECK file that contains information about the astronomical "
-                "object being rendered."
+                "The path to the SPECK file that contains information about the "
+                "astronomical object being rendered."
             },
-            { 
+            {
                 keyColor,
                 new Vector3Verifier<float>,
                 Optional::No,
@@ -358,7 +358,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _pTexture(0)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
-    , _pointColor(ColorInfo, glm::vec3(1.f, 0.4f, 0.2f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.0f, 1.0f, 1.0f))
+    , _pointColor(
+        ColorInfo,
+        glm::vec3(1.f, 0.4f, 0.2f),
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(1.0f, 1.0f, 1.0f)
+    )
     , _spriteTexturePath(SpriteTextureInfo)
     , _textColor(
         TextColorInfo,
@@ -372,7 +377,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _fadeInDistance(FadeInDistancesInfo, glm::vec2(0.0f), glm::vec2(0.0), glm::vec2(100.0))
+    , _fadeInDistance(
+        FadeInDistancesInfo,
+        glm::vec2(0.0f),
+        glm::vec2(0.0),
+        glm::vec2(100.0)
+    )
     , _disableFadeInDistance(DisableFadeInInfo, true)
     , _billboardMaxSize(BillboardMaxSizeInfo, 400.0, 0.0, 1000.0)
     , _billboardMinSize(BillboardMinSizeInfo, 0.0, 0.0, 100.0)
@@ -387,8 +397,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _labelFile("")
     , _colorOptionString("")
     , _unit(Parsec)
-    , _transformationMatrix(glm::dmat4(1.0))
     , _nValuesPerAstronomicalObject(0)
+    , _transformationMatrix(glm::dmat4(1.0))
     , _vao(0)
     , _vbo(0)
     , _polygonVao(0)
@@ -405,11 +415,11 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
         _hasSpeckFile = true;
-        _drawElements.onChange([&]() { 
+        _drawElements.onChange([&]() {
             _hasSpeckFile = _hasSpeckFile == true? false : true; });
         addProperty(_drawElements);
     }
-        
+
     // DEBUG:
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
@@ -423,7 +433,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         }
         else if (unit == KilometerUnit) {
             _unit = Kilometer;
-        } 
+        }
         else if (unit == ParsecUnit) {
             _unit = Parsec;
         }
@@ -440,10 +450,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             _unit = GigalightYears;
         }
         else {
-            LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units.");
+            LWARNING(
+                "No unit given for RenderableBillboardsCloud. Using meters as units."
+            );
             _unit = Meter;
         }
-    }        
+    }
 
     if (dictionary.hasKey(SpriteTextureInfo.identifier)) {
         _spriteTexturePath = absPath(dictionary.value<std::string>(
@@ -471,55 +483,54 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             ghoul::Dictionary colorOptionDataDic = dictionary.value<ghoul::Dictionary>(
                 ColorOptionInfo.identifier
                 );
-            for (int i = 0; i < colorOptionDataDic.size(); ++i) {
+            for (int i = 0; i < static_cast<int>(colorOptionDataDic.size()); ++i) {
                 std::string colorMapInUseName(
                     colorOptionDataDic.value<std::string>(std::to_string(i + 1)));
                 _colorOption.addOption(i, colorMapInUseName);
                 _optionConversionMap.insert({i, colorMapInUseName});
                 _colorOptionString = colorMapInUseName;
-            }                
+            }
         }
         _colorOption.onChange(
-            [&] { 
-            _dataIsDirty = true; 
+            [&] {
+            _dataIsDirty = true;
             _colorOptionString = _optionConversionMap[_colorOption.value()];
         });
         addProperty(_colorOption);
 
         if (dictionary.hasKey(ColorRangeInfo.identifier)) {
-            ghoul::Dictionary rangeDataDic = dictionary.value<ghoul::Dictionary>(
+            ghoul::Dictionary rangeDataDict = dictionary.value<ghoul::Dictionary>(
                 ColorRangeInfo.identifier
-                );
-            for (int i = 0; i < rangeDataDic.size(); ++i) {                    
+            );
+            for (size_t i = 0; i < rangeDataDict.size(); ++i) {
                 _colorRangeData.push_back(
-                    rangeDataDic.value<glm::vec2>(std::to_string(i+1)));
+                    rangeDataDict.value<glm::vec2>(std::to_string(i + 1)));
             }
-                
         }
 
     } else if (dictionary.hasKey(keyColor)) {
         _pointColor = dictionary.value<glm::vec3>(keyColor);
         addProperty(_pointColor);
-    }                        
+    }
 
     if (dictionary.hasKey(TransparencyInfo.identifier)) {
         _alphaValue = static_cast<float>(
             dictionary.value<double>(TransparencyInfo.identifier)
-            );
+        );
     }
     addProperty(_alphaValue);
 
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
             dictionary.value<double>(ScaleFactorInfo.identifier)
-            );
+        );
     }
     addProperty(_scaleFactor);
 
     if (dictionary.hasKey(PolygonSidesInfo.identifier)) {
         _polygonSides = static_cast<float>(
             dictionary.value<double>(PolygonSidesInfo.identifier)
-            );
+        );
         _hasPolygon = true;
     }
 
@@ -549,12 +560,16 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<int>(dictionary.value<float>(LabelMinSizeInfo.identifier));
+            _textMinSize = static_cast<int>(
+                dictionary.value<float>(LabelMinSizeInfo.identifier)
+            );
         }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<int>(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+            _textMaxSize = static_cast<int>(
+                dictionary.value<float>(LabelMaxSizeInfo.identifier)
+            );
         }
         addProperty(_textMaxSize);
     }
@@ -588,7 +603,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         );
         addProperty(_billboardMinSize);
     }
-    
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -602,21 +616,47 @@ void RenderableBillboardsCloud::initialize() {
     }
 
     if (!_colorOptionString.empty()) {
-        // Following DU behavior here. The last colormap variable 
+        // Following DU behavior here. The last colormap variable
         // entry is the one selected by default.
-        _colorOption.setValue(_colorRangeData.size() - 1);
+        _colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
     }
 }
 
 void RenderableBillboardsCloud::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-        
+
     _program = renderEngine.buildRenderProgram(
         "RenderableBillboardsCloud",
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl"),
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl"),
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl")
     );
+
+    //_uniformCache.projection = _program->uniformLocation("projection");
+    //_uniformCache.modelView = _program->uniformLocation("modelViewTransform");
+    _uniformCache.modelViewProjection = _program->uniformLocation(
+        "modelViewProjectionTransform"
+    );
+    _uniformCache.cameraPos = _program->uniformLocation("cameraPosition");
+    _uniformCache.cameraLookup = _program->uniformLocation("cameraLookUp");
+    _uniformCache.renderOption = _program->uniformLocation("renderOption");
+    _uniformCache.centerSceenInWorldPos = _program->uniformLocation(
+        "centerScreenInWorldPosition"
+    );
+    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+    _uniformCache.maxBillboardSize = _program->uniformLocation("maxBillboardSize");
+    _uniformCache.color = _program->uniformLocation("color");
+    //_uniformCache.sides = _program->uniformLocation("sides");
+    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+    _uniformCache.up = _program->uniformLocation("up");
+    _uniformCache.right = _program->uniformLocation("right");
+    _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
+    _uniformCache.screenSize = _program->uniformLocation("screenSize");
+    _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
+    _uniformCache.polygonTexture = _program->uniformLocation("polygonTexture");
+    _uniformCache.hasPolygon = _program->uniformLocation("hasPolygon");
+    _uniformCache.hasColormap = _program->uniformLocation("hasColorMap");
 
     if (_hasPolygon) {
         createPolygonTexture();
@@ -628,8 +668,12 @@ void RenderableBillboardsCloud::initializeGL() {
                 ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 50;
-            _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes, ghoul::fontrendering::FontManager::LoadGlyphs::No);
+            _font = OsEng.fontManager().font(
+                "Mono",
+                static_cast<float>(_fontSize),
+                ghoul::fontrendering::FontManager::Outline::Yes,
+                ghoul::fontrendering::FontManager::LoadGlyphs::No
+            );
         }
     }
 }
@@ -687,76 +731,75 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     _program->activate();
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-
     glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
-    _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
-    _program->setUniform("projection", projMatrix);
-    _program->setUniform("modelViewTransform", modelViewMatrix);
-    _program->setUniform("modelViewProjectionTransform", projMatrix * modelViewMatrix);
-    _program->setUniform("cameraPosition", glm::dvec3(worldToModelTransform *
-        glm::dvec4(data.camera.positionVec3(), 1.0)));
-    _program->setUniform("cameraLookUp", glm::dvec3(worldToModelTransform *
-        glm::dvec4(data.camera.lookUpVectorWorldSpace(), 1.0)));
+    _program->setUniform(
+        "screenSize",
+        glm::vec2(OsEng.renderEngine().renderingResolution())
+    );
+    //_program->setUniform(_uniformCache.projection, projMatrix);
+    //_program->setUniform(_uniformCache.modelView, modelViewMatrix);
+    _program->setUniform(_uniformCache.modelViewProjection, projMatrix * modelViewMatrix);
+    _program->setUniform(
+        _uniformCache.cameraPos,
+        glm::dvec3(worldToModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0))
+    );
+    _program->setUniform(
+        _uniformCache.cameraLookup,
+        glm::dvec3(worldToModelTransform *
+                   glm::dvec4(data.camera.lookUpVectorWorldSpace(), 1.0)
+        )
+    );
 
     //_program->setUniform("cameraPosition", data.camera.positionVec3());
     //_program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
 
 
-    _program->setUniform("renderOption", _renderOption.value());
-    glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) * 
-        glm::dvec4(0.0, 0.0, 0.0, 1.0);
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
+    glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) *
+                                   glm::dvec4(0.0, 0.0, 0.0, 1.0);
 
-    _program->setUniform("centerScreenInWorldPosition", centerScreenWorld);
-        
-    _program->setUniform("minBillboardSize", _billboardMinSize); // in pixels
-    _program->setUniform("maxBillboardSize", _billboardMaxSize); // in pixels
-    _program->setUniform("color", _pointColor);
-    _program->setUniform("sides", 4);
-    _program->setUniform("alphaValue", _alphaValue);
-    _program->setUniform("scaleFactor", _scaleFactor);
+    _program->setUniform(_uniformCache.centerSceenInWorldPos, centerScreenWorld);
 
-    _program->setUniform("up", orthoUp);
-    _program->setUniform("right", orthoRight);
+    _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
+    _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
+    _program->setUniform(_uniformCache.color, _pointColor);
+    //_program->setUniform(_uniformCache.sides, 4);
+    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
-    _program->setUniform("fadeInValue", fadeInVariable);
+    _program->setUniform(_uniformCache.up, orthoUp);
+    _program->setUniform(_uniformCache.right, orthoRight);
+
+    _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    _program->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
+    _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
 
     ghoul::opengl::TextureUnit spriteTextureUnit;
     if (_hasSpriteTexture) {
         spriteTextureUnit.activate();
         _spriteTexture->bind();
-        _program->setUniform("spriteTexture", spriteTextureUnit);
+        _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
     }
 
     ghoul::opengl::TextureUnit polygonTextureUnit;
     if (_hasPolygon) {
         polygonTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _pTexture);
-        _program->setUniform("polygonTexture", polygonTextureUnit);
-        _program->setUniform("hasPolygon", _hasPolygon);
+        _program->setUniform(_uniformCache.polygonTexture, polygonTextureUnit);
+        _program->setUniform(_uniformCache.hasPolygon, _hasPolygon);
     }
 
-
-    if (_hasColorMapFile) {
-        _program->setUniform("hasColorMap", true);
-    }
-    else {
-        _program->setUniform("hasColorMap", false);
-    }
+    _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
 
     glBindVertexArray(_vao);
-    const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() / _nValuesPerAstronomicalObject);
+    const GLsizei nAstronomicalObjects = static_cast<GLsizei>(_fullData.size() /
+                                         _nValuesPerAstronomicalObject);
     glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
 
     glBindVertexArray(0);
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::No);
     _program->deactivate();
 
     // Restores blending state
@@ -780,7 +823,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
     RenderEngine& renderEngine = OsEng.renderEngine();
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-        
+
     float scale = 0.0;
     switch (_unit) {
     case Meter:
@@ -863,7 +906,9 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
         /*
         // Linear Fading
-        float funcValue = static_cast<float>((1.0 / double(_fadeInDistance*scale))*(distCamera));
+        float funcValue = static_cast<float>(
+            (1.0 / double(_fadeInDistance*scale))*(distCamera)
+        );
         fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
 
         if (funcValue < 0.01) {
@@ -889,7 +934,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::mat4 viewMatrix = data.camera.viewMatrix();
+    // glm::mat4 viewMatrix = data.camera.viewMatrix();
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) *
@@ -930,7 +975,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::inverse(glm::dmat4(projectionMatrix));
     glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
     glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
-      
+
     if (_hasSpeckFile) {
         renderBillboards(
             data,
@@ -941,13 +986,19 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
             fadeInVariable
         );
     }
-        
+
     if (_drawLabels && _hasLabel) {
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVariable);
-    }                
+        renderLabels(
+            data,
+            modelViewProjectionMatrix,
+            orthoRight,
+            orthoUp,
+            fadeInVariable
+        );
+    }
 }
 
-void RenderableBillboardsCloud::update(const UpdateData&) {  
+void RenderableBillboardsCloud::update(const UpdateData&) {
     if (_dataIsDirty && _hasSpeckFile) {
         LDEBUG("Regenerating data");
 
@@ -973,13 +1024,13 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
             GL_STATIC_DRAW
         );
         GLint positionAttrib = _program->attributeLocation("in_position");
-            
+
         if (_hasColorMapFile) {
-                
-            /*const size_t nAstronomicalObjects = _fullData.size() / _nValuesPerAstronomicalObject;
+            /*const size_t nAstronomicalObjects = _fullData.size() /
+                                                  _nValuesPerAstronomicalObject;
             const size_t nValues = _slicedData.size() / nAstronomicalObjects;
             GLsizei stride = static_cast<GLsizei>(sizeof(float) * nValues);*/
-                
+
             glEnableVertexAttribArray(positionAttrib);
             glVertexAttribPointer(
                 positionAttrib,
@@ -1001,7 +1052,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 reinterpret_cast<void*>(sizeof(float)*4)
             );
         }
-        else {                                                
+        else {
             glEnableVertexAttribArray(positionAttrib);
             glVertexAttribPointer(
                 positionAttrib,
@@ -1022,12 +1073,16 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         LDEBUG("Reloading Sprite Texture");
         _spriteTexture = nullptr;
         if (_spriteTexturePath.value() != "") {
-            _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_spriteTexturePath));
+            _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_spriteTexturePath)
+            );
             if (_spriteTexture) {
-                LDEBUG("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
+                LINFO("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
                 _spriteTexture->uploadTexture();
             }
-            _spriteTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _spriteTexture->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            );
 
             _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
                 _spriteTexturePath);
@@ -1035,7 +1090,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
                 );
         }
-        _spriteTextureIsDirty = false;            
+        _spriteTextureIsDirty = false;
     }
 
     if (_hasLabel && _labelDataIsDirty) {
@@ -1045,83 +1100,106 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 }
 
 bool RenderableBillboardsCloud::loadData() {
-    bool success = false; 
+    bool success = true;
+
+    success &= loadSpeckData();
+
+    if (_hasColorMapFile) {
+        if (!_hasSpeckFile) {
+            success = true;
+        }
+        success &= readColorMapFile();
+    }
+
+    success &= loadLabelData();
+
+    return success;
+}
+
+bool RenderableBillboardsCloud::loadSpeckData() {
+    bool success = true;
     if (_hasSpeckFile) {
         std::string _file = _speckFile;
         // I disabled the cache as it didn't work on Mac --- abock
 
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     _file,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
+        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+            ghoul::filesystem::File(_file),
+            "RenderableDUMeshes|" + name(),
+            ghoul::filesystem::CacheManager::Persistent::Yes
+        );
 
-        // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // if (hasCachedFile) {
-        //     LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+        bool hasCachedFile = FileSys.fileExists(cachedFile);
+        if (hasCachedFile) {
+            LINFO(
+                "Cached file '" << cachedFile << "' used for Speck file '" <<
+                _file << "'"
+            );
 
-        //     success = loadCachedFile(cachedFile);
-        //     if (!success) {
-        //         FileSys.cacheManager()->removeCacheFile(_file);
-        //         // Intentional fall-through to the 'else' computation to generate the cache
-        //         // file for the next run
-        //     }
-        // }
-        // else 
-        // {
-        //     LINFO("Cache for Speck file '" << _file << "' not found");
-            LINFO("Loading Speck file '" << _file << "'");
-
-            success = readSpeckFile();
-            if (!success) {
-                return false;
+            success = loadCachedFile(cachedFile);
+            if (success) {
+                return true;
             }
+            else {
+                FileSys.cacheManager()->removeCacheFile(_file);
+                // Intentional fall-through to the 'else' to generate the cache
+                // file for the next run
+            }
+        }
+        else {
+            LINFO("Cache for Speck file '" << _file << "' not found");
+        }
+        LINFO("Loading Speck file '" << _file << "'");
 
-            // LINFO("Saving cache");
-            // success &= saveCachedFile(cachedFile);
-        // }
+        success = readSpeckFile();
+        if (!success) {
+            return false;
+        }
+
+        success &= saveCachedFile(cachedFile);
     }
+    return success;
+}
 
-    if (_hasColorMapFile) {
-        if (!_hasSpeckFile)
-            success = true;
-        success &= readColorMapFile();
-    }
-
+bool RenderableBillboardsCloud::loadLabelData() {
+    bool success = true;
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
         // I disabled the cache as it didn't work on Mac --- abock
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     labelFile,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
-        if (!_hasSpeckFile && !_hasColorMapFile)
+        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+            ghoul::filesystem::File(labelFile),
+            ghoul::filesystem::CacheManager::Persistent::Yes
+        );
+        if (!_hasSpeckFile && !_hasColorMapFile) {
             success = true;
-        //bool hasCachedFile = FileSys.fileExists(cachedFile);
-        //if (hasCachedFile) {
-        //    LINFO("Cached file '" << cachedFile << "' used for Label file '" << labelFile << "'");
-        //    
-        //    success &= loadCachedFile(cachedFile);
-        //    if (!success) {
-        //        FileSys.cacheManager()->removeCacheFile(labelFile);
-        //        // Intentional fall-through to the 'else' computation to generate the cache
-        //        // file for the next run
-        //    }
-        //}
-        //else 
-        // {
-            // LINFO("Cache for Label file '" << labelFile << "' not found");
+        }
+        bool hasCachedFile = FileSys.fileExists(cachedFile);
+        if (hasCachedFile) {
+            LINFO(
+                "Cached file '" << cachedFile << "' used for Label file '" <<
+                labelFile << "'"
+            );
+
+            success &= loadCachedFile(cachedFile);
+            if (!success) {
+                FileSys.cacheManager()->removeCacheFile(labelFile);
+                // Intentional fall-through to the 'else' to generate the cache
+                // file for the next run
+            }
+        }
+        else {
+            LINFO("Cache for Label file '" << labelFile << "' not found");
             LINFO("Loading Label file '" << labelFile << "'");
 
             success &= readLabelFile();
             if (!success) {
                 return false;
             }
-
-        // }
+        }
     }
-        
+
     return success;
 }
+
 
 bool RenderableBillboardsCloud::readSpeckFile() {
     std::string _file = _speckFile;
@@ -1142,7 +1220,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r 
+        // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() -1);
         }
@@ -1171,16 +1249,17 @@ bool RenderableBillboardsCloud::readSpeckFile() {
             // number of values (+3 since X Y Z are not counted in the Speck file index)
             std::stringstream str(line);
 
-            std::string dummy; 
+            std::string dummy;
             str >> dummy; // command
             str >> _nValuesPerAstronomicalObject; // variable index
             dummy.clear();
             str >> dummy; // variable name
 
-            _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject });                
+            _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject });
 
-            _nValuesPerAstronomicalObject += 1; // We want the number, but the index is 0 based
-        }            
+            // We want the number, but the index is 0 based
+            _nValuesPerAstronomicalObject += 1;
+        }
     }
 
     _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
@@ -1191,7 +1270,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r 
+        // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() -1);
         }
@@ -1203,7 +1282,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
         std::stringstream str(line);
 
         for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-            str >> values[i];                
+            str >> values[i];
         }
 
         _fullData.insert(_fullData.end(), values.begin(), values.end());
@@ -1219,7 +1298,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
         LERROR("Failed to open Color Map file '" << _file << "'");
         return false;
     }
- 
+
     std::size_t numberOfColors = 0;
 
     // The beginning of the speck file has a header that either contains comments
@@ -1227,7 +1306,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line = "";
     while (true) {
-        std::streampos position = file.tellg();
+        // std::streampos position = file.tellg();
         std::getline(file, line);
 
         if (line[0] == '#' || line.empty()) {
@@ -1243,21 +1322,21 @@ bool RenderableBillboardsCloud::readColorMapFile() {
         }
         else if (file.eof()) {
             return false;
-        }            
+        }
     }
-        
-    for (auto i = 0; i < numberOfColors; ++i) {
+
+    for (size_t i = 0; i < numberOfColors; ++i) {
         std::getline(file, line);
         std::stringstream str(line);
-            
+
         glm::vec4 color;
-        for (auto j = 0; j < 4; ++j) {
+        for (int j = 0; j < 4; ++j) {
             str >> color[j];
         }
 
         _colorMapData.push_back(color);
     }
-        
+
     return true;
 }
 
@@ -1268,7 +1347,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
         LERROR("Failed to open Label file '" << _file << "'");
         return false;
     }
-        
+
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
@@ -1278,7 +1357,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r 
+        // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() -1);
         }
@@ -1312,7 +1391,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r 
+        // lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() -1);
         }
@@ -1330,7 +1409,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
 
         std::string dummy;
         str >> dummy; // text keyword
-            
+
         std::string label;
         str >> label;
         dummy.clear();
@@ -1367,7 +1446,10 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
 
         int32_t nValues = 0;
         fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_nValuesPerAstronomicalObject), sizeof(int32_t));
+        fileStream.read(
+            reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
+            sizeof(int32_t)
+        );
 
         _fullData.resize(nValues);
         fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
@@ -1380,12 +1462,11 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
             for (int i = 0; i < nItems; ++i) {
                 int32_t keySize = 0;
                 fileStream.read(reinterpret_cast<char*>(&keySize), sizeof(int32_t));
-                std::string key;                    
+                std::string key;
                 for (int c = 0; c < keySize; ++c) {
-                    char t[2];
-                    t[1] = '\0';
-                    fileStream.read(reinterpret_cast<char*>(&t), sizeof(int32_t));
-                    key.append(t);
+                    char t;
+                    fileStream.read(&t, sizeof(char));
+                    key.append(1, t);
                 }
                 int32_t value = 0;
                 fileStream.read(reinterpret_cast<char*>(&value), sizeof(int32_t));
@@ -1416,9 +1497,14 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
         }
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-        int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(_nValuesPerAstronomicalObject);
-        fileStream.write(reinterpret_cast<const char*>(&nValuesPerAstronomicalObject), sizeof(int32_t));            
-            
+        int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
+            _nValuesPerAstronomicalObject
+        );
+        fileStream.write(
+            reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
+            sizeof(int32_t)
+        );
+
         size_t nBytes = nValues * sizeof(_fullData[0]);
         fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
 
@@ -1428,10 +1514,13 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
 
             for (auto pair : _variableDataPositionMap) {
                 int32_t keySize = static_cast<int32_t>(pair.first.size());
-                fileStream.write(reinterpret_cast<const char*>(&keySize), sizeof(int32_t));
-                for (int c = 0; c < pair.first.size(); ++c) {
-                    int32_t keyChar = static_cast<int32_t>(pair.first[c]);
-                    fileStream.write(reinterpret_cast<const char*>(&keyChar), sizeof(int32_t));
+                fileStream.write(
+                    reinterpret_cast<const char*>(&keySize),
+                    sizeof(int32_t)
+                );
+                for (size_t c = 0; c < pair.first.size(); ++c) {
+                    char keyChar = static_cast<int32_t>(pair.first[c]);
+                    fileStream.write(&keyChar, sizeof(char));
                 }
                 int32_t value = static_cast<int32_t>(pair.second);
                 fileStream.write(reinterpret_cast<const char*>(&value), sizeof(int32_t));
@@ -1446,7 +1535,7 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
         return false;
     }
 }
-    
+
 void RenderableBillboardsCloud::createDataSlice() {
     _slicedData.clear();
     if (_hasColorMapFile) {
@@ -1462,13 +1551,14 @@ void RenderableBillboardsCloud::createDataSlice() {
     if (_hasColorMapFile) {
         colorMapInUse = _variableDataPositionMap[_colorOptionString];
         glm::vec2 currentColorRange = _colorRangeData[_colorOption.value()];
-        float colorMapBinSize = (currentColorRange.y - currentColorRange.x) / static_cast<float>(_colorMapData.size());            
+        float colorMapBinSize = (currentColorRange.y - currentColorRange.x) /
+                                static_cast<float>(_colorMapData.size());
         float bin = colorMapBinSize;
-        for (int i = 0; i < _colorMapData.size(); ++i) {
+        for (size_t i = 0; i < _colorMapData.size(); ++i) {
             colorBins.push_back(bin);
             bin += colorMapBinSize;
         }
-    }        
+    }
 
     float biggestCoord = -1.0f;
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
@@ -1479,7 +1569,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             1.0
         );
         glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
-            
+
         if (_hasColorMapFile) {
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(position[j]);
@@ -1488,17 +1578,20 @@ void RenderableBillboardsCloud::createDataSlice() {
             // Finds from which bin to get the color.
             // Note: the first color in the colormap file
             // is the outliers color.
-            glm::vec4 itemColor;                
+            glm::vec4 itemColor;
             float variableColor = _fullData[i + 3 + colorMapInUse];
-            int c = colorBins.size()-1;
+            int c = static_cast<int>(colorBins.size() - 1);
             while (variableColor < colorBins[c]) {
                 --c;
                 if (c == 0)
                     break;
             }
-                
-            int colorIndex = c == colorBins.size() - 1 ? 0 : c + 1;
-                
+
+            int colorIndex =
+                c == static_cast<int>(colorBins.size() - 1) ?
+                0 :
+                c + 1;
+
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(_colorMapData[colorIndex][j]);
             }
@@ -1507,7 +1600,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             for (auto j = 0; j < 4; ++j) {
                 _slicedData.push_back(position[j]);
             }
-        }            
+        }
     }
     _fadeInDistance.setMaxValue(glm::vec2(10.0f * biggestCoord));
 }
@@ -1526,19 +1619,29 @@ void RenderableBillboardsCloud::createPolygonTexture() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256,
         256, 0, GL_RGBA, GL_BYTE, nullptr);
 
-    renderToTexture(std::bind(&openspace::RenderableBillboardsCloud::loadPolygonGeometryForRendering, 
-        this),
-        std::bind(&openspace::RenderableBillboardsCloud::renderPolygonGeometry, 
-        this, std::placeholders::_1),
-        _pTexture, 256, 256);          
+    renderToTexture(
+        std::bind(
+            &openspace::RenderableBillboardsCloud::loadPolygonGeometryForRendering,
+            this
+        ),
+        std::bind(
+            &openspace::RenderableBillboardsCloud::renderPolygonGeometry,
+            this,
+            std::placeholders::_1
+        ),
+        _pTexture,
+        256,
+        256
+    );
 }
 
 void RenderableBillboardsCloud::renderToTexture(
-    std::function<void(void)> geometryLoadingFunction,
-    std::function<void(GLuint)> renderFunction,
-    GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight) {
+                                        std::function<void(void)> geometryLoadingFunction,
+                                        std::function<void(GLuint)> renderFunction,
+                      GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight)
+{
     LDEBUG("Rendering to Texture");
-        
+
     // Saves initial Application's OpenGL State
     GLint defaultFBO;
     GLint viewport[4];
@@ -1552,12 +1655,12 @@ void RenderableBillboardsCloud::renderToTexture(
     glDrawBuffers(1, drawBuffers);
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
-        
+
     glViewport(0, 0, textureWidth, textureHeight);
-       
+
     geometryLoadingFunction();
     renderFunction(_polygonVao);
-        
+
     // Restores Applications' OpenGL State
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -1569,7 +1672,7 @@ void RenderableBillboardsCloud::renderToTexture(
     if (_polygonVao) {
         glDeleteVertexArrays(1, &_polygonVao);
     }
-    glDeleteFramebuffers(1, &textureFBO);        
+    glDeleteFramebuffers(1, &textureFBO);
 }
 
 void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
@@ -1584,13 +1687,20 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
     };
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<GLvoid*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 4,
+        nullptr
+    );
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
 
 void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
-    std::unique_ptr<ghoul::opengl::ProgramObject> program = 
+    std::unique_ptr<ghoul::opengl::ProgramObject> program =
         ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),

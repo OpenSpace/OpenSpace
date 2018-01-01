@@ -1,0 +1,77 @@
+local assetHelper = asset.require('util/asset_helper')
+local proceduralGlobes = asset.require('util/procedural_globe')
+local transforms = asset.require('../transforms')
+local kernels368 = asset.require('../sat368').Kernels
+
+
+
+local parentName = transforms.SaturnBarycenter.Name
+local parentSpice = "SATURN BARYCENTER"
+local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_gallic" }
+local trailColor = { 0.5, 0.3, 0.3 }
+
+local gallicGroup = {
+    {
+        Name = "Albiorix",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "ALBIORIX",
+        Radii = { 32000, 32000, 32000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 774.58,
+        Kernels = kernels368
+    },
+    {
+        Name = "Bebhionn",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "BEBHIONN",
+        Radii = { 6000, 6000, 6000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 838.77,
+        Kernels = kernels368
+    },
+    {
+        Name = "Erriapus",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "ERRIAPUS",
+        Radii = { 10000, 10000, 10000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 844.89,
+        Kernels = kernels368
+    },
+    {
+        Name = "Tarvos",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "TARVOS",
+        Radii = { 15000, 15000, 15000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        TrailColor = trailColor,
+        OrbitPeriod = 944.23,
+        Kernels = kernels368
+    },
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(
+    asset,
+    proceduralGlobes.createGlobes(gallicGroup)
+)

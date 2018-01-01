@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,13 +34,14 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <unordered_map>
 
-namespace ghoul::filesystem { 
-    class File; 
+namespace ghoul::filesystem {
+    class File;
 }
 
 namespace ghoul::opengl {
@@ -49,6 +50,7 @@ namespace ghoul::opengl {
 } // namespace ghoul::opengl
 
 namespace openspace {
+
 namespace documentation { struct Documentation; }
 
 class RenderableDUMeshes : public Renderable {
@@ -91,12 +93,12 @@ private:
         int colorIndex;
         int textureIndex;
         // From: Partiview User’s Guide
-        // Brian Abbott 
+        // Brian Abbott
         // Hayden Planetarium American Museum of Natural History New York, USA
-        // "Speciﬁes the dimensions of the mesh."
-        // "If you wish to draw a line between points, then numU will be 1 while 
+        // "Specifies the dimensions of the mesh."
+        // "If you wish to draw a line between points, then numU will be 1 while
         // numV will equal the number of points to connect.
-        // If you want a square, 4000×4000 grid with lines every 200 units, 
+        // If you want a square, 4000×4000 grid with lines every 200 units,
         // then numU numU will both equal 21
         int numU, numV;
         MeshType style;
@@ -122,7 +124,7 @@ private:
     bool _textColorIsDirty;
     bool _hasLabel;
     bool _labelDataIsDirty;
-    
+
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     //properties::Vec3Property _pointColor;
@@ -138,6 +140,8 @@ private:
     properties::OptionProperty _renderOption;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    UniformCache(modelViewTransform, projectionTransform, alphaValue,
+        scaleFactor, color) _uniformCache;
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 

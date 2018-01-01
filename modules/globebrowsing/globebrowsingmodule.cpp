@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,8 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+
+#include <vector>
 
 #ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
@@ -135,7 +137,7 @@ namespace openspace {
 
 GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
 
-void GlobeBrowsingModule::internalInitialize() {
+void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     // TODO: Remove dependency on OsEng.
     // Instead, make this class implement an interface that OsEng depends on.
     // Do not try to register module callbacks if OsEng does not exist,
@@ -230,6 +232,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "addLayer",
                 &globebrowsing::luascriptfunctions::addLayer,
+                {},
                 "string, string, table",
                 "Adds a layer to the specified globe. The first argument specifies the "
                 "name of the scene graph node of which to add the layer. The renderable "
@@ -241,6 +244,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "deleteLayer",
                 &globebrowsing::luascriptfunctions::deleteLayer,
+                {},
                 "string, string",
                 "Removes a layer from the specified globe. The first argument specifies "
                 "the name of the scene graph node of which to remove the layer. "
@@ -252,18 +256,21 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "goToChunk",
                 &globebrowsing::luascriptfunctions::goToChunk,
+                {},
                 "void",
                 "Go to chunk with given index x, y, level"
             },
             {
                 "goToGeo",
                 &globebrowsing::luascriptfunctions::goToGeo,
+                {},
                 "number, number, number",
                 "Go to geographic coordinates latitude and longitude"
             },
             {
                 "getGeoPosition",
                 &globebrowsing::luascriptfunctions::getGeoPosition,
+                {},
                 "void",
                 "Get geographic coordinates of the camera poosition in latitude, "
                 "longitude, and altitude"
@@ -272,6 +279,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "loadWMSCapabilities",
                 &globebrowsing::luascriptfunctions::loadWMSCapabilities,
+                {},
                 "string, string, string",
                 "Loads and parses the WMS capabilities xml file from a remote server. "
                 "The first argument is the name of the capabilities that can be used to "
@@ -282,6 +290,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "removeWMSServer",
                 &globebrowsing::luascriptfunctions::removeWMSServer,
+                {},
                 "string",
                 "Removes the WMS server identified by the first argument from the list "
                 "of available servers. The parameter corrsponds to the first argument in "
@@ -290,6 +299,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {
                 "capabilitiesWMS",
                 &globebrowsing::luascriptfunctions::capabilities,
+                {},
                 "string",
                 "Returns an array of tables that describe the available layers that are "
                 "supported by the WMS server identified by the provided name. The 'URL'"
@@ -300,9 +310,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         },
         {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
-        },
-        {
-            // Documentation
         }
     };
 }

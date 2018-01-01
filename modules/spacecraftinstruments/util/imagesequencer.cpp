@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,7 +73,7 @@ void ImageSequencer::initialize() {
     ghoul_assert(_instance == nullptr, "Instance already has been initialized");
     _instance = new ImageSequencer;
     _instance->_defaultCaptureImage =
-        absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png");
+        absPath("${DATA}/placeholder.png");
 }
 
 void ImageSequencer::deinitialize() {
@@ -182,7 +182,7 @@ double ImageSequencer::getIntervalLength() {
     return _intervalLength;
 }
 
-double ImageSequencer::getNextCaptureTime(){
+double ImageSequencer::getNextCaptureTime() {
     auto compareTime = [](const double &a, const double &b) -> bool {
         return a < b;
     };
@@ -405,7 +405,9 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
 
         // check for sanity
         if (imageData.empty() || instrumentTimes.empty() || captureProgression.empty()) {
-            LERROR("Missing sequence data");
+            LINFO(
+                "Parser did not contain images, instrument times or capture progression"
+            );
             return;
         }
 

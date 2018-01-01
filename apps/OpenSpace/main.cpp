@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-//#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/boolean.h>
 
 #include <sgct.h>
 
@@ -584,8 +584,11 @@ int main_main(int argc, char** argv) {
         "Unknown OpenGL version. Missing statement in version mapping map"
     );
 
-    auto cleanup = [&](){
-        OsEng.deinitialize();
+    using IsInitialized = ghoul::Boolean;
+    auto cleanup = [&](IsInitialized isInitialized){
+        if (isInitialized) {
+            OsEng.deinitialize();
+        }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
         sgct::MessageHandler::instance()->setLogToCallback(false);
@@ -621,16 +624,16 @@ int main_main(int argc, char** argv) {
 
     if (!initSuccess) {
         LFATAL("Initializing failed");
-        cleanup();
+        cleanup(IsInitialized::No);
         return EXIT_FAILURE;
     }
 
     // Main loop
-    LDEBUG("Starting rendering loop");
+    LINFO("Starting rendering loop");
     SgctEngine->render();
-    LDEBUG("Ending rendering loop");
+    LINFO("Ending rendering loop");
 
-    cleanup();
+    cleanup(IsInitialized::Yes);
 
     // Exit program
     exit(EXIT_SUCCESS);

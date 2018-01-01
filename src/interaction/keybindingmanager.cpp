@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,10 +47,10 @@ KeyBindingManager::KeyBindingManager()
         "Documentation",
         "keybindings",
         {
-            { "keybindingTemplate", "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs" },
-            { "mainTemplate", "${OPENSPACE_DATA}/web/keybindings/main.hbs" }
+            { "keybindingTemplate", "${WEB}/keybindings/keybinding.hbs" },
+            { "mainTemplate", "${WEB}/keybindings/main.hbs" }
         },
-        "${OPENSPACE_DATA}/web/keybindings/script.js"
+        "${WEB}/keybindings/script.js"
     )
 { }
 
@@ -186,18 +186,21 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
             {
                 "clearKeys",
                 &luascriptfunctions::clearKeys,
+                {},
                 "",
                 "Clear all key bindings"
             },
             {
                 "clearKey",
                 &luascriptfunctions::clearKey,
+                {},
                 "string",
                 "Unbinds all of the scripts that are bound to the provided key + modifier"
             },
             {
                 "bindKey",
                 &luascriptfunctions::bindKey,
+                {},
                 "string, string [,string]",
                 "Binds a key by name to a lua string command to execute both locally "
                 "and to broadcast to clients if this is the host of a parallel session. "
@@ -208,6 +211,7 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
             {
                 "bindKeyLocal",
                 &luascriptfunctions::bindKeyLocal,
+                {},
                 "string, string [,string]",
                 "Binds a key by name to a lua string command to execute only locally. "
                 "The first argument is the key, the second argument is the Lua command "
@@ -217,6 +221,7 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
             {
                 "getKeyBinding",
                 &luascriptfunctions::getKeyBindings,
+                {},
                 "string",
                 "Returns a list of information about the keybindings for the provided "
                 "key. Each element in the list is a table describing the 'Command' that "

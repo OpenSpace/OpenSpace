@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,7 +83,8 @@ documentation::Documentation DashboardItemParallelConnection::Documentation() {
     };
 }
 
-DashboardItemParallelConnection::DashboardItemParallelConnection(ghoul::Dictionary dictionary)
+DashboardItemParallelConnection::DashboardItemParallelConnection(
+                                                             ghoul::Dictionary dictionary)
     : DashboardItem("Parallel Connection")
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -111,7 +112,7 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(ghoul::Dictiona
         _font = OsEng.fontManager().font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
-    
+
     _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 

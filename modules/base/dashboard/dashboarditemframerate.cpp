@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -94,7 +94,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
     };
 }
 
-DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary) 
+DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
     : DashboardItem("Framerate")
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -123,7 +123,7 @@ DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
         _font = OsEng.fontManager().font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
-    
+
     _frametimeType.addOptions({
         { static_cast<int>(FrametimeType::DtTimeAvg), "Average Deltatime" },
         { static_cast<int>(FrametimeType::FPS), "Frames per second" },
@@ -147,7 +147,7 @@ DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
         }
     }
     else {
-        _frametimeType = static_cast<int>(FrametimeType::FPS);
+        _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
     }
     addProperty(_frametimeType);
 

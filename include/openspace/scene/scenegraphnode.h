@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <string>
@@ -54,6 +55,12 @@ namespace documentation { struct Documentation; }
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:
+    enum class State : int {
+        Loaded,
+        Initialized,
+        GLInitialized
+    };
+
     using UpdateScene = ghoul::Boolean;
 
     struct PerformanceRecord {
@@ -87,19 +94,16 @@ public:
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
 
-    void attachChild(std::unique_ptr<SceneGraphNode> child,
-        UpdateScene updateScene = UpdateScene::Yes);
-    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child,
-        UpdateScene updateScene = UpdateScene::Yes);
-    void setParent(SceneGraphNode& parent, UpdateScene updateScene = UpdateScene::Yes);
+    void attachChild(std::unique_ptr<SceneGraphNode> child);
+    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
+    void clearChildren();
+    void setParent(SceneGraphNode& parent);
 
-    void addDependency(SceneGraphNode& dependency,
-        UpdateScene updateScene = UpdateScene::Yes);
-    void removeDependency(SceneGraphNode& dependency,
-        UpdateScene updateScene = UpdateScene::Yes);
-    void clearDependencies(UpdateScene updateScene = UpdateScene::Yes);
-    void setDependencies(const std::vector<SceneGraphNode*>& dependencies,
-        UpdateScene updateScene = UpdateScene::Yes);
+    void addDependency(SceneGraphNode& dependency);
+    void removeDependency(SceneGraphNode& dependency);
+    void clearDependencies();
+    void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
+
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace);
 
@@ -141,6 +145,7 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
 
+    std::atomic<State> _state;
     std::vector<std::unique_ptr<SceneGraphNode>> _children;
     SceneGraphNode* _parent;
     std::vector<SceneGraphNode*> _dependencies;

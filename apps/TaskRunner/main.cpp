@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,13 +38,16 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/dashboarditem.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/util/taskloader.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
@@ -91,7 +94,7 @@ void performTasks(const std::string& path) {
         );
         ProgressBar progressBar(100);
         auto onProgress = [&progressBar](float progress) {
-            progressBar.print(progress * 100);
+            progressBar.print(static_cast<int>(progress * 100.f));
         };
         task.perform(onProgress);
     }
@@ -101,61 +104,9 @@ void performTasks(const std::string& path) {
 int main(int argc, char** argv) {
     using namespace openspace;
 
-    ghoul::initialize();
-
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
-    LogMgr.addLog(std::make_unique< ghoul::logging::ConsoleLog>());
-
-    LDEBUG("Initialize FileSystem");
-
-    ghoul::filesystem::Directory launchDirectory = FileSys.currentDirectory();
-
-#ifdef __APPLE__
-    ghoul::filesystem::File app(argv[0]);
-    std::string dirName = app.directoryName();
-    LINFO("Setting starting directory to '" << dirName << "'");
-    FileSys.setCurrentDirectory(dirName);
-#endif
-
-    initTextureReaders();
-
-    FactoryManager::initialize();
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
-        "Renderable"
-        );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Task>>(),
-        "Task"
-        );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Translation>>(),
-        "Translation"
-        );
-
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
-        "Rotation"
-        );
-
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Scale>>(),
-        "Scale"
-        );
-
-    openspace::ConfigurationManager configuration;
-    std::string configurationFile = configuration.findConfiguration(ConfigurationFile);
-    configuration.loadFromFile(configurationFile);
-
-    ModuleEngine moduleEngine;
-    moduleEngine.initialize();
-    LINFO("Initialization done.");
-
-    // Parse commandline arguments
-    std::vector<std::string> args(argv, argv + argc);
+    std::vector<std::string> remainingArguments;
+    bool unusedBool;
+    OpenSpaceEngine::create(argc, argv, nullptr, remainingArguments, unusedBool);
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
@@ -165,17 +116,17 @@ int main(int argc, char** argv) {
     std::string tasksPath = "";
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-            &tasksPath,
+            tasksPath,
             "--task",
             "-t",
             "Provides the path to a task file to execute"
             )
     );
 
-    commandlineParser.setCommandLine(args);
+    commandlineParser.setCommandLine(remainingArguments);
     commandlineParser.execute();
 
-    FileSys.setCurrentDirectory(launchDirectory);
+    //FileSys.setCurrentDirectory(launchDirectory);
 
     if (tasksPath != "") {
         performTasks(tasksPath);
@@ -184,16 +135,13 @@ int main(int argc, char** argv) {
 
     // If no task file was specified in as argument, run in CLI mode.
 
-    std::string tasksRoot;
-    if (configuration.getValue(ConfigurationManager::KeyConfigTasksRoot, tasksRoot)) {
-        LINFO("Task root: " << tasksRoot);
-        FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath(tasksRoot)));
-    }
+    LINFO("Task root: " << absPath("${TASKS}"));
+    FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath("${TASKS}")));
 
-    std::cout << "TASK >";
+    std::cout << "TASK > ";
     while (std::cin >> tasksPath) {
         performTasks(tasksPath);
-        std::cout << "TASK >";
+        std::cout << "TASK > ";
     }
 
     return 0;

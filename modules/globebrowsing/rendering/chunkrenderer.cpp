@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
- 
+
 namespace {
     const double KM_TO_M = 1000.0;
 }
@@ -82,9 +82,9 @@ void ChunkRenderer::recompileShaders(const RenderableGlobe& globe) {
 }
 
 ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
-    std::shared_ptr<LayerShaderManager> layeredShaderManager,
-    std::shared_ptr<GPULayerManager> gpuLayerManager,
-    const Chunk& chunk)
+                                 std::shared_ptr<LayerShaderManager> layeredShaderManager,
+                                 std::shared_ptr<GPULayerManager> gpuLayerManager,
+                                 const Chunk& chunk)
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
@@ -116,36 +116,67 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     return programObject;
 }
 
-void ChunkRenderer::calculateEclipseShadows(const Chunk& chunk, ghoul::opengl::ProgramObject* programObject,
-    const RenderData& data) {
+void ChunkRenderer::calculateEclipseShadows(const Chunk& chunk,
+                                            ghoul::opengl::ProgramObject* programObject,
+                                            const RenderData& data)
+{
     // Shadow calculations..
     if (chunk.owner().ellipsoid().hasEclipseShadows()) {
         std::vector<RenderableGlobe::ShadowRenderingStruct> shadowDataArray;
-        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray = chunk.owner().ellipsoid().shadowConfigurationArray();
+        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray =
+            chunk.owner().ellipsoid().shadowConfigurationArray();
         shadowDataArray.reserve(shadowConfArray.size());
         double lt;
         for (const auto & shadowConf : shadowConfArray) {
-            // TO REMEMBER: all distances and lengths in world coordinates are in meters!!! We need to move this to view space...
+            // TO REMEMBER: all distances and lengths in world coordinates are in
+            // meters!!! We need to move this to view space...
             // Getting source and caster:
-            glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(shadowConf.source.first, "SUN", "GALACTIC", {}, 
-                                                                      data.time.j2000Seconds(), lt);
+            glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
+                shadowConf.source.first,
+                "SUN",
+                "GALACTIC",
+                {},
+                data.time.j2000Seconds(),
+                lt
+            );
             sourcePos *= KM_TO_M; // converting to meters
-            glm::dvec3 casterPos = SpiceManager::ref().targetPosition(shadowConf.caster.first, "SUN", "GALACTIC", {}, 
-                                                                      data.time.j2000Seconds(), lt);
+            glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
+                shadowConf.caster.first,
+                "SUN",
+                "GALACTIC",
+                {},
+                data.time.j2000Seconds(),
+                lt
+            );
             casterPos *= KM_TO_M; // converting to meters
-            psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(casterPos.x, casterPos.y, casterPos.z);
+            // psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+            //     casterPos.x,
+            //     casterPos.y,
+            //     casterPos.z
+            // );
 
 
-            // First we determine if the caster is shadowing the current planet (all calculations in World Coordinates):
+            // First we determine if the caster is shadowing the current planet (all
+            // calculations in World Coordinates):
             glm::dvec3 planetCasterVec = casterPos - data.position.dvec3();
             glm::dvec3 sourceCasterVec = casterPos - sourcePos;
             double sc_length = glm::length(sourceCasterVec);
-            glm::dvec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) * sourceCasterVec;
+            glm::dvec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) /
+                                            (sc_length*sc_length)) * sourceCasterVec;
             double d_test = glm::length(planetCasterVec - planetCaster_proj);
-            double xp_test = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
-            double rp_test = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
+            double xp_test = shadowConf.caster.second * sc_length /
+                             (shadowConf.source.second + shadowConf.caster.second);
+            double rp_test = shadowConf.caster.second *
+                             (glm::length(planetCaster_proj) + xp_test) / xp_test;
 
-            glm::dvec3 sunPos = SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, data.time.j2000Seconds(), lt);
+            glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
+                "SUN",
+                "SUN",
+                "GALACTIC",
+                {},
+                data.time.j2000Seconds(),
+                lt
+            );
             double casterDistSun = glm::length(casterPos - sunPos);
             double planetDistSun = glm::length(data.position.dvec3() - sunPos);
 
@@ -161,7 +192,8 @@ void ChunkRenderer::calculateEclipseShadows(const Chunk& chunk, ghoul::opengl::P
                 shadowData.rc = shadowConf.caster.second;
                 shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
                 shadowData.xp = xp_test;
-                shadowData.xu = shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
+                shadowData.xu = shadowData.rc * sc_length /
+                                (shadowData.rs - shadowData.rc);
                 shadowData.casterPositionVec = casterPos;
             }
             shadowDataArray.push_back(shadowData);
@@ -196,9 +228,15 @@ void ChunkRenderer::calculateEclipseShadows(const Chunk& chunk, ghoul::opengl::P
             counter++;
         }
 
-        programObject->setUniform("inverseViewTransform", glm::inverse(data.camera.combinedViewMatrix()));
+        programObject->setUniform(
+            "inverseViewTransform",
+            glm::inverse(data.camera.combinedViewMatrix())
+        );
         programObject->setUniform("modelTransform", chunk.owner().modelTransform());
-        programObject->setUniform("hardShadows", chunk.owner().generalProperties().eclipseHardShadows);
+        programObject->setUniform(
+            "hardShadows",
+            chunk.owner().generalProperties().eclipseHardShadows
+        );
         programObject->setUniform("calculateEclipseShadows", true);
     }
 }
@@ -288,7 +326,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     }
 
     const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
-    
+
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
         // Calculations are done in the reference frame of the globe. Hence, the
         // camera position needs to be transformed with the inverse model matrix
@@ -435,7 +473,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     }
 
     setCommonUniforms(*programObject, chunk, data);
-    
+
     if (chunk.owner().ellipsoid().hasEclipseShadows()) {
         calculateEclipseShadows(chunk, programObject, data);
     }

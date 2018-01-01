@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,8 +38,9 @@ using std::string;
 
 namespace {
     const char* _configurationFile = "openspace.cfg";
-    const char* _keyBasePath = "BASE_PATH";
-    const char* _initialConfigHelper = "${BASE_PATH}/scripts/configuration_helper.lua";
+    const char* _keyBasePath = "BASE";
+    // We can't use ${SCRIPTS} here as that hasn't been defined by this point
+    const char* _initialConfigHelper = "${BASE}/scripts/configuration_helper.lua";
 } // namespace
 
 namespace openspace {
@@ -60,9 +61,9 @@ const string ConfigurationManager::KeyPropertyDocumentation = "PropertyDocumenta
 const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
 const string ConfigurationManager::KeyDocumentation = "Documentation";
 const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
+
+const string ConfigurationManager::KeyConfigAsset = "Asset";
 const string ConfigurationManager::KeySceneLicenseDocumentation = "LicenseDocumentation";
-const string ConfigurationManager::KeyConfigScene = "Scene";
-const string ConfigurationManager::KeyConfigTasksRoot = "TasksRoot";
 
 const string ConfigurationManager::KeyLogging = "Logging";
 const string ConfigurationManager::PartLogDir = "LogDir";
@@ -82,7 +83,6 @@ const string ConfigurationManager::KeyCapabilitiesVerbosity =
 const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
 const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
 const string ConfigurationManager::KeyDisableSceneOnMaster = "DisableSceneOnMaster";
-const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 const string ConfigurationManager::KeyPerSceneCache = "PerSceneCache";
 const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
 
@@ -113,6 +113,8 @@ const string ConfigurationManager::KeyLoadingScreen = "LoadingScreen";
 const string ConfigurationManager::PartShowMessage = "ShowMessage";
 const string ConfigurationManager::PartShowNodeNames = "ShowNodeNames";
 const string ConfigurationManager::PartShowProgressbar = "ShowProgressbar";
+
+const string ConfigurationManager::KeyModuleConfigurations = "ModuleConfigurations";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
@@ -152,7 +154,7 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     ghoul_assert(!filename.empty(), "Filename must not be empty");
     ghoul_assert(FileSys.fileExists(filename), "File must exist");
 
-    // ${BASE_PATH}
+    // ${BASE}
     string basePathToken = FileSystem::TokenOpeningBraces + string(_keyBasePath) +
         FileSystem::TokenClosingBraces;
 

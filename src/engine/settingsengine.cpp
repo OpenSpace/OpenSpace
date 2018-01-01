@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,22 +60,27 @@ SettingsEngine::SettingsEngine()
 void SettingsEngine::initialize() {
     // Load all matching files in the Scene
     // TODO: match regex with either with new ghoul readFiles or local code
-    const std::string sceneDir = "${SCENE}";
-    const std::vector<std::string> scenes = ghoul::filesystem::Directory(
-        sceneDir
-    ).readFiles();
+    const std::string sceneDir = "${ASSETS}";
+    const std::vector<std::string> scenes =
+        ghoul::filesystem::Directory(sceneDir).readFiles();
+    const size_t nScenes = scenes.size();
 
-    for (std::size_t i = 0; i < scenes.size(); ++i) {
+    for (std::size_t i = 0; i < nScenes; ++i) {
         const std::size_t found = scenes[i].find_last_of("/\\");
         _scenes.addOption(static_cast<int>(i), scenes[i].substr(found + 1));
     }
+    _scenes.addOption(static_cast<int>(scenes.size()), "None");
 
     // Set interaction to change ConfigurationManager and schedule the load
-    _scenes.onChange([this, sceneDir]() {
-        std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
-        OsEng.configurationManager().setValue(
-            ConfigurationManager::KeyConfigScene, sceneFile);
-        OsEng.scheduleLoadScene(sceneDir + "/" + sceneFile);
+    _scenes.onChange([this, nScenes, sceneDir]() {
+        if (_scenes == static_cast<int>(nScenes)) {
+            OsEng.scheduleLoadSingleAsset("");
+        } else {
+            std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
+            OsEng.configurationManager().setValue(
+                ConfigurationManager::KeyConfigAsset, sceneFile);
+            OsEng.scheduleLoadSingleAsset(sceneDir + "/" + sceneFile);
+        }
     }
     );
 }

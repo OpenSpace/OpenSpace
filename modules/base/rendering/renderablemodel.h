@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,8 @@
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+
+#include <ghoul/opengl/uniformcache.h>
 
 #include <memory>
 
@@ -72,6 +74,9 @@ private:
     properties::Mat3Property _modelTransform;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    UniformCache(directionToSunViewSpace, modelViewTransform, projectionTransform,
+        performShading, texture) _uniformCache;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     glm::dvec3 _sunPos;

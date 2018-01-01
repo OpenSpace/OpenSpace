@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -213,7 +213,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _gridType = (gridType == VolumeGridType::Spherical) ? 1 : 0;
     }
 }
-    
+
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initializeGL() {
@@ -239,7 +239,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     }
 
 
-    // TODO: defer loading of data to later. (separate thread or at least not when loading)
+    // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (auto& p : _volumeTimesteps) {
         Timestep& t = p.second;
         std::string path = FileSys.pathByAppendingComponent(
@@ -363,7 +363,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.time = Time::convertTime(timeString);
     t.inRam = false;
     t.onGpu = false;
-    
+
     _volumeTimesteps[t.time] = std::move(t);
 }
 
@@ -384,7 +384,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     }
 
     if (currentTimestepIt == _volumeTimesteps.begin()) {
-        // No such timestep was found: show first timestep if it is within the time margin.
+        // No such timestep was found: show first timestep if it is within the time margin
         Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
         double threshold = firstTimestep->time - static_cast<double>(_secondsBefore);
         return currentTime >= threshold ? firstTimestep : nullptr;
@@ -487,12 +487,9 @@ void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& 
     }
 }
 
- 
-
 bool RenderableTimeVaryingVolume::isReady() const {
     return true;
 }
-
 
 void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {

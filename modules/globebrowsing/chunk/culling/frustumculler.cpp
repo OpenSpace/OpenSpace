@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
+
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing::culling {
@@ -42,7 +43,7 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
         data.camera.sgctInternal.projectionMatrix()
     ) * viewTransform * modelTransform;
 
-    const std::vector<glm::dvec4>& corners = chunk.getBoundingPolyhedronCorners();
+    const std::vector<glm::dvec4>& corners = chunk.boundingPolyhedronCorners();
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space

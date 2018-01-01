@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,8 @@
 #import <Foundation/Foundation.h>
 
 static NSString* pauseResultId = @"com.openspaceproject.pause_resume";
-static NSString* showGuiId = @"com.openspaceproject.show_gui";
+static NSString* showFullGuiId = @"com.openspaceproject.show_full_gui";
+static NSString* showSimpleGuiId = @"com.openspaceproject.show_simple_gui";
 NSArray* focusIdentifiers;
 
 
@@ -47,7 +48,8 @@ NSArray* focusIdentifiers;
         makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier;
     - (void)pauseResumeButtonAction:(id)sender;
     - (void)focusObjectAction:(id)sender;
-    - (void)guiButtonAction:(id)sender;
+    - (void)fullGuiButtonAction:(id)sender;
+    - (void)simpleGuiButtonAction:(id)sender;
 @end
 
 @implementation TouchBarDelegate
@@ -57,8 +59,9 @@ NSArray* focusIdentifiers;
 
         touchBar.customizationIdentifier = @"com.openspaceproject.main_touch_bar";
 
-        NSArray* objs = [@[showGuiId, NSTouchBarItemIdentifierFixedSpaceSmall,
-            pauseResultId, NSTouchBarItemIdentifierFlexibleSpace]
+        NSArray* objs = [@[showSimpleGuiId, showFullGuiId,
+            NSTouchBarItemIdentifierFixedSpaceSmall, pauseResultId,
+            NSTouchBarItemIdentifierFlexibleSpace]
             arrayByAddingObjectsFromArray: focusIdentifiers];
 
         // Set the default ordering of items.
@@ -75,6 +78,7 @@ NSArray* focusIdentifiers;
     - (NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar
                         makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
     {
+        // Remove the unused variable warning
         (void)touchBar;
 
         if ([identifier isEqualToString:pauseResultId]) {
@@ -99,26 +103,45 @@ NSArray* focusIdentifiers;
             return touchBarItem;
         }
 
-        if ([identifier isEqualToString:showGuiId]) {
+        if ([identifier isEqualToString:showFullGuiId]) {
             NSButton* button = [NSButton 
-                buttonWithTitle:@"GUI"
-                target:self action:@selector(guiButtonAction:)
+                buttonWithTitle:@"Full GUI"
+                target:self action:@selector(fullGuiButtonAction:)
             ];
 
             NSCustomTouchBarItem* touchBarItem = [
                 [NSCustomTouchBarItem alloc]
-                initWithIdentifier:showGuiId
+                initWithIdentifier:showFullGuiId
             ];
             touchBarItem.view = button;
             touchBarItem.customizationLabel = NSLocalizedString(
-                @"Pauses / Resumes the in-game time",
+                @"Toggles the full GUI",
                 @""
             );
 
             return touchBarItem;
         }
 
-        if ([focusIdentifiers containsObject: identifier]) {
+        if ([identifier isEqualToString:showSimpleGuiId]) {
+            NSButton* button = [NSButton
+                buttonWithTitle:@"Simple GUI"
+                target:self action:@selector(simpleGuiButtonAction:)
+            ];
+
+            NSCustomTouchBarItem* touchBarItem = [
+                [NSCustomTouchBarItem alloc]
+                initWithIdentifier:showSimpleGuiId
+            ];
+            touchBarItem.view = button;
+            touchBarItem.customizationLabel = NSLocalizedString(
+                @"Toggles the simple GUI",
+                @""
+            );
+
+            return touchBarItem;
+        }
+
+        if ([focusIdentifiers containsObject:identifier]) {
             NSButton* button = [NSButton
                 buttonWithTitle:identifier
                 target:self action:@selector(focusObjectAction:)
@@ -163,11 +186,56 @@ NSArray* focusIdentifiers;
         );
     }
 
-    - (void)guiButtonAction:(id)sender {
+    - (void)fullGuiButtonAction:(id)sender {
+        // Remove unused variable warning
         (void)sender;
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Global Properties.ImGUI.Main.Enabled', \
-            not openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled'));",
+            "local b = openspace.getPropertyValue(\
+                'Global Properties.ImGUI.Main.Enabled'\
+            );\
+            openspace.setPropertyValueSingle(\
+                'Global Properties.ImGUI.Main.Enabled',\
+                not b\
+            );\
+            openspace.setPropertyValueSingle(\
+                'Global Properties.ImGUI.Main.IsHidden',\
+                b\
+            );",
+            openspace::scripting::ScriptEngine::RemoteScripting::No
+        );
+    }
+
+    - (void)simpleGuiButtonAction:(id)sender {
+        // Remove unused variable warning
+        (void)sender;
+        OsEng.scriptEngine().queueScript(
+"local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Properties.Enabled');\n\
+local c = openspace.getPropertyValue('Global Properties.ImGUI.Main.IsHidden');\n\
+openspace.setPropertyValue('Global Properties.ImGUI.*.Enabled', false);\n\
+if b and c then\n\
+    -- This can happen if the main properties window is enabled, the main gui\n\
+    -- is enabled and then closed again. So the main properties window is\n\
+    -- enabled, but also all windows are hidden\n\
+    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', false);\n\
+    openspace.setPropertyValueSingle(\n\
+        'Global Properties.ImGUI.Main.Properties.Enabled',\n\
+        true\n\
+    );\n\
+    openspace.setPropertyValueSingle(\n\
+        'Global Properties.ImGUI.Main.Space/Time.Enabled',\n\
+        true\n\
+    );\n\
+else\n\
+    openspace.setPropertyValueSingle(\n\
+        'Global Properties.ImGUI.Main.Properties.Enabled',\n\
+        not b\n\
+    );\n\
+    openspace.setPropertyValueSingle(\n\
+        'Global Properties.ImGUI.Main.Space/Time.Enabled',\n\
+        not b\n\
+    );\n\
+    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);\n\
+end",
             openspace::scripting::ScriptEngine::RemoteScripting::No
         );
     }
@@ -175,7 +243,6 @@ NSArray* focusIdentifiers;
 
 namespace {
     TouchBarDelegate* g_TouchBarDelegate = nullptr;
-
 } // namespace
 
 namespace openspace {

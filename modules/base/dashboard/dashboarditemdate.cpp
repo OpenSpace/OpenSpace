@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -107,7 +107,7 @@ DashboardItemDate::DashboardItemDate(ghoul::Dictionary dictionary)
         _font = OsEng.fontManager().font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
-    
+
     _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 

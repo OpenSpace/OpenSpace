@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,10 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLEATMOSPHERE___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLEATMOSPHERE___H__
+#ifndef __OPENSPACE_MODULE_ATMOSPHERE___RENDERABLEATMOSPHERE___H__
+#define __OPENSPACE_MODULE_ATMOSPHERE___RENDERABLEATMOSPHERE___H__
 
 #include <openspace/rendering/renderable.h>
+
+#include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -34,8 +36,6 @@
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/textureunit.h>
-
-#include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
 #include <memory>
 #include <string>
@@ -59,25 +59,20 @@ struct ShadowConfiguration {
 };
 
 struct ShadowRenderingStruct {
-    double xu,
-           xp;
-    double rs,
-           rc;
+    double xu;
+    double xp;
+    double rs;
+    double rc;
     glm::dvec3 sourceCasterVec;
     glm::dvec3 casterPositionVec;
     bool isShadowing;
 };
 
-namespace planetgeometry {
-class PlanetGeometry;
-}
-
 namespace documentation { struct Documentation; }
 namespace planetgeometry { class PlanetGeometry; }
 
 class RenderableAtmosphere : public Renderable {
-public:    
-
+public:
     RenderableAtmosphere(const ghoul::Dictionary& dictionary);
 
     void deinitialize() override;
@@ -90,10 +85,10 @@ public:
 
     static documentation::Documentation Documentation();
 
-private: 
+private:
     glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& transformData);
     void updateAtmosphereParameters();
-        
+
     properties::FloatProperty _atmosphereHeightP;
     properties::FloatProperty _groundAverageReflectanceP;
     properties::FloatProperty _groundRadianceEmittionP;
@@ -118,7 +113,7 @@ private:
 
     bool _atmosphereEnabled;
     bool _ozoneLayerEnabled;
-    bool _sunFollowingCameraEnabled;   
+    bool _sunFollowingCameraEnabled;
     float _atmosphereRadius;
     float _atmospherePlanetRadius;
     float _planetAverageGroundReflectance;
@@ -128,7 +123,7 @@ private:
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
-    
+
     glm::vec3 _mieExtinctionCoeff;
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _ozoneExtinctionCoeff;
@@ -150,4 +145,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEATMOSPHERE___H__
+#endif // __OPENSPACE_MODULE_ATMOSPHERE___RENDERABLEATMOSPHERE___H__

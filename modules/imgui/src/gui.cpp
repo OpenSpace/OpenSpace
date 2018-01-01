@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <modules/imgui/include/imgui_include.h>
 
@@ -59,6 +60,7 @@ GLuint vao = 0;
 GLuint vbo = 0;
 GLuint vboElements = 0;
 std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+UniformCache(tex, ortho) _uniformCache;
 std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 char* iniFileBuffer = nullptr;
 
@@ -104,8 +106,8 @@ static void RenderDrawLists(ImDrawData* drawData) {
     );
     _program->activate();
 
-    _program->setUniform("tex", unit);
-    _program->setUniform("ortho", ortho);
+    _program->setUniform(_uniformCache.tex, unit);
+    _program->setUniform(_uniformCache.ortho, ortho);
 
     glBindVertexArray(vao);
 
@@ -304,6 +306,7 @@ GUI::GUI()
     addPropertySubOwner(_globeBrowsing);
 #endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
+    addPropertySubOwner(_asset);
     _spaceTime.setEnabled(true);
     addPropertySubOwner(_spaceTime);
     addPropertySubOwner(_mission);
@@ -486,6 +489,7 @@ void GUI::initialize() {
     _featuredProperties.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _filePath.initialize();
+    _asset.initialize();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initialize();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -518,6 +522,7 @@ void GUI::deinitialize() {
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
     _filePath.deinitialize();
+    _asset.deinitialize();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitialize();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -532,6 +537,10 @@ void GUI::initializeGL() {
         absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
+
+    _uniformCache.tex = _program->uniformLocation("tex");
+    _uniformCache.ortho = _program->uniformLocation("ortho");
+
     if (!_program) {
         return;
     }
@@ -615,6 +624,7 @@ void GUI::initializeGL() {
     _globeBrowsing.initializeGL();
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.initializeGL();
+    _asset.initializeGL();
     _parallel.initializeGL();
     _mission.initializeGL();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -651,6 +661,7 @@ void GUI::deinitializeGL() {
     _globeBrowsing.deinitializeGL();
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.deinitializeGL();
+    _asset.deinitializeGL();
     _property.deinitializeGL();
 }
 
@@ -677,6 +688,9 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 void GUI::endFrame() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
+
+        _uniformCache.tex = _program->uniformLocation("tex");
+        _uniformCache.ortho = _program->uniformLocation("ortho");
     }
 
     bool perf = OsEng.renderEngine().doesPerformanceMeasurements();
@@ -717,6 +731,9 @@ void GUI::endFrame() {
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
         if (_filePath.isEnabled()) {
             _filePath.render();
+        }
+        if (_asset.isEnabled()) {
+            _asset.render();
         }
 
 #ifdef GLOBEBROWSING_USE_GDAL
@@ -850,6 +867,10 @@ void GUI::render() {
     bool filePath = _filePath.isEnabled();
     ImGui::Checkbox("File Paths", &filePath);
     _filePath.setEnabled(filePath);
+
+    bool asset = _asset.isEnabled();
+    ImGui::Checkbox("Assets", &asset);
+    _asset.setEnabled(asset);
 
 #ifdef GLOBEBROWSING_USE_GDAL
     bool globeBrowsing = _globeBrowsing.isEnabled();

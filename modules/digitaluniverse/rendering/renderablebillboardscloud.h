@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,15 +35,14 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <functional>
 #include <unordered_map>
 
-namespace ghoul::filesystem { 
-    class File; 
-}
+namespace ghoul::filesystem { class File; }
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -93,10 +92,12 @@ private:
     void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
         const glm::dmat4& worldToModelTransform, const glm::dvec3& orthoRight,
         const glm::dvec3& orthoUp, float fadeInVariable);
-    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix, 
+    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     bool loadData();
+    bool loadSpeckData();
+    bool loadLabelData();
     bool readSpeckFile();
     bool readColorMapFile();
     bool readLabelFile();
@@ -141,7 +142,11 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;        
+    UniformCache(projection, modelView, modelViewProjection, cameraPos, cameraLookup,
+        renderOption, centerSceenInWorldPos, minBillboardSize, maxBillboardSize,
+        color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
+        spriteTexture, polygonTexture, hasPolygon, hasColormap) _uniformCache;
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;
@@ -158,7 +163,7 @@ private:
     std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::vector<glm::vec2> _colorRangeData;
-    
+
     int _nValuesPerAstronomicalObject;
 
     glm::dmat4 _transformationMatrix;

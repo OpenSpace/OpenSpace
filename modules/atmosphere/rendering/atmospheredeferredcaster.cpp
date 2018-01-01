@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,7 +83,9 @@
 #include <sstream>
 #include <fstream>
 
+#ifdef WIN32
 #define _USE_MATH_DEFINES
+#endif // WIN32
 #include <math.h>
 
 
@@ -149,7 +151,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _mu_samples(128)
     , _mu_s_samples(32)
     , _nu_samples(8)
-    , _hardShadowsEnabled(false)    
+    , _hardShadowsEnabled(false)
     , _calculationTextureScale(1.0)
     , _saveCalculationTextures(false)
 {}
@@ -170,7 +172,7 @@ void AtmosphereDeferredcaster::deinitialize() {
     _deltaSProgramObject               = nullptr;
     _deltaSSupTermsProgramObject       = nullptr;
     _deltaJProgramObject               = nullptr;
-    
+
     glDeleteTextures(1, &_transmittanceTableTexture);
     glDeleteTextures(1, &_irradianceTableTexture);
     glDeleteTextures(1, &_inScatteringTableTexture);
@@ -179,13 +181,12 @@ void AtmosphereDeferredcaster::deinitialize() {
     glDeleteTextures(1, &_deltaSMieTableTexture);
     glDeleteTextures(1, &_deltaJTableTexture);
     glDeleteTextures(1, &_atmosphereTexture);
-
 }
 
 void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
-                                          const DeferredcastData& deferredData,
-                                          ghoul::opengl::ProgramObject& program) 
-{    
+                                          const DeferredcastData&,
+                                          ghoul::opengl::ProgramObject& program)
+{
     // Atmosphere Frustum Culling
     glm::dvec3 tPlanetPosWorld = glm::dvec3(
         _modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0)
@@ -193,7 +194,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
     double distance = glm::distance(tPlanetPosWorld, renderData.camera.positionVec3());
     if (distance > DISTANCE_CULLING) {
-        program.setUniform("cullAtmosphere", 1);        
+        program.setUniform("cullAtmosphere", 1);
     }
     else {
         glm::dmat4 MV = glm::dmat4(
@@ -227,7 +228,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform("ozoneLayerEnabled", _ozoneEnabled);
             program.setUniform("HO", _ozoneHeightScale);
             program.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
-            
+
             program.setUniform("TRANSMITTANCE_W", _transmittance_table_width);
             program.setUniform("TRANSMITTANCE_H", _transmittance_table_height);
             program.setUniform("SKY_W", _irradiance_table_width);
@@ -301,7 +302,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 );
             }
             else {
-                sunPosObj = inverseModelMatrix * 
+                sunPosObj = inverseModelMatrix *
                     glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
             }
 
@@ -335,7 +336,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                         lt
                     );
                     casterPos *= KM_TO_M; // converting to meters
-                   
+
                     // First we determine if the caster is shadowing the current planet
                     // (all calculations in World Coordinates):
                     glm::dvec3 planetCasterVec = casterPos - renderData.position.dvec3();
@@ -404,9 +405,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 }
                 program.setUniform("hardShadows", _hardShadowsEnabled);
             }
-            
         }
-    }             
+    }
     _transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
     program.setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
@@ -420,11 +420,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
     program.setUniform("inscatterTexture", _inScatteringTableTextureUnit);
 }
 
-void AtmosphereDeferredcaster::postRaycast(const RenderData& renderData,
-                                           const DeferredcastData& deferredData,
-                                           ghoul::opengl::ProgramObject& program)
+void AtmosphereDeferredcaster::postRaycast(const RenderData&,
+                                           const DeferredcastData&,
+                                           ghoul::opengl::ProgramObject&)
 {
-    // Deactivate the texture units 
+    // Deactivate the texture units
     _transmittanceTableTextureUnit.deactivate();
     _irradianceTableTextureUnit.deactivate();
     _inScatteringTableTextureUnit.deactivate();
@@ -703,7 +703,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _transmittance_table_width,
             _transmittance_table_height, 0, GL_RGB, GL_FLOAT, nullptr);
-        
+
         //============== Irradiance =================
         ghoul::opengl::TextureUnit irradianceTableTextureUnit;
         irradianceTableTextureUnit.activate();
@@ -716,7 +716,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _irradiance_table_width,
             _irradiance_table_height, 0, GL_RGB, GL_FLOAT, nullptr);
-        
+
         //============== InScattering =================
         ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
         inScatteringTableTextureUnit.activate();
@@ -853,7 +853,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     //glClear(GL_COLOR_BUFFER_BIT);
     static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     glClearBufferfv(GL_COLOR, 0, black);
-    renderQuadForCalc(quadCalcVAO, vertexSize);    
+    renderQuadForCalc(quadCalcVAO, vertexSize);
     if (_saveCalculationTextures) {
         saveTextureToPPMFile(
             GL_COLOR_ATTACHMENT0,
@@ -863,7 +863,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         );
     }
     _transmittanceProgramObject->deactivate();
-    
+
     // line 2 in algorithm 4.1
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaETableTexture, 0);
     checkFrameBufferState("_deltaETableTexture");
@@ -887,7 +887,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         );
     }
     _irradianceProgramObject->deactivate();
-    
+
     // line 3 in algorithm 4.1
     glFramebufferTexture(
         GL_FRAMEBUFFER,
@@ -936,7 +936,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glDrawBuffers(1, drawBuffers);
 
     _inScatteringProgramObject->deactivate();
-    
+
     // line 4 in algorithm 4.1
     glFramebufferTexture(
         GL_FRAMEBUFFER,
@@ -961,7 +961,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             _delta_e_table_width, _delta_e_table_height);
     }
     _deltaEProgramObject->deactivate();
-    
+
     // line 5 in algorithm 4.1
     glFramebufferTexture(
         GL_FRAMEBUFFER,
@@ -992,7 +992,6 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
 
     // loop in line 6 in algorithm 4.1
     for (int scatteringOrder = 2; scatteringOrder <= 4; ++scatteringOrder) {
-
         // line 7 in algorithm 4.1
         glFramebufferTexture(
             GL_FRAMEBUFFER,
@@ -1039,7 +1038,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
                     _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaJProgramObject->deactivate();
-        
+
         // line 8 in algorithm 4.1
         glFramebufferTexture(
             GL_FRAMEBUFFER,
@@ -1089,7 +1088,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
                     _delta_e_table_width, _delta_e_table_height);
         }
         _irradianceSupTermsProgramObject->deactivate();
-        
+
         // line 9 in algorithm 4.1
         glFramebufferTexture(
             GL_FRAMEBUFFER,
@@ -1107,7 +1106,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             transmittanceTableTextureUnit
         );
         deltaJTableTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_3D, _deltaJTableTexture);        
+        glBindTexture(GL_TEXTURE_3D, _deltaJTableTexture);
         _inScatteringSupTermsProgramObject->setUniform(
             "deltaJTexture",
             deltaJTableTextureUnit
@@ -1128,7 +1127,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
                 );
         }
         _inScatteringSupTermsProgramObject->deactivate();
-        
+
         glEnable(GL_BLEND);
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
         glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
@@ -1158,11 +1157,11 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
                     _delta_e_table_width, _delta_e_table_height);
         }
         _irradianceFinalProgramObject->deactivate();
-        
+
         // line 11 in algorithm 4.1
         glFramebufferTexture(
             GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0, 
+            GL_COLOR_ATTACHMENT0,
             _inScatteringTableTexture,
             0
         );
@@ -1187,7 +1186,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
                     _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaSSupTermsProgramObject->deactivate();
-        
+
         glDisable(GL_BLEND);
     }
 
@@ -1204,7 +1203,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     //========= Load Shader Programs for Calculations ==========
     //==========================================================
     loadComputationPrograms();
-    
+
     //==========================================================
     //============ Create Textures for Calculations ============
     //==========================================================
@@ -1241,8 +1240,12 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
 
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(m_viewport[0], m_viewport[1],
-        m_viewport[2], m_viewport[3]);
+    glViewport(
+        m_viewport[0],
+        m_viewport[1],
+        m_viewport[2],
+        m_viewport[3]
+    );
     glDeleteBuffers(1, &quadCalcVBO);
     glDeleteVertexArrays(1, &quadCalcVAO);
     glDeleteFramebuffers(1, &calcFBO);
@@ -1250,9 +1253,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     LDEBUG("Ended precalculations for Atmosphere effects...");
 }
 
-void AtmosphereDeferredcaster::resetAtmosphereTextures(){
-
-}
+void AtmosphereDeferredcaster::resetAtmosphereTextures() {}
 
 void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) {
     glGenVertexArrays(1, vao);
@@ -1390,7 +1391,7 @@ void AtmosphereDeferredcaster::step3DTexture(
         float diff    = atm2 - earth2;
         float ri      = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
         float ri_2    = ri * ri;
-        float epsilon = 
+        float epsilon =
             (layer == 0) ?
             0.01f :
             (layer == (static_cast<int>(_r_samples) - 1)) ? -0.001f : 0.0f;
@@ -1418,7 +1419,7 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachme
         unsigned char * pixels = new unsigned char[width*height * 3];
         for (int t = 0; t < width*height * 3; ++t)
             pixels[t] = 255;
-        
+
         if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
             glReadBuffer(color_buffer_attachment);
             glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
@@ -1475,7 +1476,6 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double* MVMatrix,
     glm::dvec3 nearNormal = col3 + col4;
     glm::dvec3 farNormal = col4 - col3;
 
-
     // Plane Distances
     double leftDistance   = MVMatrix[15] + MVMatrix[12];
     double rightDistance  = MVMatrix[15] - MVMatrix[12];
@@ -1483,7 +1483,7 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double* MVMatrix,
     double topDistance    = MVMatrix[15] - MVMatrix[13];
     double nearDistance   = MVMatrix[15] + MVMatrix[14];
     double farDistance    = MVMatrix[15] - MVMatrix[14];
-    
+
     // Normalize Planes
     double invMag = 1.0 / glm::length(leftNormal);
     leftNormal   *= invMag;
@@ -1511,15 +1511,19 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double* MVMatrix,
 
     if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
         return false;
-    } else if ((glm::dot(rightNormal, position) + rightDistance) < -radius) {
+    }
+    else if ((glm::dot(rightNormal, position) + rightDistance) < -radius) {
         return false;
-    } else if ((glm::dot(bottomNormal, position) + bottomDistance) < -radius) {
+    }
+    else if ((glm::dot(bottomNormal, position) + bottomDistance) < -radius) {
         return false;
-    } else if ((glm::dot(topNormal, position) + topDistance) < -radius) {
+    }
+    else if ((glm::dot(topNormal, position) + topDistance) < -radius) {
         return false;
-    } else if ((glm::dot(nearNormal, position) + nearDistance) < -radius) {
+    }
+    else if ((glm::dot(nearNormal, position) + nearDistance) < -radius) {
         return false;
-    } 
+    }
     // The far plane testing is disabled because the atm has no depth.
     /*else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
         return false;

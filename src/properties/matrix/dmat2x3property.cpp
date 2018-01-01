@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,10 +34,15 @@ namespace {
 
 glm::dmat2x3 fromLuaConversion(lua_State* state, bool& success) {
     glm::dmat2x3 result;
+    lua_pushnil(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat2x3>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat2x3>::value; ++j) {
-            lua_getfield(state, -1, std::to_string(number).c_str());
+            int hasNext = lua_next(state, -2);
+            if (hasNext != 1) {
+                success = false;
+                return glm::dmat2x3(0);
+            }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
                 return glm::dmat2x3(0);

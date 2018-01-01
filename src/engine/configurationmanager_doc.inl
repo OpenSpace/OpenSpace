@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "settings that are being used when OpenSpace is started."
         },
         {
-            ConfigurationManager::KeyConfigScene,
+            ConfigurationManager::KeyConfigAsset,
             new StringAnnotationVerifier(
                 "A valid scene file as described in the Scene documentation"
             ),
@@ -59,14 +59,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "This value names a list of scripts that get executed after initialization "
             "of any scene. These scripts can be used for user-specific customization, "
             "such as a global rebinding of keys from the default."
-        },
-        {
-            ConfigurationManager::KeyConfigTasksRoot,
-            new StringAnnotationVerifier(
-                "A valid task file as described in the Task documentation"
-            ),
-            Optional::Yes,
-            "The root task to be performed when launching the task runner application."
         },
         {
             ConfigurationManager::KeyPaths,
@@ -98,7 +90,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     ConfigurationManager::PartLogDir,
                     new StringVerifier,
                     Optional::Yes,
-                    "The directory for logs. Default value is \"${BASE_PATH}\""
+                    "The directory for logs. Default value is \"${BASE}\""
                 },
                 {
                     ConfigurationManager::PartLogPerformancePrefix,
@@ -263,17 +255,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "of the rendering can be different from the size of the window, the onscreen "
             "text can either be scaled according to the window size ('window'), or the "
             "rendering resolution ('framebuffer'). This value defaults to 'window'."
-        },
-        {
-            ConfigurationManager::KeyDownloadRequestURL,
-            new OrVerifier(
-                new StringVerifier,
-                new StringListVerifier
-            ),
-            Optional::Yes,
-            "The URL from which files will be downloaded by the Launcher. This can "
-            "either be a single URL or a list of possible URLs from which the "
-            "Launcher can then choose."
         },
         {
             ConfigurationManager::KeyRenderingMethod,
@@ -474,6 +455,12 @@ documentation::Documentation ConfigurationManager::Documentation() {
             Optional::Yes,
             "Values in this table describe the behavior of the loading screen that is "
             "displayed while the scene graph is created and initialized."
+        },
+        {
+            ConfigurationManager::KeyModuleConfigurations,
+            new TableVerifier,
+            Optional::Yes,
+            "Configurations for each module"
         }
         }
     };

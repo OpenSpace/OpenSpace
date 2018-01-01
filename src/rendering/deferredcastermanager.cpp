@@ -1,8 +1,8 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,13 +23,11 @@
  ****************************************************************************************/
 
 #include <openspace/rendering/deferredcastermanager.h>
+
 #include <openspace/rendering/deferredcasterlistener.h>
+
 #include <algorithm>
 #include <string>
-
-namespace {
-    const char* _loggerCat = "DeferredcasterManager";
-}
 
 namespace openspace {
 
@@ -47,7 +45,11 @@ void DeferredcasterManager::attachDeferredcaster(Deferredcaster& deferredcaster)
 }
 
 void DeferredcasterManager::detachDeferredcaster(Deferredcaster& deferredcaster) {
-    auto it = std::find(_deferredcasters.begin(), _deferredcasters.end(), &deferredcaster);
+    auto it = std::find(
+        _deferredcasters.begin(),
+        _deferredcasters.end(),
+        &deferredcaster
+    );
     if (it != _deferredcasters.end()) {
         _deferredcasters.erase(it);
         for (auto &listener : _listeners) {
@@ -57,7 +59,11 @@ void DeferredcasterManager::detachDeferredcaster(Deferredcaster& deferredcaster)
 }
 
 bool DeferredcasterManager::isAttached(Deferredcaster& deferredcaster) {
-    auto it = std::find(_deferredcasters.begin(), _deferredcasters.end(), &deferredcaster);
+    auto it = std::find(
+        _deferredcasters.begin(),
+        _deferredcasters.end(),
+        &deferredcaster
+    );
     return it != _deferredcasters.end();
 }
 
@@ -79,4 +85,4 @@ const std::vector<Deferredcaster*>& DeferredcasterManager::deferredcasters() {
     return _deferredcasters;
 }
 
-}
+} // namespace openspace

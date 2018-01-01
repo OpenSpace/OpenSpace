@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,9 @@
 #include <fstream>
 
 namespace {
-    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
-    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+    const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    const char* CssFilename = "${WEB}/common/style.css";
 } // namespace
 
 namespace openspace {

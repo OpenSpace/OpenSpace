@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,17 +62,17 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
 }
 
 void Dashboard::removeDashboardItem(int index) {
-    ghoul_assert(index < _items.size(), "Invalid index");
+    ghoul_assert(index < static_cast<int>(_items.size()), "Invalid index");
     removePropertySubOwner(_items[index].get());
     _items.erase(_items.begin() + index);
 }
 
 bool Dashboard::hasItem(int index) const {
-    return (index >= 0) && (index < _items.size());
+    return (index >= 0) && (index < static_cast<int>(_items.size()));
 }
 
 const DashboardItem& Dashboard::item(int index) const {
-    ghoul_assert(index < _items.size(), "Invalid index");
+    ghoul_assert(index < static_cast<int>(_items.size()), "Invalid index");
     return *_items[index];
 }
 
@@ -98,12 +98,14 @@ scripting::LuaLibrary Dashboard::luaLibrary() {
             {
                 "addDashboardItem",
                 &luascriptfunctions::addDashboardItem,
+                {},
                 "table",
                 "Adds a new dashboard item to the main dashboard."
             },
             {
                 "removeDashboardItems",
                 &luascriptfunctions::removeDashboardItems,
+                {},
                 "",
                 "Removes all dashboard items from the main dashboard."
             }

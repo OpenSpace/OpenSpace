@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -92,6 +93,9 @@ private:
     properties::BoolProperty _drawSolid;
     properties::DoubleProperty _standOffDistance;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
+        targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
+        squareColor, interpolation) _uniformCache;
 
     // instance variables
     bool _rebuild = false;

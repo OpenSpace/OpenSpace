@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,12 @@
 #include <string>
 #include <vector>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 namespace documentation {  struct Documentation; }
+
+class ModuleEngine;
 
 /**
  * This class is the base class for an OpenSpace module. A module groups functionality
@@ -61,7 +65,8 @@ public:
      * is set in the OpenSpaceModule constructor. This method will call the
      * internalInitialize method for further customization for each subclass.
      */
-    void initialize();
+    void initialize(const ModuleEngine* moduleEngine,
+                    const ghoul::Dictionary& configuration);
 
     /**
      * Empty deinitialization method that will call the internalDeinitialize method for
@@ -101,9 +106,11 @@ public:
 protected:
     /**
      * Customization point for each derived class. The internalInitialize method is called
-     * by the initiailze method.
+     * by the initialize method.
+     * \param configuration The configuration options that were read from the
+     * configuration file
      */
-    virtual void internalInitialize();
+    virtual void internalInitialize(const ghoul::Dictionary& configuration);
 
     /**
      * Customization point for each derived class. The internalDeinitialize method is
@@ -116,6 +123,14 @@ protected:
      * path tokens.
      */
     std::string modulePath() const;
+
+    /**
+     * Returns a const pointer to the module engine
+     */
+    const ModuleEngine* moduleEngine() const;
+
+private:
+    const ModuleEngine* _moduleEngine;
 };
 
 } // namespace openspace

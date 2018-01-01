@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,10 +43,10 @@
 namespace {
     const float LoadingFontSize = 25.f;
     const float MessageFontSize = 22.f;
-    const float ItemFontSize = 12.f;
+    const float ItemFontSize = 10.f;
 
-    const glm::vec2 LogoCenter = { 0.f, 0.4f };  // in NDC
-    const glm::vec2 LogoSize = { 0.35f, 0.35 };  // in NDC
+    const glm::vec2 LogoCenter = { 0.f, 0.525f };  // in NDC
+    const glm::vec2 LogoSize = { 0.275f, 0.275 };  // in NDC
 
     const glm::vec2 ProgressbarCenter = { 0.f, -0.75f };  // in NDC
     const glm::vec2 ProgressbarSize = { 0.7f, 0.0075f };  // in NDC
@@ -55,6 +55,7 @@ namespace {
     const glm::vec4 ProgressbarOutlineColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
 
     const glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
+    const glm::vec4 PhaseColorSynchronization = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
     const glm::vec4 PhaseColorInitialization = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
 
     const glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
@@ -108,9 +109,9 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _loadingFont(nullptr)
     , _messageFont(nullptr)
     , _itemFont(nullptr)
-    , _hasCatastrophicErrorOccurred(false)
     , _logo{ 0, 0 }
     , _progressbar{ 0, 0, 0, 0 }
+    , _hasCatastrophicErrorOccurred(false)
     , _randomEngine(_randomDevice())
 {
     _program = ghoul::opengl::ProgramObject::Build(
@@ -118,6 +119,10 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         absPath("${SHADERS}/loadingscreen.vert"),
         absPath("${SHADERS}/loadingscreen.frag")
     );
+
+    _uniformCache.logoTexture = _program->uniformLocation("logoTexture");
+    _uniformCache.useTexture = _program->uniformLocation("useTexture");
+    _uniformCache.color = _program->uniformLocation("color");
 
     _loadingFont = OsEng.fontManager().font(
         "Loading",
@@ -147,7 +152,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     {
         // Logo stuff
         _logoTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath("${OPENSPACE_DATA}/openspace-logo.png")
+            absPath("${DATA}/openspace-logo.png")
         );
         _logoTexture->uploadTexture();
 
@@ -286,15 +291,8 @@ void LoadingScreen::render() {
     unit.activate();
     _logoTexture->bind();
 
-    _program->setUniform(
-        "logoTexture",
-        unit
-    );
-
-    _program->setUniform(
-        "useTexture",
-        true
-    );
+    _program->setUniform(_uniformCache.logoTexture, unit);
+    _program->setUniform(_uniformCache.useTexture, true);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -340,13 +338,16 @@ void LoadingScreen::render() {
         glBindBuffer(GL_ARRAY_BUFFER, _progressbar.vboFill);
         glBufferData(GL_ARRAY_BUFFER, sizeof(dataFill), dataFill, GL_STATIC_DRAW);
 
-        _program->setUniform("useTexture", false);
+        _program->setUniform(_uniformCache.useTexture, false);
         switch (_phase) {
             case Phase::Construction:
-                _program->setUniform("color", PhaseColorConstruction);
+                _program->setUniform(_uniformCache.color, PhaseColorConstruction);
+                break;
+            case Phase::Synchronization:
+                _program->setUniform(_uniformCache.color, PhaseColorSynchronization);
                 break;
             case Phase::Initialization:
-                _program->setUniform("color", PhaseColorInitialization);
+                _program->setUniform(_uniformCache.color, PhaseColorInitialization);
                 break;
         }
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -398,8 +399,8 @@ void LoadingScreen::render() {
         glBindBuffer(GL_ARRAY_BUFFER, _progressbar.vboBox);
         glBufferData(GL_ARRAY_BUFFER, sizeof(dataBox), dataBox, GL_STATIC_DRAW);
 
-        _program->setUniform("useTexture", false);
-        _program->setUniform("color", ProgressbarOutlineColor);
+        _program->setUniform(_uniformCache.useTexture, false);
+        _program->setUniform(_uniformCache.color, ProgressbarOutlineColor);
         glDrawArrays(GL_TRIANGLES, 0, 24);
     }
 
@@ -528,6 +529,11 @@ void LoadingScreen::render() {
                         false;
 
                     if (logoOverlap || loadingOverlap || messageOverlap || barOverlap) {
+                        // We never want to have an overlap with these, so this try didn't
+                        // count against the maximum, thus ensuring that (if there has to
+                        // be an overlap, it's over other text that might disappear before
+                        // this one)
+                        --i;
                         continue;
                     }
 
@@ -648,6 +654,10 @@ void LoadingScreen::finalize() {
 
 void LoadingScreen::setItemNumber(int nItems) {
     _nItems = nItems;
+}
+
+int LoadingScreen::itemNumber() {
+    return _nItems;
 }
 
 void LoadingScreen::tickItem() {

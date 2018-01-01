@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -271,6 +271,13 @@ void RenderableShadowCylinder::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_fs.glsl")
     );
+
+    _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
+        "modelViewProjectionTransform"
+    );
+    _uniformCache.shadowColor = _shader->uniformLocation(
+        "shadowColor"
+    );
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
@@ -301,15 +308,12 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _shader->setUniform("modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+    _shader->setUniform(
+        _uniformCache.modelViewProjectionTransform,
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    );
 
-    //_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    //_shader->setUniform("ModelTransform", glm::mat4(_stateMatrix));
-
-
-    _shader->setUniform("shadowColor", _shadowColor);
-    //setPscUniforms(*_shader.get(), data.camera, data.position);
+    _shader->setUniform(_uniformCache.shadowColor, _shadowColor);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
@@ -328,6 +332,13 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
     );
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+
+        _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
+            "modelViewProjectionTransform"
+        );
+        _uniformCache.shadowColor = _shader->uniformLocation(
+            "shadowColor"
+        );
     }
     createCylinder(data.time.j2000Seconds());
 }

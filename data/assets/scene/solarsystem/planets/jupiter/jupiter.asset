@@ -1,0 +1,45 @@
+local transforms = asset.require('./transforms')
+local assetHelper = asset.require('util/asset_helper')
+asset.require("spice/base")
+asset.request('./trail')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Jupiter Textures",
+    Type = "HttpSynchronization",
+    Identifier = "jupiter_textures",
+    Version = 1
+})
+
+local Jupiter = {
+    Name = "Jupiter",
+    Parent = transforms.JupiterBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_JUPITER",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 71492000.0, 71492000.0, 66854000.0 },
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Name = "Jupiter Texture",
+                    FilePath = textures .. "/jupiter.jpg",
+                    Enabled = true
+                }
+            }
+        }
+    },
+    Tag = { "planet_solarSystem", "planet_giants" },
+    GuiPath = "/Solar System/Planets/Jupiter"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Jupiter })

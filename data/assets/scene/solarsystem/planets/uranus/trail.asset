@@ -1,0 +1,26 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+
+
+
+local UranusTrail = {
+    Name = "UranusTrail",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "URANUS BARYCENTER",
+            Observer = "SUN"
+        },
+        Color = { 0.60, 0.95, 1.00 },
+        Period = 30588.740,
+        Resolution = 1000
+    },
+    Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+    GuiPath = "/Solar System/Planets/Uranus"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { UranusTrail })

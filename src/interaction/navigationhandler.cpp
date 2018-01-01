@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
@@ -300,20 +301,30 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
         "navigation",
         {
             {
+                "setCameraState",
+                &luascriptfunctions::setCameraState,
+                {},
+                "object",
+                "Set the camera state"
+            },
+            {
                 "saveCameraStateToFile",
                 &luascriptfunctions::saveCameraStateToFile,
+                {},
                 "string",
                 "Save the current camera state to file"
             },
             {
                 "restoreCameraStateFromFile",
                 &luascriptfunctions::restoreCameraStateFromFile,
+                {},
                 "string",
                 "Restore the camera state from file"
             },
             {
                 "resetCameraDirection",
                 &luascriptfunctions::resetCameraDirection,
+                {},
                 "void",
                 "Reset the camera direction to point at the focus node"
             }

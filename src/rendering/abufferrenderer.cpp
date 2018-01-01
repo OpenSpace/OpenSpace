@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,7 +69,7 @@ ABufferRenderer::ABufferRenderer()
     , _resolveProgram(nullptr)
     , _hdrExposure(0.4)
     , _hdrBackground(2.8)
-    , _gamma(2.2)    
+    , _gamma(2.2)
 {}
 
 ABufferRenderer::~ABufferRenderer() {}
@@ -165,7 +165,6 @@ void ABufferRenderer::initialize() {
     }
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
-    
 }
 
 void ABufferRenderer::deinitialize() {
@@ -252,39 +251,40 @@ void ABufferRenderer::updateMSAASamplingPattern() {
         sizeY = 1.0f;
 
     const int NVERTEX = 4 * 6;
-    GLfloat openPixelSizeVertexData[GRIDSIZE * GRIDSIZE * NVERTEX];
+    // openPixelSizeVertexData
+    GLfloat vertexData[GRIDSIZE * GRIDSIZE * NVERTEX];
 
     for (int y = 0; y < GRIDSIZE; ++y) {
         for (int x = 0; x < GRIDSIZE; ++x) {
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX] = sizeX;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 1] = sizeY - step;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 2] = 0.0f;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 3] = 1.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX] = sizeX;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 1] = sizeY - step;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 2] = 0.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 3] = 1.0f;
 
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 4] = sizeX + step;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 5] = sizeY;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 6] = 0.0f;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 7] = 1.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 4] = sizeX + step;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 5] = sizeY;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 6] = 0.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 7] = 1.0f;
 
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 8] = sizeX;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 9] = sizeY;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 10] = 0.0f;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 11] = 1.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 8] = sizeX;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 9] = sizeY;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 10] = 0.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 11] = 1.0f;
 
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 12] = sizeX;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 13] = sizeY - step;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 14] = 0.0f;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 15] = 1.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 12] = sizeX;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 13] = sizeY - step;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 14] = 0.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 15] = 1.0f;
 
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 16] = sizeX + step;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 17] = sizeY - step;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 18] = 0.0f;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 19] = 1.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 16] = sizeX + step;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 17] = sizeY - step;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 18] = 0.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 19] = 1.0f;
 
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 20] = sizeX + step;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 21] = sizeY;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 22] = 0.0f;
-            openPixelSizeVertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 23] = 1.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 20] = sizeX + step;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 21] = sizeY;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 22] = 0.0f;
+            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 23] = 1.0f;
 
             sizeX += step;
         }
@@ -301,7 +301,12 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glGenBuffers(1, &pixelSizeQuadVBO);
     glBindBuffer(GL_ARRAY_BUFFER, pixelSizeQuadVBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * GRIDSIZE * GRIDSIZE * NVERTEX, openPixelSizeVertexData, GL_STATIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GLfloat) * GRIDSIZE * GRIDSIZE * NVERTEX,
+        vertexData,
+        GL_STATIC_DRAW
+    );
 
     // Position
     glVertexAttribPointer(
@@ -341,7 +346,13 @@ void ABufferRenderer::updateMSAASamplingPattern() {
 
     glGenFramebuffers(1, &pixelSizeFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, pixelSizeFramebuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture, 0);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        pixelSizeTexture,
+        0
+    );
 
     GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, textureBuffers);
@@ -443,7 +454,12 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glBindVertexArray(nOneStripVAO);
     glGenBuffers(1, &nOneStripVBO);
     glBindBuffer(GL_ARRAY_BUFFER, nOneStripVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * _nAaSamples * (NVERTEX + 12), nOneStripVertexData, GL_STATIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(GLfloat) * _nAaSamples * (NVERTEX + 12),
+        nOneStripVertexData,
+        GL_STATIC_DRAW
+    );
 
     // position
     glVertexAttribPointer(
@@ -543,11 +559,13 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     saveTextureToMemory(GL_COLOR_ATTACHMENT0, _nAaSamples, 1, _mSAAPattern);
     // Convert back to [-1, 1] range and then scales to the current viewport size:
     for (int d = 0; d < _nAaSamples; ++d) {
-        _mSAAPattern[d * 3] = (2.0 * _mSAAPattern[d * 3] - 1.0) / static_cast<double>(viewport[2]);
-        _mSAAPattern[(d * 3) + 1] = (2.0 * _mSAAPattern[(d * 3) + 1] - 1.0) / static_cast<double>(viewport[3]);
+        _mSAAPattern[d * 3] = (2.0 * _mSAAPattern[d * 3] - 1.0) /
+                              static_cast<double>(viewport[2]);
+        _mSAAPattern[(d * 3) + 1] = (2.0 * _mSAAPattern[(d * 3) + 1] - 1.0) /
+                                    static_cast<double>(viewport[3]);
         _mSAAPattern[(d * 3) + 2] = 0.0;
     }
-    
+
     nOneStripProgram->deactivate();
 
     // Restores default state
@@ -565,7 +583,7 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glDeleteBuffers(1, &nOneStripVBO);
     glDeleteVertexArrays(1, &nOneStripVAO);
 }
-    
+
 void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
     PerfMeasure("ABufferRenderer::render");
 

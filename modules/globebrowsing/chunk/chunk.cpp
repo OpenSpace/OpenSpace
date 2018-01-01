@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,15 +26,14 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
+
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing {
-
-const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
 Chunk::Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex, bool initVisible)
     : _owner(owner)
@@ -90,7 +89,7 @@ Chunk::Status Chunk::update(const RenderData& data) {
     }
 }
 
-Chunk::BoundingHeights Chunk::getBoundingHeights() const {
+Chunk::BoundingHeights Chunk::boundingHeights() const {
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
     BoundingHeights boundingHeights {
@@ -100,19 +99,15 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
-    std::shared_ptr<LayerManager> layerManager =
-        owner().chunkedLodGlobe()->layerManager();
+    std::shared_ptr<LayerManager> lm = owner().chunkedLodGlobe()->layerManager();
 
     // The raster of a height map is the first one. We assume that the height map is
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
-    const LayerGroup& heightmaps = layerManager->layerGroup(
-        layergroupid::GroupID::HeightLayers
-    );
+    const LayerGroup& heightmaps = lm->layerGroup(layergroupid::GroupID::HeightLayers);
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
-        tileselector::getTilesAndSettingsUnsorted(
-            heightmaps, _tileIndex);
+        tileselector::getTilesAndSettingsUnsorted(heightmaps, _tileIndex);
 
     bool lastHadMissingData = true;
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
@@ -124,21 +119,17 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
         if (goodTile && hasTileMetaData) {
             std::shared_ptr<TileMetaData> tileMetaData = chunkTile.tile.metaData();
 
-            float minValue =
-                settings->performLayerSettings(tileMetaData->minValues[HeightChannel]);
-            float maxValue =
-                settings->performLayerSettings(tileMetaData->maxValues[HeightChannel]);
+            float minValue = settings->performLayerSettings(
+                tileMetaData->minValues[HeightChannel]
+            );
+            float maxValue = settings->performLayerSettings(
+                tileMetaData->maxValues[HeightChannel]
+            );
 
             if (!boundingHeights.available) {
                 if (tileMetaData->hasMissingData[HeightChannel]) {
-                    boundingHeights.min = std::min(
-                        DEFAULT_HEIGHT,
-                        minValue
-                    );
-                    boundingHeights.max = std::max(
-                        DEFAULT_HEIGHT,
-                        maxValue
-                    );
+                    boundingHeights.min = std::min(DEFAULT_HEIGHT, minValue);
+                    boundingHeights.max = std::max(DEFAULT_HEIGHT, maxValue);
                 }
                 else {
                     boundingHeights.min = minValue;
@@ -147,14 +138,8 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
                 boundingHeights.available = true;
             }
             else {
-                boundingHeights.min = std::min(
-                    boundingHeights.min,
-                    minValue
-                );
-                boundingHeights.max = std::max(
-                    boundingHeights.max,
-                    maxValue
-                );
+                boundingHeights.min = std::min(boundingHeights.min, minValue);
+                boundingHeights.max = std::max(boundingHeights.max, maxValue);
             }
             lastHadMissingData = tileMetaData->hasMissingData[HeightChannel];
         }
@@ -168,11 +153,11 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
     return boundingHeights;
 }
 
-std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
+std::vector<glm::dvec4> Chunk::boundingPolyhedronCorners() const {
     const Ellipsoid& ellipsoid = owner().ellipsoid();
     const GeodeticPatch& patch = surfacePatch();
 
-    BoundingHeights boundingHeight = getBoundingHeights();
+    BoundingHeights boundingHeight = boundingHeights();
 
     // assume worst case
     double patchCenterRadius = ellipsoid.maximumRadius();

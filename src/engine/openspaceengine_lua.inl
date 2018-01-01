@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,7 +55,8 @@ int writeDocumentation(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OsEng.writeDocumentation();
+    OsEng.writeStaticDocumentation();
+    OsEng.writeSceneDocumentation();
 
     return 0;
 }
@@ -219,7 +220,7 @@ int downloadFile(lua_State* L) {
 
     const std::string _loggerCat = "OpenSpaceEngine";
     LINFO("Downloading file from " << uri);
-    DownloadManager dm = openspace::DownloadManager("", 1, false);
+    DownloadManager dm = openspace::DownloadManager(false);
     std::shared_ptr<openspace::DownloadManager::FileFuture> future =
         dm.downloadFile(uri, absPath("${SCENE}/" + savePath), true, true, 5);
     if (!future || (future && !future->isFinished)) {

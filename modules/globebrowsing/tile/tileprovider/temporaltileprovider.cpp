@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,16 +66,17 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     , _filePath(FilePathInfo)
     , _successfulInitialization(false)
 {
-    std::string filePath;
-    dictionary.getValue<std::string>(KeyFilePath, filePath);
-    try {
-        filePath = absPath(filePath);
-    }
-    catch (const std::runtime_error&) {
-        // File path was not a path to a file but a GDAL config or empty
-    }
+    _filePath = dictionary.value<std::string>(KeyFilePath);
+    // std::string filePath;
+    // dictionary.getValue<std::string>(KeyFilePath, filePath);
+    // try {
+    //     filePath = absPath(filePath);
+    // }
+    // catch (const std::runtime_error&) {
+    //     // File path was not a path to a file but a GDAL config or empty
+    // }
 
-    _filePath.setValue(filePath);
+    // _filePath.setValue(filePath);
     addProperty(_filePath);
 
     if (readFilePath()) {

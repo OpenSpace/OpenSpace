@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,16 +63,16 @@ std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
 }
 
 GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
-        const TileTextureInitData& initData,
-        const std::string& baseDirectory,
-        RawTileDataReader::PerformPreprocessing preprocess)
+                                             const TileTextureInitData& initData,
+                                       RawTileDataReader::PerformPreprocessing preprocess)
     : RawTileDataReader(initData, preprocess)
     , _dataset(nullptr)
 {
-    _initDirectory = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
+    // _initDirectory = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
     _datasetFilePath = filePath;
 
-    { // Aquire lock
+    {
+        // Aquire lock
         std::lock_guard<std::mutex> lockGuard(_datasetLock);
         initialize();
     }
@@ -224,14 +224,15 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
 
 GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath) {
     GDALDataset* dataset = static_cast<GDALDataset*>(
-        GDALOpen(filePath.c_str(), GA_ReadOnly));
+        GDALOpen(filePath.c_str(), GA_ReadOnly)
+    );
     if (!dataset) {
         using namespace ghoul::filesystem;
-        std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
-            _initDirectory, filePath
-        );
+        // std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
+        //     _initDirectory, filePath
+        // );
 
-        dataset = static_cast<GDALDataset*>(GDALOpen(correctedPath.c_str(), GA_ReadOnly));
+        dataset = static_cast<GDALDataset*>(GDALOpen(filePath.c_str(), GA_ReadOnly));
         if (!dataset) {
             throw ghoul::RuntimeError("Failed to load dataset:\n" + filePath);
         }

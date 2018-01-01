@@ -1,7 +1,7 @@
 """
 OpenSpace
 
-Copyright (c) 2014-2017
+Copyright (c) 2014-2018
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -56,7 +56,7 @@ import os
 import re
 import sys
 
-current_year = '2017'
+current_year = '2018'
 is_strict_mode = False
 
 def get_ifndef_symbol(lines):
@@ -290,19 +290,6 @@ def check_empty_only_line(lines):
         return ''
 
     index = [i + 1 for i, s in enumerate(lines) if s.translate({ord(c): None for c in '\n\r'}).isspace()]
-    if len(index) > 0:
-        return index
-    else:
-        return ''
-
-
-
-def check_line_length(lines):
-    # Disable this check in non-strict mode
-    if not is_strict_mode:
-        return ''
-
-    index = [i + 1 for i, s in enumerate(lines) if len(s) > (90 + 1)]
     if len(index) > 0:
         return index
     else:

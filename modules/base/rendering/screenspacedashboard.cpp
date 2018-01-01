@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,7 +90,10 @@ int addDashboardItemToScreenSpace(lua_State* L) {
 
         ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr.get());
         if (!dash) {
-            return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
+            return luaL_error(
+                L,
+                "Provided name is a ScreenSpace item but not a dashboard"
+            );
         }
 
         dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
@@ -241,12 +244,14 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
             {
                 "addDashboardItemToScreenSpace",
                 &luascriptfunctions::addDashboardItemToScreenSpace,
+                {},
                 "string, table",
                 "Adds a new dashboard item to an existing SceenSpaceDashboard."
             },
             {
                 "removeDashboardItemsFromScreenSpace",
                 &luascriptfunctions::removeDashboardItemsFromScreenSpace,
+                {},
                 "string",
                 "Removes all dashboard items from an existing ScreenSpaceDashboard."
             }

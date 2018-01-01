@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -294,7 +294,11 @@ void testSpecificationAndThrow(const Documentation& documentation,
 
 namespace std {
 
+std::string to_string(openspace::documentation::TestResult testResult);
+
+std::string to_string(openspace::documentation::TestResult::Offense offense);
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
+std::string to_string(openspace::documentation::TestResult::Warning warning);
 std::string to_string(openspace::documentation::TestResult::Warning::Reason reason);
 
 } // namespace std

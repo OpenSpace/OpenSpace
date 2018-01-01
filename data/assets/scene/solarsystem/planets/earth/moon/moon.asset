@@ -1,0 +1,80 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require('../earth')
+asset.require('spice/base')
+asset.request('./trail')
+
+
+
+local mapServiceConfigs = asset.localResource("map_service_configs")
+
+local Moon = {
+    Name = "Moon",
+    Parent = transforms.EarthBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MOON",
+            Observer = "EARTH BARYCENTER"
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_MOON",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = 1738140,
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                -- Utah based servers
+                {
+                    Name = "ClemUvvis",
+                    FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms"
+                },
+                {
+                    Name = "Kaguya",
+                    FilePath = mapServiceConfigs .. "/Utah/Kaguya.wms"
+                },
+                {
+                    Name = "WAC Utah",
+                    FilePath = mapServiceConfigs .. "/Utah/Wac.wms",
+                    Enabled = true
+                },
+                -- LMMP based servers
+                {
+                    Name = "OnMoon",
+                    FilePath = mapServiceConfigs .. "/OnMoonColor.wms"
+                }
+            },
+            HeightLayers = {
+                -- Utah based servers
+                {
+                    Name = "LolaDem",
+                    FilePath = mapServiceConfigs .. "/Utah/LolaDem.wms",
+                    Enabled = true,
+                    TilePixelSize = 64,
+                    Settings = { Multiplier = 0.5 }
+                }
+            }
+        },
+        ShadowGroup = {
+            Source1 = {
+                Name = sunAsset.Sun.Name,
+                Radius = 696.3E6
+            },
+            Caster1 = { 
+                Name = earthAsset.Earth.Name,
+                Radius = 6.371E6
+            }
+        }
+    },
+    GuiPath = "/Solar System/Planets/Earth/Moon"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Moon })

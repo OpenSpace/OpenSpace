@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <openspace/modulepath.h>
 
@@ -44,7 +45,9 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     : properties::PropertyOwner({ std::move(name) })
 {}
 
-void OpenSpaceModule::initialize() {
+void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
+                                 const ghoul::Dictionary& configuration)
+{
     std::string upperName = name();
     std::transform(
         upperName.begin(),
@@ -63,7 +66,8 @@ void OpenSpaceModule::initialize() {
     LDEBUG("Registering module path: " << moduleToken << ": " << path);
     FileSys.registerPathToken(moduleToken, path);
 
-    internalInitialize();
+    _moduleEngine = moduleEngine;
+    internalInitialize(configuration);
 }
 
 void OpenSpaceModule::deinitialize() {
@@ -115,7 +119,12 @@ std::string OpenSpaceModule::modulePath() const {
     );
 }
 
-void OpenSpaceModule::internalInitialize() {}
+const ModuleEngine* OpenSpaceModule::moduleEngine() const {
+    return _moduleEngine;
+}
+
+void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}
+
 void OpenSpaceModule::internalDeinitialize() {}
 
 } // namespace openspace

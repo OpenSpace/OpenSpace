@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,7 +72,7 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     //    |                 |
     //    +-----------------+  <-- south east corner
 
-    Chunk::BoundingHeights heights = chunk.getBoundingHeights();
+    Chunk::BoundingHeights heights = chunk.boundingHeights();
     const Geodetic3 c = { center, heights.min };
     const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
     const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };

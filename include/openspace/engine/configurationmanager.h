@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,12 +70,10 @@ public:
     static const std::string KeyDocumentation;
     /// The key that stores the factory documentation values
     static const std::string KeyFactoryDocumentation;
+    /// The key that stores the location of the asset file that is initially loaded
+    static const std::string KeyConfigAsset;
     /// The key that stores the scene license documentation values
     static const std::string KeySceneLicenseDocumentation;
-    /// The key that stores the location of the scene file that is initially loaded
-    static const std::string KeyConfigScene;
-    /// The key that stores the location of the tasks files
-    static const std::string KeyConfigTasksRoot;
     /// The key that stores the subdirectory containing a list of all startup scripts to
     /// be executed on application start before the scene file is loaded
     static const std::string KeyStartupScript;
@@ -118,9 +116,6 @@ public:
     static const std::string KeyDisableMasterRendering;
     /// The key that stores whether the master node should apply the scene transformation
     static const std::string KeyDisableSceneOnMaster;
-    /// The key that sets the request URL that is used to request additional data to be
-    /// downloaded
-    static const std::string KeyDownloadRequestURL;
     /// The key that stores the switch for enabling/disabling the rendering on a master
     /// computer
     static const std::string KeyRenderingMethod;
@@ -172,6 +167,8 @@ public:
     /// The part of the key storing whether the loading screen should contain a progress
     /// bar
     static const std::string PartShowProgressbar;
+    /// The key used to specify module specific configurations
+    static const std::string KeyModuleConfigurations;
 
 
     /**

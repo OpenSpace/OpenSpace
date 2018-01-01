@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -226,6 +226,18 @@ void RenderableTrail::initializeGL() {
         absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
     );
 
+    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
+    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
+    _uniformCache.color = _programObject->uniformLocation("color");
+    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
+    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    _uniformCache.vertexSorting = _programObject->uniformLocation("vertexSortingMethod");
+    _uniformCache.idOffset = _programObject->uniformLocation("idOffset");
+    _uniformCache.nVertices = _programObject->uniformLocation("nVertices");
+    _uniformCache.stride = _programObject->uniformLocation("stride");
+    _uniformCache.pointSize = _programObject->uniformLocation("pointSize");
+    _uniformCache.renderPhase = _programObject->uniformLocation("renderPhase");
+
     setRenderBin(Renderable::RenderBin::Overlay);
 }
 
@@ -249,12 +261,12 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
-    
-    _programObject->setUniform("color", _lineColor);
-    _programObject->setUniform("useLineFade", _useLineFade);
+    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+
+    _programObject->setUniform(_uniformCache.color, _lineColor);
+    _programObject->setUniform(_uniformCache.useLineFade, _useLineFade);
     if (_useLineFade) {
-        _programObject->setUniform("lineFade", _lineFade);
+        _programObject->setUniform(_uniformCache.lineFade, _lineFade);
     }
 
     static std::map<RenderInformation::VertexSorting, int> SortingMapping = {
@@ -289,38 +301,32 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     }
 
     auto render = [renderLines, renderPoints, p = _programObject.get(), &data,
-                   &modelTransform, pointSize = _pointSize.value()]
+                   &modelTransform, pointSize = _pointSize.value(), c = _uniformCache]
                   (RenderInformation& info, int nVertices, int offset)
     {
         // We pass in the model view transformation matrix as double in order to maintain
         // high precision for vertices; especially for the trails, a high vertex precision
         // is necessary as they are usually far away from their reference
         p->setUniform(
-            "modelViewTransform",
+            c.modelView,
             data.camera.combinedViewMatrix() * modelTransform * info._localTransform
         );
 
         // The vertex sorting method is used to tweak the fading along the trajectory
-        p->setUniform(
-            "vertexSortingMethod",
-            SortingMapping[info.sorting]
-        );
+        p->setUniform(c.vertexSorting, SortingMapping[info.sorting]);
 
         // This value is subtracted from the vertex id in the case of a potential ring
         // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
         // brightest
-        p->setUniform(
-            "idOffset",
-            offset
-        );
+        p->setUniform(c.idOffset, offset);
 
-        p->setUniform("nVertices", nVertices);
+        p->setUniform(c.nVertices, nVertices);
 
         if (renderPoints) {
             // The stride parameter determines the distance between larger points and
             // smaller ones
-            p->setUniform("stride", info.stride);
-            p->setUniform("pointSize", pointSize);
+            p->setUniform(c.stride, info.stride);
+            p->setUniform(c.pointSize, pointSize);
         }
 
         // Fragile! Keep in sync with fragment shader
@@ -331,7 +337,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
         glBindVertexArray(info._vaoID);
         if (renderLines) {
-            p->setUniform("renderPhase", RenderPhaseLines);
+            p->setUniform(c.renderPhase, RenderPhaseLines);
             // Subclasses of this renderer might be using the index array or might now be
             // so we check if there is data available and if there isn't, we use the
             // glDrawArrays draw call; otherwise the glDrawElements
@@ -355,7 +361,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             // Subclasses of this renderer might be using the index array or might now be
             // so we check if there is data available and if there isn't, we use the
             // glDrawArrays draw call; otherwise the glDrawElements
-            p->setUniform("renderPhase", RenderPhasePoints);
+            p->setUniform(c.renderPhase, RenderPhasePoints);
             if (info._iBufferID == 0) {
                 glDrawArrays(GL_POINTS, info.first, info.count);
             }
