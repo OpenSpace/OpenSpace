@@ -43,6 +43,7 @@ namespace {
 
     constexpr const char* RequireFunctionName = "require";
     constexpr const char* RequestFunctionName = "request";
+    constexpr const char* ExistsFunctionName = "exists";
     constexpr const char* ExportFunctionName = "export";
 
     constexpr const char* SyncedResourceFunctionName = "syncedResource";
@@ -132,6 +133,7 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     |  |- syncedResource
     |  |- require
     |  |- request
+    |  |- exists
     |  |- export
     |  |- onInitialize
     |  |- onDeinitialize
@@ -185,6 +187,12 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     lua_pushlightuserdata(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::request, 1);
     lua_setfield(*_luaState, assetTableIndex, RequestFunctionName);
+
+    // Register exists function
+    // bool exsists(string path)
+    lua_pushlightuserdata(*_luaState, asset);
+    lua_pushcclosure(*_luaState, &assetloader::exists, 1);
+    lua_setfield(*_luaState, assetTableIndex, ExistsFunctionName);
 
     // Register export-dependency function
     // export(string key, any value)
@@ -617,6 +625,19 @@ int AssetLoader::requestLua(Asset* parent) {
     int dependencyTableIndex = lua_gettop(*_luaState);
 
     lua_pushvalue(*_luaState, dependencyTableIndex);
+    return 1;
+}
+
+int AssetLoader::existsLua(Asset* asset) {
+    int nArguments = lua_gettop(*_luaState);
+    SCRIPT_CHECK_ARGUMENTS("exists", *_luaState, 1, nArguments);
+
+    std::string assetName = luaL_checkstring(*_luaState, 1);
+
+    ghoul::filesystem::Directory directory = currentDirectory();
+    std::string path = generateAssetPath(directory, assetName);
+
+    lua_pushboolean(*_luaState, FileSys.fileExists(path));
     return 1;
 }
 

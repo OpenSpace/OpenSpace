@@ -29,8 +29,7 @@ namespace openspace::assetloader {
  * Usage: void asset.onInitialize(function<void()> initFun)
  */
 int onInitialize(lua_State* state) {
-    Asset *asset =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
     return asset->loader()->onInitializeLua(asset);
 }
 
@@ -39,8 +38,7 @@ int onInitialize(lua_State* state) {
  * Usage: void asset.onDeinitialize(function<void()> initFun)
  */
 int onDeinitialize(lua_State* state) {
-    Asset *asset =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
     return asset->loader()->onDeinitializeLua(asset);
 }
 
@@ -49,10 +47,12 @@ int onDeinitialize(lua_State* state) {
 * Usage: void asset.onInitialize(function<void()> initFun)
 */
 int onInitializeDependency(lua_State* state) {
-    Asset *dependant =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    Asset *dependency =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(2)));
+    Asset* dependant = reinterpret_cast<Asset*>(
+        lua_touserdata(state, lua_upvalueindex(1))
+    );
+    Asset* dependency = reinterpret_cast<Asset*>(
+        lua_touserdata(state, lua_upvalueindex(2))
+    );
     return dependant->loader()->onInitializeDependencyLua(dependant, dependency);
 }
 
@@ -61,13 +61,14 @@ int onInitializeDependency(lua_State* state) {
 * Usage: void asset.onDeinitialize(function<void()> initFun)
 */
 int onDeinitializeDependency(lua_State* state) {
-    Asset *dependant =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
-    Asset *dependency =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(2)));
+    Asset* dependant = reinterpret_cast<Asset*>(
+        lua_touserdata(state, lua_upvalueindex(1))
+    );
+    Asset* dependency = reinterpret_cast<Asset*>(
+        lua_touserdata(state, lua_upvalueindex(2))
+    );
     return dependant->loader()->onDeinitializeDependencyLua(dependant, dependency);
 }
-
 
 /**
  * Requires rependency
@@ -77,8 +78,7 @@ int onDeinitializeDependency(lua_State* state) {
  * Usage: {AssetTable, Dependency} = asset.import(string assetIdentifier)
  */
 int require(lua_State* state) {
-    Asset *asset =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
     return asset->loader()->requireLua(asset);
 }
 
@@ -89,22 +89,22 @@ int require(lua_State* state) {
  * Usage: Dependency = asset.import(string assetIdentifier)
  */
 int request(lua_State* state) {
-    Asset *asset =
-    reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
     return asset->loader()->requestLua(asset);
 }
 
-
+int exists(lua_State* state) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    return asset->loader()->existsLua(asset);
+}
 
 int localResource(lua_State* state) {
-    Asset *asset =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
     return asset->loader()->localResourceLua(asset);
 }
 
 int syncedResource(lua_State* state) {
-    Asset *asset =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
     return asset->loader()->syncedResourceLua(asset);
 }
 
@@ -113,8 +113,7 @@ int noOperation(lua_State*) {
 }
 
 int exportAsset(lua_State* state) {
-    Asset *asset =
-        reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
     return asset->loader()->exportAssetLua(asset);
 }
 

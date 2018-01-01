@@ -48,6 +48,7 @@ int onInitializeDependency(lua_State* state);
 int onDeinitializeDependency(lua_State* state);
 int require(lua_State* state);
 int request(lua_State* state);
+int exists(lua_State* state);
 int localResource(lua_State* state);
 int syncedResource(lua_State* state);
 int noOperation(lua_State* state);
@@ -199,6 +200,7 @@ private:
     int onDeinitializeDependencyLua(Asset* dependant, Asset* dependency);
     int requireLua(Asset* asset);
     int requestLua(Asset* asset);
+    int existsLua(Asset* asset);
     int localResourceLua(Asset* asset);
     int syncedResourceLua(Asset* asset);
     int exportAssetLua(Asset* asset);
@@ -210,6 +212,7 @@ private:
     friend int assetloader::onDeinitializeDependency(lua_State* state);
     friend int assetloader::require(lua_State* state);
     friend int assetloader::request(lua_State* state);
+    friend int assetloader::exists(lua_State* state);
     friend int assetloader::localResource(lua_State* state);
     friend int assetloader::syncedResource(lua_State* state);
     friend int assetloader::exportAsset(lua_State* state);
